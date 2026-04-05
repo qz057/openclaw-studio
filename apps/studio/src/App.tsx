@@ -779,7 +779,7 @@ export function App() {
     {
       id: "cross-view-slot-release",
       label: "Focused slot -> Release posture",
-      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase41 sealed-bundle integrity contract`,
+      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase42 integrity attestation evidence`,
       detail: "Focused-slot review and release review now sit in the same local-only handoff story without enabling host execution, installer work, promotion routing, or publish rollback."
     }
   ];
@@ -808,7 +808,7 @@ export function App() {
       id: "release-depth-manifest",
       label: "Formal Release Readiness",
       value: "RELEASE-MANIFEST / BUILD-METADATA / REVIEW-MANIFEST",
-      detail: "Phase41 keeps the manifest spine and extends it into sealed-bundle integrity, channel promotion evidence, and publish rollback metadata without executing anything."
+      detail: "Phase42 keeps the manifest spine and extends it into integrity attestation evidence, promotion apply readiness, and rollback recovery ledger metadata without executing anything."
     },
     {
       id: "release-depth-bundles",
@@ -836,9 +836,15 @@ export function App() {
     },
     {
       id: "release-depth-bundle-integrity",
-      label: "Sealed-bundle Integrity Contract",
+      label: "Integrity Attestation Evidence",
       value: "SEALED-BUNDLE-INTEGRITY-CONTRACT",
       detail: "Bundle sealing metadata now feeds explicit integrity, digest, and audit checkpoints without attesting any real packaged bundle."
+    },
+    {
+      id: "release-depth-integrity-attestation",
+      label: "Integrity Attestation Evidence",
+      value: "INTEGRITY-ATTESTATION-EVIDENCE / SEALED-BUNDLE-INTEGRITY-CONTRACT",
+      detail: "Integrity contracts now feed explicit attestation packets, verifier inputs, and audit receipts without attesting any live release for real."
     },
     {
       id: "release-depth-installer-builders",
@@ -871,6 +877,12 @@ export function App() {
       detail: "Channel routing now feeds explicit alpha -> beta -> stable promotion evidence packets without promoting any artifact for real."
     },
     {
+      id: "release-depth-promotion-apply-readiness",
+      label: "Promotion Apply Readiness",
+      value: "PROMOTION-APPLY-READINESS / CHANNEL-PROMOTION-EVIDENCE",
+      detail: "Promotion evidence now feeds explicit apply-readiness manifests, reviewer inputs, and channel preflight packets without applying any promotion for real."
+    },
+    {
       id: "release-depth-signing-publish",
       label: "Signing & Publish Pipeline",
       value: "SIGNING-METADATA / NOTARIZATION-PLAN / SIGNING-PUBLISH-PIPELINE",
@@ -901,6 +913,12 @@ export function App() {
       detail: "Publish and promotion review now carry explicit rollback checkpoints and recovery-channel handoff metadata without rolling anything back for real."
     },
     {
+      id: "release-depth-rollback-recovery-ledger",
+      label: "Rollback Recovery Ledger",
+      value: "ROLLBACK-RECOVERY-LEDGER / PUBLISH-ROLLBACK-HANDSHAKE",
+      detail: "Rollback checkpoints now feed explicit recovery ledgers, operator notes, and channel recovery manifests without recovering any live publish state."
+    },
+    {
       id: "release-depth-approval",
       label: "Release Approval Workflow",
       value: "RELEASE-APPROVAL-WORKFLOW / PUBLISH-GATES / PUBLISH-ROLLBACK-HANDSHAKE",
@@ -916,7 +934,7 @@ export function App() {
       id: "release-depth-safety",
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
-      detail: "Phase41 increases release structure only; it still does not install, publish, sign, promote channels, roll back publish state, or enable host-side execution."
+      detail: "Phase42 increases release structure only; it still does not install, publish, sign, promote channels, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -1748,7 +1766,7 @@ export function App() {
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
                   <span>Phase</span>
-                  <strong>Phase41</strong>
+                  <strong>Phase42</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Packaged app</span>

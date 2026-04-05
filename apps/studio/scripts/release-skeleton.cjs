@@ -4,9 +4,9 @@ const path = require("node:path");
 const { getPaths, getPreflightSummary } = require("./studio-preflight.cjs");
 
 const APP_NAME = "OpenClaw Studio";
-const PHASE_ID = "phase41";
+const PHASE_ID = "phase42";
 const PHASE_MILESTONE =
-  "phase41 sealed-bundle integrity contract / channel promotion evidence / publish rollback handshake + docs / smoke / package / release-plan / UI / shared data closeout";
+  "phase42 integrity attestation evidence / promotion apply readiness / rollback recovery ledger + docs / smoke / package / release-plan / UI / shared data closeout";
 const RELEASE_CHANNEL = "alpha";
 const PACKAGE_ID = "openclaw-studio-alpha-shell";
 const PACKAGE_KIND = "alpha-shell-release-skeleton";
@@ -72,12 +72,14 @@ const FORMAL_RELEASE_ARTIFACTS = [
   "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
   "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
   "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
+  "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
   "release/INSTALLER-TARGETS.json",
   "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
   "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
   "release/INSTALLER-BUILDER-ORCHESTRATION.json",
   "release/INSTALLER-CHANNEL-ROUTING.json",
   "release/CHANNEL-PROMOTION-EVIDENCE.json",
+  "release/PROMOTION-APPLY-READINESS.json",
   "release/SIGNING-METADATA.json",
   "release/NOTARIZATION-PLAN.json",
   "release/SIGNING-PUBLISH-PIPELINE.json",
@@ -85,6 +87,7 @@ const FORMAL_RELEASE_ARTIFACTS = [
   "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
   "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
   "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+  "release/ROLLBACK-RECOVERY-LEDGER.json",
   "release/RELEASE-APPROVAL-WORKFLOW.json",
   "release/RELEASE-NOTES.md",
   "release/PUBLISH-GATES.json",
@@ -100,23 +103,26 @@ const RELEASE_PIPELINE_STAGES = [
   "packaged-app-staged-output-skeleton",
   "packaged-app-bundle-sealing-skeleton",
   "sealed-bundle-integrity-contract",
+  "integrity-attestation-evidence",
   "installer-target-metadata",
   "installer-target-builder-skeleton",
   "installer-builder-execution-skeleton",
   "installer-builder-orchestration",
   "installer-channel-routing",
   "channel-promotion-evidence",
+  "promotion-apply-readiness",
   "signing-ready-metadata",
   "signing-publish-pipeline-skeleton",
   "signing-publish-gating-handshake",
   "signing-publish-approval-bridge",
   "signing-publish-promotion-handshake",
   "publish-rollback-handshake",
+  "rollback-recovery-ledger",
   "approval-workflow-skeleton",
   "notarization-blocked",
   "promotion-gated"
 ];
-const REVIEW_STAGE_ID = "sealed-bundle-integrity-channel-promotion-evidence-publish-rollback-handshake-skeleton";
+const REVIEW_STAGE_ID = "integrity-attestation-promotion-apply-readiness-rollback-recovery-ledger-skeleton";
 const PACKAGE_LAYOUT = [
   {
     id: "docs-root",
@@ -315,6 +321,12 @@ function buildGeneratedDocs() {
       generated: true
     },
     {
+      id: "integrity-attestation-evidence",
+      label: "Integrity attestation evidence",
+      outputPath: "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
+      generated: true
+    },
+    {
       id: "installer-targets",
       label: "Installer targets",
       outputPath: "release/INSTALLER-TARGETS.json",
@@ -348,6 +360,12 @@ function buildGeneratedDocs() {
       id: "channel-promotion-evidence",
       label: "Channel promotion evidence",
       outputPath: "release/CHANNEL-PROMOTION-EVIDENCE.json",
+      generated: true
+    },
+    {
+      id: "promotion-apply-readiness",
+      label: "Promotion apply readiness",
+      outputPath: "release/PROMOTION-APPLY-READINESS.json",
       generated: true
     },
     {
@@ -390,6 +408,12 @@ function buildGeneratedDocs() {
       id: "publish-rollback-handshake",
       label: "Publish rollback handshake",
       outputPath: "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+      generated: true
+    },
+    {
+      id: "rollback-recovery-ledger",
+      label: "Rollback recovery ledger",
+      outputPath: "release/ROLLBACK-RECOVERY-LEDGER.json",
       generated: true
     },
     {
@@ -459,12 +483,14 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
     "    PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
     "    PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
     "    SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
+    "    INTEGRITY-ATTESTATION-EVIDENCE.json",
     "    INSTALLER-TARGETS.json",
     "    INSTALLER-TARGET-BUILDER-SKELETON.json",
     "    INSTALLER-BUILDER-EXECUTION-SKELETON.json",
     "    INSTALLER-BUILDER-ORCHESTRATION.json",
     "    INSTALLER-CHANNEL-ROUTING.json",
     "    CHANNEL-PROMOTION-EVIDENCE.json",
+    "    PROMOTION-APPLY-READINESS.json",
     "    SIGNING-METADATA.json",
     "    NOTARIZATION-PLAN.json",
     "    SIGNING-PUBLISH-PIPELINE.json",
@@ -472,6 +498,7 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
     "    SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
     "    SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
     "    PUBLISH-ROLLBACK-HANDSHAKE.json",
+    "    ROLLBACK-RECOVERY-LEDGER.json",
     "    RELEASE-APPROVAL-WORKFLOW.json",
     "    RELEASE-NOTES.md",
     "    PUBLISH-GATES.json",
@@ -484,9 +511,9 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
   ];
 
   return [
-    "# OpenClaw Studio Phase41 Package Snapshot",
+    "# OpenClaw Studio Phase42 Package Snapshot",
     "",
-    "这是一个 **phase41 alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40 packaging 与 shell foundations 的基础上继续补齐 sealed-bundle integrity contract、channel promotion evidence 与 publish rollback handshake，但它依然 **不是 installer**。",
+    "这是一个 **phase42 alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40 packaging 与 shell foundations 的基础上继续补齐 integrity attestation evidence、promotion apply readiness 与 rollback recovery ledger，但它依然 **不是 installer**。",
     "",
     `当前已验证里程碑：${PHASE_MILESTONE}。`,
     "",
@@ -569,7 +596,7 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
 
 function renderReleaseChecklist() {
   return [
-    "# OpenClaw Studio Phase41 Release Checklist",
+    "# OpenClaw Studio Phase42 Release Checklist",
     "",
     "## Required Commands",
     "",
@@ -594,12 +621,14 @@ function renderReleaseChecklist() {
     "- `release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json` 必须列出 packaged-app staged output skeleton",
     "- `release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json` 必须列出 packaged-app bundle sealing skeleton",
     "- `release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json` 必须列出 sealed-bundle integrity contract",
+    "- `release/INTEGRITY-ATTESTATION-EVIDENCE.json` 必须列出 integrity attestation evidence",
     "- `release/INSTALLER-TARGETS.json` 必须列出 installer target metadata",
     "- `release/INSTALLER-TARGET-BUILDER-SKELETON.json` 必须列出 installer-target builder skeleton",
     "- `release/INSTALLER-BUILDER-EXECUTION-SKELETON.json` 必须列出 installer builder execution skeleton",
     "- `release/INSTALLER-BUILDER-ORCHESTRATION.json` 必须列出 installer builder orchestration metadata",
     "- `release/INSTALLER-CHANNEL-ROUTING.json` 必须列出 installer channel routing metadata",
     "- `release/CHANNEL-PROMOTION-EVIDENCE.json` 必须列出 channel promotion evidence metadata",
+    "- `release/PROMOTION-APPLY-READINESS.json` 必须列出 promotion apply readiness metadata",
     "- `release/SIGNING-METADATA.json` 必须列出 signing-ready metadata",
     "- `release/NOTARIZATION-PLAN.json` 必须列出 signing / notarization skeleton",
     "- `release/SIGNING-PUBLISH-PIPELINE.json` 必须列出 signing & publish pipeline skeleton",
@@ -607,6 +636,7 @@ function renderReleaseChecklist() {
     "- `release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json` 必须列出 signing-publish approval bridge metadata",
     "- `release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json` 必须列出 signing-publish promotion handshake metadata",
     "- `release/PUBLISH-ROLLBACK-HANDSHAKE.json` 必须列出 publish rollback handshake metadata",
+    "- `release/ROLLBACK-RECOVERY-LEDGER.json` 必须列出 rollback recovery ledger metadata",
     "- `release/RELEASE-APPROVAL-WORKFLOW.json` 必须列出 release approval workflow metadata",
     "- `release/RELEASE-NOTES.md` 必须列出当前 release notes 草案",
     "- `release/PUBLISH-GATES.json` 必须列出 publish gating 条目",
@@ -631,7 +661,7 @@ function renderReleaseChecklist() {
 
 function renderReleaseSummary({ generatedAt, artifactGroups, reviewManifest }) {
   return [
-    "# OpenClaw Studio Phase41 Release Summary",
+    "# OpenClaw Studio Phase42 Release Summary",
     "",
     `Milestone: ${PHASE_MILESTONE}`,
     `Review stage: ${reviewManifest.pipeline.stage}`,
@@ -652,14 +682,14 @@ function renderReleaseSummary({ generatedAt, artifactGroups, reviewManifest }) {
 
 function renderReleaseNotes({ generatedAt }) {
   return [
-    "# OpenClaw Studio Phase41 Release Notes",
+    "# OpenClaw Studio Phase42 Release Notes",
     "",
     `Milestone: ${PHASE_MILESTONE}`,
     "",
     "## Highlights",
-    "- sealed-bundle integrity contract now turns review-only bundle sealing metadata into explicit per-platform integrity, digest, and audit checkpoints without sealing anything for real",
-    "- channel promotion evidence now maps installer channel routing and promotion targets into explicit alpha -> beta -> stable evidence packets without promoting any artifact for real",
-    "- publish rollback handshake now connects publish gates, promotion evidence, and rollback checkpoints without publishing, promoting, or rolling back anything",
+    "- integrity attestation evidence now turns sealed-bundle integrity contracts into explicit attestation packets, verifier inputs, and audit receipts without attesting any live release for real",
+    "- promotion apply readiness now turns promotion evidence and channel routing into explicit alpha -> beta -> stable apply-readiness manifests without applying any promotion for real",
+    "- rollback recovery ledger now turns rollback checkpoints and recovery channels into explicit ledger entries and recovery notes without recovering any live publish state",
     "",
     "## Current posture",
     "- still local-only",
@@ -695,16 +725,19 @@ function buildReviewManifest({ generatedAt, artifactGroups, allDocs }) {
         { id: "pipeline-staged-output", label: "Packaged-app staged output skeleton", status: "ready", detail: "Directory materialization now feeds explicit staged outputs and manifests without creating any real packaged artifact." },
         { id: "pipeline-bundle-sealing", label: "Packaged-app bundle sealing skeleton", status: "ready", detail: "Staged outputs now feed review-only sealing manifests and integrity checkpoints without freezing any real packaged bundle." },
         { id: "pipeline-bundle-integrity", label: "Sealed-bundle integrity contract", status: "ready", detail: "Bundle sealing metadata now feeds explicit integrity, digest, and audit checkpoints without attesting any real packaged bundle." },
+        { id: "pipeline-integrity-attestation", label: "Integrity attestation evidence", status: "ready", detail: "Sealed-bundle integrity contracts now feed explicit attestation packets, verifier inputs, and audit receipts without attesting any live release for real." },
         { id: "pipeline-installer-builders", label: "Installer-target builder skeleton", status: "ready", detail: "Installer targets still map cleanly to per-platform builder identities without invoking a real builder." },
         { id: "pipeline-installer-builder-execution", label: "Installer builder execution skeleton", status: "ready", detail: "Future builder commands, environment, outputs, and review checks are now declared without executing any builder." },
         { id: "pipeline-installer-builder-orchestration", label: "Installer builder orchestration", status: "ready", detail: "Builder execution skeletons now sit inside per-platform orchestration flows without invoking any real builder." },
         { id: "pipeline-installer-channel-routing", label: "Installer channel routing", status: "ready", detail: "Review-only installer flows now map cleanly into alpha/beta/stable routing manifests without routing any build for real." },
         { id: "pipeline-channel-promotion-evidence", label: "Channel promotion evidence", status: "ready", detail: "Channel routing now feeds explicit promotion evidence packets and proof manifests without promoting any artifact for real." },
+        { id: "pipeline-promotion-apply-readiness", label: "Promotion apply readiness", status: "ready", detail: "Promotion evidence now feeds explicit apply-readiness manifests, reviewer inputs, and channel preflight packets without applying any promotion for real." },
         { id: "pipeline-signing-publish", label: "Signing & publish pipeline", status: "ready", detail: "Signing, notarization, checksums, upload, and promotion stages remain reviewable as a structured pipeline contract." },
         { id: "pipeline-signing-gating", label: "Signing-publish gating handshake", status: "ready", detail: "Signing, publish, approval, and promotion evidence now flow through a structured handshake contract without approving or publishing anything." },
         { id: "pipeline-signing-approval-bridge", label: "Signing-publish approval bridge", status: "ready", detail: "Gating handshake, approval workflow, and promotion evidence are now bridged as one reviewable approval flow." },
         { id: "pipeline-signing-promotion-handshake", label: "Signing-publish promotion handshake", status: "ready", detail: "Channel routing, publish gates, and promotion evidence now converge in a dedicated review-only promotion handshake." },
         { id: "pipeline-publish-rollback", label: "Publish rollback handshake", status: "ready", detail: "Publish and promotion review now carry explicit rollback checkpoints and recovery-channel handoff metadata without rolling anything back for real." },
+        { id: "pipeline-rollback-recovery-ledger", label: "Rollback recovery ledger", status: "ready", detail: "Rollback checkpoints now feed explicit recovery ledgers, operator notes, and channel recovery manifests without recovering any live publish state." },
         { id: "pipeline-approval", label: "Release approval workflow", status: "ready", detail: "Release approval remains metadata-only and blocks any live signing, publish, or host-side execution." },
         { id: "pipeline-publish", label: "Promotion gating", status: "blocked", detail: "Installer build, signing, upload, and channel promotion remain intentionally out of scope." }
       ]
@@ -1104,6 +1137,20 @@ function buildSealedBundleIntegrityContract({ generatedAt }) {
         blockedBy: ["sealed bundle remains metadata-only", "digest publication remains blocked", "host-side execution remains disabled"],
         canVerify: false
       }
+    ]
+  };
+}
+
+function buildIntegrityAttestationEvidence({ generatedAt }) {
+  return {
+    schemaVersion: "openclaw-studio-integrity-attestation-evidence/v1",
+    generatedAt,
+    phase: PHASE_ID,
+    mode: "local-only-review",
+    attestations: [
+      { id: "attestation-windows", platform: "windows", integrityContractId: "integrity-contract-windows", promotionApplyReadinessId: "promotion-apply-alpha-to-beta", rollbackRecoveryLedgerId: "rollback-ledger-alpha-to-beta", status: "planned", attestationManifestPath: "future/attestations/windows/integrity-attestation.json", verifierInputPath: "future/attestations/windows/verifier-input.json", auditReceiptPath: "future/attestations/windows/audit-receipt.json", blockedBy: ["sealed bundle remains metadata-only", "digest publication remains blocked", "host-side execution remains disabled"], canAttest: false },
+      { id: "attestation-macos", platform: "macos", integrityContractId: "integrity-contract-macos", promotionApplyReadinessId: "promotion-apply-alpha-to-beta", rollbackRecoveryLedgerId: "rollback-ledger-alpha-to-beta", status: "planned", attestationManifestPath: "future/attestations/macos/integrity-attestation.json", verifierInputPath: "future/attestations/macos/verifier-input.json", auditReceiptPath: "future/attestations/macos/audit-receipt.json", blockedBy: ["sealed bundle remains metadata-only", "digest publication remains blocked", "host-side execution remains disabled"], canAttest: false },
+      { id: "attestation-linux", platform: "linux", integrityContractId: "integrity-contract-linux", promotionApplyReadinessId: "promotion-apply-alpha-to-beta", rollbackRecoveryLedgerId: "rollback-ledger-alpha-to-beta", status: "planned", attestationManifestPath: "future/attestations/linux/integrity-attestation.json", verifierInputPath: "future/attestations/linux/verifier-input.json", auditReceiptPath: "future/attestations/linux/audit-receipt.json", blockedBy: ["sealed bundle remains metadata-only", "digest publication remains blocked", "host-side execution remains disabled"], canAttest: false }
     ]
   };
 }
@@ -1525,6 +1572,19 @@ function buildChannelPromotionEvidence({ generatedAt }) {
         ],
         canPromote: false
       }
+    ]
+  };
+}
+
+function buildPromotionApplyReadiness({ generatedAt }) {
+  return {
+    schemaVersion: "openclaw-studio-promotion-apply-readiness/v1",
+    generatedAt,
+    phase: PHASE_ID,
+    mode: "local-only-review",
+    readiness: [
+      { id: "promotion-apply-alpha-to-beta", from: "alpha", to: "beta", channelPromotionEvidenceId: "promotion-evidence-alpha-to-beta", rollbackRecoveryLedgerId: "rollback-ledger-alpha-to-beta", status: "planned", readinessManifestPath: "future/channels/alpha-to-beta/promotion-apply-readiness.json", reviewChecks: ["promotion evidence linked", "route mapping linked", "rollback recovery ledger linked"], blockedBy: ["promotion remains non-executable", "artifact upload remains blocked", "host-side execution remains disabled"], canApply: false },
+      { id: "promotion-apply-beta-to-stable", from: "beta", to: "stable", channelPromotionEvidenceId: "promotion-evidence-beta-to-stable", rollbackRecoveryLedgerId: "rollback-ledger-beta-to-stable", status: "blocked", readinessManifestPath: "future/channels/beta-to-stable/promotion-apply-readiness.json", reviewChecks: ["promotion evidence linked", "route mapping linked", "rollback recovery ledger linked"], blockedBy: ["promotion remains non-executable", "artifact upload remains blocked", "host-side execution remains disabled"], canApply: false }
     ]
   };
 }
@@ -1990,6 +2050,19 @@ function buildPublishRollbackHandshake({ generatedAt }) {
   };
 }
 
+function buildRollbackRecoveryLedger({ generatedAt }) {
+  return {
+    schemaVersion: "openclaw-studio-rollback-recovery-ledger/v1",
+    generatedAt,
+    phase: PHASE_ID,
+    mode: "local-only-review",
+    ledgers: [
+      { id: "rollback-ledger-alpha-to-beta", from: "alpha", to: "beta", publishRollbackPathId: "publish-rollback-alpha-to-beta", status: "blocked", ledgerManifestPath: "future/publish/alpha-to-beta/rollback-recovery-ledger.json", recoveryEntries: ["sealed bundle checkpoints recorded", "promotion evidence anchor recorded", "recovery channel held at alpha"], canRecover: false },
+      { id: "rollback-ledger-beta-to-stable", from: "beta", to: "stable", publishRollbackPathId: "publish-rollback-beta-to-stable", status: "blocked", ledgerManifestPath: "future/publish/beta-to-stable/rollback-recovery-ledger.json", recoveryEntries: ["sealed bundle checkpoints recorded", "promotion evidence anchor recorded", "recovery channel held at beta"], canRecover: false }
+    ]
+  };
+}
+
 function buildReleaseApprovalWorkflow({ generatedAt }) {
   return {
     schemaVersion: "openclaw-studio-release-approval-workflow/v1",
@@ -2346,17 +2419,20 @@ function buildInstallerPlaceholder({ generatedAt, studioPackage }) {
     packagedAppStagedOutputSkeletonPath: "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
     packagedAppBundleSealingSkeletonPath: "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
     sealedBundleIntegrityContractPath: "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
+    integrityAttestationEvidencePath: "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
     installerTargetsPath: "release/INSTALLER-TARGETS.json",
     installerBuilderExecutionSkeletonPath: "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
     installerTargetBuilderSkeletonPath: "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
     installerBuilderOrchestrationPath: "release/INSTALLER-BUILDER-ORCHESTRATION.json",
     installerChannelRoutingPath: "release/INSTALLER-CHANNEL-ROUTING.json",
     channelPromotionEvidencePath: "release/CHANNEL-PROMOTION-EVIDENCE.json",
+    promotionApplyReadinessPath: "release/PROMOTION-APPLY-READINESS.json",
     signingPublishGatingHandshakePath: "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
     signingPublishPipelinePath: "release/SIGNING-PUBLISH-PIPELINE.json",
     signingPublishApprovalBridgePath: "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
     signingPublishPromotionHandshakePath: "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
     publishRollbackHandshakePath: "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+    rollbackRecoveryLedgerPath: "release/ROLLBACK-RECOVERY-LEDGER.json",
     approvalWorkflowPath: "release/RELEASE-APPROVAL-WORKFLOW.json"
   };
 }
@@ -2430,6 +2506,9 @@ function createReleaseSkeleton(summary = getPreflightSummary()) {
   const sealedBundleIntegrityContract = buildSealedBundleIntegrityContract({
     generatedAt
   });
+  const integrityAttestationEvidence = buildIntegrityAttestationEvidence({
+    generatedAt
+  });
   const installerTargets = buildInstallerTargets({
     generatedAt
   });
@@ -2446,6 +2525,9 @@ function createReleaseSkeleton(summary = getPreflightSummary()) {
     generatedAt
   });
   const channelPromotionEvidence = buildChannelPromotionEvidence({
+    generatedAt
+  });
+  const promotionApplyReadiness = buildPromotionApplyReadiness({
     generatedAt
   });
   const signingMetadata = buildSigningMetadata({
@@ -2467,6 +2549,9 @@ function createReleaseSkeleton(summary = getPreflightSummary()) {
     generatedAt
   });
   const publishRollbackHandshake = buildPublishRollbackHandshake({
+    generatedAt
+  });
+  const rollbackRecoveryLedger = buildRollbackRecoveryLedger({
     generatedAt
   });
   const releaseApprovalWorkflow = buildReleaseApprovalWorkflow({
@@ -2518,12 +2603,14 @@ function createReleaseSkeleton(summary = getPreflightSummary()) {
     packagedAppStagedOutputSkeleton,
     packagedAppBundleSealingSkeleton,
     sealedBundleIntegrityContract,
+    integrityAttestationEvidence,
     installerTargets,
     installerBuilderExecutionSkeleton,
     installerTargetBuilderSkeleton,
     installerBuilderOrchestration,
     installerChannelRouting,
     channelPromotionEvidence,
+    promotionApplyReadiness,
     signingMetadata,
     notarizationPlan,
     signingPublishGatingHandshake,
@@ -2531,6 +2618,7 @@ function createReleaseSkeleton(summary = getPreflightSummary()) {
     signingPublishApprovalBridge,
     signingPublishPromotionHandshake,
     publishRollbackHandshake,
+    rollbackRecoveryLedger,
     releaseApprovalWorkflow,
     publishGates,
     promotionGates,
@@ -2600,6 +2688,10 @@ function writeReleaseSkeleton(destinationRoot, skeleton) {
     path.join(destinationRoot, "release", "SEALED-BUNDLE-INTEGRITY-CONTRACT.json"),
     skeleton.sealedBundleIntegrityContract
   );
+  writeJsonFile(
+    path.join(destinationRoot, "release", "INTEGRITY-ATTESTATION-EVIDENCE.json"),
+    skeleton.integrityAttestationEvidence
+  );
   writeJsonFile(path.join(destinationRoot, "release", "INSTALLER-TARGETS.json"), skeleton.installerTargets);
   writeJsonFile(
     path.join(destinationRoot, "release", "INSTALLER-BUILDER-EXECUTION-SKELETON.json"),
@@ -2615,6 +2707,7 @@ function writeReleaseSkeleton(destinationRoot, skeleton) {
   );
   writeJsonFile(path.join(destinationRoot, "release", "INSTALLER-CHANNEL-ROUTING.json"), skeleton.installerChannelRouting);
   writeJsonFile(path.join(destinationRoot, "release", "CHANNEL-PROMOTION-EVIDENCE.json"), skeleton.channelPromotionEvidence);
+  writeJsonFile(path.join(destinationRoot, "release", "PROMOTION-APPLY-READINESS.json"), skeleton.promotionApplyReadiness);
   writeJsonFile(path.join(destinationRoot, "release", "SIGNING-METADATA.json"), skeleton.signingMetadata);
   writeJsonFile(path.join(destinationRoot, "release", "NOTARIZATION-PLAN.json"), skeleton.notarizationPlan);
   writeJsonFile(
@@ -2636,6 +2729,10 @@ function writeReleaseSkeleton(destinationRoot, skeleton) {
   writeJsonFile(
     path.join(destinationRoot, "release", "PUBLISH-ROLLBACK-HANDSHAKE.json"),
     skeleton.publishRollbackHandshake
+  );
+  writeJsonFile(
+    path.join(destinationRoot, "release", "ROLLBACK-RECOVERY-LEDGER.json"),
+    skeleton.rollbackRecoveryLedger
   );
   writeJsonFile(
     path.join(destinationRoot, "release", "RELEASE-APPROVAL-WORKFLOW.json"),
@@ -2668,12 +2765,14 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
     "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
     "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
+    "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
     "release/INSTALLER-TARGETS.json",
     "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
     "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
     "release/INSTALLER-BUILDER-ORCHESTRATION.json",
     "release/INSTALLER-CHANNEL-ROUTING.json",
     "release/CHANNEL-PROMOTION-EVIDENCE.json",
+    "release/PROMOTION-APPLY-READINESS.json",
     "release/SIGNING-METADATA.json",
     "release/NOTARIZATION-PLAN.json",
     "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
@@ -2681,6 +2780,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
     "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
     "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+    "release/ROLLBACK-RECOVERY-LEDGER.json",
     "release/RELEASE-APPROVAL-WORKFLOW.json",
     "release/RELEASE-NOTES.md",
     "release/PUBLISH-GATES.json",
@@ -2734,6 +2834,9 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
   const writtenSealedBundleIntegrityContract = readJson(
     path.join(destinationRoot, "release", "SEALED-BUNDLE-INTEGRITY-CONTRACT.json")
   );
+  const writtenIntegrityAttestationEvidence = readJson(
+    path.join(destinationRoot, "release", "INTEGRITY-ATTESTATION-EVIDENCE.json")
+  );
   const writtenInstallerTargets = readJson(path.join(destinationRoot, "release", "INSTALLER-TARGETS.json"));
   const writtenInstallerBuilderExecutionSkeleton = readJson(
     path.join(destinationRoot, "release", "INSTALLER-BUILDER-EXECUTION-SKELETON.json")
@@ -2749,6 +2852,9 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
   );
   const writtenChannelPromotionEvidence = readJson(
     path.join(destinationRoot, "release", "CHANNEL-PROMOTION-EVIDENCE.json")
+  );
+  const writtenPromotionApplyReadiness = readJson(
+    path.join(destinationRoot, "release", "PROMOTION-APPLY-READINESS.json")
   );
   const writtenSigningMetadata = readJson(path.join(destinationRoot, "release", "SIGNING-METADATA.json"));
   const writtenNotarizationPlan = readJson(path.join(destinationRoot, "release", "NOTARIZATION-PLAN.json"));
@@ -2766,6 +2872,9 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
   );
   const writtenPublishRollbackHandshake = readJson(
     path.join(destinationRoot, "release", "PUBLISH-ROLLBACK-HANDSHAKE.json")
+  );
+  const writtenRollbackRecoveryLedger = readJson(
+    path.join(destinationRoot, "release", "ROLLBACK-RECOVERY-LEDGER.json")
   );
   const writtenReleaseApprovalWorkflow = readJson(
     path.join(destinationRoot, "release", "RELEASE-APPROVAL-WORKFLOW.json")
@@ -2889,6 +2998,15 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
   }
 
   if (
+    writtenIntegrityAttestationEvidence.phase !== PHASE_ID ||
+    writtenIntegrityAttestationEvidence.mode !== "local-only-review" ||
+    !Array.isArray(writtenIntegrityAttestationEvidence.attestations) ||
+    writtenIntegrityAttestationEvidence.attestations.length < 3
+  ) {
+    throw new Error(`Integrity attestation evidence does not reflect the expected ${PHASE_ID} attestation metadata.`);
+  }
+
+  if (
     writtenInstallerBuilderExecutionSkeleton.phase !== PHASE_ID ||
     !Array.isArray(writtenInstallerBuilderExecutionSkeleton.executions) ||
     writtenInstallerBuilderExecutionSkeleton.executions.length < 7
@@ -2928,6 +3046,15 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     writtenChannelPromotionEvidence.promotions.length < 2
   ) {
     throw new Error(`Channel promotion evidence does not reflect the expected ${PHASE_ID} promotion metadata.`);
+  }
+
+  if (
+    writtenPromotionApplyReadiness.phase !== PHASE_ID ||
+    writtenPromotionApplyReadiness.mode !== "local-only-review" ||
+    !Array.isArray(writtenPromotionApplyReadiness.readiness) ||
+    writtenPromotionApplyReadiness.readiness.length < 2
+  ) {
+    throw new Error(`Promotion apply readiness does not reflect the expected ${PHASE_ID} readiness metadata.`);
   }
 
   if (writtenSigningMetadata.phase !== PHASE_ID || !Array.isArray(writtenSigningMetadata.readiness) || writtenSigningMetadata.readiness.length < 3) {
@@ -3007,6 +3134,15 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
   }
 
   if (
+    writtenRollbackRecoveryLedger.phase !== PHASE_ID ||
+    writtenRollbackRecoveryLedger.mode !== "local-only-review" ||
+    !Array.isArray(writtenRollbackRecoveryLedger.ledgers) ||
+    writtenRollbackRecoveryLedger.ledgers.length < 2
+  ) {
+    throw new Error(`Rollback recovery ledger does not reflect the expected ${PHASE_ID} recovery metadata.`);
+  }
+
+  if (
     writtenReleaseApprovalWorkflow.phase !== PHASE_ID ||
     writtenReleaseApprovalWorkflow.mode !== "local-only-review" ||
     writtenReleaseApprovalWorkflow.gatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
@@ -3026,11 +3162,11 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     throw new Error(`Promotion gates do not reflect the expected ${PHASE_ID} promotion-gating skeleton.`);
   }
 
-  if (!writtenReleaseSummary.includes("Phase41 Release Summary") && !writtenReleaseSummary.includes("Phase41")) {
+  if (!writtenReleaseSummary.includes("Phase42 Release Summary") && !writtenReleaseSummary.includes("Phase42")) {
     throw new Error(`Release summary does not reflect the expected ${PHASE_ID} review summary.`);
   }
 
-  if (!writtenReleaseNotes.includes("Phase41 Release Notes") && !writtenReleaseNotes.includes("Phase41")) {
+  if (!writtenReleaseNotes.includes("Phase42 Release Notes") && !writtenReleaseNotes.includes("Phase42")) {
     throw new Error(`Release notes do not reflect the expected ${PHASE_ID} release-notes skeleton.`);
   }
 
@@ -3072,11 +3208,13 @@ function formatReleasePlanSummary(skeleton) {
     `Installer orchestration flows: ${skeleton.installerBuilderOrchestration.flows.length}`,
     `Installer channel routes: ${skeleton.installerChannelRouting.routes.length}`,
     `Channel promotion evidence entries: ${skeleton.channelPromotionEvidence.promotions.length}`,
+    `Promotion apply readiness entries: ${skeleton.promotionApplyReadiness.readiness.length}`,
     `Signing/publish handshake stages: ${skeleton.signingPublishGatingHandshake.stages.length}`,
     `Signing/publish pipeline stages: ${skeleton.signingPublishPipeline.stages.length}`,
     `Signing/publish approval bridge entries: ${skeleton.signingPublishApprovalBridge.bridge.length}`,
     `Signing/publish promotion handshake stages: ${skeleton.signingPublishPromotionHandshake.stages.length}`,
     `Publish rollback handshake paths: ${skeleton.publishRollbackHandshake.paths.length}`,
+    `Rollback recovery ledger entries: ${skeleton.rollbackRecoveryLedger.ledgers.length}`,
     `Approval workflow stages: ${skeleton.releaseApprovalWorkflow.stages.length} (${skeleton.releaseApprovalWorkflow.mode})`,
     `Promotion gates: ${skeleton.promotionGates.promotions.length}`,
     `Docs: ${skeleton.allDocs.map((doc) => doc.outputPath).join(", ")}`
