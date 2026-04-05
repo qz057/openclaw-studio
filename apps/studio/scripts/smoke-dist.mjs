@@ -94,6 +94,7 @@ async function verifyRendererFocusedSlotUi() {
     "Attestation Apply Execution Packets",
     "Attestation Operator Worklists",
     "Attestation Operator Dispatch Manifests",
+    "Attestation Operator Dispatch Packets",
     "Installer-target Builder Skeleton",
     "Installer Builder Execution Skeleton",
     "Installer Builder Orchestration",
@@ -105,6 +106,7 @@ async function verifyRendererFocusedSlotUi() {
     "Promotion Operator Handoff Rails",
     "Promotion Staged-apply Ledgers",
     "Promotion Staged-apply Runsheets",
+    "Promotion Staged-apply Command Sheets",
     "Signing & Publish Pipeline",
     "Signing-publish Gating Handshake",
     "Signing-publish Approval Bridge",
@@ -116,6 +118,7 @@ async function verifyRendererFocusedSlotUi() {
     "Rollback Live-readiness Contracts",
     "Rollback Cutover Readiness Maps",
     "Rollback Cutover Handoff Plans",
+    "Rollback Cutover Execution Checklists",
     "Release Approval Workflow",
     "Release Promotion Gating",
     PHASE_TITLE
@@ -1141,6 +1144,7 @@ function verifyReleaseSkeletonContract() {
     "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json",
     "release/ATTESTATION-OPERATOR-WORKLISTS.json",
     "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json",
+    "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json",
     "release/INSTALLER-TARGETS.json",
     "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
     "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
@@ -1153,6 +1157,7 @@ function verifyReleaseSkeletonContract() {
     "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json",
     "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
     "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json",
+    "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
     "release/SIGNING-METADATA.json",
     "release/NOTARIZATION-PLAN.json",
     "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
@@ -1166,6 +1171,7 @@ function verifyReleaseSkeletonContract() {
     "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
     "release/ROLLBACK-CUTOVER-READINESS-MAPS.json",
     "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
+    "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
     "release/RELEASE-APPROVAL-WORKFLOW.json",
     "release/RELEASE-NOTES.md",
     "release/PUBLISH-GATES.json",
@@ -1205,6 +1211,7 @@ function verifyReleaseSkeletonContract() {
     skeleton.installerPlaceholder.attestationApplyExecutionPacketsPath !== "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json" ||
     skeleton.installerPlaceholder.attestationOperatorWorklistsPath !== "release/ATTESTATION-OPERATOR-WORKLISTS.json" ||
     skeleton.installerPlaceholder.attestationOperatorDispatchManifestsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json" ||
+    skeleton.installerPlaceholder.attestationOperatorDispatchPacketsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json" ||
     skeleton.installerPlaceholder.installerTargetsPath !== "release/INSTALLER-TARGETS.json" ||
     skeleton.installerPlaceholder.installerBuilderExecutionSkeletonPath !== "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json" ||
     skeleton.installerPlaceholder.installerTargetBuilderSkeletonPath !== "release/INSTALLER-TARGET-BUILDER-SKELETON.json" ||
@@ -1217,6 +1224,7 @@ function verifyReleaseSkeletonContract() {
     skeleton.installerPlaceholder.promotionOperatorHandoffRailsPath !== "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json" ||
     skeleton.installerPlaceholder.promotionStagedApplyLedgersPath !== "release/PROMOTION-STAGED-APPLY-LEDGERS.json" ||
     skeleton.installerPlaceholder.promotionStagedApplyRunsheetsPath !== "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json" ||
+    skeleton.installerPlaceholder.promotionStagedApplyCommandSheetsPath !== "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json" ||
     skeleton.installerPlaceholder.signingPublishGatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
     skeleton.installerPlaceholder.signingPublishPipelinePath !== "release/SIGNING-PUBLISH-PIPELINE.json" ||
     skeleton.installerPlaceholder.signingPublishApprovalBridgePath !== "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json" ||
@@ -1228,6 +1236,7 @@ function verifyReleaseSkeletonContract() {
     skeleton.installerPlaceholder.rollbackLiveReadinessContractsPath !== "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json" ||
     skeleton.installerPlaceholder.rollbackCutoverReadinessMapsPath !== "release/ROLLBACK-CUTOVER-READINESS-MAPS.json" ||
     skeleton.installerPlaceholder.rollbackCutoverHandoffPlansPath !== "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json" ||
+    skeleton.installerPlaceholder.rollbackCutoverExecutionChecklistsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json" ||
     skeleton.installerPlaceholder.approvalWorkflowPath !== "release/RELEASE-APPROVAL-WORKFLOW.json"
   ) {
     throw new Error(`Installer placeholder is missing ${PHASE_ID} dispatch / runsheet / handoff paths.`);
@@ -1276,18 +1285,21 @@ function verifyReleaseSkeletonContract() {
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-APPLY-EXECUTION-PACKETS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-WORKLISTS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-EXECUTION-CHECKPOINTS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-OPERATOR-HANDOFF-RAILS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-STAGED-APPLY-LEDGERS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-STAGED-APPLY-RUNSHEETS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PUBLISH-ROLLBACK-HANDSHAKE.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-OPERATOR-DRILLBOOKS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-LIVE-READINESS-CONTRACTS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-CUTOVER-READINESS-MAPS.json") ||
-    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json")
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json")
   ) {
     throw new Error(`Release build metadata is missing ${PHASE_ID} formal release artifacts.`);
   }
@@ -1304,18 +1316,21 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-APPLY-EXECUTION-PACKETS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-WORKLISTS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-EXECUTION-CHECKPOINTS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-OPERATOR-HANDOFF-RAILS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-STAGED-APPLY-LEDGERS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-STAGED-APPLY-RUNSHEETS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PUBLISH-ROLLBACK-HANDSHAKE.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-OPERATOR-DRILLBOOKS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-LIVE-READINESS-CONTRACTS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-CUTOVER-READINESS-MAPS.json") ||
-    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json")
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json")
   ) {
     throw new Error(`Release manifest is missing ${PHASE_ID} formal release artifacts.`);
   }
@@ -1388,6 +1403,10 @@ function verifyReleaseSkeletonContract() {
     throw new Error(`Attestation operator dispatch manifests are missing ${PHASE_ID} dispatch declarations.`);
   }
 
+  if (!Array.isArray(skeleton.attestationOperatorDispatchPackets?.packets) || skeleton.attestationOperatorDispatchPackets.packets.length < 2) {
+    throw new Error(`Attestation operator dispatch packets are missing ${PHASE_ID} packet declarations.`);
+  }
+
   if (!Array.isArray(skeleton.installerTargets?.targets) || skeleton.installerTargets.targets.length < 7) {
     throw new Error(`Installer targets are missing ${PHASE_ID} target declarations.`);
   }
@@ -1434,6 +1453,10 @@ function verifyReleaseSkeletonContract() {
 
   if (!Array.isArray(skeleton.promotionStagedApplyRunsheets?.runsheets) || skeleton.promotionStagedApplyRunsheets.runsheets.length < 2) {
     throw new Error(`Promotion staged-apply runsheets are missing ${PHASE_ID} runsheet declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.promotionStagedApplyCommandSheets?.commandSheets) || skeleton.promotionStagedApplyCommandSheets.commandSheets.length < 2) {
+    throw new Error(`Promotion staged-apply command sheets are missing ${PHASE_ID} command-sheet declarations.`);
   }
 
   if (!Array.isArray(skeleton.signingMetadata?.readiness) || skeleton.signingMetadata.readiness.length < 3) {
@@ -1568,6 +1591,10 @@ function verifyReleaseSkeletonContract() {
     throw new Error(`Rollback cutover handoff plans are missing ${PHASE_ID} handoff declarations.`);
   }
 
+  if (!Array.isArray(skeleton.rollbackCutoverExecutionChecklists?.checklists) || skeleton.rollbackCutoverExecutionChecklists.checklists.length < 2) {
+    throw new Error(`Rollback cutover execution checklists are missing ${PHASE_ID} execution-checklist declarations.`);
+  }
+
   if (
     skeleton.releaseApprovalWorkflow?.mode !== "local-only-review" ||
     skeleton.releaseApprovalWorkflow?.gatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
@@ -1598,6 +1625,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.packageReadme.includes("release/ATTESTATION-APPLY-EXECUTION-PACKETS.json") ||
     !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-WORKLISTS.json") ||
     !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json") ||
+    !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json") ||
     !skeleton.packageReadme.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.packageReadme.includes("release/PROMOTION-APPLY-READINESS.json") ||
     !skeleton.packageReadme.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
@@ -1605,6 +1633,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.packageReadme.includes("release/PROMOTION-OPERATOR-HANDOFF-RAILS.json") ||
     !skeleton.packageReadme.includes("release/PROMOTION-STAGED-APPLY-LEDGERS.json") ||
     !skeleton.packageReadme.includes("release/PROMOTION-STAGED-APPLY-RUNSHEETS.json") ||
+    !skeleton.packageReadme.includes("release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json") ||
     !skeleton.packageReadme.includes("release/PUBLISH-ROLLBACK-HANDSHAKE.json") ||
     !skeleton.packageReadme.includes("release/ROLLBACK-RECOVERY-LEDGER.json") ||
     !skeleton.packageReadme.includes("release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json") ||
@@ -1612,6 +1641,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.packageReadme.includes("release/ROLLBACK-LIVE-READINESS-CONTRACTS.json") ||
     !skeleton.packageReadme.includes("release/ROLLBACK-CUTOVER-READINESS-MAPS.json") ||
     !skeleton.packageReadme.includes("release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json") ||
+    !skeleton.packageReadme.includes("release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json") ||
     !skeleton.packageReadme.includes("scripts/install-placeholder.cjs")
   ) {
     throw new Error(`Generated package README is missing required ${PHASE_ID} packaging markers.`);
@@ -1626,9 +1656,9 @@ function verifyReleaseSkeletonContract() {
 
   if (
     !skeleton.releaseNotes?.includes(`${PHASE_TITLE} Release Notes`) ||
-    !skeleton.releaseNotes?.includes("attestation operator dispatch manifests") ||
-    !skeleton.releaseNotes?.includes("promotion staged-apply runsheets") ||
-    !skeleton.releaseNotes?.includes("rollback cutover handoff plans") ||
+    !skeleton.releaseNotes?.includes("attestation operator dispatch packets") ||
+    !skeleton.releaseNotes?.includes("promotion staged-apply command sheets") ||
+    !skeleton.releaseNotes?.includes("rollback cutover execution checklists") ||
     !Array.isArray(skeleton.releaseApprovalWorkflow?.stages) ||
     !skeleton.releaseApprovalWorkflow.stages.length ||
     !skeleton.signingPublishApprovalBridge?.bridge?.length ||
@@ -1650,6 +1680,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseChecklist.includes("ATTESTATION-APPLY-EXECUTION-PACKETS.json") ||
     !skeleton.releaseChecklist.includes("ATTESTATION-OPERATOR-WORKLISTS.json") ||
     !skeleton.releaseChecklist.includes("ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json") ||
+    !skeleton.releaseChecklist.includes("ATTESTATION-OPERATOR-DISPATCH-PACKETS.json") ||
     !skeleton.releaseChecklist.includes("CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-APPLY-READINESS.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-APPLY-MANIFESTS.json") ||
@@ -1657,6 +1688,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseChecklist.includes("PROMOTION-OPERATOR-HANDOFF-RAILS.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-STAGED-APPLY-LEDGERS.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-STAGED-APPLY-RUNSHEETS.json") ||
+    !skeleton.releaseChecklist.includes("PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json") ||
     !skeleton.releaseChecklist.includes("PUBLISH-ROLLBACK-HANDSHAKE.json") ||
     !skeleton.releaseChecklist.includes("ROLLBACK-RECOVERY-LEDGER.json") ||
     !skeleton.releaseChecklist.includes("ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json") ||
@@ -1664,6 +1696,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseChecklist.includes("ROLLBACK-LIVE-READINESS-CONTRACTS.json") ||
     !skeleton.releaseChecklist.includes("ROLLBACK-CUTOVER-READINESS-MAPS.json") ||
     !skeleton.releaseChecklist.includes("ROLLBACK-CUTOVER-HANDOFF-PLANS.json") ||
+    !skeleton.releaseChecklist.includes("ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json") ||
     !skeleton.releaseChecklist.includes("RELEASE-APPROVAL-WORKFLOW.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-GATES.json") ||
     !skeleton.releaseChecklist.includes("INSTALLER-PLACEHOLDER.json")

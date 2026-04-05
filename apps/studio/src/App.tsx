@@ -779,8 +779,8 @@ export function App() {
     {
       id: "cross-view-slot-release",
       label: "Focused slot -> Release posture",
-      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase47 attestation operator dispatch manifests`,
-      detail: "Focused-slot review and release review now sit in the same local-only dispatch and handoff story without enabling host execution, installer work, staged apply entry, cutover handoff, or publish rollback."
+      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase48 attestation operator dispatch packets`,
+      detail: "Focused-slot review and release review now sit in the same local-only packet, command-sheet, and cutover-checklist story without enabling host execution, installer work, staged apply entry, cutover execution, or publish rollback."
     }
   ];
   const inspectorCommandLinkage = [
@@ -808,7 +808,7 @@ export function App() {
       id: "release-depth-manifest",
       label: "Formal Release Readiness",
       value: "RELEASE-MANIFEST / BUILD-METADATA / REVIEW-MANIFEST",
-      detail: "Phase47 keeps the manifest spine and extends it into attestation operator dispatch manifests, promotion staged-apply runsheets, and rollback cutover handoff plans without executing anything."
+      detail: "Phase48 keeps the manifest spine and extends it into attestation operator dispatch packets, promotion staged-apply command sheets, and rollback cutover execution checklists without executing anything."
     },
     {
       id: "release-depth-bundles",
@@ -877,6 +877,12 @@ export function App() {
       detail: "Operator worklists now feed explicit dispatch envelopes, acknowledgement deadlines, and escalation routes without dispatching any live operator action for real."
     },
     {
+      id: "release-depth-attestation-operator-dispatch-packets",
+      label: "Attestation Operator Dispatch Packets",
+      value: "ATTESTATION-OPERATOR-DISPATCH-PACKETS / ATTESTATION-OPERATOR-DISPATCH-MANIFESTS",
+      detail: "Dispatch manifests now feed role-targeted packet bundles, acknowledgement payloads, and receipt slots without dispatching any live operator action for real."
+    },
+    {
       id: "release-depth-installer-builders",
       label: "Installer-target Builder Skeleton",
       value: "INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON",
@@ -941,6 +947,12 @@ export function App() {
       label: "Promotion Staged-apply Runsheets",
       value: "PROMOTION-STAGED-APPLY-RUNSHEETS / PROMOTION-STAGED-APPLY-LEDGERS",
       detail: "Staged-apply ledgers now feed operator-ready stage sequencing, hold points, and cutover baton scripts without applying any promotion for real."
+    },
+    {
+      id: "release-depth-promotion-staged-apply-command-sheets",
+      label: "Promotion Staged-apply Command Sheets",
+      value: "PROMOTION-STAGED-APPLY-COMMAND-SHEETS / PROMOTION-STAGED-APPLY-RUNSHEETS",
+      detail: "Runsheets now feed gated stage commands, confirmation blocks, and receipt stubs without applying any promotion for real."
     },
     {
       id: "release-depth-signing-publish",
@@ -1009,6 +1021,12 @@ export function App() {
       detail: "Rollback cutover readiness maps now feed owner baton transfers, fallback paths, and recovery handoff sections without mutating any live publish state."
     },
     {
+      id: "release-depth-rollback-cutover-execution-checklists",
+      label: "Rollback Cutover Execution Checklists",
+      value: "ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS / ROLLBACK-CUTOVER-HANDOFF-PLANS",
+      detail: "Rollback cutover handoff plans now feed cutover go/no-go sheets, platform checkpoint sweeps, and recovery confirmations without mutating any live publish state."
+    },
+    {
       id: "release-depth-approval",
       label: "Release Approval Workflow",
       value: "RELEASE-APPROVAL-WORKFLOW / PUBLISH-GATES / PUBLISH-ROLLBACK-HANDSHAKE",
@@ -1024,7 +1042,7 @@ export function App() {
       id: "release-depth-safety",
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
-      detail: "Phase47 increases release structure only; it still does not install, publish, sign, dispatch operators, run staged apply, hand off rollback cutover, roll back publish state, or enable host-side execution."
+      detail: "Phase48 increases release structure only; it still does not install, publish, sign, dispatch operators, issue staged-apply commands, execute rollback cutover checklists, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -1845,30 +1863,30 @@ export function App() {
               <div className="card-header card-header--stack">
                 <div>
                   <p className="eyebrow">Release Pipeline Depth</p>
-                  <h2>Attestation Operator Dispatch Manifests</h2>
+                  <h2>Attestation Operator Dispatch Packets</h2>
                 </div>
                 <p>
                   The alpha shell still does not build a real installer, but the release skeleton now pushes further with attestation
-                  operator dispatch manifests, promotion staged-apply runsheets, and rollback cutover handoff plans while staying
-                  entirely local-only and non-executing.
+                  operator dispatch packets, promotion staged-apply command sheets, and rollback cutover execution checklists while
+                  staying entirely local-only and non-executing.
                 </p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
                   <span>Phase</span>
-                  <strong>Phase47</strong>
+                  <strong>Phase48</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Packaged app</span>
-                  <strong>Dispatch manifests</strong>
+                  <strong>Dispatch packets</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Installer</span>
-                  <strong>Staged-apply runsheets</strong>
+                  <strong>Command sheets</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Pipeline</span>
-                  <strong>Cutover handoff plans</strong>
+                  <strong>Execution checklists</strong>
                 </div>
               </div>
               <div className="workflow-readiness-list">
