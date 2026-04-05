@@ -779,8 +779,9 @@ export function App() {
     {
       id: "cross-view-slot-release",
       label: "Focused slot -> Release posture",
-      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase49 attestation operator dispatch receipts`,
-      detail: "Focused-slot review and release review now sit in the same local-only receipt, confirmation-ledger, and execution-record story without enabling host execution, installer work, staged apply entry, cutover execution, or publish rollback."
+      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase50 attestation operator reconciliation ledgers`,
+      detail:
+        "Focused-slot review and release review now sit in the same local-only reconciliation-ledger, closeout-journal, and outcome-report story without enabling host execution, installer work, staged apply entry, cutover execution, or publish rollback."
     }
   ];
   const inspectorCommandLinkage = [
@@ -808,7 +809,8 @@ export function App() {
       id: "release-depth-manifest",
       label: "Formal Release Readiness",
       value: "RELEASE-MANIFEST / BUILD-METADATA / REVIEW-MANIFEST",
-      detail: "Phase49 keeps the manifest spine and extends it into attestation operator dispatch receipts, promotion staged-apply confirmation ledgers, and rollback cutover execution records without executing anything."
+      detail:
+        "Phase50 keeps the manifest spine and extends dispatch receipts, confirmation ledgers, and execution records into attestation operator reconciliation ledgers, promotion staged-apply closeout journals, and rollback cutover outcome reports without executing anything."
     },
     {
       id: "release-depth-bundles",
@@ -886,7 +888,14 @@ export function App() {
       id: "release-depth-attestation-operator-dispatch-receipts",
       label: "Attestation Operator Dispatch Receipts",
       value: "ATTESTATION-OPERATOR-DISPATCH-RECEIPTS / ATTESTATION-OPERATOR-DISPATCH-PACKETS",
-      detail: "Dispatch packets now feed acknowledgement capture, reconciliation ledgers, and escalation closeout anchors without dispatching any live operator action for real."
+      detail: "Dispatch packets now feed acknowledgement capture, reconciliation inputs, and escalation closeout anchors without dispatching any live operator action for real."
+    },
+    {
+      id: "release-depth-attestation-operator-reconciliation-ledgers",
+      label: "Attestation Operator Reconciliation Ledgers",
+      value: "ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS / ATTESTATION-OPERATOR-DISPATCH-RECEIPTS",
+      detail:
+        "Dispatch receipts now feed operator settlement ledgers, unresolved acknowledgement closeout, and approval-ready summaries without reconciling any live operator action for real."
     },
     {
       id: "release-depth-installer-builders",
@@ -964,7 +973,14 @@ export function App() {
       id: "release-depth-promotion-staged-apply-confirmation-ledgers",
       label: "Promotion Staged-apply Confirmation Ledgers",
       value: "PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS / PROMOTION-STAGED-APPLY-COMMAND-SHEETS",
-      detail: "Command sheets now feed stage acceptance journals, cutover confirmation blocks, and receipt reconciliation anchors without applying any promotion for real."
+      detail: "Command sheets now feed stage acceptance journals, cutover confirmation blocks, and closeout inputs without applying any promotion for real."
+    },
+    {
+      id: "release-depth-promotion-staged-apply-closeout-journals",
+      label: "Promotion Staged-apply Closeout Journals",
+      value: "PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS / PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS",
+      detail:
+        "Confirmation ledgers now feed stage closeout seals, recovery batons, and publish-ready cutover journals without applying any promotion for real."
     },
     {
       id: "release-depth-signing-publish",
@@ -1042,7 +1058,15 @@ export function App() {
       id: "release-depth-rollback-cutover-execution-records",
       label: "Rollback Cutover Execution Records",
       value: "ROLLBACK-CUTOVER-EXECUTION-RECORDS / ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS",
-      detail: "Rollback cutover execution checklists now feed evidence-backed cutover closeout records, recovery-state publications, and rollback receipt anchors without mutating any live publish state."
+      detail:
+        "Rollback cutover execution checklists now feed evidence-backed cutover closeout records, recovery-state publications, and rollback outcome inputs without mutating any live publish state."
+    },
+    {
+      id: "release-depth-rollback-cutover-outcome-reports",
+      label: "Rollback Cutover Outcome Reports",
+      value: "ROLLBACK-CUTOVER-OUTCOME-REPORTS / ROLLBACK-CUTOVER-EXECUTION-RECORDS",
+      detail:
+        "Rollback cutover execution records now feed recovery digests, outcome publications, and rollback-facing closeout reports without mutating any live publish state."
     },
     {
       id: "release-depth-approval",
@@ -1060,7 +1084,8 @@ export function App() {
       id: "release-depth-safety",
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
-      detail: "Phase49 increases release structure only; it still does not install, publish, sign, reconcile operator receipts, confirm staged apply, emit rollback execution records, roll back publish state, or enable host-side execution."
+      detail:
+        "Phase50 increases release structure only; it still does not install, publish, sign, execute operator reconciliation, finalize staged apply, publish rollback outcome reports, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -1881,30 +1906,30 @@ export function App() {
               <div className="card-header card-header--stack">
                 <div>
                   <p className="eyebrow">Release Pipeline Depth</p>
-                  <h2>Attestation Operator Dispatch Receipts</h2>
+                  <h2>Attestation Operator Reconciliation Ledgers</h2>
                 </div>
                 <p>
                   The alpha shell still does not build a real installer, but the release skeleton now pushes further with attestation
-                  operator dispatch receipts, promotion staged-apply confirmation ledgers, and rollback cutover execution records while
+                  operator reconciliation ledgers, promotion staged-apply closeout journals, and rollback cutover outcome reports while
                   staying entirely local-only and non-executing.
                 </p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
                   <span>Phase</span>
-                  <strong>Phase49</strong>
+                  <strong>Phase50</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Packaged app</span>
-                  <strong>Dispatch receipts</strong>
+                  <span>Attestation</span>
+                  <strong>Reconciliation ledgers</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Installer</span>
-                  <strong>Confirmation ledgers</strong>
+                  <span>Promotion</span>
+                  <strong>Closeout journals</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Pipeline</span>
-                  <strong>Execution records</strong>
+                  <span>Rollback</span>
+                  <strong>Outcome reports</strong>
                 </div>
               </div>
               <div className="workflow-readiness-list">
