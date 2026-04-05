@@ -1,0 +1,202 @@
+{
+  "schemaVersion": "openclaw-studio-promotion-staged-apply-closeout-journals/v1",
+  "generatedAt": "2026-04-05T14:27:12.823Z",
+  "phase": "phase50",
+  "mode": "local-only-review",
+  "journals": [
+    {
+      "id": "promotion-closeout-journal-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "attestationOperatorReconciliationLedgerId": "attestation-reconciliation-ledger-alpha-to-beta",
+      "promotionStagedApplyConfirmationLedgerId": "promotion-confirmation-ledger-alpha-to-beta",
+      "rollbackCutoverExecutionRecordId": "rollback-execution-record-alpha-to-beta",
+      "rollbackCutoverOutcomeReportId": "rollback-outcome-report-alpha-to-beta",
+      "status": "blocked",
+      "closeoutJournalPath": "future/channels/alpha-to-beta/promotion-staged-apply-closeout-journal.json",
+      "publishReadyPath": "future/channels/alpha-to-beta/promotion-staged-apply-closeout-summary.json",
+      "closeoutWindows": [
+        {
+          "id": "closeout-window-alpha-to-beta-dispatch",
+          "label": "Dispatch stage closeout",
+          "owner": "security-reviewer",
+          "status": "planned"
+        },
+        {
+          "id": "closeout-window-alpha-to-beta-freeze",
+          "label": "Freeze stage closeout",
+          "owner": "release-manager",
+          "status": "blocked"
+        },
+        {
+          "id": "closeout-window-alpha-to-beta-apply",
+          "label": "Apply stage closeout",
+          "owner": "release-engineering",
+          "status": "blocked"
+        },
+        {
+          "id": "closeout-window-alpha-to-beta-cutover",
+          "label": "Cutover stage closeout",
+          "owner": "support-operator",
+          "status": "blocked"
+        }
+      ],
+      "journalEntries": [
+        {
+          "id": "promotion-closeout-alpha-to-beta-dispatch",
+          "stageId": "command-sheet-alpha-to-beta-dispatch-intake",
+          "label": "Dispatch acknowledgement closeout seal",
+          "owner": "security-reviewer",
+          "status": "planned",
+          "evidence": [
+            "promotion-confirmation-ledger-alpha-to-beta",
+            "attestation-reconciliation-ledger-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "promotion-closeout-alpha-to-beta-freeze",
+          "stageId": "command-sheet-alpha-to-beta-freeze",
+          "label": "Freeze hold closeout seal",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "promotion-confirmation-ledger-alpha-to-beta",
+            "attestation-reconciliation-ledger-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "promotion-closeout-alpha-to-beta-apply",
+          "stageId": "command-sheet-alpha-to-beta-apply",
+          "label": "Apply stage closeout seal",
+          "owner": "release-engineering",
+          "status": "blocked",
+          "evidence": [
+            "promotion-confirmation-ledger-alpha-to-beta",
+            "rollback-outcome-report-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "promotion-closeout-alpha-to-beta-cutover",
+          "stageId": "command-sheet-alpha-to-beta-cutover",
+          "label": "Cutover baton closeout",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "rollback-execution-record-alpha-to-beta",
+            "rollback-outcome-report-alpha-to-beta"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "reconciliation ledger linked",
+        "confirmation ledger linked",
+        "rollback outcome report anchor declared",
+        "publish-ready closeout path declared"
+      ],
+      "blockedBy": [
+        "promotion staged-apply closeout journals remain metadata-only",
+        "promotion apply remains non-executable",
+        "rollback cutover outcome reporting remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canCloseStages": false
+    },
+    {
+      "id": "promotion-closeout-journal-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "attestationOperatorReconciliationLedgerId": "attestation-reconciliation-ledger-beta-to-stable",
+      "promotionStagedApplyConfirmationLedgerId": "promotion-confirmation-ledger-beta-to-stable",
+      "rollbackCutoverExecutionRecordId": "rollback-execution-record-beta-to-stable",
+      "rollbackCutoverOutcomeReportId": "rollback-outcome-report-beta-to-stable",
+      "status": "blocked",
+      "closeoutJournalPath": "future/channels/beta-to-stable/promotion-staged-apply-closeout-journal.json",
+      "publishReadyPath": "future/channels/beta-to-stable/promotion-staged-apply-closeout-summary.json",
+      "closeoutWindows": [
+        {
+          "id": "closeout-window-beta-to-stable-dispatch",
+          "label": "Dispatch stage closeout",
+          "owner": "security-reviewer",
+          "status": "blocked"
+        },
+        {
+          "id": "closeout-window-beta-to-stable-freeze",
+          "label": "Freeze stage closeout",
+          "owner": "release-manager",
+          "status": "blocked"
+        },
+        {
+          "id": "closeout-window-beta-to-stable-apply",
+          "label": "Apply stage closeout",
+          "owner": "release-engineering",
+          "status": "blocked"
+        },
+        {
+          "id": "closeout-window-beta-to-stable-cutover",
+          "label": "Cutover baton closeout",
+          "owner": "support-operator",
+          "status": "blocked"
+        }
+      ],
+      "journalEntries": [
+        {
+          "id": "promotion-closeout-beta-to-stable-dispatch",
+          "stageId": "command-sheet-beta-to-stable-dispatch-intake",
+          "label": "Dispatch acknowledgement closeout seal",
+          "owner": "security-reviewer",
+          "status": "blocked",
+          "evidence": [
+            "promotion-confirmation-ledger-beta-to-stable",
+            "attestation-reconciliation-ledger-beta-to-stable"
+          ]
+        },
+        {
+          "id": "promotion-closeout-beta-to-stable-freeze",
+          "stageId": "command-sheet-beta-to-stable-freeze",
+          "label": "Freeze hold closeout seal",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "promotion-confirmation-ledger-beta-to-stable",
+            "attestation-reconciliation-ledger-beta-to-stable"
+          ]
+        },
+        {
+          "id": "promotion-closeout-beta-to-stable-apply",
+          "stageId": "command-sheet-beta-to-stable-apply",
+          "label": "Apply stage closeout seal",
+          "owner": "release-engineering",
+          "status": "blocked",
+          "evidence": [
+            "promotion-confirmation-ledger-beta-to-stable",
+            "rollback-outcome-report-beta-to-stable"
+          ]
+        },
+        {
+          "id": "promotion-closeout-beta-to-stable-cutover",
+          "stageId": "command-sheet-beta-to-stable-cutover",
+          "label": "Cutover baton closeout",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "rollback-execution-record-beta-to-stable",
+            "rollback-outcome-report-beta-to-stable"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "reconciliation ledger linked",
+        "confirmation ledger linked",
+        "rollback outcome report anchor declared",
+        "publish-ready closeout path declared"
+      ],
+      "blockedBy": [
+        "promotion staged-apply closeout journals remain metadata-only",
+        "promotion apply remains non-executable",
+        "rollback cutover outcome reporting remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canCloseStages": false
+    }
+  ]
+}

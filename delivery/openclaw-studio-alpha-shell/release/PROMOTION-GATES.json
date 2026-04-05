@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-promotion-gates/v1",
-  "generatedAt": "2026-04-05T13:56:57.209Z",
-  "phase": "phase49",
+  "generatedAt": "2026-04-05T14:27:12.823Z",
+  "phase": "phase50",
   "promotions": [
     {
       "from": "alpha",
@@ -20,6 +20,7 @@
         "attestation operator dispatch manifests",
         "attestation operator dispatch packets",
         "attestation operator dispatch receipts",
+        "attestation operator reconciliation ledgers",
         "installer targets",
         "installer builder execution",
         "installer channel routing",
@@ -31,6 +32,7 @@
         "promotion staged-apply runsheets",
         "promotion staged-apply command sheets",
         "promotion staged-apply confirmation ledgers",
+        "promotion staged-apply closeout journals",
         "signing",
         "signing-publish gating handshake",
         "signing-publish promotion handshake",
@@ -42,6 +44,7 @@
         "rollback cutover handoff plans",
         "rollback cutover execution checklists",
         "rollback cutover execution records",
+        "rollback cutover outcome reports",
         "release approval workflow",
         "release notes",
         "upload"
@@ -63,6 +66,7 @@
         "attestation operator dispatch manifests",
         "attestation operator dispatch packets",
         "attestation operator dispatch receipts",
+        "attestation operator reconciliation ledgers",
         "installer channel routing",
         "channel promotion evidence",
         "promotion apply manifests",
@@ -72,6 +76,7 @@
         "promotion staged-apply runsheets",
         "promotion staged-apply command sheets",
         "promotion staged-apply confirmation ledgers",
+        "promotion staged-apply closeout journals",
         "signing-publish gating handshake",
         "signing-publish promotion handshake",
         "publish rollback handshake",
@@ -82,6 +87,7 @@
         "rollback cutover handoff plans",
         "rollback cutover execution checklists",
         "rollback cutover execution records",
+        "rollback cutover outcome reports",
         "release approval workflow",
         "rollback plan"
       ]

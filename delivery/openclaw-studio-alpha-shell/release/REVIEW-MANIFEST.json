@@ -1,8 +1,8 @@
 {
   "schemaVersion": "openclaw-studio-review-manifest/v1",
-  "generatedAt": "2026-04-05T13:56:57.209Z",
-  "phase": "phase49",
-  "milestone": "phase49 attestation operator dispatch receipts / promotion staged-apply confirmation ledgers / rollback cutover execution records + docs / smoke / package / release-plan / UI / shared data closeout",
+  "generatedAt": "2026-04-05T14:27:12.823Z",
+  "phase": "phase50",
+  "milestone": "phase50 attestation operator reconciliation ledgers / promotion staged-apply closeout journals / rollback cutover outcome reports + docs / smoke / package / release-plan / UI / shared data closeout",
   "reviewDocs": [
     "README.md",
     "HANDOFF.md",
@@ -26,6 +26,7 @@
     "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json",
     "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json",
     "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
+    "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
     "release/INSTALLER-TARGETS.json",
     "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
     "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
@@ -40,6 +41,7 @@
     "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json",
     "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
     "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
+    "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
     "release/SIGNING-METADATA.json",
     "release/NOTARIZATION-PLAN.json",
     "release/SIGNING-PUBLISH-PIPELINE.json",
@@ -55,6 +57,7 @@
     "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
     "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
     "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
+    "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
     "release/RELEASE-APPROVAL-WORKFLOW.json",
     "release/RELEASE-NOTES.md",
     "release/PUBLISH-GATES.json",
@@ -84,7 +87,7 @@
     }
   ],
   "pipeline": {
-    "stage": "attestation-operator-dispatch-receipts-promotion-staged-apply-confirmation-ledgers-rollback-cutover-execution-records-skeleton",
+    "stage": "attestation-operator-reconciliation-ledgers-promotion-staged-apply-closeout-journals-rollback-cutover-outcome-reports-skeleton",
     "stages": [
       {
         "id": "pipeline-docs",
@@ -180,7 +183,13 @@
         "id": "pipeline-attestation-operator-dispatch-receipts",
         "label": "Attestation operator dispatch receipts",
         "status": "ready",
-        "detail": "Dispatch packets now feed acknowledgement capture slots, reconciliation ledgers, and escalation closeout anchors without dispatching any live operator action for real."
+        "detail": "Dispatch packets now feed acknowledgement capture slots, reconciliation inputs, and escalation closeout anchors without dispatching any live operator action for real."
+      },
+      {
+        "id": "pipeline-attestation-operator-reconciliation-ledgers",
+        "label": "Attestation operator reconciliation ledgers",
+        "status": "ready",
+        "detail": "Dispatch receipts now feed operator settlement ledgers, unresolved acknowledgement closeout, and approval-ready summaries without reconciling any live operator action for real."
       },
       {
         "id": "pipeline-installer-builders",
@@ -258,7 +267,13 @@
         "id": "pipeline-promotion-staged-apply-confirmation-ledgers",
         "label": "Promotion staged-apply confirmation ledgers",
         "status": "ready",
-        "detail": "Command sheets now feed stage acceptance journals, cutover confirmation blocks, and receipt reconciliation anchors without applying any promotion for real."
+        "detail": "Command sheets now feed stage acceptance journals, cutover confirmation blocks, and closeout inputs without applying any promotion for real."
+      },
+      {
+        "id": "pipeline-promotion-staged-apply-closeout-journals",
+        "label": "Promotion staged-apply closeout journals",
+        "status": "ready",
+        "detail": "Confirmation ledgers now feed stage closeout seals, recovery batons, and publish-ready cutover journals without applying any promotion for real."
       },
       {
         "id": "pipeline-signing-publish",
@@ -336,7 +351,13 @@
         "id": "pipeline-rollback-cutover-execution-records",
         "label": "Rollback cutover execution records",
         "status": "ready",
-        "detail": "Rollback cutover execution checklists now feed evidence-backed cutover closeout records, recovery-state publications, and rollback receipt anchors without mutating any live publish state."
+        "detail": "Rollback cutover execution checklists now feed evidence-backed cutover closeout records, recovery-state publications, and rollback outcome inputs without mutating any live publish state."
+      },
+      {
+        "id": "pipeline-rollback-cutover-outcome-reports",
+        "label": "Rollback cutover outcome reports",
+        "status": "ready",
+        "detail": "Rollback cutover execution records now feed recovery digests, outcome publications, and rollback-facing closeout reports without mutating any live publish state."
       },
       {
         "id": "pipeline-approval",
@@ -361,6 +382,7 @@
     "no executable attestation operator dispatch or live dispatch-manifest apply yet; operator worklists and dispatch manifests remain review-only metadata",
     "no executable attestation operator dispatch packet emission, receipt capture, or acknowledgement reconciliation yet; dispatch packets remain review-only metadata",
     "no executable attestation operator dispatch receipt capture, acknowledgement reconciliation closeout, or escalation settlement yet; dispatch receipts remain review-only metadata",
+    "no executable attestation operator reconciliation settlement, escalation clear, or approval-ready closeout yet; reconciliation ledgers remain review-only metadata",
     "no Windows / macOS / Linux installer builder orchestration and channel routing wiring yet; routing remains review-only skeleton",
     "no executable channel promotion evidence pack or promotion routing apply yet; evidence remains review-only metadata",
     "no executable promotion apply manifests or channel apply execution yet; apply manifests remain review-only metadata",
@@ -368,6 +390,7 @@
     "no executable promotion staged-apply journaling, operator runsheet entry, or staged cutover entry yet; staged-apply ledgers and runsheets remain review-only metadata",
     "no executable promotion staged-apply command issue, confirmation capture, or staged execution sheet routing yet; command sheets remain review-only metadata",
     "no executable promotion staged-apply confirmation capture, stage acceptance journaling, or cutover closeout reconciliation yet; confirmation ledgers remain review-only metadata",
+    "no executable promotion staged-apply closeout sealing, recovery baton handoff, or publish-ready closeout yet; closeout journals remain review-only metadata",
     "no signing / notarization / hash publication workflow yet; approval bridge remains metadata-only",
     "no executable signing-publish gating handshake yet; handshake remains metadata-only",
     "no executable release approval handshake yet; workflow remains metadata-only",
@@ -376,6 +399,7 @@
     "no executable rollback cutover readiness evaluation, ownership baton transfer, or cutover topology handoff yet; cutover readiness maps and handoff plans remain review-only metadata",
     "no executable rollback cutover checklist issue, go/no-go capture, or cutover execution receipt yet; execution checklists remain review-only metadata",
     "no executable rollback cutover execution record emission, evidence closeout, or recovery-state publication yet; execution records remain review-only metadata",
+    "no executable rollback cutover outcome publication, recovery digest seal, or rollback release report emission yet; outcome reports remain review-only metadata",
     "no release publishing / artifact upload / promotion handshake / rollback apply automation yet; publish rollback handshake remains metadata-only",
     "real host-side execution remains disabled until approval / lifecycle / rollback close the loop"
   ]

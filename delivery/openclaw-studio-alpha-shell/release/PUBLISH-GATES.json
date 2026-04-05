@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-publish-gates/v1",
-  "generatedAt": "2026-04-05T13:56:57.209Z",
-  "phase": "phase49",
+  "generatedAt": "2026-04-05T14:27:12.823Z",
+  "phase": "phase50",
   "gates": [
     {
       "id": "gate-bundles",
@@ -69,6 +69,11 @@
       "status": "blocked"
     },
     {
+      "id": "gate-attestation-operator-reconciliation-ledgers",
+      "label": "Attestation operator reconciliation ledgers reviewed",
+      "status": "blocked"
+    },
+    {
       "id": "gate-installer-targets",
       "label": "Installer targets reviewed",
       "status": "planned"
@@ -129,6 +134,11 @@
       "status": "blocked"
     },
     {
+      "id": "gate-promotion-staged-apply-closeout-journals",
+      "label": "Promotion staged-apply closeout journals reviewed",
+      "status": "blocked"
+    },
+    {
       "id": "gate-signing",
       "label": "Signing / notarization complete",
       "status": "blocked"
@@ -186,6 +196,11 @@
     {
       "id": "gate-rollback-cutover-execution-records",
       "label": "Rollback cutover execution records reviewed",
+      "status": "blocked"
+    },
+    {
+      "id": "gate-rollback-cutover-outcome-reports",
+      "label": "Rollback cutover outcome reports reviewed",
       "status": "blocked"
     },
     {

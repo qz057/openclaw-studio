@@ -1,0 +1,122 @@
+{
+  "schemaVersion": "openclaw-studio-rollback-cutover-outcome-reports/v1",
+  "generatedAt": "2026-04-05T14:27:12.823Z",
+  "phase": "phase50",
+  "mode": "local-only-review",
+  "reports": [
+    {
+      "id": "rollback-outcome-report-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "publishRollbackPathId": "publish-rollback-alpha-to-beta",
+      "rollbackCutoverExecutionRecordId": "rollback-execution-record-alpha-to-beta",
+      "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
+      "promotionStagedApplyCloseoutJournalId": "promotion-closeout-journal-alpha-to-beta",
+      "attestationOperatorReconciliationLedgerId": "attestation-reconciliation-ledger-alpha-to-beta",
+      "status": "blocked",
+      "outcomeReportPath": "future/publish/alpha-to-beta/rollback-cutover-outcome-report.json",
+      "recoveryDigestPath": "future/publish/alpha-to-beta/recovery-digest.json",
+      "reportSections": [
+        {
+          "id": "rollback-outcome-report-alpha-to-beta-freeze",
+          "label": "Operator reconciliation outcome",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "attestation-reconciliation-ledger-alpha-to-beta",
+            "promotion-closeout-journal-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "rollback-outcome-report-alpha-to-beta-platforms",
+          "label": "Platform recovery digest",
+          "owner": "runtime-owner",
+          "status": "blocked",
+          "evidence": [
+            "rollback-execution-record-alpha-to-beta",
+            "rollback-readiness-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "rollback-outcome-report-alpha-to-beta-cutover",
+          "label": "Cutover outcome publication",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "rollback-execution-record-alpha-to-beta",
+            "publish-rollback-alpha-to-beta"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "rollback execution record linked",
+        "promotion closeout journal linked",
+        "attestation reconciliation ledger linked",
+        "recovery digest path declared"
+      ],
+      "blockedBy": [
+        "rollback cutover outcome reports remain metadata-only",
+        "publish rollback remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canPublishOutcome": false
+    },
+    {
+      "id": "rollback-outcome-report-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "publishRollbackPathId": "publish-rollback-beta-to-stable",
+      "rollbackCutoverExecutionRecordId": "rollback-execution-record-beta-to-stable",
+      "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
+      "promotionStagedApplyCloseoutJournalId": "promotion-closeout-journal-beta-to-stable",
+      "attestationOperatorReconciliationLedgerId": "attestation-reconciliation-ledger-beta-to-stable",
+      "status": "blocked",
+      "outcomeReportPath": "future/publish/beta-to-stable/rollback-cutover-outcome-report.json",
+      "recoveryDigestPath": "future/publish/beta-to-stable/recovery-digest.json",
+      "reportSections": [
+        {
+          "id": "rollback-outcome-report-beta-to-stable-freeze",
+          "label": "Operator reconciliation outcome",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "attestation-reconciliation-ledger-beta-to-stable",
+            "promotion-closeout-journal-beta-to-stable"
+          ]
+        },
+        {
+          "id": "rollback-outcome-report-beta-to-stable-platforms",
+          "label": "Platform recovery digest",
+          "owner": "runtime-owner",
+          "status": "blocked",
+          "evidence": [
+            "rollback-execution-record-beta-to-stable",
+            "rollback-readiness-beta-to-stable"
+          ]
+        },
+        {
+          "id": "rollback-outcome-report-beta-to-stable-cutover",
+          "label": "Cutover outcome publication",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "rollback-execution-record-beta-to-stable",
+            "publish-rollback-beta-to-stable"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "rollback execution record linked",
+        "promotion closeout journal linked",
+        "attestation reconciliation ledger linked",
+        "recovery digest path declared"
+      ],
+      "blockedBy": [
+        "rollback cutover outcome reports remain metadata-only",
+        "publish rollback remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canPublishOutcome": false
+    }
+  ]
+}

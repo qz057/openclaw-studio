@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-notarization-plan/v1",
-  "generatedAt": "2026-04-05T13:56:57.209Z",
-  "phase": "phase49",
+  "generatedAt": "2026-04-05T14:27:12.823Z",
+  "phase": "phase50",
   "platforms": [
     {
       "id": "windows",

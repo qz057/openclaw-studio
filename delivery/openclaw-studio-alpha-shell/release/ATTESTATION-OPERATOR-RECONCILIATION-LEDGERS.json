@@ -1,0 +1,164 @@
+{
+  "schemaVersion": "openclaw-studio-attestation-operator-reconciliation-ledgers/v1",
+  "generatedAt": "2026-04-05T14:27:12.823Z",
+  "phase": "phase50",
+  "mode": "local-only-review",
+  "ledgers": [
+    {
+      "id": "attestation-reconciliation-ledger-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "attestationOperatorDispatchReceiptId": "attestation-dispatch-receipt-alpha-to-beta",
+      "promotionStagedApplyConfirmationLedgerId": "promotion-confirmation-ledger-alpha-to-beta",
+      "promotionStagedApplyCloseoutJournalId": "promotion-closeout-journal-alpha-to-beta",
+      "rollbackCutoverExecutionRecordId": "rollback-execution-record-alpha-to-beta",
+      "rollbackCutoverOutcomeReportId": "rollback-outcome-report-alpha-to-beta",
+      "status": "blocked",
+      "reconciliationLedgerPath": "future/channels/alpha-to-beta/attestation-operator-reconciliation-ledger.json",
+      "approvalReadySummaryPath": "future/channels/alpha-to-beta/attestation-operator-reconciliation-summary.json",
+      "closeoutWindows": [
+        {
+          "id": "reconciliation-window-alpha-to-beta-intake",
+          "label": "Dispatch receipt intake settlement",
+          "owner": "security-reviewer",
+          "status": "planned"
+        },
+        {
+          "id": "reconciliation-window-alpha-to-beta-freeze",
+          "label": "Freeze owner settlement",
+          "owner": "release-manager",
+          "status": "blocked"
+        },
+        {
+          "id": "reconciliation-window-alpha-to-beta-apply",
+          "label": "Apply owner settlement",
+          "owner": "release-engineering",
+          "status": "blocked"
+        },
+        {
+          "id": "reconciliation-window-alpha-to-beta-escalation",
+          "label": "Escalation closeout sweep",
+          "owner": "release-manager",
+          "status": "blocked"
+        }
+      ],
+      "settlements": [
+        {
+          "id": "attestation-reconciliation-alpha-to-beta-security-reviewer",
+          "role": "security-reviewer",
+          "sourceReceiptId": "dispatch-receipt-alpha-to-beta-security-reviewer",
+          "promotionCloseoutEntryId": "promotion-closeout-alpha-to-beta-dispatch",
+          "rollbackOutcomeSectionId": "rollback-outcome-report-alpha-to-beta-freeze",
+          "status": "planned"
+        },
+        {
+          "id": "attestation-reconciliation-alpha-to-beta-release-manager",
+          "role": "release-manager",
+          "sourceReceiptId": "dispatch-receipt-alpha-to-beta-release-manager",
+          "promotionCloseoutEntryId": "promotion-closeout-alpha-to-beta-freeze",
+          "rollbackOutcomeSectionId": "rollback-outcome-report-alpha-to-beta-platforms",
+          "status": "blocked"
+        },
+        {
+          "id": "attestation-reconciliation-alpha-to-beta-release-engineering",
+          "role": "release-engineering",
+          "sourceReceiptId": "dispatch-receipt-alpha-to-beta-release-engineering",
+          "promotionCloseoutEntryId": "promotion-closeout-alpha-to-beta-apply",
+          "rollbackOutcomeSectionId": "rollback-outcome-report-alpha-to-beta-cutover",
+          "status": "blocked"
+        }
+      ],
+      "reviewChecks": [
+        "dispatch receipt linked",
+        "promotion closeout journal anchor declared",
+        "rollback outcome report anchor declared",
+        "approval-ready summary path declared"
+      ],
+      "blockedBy": [
+        "attestation operator reconciliation ledgers remain metadata-only",
+        "promotion staged-apply closeout remains non-executable",
+        "rollback cutover outcome reporting remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canCloseReconciliation": false
+    },
+    {
+      "id": "attestation-reconciliation-ledger-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "attestationOperatorDispatchReceiptId": "attestation-dispatch-receipt-beta-to-stable",
+      "promotionStagedApplyConfirmationLedgerId": "promotion-confirmation-ledger-beta-to-stable",
+      "promotionStagedApplyCloseoutJournalId": "promotion-closeout-journal-beta-to-stable",
+      "rollbackCutoverExecutionRecordId": "rollback-execution-record-beta-to-stable",
+      "rollbackCutoverOutcomeReportId": "rollback-outcome-report-beta-to-stable",
+      "status": "blocked",
+      "reconciliationLedgerPath": "future/channels/beta-to-stable/attestation-operator-reconciliation-ledger.json",
+      "approvalReadySummaryPath": "future/channels/beta-to-stable/attestation-operator-reconciliation-summary.json",
+      "closeoutWindows": [
+        {
+          "id": "reconciliation-window-beta-to-stable-intake",
+          "label": "Dispatch receipt intake settlement",
+          "owner": "security-reviewer",
+          "status": "blocked"
+        },
+        {
+          "id": "reconciliation-window-beta-to-stable-freeze",
+          "label": "Freeze owner settlement",
+          "owner": "release-manager",
+          "status": "blocked"
+        },
+        {
+          "id": "reconciliation-window-beta-to-stable-apply",
+          "label": "Apply owner settlement",
+          "owner": "release-engineering",
+          "status": "blocked"
+        },
+        {
+          "id": "reconciliation-window-beta-to-stable-escalation",
+          "label": "Escalation closeout sweep",
+          "owner": "release-manager",
+          "status": "blocked"
+        }
+      ],
+      "settlements": [
+        {
+          "id": "attestation-reconciliation-beta-to-stable-security-reviewer",
+          "role": "security-reviewer",
+          "sourceReceiptId": "dispatch-receipt-beta-to-stable-security-reviewer",
+          "promotionCloseoutEntryId": "promotion-closeout-beta-to-stable-dispatch",
+          "rollbackOutcomeSectionId": "rollback-outcome-report-beta-to-stable-freeze",
+          "status": "blocked"
+        },
+        {
+          "id": "attestation-reconciliation-beta-to-stable-release-manager",
+          "role": "release-manager",
+          "sourceReceiptId": "dispatch-receipt-beta-to-stable-release-manager",
+          "promotionCloseoutEntryId": "promotion-closeout-beta-to-stable-freeze",
+          "rollbackOutcomeSectionId": "rollback-outcome-report-beta-to-stable-platforms",
+          "status": "blocked"
+        },
+        {
+          "id": "attestation-reconciliation-beta-to-stable-release-engineering",
+          "role": "release-engineering",
+          "sourceReceiptId": "dispatch-receipt-beta-to-stable-release-engineering",
+          "promotionCloseoutEntryId": "promotion-closeout-beta-to-stable-apply",
+          "rollbackOutcomeSectionId": "rollback-outcome-report-beta-to-stable-cutover",
+          "status": "blocked"
+        }
+      ],
+      "reviewChecks": [
+        "dispatch receipt linked",
+        "promotion closeout journal anchor declared",
+        "rollback outcome report anchor declared",
+        "approval-ready summary path declared"
+      ],
+      "blockedBy": [
+        "attestation operator reconciliation ledgers remain metadata-only",
+        "promotion staged-apply closeout remains non-executable",
+        "rollback cutover outcome reporting remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canCloseReconciliation": false
+    }
+  ]
+}

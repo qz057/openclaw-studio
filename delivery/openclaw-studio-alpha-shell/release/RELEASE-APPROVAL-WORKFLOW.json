@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-release-approval-workflow/v1",
-  "generatedAt": "2026-04-05T13:56:57.209Z",
-  "phase": "phase49",
+  "generatedAt": "2026-04-05T14:27:12.823Z",
+  "phase": "phase50",
   "mode": "local-only-review",
   "canApprove": false,
   "gatingHandshakePath": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
@@ -48,7 +48,7 @@
     },
     {
       "id": "approval-attestation-verification",
-      "label": "Attestation verification, dispatch, packet, and receipt review",
+      "label": "Attestation verification, dispatch, reconciliation, and receipt review",
       "status": "planned",
       "approverRoles": [
         "release-engineering",
@@ -62,7 +62,8 @@
         "release/ATTESTATION-OPERATOR-WORKLISTS.json",
         "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json",
         "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json",
-        "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json"
+        "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
+        "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json"
       ]
     },
     {
@@ -82,7 +83,7 @@
     },
     {
       "id": "approval-promotion-apply",
-      "label": "Promotion apply, command-sheet, confirmation-ledger, and execution checkpoint review",
+      "label": "Promotion apply, command-sheet, closeout-journal, and execution checkpoint review",
       "status": "planned",
       "approverRoles": [
         "release-manager",
@@ -96,7 +97,8 @@
         "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
         "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json",
         "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
-        "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json"
+        "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
+        "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json"
       ]
     },
     {
@@ -116,7 +118,7 @@
     },
     {
       "id": "approval-publish-promotion",
-      "label": "Publish, rollback, cutover-record, and promotion review",
+      "label": "Publish, rollback, outcome-report, and promotion review",
       "status": "blocked",
       "approverRoles": [
         "release-manager",
@@ -138,7 +140,8 @@
         "release/ROLLBACK-CUTOVER-READINESS-MAPS.json",
         "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
         "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
-        "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json"
+        "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
+        "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json"
       ]
     },
     {
