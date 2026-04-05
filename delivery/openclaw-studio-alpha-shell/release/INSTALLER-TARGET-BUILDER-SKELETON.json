@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "openclaw-studio-installer-target-builder-skeleton/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "phase": "phase40",
+  "mode": "review-only",
+  "builders": [
+    {
+      "targetId": "windows-portable-dir",
+      "platform": "windows",
+      "builder": "portable-dir-builder",
+      "executionSkeletonId": "execute-windows-portable-dir-builder",
+      "status": "planned",
+      "canExecute": false
+    },
+    {
+      "targetId": "windows-nsis",
+      "platform": "windows",
+      "builder": "nsis-builder",
+      "executionSkeletonId": "execute-windows-nsis-builder",
+      "status": "blocked",
+      "canExecute": false
+    },
+    {
+      "targetId": "macos-app-bundle",
+      "platform": "macos",
+      "builder": "app-bundle-builder",
+      "executionSkeletonId": "execute-macos-app-bundle-builder",
+      "status": "planned",
+      "canExecute": false
+    },
+    {
+      "targetId": "macos-dmg",
+      "platform": "macos",
+      "builder": "dmg-builder",
+      "executionSkeletonId": "execute-macos-dmg-builder",
+      "status": "blocked",
+      "canExecute": false
+    },
+    {
+      "targetId": "linux-appimage",
+      "platform": "linux",
+      "builder": "appimage-builder",
+      "executionSkeletonId": "execute-linux-appimage-builder",
+      "status": "blocked",
+      "canExecute": false
+    },
+    {
+      "targetId": "linux-deb",
+      "platform": "linux",
+      "builder": "deb-builder",
+      "executionSkeletonId": "execute-linux-deb-builder",
+      "status": "blocked",
+      "canExecute": false
+    },
+    {
+      "targetId": "linux-rpm",
+      "platform": "linux",
+      "builder": "rpm-builder",
+      "executionSkeletonId": "execute-linux-rpm-builder",
+      "status": "blocked",
+      "canExecute": false
+    }
+  ]
+}

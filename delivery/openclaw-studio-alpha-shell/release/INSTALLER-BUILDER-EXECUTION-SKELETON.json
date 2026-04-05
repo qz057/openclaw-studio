@@ -1,0 +1,225 @@
+{
+  "schemaVersion": "openclaw-studio-installer-builder-execution-skeleton/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "phase": "phase40",
+  "mode": "review-only",
+  "executions": [
+    {
+      "id": "execute-windows-portable-dir-builder",
+      "targetId": "windows-portable-dir",
+      "builderId": "portable-dir-builder",
+      "platform": "windows",
+      "packagedAppDirectoryMaterializationId": "directory-materialization-windows",
+      "status": "planned",
+      "command": {
+        "binary": "future-installer-builder",
+        "args": [
+          "--target",
+          "portable-dir",
+          "--input",
+          "future/packaged-app/windows/OpenClaw Studio",
+          "--output",
+          "future/installers/windows/OpenClaw Studio-portable"
+        ],
+        "workingDirectory": "."
+      },
+      "environment": [
+        "OC_RELEASE_CHANNEL=alpha",
+        "OC_RELEASE_PHASE=phase40"
+      ],
+      "plannedOutput": "future/installers/windows/OpenClaw Studio-portable",
+      "reviewChecks": [
+        "packaged app directory materialized",
+        "output path declared",
+        "checksum publication remains blocked"
+      ],
+      "canExecute": false
+    },
+    {
+      "id": "execute-windows-nsis-builder",
+      "targetId": "windows-nsis",
+      "builderId": "nsis-builder",
+      "platform": "windows",
+      "packagedAppDirectoryMaterializationId": "directory-materialization-windows",
+      "status": "blocked",
+      "command": {
+        "binary": "future-installer-builder",
+        "args": [
+          "--target",
+          "nsis",
+          "--input",
+          "future/packaged-app/windows/OpenClaw Studio",
+          "--output",
+          "future/installers/windows/OpenClaw Studio Setup.exe"
+        ],
+        "workingDirectory": "."
+      },
+      "environment": [
+        "OC_RELEASE_CHANNEL=alpha",
+        "OC_RELEASE_PHASE=phase40"
+      ],
+      "plannedOutput": "future/installers/windows/OpenClaw Studio Setup.exe",
+      "reviewChecks": [
+        "packaged app directory materialized",
+        "builder config declared",
+        "signing prerequisites reviewed"
+      ],
+      "canExecute": false
+    },
+    {
+      "id": "execute-macos-app-bundle-builder",
+      "targetId": "macos-app-bundle",
+      "builderId": "app-bundle-builder",
+      "platform": "macos",
+      "packagedAppDirectoryMaterializationId": "directory-materialization-macos",
+      "status": "planned",
+      "command": {
+        "binary": "future-installer-builder",
+        "args": [
+          "--target",
+          "app-bundle",
+          "--input",
+          "future/packaged-app/macos/OpenClaw Studio.app",
+          "--output",
+          "future/installers/macos/OpenClaw Studio.app"
+        ],
+        "workingDirectory": "."
+      },
+      "environment": [
+        "OC_RELEASE_CHANNEL=alpha",
+        "OC_RELEASE_PHASE=phase40"
+      ],
+      "plannedOutput": "future/installers/macos/OpenClaw Studio.app",
+      "reviewChecks": [
+        "packaged app directory materialized",
+        "bundle output declared",
+        "codesign prerequisites reviewed"
+      ],
+      "canExecute": false
+    },
+    {
+      "id": "execute-macos-dmg-builder",
+      "targetId": "macos-dmg",
+      "builderId": "dmg-builder",
+      "platform": "macos",
+      "packagedAppDirectoryMaterializationId": "directory-materialization-macos",
+      "status": "blocked",
+      "command": {
+        "binary": "future-installer-builder",
+        "args": [
+          "--target",
+          "dmg",
+          "--input",
+          "future/packaged-app/macos/OpenClaw Studio.app",
+          "--output",
+          "future/installers/macos/OpenClaw Studio.dmg"
+        ],
+        "workingDirectory": "."
+      },
+      "environment": [
+        "OC_RELEASE_CHANNEL=alpha",
+        "OC_RELEASE_PHASE=phase40"
+      ],
+      "plannedOutput": "future/installers/macos/OpenClaw Studio.dmg",
+      "reviewChecks": [
+        "packaged app directory materialized",
+        "dmg config declared",
+        "notarization prerequisites reviewed"
+      ],
+      "canExecute": false
+    },
+    {
+      "id": "execute-linux-appimage-builder",
+      "targetId": "linux-appimage",
+      "builderId": "appimage-builder",
+      "platform": "linux",
+      "packagedAppDirectoryMaterializationId": "directory-materialization-linux",
+      "status": "blocked",
+      "command": {
+        "binary": "future-installer-builder",
+        "args": [
+          "--target",
+          "AppImage",
+          "--input",
+          "future/packaged-app/linux/openclaw-studio",
+          "--output",
+          "future/installers/linux/OpenClaw Studio.AppImage"
+        ],
+        "workingDirectory": "."
+      },
+      "environment": [
+        "OC_RELEASE_CHANNEL=alpha",
+        "OC_RELEASE_PHASE=phase40"
+      ],
+      "plannedOutput": "future/installers/linux/OpenClaw Studio.AppImage",
+      "reviewChecks": [
+        "packaged app directory materialized",
+        "appimage config declared",
+        "checksum prerequisites reviewed"
+      ],
+      "canExecute": false
+    },
+    {
+      "id": "execute-linux-deb-builder",
+      "targetId": "linux-deb",
+      "builderId": "deb-builder",
+      "platform": "linux",
+      "packagedAppDirectoryMaterializationId": "directory-materialization-linux",
+      "status": "blocked",
+      "command": {
+        "binary": "future-installer-builder",
+        "args": [
+          "--target",
+          "deb",
+          "--input",
+          "future/packaged-app/linux/openclaw-studio",
+          "--output",
+          "future/installers/linux/openclaw-studio.deb"
+        ],
+        "workingDirectory": "."
+      },
+      "environment": [
+        "OC_RELEASE_CHANNEL=alpha",
+        "OC_RELEASE_PHASE=phase40"
+      ],
+      "plannedOutput": "future/installers/linux/openclaw-studio.deb",
+      "reviewChecks": [
+        "packaged app directory materialized",
+        "deb config declared",
+        "signing prerequisites reviewed"
+      ],
+      "canExecute": false
+    },
+    {
+      "id": "execute-linux-rpm-builder",
+      "targetId": "linux-rpm",
+      "builderId": "rpm-builder",
+      "platform": "linux",
+      "packagedAppDirectoryMaterializationId": "directory-materialization-linux",
+      "status": "blocked",
+      "command": {
+        "binary": "future-installer-builder",
+        "args": [
+          "--target",
+          "rpm",
+          "--input",
+          "future/packaged-app/linux/openclaw-studio",
+          "--output",
+          "future/installers/linux/openclaw-studio.rpm"
+        ],
+        "workingDirectory": "."
+      },
+      "environment": [
+        "OC_RELEASE_CHANNEL=alpha",
+        "OC_RELEASE_PHASE=phase40"
+      ],
+      "plannedOutput": "future/installers/linux/openclaw-studio.rpm",
+      "reviewChecks": [
+        "packaged app directory materialized",
+        "rpm config declared",
+        "signing prerequisites reviewed"
+      ],
+      "canExecute": false
+    }
+  ]
+}

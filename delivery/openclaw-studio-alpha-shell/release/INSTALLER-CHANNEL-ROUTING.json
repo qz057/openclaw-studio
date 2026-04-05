@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "openclaw-studio-installer-channel-routing/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "phase": "phase40",
+  "mode": "review-only",
+  "defaultChannel": "alpha",
+  "routes": [
+    {
+      "id": "route-alpha",
+      "channel": "alpha",
+      "status": "planned",
+      "bundleSealingIds": [
+        "bundle-sealing-windows",
+        "bundle-sealing-macos",
+        "bundle-sealing-linux"
+      ],
+      "installerFlowIds": [
+        "orchestrate-windows-builders",
+        "orchestrate-macos-builders",
+        "orchestrate-linux-builders"
+      ],
+      "targetIds": [
+        "windows-portable-dir",
+        "windows-nsis",
+        "macos-app-bundle",
+        "macos-dmg",
+        "linux-appimage",
+        "linux-deb",
+        "linux-rpm"
+      ],
+      "routeManifestPath": "future/channels/alpha/installer-routing.json",
+      "nextPromotion": "beta",
+      "canRoute": false
+    },
+    {
+      "id": "route-beta",
+      "channel": "beta",
+      "status": "blocked",
+      "sourceChannel": "alpha",
+      "targetIds": [
+        "windows-portable-dir",
+        "macos-app-bundle",
+        "linux-appimage"
+      ],
+      "routeManifestPath": "future/channels/beta/installer-routing.json",
+      "nextPromotion": "stable",
+      "requires": [
+        "release approval workflow",
+        "signing-publish promotion handshake",
+        "uploaded artifacts"
+      ],
+      "canRoute": false
+    },
+    {
+      "id": "route-stable",
+      "channel": "stable",
+      "status": "blocked",
+      "sourceChannel": "beta",
+      "targetIds": [
+        "windows-nsis",
+        "macos-dmg",
+        "linux-deb",
+        "linux-rpm"
+      ],
+      "routeManifestPath": "future/channels/stable/installer-routing.json",
+      "requires": [
+        "notarization",
+        "checksums",
+        "signing-publish promotion handshake",
+        "rollback-ready publish pipeline"
+      ],
+      "canRoute": false
+    }
+  ]
+}

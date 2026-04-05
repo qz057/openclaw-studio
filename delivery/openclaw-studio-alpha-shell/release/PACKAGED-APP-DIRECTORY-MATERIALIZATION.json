@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "openclaw-studio-packaged-app-directory-materialization/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "phase": "phase40",
+  "mode": "review-only",
+  "directories": [
+    {
+      "id": "directory-materialization-windows",
+      "platform": "windows",
+      "assemblyId": "windows",
+      "packagedAppDirectoryId": "packaged-app-directory-windows",
+      "packagedAppMaterializationId": "materialize-windows-packaged-app",
+      "status": "planned",
+      "stagedOutputRoot": "future/packaged-app/windows/OpenClaw Studio",
+      "verificationManifestPath": "future/packaged-app/windows/materialization-manifest.json",
+      "launcherPath": "OpenClaw Studio.exe",
+      "resourcePaths": [
+        "resources/app.asar",
+        "resources/app/package.json",
+        "resources/app/assets"
+      ],
+      "steps": [
+        "resolve renderer/electron snapshot inputs",
+        "declare root directory layout",
+        "map launcher and resources paths",
+        "record verification manifest"
+      ],
+      "blockedBy": [
+        "materialization remains review-only",
+        "installer build remains disabled",
+        "host-side execution remains disabled"
+      ]
+    },
+    {
+      "id": "directory-materialization-macos",
+      "platform": "macos",
+      "assemblyId": "macos",
+      "packagedAppDirectoryId": "packaged-app-directory-macos",
+      "packagedAppMaterializationId": "materialize-macos-packaged-app",
+      "status": "planned",
+      "stagedOutputRoot": "future/packaged-app/macos/OpenClaw Studio.app",
+      "verificationManifestPath": "future/packaged-app/macos/materialization-manifest.json",
+      "launcherPath": "Contents/MacOS/OpenClaw Studio",
+      "resourcePaths": [
+        "Contents/Info.plist",
+        "Contents/Resources/app.asar",
+        "Contents/Resources/app/package.json"
+      ],
+      "steps": [
+        "resolve renderer/electron snapshot inputs",
+        "declare .app bundle layout",
+        "map launcher and resources paths",
+        "record verification manifest"
+      ],
+      "blockedBy": [
+        "materialization remains review-only",
+        "installer build remains disabled",
+        "host-side execution remains disabled"
+      ]
+    },
+    {
+      "id": "directory-materialization-linux",
+      "platform": "linux",
+      "assemblyId": "linux",
+      "packagedAppDirectoryId": "packaged-app-directory-linux",
+      "packagedAppMaterializationId": "materialize-linux-packaged-app",
+      "status": "planned",
+      "stagedOutputRoot": "future/packaged-app/linux/openclaw-studio",
+      "verificationManifestPath": "future/packaged-app/linux/materialization-manifest.json",
+      "launcherPath": "openclaw-studio",
+      "resourcePaths": [
+        "resources/app.asar",
+        "resources/app/package.json",
+        "resources/app/assets"
+      ],
+      "steps": [
+        "resolve renderer/electron snapshot inputs",
+        "declare root directory layout",
+        "map launcher and resources paths",
+        "record verification manifest"
+      ],
+      "blockedBy": [
+        "materialization remains review-only",
+        "installer build remains disabled",
+        "host-side execution remains disabled"
+      ]
+    }
+  ]
+}

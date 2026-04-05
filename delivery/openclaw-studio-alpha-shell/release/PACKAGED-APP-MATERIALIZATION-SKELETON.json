@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "openclaw-studio-packaged-app-materialization-skeleton/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "phase": "phase40",
+  "materializations": [
+    {
+      "id": "materialize-windows-packaged-app",
+      "platform": "windows",
+      "assemblyId": "windows",
+      "packagedAppDirectoryId": "packaged-app-directory-windows",
+      "directoryMaterializationId": "directory-materialization-windows",
+      "status": "planned",
+      "stagedOutputRoot": "future/packaged-app/windows/OpenClaw Studio",
+      "verificationManifestPath": "future/packaged-app/windows/materialization-manifest.json",
+      "reviewMode": "local-only",
+      "steps": [
+        "collect renderer/electron inputs",
+        "assemble app.asar",
+        "stage packaged app directory",
+        "verify launcher path"
+      ]
+    },
+    {
+      "id": "materialize-macos-packaged-app",
+      "platform": "macos",
+      "assemblyId": "macos",
+      "packagedAppDirectoryId": "packaged-app-directory-macos",
+      "directoryMaterializationId": "directory-materialization-macos",
+      "status": "planned",
+      "stagedOutputRoot": "future/packaged-app/macos/OpenClaw Studio.app",
+      "verificationManifestPath": "future/packaged-app/macos/materialization-manifest.json",
+      "reviewMode": "local-only",
+      "steps": [
+        "collect renderer/electron inputs",
+        "assemble app.asar",
+        "stage .app bundle layout",
+        "verify launcher path"
+      ]
+    },
+    {
+      "id": "materialize-linux-packaged-app",
+      "platform": "linux",
+      "assemblyId": "linux",
+      "packagedAppDirectoryId": "packaged-app-directory-linux",
+      "directoryMaterializationId": "directory-materialization-linux",
+      "status": "planned",
+      "stagedOutputRoot": "future/packaged-app/linux/openclaw-studio",
+      "verificationManifestPath": "future/packaged-app/linux/materialization-manifest.json",
+      "reviewMode": "local-only",
+      "steps": [
+        "collect renderer/electron inputs",
+        "assemble app.asar",
+        "stage packaged app directory",
+        "verify launcher path"
+      ]
+    }
+  ]
+}

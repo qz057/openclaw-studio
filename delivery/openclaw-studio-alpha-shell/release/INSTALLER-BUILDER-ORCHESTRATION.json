@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "openclaw-studio-installer-builder-orchestration/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "phase": "phase40",
+  "mode": "review-only",
+  "flows": [
+    {
+      "id": "orchestrate-windows-builders",
+      "platform": "windows",
+      "stagedOutputId": "staged-output-windows",
+      "bundleSealingId": "bundle-sealing-windows",
+      "channelRouteId": "route-alpha",
+      "executionIds": [
+        "execute-windows-portable-dir-builder",
+        "execute-windows-nsis-builder"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "orchestrate-macos-builders",
+      "platform": "macos",
+      "stagedOutputId": "staged-output-macos",
+      "bundleSealingId": "bundle-sealing-macos",
+      "channelRouteId": "route-alpha",
+      "executionIds": [
+        "execute-macos-app-bundle-builder",
+        "execute-macos-dmg-builder"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "orchestrate-linux-builders",
+      "platform": "linux",
+      "stagedOutputId": "staged-output-linux",
+      "bundleSealingId": "bundle-sealing-linux",
+      "channelRouteId": "route-alpha",
+      "executionIds": [
+        "execute-linux-appimage-builder",
+        "execute-linux-deb-builder",
+        "execute-linux-rpm-builder"
+      ],
+      "status": "blocked"
+    }
+  ]
+}

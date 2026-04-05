@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "openclaw-studio-packaged-app-directory-skeleton/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "phase": "phase40",
+  "directories": [
+    {
+      "id": "packaged-app-directory-windows",
+      "platform": "windows",
+      "status": "planned",
+      "root": "future/packaged-app/windows/OpenClaw Studio",
+      "launcher": "OpenClaw Studio.exe",
+      "inputs": [
+        "artifacts/renderer",
+        "artifacts/electron"
+      ],
+      "requiredPaths": [
+        "OpenClaw Studio.exe",
+        "resources/app.asar",
+        "resources/app/package.json",
+        "resources/app/assets"
+      ]
+    },
+    {
+      "id": "packaged-app-directory-macos",
+      "platform": "macos",
+      "status": "planned",
+      "root": "future/packaged-app/macos/OpenClaw Studio.app",
+      "launcher": "Contents/MacOS/OpenClaw Studio",
+      "inputs": [
+        "artifacts/renderer",
+        "artifacts/electron"
+      ],
+      "requiredPaths": [
+        "Contents/Info.plist",
+        "Contents/MacOS/OpenClaw Studio",
+        "Contents/Resources/app.asar",
+        "Contents/Resources/app/package.json"
+      ]
+    },
+    {
+      "id": "packaged-app-directory-linux",
+      "platform": "linux",
+      "status": "planned",
+      "root": "future/packaged-app/linux/openclaw-studio",
+      "launcher": "openclaw-studio",
+      "inputs": [
+        "artifacts/renderer",
+        "artifacts/electron"
+      ],
+      "requiredPaths": [
+        "openclaw-studio",
+        "resources/app.asar",
+        "resources/app/package.json",
+        "resources/app/assets"
+      ]
+    }
+  ]
+}

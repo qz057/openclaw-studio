@@ -1,0 +1,108 @@
+{
+  "schemaVersion": "openclaw-studio-release-approval-workflow/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "phase": "phase40",
+  "mode": "local-only-review",
+  "canApprove": false,
+  "gatingHandshakePath": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+  "approvalBridgePath": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
+  "promotionHandshakePath": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+  "blockedBy": [
+    "approval handshake is not executable yet",
+    "signing / notarization remain metadata-only",
+    "signing-publish gating handshake remains metadata-only",
+    "publish / promotion automation is still blocked",
+    "host-side execution remains disabled"
+  ],
+  "stages": [
+    {
+      "id": "approval-docs-manifest",
+      "label": "Docs and manifest review",
+      "status": "ready",
+      "approverRoles": [
+        "release-engineering"
+      ],
+      "evidence": [
+        "release/RELEASE-MANIFEST.json",
+        "release/BUILD-METADATA.json",
+        "release/REVIEW-MANIFEST.json"
+      ]
+    },
+    {
+      "id": "approval-packaged-app",
+      "label": "Packaged app directory review",
+      "status": "planned",
+      "approverRoles": [
+        "release-engineering",
+        "platform-owner"
+      ],
+      "evidence": [
+        "release/BUNDLE-ASSEMBLY.json",
+        "release/PACKAGED-APP-DIRECTORY-SKELETON.json",
+        "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+        "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+        "release/INSTALLER-TARGETS.json"
+      ]
+    },
+    {
+      "id": "approval-installer-builders",
+      "label": "Installer builder execution review",
+      "status": "planned",
+      "approverRoles": [
+        "release-engineering",
+        "platform-owner"
+      ],
+      "evidence": [
+        "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
+        "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
+        "release/INSTALLER-CHANNEL-ROUTING.json"
+      ]
+    },
+    {
+      "id": "approval-signing",
+      "label": "Signing, notarization, and gating handshake review",
+      "status": "blocked",
+      "approverRoles": [
+        "security",
+        "platform-owner"
+      ],
+      "evidence": [
+        "release/SIGNING-METADATA.json",
+        "release/NOTARIZATION-PLAN.json",
+        "release/SIGNING-PUBLISH-PIPELINE.json",
+        "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json"
+      ]
+    },
+    {
+      "id": "approval-publish-promotion",
+      "label": "Publish and promotion review",
+      "status": "blocked",
+      "approverRoles": [
+        "release-manager",
+        "product-owner"
+      ],
+      "evidence": [
+        "release/RELEASE-NOTES.md",
+        "release/PUBLISH-GATES.json",
+        "release/PROMOTION-GATES.json",
+        "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+        "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json"
+      ]
+    },
+    {
+      "id": "approval-host-safety",
+      "label": "Host safety boundary review",
+      "status": "blocked",
+      "approverRoles": [
+        "runtime-owner"
+      ],
+      "evidence": [
+        "release/INSTALLER-PLACEHOLDER.json"
+      ],
+      "blockers": [
+        "approval / lifecycle / rollback remain placeholder-only",
+        "host-side execution remains disabled"
+      ]
+    }
+  ]
+}

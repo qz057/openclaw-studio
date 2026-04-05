@@ -1,0 +1,450 @@
+{
+  "schemaVersion": "openclaw-studio-release-manifest/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "packageId": "openclaw-studio-alpha-shell",
+  "packageName": "OpenClaw Studio Alpha Shell",
+  "packageKind": "alpha-shell-release-skeleton",
+  "channel": "alpha",
+  "phase": "phase40",
+  "milestone": "phase40 packaged-app bundle sealing skeleton / installer channel routing / signing-publish promotion handshake + docs / smoke / package / release-plan / UI / shared data closeout",
+  "version": "0.1.0",
+  "docs": [
+    {
+      "id": "readme",
+      "label": "Repo README",
+      "path": "README.md",
+      "generated": false
+    },
+    {
+      "id": "handoff",
+      "label": "Repo HANDOFF",
+      "path": "HANDOFF.md",
+      "generated": false
+    },
+    {
+      "id": "implementation-plan",
+      "label": "Repo implementation plan",
+      "path": "IMPLEMENTATION-PLAN.md",
+      "generated": false
+    },
+    {
+      "id": "package-readme",
+      "label": "Package snapshot overview",
+      "path": "PACKAGE-README.md",
+      "generated": true
+    },
+    {
+      "id": "release-summary",
+      "label": "Release summary",
+      "path": "release/RELEASE-SUMMARY.md",
+      "generated": true
+    },
+    {
+      "id": "review-manifest",
+      "label": "Review manifest",
+      "path": "release/REVIEW-MANIFEST.json",
+      "generated": true
+    },
+    {
+      "id": "bundle-matrix",
+      "label": "Bundle matrix",
+      "path": "release/BUNDLE-MATRIX.json",
+      "generated": true
+    },
+    {
+      "id": "bundle-assembly",
+      "label": "Bundle assembly",
+      "path": "release/BUNDLE-ASSEMBLY.json",
+      "generated": true
+    },
+    {
+      "id": "packaged-app-directory-skeleton",
+      "label": "Packaged app directory skeleton",
+      "path": "release/PACKAGED-APP-DIRECTORY-SKELETON.json",
+      "generated": true
+    },
+    {
+      "id": "packaged-app-materialization-skeleton",
+      "label": "Packaged app materialization skeleton",
+      "path": "release/PACKAGED-APP-MATERIALIZATION-SKELETON.json",
+      "generated": true
+    },
+    {
+      "id": "packaged-app-directory-materialization",
+      "label": "Packaged app directory materialization",
+      "path": "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+      "generated": true
+    },
+    {
+      "id": "packaged-app-staged-output-skeleton",
+      "label": "Packaged-app staged output skeleton",
+      "path": "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+      "generated": true
+    },
+    {
+      "id": "packaged-app-bundle-sealing-skeleton",
+      "label": "Packaged-app bundle sealing skeleton",
+      "path": "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+      "generated": true
+    },
+    {
+      "id": "installer-targets",
+      "label": "Installer targets",
+      "path": "release/INSTALLER-TARGETS.json",
+      "generated": true
+    },
+    {
+      "id": "installer-target-builder-skeleton",
+      "label": "Installer-target builder skeleton",
+      "path": "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
+      "generated": true
+    },
+    {
+      "id": "installer-builder-execution-skeleton",
+      "label": "Installer builder execution skeleton",
+      "path": "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
+      "generated": true
+    },
+    {
+      "id": "installer-builder-orchestration",
+      "label": "Installer builder orchestration",
+      "path": "release/INSTALLER-BUILDER-ORCHESTRATION.json",
+      "generated": true
+    },
+    {
+      "id": "installer-channel-routing",
+      "label": "Installer channel routing",
+      "path": "release/INSTALLER-CHANNEL-ROUTING.json",
+      "generated": true
+    },
+    {
+      "id": "signing-metadata",
+      "label": "Signing-ready metadata",
+      "path": "release/SIGNING-METADATA.json",
+      "generated": true
+    },
+    {
+      "id": "notarization-plan",
+      "label": "Notarization plan",
+      "path": "release/NOTARIZATION-PLAN.json",
+      "generated": true
+    },
+    {
+      "id": "signing-publish-pipeline",
+      "label": "Signing & publish pipeline skeleton",
+      "path": "release/SIGNING-PUBLISH-PIPELINE.json",
+      "generated": true
+    },
+    {
+      "id": "signing-publish-gating-handshake",
+      "label": "Signing-publish gating handshake",
+      "path": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+      "generated": true
+    },
+    {
+      "id": "signing-publish-approval-bridge",
+      "label": "Signing-publish approval bridge",
+      "path": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
+      "generated": true
+    },
+    {
+      "id": "signing-publish-promotion-handshake",
+      "label": "Signing-publish promotion handshake",
+      "path": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+      "generated": true
+    },
+    {
+      "id": "release-approval-workflow",
+      "label": "Release approval workflow",
+      "path": "release/RELEASE-APPROVAL-WORKFLOW.json",
+      "generated": true
+    },
+    {
+      "id": "release-notes",
+      "label": "Release notes",
+      "path": "release/RELEASE-NOTES.md",
+      "generated": true
+    },
+    {
+      "id": "publish-gates",
+      "label": "Publish gates",
+      "path": "release/PUBLISH-GATES.json",
+      "generated": true
+    },
+    {
+      "id": "promotion-gates",
+      "label": "Promotion gates",
+      "path": "release/PROMOTION-GATES.json",
+      "generated": true
+    },
+    {
+      "id": "release-checklist",
+      "label": "Release checklist",
+      "path": "release/RELEASE-CHECKLIST.md",
+      "generated": true
+    }
+  ],
+  "layout": [
+    {
+      "id": "docs-root",
+      "label": "Snapshot docs",
+      "path": ".",
+      "description": "Top-level README, HANDOFF, IMPLEMENTATION-PLAN, PACKAGE-README, and formal-release skeleton docs for artifact review."
+    },
+    {
+      "id": "artifacts-renderer",
+      "label": "Renderer artifacts",
+      "path": "artifacts/renderer",
+      "description": "Built Vite renderer output copied from apps/studio/dist-renderer."
+    },
+    {
+      "id": "artifacts-electron",
+      "label": "Electron artifacts",
+      "path": "artifacts/electron",
+      "description": "Built Electron main/preload/runtime output copied from apps/studio/dist-electron."
+    },
+    {
+      "id": "release-metadata",
+      "label": "Release metadata",
+      "path": "release",
+      "description": "Manifest, build metadata, packaged app directory skeletons, bundle sealing metadata, channel routing metadata, builder execution skeletons, signing/publish handshake metadata, installer targets, approval workflow, installer placeholder contract, and release checklist."
+    },
+    {
+      "id": "release-scripts",
+      "label": "Placeholder scripts",
+      "path": "scripts",
+      "description": "Non-installer helper scripts that explain the current release posture."
+    }
+  ],
+  "artifactGroups": [
+    {
+      "id": "renderer",
+      "label": "Renderer bundle",
+      "outputRoot": "artifacts/renderer",
+      "fileCount": 3,
+      "totalBytes": 360286,
+      "entrypoints": [
+        "artifacts/renderer/index.html"
+      ]
+    },
+    {
+      "id": "electron",
+      "label": "Electron bundle",
+      "outputRoot": "artifacts/electron",
+      "fileCount": 10,
+      "totalBytes": 321764,
+      "entrypoints": [
+        "artifacts/electron/electron/main.js",
+        "artifacts/electron/electron/preload.js",
+        "artifacts/electron/electron/runtime/studio-runtime.js"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "renderer:assets/index-BMW_HQeV.js",
+      "groupId": "renderer",
+      "role": "asset",
+      "path": "artifacts/renderer/assets/index-BMW_HQeV.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-BMW_HQeV.js",
+      "sizeBytes": 340345,
+      "sha256": "971ec26a57cada9b87a677da6bbf4b0d894404cfb87e748333d0343113dc2603"
+    },
+    {
+      "id": "renderer:assets/index-Dm4t7r-s.css",
+      "groupId": "renderer",
+      "role": "asset",
+      "path": "artifacts/renderer/assets/index-Dm4t7r-s.css",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-Dm4t7r-s.css",
+      "sizeBytes": 19523,
+      "sha256": "92f6f78fe050fb7a26949f81fdd0b8ea4f4e9a613d0ed72fdd65abfe291e9fdc"
+    },
+    {
+      "id": "renderer:index.html",
+      "groupId": "renderer",
+      "role": "entrypoint",
+      "path": "artifacts/renderer/index.html",
+      "sourceRelativePath": "apps/studio/dist-renderer/index.html",
+      "sizeBytes": 418,
+      "sha256": "bb77039bed1eae2d3abfea586b5588e7cd2772e7c158045b46ca1e44890dee02"
+    },
+    {
+      "id": "electron:electron/main.js",
+      "groupId": "electron",
+      "role": "entrypoint",
+      "path": "artifacts/electron/electron/main.js",
+      "sourceRelativePath": "apps/studio/dist-electron/electron/main.js",
+      "sizeBytes": 3852,
+      "sha256": "778d5670afe072b011591cd269094f25e2915d5034ea407632bd0f4471e8c1b2"
+    },
+    {
+      "id": "electron:electron/preload.js",
+      "groupId": "electron",
+      "role": "entrypoint",
+      "path": "artifacts/electron/electron/preload.js",
+      "sourceRelativePath": "apps/studio/dist-electron/electron/preload.js",
+      "sizeBytes": 1283,
+      "sha256": "65ad3b81f24b33e42cc51eda59f4d51537299e3179ff1b005454630f3f74ed13"
+    },
+    {
+      "id": "electron:electron/runtime/mock-runtime.js",
+      "groupId": "electron",
+      "role": "asset",
+      "path": "artifacts/electron/electron/runtime/mock-runtime.js",
+      "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/mock-runtime.js",
+      "sizeBytes": 999,
+      "sha256": "f9eb306e073f2f460b131909a2cd132f14d5e76880c8b7f94209d629f3d3b3b4"
+    },
+    {
+      "id": "electron:electron/runtime/probes/codex.js",
+      "groupId": "electron",
+      "role": "asset",
+      "path": "artifacts/electron/electron/runtime/probes/codex.js",
+      "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/probes/codex.js",
+      "sizeBytes": 13500,
+      "sha256": "9b54a98aae754e553361054f8f55c2475ee17de054040a8bfe30a4d0358f2d3f"
+    },
+    {
+      "id": "electron:electron/runtime/probes/runtime-observations.js",
+      "groupId": "electron",
+      "role": "asset",
+      "path": "artifacts/electron/electron/runtime/probes/runtime-observations.js",
+      "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/probes/runtime-observations.js",
+      "sizeBytes": 5959,
+      "sha256": "9a3befe39950ae43282b7a0f684db510c4551e85dbc3c37819510e51bfabf1b6"
+    },
+    {
+      "id": "electron:electron/runtime/probes/sessions.js",
+      "groupId": "electron",
+      "role": "asset",
+      "path": "artifacts/electron/electron/runtime/probes/sessions.js",
+      "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/probes/sessions.js",
+      "sizeBytes": 7911,
+      "sha256": "324a8bd3287adb8629788aa4ca10a0e9cbd3d64bc99861dcd8e423c080222830"
+    },
+    {
+      "id": "electron:electron/runtime/probes/skills.js",
+      "groupId": "electron",
+      "role": "asset",
+      "path": "artifacts/electron/electron/runtime/probes/skills.js",
+      "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/probes/skills.js",
+      "sizeBytes": 7344,
+      "sha256": "aec9d00177d0bc128e37cc15734971ebf1a41a0a6073984161a66e05559ecb14"
+    },
+    {
+      "id": "electron:electron/runtime/probes/system-status.js",
+      "groupId": "electron",
+      "role": "asset",
+      "path": "artifacts/electron/electron/runtime/probes/system-status.js",
+      "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/probes/system-status.js",
+      "sizeBytes": 3557,
+      "sha256": "7ea46deac755db3ff5a9a9182701eacc327bb92bd576e6564da7be44188c188b"
+    },
+    {
+      "id": "electron:electron/runtime/probes/tools-mcp.js",
+      "groupId": "electron",
+      "role": "asset",
+      "path": "artifacts/electron/electron/runtime/probes/tools-mcp.js",
+      "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/probes/tools-mcp.js",
+      "sizeBytes": 224614,
+      "sha256": "4944559b1c782b6a23668c0bf9caca2b78136f955fd4260d23f43c4f4f473a35"
+    },
+    {
+      "id": "electron:electron/runtime/studio-runtime.js",
+      "groupId": "electron",
+      "role": "entrypoint",
+      "path": "artifacts/electron/electron/runtime/studio-runtime.js",
+      "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/studio-runtime.js",
+      "sizeBytes": 52745,
+      "sha256": "f99d9bfeb1fcc867cdf8a787a7b58eee055701f47ba4f5f56140a9efe0d19953"
+    }
+  ],
+  "currentDeliverySurfaces": [
+    "structured alpha-shell snapshot under delivery/openclaw-studio-alpha-shell",
+    "built renderer bundle copied into artifacts/renderer",
+    "built Electron bundle copied into artifacts/electron",
+    "deeper inspector drilldowns, active flow state, route-aware next-step boards, and inspector-command linkage",
+    "persisted shell layout foundation backed by localStorage",
+    "cross-view local orchestration boards linking route, workflow lane, workspace, detached candidate, intent focus, focused slot, and handoff posture",
+    "release manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged app materialization skeleton / packaged app directory materialization / packaged app staged output skeleton / packaged app bundle sealing skeleton / installer targets / installer-target builder skeleton / installer builder execution skeleton / installer builder orchestration / installer channel routing / signing-ready metadata / signing-publish pipeline / signing-publish gating handshake / signing-publish approval bridge / signing-publish promotion handshake / release approval workflow / release notes / publish gates / promotion gates under release/",
+    "docs closeout: README / HANDOFF / IMPLEMENTATION-PLAN / PACKAGE-README / RELEASE-SUMMARY / REVIEW-MANIFEST / BUNDLE-MATRIX / BUNDLE-ASSEMBLY / PACKAGED-APP-DIRECTORY-SKELETON / PACKAGED-APP-MATERIALIZATION-SKELETON / PACKAGED-APP-DIRECTORY-MATERIALIZATION / PACKAGED-APP-STAGED-OUTPUT-SKELETON.json / PACKAGED-APP-BUNDLE-SEALING-SKELETON.json / INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON / INSTALLER-BUILDER-EXECUTION-SKELETON / INSTALLER-BUILDER-ORCHESTRATION.json / INSTALLER-CHANNEL-ROUTING.json / SIGNING-METADATA / NOTARIZATION-PLAN / SIGNING-PUBLISH-PIPELINE / SIGNING-PUBLISH-GATING-HANDSHAKE / SIGNING-PUBLISH-APPROVAL-BRIDGE.json / SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json / RELEASE-APPROVAL-WORKFLOW / RELEASE-NOTES / PUBLISH-GATES / PROMOTION-GATES",
+    "placeholder installer explainer script that never installs anything"
+  ],
+  "deliveryConstraints": [
+    "real host-side execution remains disabled",
+    "no ~/.openclaw writes",
+    "no services / install / config mutation",
+    "no external connector process control"
+  ],
+  "formalInstallerGaps": [
+    "no packaged per-OS staged output materialization yet; staged outputs remain review-only metadata",
+    "no packaged per-OS bundle sealing yet; sealing remains review-only metadata",
+    "no Windows / macOS / Linux installer builder orchestration and channel routing wiring yet; routing remains review-only skeleton",
+    "no signing / notarization / hash publication workflow yet; approval bridge remains metadata-only",
+    "no executable signing-publish gating handshake yet; handshake remains metadata-only",
+    "no executable release approval handshake yet; workflow remains metadata-only",
+    "no release publishing / artifact upload / promotion handshake / channel promotion automation yet; publish pipeline remains skeleton-only",
+    "real host-side execution remains disabled until approval / lifecycle / rollback close the loop"
+  ],
+  "installer": {
+    "status": "placeholder",
+    "manifestPath": "release/INSTALLER-PLACEHOLDER.json",
+    "scriptPath": "scripts/install-placeholder.cjs"
+  },
+  "reviewArtifacts": [
+    "release/REVIEW-MANIFEST.json",
+    "release/RELEASE-SUMMARY.md"
+  ],
+  "formalReleaseArtifacts": [
+    "release/BUNDLE-MATRIX.json",
+    "release/BUNDLE-ASSEMBLY.json",
+    "release/PACKAGED-APP-DIRECTORY-SKELETON.json",
+    "release/PACKAGED-APP-MATERIALIZATION-SKELETON.json",
+    "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+    "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+    "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+    "release/INSTALLER-TARGETS.json",
+    "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
+    "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
+    "release/INSTALLER-BUILDER-ORCHESTRATION.json",
+    "release/INSTALLER-CHANNEL-ROUTING.json",
+    "release/SIGNING-METADATA.json",
+    "release/NOTARIZATION-PLAN.json",
+    "release/SIGNING-PUBLISH-PIPELINE.json",
+    "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+    "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
+    "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+    "release/RELEASE-APPROVAL-WORKFLOW.json",
+    "release/RELEASE-NOTES.md",
+    "release/PUBLISH-GATES.json",
+    "release/PROMOTION-GATES.json"
+  ],
+  "packageMatrix": [
+    "windows",
+    "macos",
+    "linux"
+  ],
+  "pipelineStages": [
+    "docs-closeout",
+    "artifact-snapshot",
+    "bundle-assembly-skeleton",
+    "packaged-app-directory-skeleton",
+    "packaged-app-materialization-skeleton",
+    "packaged-app-directory-materialization",
+    "packaged-app-staged-output-skeleton",
+    "packaged-app-bundle-sealing-skeleton",
+    "installer-target-metadata",
+    "installer-target-builder-skeleton",
+    "installer-builder-execution-skeleton",
+    "installer-builder-orchestration",
+    "installer-channel-routing",
+    "signing-ready-metadata",
+    "signing-publish-pipeline-skeleton",
+    "signing-publish-gating-handshake",
+    "signing-publish-approval-bridge",
+    "signing-publish-promotion-handshake",
+    "approval-workflow-skeleton",
+    "notarization-blocked",
+    "promotion-gated"
+  ]
+}

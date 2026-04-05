@@ -1,0 +1,146 @@
+{
+  "schemaVersion": "openclaw-studio-installer-targets/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "phase": "phase40",
+  "targets": [
+    {
+      "id": "windows-portable-dir",
+      "platform": "windows",
+      "label": "Portable directory",
+      "type": "portable-dir",
+      "status": "planned",
+      "packagedAppDirectoryId": "packaged-app-directory-windows",
+      "bundleSealingId": "bundle-sealing-windows",
+      "channelRouteId": "route-alpha",
+      "builderExecutionSkeletonId": "execute-windows-portable-dir-builder",
+      "plannedOutput": "future/installers/windows/OpenClaw Studio-portable",
+      "requires": [
+        "packaged-app-directory-materialization",
+        "packaged-app-bundle-sealing",
+        "checksums",
+        "release approval workflow"
+      ],
+      "canBuild": false
+    },
+    {
+      "id": "windows-nsis",
+      "platform": "windows",
+      "label": "NSIS installer",
+      "type": "nsis-installer",
+      "status": "blocked",
+      "packagedAppDirectoryId": "packaged-app-directory-windows",
+      "bundleSealingId": "bundle-sealing-windows",
+      "channelRouteId": "route-alpha",
+      "builderExecutionSkeletonId": "execute-windows-nsis-builder",
+      "plannedOutput": "future/installers/windows/OpenClaw Studio Setup.exe",
+      "requires": [
+        "packaged-app-directory-materialization",
+        "packaged-app-bundle-sealing",
+        "builder execution skeleton",
+        "signing",
+        "release approval workflow"
+      ],
+      "canBuild": false
+    },
+    {
+      "id": "macos-app-bundle",
+      "platform": "macos",
+      "label": "Application bundle",
+      "type": "app-bundle",
+      "status": "planned",
+      "packagedAppDirectoryId": "packaged-app-directory-macos",
+      "bundleSealingId": "bundle-sealing-macos",
+      "channelRouteId": "route-alpha",
+      "builderExecutionSkeletonId": "execute-macos-app-bundle-builder",
+      "plannedOutput": "future/installers/macos/OpenClaw Studio.app",
+      "requires": [
+        "packaged-app-directory-materialization",
+        "packaged-app-bundle-sealing",
+        "codesign",
+        "release approval workflow"
+      ],
+      "canBuild": false
+    },
+    {
+      "id": "macos-dmg",
+      "platform": "macos",
+      "label": "DMG installer",
+      "type": "dmg",
+      "status": "blocked",
+      "packagedAppDirectoryId": "packaged-app-directory-macos",
+      "bundleSealingId": "bundle-sealing-macos",
+      "channelRouteId": "route-alpha",
+      "builderExecutionSkeletonId": "execute-macos-dmg-builder",
+      "plannedOutput": "future/installers/macos/OpenClaw Studio.dmg",
+      "requires": [
+        "packaged-app-directory-materialization",
+        "packaged-app-bundle-sealing",
+        "builder execution skeleton",
+        "codesign",
+        "notarization",
+        "release approval workflow"
+      ],
+      "canBuild": false
+    },
+    {
+      "id": "linux-appimage",
+      "platform": "linux",
+      "label": "AppImage",
+      "type": "AppImage",
+      "status": "blocked",
+      "packagedAppDirectoryId": "packaged-app-directory-linux",
+      "bundleSealingId": "bundle-sealing-linux",
+      "channelRouteId": "route-alpha",
+      "builderExecutionSkeletonId": "execute-linux-appimage-builder",
+      "plannedOutput": "future/installers/linux/OpenClaw Studio.AppImage",
+      "requires": [
+        "packaged-app-directory-materialization",
+        "packaged-app-bundle-sealing",
+        "builder execution skeleton",
+        "checksums",
+        "release approval workflow"
+      ],
+      "canBuild": false
+    },
+    {
+      "id": "linux-deb",
+      "platform": "linux",
+      "label": "Deb package",
+      "type": "deb",
+      "status": "blocked",
+      "packagedAppDirectoryId": "packaged-app-directory-linux",
+      "bundleSealingId": "bundle-sealing-linux",
+      "channelRouteId": "route-alpha",
+      "builderExecutionSkeletonId": "execute-linux-deb-builder",
+      "plannedOutput": "future/installers/linux/openclaw-studio.deb",
+      "requires": [
+        "packaged-app-directory-materialization",
+        "packaged-app-bundle-sealing",
+        "builder execution skeleton",
+        "signing",
+        "release approval workflow"
+      ],
+      "canBuild": false
+    },
+    {
+      "id": "linux-rpm",
+      "platform": "linux",
+      "label": "RPM package",
+      "type": "rpm",
+      "status": "blocked",
+      "packagedAppDirectoryId": "packaged-app-directory-linux",
+      "bundleSealingId": "bundle-sealing-linux",
+      "channelRouteId": "route-alpha",
+      "builderExecutionSkeletonId": "execute-linux-rpm-builder",
+      "plannedOutput": "future/installers/linux/openclaw-studio.rpm",
+      "requires": [
+        "packaged-app-directory-materialization",
+        "packaged-app-bundle-sealing",
+        "builder execution skeleton",
+        "signing",
+        "release approval workflow"
+      ],
+      "canBuild": false
+    }
+  ]
+}

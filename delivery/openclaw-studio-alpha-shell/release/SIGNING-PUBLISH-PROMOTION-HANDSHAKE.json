@@ -1,0 +1,177 @@
+{
+  "schemaVersion": "openclaw-studio-signing-publish-promotion-handshake/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "phase": "phase40",
+  "mode": "local-only-review",
+  "canPromote": false,
+  "channelRoutingPath": "release/INSTALLER-CHANNEL-ROUTING.json",
+  "approvalBridgePath": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
+  "publishGatesPath": "release/PUBLISH-GATES.json",
+  "promotionGatesPath": "release/PROMOTION-GATES.json",
+  "participants": [
+    "release-engineering",
+    "security",
+    "release-manager",
+    "product-owner"
+  ],
+  "request": {
+    "id": "signing-publish-promotion-handshake-request",
+    "status": "planned",
+    "fields": [
+      {
+        "id": "request-phase",
+        "label": "Phase",
+        "required": true
+      },
+      {
+        "id": "request-package-id",
+        "label": "Package id",
+        "required": true
+      },
+      {
+        "id": "request-channel-route",
+        "label": "Channel route",
+        "required": true
+      },
+      {
+        "id": "request-sealed-bundles",
+        "label": "Sealed bundles",
+        "required": true
+      },
+      {
+        "id": "request-publish-evidence",
+        "label": "Publish evidence",
+        "required": true
+      },
+      {
+        "id": "request-promotion-target",
+        "label": "Promotion target",
+        "required": true
+      }
+    ]
+  },
+  "decision": {
+    "id": "signing-publish-promotion-handshake-decision",
+    "status": "blocked",
+    "fields": [
+      {
+        "id": "decision-status",
+        "label": "Decision",
+        "required": true
+      },
+      {
+        "id": "decision-channel",
+        "label": "Channel",
+        "required": true
+      },
+      {
+        "id": "decision-promotion-target",
+        "label": "Promotion target",
+        "required": true
+      },
+      {
+        "id": "decision-notes",
+        "label": "Reviewer notes",
+        "required": false
+      },
+      {
+        "id": "decision-expiry",
+        "label": "Expires at",
+        "required": false
+      }
+    ]
+  },
+  "acknowledgements": [
+    {
+      "id": "promotion-ack-bundle-sealing",
+      "label": "Bundle sealing evidence reviewed",
+      "status": "planned",
+      "artifact": "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json"
+    },
+    {
+      "id": "promotion-ack-channel-routing",
+      "label": "Installer channel routing reviewed",
+      "status": "planned",
+      "artifact": "release/INSTALLER-CHANNEL-ROUTING.json"
+    },
+    {
+      "id": "promotion-ack-approval-bridge",
+      "label": "Approval bridge reviewed",
+      "status": "blocked",
+      "artifact": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json"
+    },
+    {
+      "id": "promotion-ack-publish-gates",
+      "label": "Publish gates reviewed",
+      "status": "blocked",
+      "artifact": "release/PUBLISH-GATES.json"
+    },
+    {
+      "id": "promotion-ack-promotion-gates",
+      "label": "Promotion gates reviewed",
+      "status": "blocked",
+      "artifact": "release/PROMOTION-GATES.json"
+    }
+  ],
+  "stages": [
+    {
+      "id": "promotion-handshake-bundle-sealing",
+      "label": "Bundle sealing review",
+      "status": "planned",
+      "evidence": [
+        "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+        "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json"
+      ]
+    },
+    {
+      "id": "promotion-handshake-channel-routing",
+      "label": "Installer channel routing review",
+      "status": "planned",
+      "evidence": [
+        "release/INSTALLER-BUILDER-ORCHESTRATION.json",
+        "release/INSTALLER-CHANNEL-ROUTING.json"
+      ]
+    },
+    {
+      "id": "promotion-handshake-approval",
+      "label": "Approval bridge review",
+      "status": "blocked",
+      "evidence": [
+        "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
+        "release/RELEASE-APPROVAL-WORKFLOW.json"
+      ]
+    },
+    {
+      "id": "promotion-handshake-publish",
+      "label": "Publish gate review",
+      "status": "blocked",
+      "evidence": [
+        "release/RELEASE-NOTES.md",
+        "release/PUBLISH-GATES.json"
+      ]
+    },
+    {
+      "id": "promotion-handshake-promotion",
+      "label": "Promotion gate review",
+      "status": "blocked",
+      "evidence": [
+        "release/PROMOTION-GATES.json",
+        "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json"
+      ]
+    }
+  ],
+  "linkedArtifacts": [
+    "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+    "release/INSTALLER-CHANNEL-ROUTING.json",
+    "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
+    "release/PUBLISH-GATES.json",
+    "release/PROMOTION-GATES.json",
+    "release/RELEASE-APPROVAL-WORKFLOW.json"
+  ],
+  "blockedBy": [
+    "sealed bundles remain metadata-only",
+    "artifact upload remains blocked",
+    "promotion gates remain non-executable",
+    "host-side execution remains disabled"
+  ]
+}

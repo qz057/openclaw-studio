@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "openclaw-studio-notarization-plan/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "phase": "phase40",
+  "platforms": [
+    {
+      "id": "windows",
+      "status": "blocked",
+      "steps": [
+        "code signing",
+        "checksum publication"
+      ]
+    },
+    {
+      "id": "macos",
+      "status": "blocked",
+      "steps": [
+        "signing",
+        "notarization",
+        "stapling"
+      ]
+    },
+    {
+      "id": "linux",
+      "status": "blocked",
+      "steps": [
+        "package signing",
+        "checksum publication"
+      ]
+    }
+  ]
+}

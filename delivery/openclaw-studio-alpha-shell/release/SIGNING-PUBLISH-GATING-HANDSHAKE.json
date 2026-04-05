@@ -1,0 +1,201 @@
+{
+  "schemaVersion": "openclaw-studio-signing-publish-gating-handshake/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "phase": "phase40",
+  "mode": "local-only-review",
+  "canHandshake": false,
+  "participants": [
+    "release-engineering",
+    "security",
+    "release-manager",
+    "product-owner"
+  ],
+  "request": {
+    "id": "signing-publish-handshake-request",
+    "status": "planned",
+    "fields": [
+      {
+        "id": "request-phase",
+        "label": "Phase",
+        "required": true
+      },
+      {
+        "id": "request-package-id",
+        "label": "Package id",
+        "required": true
+      },
+      {
+        "id": "request-bundle-seal",
+        "label": "Bundle sealing evidence",
+        "required": true
+      },
+      {
+        "id": "request-channel-route",
+        "label": "Channel route",
+        "required": true
+      },
+      {
+        "id": "request-signing-evidence",
+        "label": "Signing evidence",
+        "required": true
+      },
+      {
+        "id": "request-publish-gates",
+        "label": "Publish gates",
+        "required": true
+      },
+      {
+        "id": "request-promotion-target",
+        "label": "Promotion target",
+        "required": true
+      }
+    ]
+  },
+  "decision": {
+    "id": "signing-publish-handshake-decision",
+    "status": "blocked",
+    "fields": [
+      {
+        "id": "decision-status",
+        "label": "Decision",
+        "required": true
+      },
+      {
+        "id": "decision-scope",
+        "label": "Scope",
+        "required": true
+      },
+      {
+        "id": "decision-notes",
+        "label": "Reviewer notes",
+        "required": false
+      },
+      {
+        "id": "decision-expiry",
+        "label": "Expires at",
+        "required": false
+      }
+    ]
+  },
+  "acknowledgements": [
+    {
+      "id": "ack-packaged-app",
+      "label": "Packaged-app directory materialization reviewed",
+      "status": "planned",
+      "artifact": "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json"
+    },
+    {
+      "id": "ack-bundle-sealing",
+      "label": "Packaged-app bundle sealing reviewed",
+      "status": "planned",
+      "artifact": "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json"
+    },
+    {
+      "id": "ack-builders",
+      "label": "Installer builder execution reviewed",
+      "status": "planned",
+      "artifact": "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json"
+    },
+    {
+      "id": "ack-channel-routing",
+      "label": "Installer channel routing reviewed",
+      "status": "planned",
+      "artifact": "release/INSTALLER-CHANNEL-ROUTING.json"
+    },
+    {
+      "id": "ack-signing",
+      "label": "Signing evidence reviewed",
+      "status": "blocked",
+      "artifact": "release/SIGNING-METADATA.json"
+    },
+    {
+      "id": "ack-publish",
+      "label": "Publish and promotion gates reviewed",
+      "status": "blocked",
+      "artifact": "release/PUBLISH-GATES.json"
+    }
+  ],
+  "stages": [
+    {
+      "id": "handshake-packaged-app",
+      "label": "Packaged-app directory materialization review",
+      "status": "planned",
+      "evidence": [
+        "release/PACKAGED-APP-DIRECTORY-SKELETON.json",
+        "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json"
+      ]
+    },
+    {
+      "id": "handshake-bundle-sealing",
+      "label": "Packaged-app bundle sealing review",
+      "status": "planned",
+      "evidence": [
+        "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+        "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json"
+      ]
+    },
+    {
+      "id": "handshake-builders",
+      "label": "Installer builder execution review",
+      "status": "planned",
+      "evidence": [
+        "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
+        "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json"
+      ]
+    },
+    {
+      "id": "handshake-channel-routing",
+      "label": "Installer channel routing review",
+      "status": "planned",
+      "evidence": [
+        "release/INSTALLER-BUILDER-ORCHESTRATION.json",
+        "release/INSTALLER-CHANNEL-ROUTING.json"
+      ]
+    },
+    {
+      "id": "handshake-signing",
+      "label": "Signing and notarization review",
+      "status": "blocked",
+      "evidence": [
+        "release/SIGNING-METADATA.json",
+        "release/NOTARIZATION-PLAN.json",
+        "release/SIGNING-PUBLISH-PIPELINE.json"
+      ]
+    },
+    {
+      "id": "handshake-publish",
+      "label": "Publish gate review",
+      "status": "blocked",
+      "evidence": [
+        "release/RELEASE-NOTES.md",
+        "release/PUBLISH-GATES.json"
+      ]
+    },
+    {
+      "id": "handshake-promotion",
+      "label": "Promotion acknowledgement",
+      "status": "blocked",
+      "evidence": [
+        "release/PROMOTION-GATES.json",
+        "release/RELEASE-APPROVAL-WORKFLOW.json"
+      ]
+    }
+  ],
+  "linkedArtifacts": [
+    "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+    "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+    "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
+    "release/INSTALLER-CHANNEL-ROUTING.json",
+    "release/SIGNING-METADATA.json",
+    "release/SIGNING-PUBLISH-PIPELINE.json",
+    "release/PUBLISH-GATES.json",
+    "release/PROMOTION-GATES.json",
+    "release/RELEASE-APPROVAL-WORKFLOW.json"
+  ],
+  "blockedBy": [
+    "signing and notarization remain metadata-only",
+    "artifact upload remains blocked",
+    "release approval remains non-executable",
+    "host-side execution remains disabled"
+  ]
+}

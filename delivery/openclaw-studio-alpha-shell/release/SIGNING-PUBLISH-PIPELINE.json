@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "openclaw-studio-signing-publish-pipeline/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "phase": "phase40",
+  "gatingHandshakePath": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+  "approvalBridgePath": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
+  "channelRoutingPath": "release/INSTALLER-CHANNEL-ROUTING.json",
+  "promotionHandshakePath": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+  "stages": [
+    {
+      "id": "pipeline-packaged-app-directory-materialization",
+      "label": "Packaged-app directory materialization",
+      "status": "planned"
+    },
+    {
+      "id": "pipeline-packaged-app-staged-output",
+      "label": "Packaged-app staged output skeleton",
+      "status": "planned"
+    },
+    {
+      "id": "pipeline-packaged-app-bundle-sealing",
+      "label": "Packaged-app bundle sealing skeleton",
+      "status": "planned"
+    },
+    {
+      "id": "pipeline-installer-builder-execution",
+      "label": "Installer builder execution skeleton",
+      "status": "planned"
+    },
+    {
+      "id": "pipeline-installer-builder-orchestration",
+      "label": "Installer builder orchestration",
+      "status": "planned"
+    },
+    {
+      "id": "pipeline-installer-channel-routing",
+      "label": "Installer channel routing",
+      "status": "planned"
+    },
+    {
+      "id": "pipeline-signing-metadata",
+      "label": "Signing-ready metadata",
+      "status": "ready"
+    },
+    {
+      "id": "pipeline-notarization",
+      "label": "Notarization planning",
+      "status": "blocked"
+    },
+    {
+      "id": "pipeline-checksums",
+      "label": "Checksum publication",
+      "status": "blocked"
+    },
+    {
+      "id": "pipeline-release-notes",
+      "label": "Release notes",
+      "status": "planned"
+    },
+    {
+      "id": "pipeline-gating-handshake",
+      "label": "Signing-publish gating handshake",
+      "status": "planned"
+    },
+    {
+      "id": "pipeline-approval-bridge",
+      "label": "Signing-publish approval bridge",
+      "status": "planned"
+    },
+    {
+      "id": "pipeline-promotion-handshake",
+      "label": "Signing-publish promotion handshake",
+      "status": "planned"
+    },
+    {
+      "id": "pipeline-upload",
+      "label": "Artifact upload",
+      "status": "blocked"
+    },
+    {
+      "id": "pipeline-promotion",
+      "label": "Promotion gating",
+      "status": "blocked"
+    }
+  ]
+}

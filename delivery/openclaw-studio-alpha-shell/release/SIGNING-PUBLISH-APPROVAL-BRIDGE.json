@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "openclaw-studio-signing-publish-approval-bridge/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "phase": "phase40",
+  "mode": "review-only",
+  "bridge": [
+    {
+      "id": "bridge-signing-to-approval",
+      "from": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+      "to": "release/RELEASE-APPROVAL-WORKFLOW.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-approval-to-channel-routing",
+      "from": "release/RELEASE-APPROVAL-WORKFLOW.json",
+      "to": "release/INSTALLER-CHANNEL-ROUTING.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-channel-routing-to-promotion-handshake",
+      "from": "release/INSTALLER-CHANNEL-ROUTING.json",
+      "to": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-promotion-handshake-to-publish",
+      "from": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+      "to": "release/PUBLISH-GATES.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-publish-to-promotion",
+      "from": "release/PUBLISH-GATES.json",
+      "to": "release/PROMOTION-GATES.json",
+      "status": "blocked"
+    }
+  ]
+}

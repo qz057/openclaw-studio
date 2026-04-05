@@ -1,0 +1,92 @@
+{
+  "schemaVersion": "openclaw-studio-publish-gates/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "phase": "phase40",
+  "gates": [
+    {
+      "id": "gate-bundles",
+      "label": "Per-platform bundles ready",
+      "status": "blocked"
+    },
+    {
+      "id": "gate-packaged-app-directories",
+      "label": "Packaged app directories reviewed",
+      "status": "planned"
+    },
+    {
+      "id": "gate-packaged-app-directory-materialization",
+      "label": "Packaged-app directory materialization reviewed",
+      "status": "planned"
+    },
+    {
+      "id": "gate-packaged-app-staged-output",
+      "label": "Packaged-app staged outputs reviewed",
+      "status": "planned"
+    },
+    {
+      "id": "gate-packaged-app-bundle-sealing",
+      "label": "Packaged-app bundle sealing reviewed",
+      "status": "planned"
+    },
+    {
+      "id": "gate-installer-targets",
+      "label": "Installer targets reviewed",
+      "status": "planned"
+    },
+    {
+      "id": "gate-installer-builder-execution",
+      "label": "Installer builder execution reviewed",
+      "status": "planned"
+    },
+    {
+      "id": "gate-installer-builder-orchestration",
+      "label": "Installer builder orchestration reviewed",
+      "status": "planned"
+    },
+    {
+      "id": "gate-installer-channel-routing",
+      "label": "Installer channel routing reviewed",
+      "status": "planned"
+    },
+    {
+      "id": "gate-signing",
+      "label": "Signing / notarization complete",
+      "status": "blocked"
+    },
+    {
+      "id": "gate-signing-handshake",
+      "label": "Signing-publish gating handshake resolved",
+      "status": "blocked"
+    },
+    {
+      "id": "gate-approval-bridge",
+      "label": "Signing-publish approval bridge resolved",
+      "status": "blocked"
+    },
+    {
+      "id": "gate-promotion-handshake",
+      "label": "Signing-publish promotion handshake resolved",
+      "status": "blocked"
+    },
+    {
+      "id": "gate-approval-workflow",
+      "label": "Release approval workflow resolved",
+      "status": "blocked"
+    },
+    {
+      "id": "gate-notes",
+      "label": "Release notes approved",
+      "status": "planned"
+    },
+    {
+      "id": "gate-upload",
+      "label": "Artifacts uploaded",
+      "status": "blocked"
+    },
+    {
+      "id": "gate-promotion",
+      "label": "Channel promotion approved",
+      "status": "blocked"
+    }
+  ]
+}

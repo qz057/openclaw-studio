@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "openclaw-studio-signing-metadata/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "phase": "phase40",
+  "readiness": [
+    {
+      "platform": "windows",
+      "status": "blocked",
+      "fields": [
+        "publisher",
+        "certificate",
+        "timestamp server"
+      ]
+    },
+    {
+      "platform": "macos",
+      "status": "blocked",
+      "fields": [
+        "team id",
+        "signing identity",
+        "notary profile"
+      ]
+    },
+    {
+      "platform": "linux",
+      "status": "blocked",
+      "fields": [
+        "signing key",
+        "checksum output",
+        "package targets"
+      ]
+    }
+  ]
+}

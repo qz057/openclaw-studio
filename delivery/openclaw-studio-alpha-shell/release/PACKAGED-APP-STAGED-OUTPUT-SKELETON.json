@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "openclaw-studio-packaged-app-staged-output-skeleton/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "phase": "phase40",
+  "outputs": [
+    {
+      "id": "staged-output-windows",
+      "platform": "windows",
+      "directoryMaterializationId": "directory-materialization-windows",
+      "materializationId": "materialize-windows-packaged-app",
+      "bundleSealingId": "bundle-sealing-windows",
+      "status": "planned",
+      "outputRoot": "future/staged-output/windows/OpenClaw Studio",
+      "manifests": [
+        "future/staged-output/windows/output-manifest.json",
+        "future/staged-output/windows/checksum-manifest.json"
+      ]
+    },
+    {
+      "id": "staged-output-macos",
+      "platform": "macos",
+      "directoryMaterializationId": "directory-materialization-macos",
+      "materializationId": "materialize-macos-packaged-app",
+      "bundleSealingId": "bundle-sealing-macos",
+      "status": "planned",
+      "outputRoot": "future/staged-output/macos/OpenClaw Studio.app",
+      "manifests": [
+        "future/staged-output/macos/output-manifest.json",
+        "future/staged-output/macos/checksum-manifest.json"
+      ]
+    },
+    {
+      "id": "staged-output-linux",
+      "platform": "linux",
+      "directoryMaterializationId": "directory-materialization-linux",
+      "materializationId": "materialize-linux-packaged-app",
+      "bundleSealingId": "bundle-sealing-linux",
+      "status": "planned",
+      "outputRoot": "future/staged-output/linux/openclaw-studio",
+      "manifests": [
+        "future/staged-output/linux/output-manifest.json",
+        "future/staged-output/linux/checksum-manifest.json"
+      ]
+    }
+  ]
+}

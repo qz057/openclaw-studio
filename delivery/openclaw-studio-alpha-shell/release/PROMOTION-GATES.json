@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "openclaw-studio-promotion-gates/v1",
+  "generatedAt": "2026-04-05T00:05:51.615Z",
+  "phase": "phase40",
+  "promotions": [
+    {
+      "from": "alpha",
+      "to": "beta",
+      "status": "blocked",
+      "requires": [
+        "bundles",
+        "packaged app directories",
+        "packaged app directory materialization",
+        "packaged app bundle sealing",
+        "installer targets",
+        "installer builder execution",
+        "installer channel routing",
+        "signing",
+        "signing-publish gating handshake",
+        "signing-publish promotion handshake",
+        "release approval workflow",
+        "release notes",
+        "upload"
+      ]
+    },
+    {
+      "from": "beta",
+      "to": "stable",
+      "status": "blocked",
+      "requires": [
+        "notarization",
+        "checksums",
+        "approval",
+        "installer channel routing",
+        "signing-publish gating handshake",
+        "signing-publish promotion handshake",
+        "release approval workflow",
+        "rollback plan"
+      ]
+    }
+  ]
+}
