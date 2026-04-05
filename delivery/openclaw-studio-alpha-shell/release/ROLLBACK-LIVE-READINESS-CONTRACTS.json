@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "openclaw-studio-rollback-live-readiness-contracts/v1",
+  "generatedAt": "2026-04-05T07:05:48.132Z",
+  "phase": "phase45",
+  "mode": "local-only-review",
+  "contracts": [
+    {
+      "id": "rollback-readiness-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "publishRollbackPathId": "publish-rollback-alpha-to-beta",
+      "promotionOperatorHandoffRailId": "promotion-handoff-alpha-to-beta",
+      "rollbackExecutionRehearsalLedgerId": "rollback-rehearsal-alpha-to-beta",
+      "rollbackOperatorDrillbookId": "rollback-drillbook-alpha-to-beta",
+      "status": "blocked",
+      "readinessContractPath": "future/publish/alpha-to-beta/rollback-live-readiness-contract.json",
+      "readinessChecks": [
+        "rollback rehearsal ledger linked",
+        "rollback operator drillbook linked",
+        "promotion operator handoff rail linked",
+        "recovery channel remains review-only"
+      ],
+      "blockedBy": [
+        "rollback live-readiness remains metadata-only",
+        "live publish remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canEnterLiveRollback": false
+    },
+    {
+      "id": "rollback-readiness-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "publishRollbackPathId": "publish-rollback-beta-to-stable",
+      "promotionOperatorHandoffRailId": "promotion-handoff-beta-to-stable",
+      "rollbackExecutionRehearsalLedgerId": "rollback-rehearsal-beta-to-stable",
+      "rollbackOperatorDrillbookId": "rollback-drillbook-beta-to-stable",
+      "status": "blocked",
+      "readinessContractPath": "future/publish/beta-to-stable/rollback-live-readiness-contract.json",
+      "readinessChecks": [
+        "rollback rehearsal ledger linked",
+        "rollback operator drillbook linked",
+        "promotion operator handoff rail linked",
+        "recovery channel remains review-only"
+      ],
+      "blockedBy": [
+        "rollback live-readiness remains metadata-only",
+        "live publish remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canEnterLiveRollback": false
+    }
+  ]
+}

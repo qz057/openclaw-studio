@@ -1,12 +1,12 @@
 {
   "schemaVersion": "openclaw-studio-release-manifest/v1",
-  "generatedAt": "2026-04-05T06:05:09.978Z",
+  "generatedAt": "2026-04-05T07:05:48.132Z",
   "packageId": "openclaw-studio-alpha-shell",
   "packageName": "OpenClaw Studio Alpha Shell",
   "packageKind": "alpha-shell-release-skeleton",
   "channel": "alpha",
-  "phase": "phase44",
-  "milestone": "phase44 attestation apply audit packs / promotion execution checkpoints / rollback operator drillbooks + docs / smoke / package / release-plan / UI / shared data closeout",
+  "phase": "phase45",
+  "milestone": "phase45 attestation apply execution packets / promotion operator handoff rails / rollback live-readiness contracts + docs / smoke / package / release-plan / UI / shared data closeout",
   "version": "0.1.0",
   "docs": [
     {
@@ -112,6 +112,12 @@
       "generated": true
     },
     {
+      "id": "attestation-apply-execution-packets",
+      "label": "Attestation apply execution packets",
+      "path": "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json",
+      "generated": true
+    },
+    {
       "id": "installer-targets",
       "label": "Installer targets",
       "path": "release/INSTALLER-TARGETS.json",
@@ -163,6 +169,12 @@
       "id": "promotion-execution-checkpoints",
       "label": "Promotion execution checkpoints",
       "path": "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
+      "generated": true
+    },
+    {
+      "id": "promotion-operator-handoff-rails",
+      "label": "Promotion operator handoff rails",
+      "path": "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json",
       "generated": true
     },
     {
@@ -226,6 +238,12 @@
       "generated": true
     },
     {
+      "id": "rollback-live-readiness-contracts",
+      "label": "Rollback live-readiness contracts",
+      "path": "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
+      "generated": true
+    },
+    {
       "id": "release-approval-workflow",
       "label": "Release approval workflow",
       "path": "release/RELEASE-APPROVAL-WORKFLOW.json",
@@ -279,7 +297,7 @@
       "id": "release-metadata",
       "label": "Release metadata",
       "path": "release",
-      "description": "Manifest, build metadata, attestation verification packs, attestation apply audit packs, promotion apply manifests, promotion execution checkpoints, rollback rehearsal ledgers, rollback operator drillbooks, packaged app directory skeletons, signing/publish handshake metadata, installer targets, approval workflow, installer placeholder contract, and release checklist."
+      "description": "Manifest, build metadata, attestation verification packs, attestation apply audit packs, attestation apply execution packets, promotion apply manifests, promotion execution checkpoints, promotion operator handoff rails, rollback rehearsal ledgers, rollback operator drillbooks, rollback live-readiness contracts, packaged app directory skeletons, signing/publish handshake metadata, installer targets, approval workflow, installer placeholder contract, and release checklist."
     },
     {
       "id": "release-scripts",
@@ -294,7 +312,7 @@
       "label": "Renderer bundle",
       "outputRoot": "artifacts/renderer",
       "fileCount": 3,
-      "totalBytes": 364129,
+      "totalBytes": 365251,
       "entrypoints": [
         "artifacts/renderer/index.html"
       ]
@@ -314,13 +332,13 @@
   ],
   "artifacts": [
     {
-      "id": "renderer:assets/index-DE2xIZav.js",
+      "id": "renderer:assets/index-cPwTr_Kx.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/index-DE2xIZav.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-DE2xIZav.js",
-      "sizeBytes": 344188,
-      "sha256": "e50613185ce29b9a3055ff078351dcdcdd220b75f894db2a1fc2cd1b4bd6f4ad"
+      "path": "artifacts/renderer/assets/index-cPwTr_Kx.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-cPwTr_Kx.js",
+      "sizeBytes": 345310,
+      "sha256": "e9b2ae2c96b53c71f16ff0fa79b617b57bb9d13bb46c87b2d6600d825f681ab9"
     },
     {
       "id": "renderer:assets/index-Dm4t7r-s.css",
@@ -338,7 +356,7 @@
       "path": "artifacts/renderer/index.html",
       "sourceRelativePath": "apps/studio/dist-renderer/index.html",
       "sizeBytes": 418,
-      "sha256": "4cad70495c904149100e82e4da851d0a0c962434832690cb13c1288aea4bf00f"
+      "sha256": "7940b65ba4a6da7ba348cc75b3cd1bdcfe49ae853aeb40dcc473490b3c215fb8"
     },
     {
       "id": "electron:electron/main.js",
@@ -438,8 +456,8 @@
     "deeper inspector drilldowns, active flow state, route-aware next-step boards, and inspector-command linkage",
     "persisted shell layout foundation backed by localStorage",
     "cross-view local orchestration boards linking route, workflow lane, workspace, detached candidate, intent focus, focused slot, and handoff posture",
-    "release manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged app materialization skeleton / packaged app directory materialization / packaged app staged output skeleton / packaged app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / attestation apply audit packs / installer targets / installer-target builder skeleton / installer builder execution skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / promotion apply readiness / promotion apply manifests / promotion execution checkpoints / signing-ready metadata / signing-publish pipeline / signing-publish gating handshake / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / rollback recovery ledger / rollback execution rehearsal ledger / rollback operator drillbooks / release approval workflow / release notes / publish gates / promotion gates under release/",
-    "docs closeout: README / HANDOFF / IMPLEMENTATION-PLAN / PACKAGE-README / RELEASE-SUMMARY / REVIEW-MANIFEST / BUNDLE-MATRIX / BUNDLE-ASSEMBLY / PACKAGED-APP-DIRECTORY-SKELETON / PACKAGED-APP-MATERIALIZATION-SKELETON / PACKAGED-APP-DIRECTORY-MATERIALIZATION / PACKAGED-APP-STAGED-OUTPUT-SKELETON.json / PACKAGED-APP-BUNDLE-SEALING-SKELETON.json / SEALED-BUNDLE-INTEGRITY-CONTRACT.json / INTEGRITY-ATTESTATION-EVIDENCE.json / ATTESTATION-VERIFICATION-PACKS.json / ATTESTATION-APPLY-AUDIT-PACKS.json / INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON / INSTALLER-BUILDER-EXECUTION-SKELETON / INSTALLER-BUILDER-ORCHESTRATION.json / INSTALLER-CHANNEL-ROUTING.json / CHANNEL-PROMOTION-EVIDENCE.json / PROMOTION-APPLY-READINESS.json / PROMOTION-APPLY-MANIFESTS.json / PROMOTION-EXECUTION-CHECKPOINTS.json / SIGNING-METADATA / NOTARIZATION-PLAN / SIGNING-PUBLISH-PIPELINE / SIGNING-PUBLISH-GATING-HANDSHAKE / SIGNING-PUBLISH-APPROVAL-BRIDGE.json / SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json / PUBLISH-ROLLBACK-HANDSHAKE.json / ROLLBACK-RECOVERY-LEDGER.json / ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json / ROLLBACK-OPERATOR-DRILLBOOKS.json / RELEASE-APPROVAL-WORKFLOW / RELEASE-NOTES / PUBLISH-GATES / PROMOTION-GATES",
+    "release manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged app materialization skeleton / packaged app directory materialization / packaged app staged output skeleton / packaged app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / attestation apply audit packs / attestation apply execution packets / installer targets / installer-target builder skeleton / installer builder execution skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / promotion apply readiness / promotion apply manifests / promotion execution checkpoints / promotion operator handoff rails / signing-ready metadata / signing-publish pipeline / signing-publish gating handshake / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / rollback recovery ledger / rollback execution rehearsal ledger / rollback operator drillbooks / rollback live-readiness contracts / release approval workflow / release notes / publish gates / promotion gates under release/",
+    "docs closeout: README / HANDOFF / IMPLEMENTATION-PLAN / PACKAGE-README / RELEASE-SUMMARY / REVIEW-MANIFEST / BUNDLE-MATRIX / BUNDLE-ASSEMBLY / PACKAGED-APP-DIRECTORY-SKELETON / PACKAGED-APP-MATERIALIZATION-SKELETON / PACKAGED-APP-DIRECTORY-MATERIALIZATION / PACKAGED-APP-STAGED-OUTPUT-SKELETON.json / PACKAGED-APP-BUNDLE-SEALING-SKELETON.json / SEALED-BUNDLE-INTEGRITY-CONTRACT.json / INTEGRITY-ATTESTATION-EVIDENCE.json / ATTESTATION-VERIFICATION-PACKS.json / ATTESTATION-APPLY-AUDIT-PACKS.json / ATTESTATION-APPLY-EXECUTION-PACKETS.json / INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON / INSTALLER-BUILDER-EXECUTION-SKELETON / INSTALLER-BUILDER-ORCHESTRATION.json / INSTALLER-CHANNEL-ROUTING.json / CHANNEL-PROMOTION-EVIDENCE.json / PROMOTION-APPLY-READINESS.json / PROMOTION-APPLY-MANIFESTS.json / PROMOTION-EXECUTION-CHECKPOINTS.json / PROMOTION-OPERATOR-HANDOFF-RAILS.json / SIGNING-METADATA / NOTARIZATION-PLAN / SIGNING-PUBLISH-PIPELINE / SIGNING-PUBLISH-GATING-HANDSHAKE / SIGNING-PUBLISH-APPROVAL-BRIDGE.json / SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json / PUBLISH-ROLLBACK-HANDSHAKE.json / ROLLBACK-RECOVERY-LEDGER.json / ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json / ROLLBACK-OPERATOR-DRILLBOOKS.json / ROLLBACK-LIVE-READINESS-CONTRACTS.json / RELEASE-APPROVAL-WORKFLOW / RELEASE-NOTES / PUBLISH-GATES / PROMOTION-GATES",
     "placeholder installer explainer script that never installs anything"
   ],
   "deliveryConstraints": [
@@ -453,16 +471,16 @@
     "no packaged per-OS bundle sealing yet; sealing remains review-only metadata",
     "no per-platform sealed-bundle integrity attestation or digest publication yet; integrity contract remains review-only metadata",
     "no attestation verification pack emission or verifier handoff yet; verification packs remain review-only metadata",
-    "no attestation apply audit pack emission or apply-audit handoff yet; audit packs remain review-only metadata",
+    "no executable attestation apply audit or apply-execution packet handoff yet; audit packs and execution packets remain review-only metadata",
     "no Windows / macOS / Linux installer builder orchestration and channel routing wiring yet; routing remains review-only skeleton",
     "no executable channel promotion evidence pack or promotion routing apply yet; evidence remains review-only metadata",
     "no executable promotion apply manifests or channel apply execution yet; apply manifests remain review-only metadata",
-    "no executable promotion execution checkpoints or checkpoint handoff yet; checkpoints remain review-only metadata",
+    "no executable promotion execution checkpoints or operator handoff rails yet; checkpoints and handoff rails remain review-only metadata",
     "no signing / notarization / hash publication workflow yet; approval bridge remains metadata-only",
     "no executable signing-publish gating handshake yet; handshake remains metadata-only",
     "no executable release approval handshake yet; workflow remains metadata-only",
     "no rollback execution rehearsal or rollback apply automation yet; rehearsal ledger remains review-only metadata",
-    "no rollback operator drillbooks or operator handoff automation yet; drillbooks remain review-only metadata",
+    "no rollback operator drillbooks or live-readiness contracts yet; drillbooks and live-readiness contracts remain review-only metadata",
     "no release publishing / artifact upload / promotion handshake / rollback apply automation yet; publish rollback handshake remains metadata-only",
     "real host-side execution remains disabled until approval / lifecycle / rollback close the loop"
   ],
@@ -487,6 +505,7 @@
     "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
     "release/ATTESTATION-VERIFICATION-PACKS.json",
     "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
+    "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json",
     "release/INSTALLER-TARGETS.json",
     "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
     "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
@@ -496,6 +515,7 @@
     "release/PROMOTION-APPLY-READINESS.json",
     "release/PROMOTION-APPLY-MANIFESTS.json",
     "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
+    "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json",
     "release/SIGNING-METADATA.json",
     "release/NOTARIZATION-PLAN.json",
     "release/SIGNING-PUBLISH-PIPELINE.json",
@@ -506,6 +526,7 @@
     "release/ROLLBACK-RECOVERY-LEDGER.json",
     "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
     "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
+    "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
     "release/RELEASE-APPROVAL-WORKFLOW.json",
     "release/RELEASE-NOTES.md",
     "release/PUBLISH-GATES.json",
@@ -529,6 +550,7 @@
     "integrity-attestation-evidence",
     "attestation-verification-packs",
     "attestation-apply-audit-packs",
+    "attestation-apply-execution-packets",
     "installer-target-metadata",
     "installer-target-builder-skeleton",
     "installer-builder-execution-skeleton",
@@ -538,6 +560,7 @@
     "promotion-apply-readiness",
     "promotion-apply-manifests",
     "promotion-execution-checkpoints",
+    "promotion-operator-handoff-rails",
     "signing-ready-metadata",
     "signing-publish-pipeline-skeleton",
     "signing-publish-gating-handshake",
@@ -547,6 +570,7 @@
     "rollback-recovery-ledger",
     "rollback-execution-rehearsal-ledger",
     "rollback-operator-drillbooks",
+    "rollback-live-readiness-contracts",
     "approval-workflow-skeleton",
     "notarization-blocked",
     "promotion-gated"

@@ -1,15 +1,15 @@
-# OpenClaw Studio Phase44 Release Notes
+# OpenClaw Studio Phase45 Release Notes
 
-Milestone: phase44 attestation apply audit packs / promotion execution checkpoints / rollback operator drillbooks + docs / smoke / package / release-plan / UI / shared data closeout
+Milestone: phase45 attestation apply execution packets / promotion operator handoff rails / rollback live-readiness contracts + docs / smoke / package / release-plan / UI / shared data closeout
 
 ## Highlights
-- attestation apply audit packs now turn attestation verification packs into route-aware apply-audit bundles, checklists, and review receipts without executing any live verification or apply for real
-- promotion execution checkpoints now turn promotion apply manifests into explicit alpha -> beta -> stable checkpoint contracts and hold points without executing any promotion for real
-- rollback operator drillbooks now turn rollback execution rehearsal ledgers into operator-facing response drillbooks and handoff notes without rolling back any live publish state
+- attestation apply execution packets now turn attestation apply audit packs into operator-reviewed apply envelopes and packet receipts without executing any live verification or apply for real
+- promotion operator handoff rails now turn promotion execution checkpoints into explicit alpha -> beta -> stable operator routing rails and checkpoint handoff segments without executing any promotion for real
+- rollback live-readiness contracts now turn rollback operator drillbooks into live-entry readiness checks and recovery proofs without rolling back any live publish state
 
 ## Current posture
 - still local-only
 - still not an installer
 - still no real publish/upload/sign/notarize actions
 
-Generated: 2026-04-05T06:05:09.978Z
+Generated: 2026-04-05T07:05:48.132Z

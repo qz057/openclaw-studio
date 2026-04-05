@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "openclaw-studio-attestation-apply-execution-packets/v1",
+  "generatedAt": "2026-04-05T07:05:48.132Z",
+  "phase": "phase45",
+  "mode": "local-only-review",
+  "packets": [
+    {
+      "id": "attestation-execution-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "attestationApplyAuditPackId": "attestation-apply-audit-alpha-to-beta",
+      "promotionApplyManifestId": "promotion-manifest-alpha-to-beta",
+      "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
+      "promotionOperatorHandoffRailId": "promotion-handoff-alpha-to-beta",
+      "status": "planned",
+      "executionPacketPath": "future/channels/alpha-to-beta/attestation-apply-execution-packet.json",
+      "operatorReceiptPath": "future/channels/alpha-to-beta/attestation-apply-execution-receipt.json",
+      "packetContents": [
+        "attestation apply audit pack linkage",
+        "promotion apply manifest linkage",
+        "pre-apply packet envelope",
+        "operator acknowledgement scaffold",
+        "promotion handoff rail anchor"
+      ],
+      "reviewChecks": [
+        "attestation apply audit pack linked",
+        "promotion execution checkpoint linked",
+        "promotion handoff rail anchor declared"
+      ],
+      "blockedBy": [
+        "attestation apply execution remains metadata-only",
+        "promotion apply remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canExecuteApply": false
+    },
+    {
+      "id": "attestation-execution-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "attestationApplyAuditPackId": "attestation-apply-audit-beta-to-stable",
+      "promotionApplyManifestId": "promotion-manifest-beta-to-stable",
+      "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
+      "promotionOperatorHandoffRailId": "promotion-handoff-beta-to-stable",
+      "status": "blocked",
+      "executionPacketPath": "future/channels/beta-to-stable/attestation-apply-execution-packet.json",
+      "operatorReceiptPath": "future/channels/beta-to-stable/attestation-apply-execution-receipt.json",
+      "packetContents": [
+        "attestation apply audit pack linkage",
+        "promotion apply manifest linkage",
+        "pre-apply packet envelope",
+        "operator acknowledgement scaffold",
+        "promotion handoff rail anchor"
+      ],
+      "reviewChecks": [
+        "attestation apply audit pack linked",
+        "promotion execution checkpoint linked",
+        "promotion handoff rail anchor declared"
+      ],
+      "blockedBy": [
+        "attestation apply execution remains metadata-only",
+        "promotion apply remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canExecuteApply": false
+    }
+  ]
+}

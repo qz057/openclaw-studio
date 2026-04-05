@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-publish-gates/v1",
-  "generatedAt": "2026-04-05T06:05:09.978Z",
-  "phase": "phase44",
+  "generatedAt": "2026-04-05T07:05:48.132Z",
+  "phase": "phase45",
   "gates": [
     {
       "id": "gate-bundles",
@@ -44,6 +44,11 @@
       "status": "planned"
     },
     {
+      "id": "gate-attestation-apply-execution-packets",
+      "label": "Attestation apply execution packets reviewed",
+      "status": "planned"
+    },
+    {
       "id": "gate-installer-targets",
       "label": "Installer targets reviewed",
       "status": "planned"
@@ -79,6 +84,11 @@
       "status": "blocked"
     },
     {
+      "id": "gate-promotion-operator-handoff-rails",
+      "label": "Promotion operator handoff rails reviewed",
+      "status": "blocked"
+    },
+    {
       "id": "gate-signing",
       "label": "Signing / notarization complete",
       "status": "blocked"
@@ -111,6 +121,11 @@
     {
       "id": "gate-rollback-operator-drillbooks",
       "label": "Rollback operator drillbooks reviewed",
+      "status": "blocked"
+    },
+    {
+      "id": "gate-rollback-live-readiness-contracts",
+      "label": "Rollback live-readiness contracts reviewed",
       "status": "blocked"
     },
     {

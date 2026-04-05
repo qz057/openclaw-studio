@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-rollback-execution-rehearsal-ledger/v1",
-  "generatedAt": "2026-04-05T06:05:09.978Z",
-  "phase": "phase44",
+  "generatedAt": "2026-04-05T07:05:48.132Z",
+  "phase": "phase45",
   "mode": "local-only-review",
   "rehearsals": [
     {
@@ -12,6 +12,7 @@
       "publishRollbackPathId": "publish-rollback-alpha-to-beta",
       "promotionApplyManifestId": "promotion-manifest-alpha-to-beta",
       "rollbackOperatorDrillbookId": "rollback-drillbook-alpha-to-beta",
+      "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
       "status": "blocked",
       "rehearsalManifestPath": "future/publish/alpha-to-beta/rollback-execution-rehearsal-ledger.json",
       "rehearsalSteps": [
@@ -36,6 +37,7 @@
       "publishRollbackPathId": "publish-rollback-beta-to-stable",
       "promotionApplyManifestId": "promotion-manifest-beta-to-stable",
       "rollbackOperatorDrillbookId": "rollback-drillbook-beta-to-stable",
+      "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
       "status": "blocked",
       "rehearsalManifestPath": "future/publish/beta-to-stable/rollback-execution-rehearsal-ledger.json",
       "rehearsalSteps": [

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-rollback-operator-drillbooks/v1",
-  "generatedAt": "2026-04-05T06:05:09.978Z",
-  "phase": "phase44",
+  "generatedAt": "2026-04-05T07:05:48.132Z",
+  "phase": "phase45",
   "mode": "local-only-review",
   "drillbooks": [
     {
@@ -11,6 +11,7 @@
       "rollbackExecutionRehearsalLedgerId": "rollback-rehearsal-alpha-to-beta",
       "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
       "publishRollbackPathId": "publish-rollback-alpha-to-beta",
+      "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
       "status": "blocked",
       "drillbookPath": "future/publish/alpha-to-beta/rollback-operator-drillbook.json",
       "operatorRoles": [
@@ -22,12 +23,14 @@
         "checkpoint intake",
         "channel freeze and evidence capture",
         "rollback route selection",
-        "post-rollback audit note"
+        "post-rollback audit note",
+        "live-readiness signoff"
       ],
       "reviewChecks": [
         "rehearsal ledger linked",
         "promotion execution checkpoint linked",
-        "publish rollback path linked"
+        "publish rollback path linked",
+        "rollback live-readiness anchor declared"
       ],
       "blockedBy": [
         "rollback operator drillbook remains metadata-only",
@@ -43,6 +46,7 @@
       "rollbackExecutionRehearsalLedgerId": "rollback-rehearsal-beta-to-stable",
       "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
       "publishRollbackPathId": "publish-rollback-beta-to-stable",
+      "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
       "status": "blocked",
       "drillbookPath": "future/publish/beta-to-stable/rollback-operator-drillbook.json",
       "operatorRoles": [
@@ -54,12 +58,14 @@
         "checkpoint intake",
         "channel freeze and evidence capture",
         "rollback route selection",
-        "post-rollback audit note"
+        "post-rollback audit note",
+        "live-readiness signoff"
       ],
       "reviewChecks": [
         "rehearsal ledger linked",
         "promotion execution checkpoint linked",
-        "publish rollback path linked"
+        "publish rollback path linked",
+        "rollback live-readiness anchor declared"
       ],
       "blockedBy": [
         "rollback operator drillbook remains metadata-only",

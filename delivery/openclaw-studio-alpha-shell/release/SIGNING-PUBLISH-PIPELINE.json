@@ -1,20 +1,23 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-pipeline/v1",
-  "generatedAt": "2026-04-05T06:05:09.978Z",
-  "phase": "phase44",
+  "generatedAt": "2026-04-05T07:05:48.132Z",
+  "phase": "phase45",
   "sealedBundleIntegrityContractPath": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
   "attestationVerificationPacksPath": "release/ATTESTATION-VERIFICATION-PACKS.json",
   "attestationApplyAuditPacksPath": "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
+  "attestationApplyExecutionPacketsPath": "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json",
   "gatingHandshakePath": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
   "approvalBridgePath": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
   "channelRoutingPath": "release/INSTALLER-CHANNEL-ROUTING.json",
   "channelPromotionEvidencePath": "release/CHANNEL-PROMOTION-EVIDENCE.json",
   "promotionApplyManifestsPath": "release/PROMOTION-APPLY-MANIFESTS.json",
   "promotionExecutionCheckpointsPath": "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
+  "promotionOperatorHandoffRailsPath": "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json",
   "promotionHandshakePath": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
   "publishRollbackHandshakePath": "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
   "rollbackExecutionRehearsalLedgerPath": "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
   "rollbackOperatorDrillbooksPath": "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
+  "rollbackLiveReadinessContractsPath": "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
   "stages": [
     {
       "id": "pipeline-packaged-app-directory-materialization",
@@ -47,6 +50,11 @@
       "status": "planned"
     },
     {
+      "id": "pipeline-attestation-apply-execution-packets",
+      "label": "Attestation apply execution packets",
+      "status": "planned"
+    },
+    {
       "id": "pipeline-installer-builder-execution",
       "label": "Installer builder execution skeleton",
       "status": "planned"
@@ -74,6 +82,11 @@
     {
       "id": "pipeline-promotion-execution-checkpoints",
       "label": "Promotion execution checkpoints",
+      "status": "blocked"
+    },
+    {
+      "id": "pipeline-promotion-operator-handoff-rails",
+      "label": "Promotion operator handoff rails",
       "status": "blocked"
     },
     {
@@ -124,6 +137,11 @@
     {
       "id": "pipeline-rollback-operator-drillbooks",
       "label": "Rollback operator drillbooks",
+      "status": "blocked"
+    },
+    {
+      "id": "pipeline-rollback-live-readiness-contracts",
+      "label": "Rollback live-readiness contracts",
       "status": "blocked"
     },
     {

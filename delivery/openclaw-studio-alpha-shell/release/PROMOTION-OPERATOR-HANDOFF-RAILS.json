@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "openclaw-studio-promotion-operator-handoff-rails/v1",
+  "generatedAt": "2026-04-05T07:05:48.132Z",
+  "phase": "phase45",
+  "mode": "local-only-review",
+  "rails": [
+    {
+      "id": "promotion-handoff-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "attestationApplyExecutionPacketId": "attestation-execution-alpha-to-beta",
+      "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
+      "rollbackOperatorDrillbookId": "rollback-drillbook-alpha-to-beta",
+      "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
+      "status": "planned",
+      "handoffRailPath": "future/channels/alpha-to-beta/promotion-operator-handoff-rail.json",
+      "operatorRoles": [
+        "release-manager",
+        "release-engineering",
+        "support-operator"
+      ],
+      "railSegments": [
+        "checkpoint intake",
+        "apply packet acknowledgement",
+        "channel freeze posture",
+        "rollback readiness relay"
+      ],
+      "reviewChecks": [
+        "attestation apply execution packet linked",
+        "promotion execution checkpoint linked",
+        "rollback live-readiness anchor declared"
+      ],
+      "blockedBy": [
+        "promotion operator handoff remains metadata-only",
+        "promotion apply remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canHandoff": false
+    },
+    {
+      "id": "promotion-handoff-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "attestationApplyExecutionPacketId": "attestation-execution-beta-to-stable",
+      "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
+      "rollbackOperatorDrillbookId": "rollback-drillbook-beta-to-stable",
+      "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
+      "status": "blocked",
+      "handoffRailPath": "future/channels/beta-to-stable/promotion-operator-handoff-rail.json",
+      "operatorRoles": [
+        "release-manager",
+        "release-engineering",
+        "support-operator"
+      ],
+      "railSegments": [
+        "checkpoint intake",
+        "apply packet acknowledgement",
+        "channel freeze posture",
+        "rollback readiness relay"
+      ],
+      "reviewChecks": [
+        "attestation apply execution packet linked",
+        "promotion execution checkpoint linked",
+        "rollback live-readiness anchor declared"
+      ],
+      "blockedBy": [
+        "promotion operator handoff remains metadata-only",
+        "promotion apply remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canHandoff": false
+    }
+  ]
+}
