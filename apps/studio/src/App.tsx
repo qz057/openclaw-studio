@@ -779,9 +779,9 @@ export function App() {
     {
       id: "cross-view-slot-release",
       label: "Focused slot -> Release posture",
-      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase50 attestation operator reconciliation ledgers`,
+      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase51 attestation operator settlement packs`,
       detail:
-        "Focused-slot review and release review now sit in the same local-only reconciliation-ledger, closeout-journal, and outcome-report story without enabling host execution, installer work, staged apply entry, cutover execution, or publish rollback."
+        "Focused-slot review and release review now sit in the same local-only settlement-pack, signoff-sheet, and publication-bundle story without enabling host execution, installer work, staged apply entry, cutover execution, or publish rollback."
     }
   ];
   const inspectorCommandLinkage = [
@@ -810,7 +810,7 @@ export function App() {
       label: "Formal Release Readiness",
       value: "RELEASE-MANIFEST / BUILD-METADATA / REVIEW-MANIFEST",
       detail:
-        "Phase50 keeps the manifest spine and extends dispatch receipts, confirmation ledgers, and execution records into attestation operator reconciliation ledgers, promotion staged-apply closeout journals, and rollback cutover outcome reports without executing anything."
+        "Phase51 keeps the manifest spine and extends reconciliation ledgers, closeout journals, and outcome reports into attestation operator settlement packs, promotion staged-apply signoff sheets, and rollback cutover publication bundles without executing anything."
     },
     {
       id: "release-depth-bundles",
@@ -898,6 +898,13 @@ export function App() {
         "Dispatch receipts now feed operator settlement ledgers, unresolved acknowledgement closeout, and approval-ready summaries without reconciling any live operator action for real."
     },
     {
+      id: "release-depth-attestation-operator-settlement-packs",
+      label: "Attestation Operator Settlement Packs",
+      value: "ATTESTATION-OPERATOR-SETTLEMENT-PACKS / ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS",
+      detail:
+        "Reconciliation ledgers now feed operator clearance packets, escalation disposition bundles, and release approval attachments without routing any live operator settlement for real."
+    },
+    {
       id: "release-depth-installer-builders",
       label: "Installer-target Builder Skeleton",
       value: "INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON",
@@ -981,6 +988,13 @@ export function App() {
       value: "PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS / PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS",
       detail:
         "Confirmation ledgers now feed stage closeout seals, recovery batons, and publish-ready cutover journals without applying any promotion for real."
+    },
+    {
+      id: "release-depth-promotion-staged-apply-signoff-sheets",
+      label: "Promotion Staged-apply Signoff Sheets",
+      value: "PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS / PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS",
+      detail:
+        "Closeout journals now feed staged approver sheets, release-ready packets, and go/no-go evidence without applying any promotion for real."
     },
     {
       id: "release-depth-signing-publish",
@@ -1069,6 +1083,13 @@ export function App() {
         "Rollback cutover execution records now feed recovery digests, outcome publications, and rollback-facing closeout reports without mutating any live publish state."
     },
     {
+      id: "release-depth-rollback-cutover-publication-bundles",
+      label: "Rollback Cutover Publication Bundles",
+      value: "ROLLBACK-CUTOVER-PUBLICATION-BUNDLES / ROLLBACK-CUTOVER-OUTCOME-REPORTS",
+      detail:
+        "Outcome reports now feed release-note attachments, publication digests, and rollback publication bundles without mutating any live publish state."
+    },
+    {
       id: "release-depth-approval",
       label: "Release Approval Workflow",
       value: "RELEASE-APPROVAL-WORKFLOW / PUBLISH-GATES / PUBLISH-ROLLBACK-HANDSHAKE",
@@ -1085,7 +1106,7 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase50 increases release structure only; it still does not install, publish, sign, execute operator reconciliation, finalize staged apply, publish rollback outcome reports, roll back publish state, or enable host-side execution."
+        "Phase51 increases release structure only; it still does not install, publish, sign, assemble settlement packs, finalize staged signoff sheets, publish rollback publication bundles, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -1906,30 +1927,30 @@ export function App() {
               <div className="card-header card-header--stack">
                 <div>
                   <p className="eyebrow">Release Pipeline Depth</p>
-                  <h2>Attestation Operator Reconciliation Ledgers</h2>
+                  <h2>Attestation Operator Settlement Packs</h2>
                 </div>
                 <p>
                   The alpha shell still does not build a real installer, but the release skeleton now pushes further with attestation
-                  operator reconciliation ledgers, promotion staged-apply closeout journals, and rollback cutover outcome reports while
+                  operator settlement packs, promotion staged-apply signoff sheets, and rollback cutover publication bundles while
                   staying entirely local-only and non-executing.
                 </p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
                   <span>Phase</span>
-                  <strong>Phase50</strong>
+                  <strong>Phase51</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Attestation</span>
-                  <strong>Reconciliation ledgers</strong>
+                  <strong>Settlement packs</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Promotion</span>
-                  <strong>Closeout journals</strong>
+                  <strong>Signoff sheets</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Rollback</span>
-                  <strong>Outcome reports</strong>
+                  <strong>Publication bundles</strong>
                 </div>
               </div>
               <div className="workflow-readiness-list">

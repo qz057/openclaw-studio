@@ -205,6 +205,24 @@
 - smoke 已提升到验证 phase49 attestation operator dispatch receipts / promotion staged-apply confirmation ledgers / rollback cutover execution records contract 与 renderer markers
 - README / HANDOFF / package snapshot 已同步反映 phase49 reality
 
+### Phase 50（当前已完成）
+- phase49 的 formal-release skeleton 已继续下沉成更明确的 attestation operator reconciliation ledgers / promotion staged-apply closeout journals / rollback cutover outcome reports layer
+- release skeleton 现在补齐 ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS / PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS / ROLLBACK-CUTOVER-OUTCOME-REPORTS
+- shell 现在补齐 Attestation Operator Reconciliation Ledgers / Promotion Staged-apply Closeout Journals / Rollback Cutover Outcome Reports 可见性
+- package snapshot 现在具备 attestation operator reconciliation ledgers / promotion staged-apply closeout journals / rollback cutover outcome reports，但仍不做真实 installer / approval / publish / operator settlement closeout / staged closeout sealing / rollback outcome publication
+- 全部仍然保持 `local-only`，不做真实 host-side execution 或系统级窗口操作
+- smoke 已提升到验证 phase50 attestation operator reconciliation ledgers / promotion staged-apply closeout journals / rollback cutover outcome reports contract 与 renderer markers
+- README / HANDOFF / package snapshot 已同步反映 phase50 reality
+
+### Phase 51（当前已完成）
+- phase50 的 formal-release skeleton 已继续下沉成更明确的 attestation operator settlement packs / promotion staged-apply signoff sheets / rollback cutover publication bundles layer
+- release skeleton 现在补齐 ATTESTATION-OPERATOR-SETTLEMENT-PACKS / PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS / ROLLBACK-CUTOVER-PUBLICATION-BUNDLES
+- shell 现在补齐 Attestation Operator Settlement Packs / Promotion Staged-apply Signoff Sheets / Rollback Cutover Publication Bundles 可见性
+- package snapshot 现在具备 attestation operator settlement packs / promotion staged-apply signoff sheets / rollback cutover publication bundles，但仍不做真实 installer / approval / publish / operator clearance routing / staged signoff capture / rollback publication handoff
+- 全部仍然保持 `local-only`，不做真实 host-side execution 或系统级窗口操作
+- smoke 已提升到验证 phase51 attestation operator settlement packs / promotion staged-apply signoff sheets / rollback cutover publication bundles contract 与 renderer markers
+- README / HANDOFF / package snapshot 已同步反映 phase51 reality
+
 ## 当前明确边界
 
 当前只允许：
@@ -213,7 +231,7 @@
 - dry-run / preview / simulate
 - Studio-local execute（只改应用内 in-memory state/history）
 - phase27 command surface / layout persistence / window intent staging
-- phase49 attestation operator dispatch receipts / promotion staged-apply confirmation ledgers / rollback cutover execution records
+- phase51 attestation operator settlement packs / promotion staged-apply signoff sheets / rollback cutover publication bundles
 - phase26/27/28 release skeleton / artifact review / handoff docs / package metadata
 
 当前明确禁止：
@@ -235,7 +253,7 @@ npm run start:smoke
 npm run package:alpha
 ```
 
-phase49 可额外跑：
+phase51 可额外跑：
 
 ```bash
 npm run release:plan
@@ -244,7 +262,7 @@ npm run release:plan
 ## 下一阶段（建议）
 
 ### Phase 50
-目标：在不开放危险执行的前提下，继续把 phase49 foundations 推进为更完整的产品能力与交付链路。
+目标：在不开放危险执行的前提下，继续把 phase51 foundations 推进为更完整的产品能力与交付链路。
 
 范围建议：
 - 更深的 Inspector / command depth / trace drill-down

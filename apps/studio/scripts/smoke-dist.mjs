@@ -1153,6 +1153,7 @@ function verifyReleaseSkeletonContract() {
     "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json",
     "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
     "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
+    "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
     "release/INSTALLER-TARGETS.json",
     "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
     "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
@@ -1168,6 +1169,7 @@ function verifyReleaseSkeletonContract() {
     "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
     "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
     "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
+    "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
     "release/SIGNING-METADATA.json",
     "release/NOTARIZATION-PLAN.json",
     "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
@@ -1184,6 +1186,7 @@ function verifyReleaseSkeletonContract() {
     "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
     "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
     "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
+    "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
     "release/RELEASE-APPROVAL-WORKFLOW.json",
     "release/RELEASE-NOTES.md",
     "release/PUBLISH-GATES.json",
@@ -1226,6 +1229,7 @@ function verifyReleaseSkeletonContract() {
     skeleton.installerPlaceholder.attestationOperatorDispatchPacketsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json" ||
     skeleton.installerPlaceholder.attestationOperatorDispatchReceiptsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" ||
     skeleton.installerPlaceholder.attestationOperatorReconciliationLedgersPath !== "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" ||
+    skeleton.installerPlaceholder.attestationOperatorSettlementPacksPath !== "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" ||
     skeleton.installerPlaceholder.installerTargetsPath !== "release/INSTALLER-TARGETS.json" ||
     skeleton.installerPlaceholder.installerBuilderExecutionSkeletonPath !== "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json" ||
     skeleton.installerPlaceholder.installerTargetBuilderSkeletonPath !== "release/INSTALLER-TARGET-BUILDER-SKELETON.json" ||
@@ -1241,6 +1245,7 @@ function verifyReleaseSkeletonContract() {
     skeleton.installerPlaceholder.promotionStagedApplyCommandSheetsPath !== "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json" ||
     skeleton.installerPlaceholder.promotionStagedApplyConfirmationLedgersPath !== "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json" ||
     skeleton.installerPlaceholder.promotionStagedApplyCloseoutJournalsPath !== "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json" ||
+    skeleton.installerPlaceholder.promotionStagedApplySignoffSheetsPath !== "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json" ||
     skeleton.installerPlaceholder.signingPublishGatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
     skeleton.installerPlaceholder.signingPublishPipelinePath !== "release/SIGNING-PUBLISH-PIPELINE.json" ||
     skeleton.installerPlaceholder.signingPublishApprovalBridgePath !== "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json" ||
@@ -1255,6 +1260,7 @@ function verifyReleaseSkeletonContract() {
     skeleton.installerPlaceholder.rollbackCutoverExecutionChecklistsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json" ||
     skeleton.installerPlaceholder.rollbackCutoverExecutionRecordsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json" ||
     skeleton.installerPlaceholder.rollbackCutoverOutcomeReportsPath !== "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json" ||
+    skeleton.installerPlaceholder.rollbackCutoverPublicationBundlesPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" ||
     skeleton.installerPlaceholder.approvalWorkflowPath !== "release/RELEASE-APPROVAL-WORKFLOW.json"
   ) {
     throw new Error(`Installer placeholder is missing ${PHASE_ID} dispatch / runsheet / handoff paths.`);
@@ -1306,6 +1312,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-EXECUTION-CHECKPOINTS.json") ||
@@ -1315,6 +1322,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PUBLISH-ROLLBACK-HANDSHAKE.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-OPERATOR-DRILLBOOKS.json") ||
@@ -1323,7 +1331,8 @@ function verifyReleaseSkeletonContract() {
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json") ||
-    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json")
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json")
   ) {
     throw new Error(`Release build metadata is missing ${PHASE_ID} formal release artifacts.`);
   }
@@ -1343,6 +1352,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-EXECUTION-CHECKPOINTS.json") ||
@@ -1352,6 +1362,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PUBLISH-ROLLBACK-HANDSHAKE.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-OPERATOR-DRILLBOOKS.json") ||
@@ -1360,7 +1371,8 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json") ||
-    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json")
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json")
   ) {
     throw new Error(`Release manifest is missing ${PHASE_ID} formal release artifacts.`);
   }
@@ -1445,6 +1457,10 @@ function verifyReleaseSkeletonContract() {
     throw new Error(`Attestation operator reconciliation ledgers are missing ${PHASE_ID} reconciliation declarations.`);
   }
 
+  if (!Array.isArray(skeleton.attestationOperatorSettlementPacks?.packs) || skeleton.attestationOperatorSettlementPacks.packs.length < 2) {
+    throw new Error(`Attestation operator settlement packs are missing ${PHASE_ID} settlement-pack declarations.`);
+  }
+
   if (!Array.isArray(skeleton.installerTargets?.targets) || skeleton.installerTargets.targets.length < 7) {
     throw new Error(`Installer targets are missing ${PHASE_ID} target declarations.`);
   }
@@ -1505,6 +1521,10 @@ function verifyReleaseSkeletonContract() {
     throw new Error(`Promotion staged-apply closeout journals are missing ${PHASE_ID} closeout-journal declarations.`);
   }
 
+  if (!Array.isArray(skeleton.promotionStagedApplySignoffSheets?.signoffSheets) || skeleton.promotionStagedApplySignoffSheets.signoffSheets.length < 2) {
+    throw new Error(`Promotion staged-apply signoff sheets are missing ${PHASE_ID} signoff-sheet declarations.`);
+  }
+
   if (!Array.isArray(skeleton.signingMetadata?.readiness) || skeleton.signingMetadata.readiness.length < 3) {
     throw new Error(`Signing metadata is missing ${PHASE_ID} readiness declarations.`);
   }
@@ -1523,14 +1543,17 @@ function verifyReleaseSkeletonContract() {
     skeleton.signingPublishGatingHandshake?.attestationOperatorDispatchManifestsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json" ||
     skeleton.signingPublishGatingHandshake?.attestationOperatorDispatchReceiptsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" ||
     skeleton.signingPublishGatingHandshake?.attestationOperatorReconciliationLedgersPath !== "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" ||
+    skeleton.signingPublishGatingHandshake?.attestationOperatorSettlementPacksPath !== "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" ||
     skeleton.signingPublishGatingHandshake?.channelPromotionEvidencePath !== "release/CHANNEL-PROMOTION-EVIDENCE.json" ||
     skeleton.signingPublishGatingHandshake?.publishRollbackHandshakePath !== "release/PUBLISH-ROLLBACK-HANDSHAKE.json" ||
     skeleton.signingPublishGatingHandshake?.promotionStagedApplyRunsheetsPath !== "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json" ||
     skeleton.signingPublishGatingHandshake?.promotionStagedApplyConfirmationLedgersPath !== "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json" ||
     skeleton.signingPublishGatingHandshake?.promotionStagedApplyCloseoutJournalsPath !== "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json" ||
+    skeleton.signingPublishGatingHandshake?.promotionStagedApplySignoffSheetsPath !== "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json" ||
     skeleton.signingPublishGatingHandshake?.rollbackCutoverHandoffPlansPath !== "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json" ||
     skeleton.signingPublishGatingHandshake?.rollbackCutoverExecutionRecordsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json" ||
     skeleton.signingPublishGatingHandshake?.rollbackCutoverOutcomeReportsPath !== "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json" ||
+    skeleton.signingPublishGatingHandshake?.rollbackCutoverPublicationBundlesPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" ||
     !Array.isArray(skeleton.signingPublishGatingHandshake?.stages) ||
     skeleton.signingPublishGatingHandshake.stages.length < 15 ||
     !Array.isArray(skeleton.signingPublishGatingHandshake?.acknowledgements) ||
@@ -1548,6 +1571,7 @@ function verifyReleaseSkeletonContract() {
     skeleton.signingPublishPipeline?.attestationOperatorDispatchManifestsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json" ||
     skeleton.signingPublishPipeline?.attestationOperatorDispatchReceiptsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" ||
     skeleton.signingPublishPipeline?.attestationOperatorReconciliationLedgersPath !== "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" ||
+    skeleton.signingPublishPipeline?.attestationOperatorSettlementPacksPath !== "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" ||
     skeleton.signingPublishPipeline?.gatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
     skeleton.signingPublishPipeline?.approvalBridgePath !== "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json" ||
     skeleton.signingPublishPipeline?.channelRoutingPath !== "release/INSTALLER-CHANNEL-ROUTING.json" ||
@@ -1559,6 +1583,7 @@ function verifyReleaseSkeletonContract() {
     skeleton.signingPublishPipeline?.promotionStagedApplyRunsheetsPath !== "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json" ||
     skeleton.signingPublishPipeline?.promotionStagedApplyConfirmationLedgersPath !== "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json" ||
     skeleton.signingPublishPipeline?.promotionStagedApplyCloseoutJournalsPath !== "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json" ||
+    skeleton.signingPublishPipeline?.promotionStagedApplySignoffSheetsPath !== "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json" ||
     skeleton.signingPublishPipeline?.promotionHandshakePath !== "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json" ||
     skeleton.signingPublishPipeline?.publishRollbackHandshakePath !== "release/PUBLISH-ROLLBACK-HANDSHAKE.json" ||
     skeleton.signingPublishPipeline?.rollbackExecutionRehearsalLedgerPath !== "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json" ||
@@ -1568,6 +1593,7 @@ function verifyReleaseSkeletonContract() {
     skeleton.signingPublishPipeline?.rollbackCutoverHandoffPlansPath !== "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json" ||
     skeleton.signingPublishPipeline?.rollbackCutoverExecutionRecordsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json" ||
     skeleton.signingPublishPipeline?.rollbackCutoverOutcomeReportsPath !== "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json" ||
+    skeleton.signingPublishPipeline?.rollbackCutoverPublicationBundlesPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" ||
     !Array.isArray(skeleton.signingPublishPipeline?.stages) ||
     skeleton.signingPublishPipeline.stages.length < 27
   ) {
@@ -1588,6 +1614,7 @@ function verifyReleaseSkeletonContract() {
     skeleton.signingPublishPromotionHandshake?.attestationOperatorDispatchManifestsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json" ||
     skeleton.signingPublishPromotionHandshake?.attestationOperatorDispatchReceiptsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" ||
     skeleton.signingPublishPromotionHandshake?.attestationOperatorReconciliationLedgersPath !== "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" ||
+    skeleton.signingPublishPromotionHandshake?.attestationOperatorSettlementPacksPath !== "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" ||
     skeleton.signingPublishPromotionHandshake?.promotionApplyManifestsPath !== "release/PROMOTION-APPLY-MANIFESTS.json" ||
     skeleton.signingPublishPromotionHandshake?.promotionExecutionCheckpointsPath !== "release/PROMOTION-EXECUTION-CHECKPOINTS.json" ||
     skeleton.signingPublishPromotionHandshake?.promotionOperatorHandoffRailsPath !== "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json" ||
@@ -1595,10 +1622,12 @@ function verifyReleaseSkeletonContract() {
     skeleton.signingPublishPromotionHandshake?.promotionStagedApplyRunsheetsPath !== "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json" ||
     skeleton.signingPublishPromotionHandshake?.promotionStagedApplyConfirmationLedgersPath !== "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json" ||
     skeleton.signingPublishPromotionHandshake?.promotionStagedApplyCloseoutJournalsPath !== "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json" ||
+    skeleton.signingPublishPromotionHandshake?.promotionStagedApplySignoffSheetsPath !== "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json" ||
     skeleton.signingPublishPromotionHandshake?.publishRollbackHandshakePath !== "release/PUBLISH-ROLLBACK-HANDSHAKE.json" ||
     skeleton.signingPublishPromotionHandshake?.rollbackCutoverHandoffPlansPath !== "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json" ||
     skeleton.signingPublishPromotionHandshake?.rollbackCutoverExecutionRecordsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json" ||
     skeleton.signingPublishPromotionHandshake?.rollbackCutoverOutcomeReportsPath !== "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json" ||
+    skeleton.signingPublishPromotionHandshake?.rollbackCutoverPublicationBundlesPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" ||
     !Array.isArray(skeleton.signingPublishPromotionHandshake?.stages) ||
     skeleton.signingPublishPromotionHandshake.stages.length < 14 ||
     !Array.isArray(skeleton.signingPublishPromotionHandshake?.acknowledgements) ||
@@ -1613,6 +1642,7 @@ function verifyReleaseSkeletonContract() {
     skeleton.publishRollbackHandshake?.attestationOperatorDispatchManifestsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json" ||
     skeleton.publishRollbackHandshake?.attestationOperatorDispatchReceiptsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" ||
     skeleton.publishRollbackHandshake?.attestationOperatorReconciliationLedgersPath !== "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" ||
+    skeleton.publishRollbackHandshake?.attestationOperatorSettlementPacksPath !== "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" ||
     skeleton.publishRollbackHandshake?.promotionHandshakePath !== "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json" ||
     skeleton.publishRollbackHandshake?.promotionExecutionCheckpointsPath !== "release/PROMOTION-EXECUTION-CHECKPOINTS.json" ||
     skeleton.publishRollbackHandshake?.promotionOperatorHandoffRailsPath !== "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json" ||
@@ -1620,6 +1650,7 @@ function verifyReleaseSkeletonContract() {
     skeleton.publishRollbackHandshake?.promotionStagedApplyRunsheetsPath !== "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json" ||
     skeleton.publishRollbackHandshake?.promotionStagedApplyConfirmationLedgersPath !== "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json" ||
     skeleton.publishRollbackHandshake?.promotionStagedApplyCloseoutJournalsPath !== "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json" ||
+    skeleton.publishRollbackHandshake?.promotionStagedApplySignoffSheetsPath !== "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json" ||
     skeleton.publishRollbackHandshake?.rollbackExecutionRehearsalLedgerPath !== "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json" ||
     skeleton.publishRollbackHandshake?.rollbackOperatorDrillbooksPath !== "release/ROLLBACK-OPERATOR-DRILLBOOKS.json" ||
     skeleton.publishRollbackHandshake?.rollbackLiveReadinessContractsPath !== "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json" ||
@@ -1627,6 +1658,7 @@ function verifyReleaseSkeletonContract() {
     skeleton.publishRollbackHandshake?.rollbackCutoverHandoffPlansPath !== "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json" ||
     skeleton.publishRollbackHandshake?.rollbackCutoverExecutionRecordsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json" ||
     skeleton.publishRollbackHandshake?.rollbackCutoverOutcomeReportsPath !== "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json" ||
+    skeleton.publishRollbackHandshake?.rollbackCutoverPublicationBundlesPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" ||
     !Array.isArray(skeleton.publishRollbackHandshake?.paths) ||
     skeleton.publishRollbackHandshake.paths.length < 2 ||
     !Array.isArray(skeleton.publishRollbackHandshake?.stages) ||
@@ -1673,6 +1705,10 @@ function verifyReleaseSkeletonContract() {
     throw new Error(`Rollback cutover outcome reports are missing ${PHASE_ID} outcome-report declarations.`);
   }
 
+  if (!Array.isArray(skeleton.rollbackCutoverPublicationBundles?.bundles) || skeleton.rollbackCutoverPublicationBundles.bundles.length < 2) {
+    throw new Error(`Rollback cutover publication bundles are missing ${PHASE_ID} publication-bundle declarations.`);
+  }
+
   if (
     skeleton.releaseApprovalWorkflow?.mode !== "local-only-review" ||
     skeleton.releaseApprovalWorkflow?.gatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
@@ -1706,6 +1742,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json") ||
     !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json") ||
     !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json") ||
+    !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json") ||
     !skeleton.packageReadme.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.packageReadme.includes("release/PROMOTION-APPLY-READINESS.json") ||
     !skeleton.packageReadme.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
@@ -1716,6 +1753,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.packageReadme.includes("release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json") ||
     !skeleton.packageReadme.includes("release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json") ||
     !skeleton.packageReadme.includes("release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json") ||
+    !skeleton.packageReadme.includes("release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json") ||
     !skeleton.packageReadme.includes("release/PUBLISH-ROLLBACK-HANDSHAKE.json") ||
     !skeleton.packageReadme.includes("release/ROLLBACK-RECOVERY-LEDGER.json") ||
     !skeleton.packageReadme.includes("release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json") ||
@@ -1726,6 +1764,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.packageReadme.includes("release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json") ||
     !skeleton.packageReadme.includes("release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json") ||
     !skeleton.packageReadme.includes("release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json") ||
+    !skeleton.packageReadme.includes("release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json") ||
     !skeleton.packageReadme.includes("scripts/install-placeholder.cjs")
   ) {
     throw new Error(`Generated package README is missing required ${PHASE_ID} packaging markers.`);
@@ -1740,9 +1779,9 @@ function verifyReleaseSkeletonContract() {
 
   if (
     !skeleton.releaseNotes?.includes(`${PHASE_TITLE} Release Notes`) ||
-    !skeleton.releaseNotes?.includes("attestation operator reconciliation ledgers") ||
-    !skeleton.releaseNotes?.includes("promotion staged-apply closeout journals") ||
-    !skeleton.releaseNotes?.includes("rollback cutover outcome reports") ||
+    !skeleton.releaseNotes?.includes("attestation operator settlement packs") ||
+    !skeleton.releaseNotes?.includes("promotion staged-apply signoff sheets") ||
+    !skeleton.releaseNotes?.includes("rollback cutover publication bundles") ||
     !Array.isArray(skeleton.releaseApprovalWorkflow?.stages) ||
     !skeleton.releaseApprovalWorkflow.stages.length ||
     !skeleton.signingPublishApprovalBridge?.bridge?.length ||
@@ -1767,6 +1806,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseChecklist.includes("ATTESTATION-OPERATOR-DISPATCH-PACKETS.json") ||
     !skeleton.releaseChecklist.includes("ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json") ||
     !skeleton.releaseChecklist.includes("ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json") ||
+    !skeleton.releaseChecklist.includes("ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json") ||
     !skeleton.releaseChecklist.includes("CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-APPLY-READINESS.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-APPLY-MANIFESTS.json") ||
@@ -1777,6 +1817,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseChecklist.includes("PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json") ||
+    !skeleton.releaseChecklist.includes("PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json") ||
     !skeleton.releaseChecklist.includes("PUBLISH-ROLLBACK-HANDSHAKE.json") ||
     !skeleton.releaseChecklist.includes("ROLLBACK-RECOVERY-LEDGER.json") ||
     !skeleton.releaseChecklist.includes("ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json") ||
@@ -1787,6 +1828,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseChecklist.includes("ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json") ||
     !skeleton.releaseChecklist.includes("ROLLBACK-CUTOVER-EXECUTION-RECORDS.json") ||
     !skeleton.releaseChecklist.includes("ROLLBACK-CUTOVER-OUTCOME-REPORTS.json") ||
+    !skeleton.releaseChecklist.includes("ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json") ||
     !skeleton.releaseChecklist.includes("RELEASE-APPROVAL-WORKFLOW.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-GATES.json") ||
     !skeleton.releaseChecklist.includes("INSTALLER-PLACEHOLDER.json")
