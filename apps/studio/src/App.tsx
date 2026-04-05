@@ -779,8 +779,8 @@ export function App() {
     {
       id: "cross-view-slot-release",
       label: "Focused slot -> Release posture",
-      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase40 packaged-app bundle sealing skeleton`,
-      detail: "Focused-slot review and release review now sit in the same local-only handoff story without enabling host execution, installer work, channel routing, or signing/publish gates."
+      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase41 sealed-bundle integrity contract`,
+      detail: "Focused-slot review and release review now sit in the same local-only handoff story without enabling host execution, installer work, promotion routing, or publish rollback."
     }
   ];
   const inspectorCommandLinkage = [
@@ -808,7 +808,7 @@ export function App() {
       id: "release-depth-manifest",
       label: "Formal Release Readiness",
       value: "RELEASE-MANIFEST / BUILD-METADATA / REVIEW-MANIFEST",
-      detail: "Phase40 keeps the manifest spine and extends it into bundle sealing, installer channel routing, and signing-publish promotion handshake metadata without executing anything."
+      detail: "Phase41 keeps the manifest spine and extends it into sealed-bundle integrity, channel promotion evidence, and publish rollback metadata without executing anything."
     },
     {
       id: "release-depth-bundles",
@@ -835,6 +835,12 @@ export function App() {
       detail: "Staged outputs now feed explicit sealing manifests and integrity checkpoints without freezing or signing any real packaged bundle."
     },
     {
+      id: "release-depth-bundle-integrity",
+      label: "Sealed-bundle Integrity Contract",
+      value: "SEALED-BUNDLE-INTEGRITY-CONTRACT",
+      detail: "Bundle sealing metadata now feeds explicit integrity, digest, and audit checkpoints without attesting any real packaged bundle."
+    },
+    {
       id: "release-depth-installer-builders",
       label: "Installer-target Builder Skeleton",
       value: "INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON",
@@ -859,6 +865,12 @@ export function App() {
       detail: "Review-only installer outputs now map into explicit alpha/beta/stable routing manifests without routing any artifact for real."
     },
     {
+      id: "release-depth-channel-promotion-evidence",
+      label: "Channel Promotion Evidence",
+      value: "CHANNEL-PROMOTION-EVIDENCE / INSTALLER-CHANNEL-ROUTING",
+      detail: "Channel routing now feeds explicit alpha -> beta -> stable promotion evidence packets without promoting any artifact for real."
+    },
+    {
       id: "release-depth-signing-publish",
       label: "Signing & Publish Pipeline",
       value: "SIGNING-METADATA / NOTARIZATION-PLAN / SIGNING-PUBLISH-PIPELINE",
@@ -868,7 +880,7 @@ export function App() {
       id: "release-depth-signing-handshake",
       label: "Signing-publish Gating Handshake",
       value: "SIGNING-PUBLISH-GATING-HANDSHAKE / RELEASE-APPROVAL-WORKFLOW",
-      detail: "Signing, publish, approval, and promotion evidence now flow through a structured handshake contract without approving or publishing anything."
+      detail: "Signing, publish, approval, integrity, and promotion evidence now flow through a structured handshake contract without approving or publishing anything."
     },
     {
       id: "release-depth-approval-bridge",
@@ -879,26 +891,32 @@ export function App() {
     {
       id: "release-depth-promotion-handshake",
       label: "Signing-publish Promotion Handshake",
-      value: "SIGNING-PUBLISH-PROMOTION-HANDSHAKE / PUBLISH-GATES / PROMOTION-GATES",
-      detail: "Channel routing, publish gates, and promotion evidence now converge in a dedicated review-only promotion handshake."
+      value: "SIGNING-PUBLISH-PROMOTION-HANDSHAKE / CHANNEL-PROMOTION-EVIDENCE / PUBLISH-GATES",
+      detail: "Channel routing, promotion evidence, and publish gates now converge in a dedicated review-only promotion handshake."
+    },
+    {
+      id: "release-depth-publish-rollback",
+      label: "Publish Rollback Handshake",
+      value: "PUBLISH-ROLLBACK-HANDSHAKE / PROMOTION-GATES / RELEASE-NOTES",
+      detail: "Publish and promotion review now carry explicit rollback checkpoints and recovery-channel handoff metadata without rolling anything back for real."
     },
     {
       id: "release-depth-approval",
       label: "Release Approval Workflow",
-      value: "RELEASE-APPROVAL-WORKFLOW / PUBLISH-GATES",
-      detail: "Release approval remains metadata-only and reviewable, blocking any live signing, publishing, or host execution."
+      value: "RELEASE-APPROVAL-WORKFLOW / PUBLISH-GATES / PUBLISH-ROLLBACK-HANDSHAKE",
+      detail: "Release approval remains metadata-only and reviewable, blocking any live signing, publishing, rollback, or host execution."
     },
     {
       id: "release-depth-promotion",
       label: "Release Promotion Gating",
-      value: "RELEASE-NOTES / PUBLISH-GATES / PROMOTION-GATES",
-      detail: "Publish gates and promotion gates stay split so future alpha -> beta -> stable promotion has an explicit review contract."
+      value: "RELEASE-NOTES / PUBLISH-GATES / PROMOTION-GATES / CHANNEL-PROMOTION-EVIDENCE",
+      detail: "Publish gates, promotion evidence, and promotion gates stay split so future alpha -> beta -> stable promotion has an explicit review contract."
     },
     {
       id: "release-depth-safety",
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
-      detail: "Phase40 increases release structure only; it still does not install, publish, sign, route channels, or enable host-side execution."
+      detail: "Phase41 increases release structure only; it still does not install, publish, sign, promote channels, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -1719,30 +1737,30 @@ export function App() {
               <div className="card-header card-header--stack">
                 <div>
                   <p className="eyebrow">Release Pipeline Depth</p>
-                  <h2>Packaged-app Bundle Sealing Skeleton</h2>
+                  <h2>Sealed-bundle Integrity Contract</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but the release skeleton now pushes further with packaged-app
-                  bundle sealing skeletons, installer channel routing, and signing-publish promotion handshake metadata while staying
-                  entirely local-only and non-executing.
+                  The alpha shell still does not build a real installer, but the release skeleton now pushes further with sealed-bundle
+                  integrity contracts, channel promotion evidence, and publish rollback handshake metadata while staying entirely
+                  local-only and non-executing.
                 </p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
                   <span>Phase</span>
-                  <strong>Phase40</strong>
+                  <strong>Phase41</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Packaged app</span>
-                  <strong>Bundle sealing</strong>
+                  <strong>Integrity contract</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Installer</span>
-                  <strong>Channel routing</strong>
+                  <strong>Promotion evidence</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Pipeline</span>
-                  <strong>Approval bridge</strong>
+                  <strong>Rollback handshake</strong>
                 </div>
               </div>
               <div className="workflow-readiness-list">

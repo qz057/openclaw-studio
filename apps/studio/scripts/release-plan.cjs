@@ -12,9 +12,9 @@ function main() {
 
   const skeleton = createReleaseSkeleton(summary);
 
-  console.log("OpenClaw Studio phase40 release plan ready.");
+  console.log("OpenClaw Studio phase41 release plan ready.");
   console.log(formatReleasePlanSummary(skeleton));
-  console.log("This is a dry-run phase40 release skeleton summary. No installer was built.");
+  console.log("This is a dry-run phase41 release skeleton summary. No installer was built.");
 }
 
 main();
