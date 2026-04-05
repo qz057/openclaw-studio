@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-promotion-apply-manifests/v1",
-  "generatedAt": "2026-04-05T03:54:33.290Z",
-  "phase": "phase43",
+  "generatedAt": "2026-04-05T06:05:09.978Z",
+  "phase": "phase44",
   "mode": "local-only-review",
   "manifests": [
     {
@@ -10,6 +10,7 @@
       "to": "beta",
       "promotionApplyReadinessId": "promotion-apply-alpha-to-beta",
       "channelPromotionEvidenceId": "promotion-evidence-alpha-to-beta",
+      "attestationApplyAuditPackId": "attestation-apply-audit-alpha-to-beta",
       "attestationVerificationPackIds": [
         "attestation-pack-windows",
         "attestation-pack-macos",
@@ -42,6 +43,7 @@
       "to": "stable",
       "promotionApplyReadinessId": "promotion-apply-beta-to-stable",
       "channelPromotionEvidenceId": "promotion-evidence-beta-to-stable",
+      "attestationApplyAuditPackId": "attestation-apply-audit-beta-to-stable",
       "attestationVerificationPackIds": [
         "attestation-pack-windows",
         "attestation-pack-macos",

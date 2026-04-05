@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-approval-bridge/v1",
-  "generatedAt": "2026-04-05T03:54:33.290Z",
-  "phase": "phase43",
+  "generatedAt": "2026-04-05T06:05:09.978Z",
+  "phase": "phase44",
   "mode": "review-only",
   "bridge": [
     {
@@ -11,8 +11,14 @@
       "status": "planned"
     },
     {
-      "id": "bridge-verification-packs-to-gating",
+      "id": "bridge-verification-packs-to-apply-audit-packs",
       "from": "release/ATTESTATION-VERIFICATION-PACKS.json",
+      "to": "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
+      "status": "planned"
+    },
+    {
+      "id": "bridge-apply-audit-packs-to-gating",
+      "from": "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
       "to": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
       "status": "blocked"
     },
@@ -41,8 +47,14 @@
       "status": "blocked"
     },
     {
-      "id": "bridge-apply-manifests-to-promotion-handshake",
+      "id": "bridge-apply-manifests-to-execution-checkpoints",
       "from": "release/PROMOTION-APPLY-MANIFESTS.json",
+      "to": "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-execution-checkpoints-to-promotion-handshake",
+      "from": "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
       "to": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
       "status": "blocked"
     },
@@ -59,8 +71,14 @@
       "status": "blocked"
     },
     {
-      "id": "bridge-rollback-rehearsal-to-publish",
+      "id": "bridge-rollback-rehearsal-to-operator-drillbooks",
       "from": "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
+      "to": "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-operator-drillbooks-to-publish",
+      "from": "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
       "to": "release/PUBLISH-GATES.json",
       "status": "blocked"
     },

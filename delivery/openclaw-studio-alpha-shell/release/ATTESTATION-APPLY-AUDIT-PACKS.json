@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "openclaw-studio-attestation-apply-audit-packs/v1",
+  "generatedAt": "2026-04-05T06:05:09.978Z",
+  "phase": "phase44",
+  "mode": "local-only-review",
+  "packs": [
+    {
+      "id": "attestation-apply-audit-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "promotionApplyManifestId": "promotion-manifest-alpha-to-beta",
+      "attestationVerificationPackIds": [
+        "attestation-pack-windows",
+        "attestation-pack-macos",
+        "attestation-pack-linux"
+      ],
+      "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
+      "status": "planned",
+      "auditPackPath": "future/channels/alpha-to-beta/attestation-apply-audit-pack.json",
+      "auditChecklistPath": "future/channels/alpha-to-beta/attestation-apply-audit-checklist.json",
+      "auditReceiptPath": "future/channels/alpha-to-beta/attestation-apply-audit-receipt.json",
+      "contents": [
+        "attestation verification packs",
+        "promotion apply manifest linkage",
+        "reviewer acknowledgement scaffold",
+        "execution checkpoint anchor"
+      ],
+      "reviewChecks": [
+        "promotion apply manifest linked",
+        "attestation verification packs linked",
+        "execution checkpoint anchor recorded"
+      ],
+      "blockedBy": [
+        "attestation apply audit remains metadata-only",
+        "promotion apply remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canAuditApply": false
+    },
+    {
+      "id": "attestation-apply-audit-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "promotionApplyManifestId": "promotion-manifest-beta-to-stable",
+      "attestationVerificationPackIds": [
+        "attestation-pack-windows",
+        "attestation-pack-macos",
+        "attestation-pack-linux"
+      ],
+      "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
+      "status": "blocked",
+      "auditPackPath": "future/channels/beta-to-stable/attestation-apply-audit-pack.json",
+      "auditChecklistPath": "future/channels/beta-to-stable/attestation-apply-audit-checklist.json",
+      "auditReceiptPath": "future/channels/beta-to-stable/attestation-apply-audit-receipt.json",
+      "contents": [
+        "attestation verification packs",
+        "promotion apply manifest linkage",
+        "reviewer acknowledgement scaffold",
+        "execution checkpoint anchor"
+      ],
+      "reviewChecks": [
+        "promotion apply manifest linked",
+        "attestation verification packs linked",
+        "execution checkpoint anchor recorded"
+      ],
+      "blockedBy": [
+        "attestation apply audit remains metadata-only",
+        "promotion apply remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canAuditApply": false
+    }
+  ]
+}

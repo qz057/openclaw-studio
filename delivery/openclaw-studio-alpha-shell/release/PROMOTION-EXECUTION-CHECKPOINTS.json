@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "openclaw-studio-promotion-execution-checkpoints/v1",
+  "generatedAt": "2026-04-05T06:05:09.978Z",
+  "phase": "phase44",
+  "mode": "local-only-review",
+  "checkpoints": [
+    {
+      "id": "promotion-checkpoint-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "promotionApplyManifestId": "promotion-manifest-alpha-to-beta",
+      "attestationApplyAuditPackId": "attestation-apply-audit-alpha-to-beta",
+      "publishRollbackPathId": "publish-rollback-alpha-to-beta",
+      "rollbackOperatorDrillbookId": "rollback-drillbook-alpha-to-beta",
+      "status": "planned",
+      "checkpointManifestPath": "future/channels/alpha-to-beta/promotion-execution-checkpoints.json",
+      "executionSteps": [
+        "review attestation apply audit pack",
+        "confirm channel route and publish gates",
+        "hold execution at pre-apply checkpoint",
+        "record rollback drillbook anchor"
+      ],
+      "reviewChecks": [
+        "promotion apply manifest linked",
+        "attestation apply audit pack linked",
+        "rollback drillbook anchor declared"
+      ],
+      "blockedBy": [
+        "promotion execution remains non-executable",
+        "artifact upload remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canExecute": false
+    },
+    {
+      "id": "promotion-checkpoint-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "promotionApplyManifestId": "promotion-manifest-beta-to-stable",
+      "attestationApplyAuditPackId": "attestation-apply-audit-beta-to-stable",
+      "publishRollbackPathId": "publish-rollback-beta-to-stable",
+      "rollbackOperatorDrillbookId": "rollback-drillbook-beta-to-stable",
+      "status": "blocked",
+      "checkpointManifestPath": "future/channels/beta-to-stable/promotion-execution-checkpoints.json",
+      "executionSteps": [
+        "review attestation apply audit pack",
+        "confirm stable route prerequisites",
+        "hold execution at pre-apply checkpoint",
+        "record rollback drillbook anchor"
+      ],
+      "reviewChecks": [
+        "promotion apply manifest linked",
+        "attestation apply audit pack linked",
+        "rollback drillbook anchor declared"
+      ],
+      "blockedBy": [
+        "promotion execution remains non-executable",
+        "artifact upload remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canExecute": false
+    }
+  ]
+}

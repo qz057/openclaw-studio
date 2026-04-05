@@ -1,17 +1,20 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-pipeline/v1",
-  "generatedAt": "2026-04-05T03:54:33.290Z",
-  "phase": "phase43",
+  "generatedAt": "2026-04-05T06:05:09.978Z",
+  "phase": "phase44",
   "sealedBundleIntegrityContractPath": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
   "attestationVerificationPacksPath": "release/ATTESTATION-VERIFICATION-PACKS.json",
+  "attestationApplyAuditPacksPath": "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
   "gatingHandshakePath": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
   "approvalBridgePath": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
   "channelRoutingPath": "release/INSTALLER-CHANNEL-ROUTING.json",
   "channelPromotionEvidencePath": "release/CHANNEL-PROMOTION-EVIDENCE.json",
   "promotionApplyManifestsPath": "release/PROMOTION-APPLY-MANIFESTS.json",
+  "promotionExecutionCheckpointsPath": "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
   "promotionHandshakePath": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
   "publishRollbackHandshakePath": "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
   "rollbackExecutionRehearsalLedgerPath": "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
+  "rollbackOperatorDrillbooksPath": "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
   "stages": [
     {
       "id": "pipeline-packaged-app-directory-materialization",
@@ -39,6 +42,11 @@
       "status": "planned"
     },
     {
+      "id": "pipeline-attestation-apply-audit-packs",
+      "label": "Attestation apply audit packs",
+      "status": "planned"
+    },
+    {
       "id": "pipeline-installer-builder-execution",
       "label": "Installer builder execution skeleton",
       "status": "planned"
@@ -62,6 +70,11 @@
       "id": "pipeline-promotion-apply-manifests",
       "label": "Promotion apply manifests",
       "status": "planned"
+    },
+    {
+      "id": "pipeline-promotion-execution-checkpoints",
+      "label": "Promotion execution checkpoints",
+      "status": "blocked"
     },
     {
       "id": "pipeline-signing-metadata",
@@ -106,6 +119,11 @@
     {
       "id": "pipeline-rollback-execution-rehearsal-ledger",
       "label": "Rollback execution rehearsal ledger",
+      "status": "blocked"
+    },
+    {
+      "id": "pipeline-rollback-operator-drillbooks",
+      "label": "Rollback operator drillbooks",
       "status": "blocked"
     },
     {

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-publish-rollback-handshake/v1",
-  "generatedAt": "2026-04-05T03:54:33.290Z",
-  "phase": "phase43",
+  "generatedAt": "2026-04-05T06:05:09.978Z",
+  "phase": "phase44",
   "mode": "local-only-review",
   "canRollback": false,
   "sealedBundleIntegrityContractPath": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
@@ -9,7 +9,9 @@
   "promotionHandshakePath": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
   "publishGatesPath": "release/PUBLISH-GATES.json",
   "promotionGatesPath": "release/PROMOTION-GATES.json",
+  "promotionExecutionCheckpointsPath": "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
   "rollbackExecutionRehearsalLedgerPath": "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
+  "rollbackOperatorDrillbooksPath": "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
   "participants": [
     "release-engineering",
     "security",
@@ -51,8 +53,18 @@
         "required": true
       },
       {
+        "id": "request-promotion-execution-checkpoints",
+        "label": "Promotion execution checkpoints",
+        "required": true
+      },
+      {
         "id": "request-rollback-rehearsal-ledger",
         "label": "Rollback execution rehearsal ledger",
+        "required": true
+      },
+      {
+        "id": "request-rollback-operator-drillbooks",
+        "label": "Rollback operator drillbooks",
         "required": true
       },
       {
@@ -125,10 +137,22 @@
       "artifact": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json"
     },
     {
+      "id": "rollback-ack-execution-checkpoints",
+      "label": "Promotion execution checkpoints reviewed",
+      "status": "blocked",
+      "artifact": "release/PROMOTION-EXECUTION-CHECKPOINTS.json"
+    },
+    {
       "id": "rollback-ack-rehearsal-ledger",
       "label": "Rollback execution rehearsal ledger reviewed",
       "status": "blocked",
       "artifact": "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json"
+    },
+    {
+      "id": "rollback-ack-operator-drillbooks",
+      "label": "Rollback operator drillbooks reviewed",
+      "status": "blocked",
+      "artifact": "release/ROLLBACK-OPERATOR-DRILLBOOKS.json"
     },
     {
       "id": "rollback-ack-release-notes",
@@ -144,7 +168,9 @@
       "to": "beta",
       "status": "blocked",
       "promotionEvidenceId": "promotion-evidence-alpha-to-beta",
+      "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
       "rollbackExecutionRehearsalLedgerId": "rollback-rehearsal-alpha-to-beta",
+      "rollbackOperatorDrillbookId": "rollback-drillbook-alpha-to-beta",
       "rollbackManifestPath": "future/publish/alpha-to-beta/rollback-handshake.json",
       "recoveryChannel": "alpha",
       "checkpoints": [
@@ -164,7 +190,9 @@
       "to": "stable",
       "status": "blocked",
       "promotionEvidenceId": "promotion-evidence-beta-to-stable",
+      "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
       "rollbackExecutionRehearsalLedgerId": "rollback-rehearsal-beta-to-stable",
+      "rollbackOperatorDrillbookId": "rollback-drillbook-beta-to-stable",
       "rollbackManifestPath": "future/publish/beta-to-stable/rollback-handshake.json",
       "recoveryChannel": "beta",
       "checkpoints": [
@@ -226,12 +254,30 @@
       ]
     },
     {
+      "id": "rollback-handshake-execution-checkpoints",
+      "label": "Promotion execution checkpoint review",
+      "status": "blocked",
+      "evidence": [
+        "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
+        "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json"
+      ]
+    },
+    {
       "id": "rollback-handshake-rehearsal",
       "label": "Rollback execution rehearsal review",
       "status": "blocked",
       "evidence": [
         "release/ROLLBACK-RECOVERY-LEDGER.json",
         "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json"
+      ]
+    },
+    {
+      "id": "rollback-handshake-operator-drillbooks",
+      "label": "Rollback operator drillbook review",
+      "status": "blocked",
+      "evidence": [
+        "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
+        "release/ROLLBACK-OPERATOR-DRILLBOOKS.json"
       ]
     },
     {
@@ -250,7 +296,9 @@
     "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
     "release/PUBLISH-GATES.json",
     "release/PROMOTION-GATES.json",
+    "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
     "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
+    "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
     "release/RELEASE-NOTES.md",
     "release/INSTALLER-PLACEHOLDER.json"
   ],
@@ -258,6 +306,7 @@
     "artifact upload remains blocked",
     "promotion remains non-executable",
     "rollback execution remains metadata-only",
+    "rollback operator drillbooks remain metadata-only",
     "host-side execution remains disabled"
   ]
 }

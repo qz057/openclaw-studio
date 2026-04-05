@@ -1,13 +1,15 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-promotion-handshake/v1",
-  "generatedAt": "2026-04-05T03:54:33.290Z",
-  "phase": "phase43",
+  "generatedAt": "2026-04-05T06:05:09.978Z",
+  "phase": "phase44",
   "mode": "local-only-review",
   "canPromote": false,
   "channelRoutingPath": "release/INSTALLER-CHANNEL-ROUTING.json",
   "sealedBundleIntegrityContractPath": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
   "channelPromotionEvidencePath": "release/CHANNEL-PROMOTION-EVIDENCE.json",
   "promotionApplyManifestsPath": "release/PROMOTION-APPLY-MANIFESTS.json",
+  "attestationApplyAuditPacksPath": "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
+  "promotionExecutionCheckpointsPath": "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
   "approvalBridgePath": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
   "publishGatesPath": "release/PUBLISH-GATES.json",
   "promotionGatesPath": "release/PROMOTION-GATES.json",
@@ -53,8 +55,18 @@
         "required": true
       },
       {
+        "id": "request-attestation-apply-audit-packs",
+        "label": "Attestation apply audit packs",
+        "required": true
+      },
+      {
         "id": "request-promotion-apply-manifests",
         "label": "Promotion apply manifests",
+        "required": true
+      },
+      {
+        "id": "request-promotion-execution-checkpoints",
+        "label": "Promotion execution checkpoints",
         "required": true
       },
       {
@@ -131,10 +143,22 @@
       "artifact": "release/CHANNEL-PROMOTION-EVIDENCE.json"
     },
     {
+      "id": "promotion-ack-attestation-apply-audit",
+      "label": "Attestation apply audit packs reviewed",
+      "status": "planned",
+      "artifact": "release/ATTESTATION-APPLY-AUDIT-PACKS.json"
+    },
+    {
       "id": "promotion-ack-apply-manifests",
       "label": "Promotion apply manifests reviewed",
       "status": "planned",
       "artifact": "release/PROMOTION-APPLY-MANIFESTS.json"
+    },
+    {
+      "id": "promotion-ack-execution-checkpoints",
+      "label": "Promotion execution checkpoints reviewed",
+      "status": "blocked",
+      "artifact": "release/PROMOTION-EXECUTION-CHECKPOINTS.json"
     },
     {
       "id": "promotion-ack-approval-bridge",
@@ -199,12 +223,30 @@
       ]
     },
     {
+      "id": "promotion-handshake-attestation-audit",
+      "label": "Attestation apply audit review",
+      "status": "planned",
+      "evidence": [
+        "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
+        "release/PROMOTION-APPLY-MANIFESTS.json"
+      ]
+    },
+    {
       "id": "promotion-handshake-apply-manifests",
       "label": "Promotion apply manifest review",
       "status": "planned",
       "evidence": [
         "release/PROMOTION-APPLY-READINESS.json",
         "release/PROMOTION-APPLY-MANIFESTS.json"
+      ]
+    },
+    {
+      "id": "promotion-handshake-execution-checkpoints",
+      "label": "Promotion execution checkpoint review",
+      "status": "blocked",
+      "evidence": [
+        "release/PROMOTION-APPLY-MANIFESTS.json",
+        "release/PROMOTION-EXECUTION-CHECKPOINTS.json"
       ]
     },
     {
@@ -249,7 +291,9 @@
     "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
     "release/INSTALLER-CHANNEL-ROUTING.json",
     "release/CHANNEL-PROMOTION-EVIDENCE.json",
+    "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
     "release/PROMOTION-APPLY-MANIFESTS.json",
+    "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
     "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
     "release/PUBLISH-GATES.json",
     "release/PUBLISH-ROLLBACK-HANDSHAKE.json",

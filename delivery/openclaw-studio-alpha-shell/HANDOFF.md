@@ -2,7 +2,7 @@
 
 ## Snapshot
 
-- 当前已验证里程碑：**phase43 attestation verification packs / promotion apply manifests / rollback execution rehearsal ledger + docs / smoke / package / release-plan / UI / shared data closeout**
+- 当前已验证里程碑：**phase44 attestation apply audit packs / promotion execution checkpoints / rollback operator drillbooks + docs / smoke / package / release-plan / UI / shared data closeout**
 - 当前主视图：
   - `Dashboard`
   - `Home`
@@ -23,6 +23,7 @@
   - phase40 已把交付层继续下沉成 packaged-app bundle sealing skeleton、installer channel routing 与 signing-publish promotion handshake
   - phase42 已把交付层继续下沉成 integrity attestation evidence、promotion apply readiness 与 rollback recovery ledger
   - phase43 已把交付层继续下沉成 attestation verification packs、promotion apply manifests 与 rollback execution rehearsal ledger
+  - phase44 已把交付层继续下沉成 attestation apply audit packs、promotion execution checkpoints 与 rollback operator drillbooks
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline
@@ -37,7 +38,7 @@ npm run start:smoke
 npm run package:alpha
 ```
 
-phase43 额外 dry-run：
+phase44 额外 dry-run：
 
 ```bash
 npm run release:plan
@@ -49,7 +50,7 @@ npm run release:plan
 
 在当前这类受限 Linux sandbox 中，如果 Electron 已到达启动路径但 Chromium sandbox host 被容器拦截，`start:smoke` 会以 sandbox-limited fallback 通过并明确标注原因。
 
-`npm run release:plan` 只输出 phase43 release skeleton 汇总，不会写 installer，也不会发布任何 artifact。
+`npm run release:plan` 只输出 phase44 release skeleton 汇总，不会写 installer，也不会发布任何 artifact。
 
 ## Phase27/28/29/30/31/32/33 Shell Surface
 
@@ -70,6 +71,7 @@ npm run release:plan
 - phase40 进一步补齐 Packaged-app Bundle Sealing Skeleton、Installer Channel Routing、Signing-publish Promotion Handshake
 - phase42 进一步补齐 Integrity Attestation Evidence、Promotion Apply Readiness、Rollback Recovery Ledger
 - phase43 进一步补齐 Attestation Verification Packs、Promotion Apply Manifests、Rollback Execution Rehearsal Ledger
+- phase44 进一步补齐 Attestation Apply Audit Packs、Promotion Execution Checkpoints、Rollback Operator Drillbooks
 - 仍然不做真实外部窗口编排
 
 ## Phase25 Boundary Model
@@ -156,11 +158,11 @@ Tools / MCP 当前深度：
 - Studio-local execute
 - preview-host contract surfaces
 
-## Phase43 Delivery Skeleton
+## Phase44 Delivery Skeleton
 
 - `npm run package:alpha`
 - 输出到：`delivery/openclaw-studio-alpha-shell`
-- 这是 phase43 结构化 alpha-shell snapshot，不是 installer
+- 这是 phase44 结构化 alpha-shell snapshot，不是 installer
 
 ### 当前能交付
 
@@ -179,6 +181,7 @@ Tools / MCP 当前深度：
 - `release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json`
 - `release/INTEGRITY-ATTESTATION-EVIDENCE.json`
 - `release/ATTESTATION-VERIFICATION-PACKS.json`
+- `release/ATTESTATION-APPLY-AUDIT-PACKS.json`
 - `release/INSTALLER-TARGETS.json`
 - `release/INSTALLER-TARGET-BUILDER-SKELETON.json`
 - `release/INSTALLER-BUILDER-EXECUTION-SKELETON.json`
@@ -187,6 +190,7 @@ Tools / MCP 当前深度：
 - `release/CHANNEL-PROMOTION-EVIDENCE.json`
 - `release/PROMOTION-APPLY-READINESS.json`
 - `release/PROMOTION-APPLY-MANIFESTS.json`
+- `release/PROMOTION-EXECUTION-CHECKPOINTS.json`
 - `release/SIGNING-METADATA.json`
 - `release/NOTARIZATION-PLAN.json`
 - `release/SIGNING-PUBLISH-PIPELINE.json`
@@ -196,6 +200,7 @@ Tools / MCP 当前深度：
 - `release/PUBLISH-ROLLBACK-HANDSHAKE.json`
 - `release/ROLLBACK-RECOVERY-LEDGER.json`
 - `release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json`
+- `release/ROLLBACK-OPERATOR-DRILLBOOKS.json`
 - `release/RELEASE-APPROVAL-WORKFLOW.json`
 - `release/RELEASE-NOTES.md`
 - `release/PUBLISH-GATES.json`
@@ -203,7 +208,7 @@ Tools / MCP 当前深度：
 - `release/RELEASE-SUMMARY.md`
 - `release/RELEASE-CHECKLIST.md`
 - `scripts/install-placeholder.cjs`
-- packaged bundle skeleton / packaged-app materialization skeleton / packaged-app directory materialization / packaged-app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / installer builder execution skeleton / installer channel routing / channel promotion evidence / promotion apply manifests / signing-publish gating handshake / signing-publish promotion handshake / publish rollback handshake / rollback execution rehearsal ledger / release approval workflow / release notes & publish gating / persisted layout / detached workspace workflows / shell-level workflow UX
+- packaged bundle skeleton / packaged-app materialization skeleton / packaged-app directory materialization / packaged-app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / attestation apply audit packs / installer builder execution skeleton / installer channel routing / channel promotion evidence / promotion apply manifests / promotion execution checkpoints / signing-publish gating handshake / signing-publish promotion handshake / publish rollback handshake / rollback execution rehearsal ledger / rollback operator drillbooks / release approval workflow / release notes & publish gating / persisted layout / detached workspace workflows / shell-level workflow UX
 - 当前 README / HANDOFF / IMPLEMENTATION-PLAN / PACKAGE-README 文档闭环
 
 ### 当前仍未交付
@@ -230,7 +235,7 @@ Tools / MCP 当前深度：
 - 不开放真实 host-side execution
 - bridge 虽已存在，但仍然 default-disabled 且只返回 placeholder result
 - placeholder result 带有 focused-slot page interactions、slot-state timeline、dock / inspector / trace panel 可见性与轻量 persistence，但仍然只是 simulated / traceable outcome，不代表真实 host 执行
-- release approval workflow、installer channel routing、attestation verification packs、promotion apply manifests、publish rollback handshake 与 signing-publish handshakes 现在都存在 metadata contract，但 approval / publish / promotion / rollback 仍尚不存在可执行链路
+- release approval workflow、installer channel routing、attestation apply audit packs、promotion execution checkpoints、rollback operator drillbooks、publish rollback handshake 与 signing-publish handshakes 现在都存在 metadata contract，但 approval / publish / promotion / rollback 仍尚不存在可执行链路
 - lifecycle runner 尚不存在
 - rollback-aware apply 尚不存在
 - package 已具备更清晰的 bundle-assembly + packaged-app materialization + packaged-app-directory materialization + packaged-app bundle sealing + installer builder execution skeleton + installer channel routing，但仍不是 release publish pipeline，也不是 installer
@@ -242,4 +247,4 @@ Tools / MCP 当前深度：
 
 1. 在保持 disabled 的前提下继续提升 validator / observability / command-surface / multi-window coverage
 2. 只有在 approval / lifecycle / rollback 真实闭环成型后，才评估任何 live host execution
-3. 把 phase43 shell foundations 继续推进成真正的多窗口编排与 attestation verification / promotion apply manifests / rollback execution rehearsal / approval pipeline
+3. 把 phase44 shell foundations 继续推进成真正的多窗口编排与 attestation apply audit / promotion checkpoint execution / rollback operator response / approval pipeline

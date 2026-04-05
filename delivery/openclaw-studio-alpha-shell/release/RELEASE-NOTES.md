@@ -1,15 +1,15 @@
-# OpenClaw Studio Phase43 Release Notes
+# OpenClaw Studio Phase44 Release Notes
 
-Milestone: phase43 attestation verification packs / promotion apply manifests / rollback execution rehearsal ledger + docs / smoke / package / release-plan / UI / shared data closeout
+Milestone: phase44 attestation apply audit packs / promotion execution checkpoints / rollback operator drillbooks + docs / smoke / package / release-plan / UI / shared data closeout
 
 ## Highlights
-- attestation verification packs now turn integrity attestation evidence into per-platform verifier-ready bundles, checklists, and audit handoff payloads without executing any live verification for real
-- promotion apply manifests now turn promotion readiness and channel evidence into explicit alpha -> beta -> stable apply manifests without applying any promotion for real
-- rollback execution rehearsal ledger now turns rollback recovery ledgers into explicit rehearsal manifests and dry-run recovery notes without recovering any live publish state
+- attestation apply audit packs now turn attestation verification packs into route-aware apply-audit bundles, checklists, and review receipts without executing any live verification or apply for real
+- promotion execution checkpoints now turn promotion apply manifests into explicit alpha -> beta -> stable checkpoint contracts and hold points without executing any promotion for real
+- rollback operator drillbooks now turn rollback execution rehearsal ledgers into operator-facing response drillbooks and handoff notes without rolling back any live publish state
 
 ## Current posture
 - still local-only
 - still not an installer
 - still no real publish/upload/sign/notarize actions
 
-Generated: 2026-04-05T03:54:33.290Z
+Generated: 2026-04-05T06:05:09.978Z
