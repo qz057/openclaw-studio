@@ -1,80 +1,74 @@
 {
-  "schemaVersion": "openclaw-studio-promotion-operator-handoff-rails/v1",
+  "schemaVersion": "openclaw-studio-attestation-operator-worklists/v1",
   "generatedAt": "2026-04-05T11:40:59.272Z",
   "phase": "phase46",
   "mode": "local-only-review",
-  "rails": [
+  "worklists": [
     {
-      "id": "promotion-handoff-alpha-to-beta",
+      "id": "attestation-worklist-alpha-to-beta",
       "from": "alpha",
       "to": "beta",
       "attestationApplyExecutionPacketId": "attestation-execution-alpha-to-beta",
       "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
-      "rollbackOperatorDrillbookId": "rollback-drillbook-alpha-to-beta",
-      "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-alpha-to-beta",
       "status": "planned",
-      "handoffRailPath": "future/channels/alpha-to-beta/promotion-operator-handoff-rail.json",
+      "worklistPath": "future/channels/alpha-to-beta/attestation-operator-worklist.json",
       "operatorRoles": [
+        "security-reviewer",
         "release-manager",
-        "release-engineering",
-        "support-operator"
+        "release-engineering"
       ],
-      "railSegments": [
-        "checkpoint intake",
-        "apply packet acknowledgement",
-        "channel freeze posture",
-        "rollback readiness relay",
-        "staged apply ledger handoff"
+      "checklist": [
+        "confirm execution packet receipt linkage",
+        "verify attestation evidence chain",
+        "assign staged-apply owners",
+        "record gated apply window",
+        "handoff staged-apply ledger anchor"
       ],
       "reviewChecks": [
         "attestation apply execution packet linked",
         "promotion execution checkpoint linked",
-        "rollback live-readiness anchor declared",
         "promotion staged-apply ledger anchor declared"
       ],
       "blockedBy": [
-        "promotion operator handoff remains metadata-only",
+        "attestation operator worklists remain metadata-only",
         "promotion apply remains non-executable",
         "host-side execution remains disabled"
       ],
-      "canHandoff": false
+      "canDispatch": false
     },
     {
-      "id": "promotion-handoff-beta-to-stable",
+      "id": "attestation-worklist-beta-to-stable",
       "from": "beta",
       "to": "stable",
       "attestationApplyExecutionPacketId": "attestation-execution-beta-to-stable",
       "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
-      "rollbackOperatorDrillbookId": "rollback-drillbook-beta-to-stable",
-      "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-beta-to-stable",
       "status": "blocked",
-      "handoffRailPath": "future/channels/beta-to-stable/promotion-operator-handoff-rail.json",
+      "worklistPath": "future/channels/beta-to-stable/attestation-operator-worklist.json",
       "operatorRoles": [
+        "security-reviewer",
         "release-manager",
-        "release-engineering",
-        "support-operator"
+        "release-engineering"
       ],
-      "railSegments": [
-        "checkpoint intake",
-        "apply packet acknowledgement",
-        "channel freeze posture",
-        "rollback readiness relay",
-        "staged apply ledger handoff"
+      "checklist": [
+        "confirm execution packet receipt linkage",
+        "verify attestation evidence chain",
+        "assign staged-apply owners",
+        "record stable-channel apply window",
+        "handoff staged-apply ledger anchor"
       ],
       "reviewChecks": [
         "attestation apply execution packet linked",
         "promotion execution checkpoint linked",
-        "rollback live-readiness anchor declared",
         "promotion staged-apply ledger anchor declared"
       ],
       "blockedBy": [
-        "promotion operator handoff remains metadata-only",
+        "attestation operator worklists remain metadata-only",
         "promotion apply remains non-executable",
         "host-side execution remains disabled"
       ],
-      "canHandoff": false
+      "canDispatch": false
     }
   ]
 }

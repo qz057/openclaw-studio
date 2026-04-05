@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-approval-bridge/v1",
-  "generatedAt": "2026-04-05T07:05:48.132Z",
-  "phase": "phase45",
+  "generatedAt": "2026-04-05T11:40:59.272Z",
+  "phase": "phase46",
   "mode": "review-only",
   "bridge": [
     {
@@ -23,8 +23,14 @@
       "status": "planned"
     },
     {
-      "id": "bridge-apply-execution-packets-to-gating",
+      "id": "bridge-apply-execution-packets-to-operator-worklists",
       "from": "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json",
+      "to": "release/ATTESTATION-OPERATOR-WORKLISTS.json",
+      "status": "planned"
+    },
+    {
+      "id": "bridge-operator-worklists-to-gating",
+      "from": "release/ATTESTATION-OPERATOR-WORKLISTS.json",
       "to": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
       "status": "blocked"
     },
@@ -65,8 +71,14 @@
       "status": "blocked"
     },
     {
-      "id": "bridge-operator-handoff-rails-to-promotion-handshake",
+      "id": "bridge-operator-handoff-rails-to-staged-apply-ledgers",
       "from": "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json",
+      "to": "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-staged-apply-ledgers-to-promotion-handshake",
+      "from": "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
       "to": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
       "status": "blocked"
     },
@@ -95,8 +107,14 @@
       "status": "blocked"
     },
     {
-      "id": "bridge-live-readiness-contracts-to-publish",
+      "id": "bridge-live-readiness-contracts-to-cutover-readiness-maps",
       "from": "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
+      "to": "release/ROLLBACK-CUTOVER-READINESS-MAPS.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-cutover-readiness-maps-to-publish",
+      "from": "release/ROLLBACK-CUTOVER-READINESS-MAPS.json",
       "to": "release/PUBLISH-GATES.json",
       "status": "blocked"
     },

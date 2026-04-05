@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "openclaw-studio-rollback-cutover-readiness-maps/v1",
+  "generatedAt": "2026-04-05T11:40:59.272Z",
+  "phase": "phase46",
+  "mode": "local-only-review",
+  "maps": [
+    {
+      "id": "rollback-cutover-map-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "publishRollbackPathId": "publish-rollback-alpha-to-beta",
+      "promotionStagedApplyLedgerId": "promotion-staged-ledger-alpha-to-beta",
+      "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
+      "rollbackOperatorDrillbookId": "rollback-drillbook-alpha-to-beta",
+      "status": "blocked",
+      "readinessMapPath": "future/publish/alpha-to-beta/rollback-cutover-readiness-map.json",
+      "cutoverWindows": [
+        {
+          "id": "cutover-alpha-to-beta-freeze",
+          "label": "Pre-cutover freeze",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "promotion-staged-ledger-alpha-to-beta",
+            "rollback-readiness-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "cutover-alpha-to-beta-platforms",
+          "label": "Platform rollback topology",
+          "owner": "runtime-owner",
+          "status": "blocked",
+          "evidence": [
+            "sealed-bundle-checkpoint-windows",
+            "sealed-bundle-checkpoint-macos",
+            "sealed-bundle-checkpoint-linux"
+          ]
+        },
+        {
+          "id": "cutover-alpha-to-beta-signoff",
+          "label": "Go/no-go signoff",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "rollback-drillbook-alpha-to-beta",
+            "publish-rollback-alpha-to-beta"
+          ]
+        }
+      ],
+      "platformMaps": [
+        {
+          "platform": "windows",
+          "recoveryChannel": "alpha",
+          "rollbackCheckpoint": "sealed-bundle-checkpoint-windows",
+          "status": "blocked"
+        },
+        {
+          "platform": "macos",
+          "recoveryChannel": "alpha",
+          "rollbackCheckpoint": "sealed-bundle-checkpoint-macos",
+          "status": "blocked"
+        },
+        {
+          "platform": "linux",
+          "recoveryChannel": "alpha",
+          "rollbackCheckpoint": "sealed-bundle-checkpoint-linux",
+          "status": "blocked"
+        }
+      ],
+      "reviewChecks": [
+        "promotion staged-apply ledger linked",
+        "rollback live-readiness contract linked",
+        "per-platform rollback checkpoints mapped"
+      ],
+      "blockedBy": [
+        "rollback cutover readiness maps remain metadata-only",
+        "live publish remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canMapCutover": false
+    },
+    {
+      "id": "rollback-cutover-map-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "publishRollbackPathId": "publish-rollback-beta-to-stable",
+      "promotionStagedApplyLedgerId": "promotion-staged-ledger-beta-to-stable",
+      "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
+      "rollbackOperatorDrillbookId": "rollback-drillbook-beta-to-stable",
+      "status": "blocked",
+      "readinessMapPath": "future/publish/beta-to-stable/rollback-cutover-readiness-map.json",
+      "cutoverWindows": [
+        {
+          "id": "cutover-beta-to-stable-freeze",
+          "label": "Pre-cutover freeze",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "promotion-staged-ledger-beta-to-stable",
+            "rollback-readiness-beta-to-stable"
+          ]
+        },
+        {
+          "id": "cutover-beta-to-stable-platforms",
+          "label": "Platform rollback topology",
+          "owner": "runtime-owner",
+          "status": "blocked",
+          "evidence": [
+            "sealed-bundle-checkpoint-windows",
+            "sealed-bundle-checkpoint-macos",
+            "sealed-bundle-checkpoint-linux"
+          ]
+        },
+        {
+          "id": "cutover-beta-to-stable-signoff",
+          "label": "Go/no-go signoff",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "rollback-drillbook-beta-to-stable",
+            "publish-rollback-beta-to-stable"
+          ]
+        }
+      ],
+      "platformMaps": [
+        {
+          "platform": "windows",
+          "recoveryChannel": "beta",
+          "rollbackCheckpoint": "sealed-bundle-checkpoint-windows",
+          "status": "blocked"
+        },
+        {
+          "platform": "macos",
+          "recoveryChannel": "beta",
+          "rollbackCheckpoint": "sealed-bundle-checkpoint-macos",
+          "status": "blocked"
+        },
+        {
+          "platform": "linux",
+          "recoveryChannel": "beta",
+          "rollbackCheckpoint": "sealed-bundle-checkpoint-linux",
+          "status": "blocked"
+        }
+      ],
+      "reviewChecks": [
+        "promotion staged-apply ledger linked",
+        "rollback live-readiness contract linked",
+        "per-platform rollback checkpoints mapped"
+      ],
+      "blockedBy": [
+        "rollback cutover readiness maps remain metadata-only",
+        "live publish remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canMapCutover": false
+    }
+  ]
+}

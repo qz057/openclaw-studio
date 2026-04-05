@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-rollback-operator-drillbooks/v1",
-  "generatedAt": "2026-04-05T07:05:48.132Z",
-  "phase": "phase45",
+  "generatedAt": "2026-04-05T11:40:59.272Z",
+  "phase": "phase46",
   "mode": "local-only-review",
   "drillbooks": [
     {
@@ -12,6 +12,8 @@
       "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
       "publishRollbackPathId": "publish-rollback-alpha-to-beta",
       "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
+      "promotionStagedApplyLedgerId": "promotion-staged-ledger-alpha-to-beta",
+      "rollbackCutoverReadinessMapId": "rollback-cutover-map-alpha-to-beta",
       "status": "blocked",
       "drillbookPath": "future/publish/alpha-to-beta/rollback-operator-drillbook.json",
       "operatorRoles": [
@@ -22,7 +24,9 @@
       "sections": [
         "checkpoint intake",
         "channel freeze and evidence capture",
+        "staged apply rollback journal review",
         "rollback route selection",
+        "cutover readiness verification",
         "post-rollback audit note",
         "live-readiness signoff"
       ],
@@ -30,7 +34,8 @@
         "rehearsal ledger linked",
         "promotion execution checkpoint linked",
         "publish rollback path linked",
-        "rollback live-readiness anchor declared"
+        "rollback live-readiness anchor declared",
+        "rollback cutover readiness map linked"
       ],
       "blockedBy": [
         "rollback operator drillbook remains metadata-only",
@@ -47,6 +52,8 @@
       "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
       "publishRollbackPathId": "publish-rollback-beta-to-stable",
       "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
+      "promotionStagedApplyLedgerId": "promotion-staged-ledger-beta-to-stable",
+      "rollbackCutoverReadinessMapId": "rollback-cutover-map-beta-to-stable",
       "status": "blocked",
       "drillbookPath": "future/publish/beta-to-stable/rollback-operator-drillbook.json",
       "operatorRoles": [
@@ -57,7 +64,9 @@
       "sections": [
         "checkpoint intake",
         "channel freeze and evidence capture",
+        "staged apply rollback journal review",
         "rollback route selection",
+        "cutover readiness verification",
         "post-rollback audit note",
         "live-readiness signoff"
       ],
@@ -65,7 +74,8 @@
         "rehearsal ledger linked",
         "promotion execution checkpoint linked",
         "publish rollback path linked",
-        "rollback live-readiness anchor declared"
+        "rollback live-readiness anchor declared",
+        "rollback cutover readiness map linked"
       ],
       "blockedBy": [
         "rollback operator drillbook remains metadata-only",

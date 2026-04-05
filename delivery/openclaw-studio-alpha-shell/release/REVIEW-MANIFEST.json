@@ -1,8 +1,8 @@
 {
   "schemaVersion": "openclaw-studio-review-manifest/v1",
-  "generatedAt": "2026-04-05T07:05:48.132Z",
-  "phase": "phase45",
-  "milestone": "phase45 attestation apply execution packets / promotion operator handoff rails / rollback live-readiness contracts + docs / smoke / package / release-plan / UI / shared data closeout",
+  "generatedAt": "2026-04-05T11:40:59.272Z",
+  "phase": "phase46",
+  "milestone": "phase46 attestation operator worklists / promotion staged-apply ledgers / rollback cutover readiness maps + docs / smoke / package / release-plan / UI / shared data closeout",
   "reviewDocs": [
     "README.md",
     "HANDOFF.md",
@@ -22,6 +22,7 @@
     "release/ATTESTATION-VERIFICATION-PACKS.json",
     "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
     "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json",
+    "release/ATTESTATION-OPERATOR-WORKLISTS.json",
     "release/INSTALLER-TARGETS.json",
     "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
     "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
@@ -32,6 +33,7 @@
     "release/PROMOTION-APPLY-MANIFESTS.json",
     "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
     "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json",
+    "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
     "release/SIGNING-METADATA.json",
     "release/NOTARIZATION-PLAN.json",
     "release/SIGNING-PUBLISH-PIPELINE.json",
@@ -43,6 +45,7 @@
     "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
     "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
     "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
+    "release/ROLLBACK-CUTOVER-READINESS-MAPS.json",
     "release/RELEASE-APPROVAL-WORKFLOW.json",
     "release/RELEASE-NOTES.md",
     "release/PUBLISH-GATES.json",
@@ -72,7 +75,7 @@
     }
   ],
   "pipeline": {
-    "stage": "attestation-apply-execution-packets-promotion-operator-handoff-rails-rollback-live-readiness-contracts-skeleton",
+    "stage": "attestation-operator-worklists-promotion-staged-apply-ledgers-rollback-cutover-readiness-maps-skeleton",
     "stages": [
       {
         "id": "pipeline-docs",
@@ -147,6 +150,12 @@
         "detail": "Apply-audit bundles now feed operator-reviewed execution packets, packet receipts, and pre-apply envelopes without executing any live apply step for real."
       },
       {
+        "id": "pipeline-attestation-operator-worklists",
+        "label": "Attestation operator worklists",
+        "status": "ready",
+        "detail": "Execution packets now feed per-role operator intake queues, acknowledgement slots, and ownership handoff scaffolds without dispatching any live operator action for real."
+      },
+      {
         "id": "pipeline-installer-builders",
         "label": "Installer-target builder skeleton",
         "status": "ready",
@@ -199,6 +208,12 @@
         "label": "Promotion operator handoff rails",
         "status": "ready",
         "detail": "Promotion execution checkpoints now feed operator routing rails, role handoff segments, and rollback readiness anchors without executing any promotion for real."
+      },
+      {
+        "id": "pipeline-promotion-staged-apply-ledgers",
+        "label": "Promotion staged-apply ledgers",
+        "status": "ready",
+        "detail": "Operator handoff rails now feed ordered staged apply journals, freeze windows, and cutover evidence slots without applying any promotion for real."
       },
       {
         "id": "pipeline-signing-publish",
@@ -255,6 +270,12 @@
         "detail": "Rollback drillbooks now feed live-readiness gates, recovery proofs, and operator entry checks without enabling any live rollback or publish state mutation."
       },
       {
+        "id": "pipeline-rollback-cutover-readiness-maps",
+        "label": "Rollback cutover readiness maps",
+        "status": "ready",
+        "detail": "Rollback live-readiness contracts now feed channel/platform cutover topology, rollback checkpoint maps, and go/no-go review surfaces without mutating any live publish state."
+      },
+      {
         "id": "pipeline-approval",
         "label": "Release approval workflow",
         "status": "ready",
@@ -274,15 +295,18 @@
     "no per-platform sealed-bundle integrity attestation or digest publication yet; integrity contract remains review-only metadata",
     "no attestation verification pack emission or verifier handoff yet; verification packs remain review-only metadata",
     "no executable attestation apply audit or apply-execution packet handoff yet; audit packs and execution packets remain review-only metadata",
+    "no executable attestation operator dispatch or operator receipt capture yet; operator worklists remain review-only metadata",
     "no Windows / macOS / Linux installer builder orchestration and channel routing wiring yet; routing remains review-only skeleton",
     "no executable channel promotion evidence pack or promotion routing apply yet; evidence remains review-only metadata",
     "no executable promotion apply manifests or channel apply execution yet; apply manifests remain review-only metadata",
     "no executable promotion execution checkpoints or operator handoff rails yet; checkpoints and handoff rails remain review-only metadata",
+    "no executable promotion staged-apply journaling or staged cutover entry yet; staged-apply ledgers remain review-only metadata",
     "no signing / notarization / hash publication workflow yet; approval bridge remains metadata-only",
     "no executable signing-publish gating handshake yet; handshake remains metadata-only",
     "no executable release approval handshake yet; workflow remains metadata-only",
     "no rollback execution rehearsal or rollback apply automation yet; rehearsal ledger remains review-only metadata",
     "no rollback operator drillbooks or live-readiness contracts yet; drillbooks and live-readiness contracts remain review-only metadata",
+    "no executable rollback cutover readiness evaluation or cutover topology handoff yet; cutover readiness maps remain review-only metadata",
     "no release publishing / artifact upload / promotion handshake / rollback apply automation yet; publish rollback handshake remains metadata-only",
     "real host-side execution remains disabled until approval / lifecycle / rollback close the loop"
   ]

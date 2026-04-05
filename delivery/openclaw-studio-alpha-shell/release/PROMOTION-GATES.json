@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-promotion-gates/v1",
-  "generatedAt": "2026-04-05T07:05:48.132Z",
-  "phase": "phase45",
+  "generatedAt": "2026-04-05T11:40:59.272Z",
+  "phase": "phase46",
   "promotions": [
     {
       "from": "alpha",
@@ -16,6 +16,7 @@
         "attestation verification packs",
         "attestation apply audit packs",
         "attestation apply execution packets",
+        "attestation operator worklists",
         "installer targets",
         "installer builder execution",
         "installer channel routing",
@@ -23,6 +24,7 @@
         "promotion apply manifests",
         "promotion execution checkpoints",
         "promotion operator handoff rails",
+        "promotion staged-apply ledgers",
         "signing",
         "signing-publish gating handshake",
         "signing-publish promotion handshake",
@@ -30,6 +32,7 @@
         "rollback execution rehearsal ledger",
         "rollback operator drillbooks",
         "rollback live-readiness contracts",
+        "rollback cutover readiness maps",
         "release approval workflow",
         "release notes",
         "upload"
@@ -47,17 +50,20 @@
         "attestation verification packs",
         "attestation apply audit packs",
         "attestation apply execution packets",
+        "attestation operator worklists",
         "installer channel routing",
         "channel promotion evidence",
         "promotion apply manifests",
         "promotion execution checkpoints",
         "promotion operator handoff rails",
+        "promotion staged-apply ledgers",
         "signing-publish gating handshake",
         "signing-publish promotion handshake",
         "publish rollback handshake",
         "rollback execution rehearsal ledger",
         "rollback operator drillbooks",
         "rollback live-readiness contracts",
+        "rollback cutover readiness maps",
         "release approval workflow",
         "rollback plan"
       ]

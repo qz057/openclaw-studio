@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-rollback-live-readiness-contracts/v1",
-  "generatedAt": "2026-04-05T07:05:48.132Z",
-  "phase": "phase45",
+  "generatedAt": "2026-04-05T11:40:59.272Z",
+  "phase": "phase46",
   "mode": "local-only-review",
   "contracts": [
     {
@@ -12,13 +12,15 @@
       "promotionOperatorHandoffRailId": "promotion-handoff-alpha-to-beta",
       "rollbackExecutionRehearsalLedgerId": "rollback-rehearsal-alpha-to-beta",
       "rollbackOperatorDrillbookId": "rollback-drillbook-alpha-to-beta",
+      "rollbackCutoverReadinessMapId": "rollback-cutover-map-alpha-to-beta",
       "status": "blocked",
       "readinessContractPath": "future/publish/alpha-to-beta/rollback-live-readiness-contract.json",
       "readinessChecks": [
         "rollback rehearsal ledger linked",
         "rollback operator drillbook linked",
         "promotion operator handoff rail linked",
-        "recovery channel remains review-only"
+        "recovery channel remains review-only",
+        "rollback cutover readiness map anchor declared"
       ],
       "blockedBy": [
         "rollback live-readiness remains metadata-only",
@@ -35,13 +37,15 @@
       "promotionOperatorHandoffRailId": "promotion-handoff-beta-to-stable",
       "rollbackExecutionRehearsalLedgerId": "rollback-rehearsal-beta-to-stable",
       "rollbackOperatorDrillbookId": "rollback-drillbook-beta-to-stable",
+      "rollbackCutoverReadinessMapId": "rollback-cutover-map-beta-to-stable",
       "status": "blocked",
       "readinessContractPath": "future/publish/beta-to-stable/rollback-live-readiness-contract.json",
       "readinessChecks": [
         "rollback rehearsal ledger linked",
         "rollback operator drillbook linked",
         "promotion operator handoff rail linked",
-        "recovery channel remains review-only"
+        "recovery channel remains review-only",
+        "rollback cutover readiness map anchor declared"
       ],
       "blockedBy": [
         "rollback live-readiness remains metadata-only",

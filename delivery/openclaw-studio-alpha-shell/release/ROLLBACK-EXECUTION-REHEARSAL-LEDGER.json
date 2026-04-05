@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-rollback-execution-rehearsal-ledger/v1",
-  "generatedAt": "2026-04-05T07:05:48.132Z",
-  "phase": "phase45",
+  "generatedAt": "2026-04-05T11:40:59.272Z",
+  "phase": "phase46",
   "mode": "local-only-review",
   "rehearsals": [
     {
@@ -11,16 +11,20 @@
       "rollbackRecoveryLedgerId": "rollback-ledger-alpha-to-beta",
       "publishRollbackPathId": "publish-rollback-alpha-to-beta",
       "promotionApplyManifestId": "promotion-manifest-alpha-to-beta",
+      "promotionStagedApplyLedgerId": "promotion-staged-ledger-alpha-to-beta",
       "rollbackOperatorDrillbookId": "rollback-drillbook-alpha-to-beta",
       "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
+      "rollbackCutoverReadinessMapId": "rollback-cutover-map-alpha-to-beta",
       "status": "blocked",
       "rehearsalManifestPath": "future/publish/alpha-to-beta/rollback-execution-rehearsal-ledger.json",
       "rehearsalSteps": [
         "load rollback checkpoints",
         "replay recovery channel selection",
+        "verify staged-apply ledger anchors",
         "verify attestation pack anchors",
         "record dry-run rollback notes",
-        "anchor operator drillbook handoff"
+        "anchor operator drillbook handoff",
+        "anchor cutover readiness map"
       ],
       "blockedBy": [
         "rollback rehearsal remains non-executable",
@@ -36,16 +40,20 @@
       "rollbackRecoveryLedgerId": "rollback-ledger-beta-to-stable",
       "publishRollbackPathId": "publish-rollback-beta-to-stable",
       "promotionApplyManifestId": "promotion-manifest-beta-to-stable",
+      "promotionStagedApplyLedgerId": "promotion-staged-ledger-beta-to-stable",
       "rollbackOperatorDrillbookId": "rollback-drillbook-beta-to-stable",
       "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
+      "rollbackCutoverReadinessMapId": "rollback-cutover-map-beta-to-stable",
       "status": "blocked",
       "rehearsalManifestPath": "future/publish/beta-to-stable/rollback-execution-rehearsal-ledger.json",
       "rehearsalSteps": [
         "load rollback checkpoints",
         "replay recovery channel selection",
+        "verify staged-apply ledger anchors",
         "verify attestation pack anchors",
         "record dry-run rollback notes",
-        "anchor operator drillbook handoff"
+        "anchor operator drillbook handoff",
+        "anchor cutover readiness map"
       ],
       "blockedBy": [
         "rollback rehearsal remains non-executable",

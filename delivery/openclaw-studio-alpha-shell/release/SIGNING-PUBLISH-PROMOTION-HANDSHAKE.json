@@ -1,17 +1,19 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-promotion-handshake/v1",
-  "generatedAt": "2026-04-05T07:05:48.132Z",
-  "phase": "phase45",
+  "generatedAt": "2026-04-05T11:40:59.272Z",
+  "phase": "phase46",
   "mode": "local-only-review",
   "canPromote": false,
   "channelRoutingPath": "release/INSTALLER-CHANNEL-ROUTING.json",
   "sealedBundleIntegrityContractPath": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
   "channelPromotionEvidencePath": "release/CHANNEL-PROMOTION-EVIDENCE.json",
   "attestationApplyExecutionPacketsPath": "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json",
+  "attestationOperatorWorklistsPath": "release/ATTESTATION-OPERATOR-WORKLISTS.json",
   "promotionApplyManifestsPath": "release/PROMOTION-APPLY-MANIFESTS.json",
   "attestationApplyAuditPacksPath": "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
   "promotionExecutionCheckpointsPath": "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
   "promotionOperatorHandoffRailsPath": "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json",
+  "promotionStagedApplyLedgersPath": "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
   "approvalBridgePath": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
   "publishGatesPath": "release/PUBLISH-GATES.json",
   "promotionGatesPath": "release/PROMOTION-GATES.json",
@@ -67,6 +69,11 @@
         "required": true
       },
       {
+        "id": "request-attestation-operator-worklists",
+        "label": "Attestation operator worklists",
+        "required": true
+      },
+      {
         "id": "request-promotion-apply-manifests",
         "label": "Promotion apply manifests",
         "required": true
@@ -79,6 +86,11 @@
       {
         "id": "request-promotion-operator-handoff-rails",
         "label": "Promotion operator handoff rails",
+        "required": true
+      },
+      {
+        "id": "request-promotion-staged-apply-ledgers",
+        "label": "Promotion staged-apply ledgers",
         "required": true
       },
       {
@@ -167,6 +179,12 @@
       "artifact": "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json"
     },
     {
+      "id": "promotion-ack-attestation-operator-worklists",
+      "label": "Attestation operator worklists reviewed",
+      "status": "planned",
+      "artifact": "release/ATTESTATION-OPERATOR-WORKLISTS.json"
+    },
+    {
       "id": "promotion-ack-apply-manifests",
       "label": "Promotion apply manifests reviewed",
       "status": "planned",
@@ -183,6 +201,12 @@
       "label": "Promotion operator handoff rails reviewed",
       "status": "blocked",
       "artifact": "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json"
+    },
+    {
+      "id": "promotion-ack-staged-apply-ledgers",
+      "label": "Promotion staged-apply ledgers reviewed",
+      "status": "blocked",
+      "artifact": "release/PROMOTION-STAGED-APPLY-LEDGERS.json"
     },
     {
       "id": "promotion-ack-approval-bridge",
@@ -265,6 +289,15 @@
       ]
     },
     {
+      "id": "promotion-handshake-attestation-worklists",
+      "label": "Attestation operator worklist review",
+      "status": "planned",
+      "evidence": [
+        "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json",
+        "release/ATTESTATION-OPERATOR-WORKLISTS.json"
+      ]
+    },
+    {
       "id": "promotion-handshake-apply-manifests",
       "label": "Promotion apply manifest review",
       "status": "planned",
@@ -289,6 +322,15 @@
       "evidence": [
         "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
         "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json"
+      ]
+    },
+    {
+      "id": "promotion-handshake-staged-apply-ledgers",
+      "label": "Promotion staged-apply ledger review",
+      "status": "blocked",
+      "evidence": [
+        "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json",
+        "release/PROMOTION-STAGED-APPLY-LEDGERS.json"
       ]
     },
     {
@@ -335,9 +377,11 @@
     "release/CHANNEL-PROMOTION-EVIDENCE.json",
     "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
     "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json",
+    "release/ATTESTATION-OPERATOR-WORKLISTS.json",
     "release/PROMOTION-APPLY-MANIFESTS.json",
     "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
     "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json",
+    "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
     "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
     "release/PUBLISH-GATES.json",
     "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
@@ -348,6 +392,7 @@
     "sealed bundles remain metadata-only",
     "artifact upload remains blocked",
     "publish rollback remains metadata-only",
+    "promotion staged-apply ledgers remain metadata-only",
     "promotion gates remain non-executable",
     "host-side execution remains disabled"
   ]

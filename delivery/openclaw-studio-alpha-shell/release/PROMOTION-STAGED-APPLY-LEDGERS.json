@@ -1,0 +1,138 @@
+{
+  "schemaVersion": "openclaw-studio-promotion-staged-apply-ledgers/v1",
+  "generatedAt": "2026-04-05T11:40:59.272Z",
+  "phase": "phase46",
+  "mode": "local-only-review",
+  "ledgers": [
+    {
+      "id": "promotion-staged-ledger-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "attestationOperatorWorklistId": "attestation-worklist-alpha-to-beta",
+      "promotionApplyManifestId": "promotion-manifest-alpha-to-beta",
+      "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
+      "promotionOperatorHandoffRailId": "promotion-handoff-alpha-to-beta",
+      "rollbackCutoverReadinessMapId": "rollback-cutover-map-alpha-to-beta",
+      "status": "blocked",
+      "ledgerPath": "future/channels/alpha-to-beta/promotion-staged-apply-ledger.json",
+      "stages": [
+        {
+          "id": "staged-ledger-alpha-to-beta-intake",
+          "label": "Attestation intake",
+          "owner": "security-reviewer",
+          "status": "planned",
+          "evidence": [
+            "attestation-worklist-alpha-to-beta",
+            "promotion-checkpoint-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "staged-ledger-alpha-to-beta-freeze",
+          "label": "Channel freeze",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "promotion-handoff-alpha-to-beta",
+            "promotion-manifest-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "staged-ledger-alpha-to-beta-apply",
+          "label": "Staged apply window",
+          "owner": "release-engineering",
+          "status": "blocked",
+          "evidence": [
+            "promotion-manifest-alpha-to-beta",
+            "promotion-checkpoint-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "staged-ledger-alpha-to-beta-cutover",
+          "label": "Cutover verification",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "rollback-cutover-map-alpha-to-beta",
+            "rollback-readiness-alpha-to-beta"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "attestation operator worklist linked",
+        "promotion operator handoff rail linked",
+        "rollback cutover readiness anchor declared"
+      ],
+      "blockedBy": [
+        "promotion staged apply remains metadata-only",
+        "promotion cutover remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canStageApply": false
+    },
+    {
+      "id": "promotion-staged-ledger-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "attestationOperatorWorklistId": "attestation-worklist-beta-to-stable",
+      "promotionApplyManifestId": "promotion-manifest-beta-to-stable",
+      "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
+      "promotionOperatorHandoffRailId": "promotion-handoff-beta-to-stable",
+      "rollbackCutoverReadinessMapId": "rollback-cutover-map-beta-to-stable",
+      "status": "blocked",
+      "ledgerPath": "future/channels/beta-to-stable/promotion-staged-apply-ledger.json",
+      "stages": [
+        {
+          "id": "staged-ledger-beta-to-stable-intake",
+          "label": "Attestation intake",
+          "owner": "security-reviewer",
+          "status": "blocked",
+          "evidence": [
+            "attestation-worklist-beta-to-stable",
+            "promotion-checkpoint-beta-to-stable"
+          ]
+        },
+        {
+          "id": "staged-ledger-beta-to-stable-freeze",
+          "label": "Channel freeze",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "promotion-handoff-beta-to-stable",
+            "promotion-manifest-beta-to-stable"
+          ]
+        },
+        {
+          "id": "staged-ledger-beta-to-stable-apply",
+          "label": "Staged apply window",
+          "owner": "release-engineering",
+          "status": "blocked",
+          "evidence": [
+            "promotion-manifest-beta-to-stable",
+            "promotion-checkpoint-beta-to-stable"
+          ]
+        },
+        {
+          "id": "staged-ledger-beta-to-stable-cutover",
+          "label": "Cutover verification",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "rollback-cutover-map-beta-to-stable",
+            "rollback-readiness-beta-to-stable"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "attestation operator worklist linked",
+        "promotion operator handoff rail linked",
+        "rollback cutover readiness anchor declared"
+      ],
+      "blockedBy": [
+        "promotion staged apply remains metadata-only",
+        "promotion cutover remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canStageApply": false
+    }
+  ]
+}
