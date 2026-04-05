@@ -1,15 +1,15 @@
-# OpenClaw Studio Phase47 Release Notes
+# OpenClaw Studio Phase48 Release Notes
 
-Milestone: phase47 attestation operator dispatch manifests / promotion staged-apply runsheets / rollback cutover handoff plans + docs / smoke / package / release-plan / UI / shared data closeout
+Milestone: phase48 attestation operator dispatch packets / promotion staged-apply command sheets / rollback cutover execution checklists + docs / smoke / package / release-plan / UI / shared data closeout
 
 ## Highlights
-- attestation operator dispatch manifests now turn operator worklists into explicit dispatch envelopes, acknowledgement deadlines, and escalation paths without dispatching any live operator action for real
-- promotion staged-apply runsheets now turn staged-apply ledgers into operator-ready stage sequencing, freeze holds, and cutover baton scripts without applying any live promotion for real
-- rollback cutover handoff plans now turn cutover readiness maps into role handoff plans, platform baton paths, and fallback entry points without mutating any live publish state
+- attestation operator dispatch packets now turn dispatch manifests into role-targeted packet bundles, acknowledgement payloads, and receipt slots without dispatching any live operator action for real
+- promotion staged-apply command sheets now turn staged-apply runsheets into gated stage commands, confirmation blocks, and receipt stubs without applying any live promotion for real
+- rollback cutover execution checklists now turn handoff plans into cutover go/no-go sheets, platform checkpoint sweeps, and recovery confirmations without mutating any live publish state
 
 ## Current posture
 - still local-only
 - still not an installer
 - still no real publish/upload/sign/notarize actions
 
-Generated: 2026-04-05T12:16:22.489Z
+Generated: 2026-04-05T13:09:04.389Z

@@ -1,12 +1,13 @@
 {
   "schemaVersion": "openclaw-studio-publish-rollback-handshake/v1",
-  "generatedAt": "2026-04-05T12:16:22.489Z",
-  "phase": "phase47",
+  "generatedAt": "2026-04-05T13:09:04.389Z",
+  "phase": "phase48",
   "mode": "local-only-review",
   "canRollback": false,
   "sealedBundleIntegrityContractPath": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
   "channelPromotionEvidencePath": "release/CHANNEL-PROMOTION-EVIDENCE.json",
   "attestationOperatorDispatchManifestsPath": "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json",
+  "attestationOperatorDispatchPacketsPath": "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json",
   "promotionHandshakePath": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
   "publishGatesPath": "release/PUBLISH-GATES.json",
   "promotionGatesPath": "release/PROMOTION-GATES.json",
@@ -14,11 +15,13 @@
   "promotionOperatorHandoffRailsPath": "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json",
   "promotionStagedApplyLedgersPath": "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
   "promotionStagedApplyRunsheetsPath": "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json",
+  "promotionStagedApplyCommandSheetsPath": "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
   "rollbackExecutionRehearsalLedgerPath": "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
   "rollbackOperatorDrillbooksPath": "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
   "rollbackLiveReadinessContractsPath": "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
   "rollbackCutoverReadinessMapsPath": "release/ROLLBACK-CUTOVER-READINESS-MAPS.json",
   "rollbackCutoverHandoffPlansPath": "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
+  "rollbackCutoverExecutionChecklistsPath": "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
   "participants": [
     "release-engineering",
     "security",
@@ -60,6 +63,11 @@
         "required": true
       },
       {
+        "id": "request-attestation-operator-dispatch-packets",
+        "label": "Attestation operator dispatch packets",
+        "required": true
+      },
+      {
         "id": "request-rollback-checkpoints",
         "label": "Rollback checkpoints",
         "required": true
@@ -85,6 +93,11 @@
         "required": true
       },
       {
+        "id": "request-promotion-staged-apply-command-sheets",
+        "label": "Promotion staged-apply command sheets",
+        "required": true
+      },
+      {
         "id": "request-rollback-rehearsal-ledger",
         "label": "Rollback execution rehearsal ledger",
         "required": true
@@ -107,6 +120,11 @@
       {
         "id": "request-rollback-cutover-handoff-plans",
         "label": "Rollback cutover handoff plans",
+        "required": true
+      },
+      {
+        "id": "request-rollback-cutover-execution-checklists",
+        "label": "Rollback cutover execution checklists",
         "required": true
       },
       {
@@ -167,6 +185,12 @@
       "artifact": "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json"
     },
     {
+      "id": "rollback-ack-attestation-dispatch-packets",
+      "label": "Attestation operator dispatch packets reviewed",
+      "status": "blocked",
+      "artifact": "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json"
+    },
+    {
       "id": "rollback-ack-publish-gates",
       "label": "Publish gates reviewed",
       "status": "blocked",
@@ -209,6 +233,12 @@
       "artifact": "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json"
     },
     {
+      "id": "rollback-ack-staged-apply-command-sheets",
+      "label": "Promotion staged-apply command sheets reviewed",
+      "status": "blocked",
+      "artifact": "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json"
+    },
+    {
       "id": "rollback-ack-rehearsal-ledger",
       "label": "Rollback execution rehearsal ledger reviewed",
       "status": "blocked",
@@ -239,6 +269,12 @@
       "artifact": "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json"
     },
     {
+      "id": "rollback-ack-cutover-execution-checklists",
+      "label": "Rollback cutover execution checklists reviewed",
+      "status": "blocked",
+      "artifact": "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json"
+    },
+    {
       "id": "rollback-ack-release-notes",
       "label": "Release notes reviewed",
       "status": "planned",
@@ -253,15 +289,18 @@
       "status": "blocked",
       "promotionEvidenceId": "promotion-evidence-alpha-to-beta",
       "attestationOperatorDispatchManifestId": "attestation-dispatch-alpha-to-beta",
+      "attestationOperatorDispatchPacketId": "attestation-dispatch-packet-alpha-to-beta",
       "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
       "promotionOperatorHandoffRailId": "promotion-handoff-alpha-to-beta",
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-alpha-to-beta",
       "promotionStagedApplyRunsheetId": "promotion-runsheet-alpha-to-beta",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-alpha-to-beta",
       "rollbackExecutionRehearsalLedgerId": "rollback-rehearsal-alpha-to-beta",
       "rollbackOperatorDrillbookId": "rollback-drillbook-alpha-to-beta",
       "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
       "rollbackCutoverReadinessMapId": "rollback-cutover-map-alpha-to-beta",
       "rollbackCutoverHandoffPlanId": "rollback-handoff-alpha-to-beta",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-alpha-to-beta",
       "rollbackManifestPath": "future/publish/alpha-to-beta/rollback-handshake.json",
       "recoveryChannel": "alpha",
       "checkpoints": [
@@ -282,15 +321,18 @@
       "status": "blocked",
       "promotionEvidenceId": "promotion-evidence-beta-to-stable",
       "attestationOperatorDispatchManifestId": "attestation-dispatch-beta-to-stable",
+      "attestationOperatorDispatchPacketId": "attestation-dispatch-packet-beta-to-stable",
       "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
       "promotionOperatorHandoffRailId": "promotion-handoff-beta-to-stable",
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-beta-to-stable",
       "promotionStagedApplyRunsheetId": "promotion-runsheet-beta-to-stable",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-beta-to-stable",
       "rollbackExecutionRehearsalLedgerId": "rollback-rehearsal-beta-to-stable",
       "rollbackOperatorDrillbookId": "rollback-drillbook-beta-to-stable",
       "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
       "rollbackCutoverReadinessMapId": "rollback-cutover-map-beta-to-stable",
       "rollbackCutoverHandoffPlanId": "rollback-handoff-beta-to-stable",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-beta-to-stable",
       "rollbackManifestPath": "future/publish/beta-to-stable/rollback-handshake.json",
       "recoveryChannel": "beta",
       "checkpoints": [
@@ -330,6 +372,15 @@
       "status": "blocked",
       "evidence": [
         "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json",
+        "release/PUBLISH-ROLLBACK-HANDSHAKE.json"
+      ]
+    },
+    {
+      "id": "rollback-handshake-dispatch-packets",
+      "label": "Attestation operator dispatch packet review",
+      "status": "blocked",
+      "evidence": [
+        "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json",
         "release/PUBLISH-ROLLBACK-HANDSHAKE.json"
       ]
     },
@@ -397,6 +448,15 @@
       ]
     },
     {
+      "id": "rollback-handshake-staged-apply-command-sheets",
+      "label": "Promotion staged-apply command sheet review",
+      "status": "blocked",
+      "evidence": [
+        "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
+        "release/PUBLISH-ROLLBACK-HANDSHAKE.json"
+      ]
+    },
+    {
       "id": "rollback-handshake-rehearsal",
       "label": "Rollback execution rehearsal review",
       "status": "blocked",
@@ -442,6 +502,15 @@
       ]
     },
     {
+      "id": "rollback-handshake-cutover-execution-checklists",
+      "label": "Rollback cutover execution checklist review",
+      "status": "blocked",
+      "evidence": [
+        "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
+        "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json"
+      ]
+    },
+    {
       "id": "rollback-handshake-recovery",
       "label": "Recovery channel review",
       "status": "blocked",
@@ -455,6 +524,7 @@
     "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
     "release/CHANNEL-PROMOTION-EVIDENCE.json",
     "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json",
+    "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json",
     "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
     "release/PUBLISH-GATES.json",
     "release/PROMOTION-GATES.json",
@@ -462,11 +532,13 @@
     "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json",
     "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
     "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json",
+    "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
     "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
     "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
     "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
     "release/ROLLBACK-CUTOVER-READINESS-MAPS.json",
     "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
+    "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
     "release/RELEASE-NOTES.md",
     "release/INSTALLER-PLACEHOLDER.json"
   ],
@@ -478,6 +550,7 @@
     "rollback live-readiness contracts remain metadata-only",
     "rollback cutover readiness maps remain metadata-only",
     "rollback cutover handoff plans remain metadata-only",
+    "rollback cutover execution checklists remain metadata-only",
     "host-side execution remains disabled"
   ]
 }

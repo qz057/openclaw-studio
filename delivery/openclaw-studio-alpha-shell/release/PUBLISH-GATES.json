@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-publish-gates/v1",
-  "generatedAt": "2026-04-05T12:16:22.489Z",
-  "phase": "phase47",
+  "generatedAt": "2026-04-05T13:09:04.389Z",
+  "phase": "phase48",
   "gates": [
     {
       "id": "gate-bundles",
@@ -59,6 +59,11 @@
       "status": "blocked"
     },
     {
+      "id": "gate-attestation-operator-dispatch-packets",
+      "label": "Attestation operator dispatch packets reviewed",
+      "status": "blocked"
+    },
+    {
       "id": "gate-installer-targets",
       "label": "Installer targets reviewed",
       "status": "planned"
@@ -109,6 +114,11 @@
       "status": "blocked"
     },
     {
+      "id": "gate-promotion-staged-apply-command-sheets",
+      "label": "Promotion staged-apply command sheets reviewed",
+      "status": "blocked"
+    },
+    {
       "id": "gate-signing",
       "label": "Signing / notarization complete",
       "status": "blocked"
@@ -156,6 +166,11 @@
     {
       "id": "gate-rollback-cutover-handoff-plans",
       "label": "Rollback cutover handoff plans reviewed",
+      "status": "blocked"
+    },
+    {
+      "id": "gate-rollback-cutover-execution-checklists",
+      "label": "Rollback cutover execution checklists reviewed",
       "status": "blocked"
     },
     {

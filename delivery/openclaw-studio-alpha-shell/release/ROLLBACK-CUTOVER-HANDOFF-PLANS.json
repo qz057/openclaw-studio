@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-rollback-cutover-handoff-plans/v1",
-  "generatedAt": "2026-04-05T12:16:22.489Z",
-  "phase": "phase47",
+  "generatedAt": "2026-04-05T13:09:04.389Z",
+  "phase": "phase48",
   "mode": "local-only-review",
   "plans": [
     {
@@ -12,7 +12,9 @@
       "rollbackCutoverReadinessMapId": "rollback-cutover-map-alpha-to-beta",
       "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
       "promotionStagedApplyRunsheetId": "promotion-runsheet-alpha-to-beta",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-alpha-to-beta",
       "attestationOperatorDispatchManifestId": "attestation-dispatch-alpha-to-beta",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-alpha-to-beta",
       "status": "blocked",
       "handoffPlanPath": "future/publish/alpha-to-beta/rollback-cutover-handoff-plan.json",
       "handoffBaton": [
@@ -53,7 +55,9 @@
       "reviewChecks": [
         "rollback cutover readiness map linked",
         "promotion staged-apply runsheet linked",
-        "attestation dispatch manifest linked"
+        "promotion staged-apply command sheet linked",
+        "attestation dispatch manifest linked",
+        "rollback cutover execution checklist anchor declared"
       ],
       "blockedBy": [
         "rollback cutover handoff remains metadata-only",
@@ -70,7 +74,9 @@
       "rollbackCutoverReadinessMapId": "rollback-cutover-map-beta-to-stable",
       "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
       "promotionStagedApplyRunsheetId": "promotion-runsheet-beta-to-stable",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-beta-to-stable",
       "attestationOperatorDispatchManifestId": "attestation-dispatch-beta-to-stable",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-beta-to-stable",
       "status": "blocked",
       "handoffPlanPath": "future/publish/beta-to-stable/rollback-cutover-handoff-plan.json",
       "handoffBaton": [
@@ -111,7 +117,9 @@
       "reviewChecks": [
         "rollback cutover readiness map linked",
         "promotion staged-apply runsheet linked",
-        "attestation dispatch manifest linked"
+        "promotion staged-apply command sheet linked",
+        "attestation dispatch manifest linked",
+        "rollback cutover execution checklist anchor declared"
       ],
       "blockedBy": [
         "rollback cutover handoff remains metadata-only",

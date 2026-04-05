@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-promotion-gates/v1",
-  "generatedAt": "2026-04-05T12:16:22.489Z",
-  "phase": "phase47",
+  "generatedAt": "2026-04-05T13:09:04.389Z",
+  "phase": "phase48",
   "promotions": [
     {
       "from": "alpha",
@@ -18,6 +18,7 @@
         "attestation apply execution packets",
         "attestation operator worklists",
         "attestation operator dispatch manifests",
+        "attestation operator dispatch packets",
         "installer targets",
         "installer builder execution",
         "installer channel routing",
@@ -27,6 +28,7 @@
         "promotion operator handoff rails",
         "promotion staged-apply ledgers",
         "promotion staged-apply runsheets",
+        "promotion staged-apply command sheets",
         "signing",
         "signing-publish gating handshake",
         "signing-publish promotion handshake",
@@ -36,6 +38,7 @@
         "rollback live-readiness contracts",
         "rollback cutover readiness maps",
         "rollback cutover handoff plans",
+        "rollback cutover execution checklists",
         "release approval workflow",
         "release notes",
         "upload"
@@ -55,6 +58,7 @@
         "attestation apply execution packets",
         "attestation operator worklists",
         "attestation operator dispatch manifests",
+        "attestation operator dispatch packets",
         "installer channel routing",
         "channel promotion evidence",
         "promotion apply manifests",
@@ -62,6 +66,7 @@
         "promotion operator handoff rails",
         "promotion staged-apply ledgers",
         "promotion staged-apply runsheets",
+        "promotion staged-apply command sheets",
         "signing-publish gating handshake",
         "signing-publish promotion handshake",
         "publish rollback handshake",
@@ -70,6 +75,7 @@
         "rollback live-readiness contracts",
         "rollback cutover readiness maps",
         "rollback cutover handoff plans",
+        "rollback cutover execution checklists",
         "release approval workflow",
         "rollback plan"
       ]

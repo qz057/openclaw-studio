@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-rollback-recovery-ledger/v1",
-  "generatedAt": "2026-04-05T12:16:22.489Z",
-  "phase": "phase47",
+  "generatedAt": "2026-04-05T13:09:04.389Z",
+  "phase": "phase48",
   "mode": "local-only-review",
   "ledgers": [
     {
@@ -13,18 +13,22 @@
       "rollbackOperatorDrillbookId": "rollback-drillbook-alpha-to-beta",
       "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-alpha-to-beta",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-alpha-to-beta",
       "rollbackCutoverReadinessMapId": "rollback-cutover-map-alpha-to-beta",
       "promotionStagedApplyRunsheetId": "promotion-runsheet-alpha-to-beta",
       "rollbackCutoverHandoffPlanId": "rollback-handoff-alpha-to-beta",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-alpha-to-beta",
       "status": "blocked",
       "ledgerManifestPath": "future/publish/alpha-to-beta/rollback-recovery-ledger.json",
       "recoveryEntries": [
         "sealed bundle checkpoints recorded",
         "promotion evidence anchor recorded",
         "staged-apply ledger anchor recorded",
+        "staged-apply command sheet anchor recorded",
         "staged-apply runsheet anchor recorded",
         "cutover readiness map recorded",
         "cutover handoff plan recorded",
+        "cutover execution checklist recorded",
         "recovery channel held at alpha"
       ],
       "canRecover": false
@@ -38,18 +42,22 @@
       "rollbackOperatorDrillbookId": "rollback-drillbook-beta-to-stable",
       "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-beta-to-stable",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-beta-to-stable",
       "rollbackCutoverReadinessMapId": "rollback-cutover-map-beta-to-stable",
       "promotionStagedApplyRunsheetId": "promotion-runsheet-beta-to-stable",
       "rollbackCutoverHandoffPlanId": "rollback-handoff-beta-to-stable",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-beta-to-stable",
       "status": "blocked",
       "ledgerManifestPath": "future/publish/beta-to-stable/rollback-recovery-ledger.json",
       "recoveryEntries": [
         "sealed bundle checkpoints recorded",
         "promotion evidence anchor recorded",
         "staged-apply ledger anchor recorded",
+        "staged-apply command sheet anchor recorded",
         "staged-apply runsheet anchor recorded",
         "cutover readiness map recorded",
         "cutover handoff plan recorded",
+        "cutover execution checklist recorded",
         "recovery channel held at beta"
       ],
       "canRecover": false

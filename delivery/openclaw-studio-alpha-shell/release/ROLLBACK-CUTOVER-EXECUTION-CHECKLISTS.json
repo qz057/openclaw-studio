@@ -1,0 +1,122 @@
+{
+  "schemaVersion": "openclaw-studio-rollback-cutover-execution-checklists/v1",
+  "generatedAt": "2026-04-05T13:09:04.389Z",
+  "phase": "phase48",
+  "mode": "local-only-review",
+  "checklists": [
+    {
+      "id": "rollback-checklist-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "publishRollbackPathId": "publish-rollback-alpha-to-beta",
+      "rollbackCutoverReadinessMapId": "rollback-cutover-map-alpha-to-beta",
+      "rollbackCutoverHandoffPlanId": "rollback-handoff-alpha-to-beta",
+      "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-alpha-to-beta",
+      "attestationOperatorDispatchPacketId": "attestation-dispatch-packet-alpha-to-beta",
+      "status": "blocked",
+      "checklistPath": "future/publish/alpha-to-beta/rollback-cutover-execution-checklist.json",
+      "executionSections": [
+        {
+          "id": "rollback-checklist-alpha-to-beta-freeze",
+          "label": "Freeze and dispatch confirmation",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "attestation-dispatch-packet-alpha-to-beta",
+            "promotion-command-sheet-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "rollback-checklist-alpha-to-beta-platforms",
+          "label": "Platform rollback checkpoint sweep",
+          "owner": "runtime-owner",
+          "status": "blocked",
+          "evidence": [
+            "rollback-cutover-map-alpha-to-beta",
+            "rollback-readiness-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "rollback-checklist-alpha-to-beta-cutover",
+          "label": "Cutover and recovery confirmation",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "rollback-handoff-alpha-to-beta",
+            "publish-rollback-alpha-to-beta"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "rollback cutover readiness map linked",
+        "rollback cutover handoff plan linked",
+        "promotion command sheet linked",
+        "dispatch packet linked"
+      ],
+      "blockedBy": [
+        "rollback cutover execution checklists remain metadata-only",
+        "publish rollback remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canExecuteChecklist": false
+    },
+    {
+      "id": "rollback-checklist-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "publishRollbackPathId": "publish-rollback-beta-to-stable",
+      "rollbackCutoverReadinessMapId": "rollback-cutover-map-beta-to-stable",
+      "rollbackCutoverHandoffPlanId": "rollback-handoff-beta-to-stable",
+      "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-beta-to-stable",
+      "attestationOperatorDispatchPacketId": "attestation-dispatch-packet-beta-to-stable",
+      "status": "blocked",
+      "checklistPath": "future/publish/beta-to-stable/rollback-cutover-execution-checklist.json",
+      "executionSections": [
+        {
+          "id": "rollback-checklist-beta-to-stable-freeze",
+          "label": "Freeze and dispatch confirmation",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "attestation-dispatch-packet-beta-to-stable",
+            "promotion-command-sheet-beta-to-stable"
+          ]
+        },
+        {
+          "id": "rollback-checklist-beta-to-stable-platforms",
+          "label": "Platform rollback checkpoint sweep",
+          "owner": "runtime-owner",
+          "status": "blocked",
+          "evidence": [
+            "rollback-cutover-map-beta-to-stable",
+            "rollback-readiness-beta-to-stable"
+          ]
+        },
+        {
+          "id": "rollback-checklist-beta-to-stable-cutover",
+          "label": "Cutover and recovery confirmation",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "rollback-handoff-beta-to-stable",
+            "publish-rollback-beta-to-stable"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "rollback cutover readiness map linked",
+        "rollback cutover handoff plan linked",
+        "promotion command sheet linked",
+        "dispatch packet linked"
+      ],
+      "blockedBy": [
+        "rollback cutover execution checklists remain metadata-only",
+        "publish rollback remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canExecuteChecklist": false
+    }
+  ]
+}

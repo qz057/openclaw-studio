@@ -1,63 +1,62 @@
 {
-  "schemaVersion": "openclaw-studio-promotion-staged-apply-runsheets/v1",
+  "schemaVersion": "openclaw-studio-promotion-staged-apply-command-sheets/v1",
   "generatedAt": "2026-04-05T13:09:04.389Z",
   "phase": "phase48",
   "mode": "local-only-review",
-  "runsheets": [
+  "commandSheets": [
     {
-      "id": "promotion-runsheet-alpha-to-beta",
+      "id": "promotion-command-sheet-alpha-to-beta",
       "from": "alpha",
       "to": "beta",
-      "attestationOperatorDispatchManifestId": "attestation-dispatch-alpha-to-beta",
       "attestationOperatorDispatchPacketId": "attestation-dispatch-packet-alpha-to-beta",
+      "promotionStagedApplyRunsheetId": "promotion-runsheet-alpha-to-beta",
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-alpha-to-beta",
       "promotionApplyManifestId": "promotion-manifest-alpha-to-beta",
       "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
-      "rollbackCutoverReadinessMapId": "rollback-cutover-map-alpha-to-beta",
       "rollbackCutoverHandoffPlanId": "rollback-handoff-alpha-to-beta",
-      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-alpha-to-beta",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-alpha-to-beta",
       "status": "blocked",
-      "runsheetPath": "future/channels/alpha-to-beta/promotion-staged-apply-runsheet.json",
-      "executionWindows": [
+      "commandSheetPath": "future/channels/alpha-to-beta/promotion-staged-apply-command-sheet.json",
+      "commandWindows": [
         {
-          "id": "runsheet-alpha-to-beta-window-dispatch",
-          "label": "Dispatch intake",
+          "id": "command-sheet-alpha-to-beta-window-dispatch",
+          "label": "Dispatch packet review",
           "owner": "security-reviewer",
           "status": "planned"
         },
         {
-          "id": "runsheet-alpha-to-beta-window-freeze",
-          "label": "Freeze hold",
+          "id": "command-sheet-alpha-to-beta-window-freeze",
+          "label": "Freeze confirmation",
           "owner": "release-manager",
           "status": "blocked"
         },
         {
-          "id": "runsheet-alpha-to-beta-window-apply",
-          "label": "Apply hold",
+          "id": "command-sheet-alpha-to-beta-window-apply",
+          "label": "Apply confirmation",
           "owner": "release-engineering",
           "status": "blocked"
         },
         {
-          "id": "runsheet-alpha-to-beta-window-cutover",
-          "label": "Cutover baton",
+          "id": "command-sheet-alpha-to-beta-window-cutover",
+          "label": "Cutover rollback checkpoint",
           "owner": "support-operator",
           "status": "blocked"
         }
       ],
       "stages": [
         {
-          "id": "runsheet-alpha-to-beta-dispatch-intake",
-          "label": "Dispatch intake",
+          "id": "command-sheet-alpha-to-beta-dispatch-intake",
+          "label": "Dispatch packet acknowledgement",
           "owner": "security-reviewer",
           "status": "planned",
           "evidence": [
-            "attestation-dispatch-alpha-to-beta",
-            "attestation-worklist-alpha-to-beta"
+            "attestation-dispatch-packet-alpha-to-beta",
+            "promotion-runsheet-alpha-to-beta"
           ]
         },
         {
-          "id": "runsheet-alpha-to-beta-freeze",
-          "label": "Freeze and receipt sweep",
+          "id": "command-sheet-alpha-to-beta-freeze",
+          "label": "Freeze hold confirmation",
           "owner": "release-manager",
           "status": "blocked",
           "evidence": [
@@ -66,8 +65,8 @@
           ]
         },
         {
-          "id": "runsheet-alpha-to-beta-apply",
-          "label": "Staged apply baton",
+          "id": "command-sheet-alpha-to-beta-apply",
+          "label": "Apply command confirmation",
           "owner": "release-engineering",
           "status": "blocked",
           "evidence": [
@@ -76,84 +75,83 @@
           ]
         },
         {
-          "id": "runsheet-alpha-to-beta-cutover",
-          "label": "Cutover handoff",
+          "id": "command-sheet-alpha-to-beta-cutover",
+          "label": "Cutover rollback checklist sync",
           "owner": "support-operator",
           "status": "blocked",
           "evidence": [
-            "rollback-cutover-map-alpha-to-beta",
-            "rollback-handoff-alpha-to-beta"
+            "rollback-handoff-alpha-to-beta",
+            "rollback-checklist-alpha-to-beta"
           ]
         }
       ],
       "reviewChecks": [
-        "staged-apply ledger linked",
-        "dispatch manifest linked",
         "dispatch packet linked",
-        "rollback cutover handoff plan anchor declared",
-        "promotion command sheet anchor declared"
+        "staged-apply runsheet linked",
+        "promotion execution checkpoint linked",
+        "rollback execution checklist anchor declared"
       ],
       "blockedBy": [
-        "promotion staged-apply runsheets remain metadata-only",
+        "promotion staged-apply command sheets remain metadata-only",
         "promotion apply remains non-executable",
+        "rollback cutover remains non-executable",
         "host-side execution remains disabled"
       ],
-      "canRun": false
+      "canIssueCommands": false
     },
     {
-      "id": "promotion-runsheet-beta-to-stable",
+      "id": "promotion-command-sheet-beta-to-stable",
       "from": "beta",
       "to": "stable",
-      "attestationOperatorDispatchManifestId": "attestation-dispatch-beta-to-stable",
       "attestationOperatorDispatchPacketId": "attestation-dispatch-packet-beta-to-stable",
+      "promotionStagedApplyRunsheetId": "promotion-runsheet-beta-to-stable",
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-beta-to-stable",
       "promotionApplyManifestId": "promotion-manifest-beta-to-stable",
       "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
-      "rollbackCutoverReadinessMapId": "rollback-cutover-map-beta-to-stable",
       "rollbackCutoverHandoffPlanId": "rollback-handoff-beta-to-stable",
-      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-beta-to-stable",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-beta-to-stable",
       "status": "blocked",
-      "runsheetPath": "future/channels/beta-to-stable/promotion-staged-apply-runsheet.json",
-      "executionWindows": [
+      "commandSheetPath": "future/channels/beta-to-stable/promotion-staged-apply-command-sheet.json",
+      "commandWindows": [
         {
-          "id": "runsheet-beta-to-stable-window-dispatch",
-          "label": "Dispatch intake",
+          "id": "command-sheet-beta-to-stable-window-dispatch",
+          "label": "Dispatch packet review",
           "owner": "security-reviewer",
           "status": "blocked"
         },
         {
-          "id": "runsheet-beta-to-stable-window-freeze",
-          "label": "Freeze hold",
+          "id": "command-sheet-beta-to-stable-window-freeze",
+          "label": "Freeze confirmation",
           "owner": "release-manager",
           "status": "blocked"
         },
         {
-          "id": "runsheet-beta-to-stable-window-apply",
-          "label": "Apply hold",
+          "id": "command-sheet-beta-to-stable-window-apply",
+          "label": "Apply confirmation",
           "owner": "release-engineering",
           "status": "blocked"
         },
         {
-          "id": "runsheet-beta-to-stable-window-cutover",
-          "label": "Cutover baton",
+          "id": "command-sheet-beta-to-stable-window-cutover",
+          "label": "Cutover rollback checkpoint",
           "owner": "support-operator",
           "status": "blocked"
         }
       ],
       "stages": [
         {
-          "id": "runsheet-beta-to-stable-dispatch-intake",
-          "label": "Dispatch intake",
+          "id": "command-sheet-beta-to-stable-dispatch-intake",
+          "label": "Dispatch packet acknowledgement",
           "owner": "security-reviewer",
           "status": "blocked",
           "evidence": [
-            "attestation-dispatch-beta-to-stable",
-            "attestation-worklist-beta-to-stable"
+            "attestation-dispatch-packet-beta-to-stable",
+            "promotion-runsheet-beta-to-stable"
           ]
         },
         {
-          "id": "runsheet-beta-to-stable-freeze",
-          "label": "Freeze and receipt sweep",
+          "id": "command-sheet-beta-to-stable-freeze",
+          "label": "Freeze hold confirmation",
           "owner": "release-manager",
           "status": "blocked",
           "evidence": [
@@ -162,8 +160,8 @@
           ]
         },
         {
-          "id": "runsheet-beta-to-stable-apply",
-          "label": "Staged apply baton",
+          "id": "command-sheet-beta-to-stable-apply",
+          "label": "Apply command confirmation",
           "owner": "release-engineering",
           "status": "blocked",
           "evidence": [
@@ -172,29 +170,29 @@
           ]
         },
         {
-          "id": "runsheet-beta-to-stable-cutover",
-          "label": "Cutover handoff",
+          "id": "command-sheet-beta-to-stable-cutover",
+          "label": "Cutover rollback checklist sync",
           "owner": "support-operator",
           "status": "blocked",
           "evidence": [
-            "rollback-cutover-map-beta-to-stable",
-            "rollback-handoff-beta-to-stable"
+            "rollback-handoff-beta-to-stable",
+            "rollback-checklist-beta-to-stable"
           ]
         }
       ],
       "reviewChecks": [
-        "staged-apply ledger linked",
-        "dispatch manifest linked",
         "dispatch packet linked",
-        "rollback cutover handoff plan anchor declared",
-        "promotion command sheet anchor declared"
+        "staged-apply runsheet linked",
+        "promotion execution checkpoint linked",
+        "rollback execution checklist anchor declared"
       ],
       "blockedBy": [
-        "promotion staged-apply runsheets remain metadata-only",
+        "promotion staged-apply command sheets remain metadata-only",
         "promotion apply remains non-executable",
+        "rollback cutover remains non-executable",
         "host-side execution remains disabled"
       ],
-      "canRun": false
+      "canIssueCommands": false
     }
   ]
 }

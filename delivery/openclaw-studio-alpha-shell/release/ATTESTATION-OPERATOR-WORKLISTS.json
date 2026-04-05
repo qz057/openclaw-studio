@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-attestation-operator-worklists/v1",
-  "generatedAt": "2026-04-05T12:16:22.489Z",
-  "phase": "phase47",
+  "generatedAt": "2026-04-05T13:09:04.389Z",
+  "phase": "phase48",
   "mode": "local-only-review",
   "worklists": [
     {
@@ -12,6 +12,7 @@
       "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-alpha-to-beta",
       "attestationOperatorDispatchManifestId": "attestation-dispatch-alpha-to-beta",
+      "attestationOperatorDispatchPacketId": "attestation-dispatch-packet-alpha-to-beta",
       "status": "planned",
       "worklistPath": "future/channels/alpha-to-beta/attestation-operator-worklist.json",
       "operatorRoles": [
@@ -30,7 +31,8 @@
         "attestation apply execution packet linked",
         "promotion execution checkpoint linked",
         "promotion staged-apply ledger anchor declared",
-        "operator dispatch manifest anchor declared"
+        "operator dispatch manifest anchor declared",
+        "operator dispatch packet anchor declared"
       ],
       "blockedBy": [
         "attestation operator worklists remain metadata-only",
@@ -47,6 +49,7 @@
       "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-beta-to-stable",
       "attestationOperatorDispatchManifestId": "attestation-dispatch-beta-to-stable",
+      "attestationOperatorDispatchPacketId": "attestation-dispatch-packet-beta-to-stable",
       "status": "blocked",
       "worklistPath": "future/channels/beta-to-stable/attestation-operator-worklist.json",
       "operatorRoles": [
@@ -65,7 +68,8 @@
         "attestation apply execution packet linked",
         "promotion execution checkpoint linked",
         "promotion staged-apply ledger anchor declared",
-        "operator dispatch manifest anchor declared"
+        "operator dispatch manifest anchor declared",
+        "operator dispatch packet anchor declared"
       ],
       "blockedBy": [
         "attestation operator worklists remain metadata-only",

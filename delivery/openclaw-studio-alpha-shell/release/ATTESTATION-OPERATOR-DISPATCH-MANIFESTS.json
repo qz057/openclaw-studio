@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-attestation-operator-dispatch-manifests/v1",
-  "generatedAt": "2026-04-05T12:16:22.489Z",
-  "phase": "phase47",
+  "generatedAt": "2026-04-05T13:09:04.389Z",
+  "phase": "phase48",
   "mode": "local-only-review",
   "manifests": [
     {
@@ -13,6 +13,7 @@
       "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-alpha-to-beta",
       "promotionStagedApplyRunsheetId": "promotion-runsheet-alpha-to-beta",
+      "attestationOperatorDispatchPacketId": "attestation-dispatch-packet-alpha-to-beta",
       "rollbackCutoverHandoffPlanId": "rollback-handoff-alpha-to-beta",
       "status": "blocked",
       "dispatchManifestPath": "future/channels/alpha-to-beta/attestation-operator-dispatch-manifest.json",
@@ -55,7 +56,8 @@
       "reviewChecks": [
         "attestation operator worklist linked",
         "promotion staged-apply runsheet anchor declared",
-        "rollback cutover handoff plan anchor declared"
+        "rollback cutover handoff plan anchor declared",
+        "dispatch packet anchor declared"
       ],
       "blockedBy": [
         "attestation operator dispatch remains metadata-only",
@@ -73,6 +75,7 @@
       "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-beta-to-stable",
       "promotionStagedApplyRunsheetId": "promotion-runsheet-beta-to-stable",
+      "attestationOperatorDispatchPacketId": "attestation-dispatch-packet-beta-to-stable",
       "rollbackCutoverHandoffPlanId": "rollback-handoff-beta-to-stable",
       "status": "blocked",
       "dispatchManifestPath": "future/channels/beta-to-stable/attestation-operator-dispatch-manifest.json",
@@ -115,7 +118,8 @@
       "reviewChecks": [
         "attestation operator worklist linked",
         "promotion staged-apply runsheet anchor declared",
-        "rollback cutover handoff plan anchor declared"
+        "rollback cutover handoff plan anchor declared",
+        "dispatch packet anchor declared"
       ],
       "blockedBy": [
         "attestation operator dispatch remains metadata-only",

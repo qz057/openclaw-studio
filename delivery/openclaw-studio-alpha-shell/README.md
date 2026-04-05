@@ -1,6 +1,6 @@
 # OpenClaw Studio
 
-OpenClaw Studio 是一个基于 Electron + React + TypeScript 的 OpenClaw 桌面工作台。当前仓库已经进入 **phase47 attestation operator dispatch manifests / promotion staged-apply runsheets / rollback cutover handoff plans** 阶段：真实 host-side execution 仍然保持关闭，但在 phase25/26/27/28/29/30/31/32/33 的 focused-slot、preview → slot handoff、slot-level simulated outcomes、release skeleton、command surface、layout persistence、window deepening、workflow lane 与 orchestration board 基础上，shell 已在 phase46 的 attestation operator worklists / promotion staged-apply ledgers / rollback cutover readiness maps 之上，进一步下沉出 attestation operator dispatch manifests、promotion staged-apply runsheets 与 rollback cutover handoff plans metadata。
+OpenClaw Studio 是一个基于 Electron + React + TypeScript 的 OpenClaw 桌面工作台。当前仓库已经进入 **phase48 attestation operator dispatch packets / promotion staged-apply command sheets / rollback cutover execution checklists** 阶段：真实 host-side execution 仍然保持关闭，但在 phase25/26/27/28/29/30/31/32/33 的 focused-slot、preview → slot handoff、slot-level simulated outcomes、release skeleton、command surface、layout persistence、window deepening、workflow lane 与 orchestration board 基础上，shell 已在 phase47 的 attestation operator dispatch manifests / promotion staged-apply runsheets / rollback cutover handoff plans 之上，进一步下沉出 attestation operator dispatch packets、promotion staged-apply command sheets 与 rollback cutover execution checklists metadata。
 
 ## 当前已验证范围
 
@@ -72,8 +72,9 @@ OpenClaw Studio 是一个基于 Electron + React + TypeScript 的 OpenClaw 桌�
   - phase45 已补齐 ATTESTATION-APPLY-EXECUTION-PACKETS / PROMOTION-OPERATOR-HANDOFF-RAILS / ROLLBACK-LIVE-READINESS-CONTRACTS
   - phase46 已补齐 ATTESTATION-OPERATOR-WORKLISTS / PROMOTION-STAGED-APPLY-LEDGERS / ROLLBACK-CUTOVER-READINESS-MAPS
   - phase47 已补齐 ATTESTATION-OPERATOR-DISPATCH-MANIFESTS / PROMOTION-STAGED-APPLY-RUNSHEETS / ROLLBACK-CUTOVER-HANDOFF-PLANS
-  - package snapshot 现在带 per-platform bundle skeleton、packaged-app materialization skeleton、packaged-app directory materialization、packaged-app bundle sealing skeleton、sealed-bundle integrity contract、integrity attestation evidence、attestation verification packs、attestation apply audit packs、attestation apply execution packets、attestation operator worklists、attestation operator dispatch manifests、installer builder execution skeleton、installer channel routing、channel promotion evidence、promotion apply manifests、promotion execution checkpoints、promotion operator handoff rails、promotion staged-apply ledgers、promotion staged-apply runsheets、signing-publish gating handshake、publish rollback handshake、rollback execution rehearsal ledger、rollback operator drillbooks、rollback live-readiness contracts、rollback cutover readiness maps、rollback cutover handoff plans、release approval workflow、release notes 与 publish gating
-  - main shell 里的 Formal Release Readiness 卡片已同步反映 packaged-app materialization / packaged-app directory materialization / packaged-app bundle sealing / attestation operator dispatch manifests / promotion staged-apply runsheets / rollback cutover handoff plans posture
+  - phase48 已补齐 ATTESTATION-OPERATOR-DISPATCH-PACKETS / PROMOTION-STAGED-APPLY-COMMAND-SHEETS / ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS
+  - package snapshot 现在带 per-platform bundle skeleton、packaged-app materialization skeleton、packaged-app directory materialization、packaged-app bundle sealing skeleton、sealed-bundle integrity contract、integrity attestation evidence、attestation verification packs、attestation apply audit packs、attestation apply execution packets、attestation operator worklists、attestation operator dispatch manifests、attestation operator dispatch packets、installer builder execution skeleton、installer channel routing、channel promotion evidence、promotion apply manifests、promotion execution checkpoints、promotion operator handoff rails、promotion staged-apply ledgers、promotion staged-apply runsheets、promotion staged-apply command sheets、signing-publish gating handshake、publish rollback handshake、rollback execution rehearsal ledger、rollback operator drillbooks、rollback live-readiness contracts、rollback cutover readiness maps、rollback cutover handoff plans、rollback cutover execution checklists、release approval workflow、release notes 与 publish gating
+  - main shell 里的 Formal Release Readiness 卡片已同步反映 packaged-app materialization / packaged-app directory materialization / packaged-app bundle sealing / attestation operator dispatch packets / promotion staged-apply command sheets / rollback cutover execution checklists posture
   - 全部仍然保持 `local-only`，不做真实 host-side execution
 
 ## 当前边界结论
@@ -137,7 +138,7 @@ npm run start:smoke
 npm run package:alpha
 ```
 
-phase47 额外提供一个只读 dry-run：
+phase48 额外提供一个只读 dry-run：
 
 ```bash
 npm run release:plan
@@ -157,11 +158,11 @@ npm run release:plan
 - slot handler simulated outcome coverage 是否包含 blocked / abort / partial-apply / rollback-required / rollback-incomplete
 - host handoff trace 是否显式包含 preview / slot / result / rollback phase
 - Inspector / dock 是否与当前 focus slot 同步
-- renderer bundle 是否显式包含 phase25 focused-slot markers，以及 phase38 packaged-app directory materialization / installer builder execution / signing-publish gating handshake markers，外加 phase47 attestation operator dispatch manifests / promotion staged-apply runsheets / rollback cutover handoff plans markers
+- renderer bundle 是否显式包含 phase25 focused-slot markers，以及 phase38 packaged-app directory materialization / installer builder execution / signing-publish gating handshake markers，外加 phase48 attestation operator dispatch packets / promotion staged-apply command sheets / rollback cutover execution checklists markers
 - host preview action 是否显式暴露 focus / slot-state / disposition / slot roster / timeline section
 - local connector controls 是否仍保持 local-only 行为
 - startup preflight 是否 ready
-- phase47 release skeleton contract 是否完整（layout / docs / manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged-app directory materialization / packaged-app materialization skeleton / packaged-app staged output skeleton / packaged-app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / attestation apply audit packs / attestation apply execution packets / attestation operator worklists / attestation operator dispatch manifests / installer targets / installer builder execution skeleton / installer-target builder skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / promotion apply readiness / promotion apply manifests / promotion execution checkpoints / promotion operator handoff rails / promotion staged-apply ledgers / promotion staged-apply runsheets / signing metadata / notarization plan / signing-publish gating handshake / signing-publish pipeline / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / rollback recovery ledger / rollback execution rehearsal ledger / rollback operator drillbooks / rollback live-readiness contracts / rollback cutover readiness maps / rollback cutover handoff plans / release approval workflow / release notes / publish gates / promotion gates / release summary / installer placeholder / release checklist）
+- phase48 release skeleton contract 是否完整（layout / docs / manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged-app directory materialization / packaged-app materialization skeleton / packaged-app staged output skeleton / packaged-app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / attestation apply audit packs / attestation apply execution packets / attestation operator worklists / attestation operator dispatch manifests / attestation operator dispatch packets / installer targets / installer builder execution skeleton / installer-target builder skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / promotion apply readiness / promotion apply manifests / promotion execution checkpoints / promotion operator handoff rails / promotion staged-apply ledgers / promotion staged-apply runsheets / promotion staged-apply command sheets / signing metadata / notarization plan / signing-publish gating handshake / signing-publish pipeline / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / rollback recovery ledger / rollback execution rehearsal ledger / rollback operator drillbooks / rollback live-readiness contracts / rollback cutover readiness maps / rollback cutover handoff plans / rollback cutover execution checklists / release approval workflow / release notes / publish gates / promotion gates / release summary / installer placeholder / release checklist）
 - shell state 是否显式包含 action groups / sequences / contextual flows / keyboard routing / workflow posture / orchestration board / pre-release bundle pipeline contract
 
 ### `npm run start:smoke`
@@ -173,7 +174,7 @@ npm run release:plan
 
 ### `npm run release:plan`
 
-- 只做 phase47 release skeleton dry-run 汇总
+- 只做 phase48 release skeleton dry-run 汇总
 - 不写安装器
 - 不发布 artifact
 - 适合先检查 manifest / metadata / installer placeholder 契约是否成型
@@ -229,6 +230,7 @@ delivery/openclaw-studio-alpha-shell/
     ATTESTATION-APPLY-EXECUTION-PACKETS.json
     ATTESTATION-OPERATOR-WORKLISTS.json
     ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json
+    ATTESTATION-OPERATOR-DISPATCH-PACKETS.json
     INSTALLER-TARGETS.json
     INSTALLER-TARGET-BUILDER-SKELETON.json
     INSTALLER-BUILDER-EXECUTION-SKELETON.json
@@ -241,6 +243,7 @@ delivery/openclaw-studio-alpha-shell/
     PROMOTION-OPERATOR-HANDOFF-RAILS.json
     PROMOTION-STAGED-APPLY-LEDGERS.json
     PROMOTION-STAGED-APPLY-RUNSHEETS.json
+    PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json
     SIGNING-METADATA.json
     NOTARIZATION-PLAN.json
     SIGNING-PUBLISH-PIPELINE.json
@@ -254,6 +257,7 @@ delivery/openclaw-studio-alpha-shell/
     ROLLBACK-LIVE-READINESS-CONTRACTS.json
     ROLLBACK-CUTOVER-READINESS-MAPS.json
     ROLLBACK-CUTOVER-HANDOFF-PLANS.json
+    ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json
     RELEASE-APPROVAL-WORKFLOW.json
     RELEASE-NOTES.md
     PUBLISH-GATES.json
@@ -265,7 +269,7 @@ delivery/openclaw-studio-alpha-shell/
     install-placeholder.cjs
 ```
 
-这是一个 **phase47 alpha-shell release skeleton**，不是正式 installer。
+这是一个 **phase48 alpha-shell release skeleton**，不是正式 installer。
 
 它用于：
 
@@ -278,8 +282,8 @@ delivery/openclaw-studio-alpha-shell/
 
 - 可运行的 Electron + renderer 构建产物快照
 - 当前 README / HANDOFF / IMPLEMENTATION-PLAN 文档闭环
-- release manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged-app directory materialization / packaged-app materialization skeleton / packaged-app staged output skeleton / packaged-app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / attestation apply audit packs / attestation apply execution packets / attestation operator worklists / attestation operator dispatch manifests / installer targets / installer builder execution skeleton / installer-target builder skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / promotion apply readiness / promotion apply manifests / promotion execution checkpoints / promotion operator handoff rails / promotion staged-apply ledgers / promotion staged-apply runsheets / signing metadata / notarization plan / signing-publish gating handshake / signing-publish pipeline / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / rollback recovery ledger / rollback execution rehearsal ledger / rollback operator drillbooks / rollback live-readiness contracts / rollback cutover readiness maps / rollback cutover handoff plans / release approval workflow / release notes / publish gates / promotion gates / release summary / installer placeholder / checklist
-- disabled host bridge + focused-slot UI + trace surface + phase38 packaged-app directory materialization / installer builder execution skeleton / signing-publish gating handshake，以及 phase47 attestation operator dispatch manifests / promotion staged-apply runsheets / rollback cutover handoff plans 的验证后快照
+- release manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged-app directory materialization / packaged-app materialization skeleton / packaged-app staged output skeleton / packaged-app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / attestation apply audit packs / attestation apply execution packets / attestation operator worklists / attestation operator dispatch manifests / attestation operator dispatch packets / installer targets / installer builder execution skeleton / installer-target builder skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / promotion apply readiness / promotion apply manifests / promotion execution checkpoints / promotion operator handoff rails / promotion staged-apply ledgers / promotion staged-apply runsheets / promotion staged-apply command sheets / signing metadata / notarization plan / signing-publish gating handshake / signing-publish pipeline / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / rollback recovery ledger / rollback execution rehearsal ledger / rollback operator drillbooks / rollback live-readiness contracts / rollback cutover readiness maps / rollback cutover handoff plans / rollback cutover execution checklists / release approval workflow / release notes / publish gates / promotion gates / release summary / installer placeholder / checklist
+- disabled host bridge + focused-slot UI + trace surface + phase38 packaged-app directory materialization / installer builder execution skeleton / signing-publish gating handshake，以及 phase48 attestation operator dispatch packets / promotion staged-apply command sheets / rollback cutover execution checklists 的验证后快照
 
 ## 当前还没交付什么
 
@@ -301,7 +305,7 @@ delivery/openclaw-studio-alpha-shell/
 
 - 真实 host-side execution 仍然**明确关闭**
 - host bridge skeleton 已存在，但仍然是 **default-disabled simulated placeholder flow**，不会执行任何真实 host mutation
-- release approval workflow、installer channel routing、attestation operator dispatch manifests、promotion staged-apply runsheets、rollback cutover handoff plans、publish rollback handshake 与 signing-publish handshakes 现在都已具备 metadata contract，但仍然不会触发真实审批、签名、发布、回滚、路由或安装
+- release approval workflow、installer channel routing、attestation operator dispatch packets、promotion staged-apply command sheets、rollback cutover execution checklists、publish rollback handshake 与 signing-publish handshakes 现在都已具备 metadata contract，但仍然不会触发真实审批、签名、发布、回滚、路由或安装
 - live approval handshake / lifecycle runner / rollback-aware apply 仍未落地为可执行能力
 - 当前 package 已具备更正式的 release skeleton，但仍然不是正式安装器，也不会执行任何安装动作
 - Codex 任务状态仍然是基于本地日志的启发式读取，不是正式 task API

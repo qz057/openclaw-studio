@@ -1,0 +1,138 @@
+{
+  "schemaVersion": "openclaw-studio-attestation-operator-dispatch-packets/v1",
+  "generatedAt": "2026-04-05T13:09:04.389Z",
+  "phase": "phase48",
+  "mode": "local-only-review",
+  "packets": [
+    {
+      "id": "attestation-dispatch-packet-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "attestationOperatorDispatchManifestId": "attestation-dispatch-alpha-to-beta",
+      "attestationOperatorWorklistId": "attestation-worklist-alpha-to-beta",
+      "attestationApplyExecutionPacketId": "attestation-execution-alpha-to-beta",
+      "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
+      "promotionStagedApplyRunsheetId": "promotion-runsheet-alpha-to-beta",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-alpha-to-beta",
+      "rollbackCutoverHandoffPlanId": "rollback-handoff-alpha-to-beta",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-alpha-to-beta",
+      "status": "blocked",
+      "dispatchPacketPath": "future/channels/alpha-to-beta/attestation-operator-dispatch-packet.json",
+      "dispatchEnvelopePath": "future/channels/alpha-to-beta/dispatch-envelope.json",
+      "targetPackets": [
+        {
+          "id": "dispatch-packet-alpha-to-beta-security-reviewer",
+          "role": "security-reviewer",
+          "sourceManifestTrackId": "dispatch-alpha-to-beta-security-review",
+          "packetPath": "future/channels/alpha-to-beta/dispatch-packets/security-reviewer.json",
+          "acknowledgementPath": "future/channels/alpha-to-beta/dispatch-receipts/security-reviewer.json",
+          "commandSheetStageId": "command-sheet-alpha-to-beta-dispatch-intake",
+          "status": "planned"
+        },
+        {
+          "id": "dispatch-packet-alpha-to-beta-release-manager",
+          "role": "release-manager",
+          "sourceManifestTrackId": "dispatch-alpha-to-beta-release-manager",
+          "packetPath": "future/channels/alpha-to-beta/dispatch-packets/release-manager.json",
+          "acknowledgementPath": "future/channels/alpha-to-beta/dispatch-receipts/release-manager.json",
+          "commandSheetStageId": "command-sheet-alpha-to-beta-freeze",
+          "status": "blocked"
+        },
+        {
+          "id": "dispatch-packet-alpha-to-beta-release-engineering",
+          "role": "release-engineering",
+          "sourceManifestTrackId": "dispatch-alpha-to-beta-release-engineering",
+          "packetPath": "future/channels/alpha-to-beta/dispatch-packets/release-engineering.json",
+          "acknowledgementPath": "future/channels/alpha-to-beta/dispatch-receipts/release-engineering.json",
+          "commandSheetStageId": "command-sheet-alpha-to-beta-apply",
+          "status": "blocked"
+        }
+      ],
+      "packetContents": [
+        "dispatch manifest linkage",
+        "role-targeted packet envelopes",
+        "acknowledgement payload scaffolds",
+        "command-sheet stage anchors",
+        "rollback cutover escalation anchors"
+      ],
+      "reviewChecks": [
+        "dispatch manifest linked",
+        "dispatch envelope path declared",
+        "promotion command sheet anchor declared",
+        "rollback execution checklist anchor declared"
+      ],
+      "blockedBy": [
+        "attestation operator dispatch packets remain metadata-only",
+        "promotion staged apply remains non-executable",
+        "rollback cutover remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canIssuePackets": false
+    },
+    {
+      "id": "attestation-dispatch-packet-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "attestationOperatorDispatchManifestId": "attestation-dispatch-beta-to-stable",
+      "attestationOperatorWorklistId": "attestation-worklist-beta-to-stable",
+      "attestationApplyExecutionPacketId": "attestation-execution-beta-to-stable",
+      "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
+      "promotionStagedApplyRunsheetId": "promotion-runsheet-beta-to-stable",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-beta-to-stable",
+      "rollbackCutoverHandoffPlanId": "rollback-handoff-beta-to-stable",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-beta-to-stable",
+      "status": "blocked",
+      "dispatchPacketPath": "future/channels/beta-to-stable/attestation-operator-dispatch-packet.json",
+      "dispatchEnvelopePath": "future/channels/beta-to-stable/dispatch-envelope.json",
+      "targetPackets": [
+        {
+          "id": "dispatch-packet-beta-to-stable-security-reviewer",
+          "role": "security-reviewer",
+          "sourceManifestTrackId": "dispatch-beta-to-stable-security-review",
+          "packetPath": "future/channels/beta-to-stable/dispatch-packets/security-reviewer.json",
+          "acknowledgementPath": "future/channels/beta-to-stable/dispatch-receipts/security-reviewer.json",
+          "commandSheetStageId": "command-sheet-beta-to-stable-dispatch-intake",
+          "status": "blocked"
+        },
+        {
+          "id": "dispatch-packet-beta-to-stable-release-manager",
+          "role": "release-manager",
+          "sourceManifestTrackId": "dispatch-beta-to-stable-release-manager",
+          "packetPath": "future/channels/beta-to-stable/dispatch-packets/release-manager.json",
+          "acknowledgementPath": "future/channels/beta-to-stable/dispatch-receipts/release-manager.json",
+          "commandSheetStageId": "command-sheet-beta-to-stable-freeze",
+          "status": "blocked"
+        },
+        {
+          "id": "dispatch-packet-beta-to-stable-release-engineering",
+          "role": "release-engineering",
+          "sourceManifestTrackId": "dispatch-beta-to-stable-release-engineering",
+          "packetPath": "future/channels/beta-to-stable/dispatch-packets/release-engineering.json",
+          "acknowledgementPath": "future/channels/beta-to-stable/dispatch-receipts/release-engineering.json",
+          "commandSheetStageId": "command-sheet-beta-to-stable-apply",
+          "status": "blocked"
+        }
+      ],
+      "packetContents": [
+        "dispatch manifest linkage",
+        "role-targeted packet envelopes",
+        "acknowledgement payload scaffolds",
+        "command-sheet stage anchors",
+        "rollback cutover escalation anchors"
+      ],
+      "reviewChecks": [
+        "dispatch manifest linked",
+        "dispatch envelope path declared",
+        "promotion command sheet anchor declared",
+        "rollback execution checklist anchor declared"
+      ],
+      "blockedBy": [
+        "attestation operator dispatch packets remain metadata-only",
+        "promotion staged apply remains non-executable",
+        "rollback cutover remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canIssuePackets": false
+    }
+  ]
+}

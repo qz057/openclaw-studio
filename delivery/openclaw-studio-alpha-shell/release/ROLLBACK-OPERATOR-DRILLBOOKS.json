@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-rollback-operator-drillbooks/v1",
-  "generatedAt": "2026-04-05T12:16:22.489Z",
-  "phase": "phase47",
+  "generatedAt": "2026-04-05T13:09:04.389Z",
+  "phase": "phase48",
   "mode": "local-only-review",
   "drillbooks": [
     {
@@ -15,7 +15,9 @@
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-alpha-to-beta",
       "rollbackCutoverReadinessMapId": "rollback-cutover-map-alpha-to-beta",
       "promotionStagedApplyRunsheetId": "promotion-runsheet-alpha-to-beta",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-alpha-to-beta",
       "rollbackCutoverHandoffPlanId": "rollback-handoff-alpha-to-beta",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-alpha-to-beta",
       "status": "blocked",
       "drillbookPath": "future/publish/alpha-to-beta/rollback-operator-drillbook.json",
       "operatorRoles": [
@@ -38,7 +40,8 @@
         "publish rollback path linked",
         "rollback live-readiness anchor declared",
         "rollback cutover readiness map linked",
-        "rollback cutover handoff plan linked"
+        "rollback cutover handoff plan linked",
+        "rollback cutover execution checklist linked"
       ],
       "blockedBy": [
         "rollback operator drillbook remains metadata-only",
@@ -58,7 +61,9 @@
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-beta-to-stable",
       "rollbackCutoverReadinessMapId": "rollback-cutover-map-beta-to-stable",
       "promotionStagedApplyRunsheetId": "promotion-runsheet-beta-to-stable",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-beta-to-stable",
       "rollbackCutoverHandoffPlanId": "rollback-handoff-beta-to-stable",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-beta-to-stable",
       "status": "blocked",
       "drillbookPath": "future/publish/beta-to-stable/rollback-operator-drillbook.json",
       "operatorRoles": [
@@ -81,7 +86,8 @@
         "publish rollback path linked",
         "rollback live-readiness anchor declared",
         "rollback cutover readiness map linked",
-        "rollback cutover handoff plan linked"
+        "rollback cutover handoff plan linked",
+        "rollback cutover execution checklist linked"
       ],
       "blockedBy": [
         "rollback operator drillbook remains metadata-only",

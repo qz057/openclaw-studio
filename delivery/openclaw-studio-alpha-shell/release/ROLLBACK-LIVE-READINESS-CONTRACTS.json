@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-rollback-live-readiness-contracts/v1",
-  "generatedAt": "2026-04-05T12:16:22.489Z",
-  "phase": "phase47",
+  "generatedAt": "2026-04-05T13:09:04.389Z",
+  "phase": "phase48",
   "mode": "local-only-review",
   "contracts": [
     {
@@ -15,15 +15,19 @@
       "rollbackCutoverReadinessMapId": "rollback-cutover-map-alpha-to-beta",
       "promotionStagedApplyRunsheetId": "promotion-runsheet-alpha-to-beta",
       "rollbackCutoverHandoffPlanId": "rollback-handoff-alpha-to-beta",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-alpha-to-beta",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-alpha-to-beta",
       "status": "blocked",
       "readinessContractPath": "future/publish/alpha-to-beta/rollback-live-readiness-contract.json",
       "readinessChecks": [
         "rollback rehearsal ledger linked",
         "rollback operator drillbook linked",
         "promotion operator handoff rail linked",
+        "promotion command sheet linked",
         "recovery channel remains review-only",
         "rollback cutover readiness map anchor declared",
-        "rollback cutover handoff plan anchor declared"
+        "rollback cutover handoff plan anchor declared",
+        "rollback cutover execution checklist anchor declared"
       ],
       "blockedBy": [
         "rollback live-readiness remains metadata-only",
@@ -43,15 +47,19 @@
       "rollbackCutoverReadinessMapId": "rollback-cutover-map-beta-to-stable",
       "promotionStagedApplyRunsheetId": "promotion-runsheet-beta-to-stable",
       "rollbackCutoverHandoffPlanId": "rollback-handoff-beta-to-stable",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-beta-to-stable",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-beta-to-stable",
       "status": "blocked",
       "readinessContractPath": "future/publish/beta-to-stable/rollback-live-readiness-contract.json",
       "readinessChecks": [
         "rollback rehearsal ledger linked",
         "rollback operator drillbook linked",
         "promotion operator handoff rail linked",
+        "promotion command sheet linked",
         "recovery channel remains review-only",
         "rollback cutover readiness map anchor declared",
-        "rollback cutover handoff plan anchor declared"
+        "rollback cutover handoff plan anchor declared",
+        "rollback cutover execution checklist anchor declared"
       ],
       "blockedBy": [
         "rollback live-readiness remains metadata-only",

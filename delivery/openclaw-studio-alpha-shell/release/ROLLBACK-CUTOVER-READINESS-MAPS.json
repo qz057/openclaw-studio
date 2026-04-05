@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-rollback-cutover-readiness-maps/v1",
-  "generatedAt": "2026-04-05T12:16:22.489Z",
-  "phase": "phase47",
+  "generatedAt": "2026-04-05T13:09:04.389Z",
+  "phase": "phase48",
   "mode": "local-only-review",
   "maps": [
     {
@@ -11,9 +11,11 @@
       "publishRollbackPathId": "publish-rollback-alpha-to-beta",
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-alpha-to-beta",
       "promotionStagedApplyRunsheetId": "promotion-runsheet-alpha-to-beta",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-alpha-to-beta",
       "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
       "rollbackOperatorDrillbookId": "rollback-drillbook-alpha-to-beta",
       "rollbackCutoverHandoffPlanId": "rollback-handoff-alpha-to-beta",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-alpha-to-beta",
       "status": "blocked",
       "readinessMapPath": "future/publish/alpha-to-beta/rollback-cutover-readiness-map.json",
       "cutoverWindows": [
@@ -71,9 +73,11 @@
       ],
       "reviewChecks": [
         "promotion staged-apply ledger linked",
+        "promotion staged-apply command sheet linked",
         "rollback live-readiness contract linked",
         "per-platform rollback checkpoints mapped",
-        "cutover handoff plan anchor declared"
+        "cutover handoff plan anchor declared",
+        "cutover execution checklist anchor declared"
       ],
       "blockedBy": [
         "rollback cutover readiness maps remain metadata-only",
@@ -89,9 +93,11 @@
       "publishRollbackPathId": "publish-rollback-beta-to-stable",
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-beta-to-stable",
       "promotionStagedApplyRunsheetId": "promotion-runsheet-beta-to-stable",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-beta-to-stable",
       "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
       "rollbackOperatorDrillbookId": "rollback-drillbook-beta-to-stable",
       "rollbackCutoverHandoffPlanId": "rollback-handoff-beta-to-stable",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-beta-to-stable",
       "status": "blocked",
       "readinessMapPath": "future/publish/beta-to-stable/rollback-cutover-readiness-map.json",
       "cutoverWindows": [
@@ -149,9 +155,11 @@
       ],
       "reviewChecks": [
         "promotion staged-apply ledger linked",
+        "promotion staged-apply command sheet linked",
         "rollback live-readiness contract linked",
         "per-platform rollback checkpoints mapped",
-        "cutover handoff plan anchor declared"
+        "cutover handoff plan anchor declared",
+        "cutover execution checklist anchor declared"
       ],
       "blockedBy": [
         "rollback cutover readiness maps remain metadata-only",
