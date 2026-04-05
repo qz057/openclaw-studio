@@ -779,8 +779,8 @@ export function App() {
     {
       id: "cross-view-slot-release",
       label: "Focused slot -> Release posture",
-      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase45 attestation apply execution packets`,
-      detail: "Focused-slot review and release review now sit in the same local-only handoff story without enabling host execution, installer work, promotion execution, operator handoff, rollback live entry, or publish rollback."
+      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase46 attestation operator worklists`,
+      detail: "Focused-slot review and release review now sit in the same local-only handoff story without enabling host execution, installer work, staged apply, cutover entry, or publish rollback."
     }
   ];
   const inspectorCommandLinkage = [
@@ -808,7 +808,7 @@ export function App() {
       id: "release-depth-manifest",
       label: "Formal Release Readiness",
       value: "RELEASE-MANIFEST / BUILD-METADATA / REVIEW-MANIFEST",
-      detail: "Phase45 keeps the manifest spine and extends it into attestation apply execution packets, promotion operator handoff rails, and rollback live-readiness contracts without executing anything."
+      detail: "Phase46 keeps the manifest spine and extends it into attestation operator worklists, promotion staged-apply ledgers, and rollback cutover readiness maps without executing anything."
     },
     {
       id: "release-depth-bundles",
@@ -865,6 +865,12 @@ export function App() {
       detail: "Apply-audit bundles now feed operator-reviewed execution packets, packet receipts, and pre-apply envelopes without executing any live verification or apply step for real."
     },
     {
+      id: "release-depth-attestation-operator-worklists",
+      label: "Attestation Operator Worklists",
+      value: "ATTESTATION-OPERATOR-WORKLISTS / ATTESTATION-APPLY-EXECUTION-PACKETS",
+      detail: "Execution packets now feed per-role intake queues, acknowledgement slots, and ownership scaffolds without dispatching any live operator action for real."
+    },
+    {
       id: "release-depth-installer-builders",
       label: "Installer-target Builder Skeleton",
       value: "INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON",
@@ -917,6 +923,12 @@ export function App() {
       label: "Promotion Operator Handoff Rails",
       value: "PROMOTION-OPERATOR-HANDOFF-RAILS / PROMOTION-EXECUTION-CHECKPOINTS",
       detail: "Promotion execution checkpoints now feed operator routing rails, role handoff segments, and rollback readiness anchors without executing any promotion for real."
+    },
+    {
+      id: "release-depth-promotion-staged-apply-ledgers",
+      label: "Promotion Staged-apply Ledgers",
+      value: "PROMOTION-STAGED-APPLY-LEDGERS / PROMOTION-OPERATOR-HANDOFF-RAILS",
+      detail: "Operator handoff rails now feed ordered staged apply journals, freeze windows, and cutover evidence slots without applying any promotion for real."
     },
     {
       id: "release-depth-signing-publish",
@@ -973,6 +985,12 @@ export function App() {
       detail: "Rollback operator drillbooks now feed live-entry readiness checks, recovery proofs, and operator go/no-go contracts without enabling any live rollback for real."
     },
     {
+      id: "release-depth-rollback-cutover-readiness-maps",
+      label: "Rollback Cutover Readiness Maps",
+      value: "ROLLBACK-CUTOVER-READINESS-MAPS / ROLLBACK-LIVE-READINESS-CONTRACTS",
+      detail: "Rollback live-readiness contracts now feed channel/platform cutover topology, checkpoint maps, and go/no-go review surfaces without mutating any live publish state."
+    },
+    {
       id: "release-depth-approval",
       label: "Release Approval Workflow",
       value: "RELEASE-APPROVAL-WORKFLOW / PUBLISH-GATES / PUBLISH-ROLLBACK-HANDSHAKE",
@@ -988,7 +1006,7 @@ export function App() {
       id: "release-depth-safety",
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
-      detail: "Phase45 increases release structure only; it still does not install, publish, sign, execute promotion checkpoints, run operator handoff rails, enter live rollback readiness, roll back publish state, or enable host-side execution."
+      detail: "Phase46 increases release structure only; it still does not install, publish, sign, dispatch operator worklists, stage promotion apply, enter rollback cutover, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -1809,30 +1827,30 @@ export function App() {
               <div className="card-header card-header--stack">
                 <div>
                   <p className="eyebrow">Release Pipeline Depth</p>
-                  <h2>Attestation Apply Execution Packets</h2>
+                  <h2>Attestation Operator Worklists</h2>
                 </div>
                 <p>
                   The alpha shell still does not build a real installer, but the release skeleton now pushes further with attestation
-                  apply execution packets, promotion operator handoff rails, and rollback live-readiness contracts while staying entirely
+                  operator worklists, promotion staged-apply ledgers, and rollback cutover readiness maps while staying entirely
                   local-only and non-executing.
                 </p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
                   <span>Phase</span>
-                  <strong>Phase45</strong>
+                  <strong>Phase46</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Packaged app</span>
-                  <strong>Execution packets</strong>
+                  <strong>Operator worklists</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Installer</span>
-                  <strong>Handoff rails</strong>
+                  <strong>Staged-apply ledgers</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Pipeline</span>
-                  <strong>Live-readiness contracts</strong>
+                  <strong>Cutover readiness maps</strong>
                 </div>
               </div>
               <div className="workflow-readiness-list">
