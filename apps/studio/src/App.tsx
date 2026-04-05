@@ -779,8 +779,8 @@ export function App() {
     {
       id: "cross-view-slot-release",
       label: "Focused slot -> Release posture",
-      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase43 attestation verification packs`,
-      detail: "Focused-slot review and release review now sit in the same local-only handoff story without enabling host execution, installer work, promotion apply, rollback rehearsal, or publish rollback."
+      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase44 attestation apply audit packs`,
+      detail: "Focused-slot review and release review now sit in the same local-only handoff story without enabling host execution, installer work, promotion execution, rollback operator actions, or publish rollback."
     }
   ];
   const inspectorCommandLinkage = [
@@ -808,7 +808,7 @@ export function App() {
       id: "release-depth-manifest",
       label: "Formal Release Readiness",
       value: "RELEASE-MANIFEST / BUILD-METADATA / REVIEW-MANIFEST",
-      detail: "Phase43 keeps the manifest spine and extends it into attestation verification packs, promotion apply manifests, and rollback execution rehearsal ledger metadata without executing anything."
+      detail: "Phase44 keeps the manifest spine and extends it into attestation apply audit packs, promotion execution checkpoints, and rollback operator drillbooks without executing anything."
     },
     {
       id: "release-depth-bundles",
@@ -853,6 +853,12 @@ export function App() {
       detail: "Integrity attestation evidence now feeds verifier-ready packs, checklists, and audit handoff payloads without executing any live verification for real."
     },
     {
+      id: "release-depth-attestation-apply-audit-packs",
+      label: "Attestation Apply Audit Packs",
+      value: "ATTESTATION-APPLY-AUDIT-PACKS / ATTESTATION-VERIFICATION-PACKS",
+      detail: "Verification packs now feed route-aware apply-audit bundles, review checklists, and receipts without executing any live verification or apply step for real."
+    },
+    {
       id: "release-depth-installer-builders",
       label: "Installer-target Builder Skeleton",
       value: "INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON",
@@ -893,6 +899,12 @@ export function App() {
       label: "Promotion Apply Manifests",
       value: "PROMOTION-APPLY-MANIFESTS / PROMOTION-APPLY-READINESS",
       detail: "Promotion readiness now feeds explicit apply manifests, rollout ordering, and rollback anchors without applying any promotion for real."
+    },
+    {
+      id: "release-depth-promotion-execution-checkpoints",
+      label: "Promotion Execution Checkpoints",
+      value: "PROMOTION-EXECUTION-CHECKPOINTS / PROMOTION-APPLY-MANIFESTS",
+      detail: "Promotion apply manifests now feed explicit checkpoint contracts, hold points, and rollback drillbook anchors without executing any promotion for real."
     },
     {
       id: "release-depth-signing-publish",
@@ -937,6 +949,12 @@ export function App() {
       detail: "Rollback recovery ledgers now feed rehearsal manifests, dry-run traces, and operator rehearsal notes without executing any live rollback for real."
     },
     {
+      id: "release-depth-rollback-operator-drillbooks",
+      label: "Rollback Operator Drillbooks",
+      value: "ROLLBACK-OPERATOR-DRILLBOOKS / ROLLBACK-EXECUTION-REHEARSAL-LEDGER",
+      detail: "Rollback rehearsal ledgers now feed operator drillbooks, response sections, and handoff checklists without operating on any live publish state for real."
+    },
+    {
       id: "release-depth-approval",
       label: "Release Approval Workflow",
       value: "RELEASE-APPROVAL-WORKFLOW / PUBLISH-GATES / PUBLISH-ROLLBACK-HANDSHAKE",
@@ -952,7 +970,7 @@ export function App() {
       id: "release-depth-safety",
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
-      detail: "Phase43 increases release structure only; it still does not install, publish, sign, promote channels, rehearse live rollback execution, roll back publish state, or enable host-side execution."
+      detail: "Phase44 increases release structure only; it still does not install, publish, sign, execute promotion checkpoints, run rollback operator actions, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -1773,30 +1791,30 @@ export function App() {
               <div className="card-header card-header--stack">
                 <div>
                   <p className="eyebrow">Release Pipeline Depth</p>
-                  <h2>Attestation Verification Packs</h2>
+                  <h2>Attestation Apply Audit Packs</h2>
                 </div>
                 <p>
                   The alpha shell still does not build a real installer, but the release skeleton now pushes further with attestation
-                  verification packs, promotion apply manifests, and rollback execution rehearsal metadata while staying entirely
+                  apply audit packs, promotion execution checkpoints, and rollback operator drillbooks while staying entirely
                   local-only and non-executing.
                 </p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
                   <span>Phase</span>
-                  <strong>Phase43</strong>
+                  <strong>Phase44</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Packaged app</span>
-                  <strong>Verification packs</strong>
+                  <strong>Apply audit packs</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Installer</span>
-                  <strong>Apply manifests</strong>
+                  <strong>Execution checkpoints</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Pipeline</span>
-                  <strong>Rollback rehearsal</strong>
+                  <strong>Operator drillbooks</strong>
                 </div>
               </div>
               <div className="workflow-readiness-list">

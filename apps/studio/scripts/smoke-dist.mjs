@@ -90,6 +90,7 @@ async function verifyRendererFocusedSlotUi() {
     "Sealed-bundle Integrity Contract",
     "Integrity Attestation Evidence",
     "Attestation Verification Packs",
+    "Attestation Apply Audit Packs",
     "Installer-target Builder Skeleton",
     "Installer Builder Execution Skeleton",
     "Installer Builder Orchestration",
@@ -97,6 +98,7 @@ async function verifyRendererFocusedSlotUi() {
     "Channel Promotion Evidence",
     "Promotion Apply Readiness",
     "Promotion Apply Manifests",
+    "Promotion Execution Checkpoints",
     "Signing & Publish Pipeline",
     "Signing-publish Gating Handshake",
     "Signing-publish Approval Bridge",
@@ -104,9 +106,10 @@ async function verifyRendererFocusedSlotUi() {
     "Publish Rollback Handshake",
     "Rollback Recovery Ledger",
     "Rollback Execution Rehearsal Ledger",
+    "Rollback Operator Drillbooks",
     "Release Approval Workflow",
     "Release Promotion Gating",
-    "Phase43"
+    "Phase44"
   ];
 
   for (const marker of requiredMarkers) {
@@ -1125,6 +1128,7 @@ function verifyReleaseSkeletonContract() {
     "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
     "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
     "release/ATTESTATION-VERIFICATION-PACKS.json",
+    "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
     "release/INSTALLER-TARGETS.json",
     "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
     "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
@@ -1133,6 +1137,7 @@ function verifyReleaseSkeletonContract() {
     "release/CHANNEL-PROMOTION-EVIDENCE.json",
     "release/PROMOTION-APPLY-READINESS.json",
     "release/PROMOTION-APPLY-MANIFESTS.json",
+    "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
     "release/SIGNING-METADATA.json",
     "release/NOTARIZATION-PLAN.json",
     "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
@@ -1142,6 +1147,7 @@ function verifyReleaseSkeletonContract() {
     "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
     "release/ROLLBACK-RECOVERY-LEDGER.json",
     "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
+    "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
     "release/RELEASE-APPROVAL-WORKFLOW.json",
     "release/RELEASE-NOTES.md",
     "release/PUBLISH-GATES.json",
@@ -1177,6 +1183,7 @@ function verifyReleaseSkeletonContract() {
     skeleton.installerPlaceholder.sealedBundleIntegrityContractPath !== "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json" ||
     skeleton.installerPlaceholder.integrityAttestationEvidencePath !== "release/INTEGRITY-ATTESTATION-EVIDENCE.json" ||
     skeleton.installerPlaceholder.attestationVerificationPacksPath !== "release/ATTESTATION-VERIFICATION-PACKS.json" ||
+    skeleton.installerPlaceholder.attestationApplyAuditPacksPath !== "release/ATTESTATION-APPLY-AUDIT-PACKS.json" ||
     skeleton.installerPlaceholder.installerTargetsPath !== "release/INSTALLER-TARGETS.json" ||
     skeleton.installerPlaceholder.installerBuilderExecutionSkeletonPath !== "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json" ||
     skeleton.installerPlaceholder.installerTargetBuilderSkeletonPath !== "release/INSTALLER-TARGET-BUILDER-SKELETON.json" ||
@@ -1185,6 +1192,7 @@ function verifyReleaseSkeletonContract() {
     skeleton.installerPlaceholder.channelPromotionEvidencePath !== "release/CHANNEL-PROMOTION-EVIDENCE.json" ||
     skeleton.installerPlaceholder.promotionApplyReadinessPath !== "release/PROMOTION-APPLY-READINESS.json" ||
     skeleton.installerPlaceholder.promotionApplyManifestsPath !== "release/PROMOTION-APPLY-MANIFESTS.json" ||
+    skeleton.installerPlaceholder.promotionExecutionCheckpointsPath !== "release/PROMOTION-EXECUTION-CHECKPOINTS.json" ||
     skeleton.installerPlaceholder.signingPublishGatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
     skeleton.installerPlaceholder.signingPublishPipelinePath !== "release/SIGNING-PUBLISH-PIPELINE.json" ||
     skeleton.installerPlaceholder.signingPublishApprovalBridgePath !== "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json" ||
@@ -1192,9 +1200,10 @@ function verifyReleaseSkeletonContract() {
     skeleton.installerPlaceholder.publishRollbackHandshakePath !== "release/PUBLISH-ROLLBACK-HANDSHAKE.json" ||
     skeleton.installerPlaceholder.rollbackRecoveryLedgerPath !== "release/ROLLBACK-RECOVERY-LEDGER.json" ||
     skeleton.installerPlaceholder.rollbackExecutionRehearsalLedgerPath !== "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json" ||
+    skeleton.installerPlaceholder.rollbackOperatorDrillbooksPath !== "release/ROLLBACK-OPERATOR-DRILLBOOKS.json" ||
     skeleton.installerPlaceholder.approvalWorkflowPath !== "release/RELEASE-APPROVAL-WORKFLOW.json"
   ) {
-    throw new Error(`Installer placeholder is missing ${PHASE_ID} verification / apply-manifest / rollback rehearsal paths.`);
+    throw new Error(`Installer placeholder is missing ${PHASE_ID} audit / checkpoint / drillbook paths.`);
   }
 
   for (const requiredLayoutPath of requiredLayoutPaths) {
@@ -1236,10 +1245,13 @@ function verifyReleaseSkeletonContract() {
   if (
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-VERIFICATION-PACKS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-APPLY-AUDIT-PACKS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-EXECUTION-CHECKPOINTS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PUBLISH-ROLLBACK-HANDSHAKE.json") ||
-    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json")
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-OPERATOR-DRILLBOOKS.json")
   ) {
     throw new Error(`Release build metadata is missing ${PHASE_ID} formal release artifacts.`);
   }
@@ -1252,10 +1264,13 @@ function verifyReleaseSkeletonContract() {
     !Array.isArray(skeleton.releaseManifest.formalReleaseArtifacts) ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-VERIFICATION-PACKS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-APPLY-AUDIT-PACKS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-EXECUTION-CHECKPOINTS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PUBLISH-ROLLBACK-HANDSHAKE.json") ||
-    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json")
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-OPERATOR-DRILLBOOKS.json")
   ) {
     throw new Error(`Release manifest is missing ${PHASE_ID} formal release artifacts.`);
   }
@@ -1312,6 +1327,10 @@ function verifyReleaseSkeletonContract() {
     throw new Error(`Attestation verification packs are missing ${PHASE_ID} verification declarations.`);
   }
 
+  if (!Array.isArray(skeleton.attestationApplyAuditPacks?.packs) || skeleton.attestationApplyAuditPacks.packs.length < 2) {
+    throw new Error(`Attestation apply audit packs are missing ${PHASE_ID} audit declarations.`);
+  }
+
   if (!Array.isArray(skeleton.installerTargets?.targets) || skeleton.installerTargets.targets.length < 7) {
     throw new Error(`Installer targets are missing ${PHASE_ID} target declarations.`);
   }
@@ -1344,6 +1363,10 @@ function verifyReleaseSkeletonContract() {
     throw new Error(`Promotion apply manifests are missing ${PHASE_ID} manifest declarations.`);
   }
 
+  if (!Array.isArray(skeleton.promotionExecutionCheckpoints?.checkpoints) || skeleton.promotionExecutionCheckpoints.checkpoints.length < 2) {
+    throw new Error(`Promotion execution checkpoints are missing ${PHASE_ID} checkpoint declarations.`);
+  }
+
   if (!Array.isArray(skeleton.signingMetadata?.readiness) || skeleton.signingMetadata.readiness.length < 3) {
     throw new Error(`Signing metadata is missing ${PHASE_ID} readiness declarations.`);
   }
@@ -1356,12 +1379,13 @@ function verifyReleaseSkeletonContract() {
     skeleton.signingPublishGatingHandshake?.canHandshake !== false ||
     skeleton.signingPublishGatingHandshake?.sealedBundleIntegrityContractPath !== "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json" ||
     skeleton.signingPublishGatingHandshake?.attestationVerificationPacksPath !== "release/ATTESTATION-VERIFICATION-PACKS.json" ||
+    skeleton.signingPublishGatingHandshake?.attestationApplyAuditPacksPath !== "release/ATTESTATION-APPLY-AUDIT-PACKS.json" ||
     skeleton.signingPublishGatingHandshake?.channelPromotionEvidencePath !== "release/CHANNEL-PROMOTION-EVIDENCE.json" ||
     skeleton.signingPublishGatingHandshake?.publishRollbackHandshakePath !== "release/PUBLISH-ROLLBACK-HANDSHAKE.json" ||
     !Array.isArray(skeleton.signingPublishGatingHandshake?.stages) ||
-    skeleton.signingPublishGatingHandshake.stages.length < 11 ||
+    skeleton.signingPublishGatingHandshake.stages.length < 12 ||
     !Array.isArray(skeleton.signingPublishGatingHandshake?.acknowledgements) ||
-    skeleton.signingPublishGatingHandshake.acknowledgements.length < 10
+    skeleton.signingPublishGatingHandshake.acknowledgements.length < 11
   ) {
     throw new Error(`Signing-publish gating handshake is missing ${PHASE_ID} handshake declarations.`);
   }
@@ -1369,16 +1393,19 @@ function verifyReleaseSkeletonContract() {
   if (
     skeleton.signingPublishPipeline?.sealedBundleIntegrityContractPath !== "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json" ||
     skeleton.signingPublishPipeline?.attestationVerificationPacksPath !== "release/ATTESTATION-VERIFICATION-PACKS.json" ||
+    skeleton.signingPublishPipeline?.attestationApplyAuditPacksPath !== "release/ATTESTATION-APPLY-AUDIT-PACKS.json" ||
     skeleton.signingPublishPipeline?.gatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
     skeleton.signingPublishPipeline?.approvalBridgePath !== "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json" ||
     skeleton.signingPublishPipeline?.channelRoutingPath !== "release/INSTALLER-CHANNEL-ROUTING.json" ||
     skeleton.signingPublishPipeline?.channelPromotionEvidencePath !== "release/CHANNEL-PROMOTION-EVIDENCE.json" ||
     skeleton.signingPublishPipeline?.promotionApplyManifestsPath !== "release/PROMOTION-APPLY-MANIFESTS.json" ||
+    skeleton.signingPublishPipeline?.promotionExecutionCheckpointsPath !== "release/PROMOTION-EXECUTION-CHECKPOINTS.json" ||
     skeleton.signingPublishPipeline?.promotionHandshakePath !== "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json" ||
     skeleton.signingPublishPipeline?.publishRollbackHandshakePath !== "release/PUBLISH-ROLLBACK-HANDSHAKE.json" ||
     skeleton.signingPublishPipeline?.rollbackExecutionRehearsalLedgerPath !== "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json" ||
+    skeleton.signingPublishPipeline?.rollbackOperatorDrillbooksPath !== "release/ROLLBACK-OPERATOR-DRILLBOOKS.json" ||
     !Array.isArray(skeleton.signingPublishPipeline?.stages) ||
-    skeleton.signingPublishPipeline.stages.length < 20
+    skeleton.signingPublishPipeline.stages.length < 24
   ) {
     throw new Error(`Signing & publish pipeline is missing ${PHASE_ID} pipeline declarations.`);
   }
@@ -1391,12 +1418,14 @@ function verifyReleaseSkeletonContract() {
     skeleton.signingPublishPromotionHandshake?.channelRoutingPath !== "release/INSTALLER-CHANNEL-ROUTING.json" ||
     skeleton.signingPublishPromotionHandshake?.sealedBundleIntegrityContractPath !== "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json" ||
     skeleton.signingPublishPromotionHandshake?.channelPromotionEvidencePath !== "release/CHANNEL-PROMOTION-EVIDENCE.json" ||
+    skeleton.signingPublishPromotionHandshake?.attestationApplyAuditPacksPath !== "release/ATTESTATION-APPLY-AUDIT-PACKS.json" ||
     skeleton.signingPublishPromotionHandshake?.promotionApplyManifestsPath !== "release/PROMOTION-APPLY-MANIFESTS.json" ||
+    skeleton.signingPublishPromotionHandshake?.promotionExecutionCheckpointsPath !== "release/PROMOTION-EXECUTION-CHECKPOINTS.json" ||
     skeleton.signingPublishPromotionHandshake?.publishRollbackHandshakePath !== "release/PUBLISH-ROLLBACK-HANDSHAKE.json" ||
     !Array.isArray(skeleton.signingPublishPromotionHandshake?.stages) ||
-    skeleton.signingPublishPromotionHandshake.stages.length < 9 ||
+    skeleton.signingPublishPromotionHandshake.stages.length < 11 ||
     !Array.isArray(skeleton.signingPublishPromotionHandshake?.acknowledgements) ||
-    skeleton.signingPublishPromotionHandshake.acknowledgements.length < 9
+    skeleton.signingPublishPromotionHandshake.acknowledgements.length < 11
   ) {
     throw new Error(`Signing-publish promotion handshake is missing ${PHASE_ID} promotion declarations.`);
   }
@@ -1405,13 +1434,15 @@ function verifyReleaseSkeletonContract() {
     skeleton.publishRollbackHandshake?.sealedBundleIntegrityContractPath !== "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json" ||
     skeleton.publishRollbackHandshake?.channelPromotionEvidencePath !== "release/CHANNEL-PROMOTION-EVIDENCE.json" ||
     skeleton.publishRollbackHandshake?.promotionHandshakePath !== "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json" ||
+    skeleton.publishRollbackHandshake?.promotionExecutionCheckpointsPath !== "release/PROMOTION-EXECUTION-CHECKPOINTS.json" ||
     skeleton.publishRollbackHandshake?.rollbackExecutionRehearsalLedgerPath !== "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json" ||
+    skeleton.publishRollbackHandshake?.rollbackOperatorDrillbooksPath !== "release/ROLLBACK-OPERATOR-DRILLBOOKS.json" ||
     !Array.isArray(skeleton.publishRollbackHandshake?.paths) ||
     skeleton.publishRollbackHandshake.paths.length < 2 ||
     !Array.isArray(skeleton.publishRollbackHandshake?.stages) ||
-    skeleton.publishRollbackHandshake.stages.length < 7 ||
+    skeleton.publishRollbackHandshake.stages.length < 9 ||
     !Array.isArray(skeleton.publishRollbackHandshake?.acknowledgements) ||
-    skeleton.publishRollbackHandshake.acknowledgements.length < 7
+    skeleton.publishRollbackHandshake.acknowledgements.length < 9
   ) {
     throw new Error(`Publish rollback handshake is missing ${PHASE_ID} rollback declarations.`);
   }
@@ -1422,6 +1453,10 @@ function verifyReleaseSkeletonContract() {
 
   if (!Array.isArray(skeleton.rollbackExecutionRehearsalLedger?.rehearsals) || skeleton.rollbackExecutionRehearsalLedger.rehearsals.length < 2) {
     throw new Error(`Rollback execution rehearsal ledger is missing ${PHASE_ID} rehearsal declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.rollbackOperatorDrillbooks?.drillbooks) || skeleton.rollbackOperatorDrillbooks.drillbooks.length < 2) {
+    throw new Error(`Rollback operator drillbooks are missing ${PHASE_ID} operator declarations.`);
   }
 
   if (
@@ -1450,27 +1485,30 @@ function verifyReleaseSkeletonContract() {
     !skeleton.packageReadme.includes("release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json") ||
     !skeleton.packageReadme.includes("release/INTEGRITY-ATTESTATION-EVIDENCE.json") ||
     !skeleton.packageReadme.includes("release/ATTESTATION-VERIFICATION-PACKS.json") ||
+    !skeleton.packageReadme.includes("release/ATTESTATION-APPLY-AUDIT-PACKS.json") ||
     !skeleton.packageReadme.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.packageReadme.includes("release/PROMOTION-APPLY-READINESS.json") ||
     !skeleton.packageReadme.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
+    !skeleton.packageReadme.includes("release/PROMOTION-EXECUTION-CHECKPOINTS.json") ||
     !skeleton.packageReadme.includes("release/PUBLISH-ROLLBACK-HANDSHAKE.json") ||
     !skeleton.packageReadme.includes("release/ROLLBACK-RECOVERY-LEDGER.json") ||
     !skeleton.packageReadme.includes("release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json") ||
+    !skeleton.packageReadme.includes("release/ROLLBACK-OPERATOR-DRILLBOOKS.json") ||
     !skeleton.packageReadme.includes("scripts/install-placeholder.cjs")
   ) {
     throw new Error(`Generated package README is missing required ${PHASE_ID} packaging markers.`);
   }
 
   if (
-    !skeleton.releaseSummary?.includes("Phase43 Release Summary") ||
+    !skeleton.releaseSummary?.includes("Phase44 Release Summary") ||
     !skeleton.releaseSummary?.includes(REVIEW_STAGE_ID)
   ) {
     throw new Error(`Generated release summary is missing required ${PHASE_ID} review markers.`);
   }
 
   if (
-    !skeleton.releaseNotes?.includes("Phase43 Release Notes") ||
-    !skeleton.releaseNotes?.includes("attestation verification packs") ||
+    !skeleton.releaseNotes?.includes("Phase44 Release Notes") ||
+    !skeleton.releaseNotes?.includes("attestation apply audit packs") ||
     !Array.isArray(skeleton.releaseApprovalWorkflow?.stages) ||
     !skeleton.releaseApprovalWorkflow.stages.length ||
     !skeleton.signingPublishApprovalBridge?.bridge?.length ||
@@ -1488,12 +1526,15 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseChecklist.includes("SEALED-BUNDLE-INTEGRITY-CONTRACT.json") ||
     !skeleton.releaseChecklist.includes("INTEGRITY-ATTESTATION-EVIDENCE.json") ||
     !skeleton.releaseChecklist.includes("ATTESTATION-VERIFICATION-PACKS.json") ||
+    !skeleton.releaseChecklist.includes("ATTESTATION-APPLY-AUDIT-PACKS.json") ||
     !skeleton.releaseChecklist.includes("CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-APPLY-READINESS.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-APPLY-MANIFESTS.json") ||
+    !skeleton.releaseChecklist.includes("PROMOTION-EXECUTION-CHECKPOINTS.json") ||
     !skeleton.releaseChecklist.includes("PUBLISH-ROLLBACK-HANDSHAKE.json") ||
     !skeleton.releaseChecklist.includes("ROLLBACK-RECOVERY-LEDGER.json") ||
     !skeleton.releaseChecklist.includes("ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json") ||
+    !skeleton.releaseChecklist.includes("ROLLBACK-OPERATOR-DRILLBOOKS.json") ||
     !skeleton.releaseChecklist.includes("RELEASE-APPROVAL-WORKFLOW.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-GATES.json") ||
     !skeleton.releaseChecklist.includes("INSTALLER-PLACEHOLDER.json")

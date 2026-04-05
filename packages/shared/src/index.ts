@@ -3870,9 +3870,9 @@ export const mockShellState: StudioShellState = {
           {
             id: "settings-advanced",
             label: "Product foundations",
-            value: "Phase43 active",
+            value: "Phase44 active",
             detail:
-              "Attestation verification packs, promotion apply manifests, rollback execution rehearsal ledger, release approval workflow, and promotion gating are active, but they remain local-only and non-executing.",
+              "Attestation apply audit packs, promotion execution checkpoints, rollback operator drillbooks, release approval workflow, and promotion gating are active, but they remain local-only and non-executing.",
             tone: "positive"
           }
         ]
