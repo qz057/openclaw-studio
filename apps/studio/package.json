@@ -1,0 +1,38 @@
+{
+  "name": "@openclaw/studio",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist-electron/electron/main.js",
+  "dependencies": {
+    "@openclaw/bridge": "file:../../packages/bridge",
+    "@openclaw/shared": "file:../../packages/shared",
+    "loose-envify": "https://cdn.npmmirror.com/packages/loose-envify/1.4.0/loose-envify-1.4.0.tgz",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@esbuild/linux-x64": "https://cdn.npmmirror.com/packages/%40esbuild/linux-x64/0.21.5/linux-x64-0.21.5.tgz",
+    "@types/node": "22.19.15",
+    "@rollup/rollup-linux-x64-gnu": "https://cdn.npmmirror.com/packages/%40rollup/rollup-linux-x64-gnu/4.59.0/rollup-linux-x64-gnu-4.59.0.tgz",
+    "rollup": "https://cdn.npmmirror.com/packages/rollup/4.59.0/rollup-4.59.0.tgz",
+    "typescript": "5.9.3",
+    "vite": "5.4.21"
+  },
+  "optionalDependencies": {
+    "electron": "35.7.5"
+  },
+  "scripts": {
+    "build": "npm run build:packages && npm run build:renderer && npm run build:electron",
+    "build:packages": "tsc -b ../../packages/shared ../../packages/bridge",
+    "build:renderer": "vite build --config vite.config.mts",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "doctor": "node ./scripts/doctor-studio.cjs",
+    "package:alpha": "node ./scripts/package-alpha.cjs",
+    "release:plan": "node ./scripts/release-plan.cjs",
+    "smoke": "node ./scripts/smoke-dist.mjs",
+    "start:smoke": "node ./scripts/start-smoke.cjs",
+    "typecheck": "npm run typecheck:packages && tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.electron.json",
+    "typecheck:packages": "tsc -p ../../packages/shared/tsconfig.json && tsc --noEmit -p ../../packages/shared/tsconfig.json && tsc --noEmit -p ../../packages/bridge/tsconfig.json",
+    "start": "node ./scripts/start-studio.cjs"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "openclaw-studio",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "packageManager": "pnpm@10.32.1",
+  "scripts": {
+    "build": "npm run build --workspace @openclaw/studio",
+    "doctor": "npm run doctor --workspace @openclaw/studio",
+    "package:alpha": "npm run package:alpha --workspace @openclaw/studio",
+    "release:plan": "npm run release:plan --workspace @openclaw/studio",
+    "smoke": "npm run smoke --workspace @openclaw/studio",
+    "start:smoke": "npm run start:smoke --workspace @openclaw/studio",
+    "typecheck": "npm run typecheck --workspace @openclaw/studio",
+    "start": "npm run start --workspace @openclaw/studio"
+  }
+}
