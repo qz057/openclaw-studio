@@ -143,13 +143,13 @@
 - README / HANDOFF / package snapshot 已同步反映 phase40 reality
 
 ### Phase 41（当前已完成）
-- phase40 的 formal-release skeleton 已继续下沉成更明确的 sealed-bundle integrity / channel promotion evidence / publish rollback handshake layer
-- release skeleton 现在补齐 SEALED-BUNDLE-INTEGRITY-CONTRACT / CHANNEL-PROMOTION-EVIDENCE / PUBLISH-ROLLBACK-HANDSHAKE
+- phase40 的 formal-release skeleton 已继续下沉成更明确的 integrity attestation evidence / promotion apply readiness / rollback recovery ledger layer
+- release skeleton 现在补齐 INTEGRITY-ATTESTATION-EVIDENCE / PROMOTION-APPLY-READINESS / ROLLBACK-RECOVERY-LEDGER
 - shell 现在补齐 Sealed-bundle Integrity Contract / Channel Promotion Evidence / Publish Rollback Handshake 可见性
-- package snapshot 现在具备 sealed-bundle integrity contract / channel promotion evidence / publish rollback handshake，但仍不做真实 installer / approval / publish / rollback
+- package snapshot 现在具备 integrity attestation evidence / promotion apply readiness / rollback recovery ledger，但仍不做真实 installer / approval / publish / rollback
 - 全部仍然保持 `local-only`，不做真实 host-side execution 或系统级窗口操作
-- smoke 已提升到验证 phase41 sealed-bundle integrity / channel promotion evidence / publish rollback handshake contract 与 renderer markers
-- README / HANDOFF / package snapshot 已同步反映 phase41 reality
+- smoke 已提升到验证 phase42 integrity attestation evidence / promotion apply readiness / rollback recovery ledger contract 与 renderer markers
+- README / HANDOFF / package snapshot 已同步反映 phase42 reality
 
 ## 当前明确边界
 
@@ -159,7 +159,7 @@
 - dry-run / preview / simulate
 - Studio-local execute（只改应用内 in-memory state/history）
 - phase27 command surface / layout persistence / window intent staging
-- phase41 sealed-bundle integrity contract / channel promotion evidence / publish rollback handshake
+- phase42 integrity attestation evidence / promotion apply readiness / rollback recovery ledger
 - phase26/27/28 release skeleton / artifact review / handoff docs / package metadata
 
 当前明确禁止：
@@ -181,7 +181,7 @@ npm run start:smoke
 npm run package:alpha
 ```
 
-phase41 可额外跑：
+phase42 可额外跑：
 
 ```bash
 npm run release:plan
@@ -190,7 +190,7 @@ npm run release:plan
 ## 下一阶段（建议）
 
 ### Phase 42
-目标：在不开放危险执行的前提下，继续把 phase41 foundations 推进为更完整的产品能力与交付链路。
+目标：在不开放危险执行的前提下，继续把 phase42 foundations 推进为更完整的产品能力与交付链路。
 
 范围建议：
 - 更深的 Inspector / command depth / trace drill-down

@@ -1,6 +1,6 @@
 # OpenClaw Studio
 
-OpenClaw Studio 是一个基于 Electron + React + TypeScript 的 OpenClaw 桌面工作台。当前仓库已经进入 **phase41 sealed-bundle integrity contract / channel promotion evidence / publish rollback handshake** 阶段：真实 host-side execution 仍然保持关闭，但在 phase25/26/27/28/29/30/31/32/33 的 focused-slot、preview → slot handoff、slot-level simulated outcomes、release skeleton、command surface、layout persistence、window deepening、workflow lane 与 orchestration board 基础上，shell 已在 phase40 的 packaged-app bundle sealing / installer channel routing / signing-publish promotion handshake 之上，进一步下沉出 sealed-bundle integrity contract、channel promotion evidence 与 publish rollback handshake metadata。
+OpenClaw Studio 是一个基于 Electron + React + TypeScript 的 OpenClaw 桌面工作台。当前仓库已经进入 **phase42 integrity attestation evidence / promotion apply readiness / rollback recovery ledger** 阶段：真实 host-side execution 仍然保持关闭，但在 phase25/26/27/28/29/30/31/32/33 的 focused-slot、preview → slot handoff、slot-level simulated outcomes、release skeleton、command surface、layout persistence、window deepening、workflow lane 与 orchestration board 基础上，shell 已在 phase40 的 packaged-app bundle sealing / installer channel routing / signing-publish promotion handshake 之上，进一步下沉出 sealed-bundle integrity contract、channel promotion evidence 与 publish rollback handshake metadata。
 
 ## 当前已验证范围
 
@@ -66,7 +66,7 @@ OpenClaw Studio 是一个基于 Electron + React + TypeScript 的 OpenClaw 桌�
   - phase37 已补齐 PACKAGED-APP-MATERIALIZATION-SKELETON / INSTALLER-TARGET-BUILDER-SKELETON / SIGNING-PUBLISH-PIPELINE
   - phase39 已补齐 PACKAGED-APP-STAGED-OUTPUT-SKELETON / INSTALLER-BUILDER-ORCHESTRATION / SIGNING-PUBLISH-APPROVAL-BRIDGE
   - phase40 已补齐 PACKAGED-APP-BUNDLE-SEALING-SKELETON / INSTALLER-CHANNEL-ROUTING / SIGNING-PUBLISH-PROMOTION-HANDSHAKE
-  - phase41 已补齐 SEALED-BUNDLE-INTEGRITY-CONTRACT / CHANNEL-PROMOTION-EVIDENCE / PUBLISH-ROLLBACK-HANDSHAKE
+  - phase42 已补齐 INTEGRITY-ATTESTATION-EVIDENCE / PROMOTION-APPLY-READINESS / ROLLBACK-RECOVERY-LEDGER
   - package snapshot 现在带 per-platform bundle skeleton、packaged-app materialization skeleton、packaged-app directory materialization、packaged-app bundle sealing skeleton、sealed-bundle integrity contract、installer builder execution skeleton、installer channel routing、channel promotion evidence、signing-publish gating handshake、publish rollback handshake、release approval workflow、release notes 与 publish gating
   - main shell 里的 Formal Release Readiness 卡片已同步反映 packaged-app materialization / packaged-app directory materialization / packaged-app bundle sealing / sealed-bundle integrity / installer builder execution / installer channel routing / channel promotion evidence / publish rollback posture
   - 全部仍然保持 `local-only`，不做真实 host-side execution
@@ -132,7 +132,7 @@ npm run start:smoke
 npm run package:alpha
 ```
 
-phase41 额外提供一个只读 dry-run：
+phase42 额外提供一个只读 dry-run：
 
 ```bash
 npm run release:plan
@@ -152,11 +152,11 @@ npm run release:plan
 - slot handler simulated outcome coverage 是否包含 blocked / abort / partial-apply / rollback-required / rollback-incomplete
 - host handoff trace 是否显式包含 preview / slot / result / rollback phase
 - Inspector / dock 是否与当前 focus slot 同步
-- renderer bundle 是否显式包含 phase25 focused-slot markers，以及 phase38 packaged-app directory materialization / installer builder execution / signing-publish gating handshake markers，外加 phase41 sealed-bundle integrity / channel promotion evidence / publish rollback handshake markers
+- renderer bundle 是否显式包含 phase25 focused-slot markers，以及 phase38 packaged-app directory materialization / installer builder execution / signing-publish gating handshake markers，外加 phase42 integrity attestation evidence / promotion apply readiness / rollback recovery ledger markers
 - host preview action 是否显式暴露 focus / slot-state / disposition / slot roster / timeline section
 - local connector controls 是否仍保持 local-only 行为
 - startup preflight 是否 ready
-- phase41 release skeleton contract 是否完整（layout / docs / manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged-app directory materialization / packaged-app materialization skeleton / packaged-app staged output skeleton / packaged-app bundle sealing skeleton / sealed-bundle integrity contract / installer targets / installer builder execution skeleton / installer-target builder skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / signing metadata / notarization plan / signing-publish gating handshake / signing-publish pipeline / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / release approval workflow / release notes / publish gates / promotion gates / release summary / installer placeholder / release checklist）
+- phase42 release skeleton contract 是否完整（layout / docs / manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged-app directory materialization / packaged-app materialization skeleton / packaged-app staged output skeleton / packaged-app bundle sealing skeleton / sealed-bundle integrity contract / installer targets / installer builder execution skeleton / installer-target builder skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / signing metadata / notarization plan / signing-publish gating handshake / signing-publish pipeline / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / release approval workflow / release notes / publish gates / promotion gates / release summary / installer placeholder / release checklist）
 - shell state 是否显式包含 action groups / sequences / contextual flows / keyboard routing / workflow posture / orchestration board / pre-release bundle pipeline contract
 
 ### `npm run start:smoke`
@@ -168,7 +168,7 @@ npm run release:plan
 
 ### `npm run release:plan`
 
-- 只做 phase41 release skeleton dry-run 汇总
+- 只做 phase42 release skeleton dry-run 汇总
 - 不写安装器
 - 不发布 artifact
 - 适合先检查 manifest / metadata / installer placeholder 契约是否成型
@@ -218,12 +218,14 @@ delivery/openclaw-studio-alpha-shell/
     PACKAGED-APP-STAGED-OUTPUT-SKELETON.json
     PACKAGED-APP-BUNDLE-SEALING-SKELETON.json
     SEALED-BUNDLE-INTEGRITY-CONTRACT.json
+    INTEGRITY-ATTESTATION-EVIDENCE.json
     INSTALLER-TARGETS.json
     INSTALLER-TARGET-BUILDER-SKELETON.json
     INSTALLER-BUILDER-EXECUTION-SKELETON.json
     INSTALLER-BUILDER-ORCHESTRATION.json
     INSTALLER-CHANNEL-ROUTING.json
     CHANNEL-PROMOTION-EVIDENCE.json
+    PROMOTION-APPLY-READINESS.json
     SIGNING-METADATA.json
     NOTARIZATION-PLAN.json
     SIGNING-PUBLISH-PIPELINE.json
@@ -231,6 +233,7 @@ delivery/openclaw-studio-alpha-shell/
     SIGNING-PUBLISH-APPROVAL-BRIDGE.json
     SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json
     PUBLISH-ROLLBACK-HANDSHAKE.json
+    ROLLBACK-RECOVERY-LEDGER.json
     RELEASE-APPROVAL-WORKFLOW.json
     RELEASE-NOTES.md
     PUBLISH-GATES.json
@@ -242,7 +245,7 @@ delivery/openclaw-studio-alpha-shell/
     install-placeholder.cjs
 ```
 
-这是一个 **phase41 alpha-shell release skeleton**，不是正式 installer。
+这是一个 **phase42 alpha-shell release skeleton**，不是正式 installer。
 
 它用于：
 
@@ -256,7 +259,7 @@ delivery/openclaw-studio-alpha-shell/
 - 可运行的 Electron + renderer 构建产物快照
 - 当前 README / HANDOFF / IMPLEMENTATION-PLAN 文档闭环
 - release manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged-app directory materialization / packaged-app materialization skeleton / packaged-app staged output skeleton / packaged-app bundle sealing skeleton / sealed-bundle integrity contract / installer targets / installer builder execution skeleton / installer-target builder skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / signing metadata / notarization plan / signing-publish gating handshake / signing-publish pipeline / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / release approval workflow / release notes / publish gates / promotion gates / release summary / installer placeholder / checklist
-- disabled host bridge + focused-slot UI + trace surface + phase38 packaged-app directory materialization / installer builder execution skeleton / signing-publish gating handshake，以及 phase41 sealed-bundle integrity contract / channel promotion evidence / publish rollback handshake 的验证后快照
+- disabled host bridge + focused-slot UI + trace surface + phase38 packaged-app directory materialization / installer builder execution skeleton / signing-publish gating handshake，以及 phase42 integrity attestation evidence / promotion apply readiness / rollback recovery ledger 的验证后快照
 
 ## 当前还没交付什么
 

@@ -2,7 +2,7 @@
 
 ## Snapshot
 
-- 当前已验证里程碑：**phase41 sealed-bundle integrity contract / channel promotion evidence / publish rollback handshake + docs / smoke / package / release-plan / UI / shared data closeout**
+- 当前已验证里程碑：**phase42 integrity attestation evidence / promotion apply readiness / rollback recovery ledger + docs / smoke / package / release-plan / UI / shared data closeout**
 - 当前主视图：
   - `Dashboard`
   - `Home`
@@ -21,7 +21,7 @@
   - phase37 已把交付层继续下沉成 packaged-app materialization skeleton、installer-target builder skeleton 与 signing-publish pipeline
   - phase39 已把交付层继续下沉成 packaged-app staged output skeleton、installer builder orchestration 与 signing-publish approval bridge
   - phase40 已把交付层继续下沉成 packaged-app bundle sealing skeleton、installer channel routing 与 signing-publish promotion handshake
-  - phase41 已把交付层继续下沉成 sealed-bundle integrity contract、channel promotion evidence 与 publish rollback handshake
+  - phase42 已把交付层继续下沉成 sealed-bundle integrity contract、channel promotion evidence 与 publish rollback handshake
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline
@@ -36,7 +36,7 @@ npm run start:smoke
 npm run package:alpha
 ```
 
-phase41 额外 dry-run：
+phase42 额外 dry-run：
 
 ```bash
 npm run release:plan
@@ -48,7 +48,7 @@ npm run release:plan
 
 在当前这类受限 Linux sandbox 中，如果 Electron 已到达启动路径但 Chromium sandbox host 被容器拦截，`start:smoke` 会以 sandbox-limited fallback 通过并明确标注原因。
 
-`npm run release:plan` 只输出 phase41 release skeleton 汇总，不会写 installer，也不会发布任何 artifact。
+`npm run release:plan` 只输出 phase42 release skeleton 汇总，不会写 installer，也不会发布任何 artifact。
 
 ## Phase27/28/29/30/31/32/33 Shell Surface
 
@@ -67,7 +67,7 @@ npm run release:plan
 - phase37 进一步补齐 Packaged-app Materialization Skeleton、Installer-target Builder Skeleton、Signing & Publish Pipeline
 - phase39 进一步补齐 Packaged-app Staged Output Skeleton、Installer Builder Orchestration、Signing-publish Approval Bridge
 - phase40 进一步补齐 Packaged-app Bundle Sealing Skeleton、Installer Channel Routing、Signing-publish Promotion Handshake
-- phase41 进一步补齐 Sealed-bundle Integrity Contract、Channel Promotion Evidence、Publish Rollback Handshake
+- phase42 进一步补齐 Sealed-bundle Integrity Contract、Channel Promotion Evidence、Publish Rollback Handshake
 - 仍然不做真实外部窗口编排
 
 ## Phase25 Boundary Model
@@ -154,11 +154,11 @@ Tools / MCP 当前深度：
 - Studio-local execute
 - preview-host contract surfaces
 
-## Phase41 Delivery Skeleton
+## Phase42 Delivery Skeleton
 
 - `npm run package:alpha`
 - 输出到：`delivery/openclaw-studio-alpha-shell`
-- 这是 phase41 结构化 alpha-shell snapshot，不是 installer
+- 这是 phase42 结构化 alpha-shell snapshot，不是 installer
 
 ### 当前能交付
 
@@ -234,4 +234,4 @@ Tools / MCP 当前深度：
 
 1. 在保持 disabled 的前提下继续提升 validator / observability / command-surface / multi-window coverage
 2. 只有在 approval / lifecycle / rollback 真实闭环成型后，才评估任何 live host execution
-3. 把 phase41 shell foundations 继续推进成真正的多窗口编排与 sealed-bundle integrity attestation / channel promotion evidence apply / publish rollback execution / approval pipeline
+3. 把 phase42 shell foundations 继续推进成真正的多窗口编排与 sealed-bundle integrity attestation / channel promotion evidence apply / publish rollback execution / approval pipeline

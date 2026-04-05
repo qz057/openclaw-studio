@@ -1,4 +1,4 @@
-# OpenClaw Studio Phase41 Release Checklist
+# OpenClaw Studio Phase42 Release Checklist
 
 ## Required Commands
 
@@ -18,7 +18,7 @@
 - `artifacts/electron/electron/main.js` 与 `artifacts/electron/electron/preload.js` 必须存在
 - `release/RELEASE-MANIFEST.json` 必须列出 docs、artifact groups、installer placeholder contract
 - `release/BUILD-METADATA.json` 必须记录 build/preflight/toolchain 元数据
-- `release/REVIEW-MANIFEST.json` 必须列出 sealed-bundle-integrity-channel-promotion-evidence-publish-rollback-handshake-skeleton pipeline stage、review docs、artifact groups、blocked 发布动作
+- `release/REVIEW-MANIFEST.json` 必须列出 integrity-attestation-promotion-apply-readiness-rollback-recovery-ledger-skeleton pipeline stage、review docs、artifact groups、blocked 发布动作
 - `release/BUNDLE-MATRIX.json` 必须列出 per-platform bundle skeleton
 - `release/BUNDLE-ASSEMBLY.json` 必须列出 bundle assembly skeleton
 - `release/PACKAGED-APP-DIRECTORY-SKELETON.json` 必须列出 per-platform packaged app directory skeleton
@@ -27,12 +27,14 @@
 - `release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json` 必须列出 packaged-app staged output skeleton
 - `release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json` 必须列出 packaged-app bundle sealing skeleton
 - `release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json` 必须列出 sealed-bundle integrity contract
+- `release/INTEGRITY-ATTESTATION-EVIDENCE.json` 必须列出 integrity attestation evidence
 - `release/INSTALLER-TARGETS.json` 必须列出 installer target metadata
 - `release/INSTALLER-TARGET-BUILDER-SKELETON.json` 必须列出 installer-target builder skeleton
 - `release/INSTALLER-BUILDER-EXECUTION-SKELETON.json` 必须列出 installer builder execution skeleton
 - `release/INSTALLER-BUILDER-ORCHESTRATION.json` 必须列出 installer builder orchestration metadata
 - `release/INSTALLER-CHANNEL-ROUTING.json` 必须列出 installer channel routing metadata
 - `release/CHANNEL-PROMOTION-EVIDENCE.json` 必须列出 channel promotion evidence metadata
+- `release/PROMOTION-APPLY-READINESS.json` 必须列出 promotion apply readiness metadata
 - `release/SIGNING-METADATA.json` 必须列出 signing-ready metadata
 - `release/NOTARIZATION-PLAN.json` 必须列出 signing / notarization skeleton
 - `release/SIGNING-PUBLISH-PIPELINE.json` 必须列出 signing & publish pipeline skeleton
@@ -40,6 +42,7 @@
 - `release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json` 必须列出 signing-publish approval bridge metadata
 - `release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json` 必须列出 signing-publish promotion handshake metadata
 - `release/PUBLISH-ROLLBACK-HANDSHAKE.json` 必须列出 publish rollback handshake metadata
+- `release/ROLLBACK-RECOVERY-LEDGER.json` 必须列出 rollback recovery ledger metadata
 - `release/RELEASE-APPROVAL-WORKFLOW.json` 必须列出 release approval workflow metadata
 - `release/RELEASE-NOTES.md` 必须列出当前 release notes 草案
 - `release/PUBLISH-GATES.json` 必须列出 publish gating 条目

@@ -1,11 +1,11 @@
-# OpenClaw Studio Phase41 Release Summary
+# OpenClaw Studio Phase42 Release Summary
 
-Milestone: phase41 sealed-bundle integrity contract / channel promotion evidence / publish rollback handshake + docs / smoke / package / release-plan / UI / shared data closeout
-Review stage: sealed-bundle-integrity-channel-promotion-evidence-publish-rollback-handshake-skeleton
-Review docs: README.md, HANDOFF.md, IMPLEMENTATION-PLAN.md, PACKAGE-README.md, release/RELEASE-SUMMARY.md, release/REVIEW-MANIFEST.json, release/BUNDLE-MATRIX.json, release/BUNDLE-ASSEMBLY.json, release/PACKAGED-APP-DIRECTORY-SKELETON.json, release/PACKAGED-APP-MATERIALIZATION-SKELETON.json, release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json, release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json, release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json, release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json, release/INSTALLER-TARGETS.json, release/INSTALLER-TARGET-BUILDER-SKELETON.json, release/INSTALLER-BUILDER-EXECUTION-SKELETON.json, release/INSTALLER-BUILDER-ORCHESTRATION.json, release/INSTALLER-CHANNEL-ROUTING.json, release/CHANNEL-PROMOTION-EVIDENCE.json, release/SIGNING-METADATA.json, release/NOTARIZATION-PLAN.json, release/SIGNING-PUBLISH-PIPELINE.json, release/SIGNING-PUBLISH-GATING-HANDSHAKE.json, release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json, release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json, release/PUBLISH-ROLLBACK-HANDSHAKE.json, release/RELEASE-APPROVAL-WORKFLOW.json, release/RELEASE-NOTES.md, release/PUBLISH-GATES.json, release/PROMOTION-GATES.json, release/RELEASE-CHECKLIST.md
+Milestone: phase42 integrity attestation evidence / promotion apply readiness / rollback recovery ledger + docs / smoke / package / release-plan / UI / shared data closeout
+Review stage: integrity-attestation-promotion-apply-readiness-rollback-recovery-ledger-skeleton
+Review docs: README.md, HANDOFF.md, IMPLEMENTATION-PLAN.md, PACKAGE-README.md, release/RELEASE-SUMMARY.md, release/REVIEW-MANIFEST.json, release/BUNDLE-MATRIX.json, release/BUNDLE-ASSEMBLY.json, release/PACKAGED-APP-DIRECTORY-SKELETON.json, release/PACKAGED-APP-MATERIALIZATION-SKELETON.json, release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json, release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json, release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json, release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json, release/INTEGRITY-ATTESTATION-EVIDENCE.json, release/INSTALLER-TARGETS.json, release/INSTALLER-TARGET-BUILDER-SKELETON.json, release/INSTALLER-BUILDER-EXECUTION-SKELETON.json, release/INSTALLER-BUILDER-ORCHESTRATION.json, release/INSTALLER-CHANNEL-ROUTING.json, release/CHANNEL-PROMOTION-EVIDENCE.json, release/PROMOTION-APPLY-READINESS.json, release/SIGNING-METADATA.json, release/NOTARIZATION-PLAN.json, release/SIGNING-PUBLISH-PIPELINE.json, release/SIGNING-PUBLISH-GATING-HANDSHAKE.json, release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json, release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json, release/PUBLISH-ROLLBACK-HANDSHAKE.json, release/ROLLBACK-RECOVERY-LEDGER.json, release/RELEASE-APPROVAL-WORKFLOW.json, release/RELEASE-NOTES.md, release/PUBLISH-GATES.json, release/PROMOTION-GATES.json, release/RELEASE-CHECKLIST.md
 
 ## Artifact groups
-- Renderer bundle: 3 files, 352.8 KiB, output=artifacts/renderer
+- Renderer bundle: 3 files, 353.7 KiB, output=artifacts/renderer
 - Electron bundle: 10 files, 314.2 KiB, output=artifacts/electron
 
 ## Pipeline depth
@@ -17,16 +17,19 @@ Review docs: README.md, HANDOFF.md, IMPLEMENTATION-PLAN.md, PACKAGE-README.md, r
 - pipeline-staged-output: Packaged-app staged output skeleton (ready) · Directory materialization now feeds explicit staged outputs and manifests without creating any real packaged artifact.
 - pipeline-bundle-sealing: Packaged-app bundle sealing skeleton (ready) · Staged outputs now feed review-only sealing manifests and integrity checkpoints without freezing any real packaged bundle.
 - pipeline-bundle-integrity: Sealed-bundle integrity contract (ready) · Bundle sealing metadata now feeds explicit integrity, digest, and audit checkpoints without attesting any real packaged bundle.
+- pipeline-integrity-attestation: Integrity attestation evidence (ready) · Sealed-bundle integrity contracts now feed explicit attestation packets, verifier inputs, and audit receipts without attesting any live release for real.
 - pipeline-installer-builders: Installer-target builder skeleton (ready) · Installer targets still map cleanly to per-platform builder identities without invoking a real builder.
 - pipeline-installer-builder-execution: Installer builder execution skeleton (ready) · Future builder commands, environment, outputs, and review checks are now declared without executing any builder.
 - pipeline-installer-builder-orchestration: Installer builder orchestration (ready) · Builder execution skeletons now sit inside per-platform orchestration flows without invoking any real builder.
 - pipeline-installer-channel-routing: Installer channel routing (ready) · Review-only installer flows now map cleanly into alpha/beta/stable routing manifests without routing any build for real.
 - pipeline-channel-promotion-evidence: Channel promotion evidence (ready) · Channel routing now feeds explicit promotion evidence packets and proof manifests without promoting any artifact for real.
+- pipeline-promotion-apply-readiness: Promotion apply readiness (ready) · Promotion evidence now feeds explicit apply-readiness manifests, reviewer inputs, and channel preflight packets without applying any promotion for real.
 - pipeline-signing-publish: Signing & publish pipeline (ready) · Signing, notarization, checksums, upload, and promotion stages remain reviewable as a structured pipeline contract.
 - pipeline-signing-gating: Signing-publish gating handshake (ready) · Signing, publish, approval, and promotion evidence now flow through a structured handshake contract without approving or publishing anything.
 - pipeline-signing-approval-bridge: Signing-publish approval bridge (ready) · Gating handshake, approval workflow, and promotion evidence are now bridged as one reviewable approval flow.
 - pipeline-signing-promotion-handshake: Signing-publish promotion handshake (ready) · Channel routing, publish gates, and promotion evidence now converge in a dedicated review-only promotion handshake.
 - pipeline-publish-rollback: Publish rollback handshake (ready) · Publish and promotion review now carry explicit rollback checkpoints and recovery-channel handoff metadata without rolling anything back for real.
+- pipeline-rollback-recovery-ledger: Rollback recovery ledger (ready) · Rollback checkpoints now feed explicit recovery ledgers, operator notes, and channel recovery manifests without recovering any live publish state.
 - pipeline-approval: Release approval workflow (ready) · Release approval remains metadata-only and blocks any live signing, publish, or host-side execution.
 - pipeline-publish: Promotion gating (blocked) · Installer build, signing, upload, and channel promotion remain intentionally out of scope.
 
@@ -42,4 +45,4 @@ Review docs: README.md, HANDOFF.md, IMPLEMENTATION-PLAN.md, PACKAGE-README.md, r
 - no release publishing / artifact upload / promotion handshake / rollback apply automation yet; publish rollback handshake remains metadata-only
 - real host-side execution remains disabled until approval / lifecycle / rollback close the loop
 
-Generated: 2026-04-05T01:10:02.938Z
+Generated: 2026-04-05T01:58:51.081Z

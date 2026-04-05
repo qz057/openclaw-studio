@@ -1,12 +1,12 @@
 {
   "schemaVersion": "openclaw-studio-build-metadata/v1",
-  "generatedAt": "2026-04-05T01:10:02.938Z",
+  "generatedAt": "2026-04-05T01:58:51.081Z",
   "app": {
     "name": "OpenClaw Studio",
     "workspacePackage": "@openclaw/studio",
     "version": "0.1.0",
     "channel": "alpha",
-    "phase": "phase41"
+    "phase": "phase42"
   },
   "toolchain": {
     "node": "v22.22.1",
@@ -16,7 +16,7 @@
     "electronOptionalVersion": "35.7.5"
   },
   "release": {
-    "milestone": "phase41 sealed-bundle integrity contract / channel promotion evidence / publish rollback handshake + docs / smoke / package / release-plan / UI / shared data closeout",
+    "milestone": "phase42 integrity attestation evidence / promotion apply readiness / rollback recovery ledger + docs / smoke / package / release-plan / UI / shared data closeout",
     "packageId": "openclaw-studio-alpha-shell",
     "packageKind": "alpha-shell-release-skeleton",
     "outputRoot": "/home/qz057/.openclaw/workspace/openclaw-studio/delivery/openclaw-studio-alpha-shell",
@@ -33,12 +33,14 @@
       "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
       "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
       "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
+      "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
       "release/INSTALLER-TARGETS.json",
       "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
       "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
       "release/INSTALLER-BUILDER-ORCHESTRATION.json",
       "release/INSTALLER-CHANNEL-ROUTING.json",
       "release/CHANNEL-PROMOTION-EVIDENCE.json",
+      "release/PROMOTION-APPLY-READINESS.json",
       "release/SIGNING-METADATA.json",
       "release/NOTARIZATION-PLAN.json",
       "release/SIGNING-PUBLISH-PIPELINE.json",
@@ -46,6 +48,7 @@
       "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
       "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
       "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+      "release/ROLLBACK-RECOVERY-LEDGER.json",
       "release/RELEASE-APPROVAL-WORKFLOW.json",
       "release/RELEASE-NOTES.md",
       "release/PUBLISH-GATES.json",
@@ -168,6 +171,11 @@
       "generated": true
     },
     {
+      "id": "integrity-attestation-evidence",
+      "path": "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
+      "generated": true
+    },
+    {
       "id": "installer-targets",
       "path": "release/INSTALLER-TARGETS.json",
       "generated": true
@@ -195,6 +203,11 @@
     {
       "id": "channel-promotion-evidence",
       "path": "release/CHANNEL-PROMOTION-EVIDENCE.json",
+      "generated": true
+    },
+    {
+      "id": "promotion-apply-readiness",
+      "path": "release/PROMOTION-APPLY-READINESS.json",
       "generated": true
     },
     {
@@ -233,6 +246,11 @@
       "generated": true
     },
     {
+      "id": "rollback-recovery-ledger",
+      "path": "release/ROLLBACK-RECOVERY-LEDGER.json",
+      "generated": true
+    },
+    {
       "id": "release-approval-workflow",
       "path": "release/RELEASE-APPROVAL-WORKFLOW.json",
       "generated": true
@@ -265,7 +283,7 @@
       "sourceRoot": "/home/qz057/.openclaw/workspace/openclaw-studio/apps/studio/dist-renderer",
       "outputRoot": "artifacts/renderer",
       "fileCount": 3,
-      "totalBytes": 361227,
+      "totalBytes": 362140,
       "entrypoints": [
         "artifacts/renderer/index.html"
       ]
@@ -320,7 +338,7 @@
     ]
   },
   "pipeline": {
-    "stage": "sealed-bundle-integrity-channel-promotion-evidence-publish-rollback-handshake-skeleton",
+    "stage": "integrity-attestation-promotion-apply-readiness-rollback-recovery-ledger-skeleton",
     "reviewArtifacts": [
       "release/REVIEW-MANIFEST.json",
       "release/RELEASE-SUMMARY.md"
@@ -334,12 +352,14 @@
       "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
       "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
       "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
+      "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
       "release/INSTALLER-TARGETS.json",
       "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
       "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
       "release/INSTALLER-BUILDER-ORCHESTRATION.json",
       "release/INSTALLER-CHANNEL-ROUTING.json",
       "release/CHANNEL-PROMOTION-EVIDENCE.json",
+      "release/PROMOTION-APPLY-READINESS.json",
       "release/SIGNING-METADATA.json",
       "release/NOTARIZATION-PLAN.json",
       "release/SIGNING-PUBLISH-PIPELINE.json",
@@ -347,6 +367,7 @@
       "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
       "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
       "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+      "release/ROLLBACK-RECOVERY-LEDGER.json",
       "release/RELEASE-APPROVAL-WORKFLOW.json",
       "release/RELEASE-NOTES.md",
       "release/PUBLISH-GATES.json",

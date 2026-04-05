@@ -1,8 +1,8 @@
-# OpenClaw Studio Phase41 Package Snapshot
+# OpenClaw Studio Phase42 Package Snapshot
 
-这是一个 **phase41 alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40 packaging 与 shell foundations 的基础上继续补齐 sealed-bundle integrity contract、channel promotion evidence 与 publish rollback handshake，但它依然 **不是 installer**。
+这是一个 **phase42 alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40 packaging 与 shell foundations 的基础上继续补齐 integrity attestation evidence、promotion apply readiness 与 rollback recovery ledger，但它依然 **不是 installer**。
 
-当前已验证里程碑：phase41 sealed-bundle integrity contract / channel promotion evidence / publish rollback handshake + docs / smoke / package / release-plan / UI / shared data closeout。
+当前已验证里程碑：phase42 integrity attestation evidence / promotion apply readiness / rollback recovery ledger + docs / smoke / package / release-plan / UI / shared data closeout。
 
 ## 当前能交付什么
 
@@ -60,12 +60,14 @@ openclaw-studio-alpha-shell/
     PACKAGED-APP-STAGED-OUTPUT-SKELETON.json
     PACKAGED-APP-BUNDLE-SEALING-SKELETON.json
     SEALED-BUNDLE-INTEGRITY-CONTRACT.json
+    INTEGRITY-ATTESTATION-EVIDENCE.json
     INSTALLER-TARGETS.json
     INSTALLER-TARGET-BUILDER-SKELETON.json
     INSTALLER-BUILDER-EXECUTION-SKELETON.json
     INSTALLER-BUILDER-ORCHESTRATION.json
     INSTALLER-CHANNEL-ROUTING.json
     CHANNEL-PROMOTION-EVIDENCE.json
+    PROMOTION-APPLY-READINESS.json
     SIGNING-METADATA.json
     NOTARIZATION-PLAN.json
     SIGNING-PUBLISH-PIPELINE.json
@@ -73,6 +75,7 @@ openclaw-studio-alpha-shell/
     SIGNING-PUBLISH-APPROVAL-BRIDGE.json
     SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json
     PUBLISH-ROLLBACK-HANDSHAKE.json
+    ROLLBACK-RECOVERY-LEDGER.json
     RELEASE-APPROVAL-WORKFLOW.json
     RELEASE-NOTES.md
     PUBLISH-GATES.json
@@ -86,7 +89,7 @@ openclaw-studio-alpha-shell/
 
 ## 已复制的 artifact 组
 
-- Renderer bundle: 3 files, 352.8 KiB, output=artifacts/renderer
+- Renderer bundle: 3 files, 353.7 KiB, output=artifacts/renderer
 - Electron bundle: 10 files, 314.2 KiB, output=artifacts/electron
 
 ## 已包含的文档
@@ -105,12 +108,14 @@ openclaw-studio-alpha-shell/
 - release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json（generated）
 - release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json（generated）
 - release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json（generated）
+- release/INTEGRITY-ATTESTATION-EVIDENCE.json（generated）
 - release/INSTALLER-TARGETS.json（generated）
 - release/INSTALLER-TARGET-BUILDER-SKELETON.json（generated）
 - release/INSTALLER-BUILDER-EXECUTION-SKELETON.json（generated）
 - release/INSTALLER-BUILDER-ORCHESTRATION.json（generated）
 - release/INSTALLER-CHANNEL-ROUTING.json（generated）
 - release/CHANNEL-PROMOTION-EVIDENCE.json（generated）
+- release/PROMOTION-APPLY-READINESS.json（generated）
 - release/SIGNING-METADATA.json（generated）
 - release/NOTARIZATION-PLAN.json（generated）
 - release/SIGNING-PUBLISH-PIPELINE.json（generated）
@@ -118,6 +123,7 @@ openclaw-studio-alpha-shell/
 - release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json（generated）
 - release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json（generated）
 - release/PUBLISH-ROLLBACK-HANDSHAKE.json（generated）
+- release/ROLLBACK-RECOVERY-LEDGER.json（generated）
 - release/RELEASE-APPROVAL-WORKFLOW.json（generated）
 - release/RELEASE-NOTES.md（generated）
 - release/PUBLISH-GATES.json（generated）
@@ -164,4 +170,4 @@ openclaw-studio-alpha-shell/
 - `scripts/install-placeholder.cjs` 只解释当前 installer 仍缺什么，不执行安装
 - 如需重新生成整个 snapshot，请回到 repo root 运行 `npm run package:alpha`
 
-Generated: 2026-04-05T01:10:02.938Z
+Generated: 2026-04-05T01:58:51.081Z

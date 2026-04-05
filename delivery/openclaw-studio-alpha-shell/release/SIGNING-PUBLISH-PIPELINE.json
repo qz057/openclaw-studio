@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-pipeline/v1",
-  "generatedAt": "2026-04-05T01:10:02.938Z",
-  "phase": "phase41",
+  "generatedAt": "2026-04-05T01:58:51.081Z",
+  "phase": "phase42",
   "sealedBundleIntegrityContractPath": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
   "gatingHandshakePath": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
   "approvalBridgePath": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",

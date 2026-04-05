@@ -1,8 +1,8 @@
 {
   "schemaVersion": "openclaw-studio-review-manifest/v1",
-  "generatedAt": "2026-04-05T01:10:02.938Z",
-  "phase": "phase41",
-  "milestone": "phase41 sealed-bundle integrity contract / channel promotion evidence / publish rollback handshake + docs / smoke / package / release-plan / UI / shared data closeout",
+  "generatedAt": "2026-04-05T01:58:51.081Z",
+  "phase": "phase42",
+  "milestone": "phase42 integrity attestation evidence / promotion apply readiness / rollback recovery ledger + docs / smoke / package / release-plan / UI / shared data closeout",
   "reviewDocs": [
     "README.md",
     "HANDOFF.md",
@@ -18,12 +18,14 @@
     "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
     "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
     "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
+    "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
     "release/INSTALLER-TARGETS.json",
     "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
     "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
     "release/INSTALLER-BUILDER-ORCHESTRATION.json",
     "release/INSTALLER-CHANNEL-ROUTING.json",
     "release/CHANNEL-PROMOTION-EVIDENCE.json",
+    "release/PROMOTION-APPLY-READINESS.json",
     "release/SIGNING-METADATA.json",
     "release/NOTARIZATION-PLAN.json",
     "release/SIGNING-PUBLISH-PIPELINE.json",
@@ -31,6 +33,7 @@
     "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
     "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
     "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+    "release/ROLLBACK-RECOVERY-LEDGER.json",
     "release/RELEASE-APPROVAL-WORKFLOW.json",
     "release/RELEASE-NOTES.md",
     "release/PUBLISH-GATES.json",
@@ -60,7 +63,7 @@
     }
   ],
   "pipeline": {
-    "stage": "sealed-bundle-integrity-channel-promotion-evidence-publish-rollback-handshake-skeleton",
+    "stage": "integrity-attestation-promotion-apply-readiness-rollback-recovery-ledger-skeleton",
     "stages": [
       {
         "id": "pipeline-docs",
@@ -111,6 +114,12 @@
         "detail": "Bundle sealing metadata now feeds explicit integrity, digest, and audit checkpoints without attesting any real packaged bundle."
       },
       {
+        "id": "pipeline-integrity-attestation",
+        "label": "Integrity attestation evidence",
+        "status": "ready",
+        "detail": "Sealed-bundle integrity contracts now feed explicit attestation packets, verifier inputs, and audit receipts without attesting any live release for real."
+      },
+      {
         "id": "pipeline-installer-builders",
         "label": "Installer-target builder skeleton",
         "status": "ready",
@@ -141,6 +150,12 @@
         "detail": "Channel routing now feeds explicit promotion evidence packets and proof manifests without promoting any artifact for real."
       },
       {
+        "id": "pipeline-promotion-apply-readiness",
+        "label": "Promotion apply readiness",
+        "status": "ready",
+        "detail": "Promotion evidence now feeds explicit apply-readiness manifests, reviewer inputs, and channel preflight packets without applying any promotion for real."
+      },
+      {
         "id": "pipeline-signing-publish",
         "label": "Signing & publish pipeline",
         "status": "ready",
@@ -169,6 +184,12 @@
         "label": "Publish rollback handshake",
         "status": "ready",
         "detail": "Publish and promotion review now carry explicit rollback checkpoints and recovery-channel handoff metadata without rolling anything back for real."
+      },
+      {
+        "id": "pipeline-rollback-recovery-ledger",
+        "label": "Rollback recovery ledger",
+        "status": "ready",
+        "detail": "Rollback checkpoints now feed explicit recovery ledgers, operator notes, and channel recovery manifests without recovering any live publish state."
       },
       {
         "id": "pipeline-approval",

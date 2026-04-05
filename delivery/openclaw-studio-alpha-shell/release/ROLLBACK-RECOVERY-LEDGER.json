@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "openclaw-studio-rollback-recovery-ledger/v1",
+  "generatedAt": "2026-04-05T01:58:51.081Z",
+  "phase": "phase42",
+  "mode": "local-only-review",
+  "ledgers": [
+    {
+      "id": "rollback-ledger-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "publishRollbackPathId": "publish-rollback-alpha-to-beta",
+      "status": "blocked",
+      "ledgerManifestPath": "future/publish/alpha-to-beta/rollback-recovery-ledger.json",
+      "recoveryEntries": [
+        "sealed bundle checkpoints recorded",
+        "promotion evidence anchor recorded",
+        "recovery channel held at alpha"
+      ],
+      "canRecover": false
+    },
+    {
+      "id": "rollback-ledger-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "publishRollbackPathId": "publish-rollback-beta-to-stable",
+      "status": "blocked",
+      "ledgerManifestPath": "future/publish/beta-to-stable/rollback-recovery-ledger.json",
+      "recoveryEntries": [
+        "sealed bundle checkpoints recorded",
+        "promotion evidence anchor recorded",
+        "recovery channel held at beta"
+      ],
+      "canRecover": false
+    }
+  ]
+}

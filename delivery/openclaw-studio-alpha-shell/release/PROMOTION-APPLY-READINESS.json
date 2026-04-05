@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "openclaw-studio-promotion-apply-readiness/v1",
+  "generatedAt": "2026-04-05T01:58:51.081Z",
+  "phase": "phase42",
+  "mode": "local-only-review",
+  "readiness": [
+    {
+      "id": "promotion-apply-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "channelPromotionEvidenceId": "promotion-evidence-alpha-to-beta",
+      "rollbackRecoveryLedgerId": "rollback-ledger-alpha-to-beta",
+      "status": "planned",
+      "readinessManifestPath": "future/channels/alpha-to-beta/promotion-apply-readiness.json",
+      "reviewChecks": [
+        "promotion evidence linked",
+        "route mapping linked",
+        "rollback recovery ledger linked"
+      ],
+      "blockedBy": [
+        "promotion remains non-executable",
+        "artifact upload remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canApply": false
+    },
+    {
+      "id": "promotion-apply-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "channelPromotionEvidenceId": "promotion-evidence-beta-to-stable",
+      "rollbackRecoveryLedgerId": "rollback-ledger-beta-to-stable",
+      "status": "blocked",
+      "readinessManifestPath": "future/channels/beta-to-stable/promotion-apply-readiness.json",
+      "reviewChecks": [
+        "promotion evidence linked",
+        "route mapping linked",
+        "rollback recovery ledger linked"
+      ],
+      "blockedBy": [
+        "promotion remains non-executable",
+        "artifact upload remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canApply": false
+    }
+  ]
+}

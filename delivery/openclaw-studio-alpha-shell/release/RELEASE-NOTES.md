@@ -1,15 +1,15 @@
-# OpenClaw Studio Phase41 Release Notes
+# OpenClaw Studio Phase42 Release Notes
 
-Milestone: phase41 sealed-bundle integrity contract / channel promotion evidence / publish rollback handshake + docs / smoke / package / release-plan / UI / shared data closeout
+Milestone: phase42 integrity attestation evidence / promotion apply readiness / rollback recovery ledger + docs / smoke / package / release-plan / UI / shared data closeout
 
 ## Highlights
-- sealed-bundle integrity contract now turns review-only bundle sealing metadata into explicit per-platform integrity, digest, and audit checkpoints without sealing anything for real
-- channel promotion evidence now maps installer channel routing and promotion targets into explicit alpha -> beta -> stable evidence packets without promoting any artifact for real
-- publish rollback handshake now connects publish gates, promotion evidence, and rollback checkpoints without publishing, promoting, or rolling back anything
+- integrity attestation evidence now turns sealed-bundle integrity contracts into explicit attestation packets, verifier inputs, and audit receipts without attesting any live release for real
+- promotion apply readiness now turns promotion evidence and channel routing into explicit alpha -> beta -> stable apply-readiness manifests without applying any promotion for real
+- rollback recovery ledger now turns rollback checkpoints and recovery channels into explicit ledger entries and recovery notes without recovering any live publish state
 
 ## Current posture
 - still local-only
 - still not an installer
 - still no real publish/upload/sign/notarize actions
 
-Generated: 2026-04-05T01:10:02.938Z
+Generated: 2026-04-05T01:58:51.081Z
