@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-promotion-handshake/v1",
-  "generatedAt": "2026-04-05T14:27:12.823Z",
-  "phase": "phase50",
+  "generatedAt": "2026-04-05T15:12:45.054Z",
+  "phase": "phase51",
   "mode": "local-only-review",
   "canPromote": false,
   "channelRoutingPath": "release/INSTALLER-CHANNEL-ROUTING.json",
@@ -13,6 +13,7 @@
   "attestationOperatorDispatchPacketsPath": "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json",
   "attestationOperatorDispatchReceiptsPath": "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
   "attestationOperatorReconciliationLedgersPath": "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
+  "attestationOperatorSettlementPacksPath": "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
   "promotionApplyManifestsPath": "release/PROMOTION-APPLY-MANIFESTS.json",
   "attestationApplyAuditPacksPath": "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
   "promotionExecutionCheckpointsPath": "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
@@ -22,6 +23,7 @@
   "promotionStagedApplyCommandSheetsPath": "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
   "promotionStagedApplyConfirmationLedgersPath": "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
   "promotionStagedApplyCloseoutJournalsPath": "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
+  "promotionStagedApplySignoffSheetsPath": "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
   "approvalBridgePath": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
   "publishGatesPath": "release/PUBLISH-GATES.json",
   "promotionGatesPath": "release/PROMOTION-GATES.json",
@@ -30,6 +32,7 @@
   "rollbackCutoverExecutionChecklistsPath": "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
   "rollbackCutoverExecutionRecordsPath": "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
   "rollbackCutoverOutcomeReportsPath": "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
+  "rollbackCutoverPublicationBundlesPath": "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
   "participants": [
     "release-engineering",
     "security",
@@ -106,6 +109,11 @@
         "required": true
       },
       {
+        "id": "request-attestation-operator-settlement-packs",
+        "label": "Attestation operator settlement packs",
+        "required": true
+      },
+      {
         "id": "request-promotion-apply-manifests",
         "label": "Promotion apply manifests",
         "required": true
@@ -146,6 +154,11 @@
         "required": true
       },
       {
+        "id": "request-promotion-staged-apply-signoff-sheets",
+        "label": "Promotion staged-apply signoff sheets",
+        "required": true
+      },
+      {
         "id": "request-publish-evidence",
         "label": "Publish evidence",
         "required": true
@@ -173,6 +186,11 @@
       {
         "id": "request-rollback-cutover-outcome-reports",
         "label": "Rollback cutover outcome reports",
+        "required": true
+      },
+      {
+        "id": "request-rollback-cutover-publication-bundles",
+        "label": "Rollback cutover publication bundles",
         "required": true
       },
       {
@@ -281,6 +299,12 @@
       "artifact": "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json"
     },
     {
+      "id": "promotion-ack-attestation-operator-settlement-packs",
+      "label": "Attestation operator settlement packs reviewed",
+      "status": "blocked",
+      "artifact": "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json"
+    },
+    {
       "id": "promotion-ack-apply-manifests",
       "label": "Promotion apply manifests reviewed",
       "status": "planned",
@@ -329,6 +353,12 @@
       "artifact": "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json"
     },
     {
+      "id": "promotion-ack-staged-apply-signoff-sheets",
+      "label": "Promotion staged-apply signoff sheets reviewed",
+      "status": "blocked",
+      "artifact": "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json"
+    },
+    {
       "id": "promotion-ack-approval-bridge",
       "label": "Approval bridge reviewed",
       "status": "blocked",
@@ -369,6 +399,12 @@
       "label": "Rollback cutover outcome reports reviewed",
       "status": "blocked",
       "artifact": "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json"
+    },
+    {
+      "id": "promotion-ack-rollback-cutover-publication-bundles",
+      "label": "Rollback cutover publication bundles reviewed",
+      "status": "blocked",
+      "artifact": "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json"
     },
     {
       "id": "promotion-ack-promotion-gates",
@@ -478,6 +514,15 @@
       ]
     },
     {
+      "id": "promotion-handshake-attestation-settlement-packs",
+      "label": "Attestation operator settlement pack review",
+      "status": "blocked",
+      "evidence": [
+        "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
+        "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json"
+      ]
+    },
+    {
       "id": "promotion-handshake-apply-manifests",
       "label": "Promotion apply manifest review",
       "status": "planned",
@@ -550,6 +595,15 @@
       ]
     },
     {
+      "id": "promotion-handshake-staged-apply-signoff-sheets",
+      "label": "Promotion staged-apply signoff sheet review",
+      "status": "blocked",
+      "evidence": [
+        "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
+        "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json"
+      ]
+    },
+    {
       "id": "promotion-handshake-approval",
       "label": "Approval bridge review",
       "status": "blocked",
@@ -613,6 +667,15 @@
       ]
     },
     {
+      "id": "promotion-handshake-rollback-cutover-publication-bundles",
+      "label": "Rollback cutover publication bundle review",
+      "status": "blocked",
+      "evidence": [
+        "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
+        "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json"
+      ]
+    },
+    {
       "id": "promotion-handshake-promotion",
       "label": "Promotion gate review",
       "status": "blocked",
@@ -634,6 +697,7 @@
     "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json",
     "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
     "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
+    "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
     "release/PROMOTION-APPLY-MANIFESTS.json",
     "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
     "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json",
@@ -642,6 +706,7 @@
     "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
     "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
     "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
+    "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
     "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
     "release/PUBLISH-GATES.json",
     "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
@@ -649,18 +714,17 @@
     "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
     "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
     "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
+    "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
     "release/PROMOTION-GATES.json",
     "release/RELEASE-APPROVAL-WORKFLOW.json"
   ],
   "blockedBy": [
     "sealed bundles remain metadata-only",
     "artifact upload remains blocked",
-    "attestation operator reconciliation remains metadata-only",
-    "promotion staged-apply closeout journals remain metadata-only",
-    "rollback cutover outcome reports remain metadata-only",
+    "attestation operator settlement packs remain metadata-only",
+    "promotion staged-apply signoff sheets remain metadata-only",
+    "rollback cutover publication bundles remain metadata-only",
     "publish rollback remains metadata-only",
-    "promotion staged-apply confirmation ledgers remain metadata-only",
-    "rollback cutover execution records remain metadata-only",
     "promotion gates remain non-executable",
     "host-side execution remains disabled"
   ]

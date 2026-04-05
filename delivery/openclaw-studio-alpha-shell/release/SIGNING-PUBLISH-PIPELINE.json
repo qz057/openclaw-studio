@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-pipeline/v1",
-  "generatedAt": "2026-04-05T14:27:12.823Z",
-  "phase": "phase50",
+  "generatedAt": "2026-04-05T15:12:45.054Z",
+  "phase": "phase51",
   "sealedBundleIntegrityContractPath": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
   "attestationVerificationPacksPath": "release/ATTESTATION-VERIFICATION-PACKS.json",
   "attestationApplyAuditPacksPath": "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
@@ -11,6 +11,7 @@
   "attestationOperatorDispatchPacketsPath": "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json",
   "attestationOperatorDispatchReceiptsPath": "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
   "attestationOperatorReconciliationLedgersPath": "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
+  "attestationOperatorSettlementPacksPath": "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
   "gatingHandshakePath": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
   "approvalBridgePath": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
   "channelRoutingPath": "release/INSTALLER-CHANNEL-ROUTING.json",
@@ -23,6 +24,7 @@
   "promotionStagedApplyCommandSheetsPath": "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
   "promotionStagedApplyConfirmationLedgersPath": "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
   "promotionStagedApplyCloseoutJournalsPath": "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
+  "promotionStagedApplySignoffSheetsPath": "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
   "promotionHandshakePath": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
   "publishRollbackHandshakePath": "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
   "rollbackExecutionRehearsalLedgerPath": "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
@@ -33,6 +35,7 @@
   "rollbackCutoverExecutionChecklistsPath": "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
   "rollbackCutoverExecutionRecordsPath": "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
   "rollbackCutoverOutcomeReportsPath": "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
+  "rollbackCutoverPublicationBundlesPath": "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
   "stages": [
     {
       "id": "pipeline-packaged-app-directory-materialization",
@@ -95,6 +98,11 @@
       "status": "blocked"
     },
     {
+      "id": "pipeline-attestation-operator-settlement-packs",
+      "label": "Attestation operator settlement packs",
+      "status": "blocked"
+    },
+    {
       "id": "pipeline-installer-builder-execution",
       "label": "Installer builder execution skeleton",
       "status": "planned"
@@ -152,6 +160,11 @@
     {
       "id": "pipeline-promotion-staged-apply-closeout-journals",
       "label": "Promotion staged-apply closeout journals",
+      "status": "blocked"
+    },
+    {
+      "id": "pipeline-promotion-staged-apply-signoff-sheets",
+      "label": "Promotion staged-apply signoff sheets",
       "status": "blocked"
     },
     {
@@ -232,6 +245,11 @@
     {
       "id": "pipeline-rollback-cutover-outcome-reports",
       "label": "Rollback cutover outcome reports",
+      "status": "blocked"
+    },
+    {
+      "id": "pipeline-rollback-cutover-publication-bundles",
+      "label": "Rollback cutover publication bundles",
       "status": "blocked"
     },
     {

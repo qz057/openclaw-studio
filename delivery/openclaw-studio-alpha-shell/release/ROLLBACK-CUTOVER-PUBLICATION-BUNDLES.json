@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "openclaw-studio-rollback-cutover-publication-bundles/v1",
+  "generatedAt": "2026-04-05T15:12:45.054Z",
+  "phase": "phase51",
+  "mode": "local-only-review",
+  "bundles": [
+    {
+      "id": "rollback-publication-bundle-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "publishRollbackPathId": "publish-rollback-alpha-to-beta",
+      "rollbackCutoverOutcomeReportId": "rollback-outcome-report-alpha-to-beta",
+      "attestationOperatorSettlementPackId": "attestation-settlement-pack-alpha-to-beta",
+      "promotionStagedApplySignoffSheetId": "promotion-signoff-sheet-alpha-to-beta",
+      "publishGateId": "gate-rollback-cutover-publication-bundles",
+      "status": "blocked",
+      "publicationBundlePath": "future/publish/alpha-to-beta/rollback-cutover-publication-bundle.json",
+      "releaseNotesAppendixPath": "future/publish/alpha-to-beta/rollback-cutover-release-notes.md",
+      "publicationDigestPath": "future/publish/alpha-to-beta/rollback-cutover-publication-digest.json",
+      "bundleSections": [
+        {
+          "id": "rollback-publication-alpha-to-beta-operator",
+          "label": "Operator settlement appendix",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "attestation-settlement-pack-alpha-to-beta",
+            "promotion-signoff-sheet-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "rollback-publication-alpha-to-beta-platforms",
+          "label": "Platform recovery publication digest",
+          "owner": "runtime-owner",
+          "status": "blocked",
+          "evidence": [
+            "rollback-outcome-report-alpha-to-beta",
+            "publish-rollback-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "rollback-publication-alpha-to-beta-cutover",
+          "label": "Cutover publication handoff",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "rollback-outcome-report-alpha-to-beta",
+            "promotion-signoff-sheet-alpha-to-beta"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "rollback outcome report linked",
+        "attestation settlement pack linked",
+        "promotion signoff sheet linked",
+        "release-notes appendix path declared",
+        "publication digest path declared"
+      ],
+      "blockedBy": [
+        "rollback cutover publication bundles remain metadata-only",
+        "publish rollback remains non-executable",
+        "promotion staged-apply signoff remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canPublishBundle": false
+    },
+    {
+      "id": "rollback-publication-bundle-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "publishRollbackPathId": "publish-rollback-beta-to-stable",
+      "rollbackCutoverOutcomeReportId": "rollback-outcome-report-beta-to-stable",
+      "attestationOperatorSettlementPackId": "attestation-settlement-pack-beta-to-stable",
+      "promotionStagedApplySignoffSheetId": "promotion-signoff-sheet-beta-to-stable",
+      "publishGateId": "gate-rollback-cutover-publication-bundles",
+      "status": "blocked",
+      "publicationBundlePath": "future/publish/beta-to-stable/rollback-cutover-publication-bundle.json",
+      "releaseNotesAppendixPath": "future/publish/beta-to-stable/rollback-cutover-release-notes.md",
+      "publicationDigestPath": "future/publish/beta-to-stable/rollback-cutover-publication-digest.json",
+      "bundleSections": [
+        {
+          "id": "rollback-publication-beta-to-stable-operator",
+          "label": "Operator settlement appendix",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "attestation-settlement-pack-beta-to-stable",
+            "promotion-signoff-sheet-beta-to-stable"
+          ]
+        },
+        {
+          "id": "rollback-publication-beta-to-stable-platforms",
+          "label": "Platform recovery publication digest",
+          "owner": "runtime-owner",
+          "status": "blocked",
+          "evidence": [
+            "rollback-outcome-report-beta-to-stable",
+            "publish-rollback-beta-to-stable"
+          ]
+        },
+        {
+          "id": "rollback-publication-beta-to-stable-cutover",
+          "label": "Cutover publication handoff",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "rollback-outcome-report-beta-to-stable",
+            "promotion-signoff-sheet-beta-to-stable"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "rollback outcome report linked",
+        "attestation settlement pack linked",
+        "promotion signoff sheet linked",
+        "release-notes appendix path declared",
+        "publication digest path declared"
+      ],
+      "blockedBy": [
+        "rollback cutover publication bundles remain metadata-only",
+        "publish rollback remains non-executable",
+        "promotion staged-apply signoff remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canPublishBundle": false
+    }
+  ]
+}

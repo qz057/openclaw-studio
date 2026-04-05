@@ -1,0 +1,146 @@
+{
+  "schemaVersion": "openclaw-studio-promotion-staged-apply-signoff-sheets/v1",
+  "generatedAt": "2026-04-05T15:12:45.054Z",
+  "phase": "phase51",
+  "mode": "local-only-review",
+  "signoffSheets": [
+    {
+      "id": "promotion-signoff-sheet-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "attestationOperatorSettlementPackId": "attestation-settlement-pack-alpha-to-beta",
+      "promotionStagedApplyCloseoutJournalId": "promotion-closeout-journal-alpha-to-beta",
+      "rollbackCutoverOutcomeReportId": "rollback-outcome-report-alpha-to-beta",
+      "releaseApprovalStageId": "approval-promotion-apply",
+      "publishGateId": "gate-promotion-staged-apply-signoff-sheets",
+      "status": "blocked",
+      "signoffSheetPath": "future/channels/alpha-to-beta/promotion-staged-apply-signoff-sheet.json",
+      "decisionLedgerPath": "future/channels/alpha-to-beta/promotion-staged-apply-signoff-decisions.json",
+      "releaseReadyPacketPath": "future/channels/alpha-to-beta/promotion-staged-apply-release-ready-packet.json",
+      "signoffs": [
+        {
+          "id": "promotion-signoff-alpha-to-beta-security",
+          "label": "Operator settlement acknowledgement",
+          "owner": "security-reviewer",
+          "status": "planned",
+          "evidence": [
+            "attestation-settlement-pack-alpha-to-beta",
+            "promotion-closeout-journal-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "promotion-signoff-alpha-to-beta-release-manager",
+          "label": "Freeze and rollout signoff",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "promotion-closeout-journal-alpha-to-beta",
+            "rollback-outcome-report-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "promotion-signoff-alpha-to-beta-release-engineering",
+          "label": "Apply window signoff",
+          "owner": "release-engineering",
+          "status": "blocked",
+          "evidence": [
+            "attestation-settlement-pack-alpha-to-beta",
+            "rollback-outcome-report-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "promotion-signoff-alpha-to-beta-product-owner",
+          "label": "Promotion go/no-go signoff",
+          "owner": "product-owner",
+          "status": "blocked",
+          "evidence": [
+            "promotion-closeout-journal-alpha-to-beta",
+            "rollback-outcome-report-alpha-to-beta"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "attestation settlement pack linked",
+        "promotion closeout journal linked",
+        "rollback outcome report linked",
+        "release-ready packet path declared"
+      ],
+      "blockedBy": [
+        "promotion staged-apply signoff sheets remain metadata-only",
+        "attestation operator settlement packs remain metadata-only",
+        "publish gating remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canSignOff": false
+    },
+    {
+      "id": "promotion-signoff-sheet-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "attestationOperatorSettlementPackId": "attestation-settlement-pack-beta-to-stable",
+      "promotionStagedApplyCloseoutJournalId": "promotion-closeout-journal-beta-to-stable",
+      "rollbackCutoverOutcomeReportId": "rollback-outcome-report-beta-to-stable",
+      "releaseApprovalStageId": "approval-promotion-apply",
+      "publishGateId": "gate-promotion-staged-apply-signoff-sheets",
+      "status": "blocked",
+      "signoffSheetPath": "future/channels/beta-to-stable/promotion-staged-apply-signoff-sheet.json",
+      "decisionLedgerPath": "future/channels/beta-to-stable/promotion-staged-apply-signoff-decisions.json",
+      "releaseReadyPacketPath": "future/channels/beta-to-stable/promotion-staged-apply-release-ready-packet.json",
+      "signoffs": [
+        {
+          "id": "promotion-signoff-beta-to-stable-security",
+          "label": "Operator settlement acknowledgement",
+          "owner": "security-reviewer",
+          "status": "blocked",
+          "evidence": [
+            "attestation-settlement-pack-beta-to-stable",
+            "promotion-closeout-journal-beta-to-stable"
+          ]
+        },
+        {
+          "id": "promotion-signoff-beta-to-stable-release-manager",
+          "label": "Freeze and rollout signoff",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "promotion-closeout-journal-beta-to-stable",
+            "rollback-outcome-report-beta-to-stable"
+          ]
+        },
+        {
+          "id": "promotion-signoff-beta-to-stable-release-engineering",
+          "label": "Apply window signoff",
+          "owner": "release-engineering",
+          "status": "blocked",
+          "evidence": [
+            "attestation-settlement-pack-beta-to-stable",
+            "rollback-outcome-report-beta-to-stable"
+          ]
+        },
+        {
+          "id": "promotion-signoff-beta-to-stable-product-owner",
+          "label": "Promotion go/no-go signoff",
+          "owner": "product-owner",
+          "status": "blocked",
+          "evidence": [
+            "promotion-closeout-journal-beta-to-stable",
+            "rollback-outcome-report-beta-to-stable"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "attestation settlement pack linked",
+        "promotion closeout journal linked",
+        "rollback outcome report linked",
+        "release-ready packet path declared"
+      ],
+      "blockedBy": [
+        "promotion staged-apply signoff sheets remain metadata-only",
+        "attestation operator settlement packs remain metadata-only",
+        "publish gating remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canSignOff": false
+    }
+  ]
+}

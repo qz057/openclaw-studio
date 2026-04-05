@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-release-approval-workflow/v1",
-  "generatedAt": "2026-04-05T14:27:12.823Z",
-  "phase": "phase50",
+  "generatedAt": "2026-04-05T15:12:45.054Z",
+  "phase": "phase51",
   "mode": "local-only-review",
   "canApprove": false,
   "gatingHandshakePath": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
@@ -63,7 +63,8 @@
         "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json",
         "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json",
         "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
-        "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json"
+        "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
+        "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json"
       ]
     },
     {
@@ -98,7 +99,8 @@
         "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json",
         "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
         "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
-        "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json"
+        "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
+        "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json"
       ]
     },
     {
@@ -141,7 +143,8 @@
         "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
         "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
         "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
-        "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json"
+        "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
+        "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json"
       ]
     },
     {

@@ -1,0 +1,144 @@
+{
+  "schemaVersion": "openclaw-studio-attestation-operator-settlement-packs/v1",
+  "generatedAt": "2026-04-05T15:12:45.054Z",
+  "phase": "phase51",
+  "mode": "local-only-review",
+  "packs": [
+    {
+      "id": "attestation-settlement-pack-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "attestationOperatorReconciliationLedgerId": "attestation-reconciliation-ledger-alpha-to-beta",
+      "promotionStagedApplyCloseoutJournalId": "promotion-closeout-journal-alpha-to-beta",
+      "rollbackCutoverOutcomeReportId": "rollback-outcome-report-alpha-to-beta",
+      "releaseApprovalStageId": "approval-attestation-verification",
+      "publishGateId": "gate-attestation-operator-settlement-packs",
+      "status": "blocked",
+      "settlementPackPath": "future/channels/alpha-to-beta/attestation-operator-settlement-pack.json",
+      "escalationDispositionPath": "future/channels/alpha-to-beta/attestation-operator-escalation-disposition.json",
+      "approvalAttachmentPath": "future/channels/alpha-to-beta/attestation-operator-approval-attachment.json",
+      "handoffTargets": [
+        "release-manager",
+        "product-owner",
+        "security"
+      ],
+      "settlements": [
+        {
+          "id": "attestation-settlement-alpha-to-beta-security-reviewer",
+          "role": "security-reviewer",
+          "sourceSettlementId": "attestation-reconciliation-alpha-to-beta-security-reviewer",
+          "disposition": "dispatch-intake-cleared",
+          "status": "planned",
+          "evidence": [
+            "attestation-reconciliation-ledger-alpha-to-beta",
+            "promotion-closeout-journal-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "attestation-settlement-alpha-to-beta-release-manager",
+          "role": "release-manager",
+          "sourceSettlementId": "attestation-reconciliation-alpha-to-beta-release-manager",
+          "disposition": "freeze-hold-cleared",
+          "status": "blocked",
+          "evidence": [
+            "attestation-reconciliation-ledger-alpha-to-beta",
+            "rollback-outcome-report-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "attestation-settlement-alpha-to-beta-release-engineering",
+          "role": "release-engineering",
+          "sourceSettlementId": "attestation-reconciliation-alpha-to-beta-release-engineering",
+          "disposition": "apply-window-cleared",
+          "status": "blocked",
+          "evidence": [
+            "attestation-reconciliation-ledger-alpha-to-beta",
+            "rollback-outcome-report-alpha-to-beta"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "reconciliation ledger linked",
+        "promotion closeout journal linked",
+        "rollback outcome report linked",
+        "escalation disposition path declared",
+        "approval attachment path declared"
+      ],
+      "blockedBy": [
+        "attestation operator settlement packs remain metadata-only",
+        "promotion staged-apply signoff remains non-executable",
+        "rollback cutover publication remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canAssembleSettlementPack": false
+    },
+    {
+      "id": "attestation-settlement-pack-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "attestationOperatorReconciliationLedgerId": "attestation-reconciliation-ledger-beta-to-stable",
+      "promotionStagedApplyCloseoutJournalId": "promotion-closeout-journal-beta-to-stable",
+      "rollbackCutoverOutcomeReportId": "rollback-outcome-report-beta-to-stable",
+      "releaseApprovalStageId": "approval-attestation-verification",
+      "publishGateId": "gate-attestation-operator-settlement-packs",
+      "status": "blocked",
+      "settlementPackPath": "future/channels/beta-to-stable/attestation-operator-settlement-pack.json",
+      "escalationDispositionPath": "future/channels/beta-to-stable/attestation-operator-escalation-disposition.json",
+      "approvalAttachmentPath": "future/channels/beta-to-stable/attestation-operator-approval-attachment.json",
+      "handoffTargets": [
+        "release-manager",
+        "product-owner",
+        "security"
+      ],
+      "settlements": [
+        {
+          "id": "attestation-settlement-beta-to-stable-security-reviewer",
+          "role": "security-reviewer",
+          "sourceSettlementId": "attestation-reconciliation-beta-to-stable-security-reviewer",
+          "disposition": "dispatch-intake-cleared",
+          "status": "blocked",
+          "evidence": [
+            "attestation-reconciliation-ledger-beta-to-stable",
+            "promotion-closeout-journal-beta-to-stable"
+          ]
+        },
+        {
+          "id": "attestation-settlement-beta-to-stable-release-manager",
+          "role": "release-manager",
+          "sourceSettlementId": "attestation-reconciliation-beta-to-stable-release-manager",
+          "disposition": "freeze-hold-cleared",
+          "status": "blocked",
+          "evidence": [
+            "attestation-reconciliation-ledger-beta-to-stable",
+            "rollback-outcome-report-beta-to-stable"
+          ]
+        },
+        {
+          "id": "attestation-settlement-beta-to-stable-release-engineering",
+          "role": "release-engineering",
+          "sourceSettlementId": "attestation-reconciliation-beta-to-stable-release-engineering",
+          "disposition": "apply-window-cleared",
+          "status": "blocked",
+          "evidence": [
+            "attestation-reconciliation-ledger-beta-to-stable",
+            "rollback-outcome-report-beta-to-stable"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "reconciliation ledger linked",
+        "promotion closeout journal linked",
+        "rollback outcome report linked",
+        "escalation disposition path declared",
+        "approval attachment path declared"
+      ],
+      "blockedBy": [
+        "attestation operator settlement packs remain metadata-only",
+        "promotion staged-apply signoff remains non-executable",
+        "rollback cutover publication remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canAssembleSettlementPack": false
+    }
+  ]
+}

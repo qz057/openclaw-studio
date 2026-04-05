@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-approval-bridge/v1",
-  "generatedAt": "2026-04-05T14:27:12.823Z",
-  "phase": "phase50",
+  "generatedAt": "2026-04-05T15:12:45.054Z",
+  "phase": "phase51",
   "mode": "review-only",
   "bridge": [
     {
@@ -53,8 +53,14 @@
       "status": "blocked"
     },
     {
-      "id": "bridge-reconciliation-ledgers-to-gating",
+      "id": "bridge-reconciliation-ledgers-to-settlement-packs",
       "from": "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
+      "to": "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-settlement-packs-to-gating",
+      "from": "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
       "to": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
       "status": "blocked"
     },
@@ -125,8 +131,14 @@
       "status": "blocked"
     },
     {
-      "id": "bridge-closeout-journals-to-promotion-handshake",
+      "id": "bridge-closeout-journals-to-signoff-sheets",
       "from": "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
+      "to": "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-signoff-sheets-to-promotion-handshake",
+      "from": "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
       "to": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
       "status": "blocked"
     },
@@ -185,8 +197,14 @@
       "status": "blocked"
     },
     {
-      "id": "bridge-outcome-reports-to-publish",
+      "id": "bridge-outcome-reports-to-publication-bundles",
       "from": "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
+      "to": "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-publication-bundles-to-publish",
+      "from": "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
       "to": "release/PUBLISH-GATES.json",
       "status": "blocked"
     },
