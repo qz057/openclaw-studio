@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-rollback-cutover-execution-checklists/v1",
-  "generatedAt": "2026-04-05T13:09:04.389Z",
-  "phase": "phase48",
+  "generatedAt": "2026-04-05T13:56:57.209Z",
+  "phase": "phase49",
   "mode": "local-only-review",
   "checklists": [
     {
@@ -13,9 +13,13 @@
       "rollbackCutoverHandoffPlanId": "rollback-handoff-alpha-to-beta",
       "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
       "promotionStagedApplyCommandSheetId": "promotion-command-sheet-alpha-to-beta",
+      "promotionStagedApplyConfirmationLedgerId": "promotion-confirmation-ledger-alpha-to-beta",
       "attestationOperatorDispatchPacketId": "attestation-dispatch-packet-alpha-to-beta",
+      "attestationOperatorDispatchReceiptId": "attestation-dispatch-receipt-alpha-to-beta",
+      "rollbackCutoverExecutionRecordId": "rollback-execution-record-alpha-to-beta",
       "status": "blocked",
       "checklistPath": "future/publish/alpha-to-beta/rollback-cutover-execution-checklist.json",
+      "executionRecordPath": "future/publish/alpha-to-beta/rollback-cutover-execution-record.json",
       "executionSections": [
         {
           "id": "rollback-checklist-alpha-to-beta-freeze",
@@ -25,7 +29,8 @@
           "evidence": [
             "attestation-dispatch-packet-alpha-to-beta",
             "promotion-command-sheet-alpha-to-beta"
-          ]
+          ],
+          "executionRecordSectionId": "rollback-execution-record-alpha-to-beta-freeze"
         },
         {
           "id": "rollback-checklist-alpha-to-beta-platforms",
@@ -35,7 +40,8 @@
           "evidence": [
             "rollback-cutover-map-alpha-to-beta",
             "rollback-readiness-alpha-to-beta"
-          ]
+          ],
+          "executionRecordSectionId": "rollback-execution-record-alpha-to-beta-platforms"
         },
         {
           "id": "rollback-checklist-alpha-to-beta-cutover",
@@ -45,14 +51,16 @@
           "evidence": [
             "rollback-handoff-alpha-to-beta",
             "publish-rollback-alpha-to-beta"
-          ]
+          ],
+          "executionRecordSectionId": "rollback-execution-record-alpha-to-beta-cutover"
         }
       ],
       "reviewChecks": [
         "rollback cutover readiness map linked",
         "rollback cutover handoff plan linked",
         "promotion command sheet linked",
-        "dispatch packet linked"
+        "dispatch packet linked",
+        "execution record anchor declared"
       ],
       "blockedBy": [
         "rollback cutover execution checklists remain metadata-only",
@@ -70,9 +78,13 @@
       "rollbackCutoverHandoffPlanId": "rollback-handoff-beta-to-stable",
       "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
       "promotionStagedApplyCommandSheetId": "promotion-command-sheet-beta-to-stable",
+      "promotionStagedApplyConfirmationLedgerId": "promotion-confirmation-ledger-beta-to-stable",
       "attestationOperatorDispatchPacketId": "attestation-dispatch-packet-beta-to-stable",
+      "attestationOperatorDispatchReceiptId": "attestation-dispatch-receipt-beta-to-stable",
+      "rollbackCutoverExecutionRecordId": "rollback-execution-record-beta-to-stable",
       "status": "blocked",
       "checklistPath": "future/publish/beta-to-stable/rollback-cutover-execution-checklist.json",
+      "executionRecordPath": "future/publish/beta-to-stable/rollback-cutover-execution-record.json",
       "executionSections": [
         {
           "id": "rollback-checklist-beta-to-stable-freeze",
@@ -82,7 +94,8 @@
           "evidence": [
             "attestation-dispatch-packet-beta-to-stable",
             "promotion-command-sheet-beta-to-stable"
-          ]
+          ],
+          "executionRecordSectionId": "rollback-execution-record-beta-to-stable-freeze"
         },
         {
           "id": "rollback-checklist-beta-to-stable-platforms",
@@ -92,7 +105,8 @@
           "evidence": [
             "rollback-cutover-map-beta-to-stable",
             "rollback-readiness-beta-to-stable"
-          ]
+          ],
+          "executionRecordSectionId": "rollback-execution-record-beta-to-stable-platforms"
         },
         {
           "id": "rollback-checklist-beta-to-stable-cutover",
@@ -102,14 +116,16 @@
           "evidence": [
             "rollback-handoff-beta-to-stable",
             "publish-rollback-beta-to-stable"
-          ]
+          ],
+          "executionRecordSectionId": "rollback-execution-record-beta-to-stable-cutover"
         }
       ],
       "reviewChecks": [
         "rollback cutover readiness map linked",
         "rollback cutover handoff plan linked",
         "promotion command sheet linked",
-        "dispatch packet linked"
+        "dispatch packet linked",
+        "execution record anchor declared"
       ],
       "blockedBy": [
         "rollback cutover execution checklists remain metadata-only",

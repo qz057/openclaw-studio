@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-approval-bridge/v1",
-  "generatedAt": "2026-04-05T13:09:04.389Z",
-  "phase": "phase48",
+  "generatedAt": "2026-04-05T13:56:57.209Z",
+  "phase": "phase49",
   "mode": "review-only",
   "bridge": [
     {
@@ -41,8 +41,14 @@
       "status": "blocked"
     },
     {
-      "id": "bridge-dispatch-packets-to-gating",
+      "id": "bridge-dispatch-packets-to-dispatch-receipts",
       "from": "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json",
+      "to": "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-dispatch-receipts-to-gating",
+      "from": "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
       "to": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
       "status": "blocked"
     },
@@ -101,8 +107,14 @@
       "status": "blocked"
     },
     {
-      "id": "bridge-command-sheets-to-promotion-handshake",
+      "id": "bridge-command-sheets-to-confirmation-ledgers",
       "from": "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
+      "to": "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-confirmation-ledgers-to-promotion-handshake",
+      "from": "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
       "to": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
       "status": "blocked"
     },
@@ -149,8 +161,14 @@
       "status": "blocked"
     },
     {
-      "id": "bridge-execution-checklists-to-publish",
+      "id": "bridge-execution-checklists-to-execution-records",
       "from": "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
+      "to": "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-execution-records-to-publish",
+      "from": "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
       "to": "release/PUBLISH-GATES.json",
       "status": "blocked"
     },

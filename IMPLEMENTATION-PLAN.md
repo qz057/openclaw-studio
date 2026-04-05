@@ -196,6 +196,15 @@
 - smoke 已提升到验证 phase48 attestation operator dispatch packets / promotion staged-apply command sheets / rollback cutover execution checklists contract 与 renderer markers
 - README / HANDOFF / package snapshot 已同步反映 phase48 reality
 
+### Phase 49（当前已完成）
+- phase48 的 formal-release skeleton 已继续下沉成更明确的 attestation operator dispatch receipts / promotion staged-apply confirmation ledgers / rollback cutover execution records layer
+- release skeleton 现在补齐 ATTESTATION-OPERATOR-DISPATCH-RECEIPTS / PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS / ROLLBACK-CUTOVER-EXECUTION-RECORDS
+- shell 现在补齐 Attestation Operator Dispatch Receipts / Promotion Staged-apply Confirmation Ledgers / Rollback Cutover Execution Records 可见性
+- package snapshot 现在具备 attestation operator dispatch receipts / promotion staged-apply confirmation ledgers / rollback cutover execution records，但仍不做真实 installer / approval / publish / operator receipt reconciliation / staged confirmation closeout / rollback cutover record emission
+- 全部仍然保持 `local-only`，不做真实 host-side execution 或系统级窗口操作
+- smoke 已提升到验证 phase49 attestation operator dispatch receipts / promotion staged-apply confirmation ledgers / rollback cutover execution records contract 与 renderer markers
+- README / HANDOFF / package snapshot 已同步反映 phase49 reality
+
 ## 当前明确边界
 
 当前只允许：
@@ -204,7 +213,7 @@
 - dry-run / preview / simulate
 - Studio-local execute（只改应用内 in-memory state/history）
 - phase27 command surface / layout persistence / window intent staging
-- phase48 attestation operator dispatch packets / promotion staged-apply command sheets / rollback cutover execution checklists
+- phase49 attestation operator dispatch receipts / promotion staged-apply confirmation ledgers / rollback cutover execution records
 - phase26/27/28 release skeleton / artifact review / handoff docs / package metadata
 
 当前明确禁止：
@@ -226,7 +235,7 @@ npm run start:smoke
 npm run package:alpha
 ```
 
-phase48 可额外跑：
+phase49 可额外跑：
 
 ```bash
 npm run release:plan
@@ -234,13 +243,13 @@ npm run release:plan
 
 ## 下一阶段（建议）
 
-### Phase 49
-目标：在不开放危险执行的前提下，继续把 phase48 foundations 推进为更完整的产品能力与交付链路。
+### Phase 50
+目标：在不开放危险执行的前提下，继续把 phase49 foundations 推进为更完整的产品能力与交付链路。
 
 范围建议：
 - 更深的 Inspector / command depth / trace drill-down
 - 更真实的 multi-window orchestration 与跨窗口共享状态
-- 把当前 skeleton 继续推进为 executable review-only attestation operator packet issuance / promotion staged-apply confirmation / rollback cutover checklist execution / release approval pipeline
+- 把当前 skeleton 继续推进为 executable review-only attestation operator receipt reconciliation / promotion staged-apply confirmation closeout / rollback cutover execution record closeout / release approval pipeline
 - 在 approval / lifecycle / rollback 真实闭环前继续提升 observability，而不是开启真实 host-side execution
 
 ### 后续阶段

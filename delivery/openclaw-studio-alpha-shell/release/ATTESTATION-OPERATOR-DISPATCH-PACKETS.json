@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-attestation-operator-dispatch-packets/v1",
-  "generatedAt": "2026-04-05T13:09:04.389Z",
-  "phase": "phase48",
+  "generatedAt": "2026-04-05T13:56:57.209Z",
+  "phase": "phase49",
   "mode": "local-only-review",
   "packets": [
     {
@@ -14,11 +14,13 @@
       "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
       "promotionStagedApplyRunsheetId": "promotion-runsheet-alpha-to-beta",
       "promotionStagedApplyCommandSheetId": "promotion-command-sheet-alpha-to-beta",
+      "attestationOperatorDispatchReceiptId": "attestation-dispatch-receipt-alpha-to-beta",
       "rollbackCutoverHandoffPlanId": "rollback-handoff-alpha-to-beta",
       "rollbackCutoverExecutionChecklistId": "rollback-checklist-alpha-to-beta",
       "status": "blocked",
       "dispatchPacketPath": "future/channels/alpha-to-beta/attestation-operator-dispatch-packet.json",
       "dispatchEnvelopePath": "future/channels/alpha-to-beta/dispatch-envelope.json",
+      "dispatchReceiptLedgerPath": "future/channels/alpha-to-beta/dispatch-receipts/ledger.json",
       "targetPackets": [
         {
           "id": "dispatch-packet-alpha-to-beta-security-reviewer",
@@ -26,6 +28,7 @@
           "sourceManifestTrackId": "dispatch-alpha-to-beta-security-review",
           "packetPath": "future/channels/alpha-to-beta/dispatch-packets/security-reviewer.json",
           "acknowledgementPath": "future/channels/alpha-to-beta/dispatch-receipts/security-reviewer.json",
+          "receiptEntryId": "dispatch-receipt-alpha-to-beta-security-reviewer",
           "commandSheetStageId": "command-sheet-alpha-to-beta-dispatch-intake",
           "status": "planned"
         },
@@ -35,6 +38,7 @@
           "sourceManifestTrackId": "dispatch-alpha-to-beta-release-manager",
           "packetPath": "future/channels/alpha-to-beta/dispatch-packets/release-manager.json",
           "acknowledgementPath": "future/channels/alpha-to-beta/dispatch-receipts/release-manager.json",
+          "receiptEntryId": "dispatch-receipt-alpha-to-beta-release-manager",
           "commandSheetStageId": "command-sheet-alpha-to-beta-freeze",
           "status": "blocked"
         },
@@ -44,6 +48,7 @@
           "sourceManifestTrackId": "dispatch-alpha-to-beta-release-engineering",
           "packetPath": "future/channels/alpha-to-beta/dispatch-packets/release-engineering.json",
           "acknowledgementPath": "future/channels/alpha-to-beta/dispatch-receipts/release-engineering.json",
+          "receiptEntryId": "dispatch-receipt-alpha-to-beta-release-engineering",
           "commandSheetStageId": "command-sheet-alpha-to-beta-apply",
           "status": "blocked"
         }
@@ -58,6 +63,7 @@
       "reviewChecks": [
         "dispatch manifest linked",
         "dispatch envelope path declared",
+        "dispatch receipt ledger anchor declared",
         "promotion command sheet anchor declared",
         "rollback execution checklist anchor declared"
       ],
@@ -79,11 +85,13 @@
       "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
       "promotionStagedApplyRunsheetId": "promotion-runsheet-beta-to-stable",
       "promotionStagedApplyCommandSheetId": "promotion-command-sheet-beta-to-stable",
+      "attestationOperatorDispatchReceiptId": "attestation-dispatch-receipt-beta-to-stable",
       "rollbackCutoverHandoffPlanId": "rollback-handoff-beta-to-stable",
       "rollbackCutoverExecutionChecklistId": "rollback-checklist-beta-to-stable",
       "status": "blocked",
       "dispatchPacketPath": "future/channels/beta-to-stable/attestation-operator-dispatch-packet.json",
       "dispatchEnvelopePath": "future/channels/beta-to-stable/dispatch-envelope.json",
+      "dispatchReceiptLedgerPath": "future/channels/beta-to-stable/dispatch-receipts/ledger.json",
       "targetPackets": [
         {
           "id": "dispatch-packet-beta-to-stable-security-reviewer",
@@ -91,6 +99,7 @@
           "sourceManifestTrackId": "dispatch-beta-to-stable-security-review",
           "packetPath": "future/channels/beta-to-stable/dispatch-packets/security-reviewer.json",
           "acknowledgementPath": "future/channels/beta-to-stable/dispatch-receipts/security-reviewer.json",
+          "receiptEntryId": "dispatch-receipt-beta-to-stable-security-reviewer",
           "commandSheetStageId": "command-sheet-beta-to-stable-dispatch-intake",
           "status": "blocked"
         },
@@ -100,6 +109,7 @@
           "sourceManifestTrackId": "dispatch-beta-to-stable-release-manager",
           "packetPath": "future/channels/beta-to-stable/dispatch-packets/release-manager.json",
           "acknowledgementPath": "future/channels/beta-to-stable/dispatch-receipts/release-manager.json",
+          "receiptEntryId": "dispatch-receipt-beta-to-stable-release-manager",
           "commandSheetStageId": "command-sheet-beta-to-stable-freeze",
           "status": "blocked"
         },
@@ -109,6 +119,7 @@
           "sourceManifestTrackId": "dispatch-beta-to-stable-release-engineering",
           "packetPath": "future/channels/beta-to-stable/dispatch-packets/release-engineering.json",
           "acknowledgementPath": "future/channels/beta-to-stable/dispatch-receipts/release-engineering.json",
+          "receiptEntryId": "dispatch-receipt-beta-to-stable-release-engineering",
           "commandSheetStageId": "command-sheet-beta-to-stable-apply",
           "status": "blocked"
         }
@@ -123,6 +134,7 @@
       "reviewChecks": [
         "dispatch manifest linked",
         "dispatch envelope path declared",
+        "dispatch receipt ledger anchor declared",
         "promotion command sheet anchor declared",
         "rollback execution checklist anchor declared"
       ],

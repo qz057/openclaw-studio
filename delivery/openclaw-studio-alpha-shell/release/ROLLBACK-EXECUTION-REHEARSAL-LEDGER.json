@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-rollback-execution-rehearsal-ledger/v1",
-  "generatedAt": "2026-04-05T13:09:04.389Z",
-  "phase": "phase48",
+  "generatedAt": "2026-04-05T13:56:57.209Z",
+  "phase": "phase49",
   "mode": "local-only-review",
   "rehearsals": [
     {
@@ -14,13 +14,16 @@
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-alpha-to-beta",
       "attestationOperatorDispatchManifestId": "attestation-dispatch-alpha-to-beta",
       "attestationOperatorDispatchPacketId": "attestation-dispatch-packet-alpha-to-beta",
+      "attestationOperatorDispatchReceiptId": "attestation-dispatch-receipt-alpha-to-beta",
       "promotionStagedApplyRunsheetId": "promotion-runsheet-alpha-to-beta",
       "promotionStagedApplyCommandSheetId": "promotion-command-sheet-alpha-to-beta",
+      "promotionStagedApplyConfirmationLedgerId": "promotion-confirmation-ledger-alpha-to-beta",
       "rollbackOperatorDrillbookId": "rollback-drillbook-alpha-to-beta",
       "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
       "rollbackCutoverReadinessMapId": "rollback-cutover-map-alpha-to-beta",
       "rollbackCutoverHandoffPlanId": "rollback-handoff-alpha-to-beta",
       "rollbackCutoverExecutionChecklistId": "rollback-checklist-alpha-to-beta",
+      "rollbackCutoverExecutionRecordId": "rollback-execution-record-alpha-to-beta",
       "status": "blocked",
       "rehearsalManifestPath": "future/publish/alpha-to-beta/rollback-execution-rehearsal-ledger.json",
       "rehearsalSteps": [
@@ -29,13 +32,16 @@
         "verify staged-apply ledger anchors",
         "verify dispatch manifest anchors",
         "verify dispatch packet anchors",
+        "verify dispatch receipt anchors",
         "verify attestation pack anchors",
         "verify command sheet anchors",
+        "verify confirmation ledger anchors",
         "record dry-run rollback notes",
         "anchor operator drillbook handoff",
         "anchor cutover readiness map",
         "anchor cutover handoff plan",
-        "anchor cutover execution checklist"
+        "anchor cutover execution checklist",
+        "anchor cutover execution record"
       ],
       "blockedBy": [
         "rollback rehearsal remains non-executable",
@@ -54,13 +60,16 @@
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-beta-to-stable",
       "attestationOperatorDispatchManifestId": "attestation-dispatch-beta-to-stable",
       "attestationOperatorDispatchPacketId": "attestation-dispatch-packet-beta-to-stable",
+      "attestationOperatorDispatchReceiptId": "attestation-dispatch-receipt-beta-to-stable",
       "promotionStagedApplyRunsheetId": "promotion-runsheet-beta-to-stable",
       "promotionStagedApplyCommandSheetId": "promotion-command-sheet-beta-to-stable",
+      "promotionStagedApplyConfirmationLedgerId": "promotion-confirmation-ledger-beta-to-stable",
       "rollbackOperatorDrillbookId": "rollback-drillbook-beta-to-stable",
       "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
       "rollbackCutoverReadinessMapId": "rollback-cutover-map-beta-to-stable",
       "rollbackCutoverHandoffPlanId": "rollback-handoff-beta-to-stable",
       "rollbackCutoverExecutionChecklistId": "rollback-checklist-beta-to-stable",
+      "rollbackCutoverExecutionRecordId": "rollback-execution-record-beta-to-stable",
       "status": "blocked",
       "rehearsalManifestPath": "future/publish/beta-to-stable/rollback-execution-rehearsal-ledger.json",
       "rehearsalSteps": [
@@ -69,13 +78,16 @@
         "verify staged-apply ledger anchors",
         "verify dispatch manifest anchors",
         "verify dispatch packet anchors",
+        "verify dispatch receipt anchors",
         "verify attestation pack anchors",
         "verify command sheet anchors",
+        "verify confirmation ledger anchors",
         "record dry-run rollback notes",
         "anchor operator drillbook handoff",
         "anchor cutover readiness map",
         "anchor cutover handoff plan",
-        "anchor cutover execution checklist"
+        "anchor cutover execution checklist",
+        "anchor cutover execution record"
       ],
       "blockedBy": [
         "rollback rehearsal remains non-executable",

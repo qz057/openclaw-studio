@@ -1,8 +1,8 @@
-# OpenClaw Studio Phase48 Package Snapshot
+# OpenClaw Studio Phase49 Package Snapshot
 
-这是一个 **phase48 alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47 packaging 与 shell foundations 的基础上继续补齐 attestation operator dispatch packets、promotion staged-apply command sheets 与 rollback cutover execution checklists，但它依然 **不是 installer**。
+这是一个 **phase49 alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47/48 packaging 与 shell foundations 的基础上继续补齐 attestation operator dispatch receipts、promotion staged-apply confirmation ledgers 与 rollback cutover execution records，但它依然 **不是 installer**。
 
-当前已验证里程碑：phase48 attestation operator dispatch packets / promotion staged-apply command sheets / rollback cutover execution checklists + docs / smoke / package / release-plan / UI / shared data closeout。
+当前已验证里程碑：phase49 attestation operator dispatch receipts / promotion staged-apply confirmation ledgers / rollback cutover execution records + docs / smoke / package / release-plan / UI / shared data closeout。
 
 ## 当前能交付什么
 
@@ -12,8 +12,8 @@
 - deeper inspector drilldowns, active flow state, route-aware next-step boards, and inspector-command linkage
 - persisted shell layout foundation backed by localStorage
 - cross-view local orchestration boards linking route, workflow lane, workspace, detached candidate, intent focus, focused slot, and handoff posture
-- release manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged app materialization skeleton / packaged app directory materialization / packaged app staged output skeleton / packaged app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / attestation apply audit packs / attestation apply execution packets / attestation operator worklists / attestation operator dispatch manifests / attestation operator dispatch packets / installer targets / installer-target builder skeleton / installer builder execution skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / promotion apply readiness / promotion apply manifests / promotion execution checkpoints / promotion operator handoff rails / promotion staged-apply ledgers / promotion staged-apply runsheets / promotion staged-apply command sheets / signing-ready metadata / signing-publish pipeline / signing-publish gating handshake / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / rollback recovery ledger / rollback execution rehearsal ledger / rollback operator drillbooks / rollback live-readiness contracts / rollback cutover readiness maps / rollback cutover handoff plans / rollback cutover execution checklists / release approval workflow / release notes / publish gates / promotion gates under release/
-- docs closeout: README / HANDOFF / IMPLEMENTATION-PLAN / PACKAGE-README / RELEASE-SUMMARY / REVIEW-MANIFEST / BUNDLE-MATRIX / BUNDLE-ASSEMBLY / PACKAGED-APP-DIRECTORY-SKELETON / PACKAGED-APP-MATERIALIZATION-SKELETON / PACKAGED-APP-DIRECTORY-MATERIALIZATION / PACKAGED-APP-STAGED-OUTPUT-SKELETON.json / PACKAGED-APP-BUNDLE-SEALING-SKELETON.json / SEALED-BUNDLE-INTEGRITY-CONTRACT.json / INTEGRITY-ATTESTATION-EVIDENCE.json / ATTESTATION-VERIFICATION-PACKS.json / ATTESTATION-APPLY-AUDIT-PACKS.json / ATTESTATION-APPLY-EXECUTION-PACKETS.json / ATTESTATION-OPERATOR-WORKLISTS.json / ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json / ATTESTATION-OPERATOR-DISPATCH-PACKETS.json / INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON / INSTALLER-BUILDER-EXECUTION-SKELETON / INSTALLER-BUILDER-ORCHESTRATION.json / INSTALLER-CHANNEL-ROUTING.json / CHANNEL-PROMOTION-EVIDENCE.json / PROMOTION-APPLY-READINESS.json / PROMOTION-APPLY-MANIFESTS.json / PROMOTION-EXECUTION-CHECKPOINTS.json / PROMOTION-OPERATOR-HANDOFF-RAILS.json / PROMOTION-STAGED-APPLY-LEDGERS.json / PROMOTION-STAGED-APPLY-RUNSHEETS.json / PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json / SIGNING-METADATA / NOTARIZATION-PLAN / SIGNING-PUBLISH-PIPELINE / SIGNING-PUBLISH-GATING-HANDSHAKE / SIGNING-PUBLISH-APPROVAL-BRIDGE.json / SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json / PUBLISH-ROLLBACK-HANDSHAKE.json / ROLLBACK-RECOVERY-LEDGER.json / ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json / ROLLBACK-OPERATOR-DRILLBOOKS.json / ROLLBACK-LIVE-READINESS-CONTRACTS.json / ROLLBACK-CUTOVER-READINESS-MAPS.json / ROLLBACK-CUTOVER-HANDOFF-PLANS.json / ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json / RELEASE-APPROVAL-WORKFLOW / RELEASE-NOTES / PUBLISH-GATES / PROMOTION-GATES
+- release manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged app materialization skeleton / packaged app directory materialization / packaged app staged output skeleton / packaged app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / attestation apply audit packs / attestation apply execution packets / attestation operator worklists / attestation operator dispatch manifests / attestation operator dispatch packets / attestation operator dispatch receipts / installer targets / installer-target builder skeleton / installer builder execution skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / promotion apply readiness / promotion apply manifests / promotion execution checkpoints / promotion operator handoff rails / promotion staged-apply ledgers / promotion staged-apply runsheets / promotion staged-apply command sheets / promotion staged-apply confirmation ledgers / signing-ready metadata / signing-publish pipeline / signing-publish gating handshake / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / rollback recovery ledger / rollback execution rehearsal ledger / rollback operator drillbooks / rollback live-readiness contracts / rollback cutover readiness maps / rollback cutover handoff plans / rollback cutover execution checklists / rollback cutover execution records / release approval workflow / release notes / publish gates / promotion gates under release/
+- docs closeout: README / HANDOFF / IMPLEMENTATION-PLAN / PACKAGE-README / RELEASE-SUMMARY / REVIEW-MANIFEST / BUNDLE-MATRIX / BUNDLE-ASSEMBLY / PACKAGED-APP-DIRECTORY-SKELETON / PACKAGED-APP-MATERIALIZATION-SKELETON / PACKAGED-APP-DIRECTORY-MATERIALIZATION / PACKAGED-APP-STAGED-OUTPUT-SKELETON.json / PACKAGED-APP-BUNDLE-SEALING-SKELETON.json / SEALED-BUNDLE-INTEGRITY-CONTRACT.json / INTEGRITY-ATTESTATION-EVIDENCE.json / ATTESTATION-VERIFICATION-PACKS.json / ATTESTATION-APPLY-AUDIT-PACKS.json / ATTESTATION-APPLY-EXECUTION-PACKETS.json / ATTESTATION-OPERATOR-WORKLISTS.json / ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json / ATTESTATION-OPERATOR-DISPATCH-PACKETS.json / ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json / INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON / INSTALLER-BUILDER-EXECUTION-SKELETON / INSTALLER-BUILDER-ORCHESTRATION.json / INSTALLER-CHANNEL-ROUTING.json / CHANNEL-PROMOTION-EVIDENCE.json / PROMOTION-APPLY-READINESS.json / PROMOTION-APPLY-MANIFESTS.json / PROMOTION-EXECUTION-CHECKPOINTS.json / PROMOTION-OPERATOR-HANDOFF-RAILS.json / PROMOTION-STAGED-APPLY-LEDGERS.json / PROMOTION-STAGED-APPLY-RUNSHEETS.json / PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json / PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json / SIGNING-METADATA / NOTARIZATION-PLAN / SIGNING-PUBLISH-PIPELINE / SIGNING-PUBLISH-GATING-HANDSHAKE / SIGNING-PUBLISH-APPROVAL-BRIDGE.json / SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json / PUBLISH-ROLLBACK-HANDSHAKE.json / ROLLBACK-RECOVERY-LEDGER.json / ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json / ROLLBACK-OPERATOR-DRILLBOOKS.json / ROLLBACK-LIVE-READINESS-CONTRACTS.json / ROLLBACK-CUTOVER-READINESS-MAPS.json / ROLLBACK-CUTOVER-HANDOFF-PLANS.json / ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json / ROLLBACK-CUTOVER-EXECUTION-RECORDS.json / RELEASE-APPROVAL-WORKFLOW / RELEASE-NOTES / PUBLISH-GATES / PROMOTION-GATES
 - placeholder installer explainer script that never installs anything
 
 ## 当前还没交付什么
@@ -33,12 +33,14 @@
 - no executable attestation apply audit or apply-execution packet handoff yet; audit packs and execution packets remain review-only metadata
 - no executable attestation operator dispatch or live dispatch-manifest apply yet; operator worklists and dispatch manifests remain review-only metadata
 - no executable attestation operator dispatch packet emission, receipt capture, or acknowledgement reconciliation yet; dispatch packets remain review-only metadata
+- no executable attestation operator dispatch receipt capture, acknowledgement reconciliation closeout, or escalation settlement yet; dispatch receipts remain review-only metadata
 - no Windows / macOS / Linux installer builder orchestration and channel routing wiring yet; routing remains review-only skeleton
 - no executable channel promotion evidence pack or promotion routing apply yet; evidence remains review-only metadata
 - no executable promotion apply manifests or channel apply execution yet; apply manifests remain review-only metadata
 - no executable promotion execution checkpoints or operator handoff rails yet; checkpoints and handoff rails remain review-only metadata
 - no executable promotion staged-apply journaling, operator runsheet entry, or staged cutover entry yet; staged-apply ledgers and runsheets remain review-only metadata
 - no executable promotion staged-apply command issue, confirmation capture, or staged execution sheet routing yet; command sheets remain review-only metadata
+- no executable promotion staged-apply confirmation capture, stage acceptance journaling, or cutover closeout reconciliation yet; confirmation ledgers remain review-only metadata
 - no signing / notarization / hash publication workflow yet; approval bridge remains metadata-only
 - no executable signing-publish gating handshake yet; handshake remains metadata-only
 - no executable release approval handshake yet; workflow remains metadata-only
@@ -46,6 +48,7 @@
 - no rollback operator drillbooks or live-readiness contracts yet; drillbooks and live-readiness contracts remain review-only metadata
 - no executable rollback cutover readiness evaluation, ownership baton transfer, or cutover topology handoff yet; cutover readiness maps and handoff plans remain review-only metadata
 - no executable rollback cutover checklist issue, go/no-go capture, or cutover execution receipt yet; execution checklists remain review-only metadata
+- no executable rollback cutover execution record emission, evidence closeout, or recovery-state publication yet; execution records remain review-only metadata
 - no release publishing / artifact upload / promotion handshake / rollback apply automation yet; publish rollback handshake remains metadata-only
 - real host-side execution remains disabled until approval / lifecycle / rollback close the loop
 
@@ -79,6 +82,7 @@ openclaw-studio-alpha-shell/
     ATTESTATION-OPERATOR-WORKLISTS.json
     ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json
     ATTESTATION-OPERATOR-DISPATCH-PACKETS.json
+    ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json
     INSTALLER-TARGETS.json
     INSTALLER-TARGET-BUILDER-SKELETON.json
     INSTALLER-BUILDER-EXECUTION-SKELETON.json
@@ -92,6 +96,7 @@ openclaw-studio-alpha-shell/
     PROMOTION-STAGED-APPLY-LEDGERS.json
     PROMOTION-STAGED-APPLY-RUNSHEETS.json
     PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json
+    PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json
     SIGNING-METADATA.json
     NOTARIZATION-PLAN.json
     SIGNING-PUBLISH-PIPELINE.json
@@ -106,6 +111,7 @@ openclaw-studio-alpha-shell/
     ROLLBACK-CUTOVER-READINESS-MAPS.json
     ROLLBACK-CUTOVER-HANDOFF-PLANS.json
     ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json
+    ROLLBACK-CUTOVER-EXECUTION-RECORDS.json
     RELEASE-APPROVAL-WORKFLOW.json
     RELEASE-NOTES.md
     PUBLISH-GATES.json
@@ -119,7 +125,7 @@ openclaw-studio-alpha-shell/
 
 ## 已复制的 artifact 组
 
-- Renderer bundle: 3 files, 359.8 KiB, output=artifacts/renderer
+- Renderer bundle: 3 files, 360.9 KiB, output=artifacts/renderer
 - Electron bundle: 10 files, 314.2 KiB, output=artifacts/electron
 
 ## 已包含的文档
@@ -145,6 +151,7 @@ openclaw-studio-alpha-shell/
 - release/ATTESTATION-OPERATOR-WORKLISTS.json（generated）
 - release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json（generated）
 - release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json（generated）
+- release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json（generated）
 - release/INSTALLER-TARGETS.json（generated）
 - release/INSTALLER-TARGET-BUILDER-SKELETON.json（generated）
 - release/INSTALLER-BUILDER-EXECUTION-SKELETON.json（generated）
@@ -158,6 +165,7 @@ openclaw-studio-alpha-shell/
 - release/PROMOTION-STAGED-APPLY-LEDGERS.json（generated）
 - release/PROMOTION-STAGED-APPLY-RUNSHEETS.json（generated）
 - release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json（generated）
+- release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json（generated）
 - release/SIGNING-METADATA.json（generated）
 - release/NOTARIZATION-PLAN.json（generated）
 - release/SIGNING-PUBLISH-PIPELINE.json（generated）
@@ -172,6 +180,7 @@ openclaw-studio-alpha-shell/
 - release/ROLLBACK-CUTOVER-READINESS-MAPS.json（generated）
 - release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json（generated）
 - release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json（generated）
+- release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json（generated）
 - release/RELEASE-APPROVAL-WORKFLOW.json（generated）
 - release/RELEASE-NOTES.md（generated）
 - release/PUBLISH-GATES.json（generated）
@@ -198,6 +207,7 @@ openclaw-studio-alpha-shell/
 - 再看 `release/ATTESTATION-OPERATOR-WORKLISTS.json`
 - 再看 `release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json`
 - 再看 `release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json`
+- 再看 `release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json`
 - 再看 `release/INSTALLER-TARGETS.json`
 - 再看 `release/INSTALLER-TARGET-BUILDER-SKELETON.json`
 - 再看 `release/INSTALLER-BUILDER-EXECUTION-SKELETON.json`
@@ -211,6 +221,7 @@ openclaw-studio-alpha-shell/
 - 再看 `release/PROMOTION-STAGED-APPLY-LEDGERS.json`
 - 再看 `release/PROMOTION-STAGED-APPLY-RUNSHEETS.json`
 - 再看 `release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json`
+- 再看 `release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json`
 - 再看 `release/SIGNING-METADATA.json`
 - 再看 `release/NOTARIZATION-PLAN.json`
 - 再看 `release/SIGNING-PUBLISH-PIPELINE.json`
@@ -225,6 +236,7 @@ openclaw-studio-alpha-shell/
 - 再看 `release/ROLLBACK-CUTOVER-READINESS-MAPS.json`
 - 再看 `release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json`
 - 再看 `release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json`
+- 再看 `release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json`
 - 再看 `release/RELEASE-APPROVAL-WORKFLOW.json`
 - 再看 `release/RELEASE-NOTES.md`
 - 再看 `release/PUBLISH-GATES.json`
@@ -239,4 +251,4 @@ openclaw-studio-alpha-shell/
 - `scripts/install-placeholder.cjs` 只解释当前 installer 仍缺什么，不执行安装
 - 如需重新生成整个 snapshot，请回到 repo root 运行 `npm run package:alpha`
 
-Generated: 2026-04-05T13:09:04.389Z
+Generated: 2026-04-05T13:56:57.209Z

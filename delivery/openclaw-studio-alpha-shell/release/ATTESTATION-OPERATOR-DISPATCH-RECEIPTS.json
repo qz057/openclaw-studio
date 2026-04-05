@@ -1,0 +1,138 @@
+{
+  "schemaVersion": "openclaw-studio-attestation-operator-dispatch-receipts/v1",
+  "generatedAt": "2026-04-05T13:56:57.209Z",
+  "phase": "phase49",
+  "mode": "local-only-review",
+  "receipts": [
+    {
+      "id": "attestation-dispatch-receipt-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "attestationOperatorDispatchManifestId": "attestation-dispatch-alpha-to-beta",
+      "attestationOperatorDispatchPacketId": "attestation-dispatch-packet-alpha-to-beta",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-alpha-to-beta",
+      "promotionStagedApplyConfirmationLedgerId": "promotion-confirmation-ledger-alpha-to-beta",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-alpha-to-beta",
+      "rollbackCutoverExecutionRecordId": "rollback-execution-record-alpha-to-beta",
+      "status": "blocked",
+      "receiptLedgerPath": "future/channels/alpha-to-beta/attestation-operator-dispatch-receipts.json",
+      "reconciliationWindow": {
+        "id": "dispatch-receipt-window-alpha-to-beta",
+        "label": "Alpha -> Beta dispatch receipt sweep",
+        "owner": "release-manager",
+        "status": "blocked",
+        "closeoutMode": "review-only"
+      },
+      "receiptEntries": [
+        {
+          "id": "dispatch-receipt-alpha-to-beta-security-reviewer",
+          "role": "security-reviewer",
+          "sourcePacketId": "dispatch-packet-alpha-to-beta-security-reviewer",
+          "acknowledgementPath": "future/channels/alpha-to-beta/dispatch-receipts/security-reviewer.json",
+          "commandSheetStageId": "command-sheet-alpha-to-beta-dispatch-intake",
+          "confirmationLedgerEntryId": "promotion-confirmation-alpha-to-beta-dispatch",
+          "executionRecordSectionId": "rollback-execution-record-alpha-to-beta-freeze",
+          "status": "planned"
+        },
+        {
+          "id": "dispatch-receipt-alpha-to-beta-release-manager",
+          "role": "release-manager",
+          "sourcePacketId": "dispatch-packet-alpha-to-beta-release-manager",
+          "acknowledgementPath": "future/channels/alpha-to-beta/dispatch-receipts/release-manager.json",
+          "commandSheetStageId": "command-sheet-alpha-to-beta-freeze",
+          "confirmationLedgerEntryId": "promotion-confirmation-alpha-to-beta-freeze",
+          "executionRecordSectionId": "rollback-execution-record-alpha-to-beta-platforms",
+          "status": "blocked"
+        },
+        {
+          "id": "dispatch-receipt-alpha-to-beta-release-engineering",
+          "role": "release-engineering",
+          "sourcePacketId": "dispatch-packet-alpha-to-beta-release-engineering",
+          "acknowledgementPath": "future/channels/alpha-to-beta/dispatch-receipts/release-engineering.json",
+          "commandSheetStageId": "command-sheet-alpha-to-beta-apply",
+          "confirmationLedgerEntryId": "promotion-confirmation-alpha-to-beta-apply",
+          "executionRecordSectionId": "rollback-execution-record-alpha-to-beta-cutover",
+          "status": "blocked"
+        }
+      ],
+      "reviewChecks": [
+        "dispatch packet linked",
+        "receipt reconciliation window declared",
+        "promotion confirmation ledger anchor declared",
+        "rollback execution record anchor declared"
+      ],
+      "blockedBy": [
+        "attestation operator dispatch receipts remain metadata-only",
+        "promotion staged apply remains non-executable",
+        "rollback cutover remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canReconcileReceipts": false
+    },
+    {
+      "id": "attestation-dispatch-receipt-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "attestationOperatorDispatchManifestId": "attestation-dispatch-beta-to-stable",
+      "attestationOperatorDispatchPacketId": "attestation-dispatch-packet-beta-to-stable",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-beta-to-stable",
+      "promotionStagedApplyConfirmationLedgerId": "promotion-confirmation-ledger-beta-to-stable",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-beta-to-stable",
+      "rollbackCutoverExecutionRecordId": "rollback-execution-record-beta-to-stable",
+      "status": "blocked",
+      "receiptLedgerPath": "future/channels/beta-to-stable/attestation-operator-dispatch-receipts.json",
+      "reconciliationWindow": {
+        "id": "dispatch-receipt-window-beta-to-stable",
+        "label": "Beta -> Stable dispatch receipt sweep",
+        "owner": "release-manager",
+        "status": "blocked",
+        "closeoutMode": "review-only"
+      },
+      "receiptEntries": [
+        {
+          "id": "dispatch-receipt-beta-to-stable-security-reviewer",
+          "role": "security-reviewer",
+          "sourcePacketId": "dispatch-packet-beta-to-stable-security-reviewer",
+          "acknowledgementPath": "future/channels/beta-to-stable/dispatch-receipts/security-reviewer.json",
+          "commandSheetStageId": "command-sheet-beta-to-stable-dispatch-intake",
+          "confirmationLedgerEntryId": "promotion-confirmation-beta-to-stable-dispatch",
+          "executionRecordSectionId": "rollback-execution-record-beta-to-stable-freeze",
+          "status": "blocked"
+        },
+        {
+          "id": "dispatch-receipt-beta-to-stable-release-manager",
+          "role": "release-manager",
+          "sourcePacketId": "dispatch-packet-beta-to-stable-release-manager",
+          "acknowledgementPath": "future/channels/beta-to-stable/dispatch-receipts/release-manager.json",
+          "commandSheetStageId": "command-sheet-beta-to-stable-freeze",
+          "confirmationLedgerEntryId": "promotion-confirmation-beta-to-stable-freeze",
+          "executionRecordSectionId": "rollback-execution-record-beta-to-stable-platforms",
+          "status": "blocked"
+        },
+        {
+          "id": "dispatch-receipt-beta-to-stable-release-engineering",
+          "role": "release-engineering",
+          "sourcePacketId": "dispatch-packet-beta-to-stable-release-engineering",
+          "acknowledgementPath": "future/channels/beta-to-stable/dispatch-receipts/release-engineering.json",
+          "commandSheetStageId": "command-sheet-beta-to-stable-apply",
+          "confirmationLedgerEntryId": "promotion-confirmation-beta-to-stable-apply",
+          "executionRecordSectionId": "rollback-execution-record-beta-to-stable-cutover",
+          "status": "blocked"
+        }
+      ],
+      "reviewChecks": [
+        "dispatch packet linked",
+        "receipt reconciliation window declared",
+        "promotion confirmation ledger anchor declared",
+        "rollback execution record anchor declared"
+      ],
+      "blockedBy": [
+        "attestation operator dispatch receipts remain metadata-only",
+        "promotion staged apply remains non-executable",
+        "rollback cutover remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canReconcileReceipts": false
+    }
+  ]
+}

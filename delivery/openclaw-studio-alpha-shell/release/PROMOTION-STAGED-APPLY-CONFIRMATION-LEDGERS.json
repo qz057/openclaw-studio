@@ -1,0 +1,206 @@
+{
+  "schemaVersion": "openclaw-studio-promotion-staged-apply-confirmation-ledgers/v1",
+  "generatedAt": "2026-04-05T13:56:57.209Z",
+  "phase": "phase49",
+  "mode": "local-only-review",
+  "ledgers": [
+    {
+      "id": "promotion-confirmation-ledger-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "attestationOperatorDispatchReceiptId": "attestation-dispatch-receipt-alpha-to-beta",
+      "promotionStagedApplyLedgerId": "promotion-staged-ledger-alpha-to-beta",
+      "promotionStagedApplyRunsheetId": "promotion-runsheet-alpha-to-beta",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-alpha-to-beta",
+      "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-alpha-to-beta",
+      "rollbackCutoverExecutionRecordId": "rollback-execution-record-alpha-to-beta",
+      "status": "blocked",
+      "confirmationLedgerPath": "future/channels/alpha-to-beta/promotion-staged-apply-confirmation-ledger.json",
+      "confirmationWindows": [
+        {
+          "id": "confirmation-window-alpha-to-beta-dispatch",
+          "label": "Dispatch acknowledgement closeout",
+          "owner": "security-reviewer",
+          "status": "planned"
+        },
+        {
+          "id": "confirmation-window-alpha-to-beta-freeze",
+          "label": "Freeze hold closeout",
+          "owner": "release-manager",
+          "status": "blocked"
+        },
+        {
+          "id": "confirmation-window-alpha-to-beta-apply",
+          "label": "Apply stage closeout",
+          "owner": "release-engineering",
+          "status": "blocked"
+        },
+        {
+          "id": "confirmation-window-alpha-to-beta-cutover",
+          "label": "Cutover checkpoint closeout",
+          "owner": "support-operator",
+          "status": "blocked"
+        }
+      ],
+      "confirmations": [
+        {
+          "id": "promotion-confirmation-alpha-to-beta-dispatch",
+          "stageId": "command-sheet-alpha-to-beta-dispatch-intake",
+          "label": "Dispatch acknowledgement ledger close",
+          "owner": "security-reviewer",
+          "status": "planned",
+          "evidence": [
+            "attestation-dispatch-receipt-alpha-to-beta",
+            "promotion-command-sheet-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "promotion-confirmation-alpha-to-beta-freeze",
+          "stageId": "command-sheet-alpha-to-beta-freeze",
+          "label": "Freeze hold ledger close",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "promotion-staged-ledger-alpha-to-beta",
+            "promotion-runsheet-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "promotion-confirmation-alpha-to-beta-apply",
+          "stageId": "command-sheet-alpha-to-beta-apply",
+          "label": "Apply confirmation ledger close",
+          "owner": "release-engineering",
+          "status": "blocked",
+          "evidence": [
+            "promotion-manifest-alpha-to-beta",
+            "promotion-checkpoint-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "promotion-confirmation-alpha-to-beta-cutover",
+          "stageId": "command-sheet-alpha-to-beta-cutover",
+          "label": "Cutover checkpoint ledger close",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "rollback-checklist-alpha-to-beta",
+            "rollback-execution-record-alpha-to-beta"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "dispatch receipt linked",
+        "command sheet linked",
+        "rollback execution checklist linked",
+        "rollback execution record anchor declared"
+      ],
+      "blockedBy": [
+        "promotion staged-apply confirmation ledgers remain metadata-only",
+        "promotion apply remains non-executable",
+        "rollback cutover remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canConfirmStages": false
+    },
+    {
+      "id": "promotion-confirmation-ledger-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "attestationOperatorDispatchReceiptId": "attestation-dispatch-receipt-beta-to-stable",
+      "promotionStagedApplyLedgerId": "promotion-staged-ledger-beta-to-stable",
+      "promotionStagedApplyRunsheetId": "promotion-runsheet-beta-to-stable",
+      "promotionStagedApplyCommandSheetId": "promotion-command-sheet-beta-to-stable",
+      "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-beta-to-stable",
+      "rollbackCutoverExecutionRecordId": "rollback-execution-record-beta-to-stable",
+      "status": "blocked",
+      "confirmationLedgerPath": "future/channels/beta-to-stable/promotion-staged-apply-confirmation-ledger.json",
+      "confirmationWindows": [
+        {
+          "id": "confirmation-window-beta-to-stable-dispatch",
+          "label": "Dispatch acknowledgement closeout",
+          "owner": "security-reviewer",
+          "status": "blocked"
+        },
+        {
+          "id": "confirmation-window-beta-to-stable-freeze",
+          "label": "Freeze hold closeout",
+          "owner": "release-manager",
+          "status": "blocked"
+        },
+        {
+          "id": "confirmation-window-beta-to-stable-apply",
+          "label": "Apply stage closeout",
+          "owner": "release-engineering",
+          "status": "blocked"
+        },
+        {
+          "id": "confirmation-window-beta-to-stable-cutover",
+          "label": "Cutover checkpoint closeout",
+          "owner": "support-operator",
+          "status": "blocked"
+        }
+      ],
+      "confirmations": [
+        {
+          "id": "promotion-confirmation-beta-to-stable-dispatch",
+          "stageId": "command-sheet-beta-to-stable-dispatch-intake",
+          "label": "Dispatch acknowledgement ledger close",
+          "owner": "security-reviewer",
+          "status": "blocked",
+          "evidence": [
+            "attestation-dispatch-receipt-beta-to-stable",
+            "promotion-command-sheet-beta-to-stable"
+          ]
+        },
+        {
+          "id": "promotion-confirmation-beta-to-stable-freeze",
+          "stageId": "command-sheet-beta-to-stable-freeze",
+          "label": "Freeze hold ledger close",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "promotion-staged-ledger-beta-to-stable",
+            "promotion-runsheet-beta-to-stable"
+          ]
+        },
+        {
+          "id": "promotion-confirmation-beta-to-stable-apply",
+          "stageId": "command-sheet-beta-to-stable-apply",
+          "label": "Apply confirmation ledger close",
+          "owner": "release-engineering",
+          "status": "blocked",
+          "evidence": [
+            "promotion-manifest-beta-to-stable",
+            "promotion-checkpoint-beta-to-stable"
+          ]
+        },
+        {
+          "id": "promotion-confirmation-beta-to-stable-cutover",
+          "stageId": "command-sheet-beta-to-stable-cutover",
+          "label": "Cutover checkpoint ledger close",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "rollback-checklist-beta-to-stable",
+            "rollback-execution-record-beta-to-stable"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "dispatch receipt linked",
+        "command sheet linked",
+        "rollback execution checklist linked",
+        "rollback execution record anchor declared"
+      ],
+      "blockedBy": [
+        "promotion staged-apply confirmation ledgers remain metadata-only",
+        "promotion apply remains non-executable",
+        "rollback cutover remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canConfirmStages": false
+    }
+  ]
+}

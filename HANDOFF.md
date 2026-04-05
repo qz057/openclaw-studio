@@ -2,7 +2,7 @@
 
 ## Snapshot
 
-- 当前已验证里程碑：**phase48 attestation operator dispatch packets / promotion staged-apply command sheets / rollback cutover execution checklists + docs / smoke / package / release-plan / UI / shared data closeout**
+- 当前已验证里程碑：**phase49 attestation operator dispatch receipts / promotion staged-apply confirmation ledgers / rollback cutover execution records + docs / smoke / package / release-plan / UI / shared data closeout**
 - 当前主视图：
   - `Dashboard`
   - `Home`
@@ -28,6 +28,7 @@
   - phase46 已把交付层继续下沉成 attestation operator worklists、promotion staged-apply ledgers 与 rollback cutover readiness maps
   - phase47 已把交付层继续下沉成 attestation operator dispatch manifests、promotion staged-apply runsheets 与 rollback cutover handoff plans
   - phase48 已把交付层继续下沉成 attestation operator dispatch packets、promotion staged-apply command sheets 与 rollback cutover execution checklists
+  - phase49 已把交付层继续下沉成 attestation operator dispatch receipts、promotion staged-apply confirmation ledgers 与 rollback cutover execution records
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline
@@ -42,7 +43,7 @@ npm run start:smoke
 npm run package:alpha
 ```
 
-phase48 额外 dry-run：
+phase49 额外 dry-run：
 
 ```bash
 npm run release:plan
@@ -54,7 +55,7 @@ npm run release:plan
 
 在当前这类受限 Linux sandbox 中，如果 Electron 已到达启动路径但 Chromium sandbox host 被容器拦截，`start:smoke` 会以 sandbox-limited fallback 通过并明确标注原因。
 
-`npm run release:plan` 只输出 phase48 release skeleton 汇总，不会写 installer，也不会发布任何 artifact。
+`npm run release:plan` 只输出 phase49 release skeleton 汇总，不会写 installer，也不会发布任何 artifact。
 
 ## Phase27/28/29/30/31/32/33 Shell Surface
 
@@ -80,6 +81,7 @@ npm run release:plan
 - phase46 进一步补齐 Attestation Operator Worklists、Promotion Staged-apply Ledgers、Rollback Cutover Readiness Maps
 - phase47 进一步补齐 Attestation Operator Dispatch Manifests、Promotion Staged-apply Runsheets、Rollback Cutover Handoff Plans
 - phase48 进一步补齐 Attestation Operator Dispatch Packets、Promotion Staged-apply Command Sheets、Rollback Cutover Execution Checklists
+- phase49 进一步补齐 Attestation Operator Dispatch Receipts、Promotion Staged-apply Confirmation Ledgers、Rollback Cutover Execution Records
 - 仍然不做真实外部窗口编排
 
 ## Phase25 Boundary Model
@@ -166,11 +168,11 @@ Tools / MCP 当前深度：
 - Studio-local execute
 - preview-host contract surfaces
 
-## Phase48 Delivery Skeleton
+## Phase49 Delivery Skeleton
 
 - `npm run package:alpha`
 - 输出到：`delivery/openclaw-studio-alpha-shell`
-- 这是 phase48 结构化 alpha-shell snapshot，不是 installer
+- 这是 phase49 结构化 alpha-shell snapshot，不是 installer
 
 ### 当前能交付
 
@@ -194,6 +196,7 @@ Tools / MCP 当前深度：
 - `release/ATTESTATION-OPERATOR-WORKLISTS.json`
 - `release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json`
 - `release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json`
+- `release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json`
 - `release/INSTALLER-TARGETS.json`
 - `release/INSTALLER-TARGET-BUILDER-SKELETON.json`
 - `release/INSTALLER-BUILDER-EXECUTION-SKELETON.json`
@@ -207,6 +210,7 @@ Tools / MCP 当前深度：
 - `release/PROMOTION-STAGED-APPLY-LEDGERS.json`
 - `release/PROMOTION-STAGED-APPLY-RUNSHEETS.json`
 - `release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json`
+- `release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json`
 - `release/SIGNING-METADATA.json`
 - `release/NOTARIZATION-PLAN.json`
 - `release/SIGNING-PUBLISH-PIPELINE.json`
@@ -221,6 +225,7 @@ Tools / MCP 当前深度：
 - `release/ROLLBACK-CUTOVER-READINESS-MAPS.json`
 - `release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json`
 - `release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json`
+- `release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json`
 - `release/RELEASE-APPROVAL-WORKFLOW.json`
 - `release/RELEASE-NOTES.md`
 - `release/PUBLISH-GATES.json`
@@ -228,7 +233,7 @@ Tools / MCP 当前深度：
 - `release/RELEASE-SUMMARY.md`
 - `release/RELEASE-CHECKLIST.md`
 - `scripts/install-placeholder.cjs`
-- packaged bundle skeleton / packaged-app materialization skeleton / packaged-app directory materialization / packaged-app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / attestation apply audit packs / attestation apply execution packets / attestation operator worklists / attestation operator dispatch manifests / attestation operator dispatch packets / installer builder execution skeleton / installer channel routing / channel promotion evidence / promotion apply manifests / promotion execution checkpoints / promotion operator handoff rails / promotion staged-apply ledgers / promotion staged-apply runsheets / promotion staged-apply command sheets / signing-publish gating handshake / signing-publish promotion handshake / publish rollback handshake / rollback execution rehearsal ledger / rollback operator drillbooks / rollback live-readiness contracts / rollback cutover readiness maps / rollback cutover handoff plans / rollback cutover execution checklists / release approval workflow / release notes & publish gating / persisted layout / detached workspace workflows / shell-level workflow UX
+- packaged bundle skeleton / packaged-app materialization skeleton / packaged-app directory materialization / packaged-app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / attestation apply audit packs / attestation apply execution packets / attestation operator worklists / attestation operator dispatch manifests / attestation operator dispatch packets / attestation operator dispatch receipts / installer builder execution skeleton / installer channel routing / channel promotion evidence / promotion apply manifests / promotion execution checkpoints / promotion operator handoff rails / promotion staged-apply ledgers / promotion staged-apply runsheets / promotion staged-apply command sheets / promotion staged-apply confirmation ledgers / signing-publish gating handshake / signing-publish promotion handshake / publish rollback handshake / rollback execution rehearsal ledger / rollback operator drillbooks / rollback live-readiness contracts / rollback cutover readiness maps / rollback cutover handoff plans / rollback cutover execution checklists / rollback cutover execution records / release approval workflow / release notes & publish gating / persisted layout / detached workspace workflows / shell-level workflow UX
 - 当前 README / HANDOFF / IMPLEMENTATION-PLAN / PACKAGE-README 文档闭环
 
 ### 当前仍未交付
@@ -255,7 +260,7 @@ Tools / MCP 当前深度：
 - 不开放真实 host-side execution
 - bridge 虽已存在，但仍然 default-disabled 且只返回 placeholder result
 - placeholder result 带有 focused-slot page interactions、slot-state timeline、dock / inspector / trace panel 可见性与轻量 persistence，但仍然只是 simulated / traceable outcome，不代表真实 host 执行
-- release approval workflow、installer channel routing、attestation operator dispatch packets、promotion staged-apply command sheets、rollback cutover execution checklists、publish rollback handshake 与 signing-publish handshakes 现在都存在 metadata contract，但 approval / publish / promotion / rollback 仍尚不存在可执行链路
+- release approval workflow、installer channel routing、attestation operator dispatch receipts、promotion staged-apply confirmation ledgers、rollback cutover execution records、publish rollback handshake 与 signing-publish handshakes 现在都存在 metadata contract，但 approval / publish / promotion / rollback 仍尚不存在可执行链路
 - lifecycle runner 尚不存在
 - rollback-aware apply 尚不存在
 - package 已具备更清晰的 bundle-assembly + packaged-app materialization + packaged-app-directory materialization + packaged-app bundle sealing + installer builder execution skeleton + installer channel routing，但仍不是 release publish pipeline，也不是 installer
@@ -267,4 +272,4 @@ Tools / MCP 当前深度：
 
 1. 在保持 disabled 的前提下继续提升 validator / observability / command-surface / multi-window coverage
 2. 只有在 approval / lifecycle / rollback 真实闭环成型后，才评估任何 live host execution
-3. 把 phase48 shell foundations 继续推进成真正的多窗口编排与 attestation operator packet issuance / promotion staged apply confirmation / rollback cutover checklist execution / approval pipeline
+3. 把 phase49 shell foundations 继续推进成真正的多窗口编排与 attestation operator receipt reconciliation / promotion staged apply confirmation closeout / rollback cutover execution record closeout / approval pipeline

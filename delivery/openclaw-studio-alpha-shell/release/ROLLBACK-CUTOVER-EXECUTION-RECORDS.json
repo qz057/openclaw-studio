@@ -1,0 +1,126 @@
+{
+  "schemaVersion": "openclaw-studio-rollback-cutover-execution-records/v1",
+  "generatedAt": "2026-04-05T13:56:57.209Z",
+  "phase": "phase49",
+  "mode": "local-only-review",
+  "records": [
+    {
+      "id": "rollback-execution-record-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "publishRollbackPathId": "publish-rollback-alpha-to-beta",
+      "rollbackCutoverReadinessMapId": "rollback-cutover-map-alpha-to-beta",
+      "rollbackCutoverHandoffPlanId": "rollback-handoff-alpha-to-beta",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-alpha-to-beta",
+      "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
+      "promotionStagedApplyConfirmationLedgerId": "promotion-confirmation-ledger-alpha-to-beta",
+      "attestationOperatorDispatchReceiptId": "attestation-dispatch-receipt-alpha-to-beta",
+      "status": "blocked",
+      "executionRecordPath": "future/publish/alpha-to-beta/rollback-cutover-execution-record.json",
+      "recoveryStatePath": "future/publish/alpha-to-beta/recovery-state.json",
+      "recordSections": [
+        {
+          "id": "rollback-execution-record-alpha-to-beta-freeze",
+          "label": "Freeze and dispatch receipt closeout",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "attestation-dispatch-receipt-alpha-to-beta",
+            "promotion-confirmation-ledger-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "rollback-execution-record-alpha-to-beta-platforms",
+          "label": "Platform checkpoint evidence capture",
+          "owner": "runtime-owner",
+          "status": "blocked",
+          "evidence": [
+            "rollback-cutover-map-alpha-to-beta",
+            "rollback-readiness-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "rollback-execution-record-alpha-to-beta-cutover",
+          "label": "Cutover recovery state publication",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "rollback-handoff-alpha-to-beta",
+            "publish-rollback-alpha-to-beta"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "rollback execution checklist linked",
+        "dispatch receipt linked",
+        "promotion confirmation ledger linked",
+        "recovery-state publication path declared"
+      ],
+      "blockedBy": [
+        "rollback cutover execution records remain metadata-only",
+        "publish rollback remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canRecordExecution": false
+    },
+    {
+      "id": "rollback-execution-record-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "publishRollbackPathId": "publish-rollback-beta-to-stable",
+      "rollbackCutoverReadinessMapId": "rollback-cutover-map-beta-to-stable",
+      "rollbackCutoverHandoffPlanId": "rollback-handoff-beta-to-stable",
+      "rollbackCutoverExecutionChecklistId": "rollback-checklist-beta-to-stable",
+      "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
+      "promotionStagedApplyConfirmationLedgerId": "promotion-confirmation-ledger-beta-to-stable",
+      "attestationOperatorDispatchReceiptId": "attestation-dispatch-receipt-beta-to-stable",
+      "status": "blocked",
+      "executionRecordPath": "future/publish/beta-to-stable/rollback-cutover-execution-record.json",
+      "recoveryStatePath": "future/publish/beta-to-stable/recovery-state.json",
+      "recordSections": [
+        {
+          "id": "rollback-execution-record-beta-to-stable-freeze",
+          "label": "Freeze and dispatch receipt closeout",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "attestation-dispatch-receipt-beta-to-stable",
+            "promotion-confirmation-ledger-beta-to-stable"
+          ]
+        },
+        {
+          "id": "rollback-execution-record-beta-to-stable-platforms",
+          "label": "Platform checkpoint evidence capture",
+          "owner": "runtime-owner",
+          "status": "blocked",
+          "evidence": [
+            "rollback-cutover-map-beta-to-stable",
+            "rollback-readiness-beta-to-stable"
+          ]
+        },
+        {
+          "id": "rollback-execution-record-beta-to-stable-cutover",
+          "label": "Cutover recovery state publication",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "rollback-handoff-beta-to-stable",
+            "publish-rollback-beta-to-stable"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "rollback execution checklist linked",
+        "dispatch receipt linked",
+        "promotion confirmation ledger linked",
+        "recovery-state publication path declared"
+      ],
+      "blockedBy": [
+        "rollback cutover execution records remain metadata-only",
+        "publish rollback remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canRecordExecution": false
+    }
+  ]
+}
