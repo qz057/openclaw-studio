@@ -1,10 +1,11 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-gating-handshake/v1",
-  "generatedAt": "2026-04-05T01:58:51.081Z",
-  "phase": "phase42",
+  "generatedAt": "2026-04-05T03:54:33.290Z",
+  "phase": "phase43",
   "mode": "local-only-review",
   "canHandshake": false,
   "sealedBundleIntegrityContractPath": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
+  "attestationVerificationPacksPath": "release/ATTESTATION-VERIFICATION-PACKS.json",
   "channelPromotionEvidencePath": "release/CHANNEL-PROMOTION-EVIDENCE.json",
   "publishRollbackHandshakePath": "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
   "participants": [
@@ -35,6 +36,11 @@
       {
         "id": "request-bundle-integrity",
         "label": "Sealed-bundle integrity contract",
+        "required": true
+      },
+      {
+        "id": "request-attestation-verification-packs",
+        "label": "Attestation verification packs",
         "required": true
       },
       {
@@ -115,6 +121,12 @@
       "artifact": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json"
     },
     {
+      "id": "ack-attestation-verification",
+      "label": "Attestation verification packs reviewed",
+      "status": "planned",
+      "artifact": "release/ATTESTATION-VERIFICATION-PACKS.json"
+    },
+    {
       "id": "ack-builders",
       "label": "Installer builder execution reviewed",
       "status": "planned",
@@ -177,6 +189,15 @@
       "evidence": [
         "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
         "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json"
+      ]
+    },
+    {
+      "id": "handshake-attestation-verification",
+      "label": "Attestation verification pack review",
+      "status": "planned",
+      "evidence": [
+        "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
+        "release/ATTESTATION-VERIFICATION-PACKS.json"
       ]
     },
     {
@@ -248,6 +269,7 @@
     "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
     "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
     "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
+    "release/ATTESTATION-VERIFICATION-PACKS.json",
     "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
     "release/INSTALLER-CHANNEL-ROUTING.json",
     "release/CHANNEL-PROMOTION-EVIDENCE.json",

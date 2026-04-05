@@ -1,12 +1,18 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-approval-bridge/v1",
-  "generatedAt": "2026-04-05T01:58:51.081Z",
-  "phase": "phase42",
+  "generatedAt": "2026-04-05T03:54:33.290Z",
+  "phase": "phase43",
   "mode": "review-only",
   "bridge": [
     {
-      "id": "bridge-integrity-to-gating",
-      "from": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
+      "id": "bridge-integrity-attestation-to-verification-packs",
+      "from": "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
+      "to": "release/ATTESTATION-VERIFICATION-PACKS.json",
+      "status": "planned"
+    },
+    {
+      "id": "bridge-verification-packs-to-gating",
+      "from": "release/ATTESTATION-VERIFICATION-PACKS.json",
       "to": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
       "status": "blocked"
     },
@@ -29,8 +35,14 @@
       "status": "blocked"
     },
     {
-      "id": "bridge-promotion-evidence-to-promotion-handshake",
+      "id": "bridge-promotion-evidence-to-apply-manifests",
       "from": "release/CHANNEL-PROMOTION-EVIDENCE.json",
+      "to": "release/PROMOTION-APPLY-MANIFESTS.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-apply-manifests-to-promotion-handshake",
+      "from": "release/PROMOTION-APPLY-MANIFESTS.json",
       "to": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
       "status": "blocked"
     },
@@ -41,8 +53,14 @@
       "status": "blocked"
     },
     {
-      "id": "bridge-publish-rollback-to-publish",
+      "id": "bridge-publish-rollback-to-rollback-rehearsal",
       "from": "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+      "to": "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-rollback-rehearsal-to-publish",
+      "from": "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
       "to": "release/PUBLISH-GATES.json",
       "status": "blocked"
     },

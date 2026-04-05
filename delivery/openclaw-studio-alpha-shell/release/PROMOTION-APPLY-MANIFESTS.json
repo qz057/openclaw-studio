@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "openclaw-studio-promotion-apply-manifests/v1",
+  "generatedAt": "2026-04-05T03:54:33.290Z",
+  "phase": "phase43",
+  "mode": "local-only-review",
+  "manifests": [
+    {
+      "id": "promotion-manifest-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "promotionApplyReadinessId": "promotion-apply-alpha-to-beta",
+      "channelPromotionEvidenceId": "promotion-evidence-alpha-to-beta",
+      "attestationVerificationPackIds": [
+        "attestation-pack-windows",
+        "attestation-pack-macos",
+        "attestation-pack-linux"
+      ],
+      "rollbackExecutionRehearsalLedgerId": "rollback-rehearsal-alpha-to-beta",
+      "status": "planned",
+      "manifestPath": "future/channels/alpha-to-beta/promotion-apply-manifest.json",
+      "applyOrder": [
+        "verify attestation packs",
+        "confirm channel route and publish gates",
+        "stage promotion apply payload",
+        "record rollback rehearsal anchor"
+      ],
+      "reviewChecks": [
+        "promotion readiness linked",
+        "attestation verification packs linked",
+        "rollback rehearsal anchor declared"
+      ],
+      "blockedBy": [
+        "promotion apply remains non-executable",
+        "artifact upload remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canApply": false
+    },
+    {
+      "id": "promotion-manifest-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "promotionApplyReadinessId": "promotion-apply-beta-to-stable",
+      "channelPromotionEvidenceId": "promotion-evidence-beta-to-stable",
+      "attestationVerificationPackIds": [
+        "attestation-pack-windows",
+        "attestation-pack-macos",
+        "attestation-pack-linux"
+      ],
+      "rollbackExecutionRehearsalLedgerId": "rollback-rehearsal-beta-to-stable",
+      "status": "blocked",
+      "manifestPath": "future/channels/beta-to-stable/promotion-apply-manifest.json",
+      "applyOrder": [
+        "verify attestation packs",
+        "confirm stable route prerequisites",
+        "stage promotion apply payload",
+        "record rollback rehearsal anchor"
+      ],
+      "reviewChecks": [
+        "promotion readiness linked",
+        "attestation verification packs linked",
+        "rollback rehearsal anchor declared"
+      ],
+      "blockedBy": [
+        "promotion apply remains non-executable",
+        "artifact upload remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canApply": false
+    }
+  ]
+}

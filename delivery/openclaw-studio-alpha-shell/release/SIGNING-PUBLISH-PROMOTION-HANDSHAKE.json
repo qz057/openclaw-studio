@@ -1,12 +1,13 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-promotion-handshake/v1",
-  "generatedAt": "2026-04-05T01:58:51.081Z",
-  "phase": "phase42",
+  "generatedAt": "2026-04-05T03:54:33.290Z",
+  "phase": "phase43",
   "mode": "local-only-review",
   "canPromote": false,
   "channelRoutingPath": "release/INSTALLER-CHANNEL-ROUTING.json",
   "sealedBundleIntegrityContractPath": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
   "channelPromotionEvidencePath": "release/CHANNEL-PROMOTION-EVIDENCE.json",
+  "promotionApplyManifestsPath": "release/PROMOTION-APPLY-MANIFESTS.json",
   "approvalBridgePath": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
   "publishGatesPath": "release/PUBLISH-GATES.json",
   "promotionGatesPath": "release/PROMOTION-GATES.json",
@@ -49,6 +50,11 @@
       {
         "id": "request-channel-promotion-evidence",
         "label": "Channel promotion evidence",
+        "required": true
+      },
+      {
+        "id": "request-promotion-apply-manifests",
+        "label": "Promotion apply manifests",
         "required": true
       },
       {
@@ -125,6 +131,12 @@
       "artifact": "release/CHANNEL-PROMOTION-EVIDENCE.json"
     },
     {
+      "id": "promotion-ack-apply-manifests",
+      "label": "Promotion apply manifests reviewed",
+      "status": "planned",
+      "artifact": "release/PROMOTION-APPLY-MANIFESTS.json"
+    },
+    {
       "id": "promotion-ack-approval-bridge",
       "label": "Approval bridge reviewed",
       "status": "blocked",
@@ -187,6 +199,15 @@
       ]
     },
     {
+      "id": "promotion-handshake-apply-manifests",
+      "label": "Promotion apply manifest review",
+      "status": "planned",
+      "evidence": [
+        "release/PROMOTION-APPLY-READINESS.json",
+        "release/PROMOTION-APPLY-MANIFESTS.json"
+      ]
+    },
+    {
       "id": "promotion-handshake-approval",
       "label": "Approval bridge review",
       "status": "blocked",
@@ -228,6 +249,7 @@
     "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
     "release/INSTALLER-CHANNEL-ROUTING.json",
     "release/CHANNEL-PROMOTION-EVIDENCE.json",
+    "release/PROMOTION-APPLY-MANIFESTS.json",
     "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
     "release/PUBLISH-GATES.json",
     "release/PUBLISH-ROLLBACK-HANDSHAKE.json",

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-release-approval-workflow/v1",
-  "generatedAt": "2026-04-05T01:58:51.081Z",
-  "phase": "phase42",
+  "generatedAt": "2026-04-05T03:54:33.290Z",
+  "phase": "phase43",
   "mode": "local-only-review",
   "canApprove": false,
   "gatingHandshakePath": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
@@ -47,6 +47,19 @@
       ]
     },
     {
+      "id": "approval-attestation-verification",
+      "label": "Attestation verification pack review",
+      "status": "planned",
+      "approverRoles": [
+        "release-engineering",
+        "security"
+      ],
+      "evidence": [
+        "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
+        "release/ATTESTATION-VERIFICATION-PACKS.json"
+      ]
+    },
+    {
       "id": "approval-installer-builders",
       "label": "Installer builder execution review",
       "status": "planned",
@@ -59,6 +72,19 @@
         "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
         "release/INSTALLER-CHANNEL-ROUTING.json",
         "release/CHANNEL-PROMOTION-EVIDENCE.json"
+      ]
+    },
+    {
+      "id": "approval-promotion-apply",
+      "label": "Promotion apply manifest review",
+      "status": "planned",
+      "approverRoles": [
+        "release-manager",
+        "product-owner"
+      ],
+      "evidence": [
+        "release/PROMOTION-APPLY-READINESS.json",
+        "release/PROMOTION-APPLY-MANIFESTS.json"
       ]
     },
     {
@@ -89,9 +115,11 @@
         "release/PUBLISH-GATES.json",
         "release/PROMOTION-GATES.json",
         "release/CHANNEL-PROMOTION-EVIDENCE.json",
+        "release/PROMOTION-APPLY-MANIFESTS.json",
         "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
         "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
-        "release/PUBLISH-ROLLBACK-HANDSHAKE.json"
+        "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+        "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json"
       ]
     },
     {

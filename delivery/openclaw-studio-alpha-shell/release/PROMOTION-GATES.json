@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-promotion-gates/v1",
-  "generatedAt": "2026-04-05T01:58:51.081Z",
-  "phase": "phase42",
+  "generatedAt": "2026-04-05T03:54:33.290Z",
+  "phase": "phase43",
   "promotions": [
     {
       "from": "alpha",
@@ -13,14 +13,17 @@
         "packaged app directory materialization",
         "packaged app bundle sealing",
         "sealed bundle integrity contract",
+        "attestation verification packs",
         "installer targets",
         "installer builder execution",
         "installer channel routing",
         "channel promotion evidence",
+        "promotion apply manifests",
         "signing",
         "signing-publish gating handshake",
         "signing-publish promotion handshake",
         "publish rollback handshake",
+        "rollback execution rehearsal ledger",
         "release approval workflow",
         "release notes",
         "upload"
@@ -35,11 +38,14 @@
         "checksums",
         "approval",
         "sealed bundle integrity contract",
+        "attestation verification packs",
         "installer channel routing",
         "channel promotion evidence",
+        "promotion apply manifests",
         "signing-publish gating handshake",
         "signing-publish promotion handshake",
         "publish rollback handshake",
+        "rollback execution rehearsal ledger",
         "release approval workflow",
         "rollback plan"
       ]

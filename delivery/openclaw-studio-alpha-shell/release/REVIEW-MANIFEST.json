@@ -1,8 +1,8 @@
 {
   "schemaVersion": "openclaw-studio-review-manifest/v1",
-  "generatedAt": "2026-04-05T01:58:51.081Z",
-  "phase": "phase42",
-  "milestone": "phase42 integrity attestation evidence / promotion apply readiness / rollback recovery ledger + docs / smoke / package / release-plan / UI / shared data closeout",
+  "generatedAt": "2026-04-05T03:54:33.290Z",
+  "phase": "phase43",
+  "milestone": "phase43 attestation verification packs / promotion apply manifests / rollback execution rehearsal ledger + docs / smoke / package / release-plan / UI / shared data closeout",
   "reviewDocs": [
     "README.md",
     "HANDOFF.md",
@@ -19,6 +19,7 @@
     "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
     "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
     "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
+    "release/ATTESTATION-VERIFICATION-PACKS.json",
     "release/INSTALLER-TARGETS.json",
     "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
     "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
@@ -26,6 +27,7 @@
     "release/INSTALLER-CHANNEL-ROUTING.json",
     "release/CHANNEL-PROMOTION-EVIDENCE.json",
     "release/PROMOTION-APPLY-READINESS.json",
+    "release/PROMOTION-APPLY-MANIFESTS.json",
     "release/SIGNING-METADATA.json",
     "release/NOTARIZATION-PLAN.json",
     "release/SIGNING-PUBLISH-PIPELINE.json",
@@ -34,6 +36,7 @@
     "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
     "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
     "release/ROLLBACK-RECOVERY-LEDGER.json",
+    "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
     "release/RELEASE-APPROVAL-WORKFLOW.json",
     "release/RELEASE-NOTES.md",
     "release/PUBLISH-GATES.json",
@@ -63,7 +66,7 @@
     }
   ],
   "pipeline": {
-    "stage": "integrity-attestation-promotion-apply-readiness-rollback-recovery-ledger-skeleton",
+    "stage": "attestation-verification-packs-promotion-apply-manifests-rollback-execution-rehearsal-ledger-skeleton",
     "stages": [
       {
         "id": "pipeline-docs",
@@ -120,6 +123,12 @@
         "detail": "Sealed-bundle integrity contracts now feed explicit attestation packets, verifier inputs, and audit receipts without attesting any live release for real."
       },
       {
+        "id": "pipeline-attestation-verification-packs",
+        "label": "Attestation verification packs",
+        "status": "ready",
+        "detail": "Integrity attestation evidence now feeds verifier-ready packs, checklists, and audit handoff bundles without executing any live verification for real."
+      },
+      {
         "id": "pipeline-installer-builders",
         "label": "Installer-target builder skeleton",
         "status": "ready",
@@ -154,6 +163,12 @@
         "label": "Promotion apply readiness",
         "status": "ready",
         "detail": "Promotion evidence now feeds explicit apply-readiness manifests, reviewer inputs, and channel preflight packets without applying any promotion for real."
+      },
+      {
+        "id": "pipeline-promotion-apply-manifests",
+        "label": "Promotion apply manifests",
+        "status": "ready",
+        "detail": "Promotion apply readiness now feeds explicit apply manifests, ordered rollout steps, and rollback anchors without applying any promotion for real."
       },
       {
         "id": "pipeline-signing-publish",
@@ -192,6 +207,12 @@
         "detail": "Rollback checkpoints now feed explicit recovery ledgers, operator notes, and channel recovery manifests without recovering any live publish state."
       },
       {
+        "id": "pipeline-rollback-execution-rehearsal-ledger",
+        "label": "Rollback execution rehearsal ledger",
+        "status": "ready",
+        "detail": "Rollback recovery ledgers now feed rehearsal manifests, dry-run rollback traces, and operator rehearsal notes without executing any live rollback for real."
+      },
+      {
         "id": "pipeline-approval",
         "label": "Release approval workflow",
         "status": "ready",
@@ -209,11 +230,14 @@
     "no packaged per-OS staged output materialization yet; staged outputs remain review-only metadata",
     "no packaged per-OS bundle sealing yet; sealing remains review-only metadata",
     "no per-platform sealed-bundle integrity attestation or digest publication yet; integrity contract remains review-only metadata",
+    "no attestation verification pack emission or verifier handoff yet; verification packs remain review-only metadata",
     "no Windows / macOS / Linux installer builder orchestration and channel routing wiring yet; routing remains review-only skeleton",
     "no executable channel promotion evidence pack or promotion routing apply yet; evidence remains review-only metadata",
+    "no executable promotion apply manifests or channel apply execution yet; apply manifests remain review-only metadata",
     "no signing / notarization / hash publication workflow yet; approval bridge remains metadata-only",
     "no executable signing-publish gating handshake yet; handshake remains metadata-only",
     "no executable release approval handshake yet; workflow remains metadata-only",
+    "no rollback execution rehearsal or rollback apply automation yet; rehearsal ledger remains review-only metadata",
     "no release publishing / artifact upload / promotion handshake / rollback apply automation yet; publish rollback handshake remains metadata-only",
     "real host-side execution remains disabled until approval / lifecycle / rollback close the loop"
   ]

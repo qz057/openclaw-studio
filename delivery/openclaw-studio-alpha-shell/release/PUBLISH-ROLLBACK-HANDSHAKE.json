@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-publish-rollback-handshake/v1",
-  "generatedAt": "2026-04-05T01:58:51.081Z",
-  "phase": "phase42",
+  "generatedAt": "2026-04-05T03:54:33.290Z",
+  "phase": "phase43",
   "mode": "local-only-review",
   "canRollback": false,
   "sealedBundleIntegrityContractPath": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
@@ -9,6 +9,7 @@
   "promotionHandshakePath": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
   "publishGatesPath": "release/PUBLISH-GATES.json",
   "promotionGatesPath": "release/PROMOTION-GATES.json",
+  "rollbackExecutionRehearsalLedgerPath": "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
   "participants": [
     "release-engineering",
     "security",
@@ -47,6 +48,11 @@
       {
         "id": "request-rollback-checkpoints",
         "label": "Rollback checkpoints",
+        "required": true
+      },
+      {
+        "id": "request-rollback-rehearsal-ledger",
+        "label": "Rollback execution rehearsal ledger",
         "required": true
       },
       {
@@ -119,6 +125,12 @@
       "artifact": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json"
     },
     {
+      "id": "rollback-ack-rehearsal-ledger",
+      "label": "Rollback execution rehearsal ledger reviewed",
+      "status": "blocked",
+      "artifact": "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json"
+    },
+    {
       "id": "rollback-ack-release-notes",
       "label": "Release notes reviewed",
       "status": "planned",
@@ -132,6 +144,7 @@
       "to": "beta",
       "status": "blocked",
       "promotionEvidenceId": "promotion-evidence-alpha-to-beta",
+      "rollbackExecutionRehearsalLedgerId": "rollback-rehearsal-alpha-to-beta",
       "rollbackManifestPath": "future/publish/alpha-to-beta/rollback-handshake.json",
       "recoveryChannel": "alpha",
       "checkpoints": [
@@ -151,6 +164,7 @@
       "to": "stable",
       "status": "blocked",
       "promotionEvidenceId": "promotion-evidence-beta-to-stable",
+      "rollbackExecutionRehearsalLedgerId": "rollback-rehearsal-beta-to-stable",
       "rollbackManifestPath": "future/publish/beta-to-stable/rollback-handshake.json",
       "recoveryChannel": "beta",
       "checkpoints": [
@@ -212,6 +226,15 @@
       ]
     },
     {
+      "id": "rollback-handshake-rehearsal",
+      "label": "Rollback execution rehearsal review",
+      "status": "blocked",
+      "evidence": [
+        "release/ROLLBACK-RECOVERY-LEDGER.json",
+        "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json"
+      ]
+    },
+    {
       "id": "rollback-handshake-recovery",
       "label": "Recovery channel review",
       "status": "blocked",
@@ -227,6 +250,7 @@
     "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
     "release/PUBLISH-GATES.json",
     "release/PROMOTION-GATES.json",
+    "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
     "release/RELEASE-NOTES.md",
     "release/INSTALLER-PLACEHOLDER.json"
   ],

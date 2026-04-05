@@ -1,8 +1,8 @@
-# OpenClaw Studio Phase42 Package Snapshot
+# OpenClaw Studio Phase43 Package Snapshot
 
-这是一个 **phase42 alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40 packaging 与 shell foundations 的基础上继续补齐 integrity attestation evidence、promotion apply readiness 与 rollback recovery ledger，但它依然 **不是 installer**。
+这是一个 **phase43 alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42 packaging 与 shell foundations 的基础上继续补齐 attestation verification packs、promotion apply manifests 与 rollback execution rehearsal ledger，但它依然 **不是 installer**。
 
-当前已验证里程碑：phase42 integrity attestation evidence / promotion apply readiness / rollback recovery ledger + docs / smoke / package / release-plan / UI / shared data closeout。
+当前已验证里程碑：phase43 attestation verification packs / promotion apply manifests / rollback execution rehearsal ledger + docs / smoke / package / release-plan / UI / shared data closeout。
 
 ## 当前能交付什么
 
@@ -12,8 +12,8 @@
 - deeper inspector drilldowns, active flow state, route-aware next-step boards, and inspector-command linkage
 - persisted shell layout foundation backed by localStorage
 - cross-view local orchestration boards linking route, workflow lane, workspace, detached candidate, intent focus, focused slot, and handoff posture
-- release manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged app materialization skeleton / packaged app directory materialization / packaged app staged output skeleton / packaged app bundle sealing skeleton / sealed-bundle integrity contract / installer targets / installer-target builder skeleton / installer builder execution skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / signing-ready metadata / signing-publish pipeline / signing-publish gating handshake / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / release approval workflow / release notes / publish gates / promotion gates under release/
-- docs closeout: README / HANDOFF / IMPLEMENTATION-PLAN / PACKAGE-README / RELEASE-SUMMARY / REVIEW-MANIFEST / BUNDLE-MATRIX / BUNDLE-ASSEMBLY / PACKAGED-APP-DIRECTORY-SKELETON / PACKAGED-APP-MATERIALIZATION-SKELETON / PACKAGED-APP-DIRECTORY-MATERIALIZATION / PACKAGED-APP-STAGED-OUTPUT-SKELETON.json / PACKAGED-APP-BUNDLE-SEALING-SKELETON.json / SEALED-BUNDLE-INTEGRITY-CONTRACT.json / INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON / INSTALLER-BUILDER-EXECUTION-SKELETON / INSTALLER-BUILDER-ORCHESTRATION.json / INSTALLER-CHANNEL-ROUTING.json / CHANNEL-PROMOTION-EVIDENCE.json / SIGNING-METADATA / NOTARIZATION-PLAN / SIGNING-PUBLISH-PIPELINE / SIGNING-PUBLISH-GATING-HANDSHAKE / SIGNING-PUBLISH-APPROVAL-BRIDGE.json / SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json / PUBLISH-ROLLBACK-HANDSHAKE.json / RELEASE-APPROVAL-WORKFLOW / RELEASE-NOTES / PUBLISH-GATES / PROMOTION-GATES
+- release manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged app materialization skeleton / packaged app directory materialization / packaged app staged output skeleton / packaged app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / installer targets / installer-target builder skeleton / installer builder execution skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / promotion apply readiness / promotion apply manifests / signing-ready metadata / signing-publish pipeline / signing-publish gating handshake / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / rollback recovery ledger / rollback execution rehearsal ledger / release approval workflow / release notes / publish gates / promotion gates under release/
+- docs closeout: README / HANDOFF / IMPLEMENTATION-PLAN / PACKAGE-README / RELEASE-SUMMARY / REVIEW-MANIFEST / BUNDLE-MATRIX / BUNDLE-ASSEMBLY / PACKAGED-APP-DIRECTORY-SKELETON / PACKAGED-APP-MATERIALIZATION-SKELETON / PACKAGED-APP-DIRECTORY-MATERIALIZATION / PACKAGED-APP-STAGED-OUTPUT-SKELETON.json / PACKAGED-APP-BUNDLE-SEALING-SKELETON.json / SEALED-BUNDLE-INTEGRITY-CONTRACT.json / INTEGRITY-ATTESTATION-EVIDENCE.json / ATTESTATION-VERIFICATION-PACKS.json / INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON / INSTALLER-BUILDER-EXECUTION-SKELETON / INSTALLER-BUILDER-ORCHESTRATION.json / INSTALLER-CHANNEL-ROUTING.json / CHANNEL-PROMOTION-EVIDENCE.json / PROMOTION-APPLY-READINESS.json / PROMOTION-APPLY-MANIFESTS.json / SIGNING-METADATA / NOTARIZATION-PLAN / SIGNING-PUBLISH-PIPELINE / SIGNING-PUBLISH-GATING-HANDSHAKE / SIGNING-PUBLISH-APPROVAL-BRIDGE.json / SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json / PUBLISH-ROLLBACK-HANDSHAKE.json / ROLLBACK-RECOVERY-LEDGER.json / ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json / RELEASE-APPROVAL-WORKFLOW / RELEASE-NOTES / PUBLISH-GATES / PROMOTION-GATES
 - placeholder installer explainer script that never installs anything
 
 ## 当前还没交付什么
@@ -29,11 +29,14 @@
 - no packaged per-OS staged output materialization yet; staged outputs remain review-only metadata
 - no packaged per-OS bundle sealing yet; sealing remains review-only metadata
 - no per-platform sealed-bundle integrity attestation or digest publication yet; integrity contract remains review-only metadata
+- no attestation verification pack emission or verifier handoff yet; verification packs remain review-only metadata
 - no Windows / macOS / Linux installer builder orchestration and channel routing wiring yet; routing remains review-only skeleton
 - no executable channel promotion evidence pack or promotion routing apply yet; evidence remains review-only metadata
+- no executable promotion apply manifests or channel apply execution yet; apply manifests remain review-only metadata
 - no signing / notarization / hash publication workflow yet; approval bridge remains metadata-only
 - no executable signing-publish gating handshake yet; handshake remains metadata-only
 - no executable release approval handshake yet; workflow remains metadata-only
+- no rollback execution rehearsal or rollback apply automation yet; rehearsal ledger remains review-only metadata
 - no release publishing / artifact upload / promotion handshake / rollback apply automation yet; publish rollback handshake remains metadata-only
 - real host-side execution remains disabled until approval / lifecycle / rollback close the loop
 
@@ -61,6 +64,7 @@ openclaw-studio-alpha-shell/
     PACKAGED-APP-BUNDLE-SEALING-SKELETON.json
     SEALED-BUNDLE-INTEGRITY-CONTRACT.json
     INTEGRITY-ATTESTATION-EVIDENCE.json
+    ATTESTATION-VERIFICATION-PACKS.json
     INSTALLER-TARGETS.json
     INSTALLER-TARGET-BUILDER-SKELETON.json
     INSTALLER-BUILDER-EXECUTION-SKELETON.json
@@ -68,6 +72,7 @@ openclaw-studio-alpha-shell/
     INSTALLER-CHANNEL-ROUTING.json
     CHANNEL-PROMOTION-EVIDENCE.json
     PROMOTION-APPLY-READINESS.json
+    PROMOTION-APPLY-MANIFESTS.json
     SIGNING-METADATA.json
     NOTARIZATION-PLAN.json
     SIGNING-PUBLISH-PIPELINE.json
@@ -76,6 +81,7 @@ openclaw-studio-alpha-shell/
     SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json
     PUBLISH-ROLLBACK-HANDSHAKE.json
     ROLLBACK-RECOVERY-LEDGER.json
+    ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json
     RELEASE-APPROVAL-WORKFLOW.json
     RELEASE-NOTES.md
     PUBLISH-GATES.json
@@ -89,7 +95,7 @@ openclaw-studio-alpha-shell/
 
 ## 已复制的 artifact 组
 
-- Renderer bundle: 3 files, 353.7 KiB, output=artifacts/renderer
+- Renderer bundle: 3 files, 354.6 KiB, output=artifacts/renderer
 - Electron bundle: 10 files, 314.2 KiB, output=artifacts/electron
 
 ## 已包含的文档
@@ -109,6 +115,7 @@ openclaw-studio-alpha-shell/
 - release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json（generated）
 - release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json（generated）
 - release/INTEGRITY-ATTESTATION-EVIDENCE.json（generated）
+- release/ATTESTATION-VERIFICATION-PACKS.json（generated）
 - release/INSTALLER-TARGETS.json（generated）
 - release/INSTALLER-TARGET-BUILDER-SKELETON.json（generated）
 - release/INSTALLER-BUILDER-EXECUTION-SKELETON.json（generated）
@@ -116,6 +123,7 @@ openclaw-studio-alpha-shell/
 - release/INSTALLER-CHANNEL-ROUTING.json（generated）
 - release/CHANNEL-PROMOTION-EVIDENCE.json（generated）
 - release/PROMOTION-APPLY-READINESS.json（generated）
+- release/PROMOTION-APPLY-MANIFESTS.json（generated）
 - release/SIGNING-METADATA.json（generated）
 - release/NOTARIZATION-PLAN.json（generated）
 - release/SIGNING-PUBLISH-PIPELINE.json（generated）
@@ -124,6 +132,7 @@ openclaw-studio-alpha-shell/
 - release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json（generated）
 - release/PUBLISH-ROLLBACK-HANDSHAKE.json（generated）
 - release/ROLLBACK-RECOVERY-LEDGER.json（generated）
+- release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json（generated）
 - release/RELEASE-APPROVAL-WORKFLOW.json（generated）
 - release/RELEASE-NOTES.md（generated）
 - release/PUBLISH-GATES.json（generated）
@@ -143,12 +152,16 @@ openclaw-studio-alpha-shell/
 - 再看 `release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json`
 - 再看 `release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json`
 - 再看 `release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json`
+- 再看 `release/INTEGRITY-ATTESTATION-EVIDENCE.json`
+- 再看 `release/ATTESTATION-VERIFICATION-PACKS.json`
 - 再看 `release/INSTALLER-TARGETS.json`
 - 再看 `release/INSTALLER-TARGET-BUILDER-SKELETON.json`
 - 再看 `release/INSTALLER-BUILDER-EXECUTION-SKELETON.json`
 - 再看 `release/INSTALLER-BUILDER-ORCHESTRATION.json`
 - 再看 `release/INSTALLER-CHANNEL-ROUTING.json`
 - 再看 `release/CHANNEL-PROMOTION-EVIDENCE.json`
+- 再看 `release/PROMOTION-APPLY-READINESS.json`
+- 再看 `release/PROMOTION-APPLY-MANIFESTS.json`
 - 再看 `release/SIGNING-METADATA.json`
 - 再看 `release/NOTARIZATION-PLAN.json`
 - 再看 `release/SIGNING-PUBLISH-PIPELINE.json`
@@ -156,6 +169,8 @@ openclaw-studio-alpha-shell/
 - 再看 `release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json`
 - 再看 `release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json`
 - 再看 `release/PUBLISH-ROLLBACK-HANDSHAKE.json`
+- 再看 `release/ROLLBACK-RECOVERY-LEDGER.json`
+- 再看 `release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json`
 - 再看 `release/RELEASE-APPROVAL-WORKFLOW.json`
 - 再看 `release/RELEASE-NOTES.md`
 - 再看 `release/PUBLISH-GATES.json`
@@ -170,4 +185,4 @@ openclaw-studio-alpha-shell/
 - `scripts/install-placeholder.cjs` 只解释当前 installer 仍缺什么，不执行安装
 - 如需重新生成整个 snapshot，请回到 repo root 运行 `npm run package:alpha`
 
-Generated: 2026-04-05T01:58:51.081Z
+Generated: 2026-04-05T03:54:33.290Z

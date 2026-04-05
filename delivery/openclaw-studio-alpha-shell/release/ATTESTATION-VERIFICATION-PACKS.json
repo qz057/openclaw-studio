@@ -1,0 +1,101 @@
+{
+  "schemaVersion": "openclaw-studio-attestation-verification-packs/v1",
+  "generatedAt": "2026-04-05T03:54:33.290Z",
+  "phase": "phase43",
+  "mode": "local-only-review",
+  "packs": [
+    {
+      "id": "attestation-pack-windows",
+      "platform": "windows",
+      "integrityAttestationEvidenceId": "attestation-windows",
+      "sealedBundleIntegrityContractId": "integrity-contract-windows",
+      "promotionApplyManifestIds": [
+        "promotion-manifest-alpha-to-beta",
+        "promotion-manifest-beta-to-stable"
+      ],
+      "status": "planned",
+      "verificationPackPath": "future/attestations/windows/verification-pack.json",
+      "verifierChecklistPath": "future/attestations/windows/verification-checklist.json",
+      "auditTrailPath": "future/attestations/windows/verification-audit.json",
+      "contents": [
+        "integrity attestation",
+        "verifier input",
+        "audit receipt",
+        "bundle integrity contract link"
+      ],
+      "reviewChecks": [
+        "attestation evidence linked",
+        "verifier checklist declared",
+        "promotion apply manifest anchors recorded"
+      ],
+      "blockedBy": [
+        "attestation remains metadata-only",
+        "digest publication remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canVerify": false
+    },
+    {
+      "id": "attestation-pack-macos",
+      "platform": "macos",
+      "integrityAttestationEvidenceId": "attestation-macos",
+      "sealedBundleIntegrityContractId": "integrity-contract-macos",
+      "promotionApplyManifestIds": [
+        "promotion-manifest-alpha-to-beta",
+        "promotion-manifest-beta-to-stable"
+      ],
+      "status": "planned",
+      "verificationPackPath": "future/attestations/macos/verification-pack.json",
+      "verifierChecklistPath": "future/attestations/macos/verification-checklist.json",
+      "auditTrailPath": "future/attestations/macos/verification-audit.json",
+      "contents": [
+        "integrity attestation",
+        "verifier input",
+        "audit receipt",
+        "bundle integrity contract link"
+      ],
+      "reviewChecks": [
+        "attestation evidence linked",
+        "verifier checklist declared",
+        "promotion apply manifest anchors recorded"
+      ],
+      "blockedBy": [
+        "attestation remains metadata-only",
+        "digest publication remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canVerify": false
+    },
+    {
+      "id": "attestation-pack-linux",
+      "platform": "linux",
+      "integrityAttestationEvidenceId": "attestation-linux",
+      "sealedBundleIntegrityContractId": "integrity-contract-linux",
+      "promotionApplyManifestIds": [
+        "promotion-manifest-alpha-to-beta",
+        "promotion-manifest-beta-to-stable"
+      ],
+      "status": "planned",
+      "verificationPackPath": "future/attestations/linux/verification-pack.json",
+      "verifierChecklistPath": "future/attestations/linux/verification-checklist.json",
+      "auditTrailPath": "future/attestations/linux/verification-audit.json",
+      "contents": [
+        "integrity attestation",
+        "verifier input",
+        "audit receipt",
+        "bundle integrity contract link"
+      ],
+      "reviewChecks": [
+        "attestation evidence linked",
+        "verifier checklist declared",
+        "promotion apply manifest anchors recorded"
+      ],
+      "blockedBy": [
+        "attestation remains metadata-only",
+        "digest publication remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canVerify": false
+    }
+  ]
+}

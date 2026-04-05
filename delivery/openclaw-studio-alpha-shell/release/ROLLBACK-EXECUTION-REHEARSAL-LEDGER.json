@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "openclaw-studio-rollback-execution-rehearsal-ledger/v1",
+  "generatedAt": "2026-04-05T03:54:33.290Z",
+  "phase": "phase43",
+  "mode": "local-only-review",
+  "rehearsals": [
+    {
+      "id": "rollback-rehearsal-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "rollbackRecoveryLedgerId": "rollback-ledger-alpha-to-beta",
+      "publishRollbackPathId": "publish-rollback-alpha-to-beta",
+      "promotionApplyManifestId": "promotion-manifest-alpha-to-beta",
+      "status": "blocked",
+      "rehearsalManifestPath": "future/publish/alpha-to-beta/rollback-execution-rehearsal-ledger.json",
+      "rehearsalSteps": [
+        "load rollback checkpoints",
+        "replay recovery channel selection",
+        "verify attestation pack anchors",
+        "record dry-run rollback notes"
+      ],
+      "blockedBy": [
+        "rollback rehearsal remains non-executable",
+        "live publish remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canRehearse": false
+    },
+    {
+      "id": "rollback-rehearsal-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "rollbackRecoveryLedgerId": "rollback-ledger-beta-to-stable",
+      "publishRollbackPathId": "publish-rollback-beta-to-stable",
+      "promotionApplyManifestId": "promotion-manifest-beta-to-stable",
+      "status": "blocked",
+      "rehearsalManifestPath": "future/publish/beta-to-stable/rollback-execution-rehearsal-ledger.json",
+      "rehearsalSteps": [
+        "load rollback checkpoints",
+        "replay recovery channel selection",
+        "verify attestation pack anchors",
+        "record dry-run rollback notes"
+      ],
+      "blockedBy": [
+        "rollback rehearsal remains non-executable",
+        "live publish remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canRehearse": false
+    }
+  ]
+}

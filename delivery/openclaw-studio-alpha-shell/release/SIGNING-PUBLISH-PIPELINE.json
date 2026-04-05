@@ -1,14 +1,17 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-pipeline/v1",
-  "generatedAt": "2026-04-05T01:58:51.081Z",
-  "phase": "phase42",
+  "generatedAt": "2026-04-05T03:54:33.290Z",
+  "phase": "phase43",
   "sealedBundleIntegrityContractPath": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
+  "attestationVerificationPacksPath": "release/ATTESTATION-VERIFICATION-PACKS.json",
   "gatingHandshakePath": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
   "approvalBridgePath": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
   "channelRoutingPath": "release/INSTALLER-CHANNEL-ROUTING.json",
   "channelPromotionEvidencePath": "release/CHANNEL-PROMOTION-EVIDENCE.json",
+  "promotionApplyManifestsPath": "release/PROMOTION-APPLY-MANIFESTS.json",
   "promotionHandshakePath": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
   "publishRollbackHandshakePath": "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+  "rollbackExecutionRehearsalLedgerPath": "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
   "stages": [
     {
       "id": "pipeline-packaged-app-directory-materialization",
@@ -31,6 +34,11 @@
       "status": "planned"
     },
     {
+      "id": "pipeline-attestation-verification-packs",
+      "label": "Attestation verification packs",
+      "status": "planned"
+    },
+    {
       "id": "pipeline-installer-builder-execution",
       "label": "Installer builder execution skeleton",
       "status": "planned"
@@ -48,6 +56,11 @@
     {
       "id": "pipeline-channel-promotion-evidence",
       "label": "Channel promotion evidence",
+      "status": "planned"
+    },
+    {
+      "id": "pipeline-promotion-apply-manifests",
+      "label": "Promotion apply manifests",
       "status": "planned"
     },
     {
@@ -88,6 +101,11 @@
     {
       "id": "pipeline-publish-rollback-handshake",
       "label": "Publish rollback handshake",
+      "status": "blocked"
+    },
+    {
+      "id": "pipeline-rollback-execution-rehearsal-ledger",
+      "label": "Rollback execution rehearsal ledger",
       "status": "blocked"
     },
     {
