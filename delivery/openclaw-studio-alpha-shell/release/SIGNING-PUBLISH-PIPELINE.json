@@ -1,11 +1,14 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-pipeline/v1",
-  "generatedAt": "2026-04-05T00:05:51.615Z",
-  "phase": "phase40",
+  "generatedAt": "2026-04-05T01:10:02.938Z",
+  "phase": "phase41",
+  "sealedBundleIntegrityContractPath": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
   "gatingHandshakePath": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
   "approvalBridgePath": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
   "channelRoutingPath": "release/INSTALLER-CHANNEL-ROUTING.json",
+  "channelPromotionEvidencePath": "release/CHANNEL-PROMOTION-EVIDENCE.json",
   "promotionHandshakePath": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+  "publishRollbackHandshakePath": "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
   "stages": [
     {
       "id": "pipeline-packaged-app-directory-materialization",
@@ -23,6 +26,11 @@
       "status": "planned"
     },
     {
+      "id": "pipeline-sealed-bundle-integrity",
+      "label": "Sealed-bundle integrity contract",
+      "status": "planned"
+    },
+    {
       "id": "pipeline-installer-builder-execution",
       "label": "Installer builder execution skeleton",
       "status": "planned"
@@ -35,6 +43,11 @@
     {
       "id": "pipeline-installer-channel-routing",
       "label": "Installer channel routing",
+      "status": "planned"
+    },
+    {
+      "id": "pipeline-channel-promotion-evidence",
+      "label": "Channel promotion evidence",
       "status": "planned"
     },
     {
@@ -71,6 +84,11 @@
       "id": "pipeline-promotion-handshake",
       "label": "Signing-publish promotion handshake",
       "status": "planned"
+    },
+    {
+      "id": "pipeline-publish-rollback-handshake",
+      "label": "Publish rollback handshake",
+      "status": "blocked"
     },
     {
       "id": "pipeline-upload",

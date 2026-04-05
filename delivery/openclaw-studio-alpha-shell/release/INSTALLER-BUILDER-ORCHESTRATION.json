@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-installer-builder-orchestration/v1",
-  "generatedAt": "2026-04-05T00:05:51.615Z",
-  "phase": "phase40",
+  "generatedAt": "2026-04-05T01:10:02.938Z",
+  "phase": "phase41",
   "mode": "review-only",
   "flows": [
     {
@@ -9,6 +9,7 @@
       "platform": "windows",
       "stagedOutputId": "staged-output-windows",
       "bundleSealingId": "bundle-sealing-windows",
+      "integrityContractId": "integrity-contract-windows",
       "channelRouteId": "route-alpha",
       "executionIds": [
         "execute-windows-portable-dir-builder",
@@ -21,6 +22,7 @@
       "platform": "macos",
       "stagedOutputId": "staged-output-macos",
       "bundleSealingId": "bundle-sealing-macos",
+      "integrityContractId": "integrity-contract-macos",
       "channelRouteId": "route-alpha",
       "executionIds": [
         "execute-macos-app-bundle-builder",
@@ -33,6 +35,7 @@
       "platform": "linux",
       "stagedOutputId": "staged-output-linux",
       "bundleSealingId": "bundle-sealing-linux",
+      "integrityContractId": "integrity-contract-linux",
       "channelRouteId": "route-alpha",
       "executionIds": [
         "execute-linux-appimage-builder",

@@ -1,8 +1,8 @@
 {
   "schemaVersion": "openclaw-studio-review-manifest/v1",
-  "generatedAt": "2026-04-05T00:05:51.615Z",
-  "phase": "phase40",
-  "milestone": "phase40 packaged-app bundle sealing skeleton / installer channel routing / signing-publish promotion handshake + docs / smoke / package / release-plan / UI / shared data closeout",
+  "generatedAt": "2026-04-05T01:10:02.938Z",
+  "phase": "phase41",
+  "milestone": "phase41 sealed-bundle integrity contract / channel promotion evidence / publish rollback handshake + docs / smoke / package / release-plan / UI / shared data closeout",
   "reviewDocs": [
     "README.md",
     "HANDOFF.md",
@@ -17,17 +17,20 @@
     "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
     "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
     "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+    "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
     "release/INSTALLER-TARGETS.json",
     "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
     "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
     "release/INSTALLER-BUILDER-ORCHESTRATION.json",
     "release/INSTALLER-CHANNEL-ROUTING.json",
+    "release/CHANNEL-PROMOTION-EVIDENCE.json",
     "release/SIGNING-METADATA.json",
     "release/NOTARIZATION-PLAN.json",
     "release/SIGNING-PUBLISH-PIPELINE.json",
     "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
     "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
     "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+    "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
     "release/RELEASE-APPROVAL-WORKFLOW.json",
     "release/RELEASE-NOTES.md",
     "release/PUBLISH-GATES.json",
@@ -57,7 +60,7 @@
     }
   ],
   "pipeline": {
-    "stage": "bundle-sealing-channel-routing-promotion-handshake-skeleton",
+    "stage": "sealed-bundle-integrity-channel-promotion-evidence-publish-rollback-handshake-skeleton",
     "stages": [
       {
         "id": "pipeline-docs",
@@ -102,6 +105,12 @@
         "detail": "Staged outputs now feed review-only sealing manifests and integrity checkpoints without freezing any real packaged bundle."
       },
       {
+        "id": "pipeline-bundle-integrity",
+        "label": "Sealed-bundle integrity contract",
+        "status": "ready",
+        "detail": "Bundle sealing metadata now feeds explicit integrity, digest, and audit checkpoints without attesting any real packaged bundle."
+      },
+      {
         "id": "pipeline-installer-builders",
         "label": "Installer-target builder skeleton",
         "status": "ready",
@@ -124,6 +133,12 @@
         "label": "Installer channel routing",
         "status": "ready",
         "detail": "Review-only installer flows now map cleanly into alpha/beta/stable routing manifests without routing any build for real."
+      },
+      {
+        "id": "pipeline-channel-promotion-evidence",
+        "label": "Channel promotion evidence",
+        "status": "ready",
+        "detail": "Channel routing now feeds explicit promotion evidence packets and proof manifests without promoting any artifact for real."
       },
       {
         "id": "pipeline-signing-publish",
@@ -150,6 +165,12 @@
         "detail": "Channel routing, publish gates, and promotion evidence now converge in a dedicated review-only promotion handshake."
       },
       {
+        "id": "pipeline-publish-rollback",
+        "label": "Publish rollback handshake",
+        "status": "ready",
+        "detail": "Publish and promotion review now carry explicit rollback checkpoints and recovery-channel handoff metadata without rolling anything back for real."
+      },
+      {
         "id": "pipeline-approval",
         "label": "Release approval workflow",
         "status": "ready",
@@ -166,11 +187,13 @@
   "blockedActions": [
     "no packaged per-OS staged output materialization yet; staged outputs remain review-only metadata",
     "no packaged per-OS bundle sealing yet; sealing remains review-only metadata",
+    "no per-platform sealed-bundle integrity attestation or digest publication yet; integrity contract remains review-only metadata",
     "no Windows / macOS / Linux installer builder orchestration and channel routing wiring yet; routing remains review-only skeleton",
+    "no executable channel promotion evidence pack or promotion routing apply yet; evidence remains review-only metadata",
     "no signing / notarization / hash publication workflow yet; approval bridge remains metadata-only",
     "no executable signing-publish gating handshake yet; handshake remains metadata-only",
     "no executable release approval handshake yet; workflow remains metadata-only",
-    "no release publishing / artifact upload / promotion handshake / channel promotion automation yet; publish pipeline remains skeleton-only",
+    "no release publishing / artifact upload / promotion handshake / rollback apply automation yet; publish rollback handshake remains metadata-only",
     "real host-side execution remains disabled until approval / lifecycle / rollback close the loop"
   ]
 }

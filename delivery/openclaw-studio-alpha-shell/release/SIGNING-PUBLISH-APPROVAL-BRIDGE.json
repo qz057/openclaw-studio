@@ -1,9 +1,15 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-approval-bridge/v1",
-  "generatedAt": "2026-04-05T00:05:51.615Z",
-  "phase": "phase40",
+  "generatedAt": "2026-04-05T01:10:02.938Z",
+  "phase": "phase41",
   "mode": "review-only",
   "bridge": [
+    {
+      "id": "bridge-integrity-to-gating",
+      "from": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
+      "to": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+      "status": "blocked"
+    },
     {
       "id": "bridge-signing-to-approval",
       "from": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
@@ -17,14 +23,26 @@
       "status": "blocked"
     },
     {
-      "id": "bridge-channel-routing-to-promotion-handshake",
+      "id": "bridge-channel-routing-to-promotion-evidence",
       "from": "release/INSTALLER-CHANNEL-ROUTING.json",
+      "to": "release/CHANNEL-PROMOTION-EVIDENCE.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-promotion-evidence-to-promotion-handshake",
+      "from": "release/CHANNEL-PROMOTION-EVIDENCE.json",
       "to": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
       "status": "blocked"
     },
     {
-      "id": "bridge-promotion-handshake-to-publish",
+      "id": "bridge-promotion-handshake-to-publish-rollback",
       "from": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+      "to": "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-publish-rollback-to-publish",
+      "from": "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
       "to": "release/PUBLISH-GATES.json",
       "status": "blocked"
     },

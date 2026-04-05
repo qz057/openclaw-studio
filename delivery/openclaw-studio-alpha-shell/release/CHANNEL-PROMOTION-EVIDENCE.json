@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "openclaw-studio-channel-promotion-evidence/v1",
+  "generatedAt": "2026-04-05T01:10:02.938Z",
+  "phase": "phase41",
+  "mode": "local-only-review",
+  "promotions": [
+    {
+      "id": "promotion-evidence-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "status": "planned",
+      "sourceRouteId": "route-alpha",
+      "targetRouteId": "route-beta",
+      "publishRollbackPathId": "publish-rollback-alpha-to-beta",
+      "sealedBundleIntegrityIds": [
+        "integrity-contract-windows",
+        "integrity-contract-macos",
+        "integrity-contract-linux"
+      ],
+      "evidenceManifestPath": "future/channels/alpha-to-beta/promotion-evidence.json",
+      "evidenceArtifacts": [
+        "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
+        "release/INSTALLER-CHANNEL-ROUTING.json",
+        "release/PUBLISH-GATES.json",
+        "release/PROMOTION-GATES.json",
+        "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json"
+      ],
+      "reviewChecks": [
+        "source and target routes linked",
+        "sealed-bundle integrity evidence linked",
+        "promotion target recorded",
+        "rollback handshake anchor recorded"
+      ],
+      "canPromote": false
+    },
+    {
+      "id": "promotion-evidence-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "status": "blocked",
+      "sourceRouteId": "route-beta",
+      "targetRouteId": "route-stable",
+      "publishRollbackPathId": "publish-rollback-beta-to-stable",
+      "sealedBundleIntegrityIds": [
+        "integrity-contract-windows",
+        "integrity-contract-macos",
+        "integrity-contract-linux"
+      ],
+      "evidenceManifestPath": "future/channels/beta-to-stable/promotion-evidence.json",
+      "evidenceArtifacts": [
+        "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
+        "release/INSTALLER-CHANNEL-ROUTING.json",
+        "release/PUBLISH-GATES.json",
+        "release/PROMOTION-GATES.json",
+        "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json"
+      ],
+      "reviewChecks": [
+        "source and target routes linked",
+        "sealed-bundle integrity evidence linked",
+        "promotion target recorded",
+        "rollback handshake anchor recorded"
+      ],
+      "blockedBy": [
+        "uploaded artifacts remain blocked",
+        "notarization and checksums remain blocked",
+        "publish rollback handshake remains metadata-only"
+      ],
+      "canPromote": false
+    }
+  ]
+}

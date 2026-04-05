@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-release-approval-workflow/v1",
-  "generatedAt": "2026-04-05T00:05:51.615Z",
-  "phase": "phase40",
+  "generatedAt": "2026-04-05T01:10:02.938Z",
+  "phase": "phase41",
   "mode": "local-only-review",
   "canApprove": false,
   "gatingHandshakePath": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
@@ -11,6 +11,7 @@
     "approval handshake is not executable yet",
     "signing / notarization remain metadata-only",
     "signing-publish gating handshake remains metadata-only",
+    "publish rollback handshake remains metadata-only",
     "publish / promotion automation is still blocked",
     "host-side execution remains disabled"
   ],
@@ -41,6 +42,7 @@
         "release/PACKAGED-APP-DIRECTORY-SKELETON.json",
         "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
         "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+        "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
         "release/INSTALLER-TARGETS.json"
       ]
     },
@@ -55,7 +57,8 @@
       "evidence": [
         "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
         "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
-        "release/INSTALLER-CHANNEL-ROUTING.json"
+        "release/INSTALLER-CHANNEL-ROUTING.json",
+        "release/CHANNEL-PROMOTION-EVIDENCE.json"
       ]
     },
     {
@@ -75,7 +78,7 @@
     },
     {
       "id": "approval-publish-promotion",
-      "label": "Publish and promotion review",
+      "label": "Publish, rollback, and promotion review",
       "status": "blocked",
       "approverRoles": [
         "release-manager",
@@ -85,8 +88,10 @@
         "release/RELEASE-NOTES.md",
         "release/PUBLISH-GATES.json",
         "release/PROMOTION-GATES.json",
+        "release/CHANNEL-PROMOTION-EVIDENCE.json",
         "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
-        "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json"
+        "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+        "release/PUBLISH-ROLLBACK-HANDSHAKE.json"
       ]
     },
     {

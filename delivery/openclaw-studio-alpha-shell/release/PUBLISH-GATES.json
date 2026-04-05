@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-publish-gates/v1",
-  "generatedAt": "2026-04-05T00:05:51.615Z",
-  "phase": "phase40",
+  "generatedAt": "2026-04-05T01:10:02.938Z",
+  "phase": "phase41",
   "gates": [
     {
       "id": "gate-bundles",
@@ -29,6 +29,11 @@
       "status": "planned"
     },
     {
+      "id": "gate-sealed-bundle-integrity",
+      "label": "Sealed-bundle integrity contract reviewed",
+      "status": "planned"
+    },
+    {
       "id": "gate-installer-targets",
       "label": "Installer targets reviewed",
       "status": "planned"
@@ -49,6 +54,11 @@
       "status": "planned"
     },
     {
+      "id": "gate-channel-promotion-evidence",
+      "label": "Channel promotion evidence reviewed",
+      "status": "planned"
+    },
+    {
       "id": "gate-signing",
       "label": "Signing / notarization complete",
       "status": "blocked"
@@ -66,6 +76,11 @@
     {
       "id": "gate-promotion-handshake",
       "label": "Signing-publish promotion handshake resolved",
+      "status": "blocked"
+    },
+    {
+      "id": "gate-publish-rollback-handshake",
+      "label": "Publish rollback handshake resolved",
       "status": "blocked"
     },
     {

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-packaged-app-staged-output-skeleton/v1",
-  "generatedAt": "2026-04-05T00:05:51.615Z",
-  "phase": "phase40",
+  "generatedAt": "2026-04-05T01:10:02.938Z",
+  "phase": "phase41",
   "outputs": [
     {
       "id": "staged-output-windows",
@@ -9,6 +9,7 @@
       "directoryMaterializationId": "directory-materialization-windows",
       "materializationId": "materialize-windows-packaged-app",
       "bundleSealingId": "bundle-sealing-windows",
+      "integrityContractId": "integrity-contract-windows",
       "status": "planned",
       "outputRoot": "future/staged-output/windows/OpenClaw Studio",
       "manifests": [
@@ -22,6 +23,7 @@
       "directoryMaterializationId": "directory-materialization-macos",
       "materializationId": "materialize-macos-packaged-app",
       "bundleSealingId": "bundle-sealing-macos",
+      "integrityContractId": "integrity-contract-macos",
       "status": "planned",
       "outputRoot": "future/staged-output/macos/OpenClaw Studio.app",
       "manifests": [
@@ -35,6 +37,7 @@
       "directoryMaterializationId": "directory-materialization-linux",
       "materializationId": "materialize-linux-packaged-app",
       "bundleSealingId": "bundle-sealing-linux",
+      "integrityContractId": "integrity-contract-linux",
       "status": "planned",
       "outputRoot": "future/staged-output/linux/openclaw-studio",
       "manifests": [

@@ -1,13 +1,16 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-promotion-handshake/v1",
-  "generatedAt": "2026-04-05T00:05:51.615Z",
-  "phase": "phase40",
+  "generatedAt": "2026-04-05T01:10:02.938Z",
+  "phase": "phase41",
   "mode": "local-only-review",
   "canPromote": false,
   "channelRoutingPath": "release/INSTALLER-CHANNEL-ROUTING.json",
+  "sealedBundleIntegrityContractPath": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
+  "channelPromotionEvidencePath": "release/CHANNEL-PROMOTION-EVIDENCE.json",
   "approvalBridgePath": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
   "publishGatesPath": "release/PUBLISH-GATES.json",
   "promotionGatesPath": "release/PROMOTION-GATES.json",
+  "publishRollbackHandshakePath": "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
   "participants": [
     "release-engineering",
     "security",
@@ -39,8 +42,23 @@
         "required": true
       },
       {
+        "id": "request-bundle-integrity",
+        "label": "Sealed-bundle integrity contract",
+        "required": true
+      },
+      {
+        "id": "request-channel-promotion-evidence",
+        "label": "Channel promotion evidence",
+        "required": true
+      },
+      {
         "id": "request-publish-evidence",
         "label": "Publish evidence",
+        "required": true
+      },
+      {
+        "id": "request-publish-rollback",
+        "label": "Publish rollback handshake",
         "required": true
       },
       {
@@ -89,10 +107,22 @@
       "artifact": "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json"
     },
     {
+      "id": "promotion-ack-bundle-integrity",
+      "label": "Sealed-bundle integrity reviewed",
+      "status": "planned",
+      "artifact": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json"
+    },
+    {
       "id": "promotion-ack-channel-routing",
       "label": "Installer channel routing reviewed",
       "status": "planned",
       "artifact": "release/INSTALLER-CHANNEL-ROUTING.json"
+    },
+    {
+      "id": "promotion-ack-channel-promotion-evidence",
+      "label": "Channel promotion evidence reviewed",
+      "status": "planned",
+      "artifact": "release/CHANNEL-PROMOTION-EVIDENCE.json"
     },
     {
       "id": "promotion-ack-approval-bridge",
@@ -105,6 +135,12 @@
       "label": "Publish gates reviewed",
       "status": "blocked",
       "artifact": "release/PUBLISH-GATES.json"
+    },
+    {
+      "id": "promotion-ack-publish-rollback",
+      "label": "Publish rollback handshake reviewed",
+      "status": "blocked",
+      "artifact": "release/PUBLISH-ROLLBACK-HANDSHAKE.json"
     },
     {
       "id": "promotion-ack-promotion-gates",
@@ -124,12 +160,30 @@
       ]
     },
     {
+      "id": "promotion-handshake-bundle-integrity",
+      "label": "Sealed-bundle integrity review",
+      "status": "planned",
+      "evidence": [
+        "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+        "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json"
+      ]
+    },
+    {
       "id": "promotion-handshake-channel-routing",
       "label": "Installer channel routing review",
       "status": "planned",
       "evidence": [
         "release/INSTALLER-BUILDER-ORCHESTRATION.json",
         "release/INSTALLER-CHANNEL-ROUTING.json"
+      ]
+    },
+    {
+      "id": "promotion-handshake-channel-promotion-evidence",
+      "label": "Channel promotion evidence review",
+      "status": "planned",
+      "evidence": [
+        "release/INSTALLER-CHANNEL-ROUTING.json",
+        "release/CHANNEL-PROMOTION-EVIDENCE.json"
       ]
     },
     {
@@ -151,6 +205,15 @@
       ]
     },
     {
+      "id": "promotion-handshake-publish-rollback",
+      "label": "Publish rollback review",
+      "status": "blocked",
+      "evidence": [
+        "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+        "release/PUBLISH-GATES.json"
+      ]
+    },
+    {
       "id": "promotion-handshake-promotion",
       "label": "Promotion gate review",
       "status": "blocked",
@@ -162,15 +225,19 @@
   ],
   "linkedArtifacts": [
     "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+    "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
     "release/INSTALLER-CHANNEL-ROUTING.json",
+    "release/CHANNEL-PROMOTION-EVIDENCE.json",
     "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
     "release/PUBLISH-GATES.json",
+    "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
     "release/PROMOTION-GATES.json",
     "release/RELEASE-APPROVAL-WORKFLOW.json"
   ],
   "blockedBy": [
     "sealed bundles remain metadata-only",
     "artifact upload remains blocked",
+    "publish rollback remains metadata-only",
     "promotion gates remain non-executable",
     "host-side execution remains disabled"
   ]

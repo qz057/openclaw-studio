@@ -1,0 +1,107 @@
+{
+  "schemaVersion": "openclaw-studio-sealed-bundle-integrity-contract/v1",
+  "generatedAt": "2026-04-05T01:10:02.938Z",
+  "phase": "phase41",
+  "mode": "review-only",
+  "contracts": [
+    {
+      "id": "integrity-contract-windows",
+      "platform": "windows",
+      "channel": "alpha",
+      "stagedOutputId": "staged-output-windows",
+      "bundleSealingId": "bundle-sealing-windows",
+      "installerFlowId": "orchestrate-windows-builders",
+      "promotionEvidenceIds": [
+        "promotion-evidence-alpha-to-beta",
+        "promotion-evidence-beta-to-stable"
+      ],
+      "rollbackCheckpointId": "sealed-bundle-checkpoint-windows",
+      "status": "planned",
+      "contractManifestPath": "future/sealed-bundles/windows/integrity-contract.json",
+      "integrityManifestPath": "future/sealed-bundles/windows/bundle-integrity-manifest.json",
+      "auditManifestPath": "future/sealed-bundles/windows/integrity-audit.json",
+      "hashSources": [
+        "future/staged-output/windows/output-manifest.json",
+        "future/staged-output/windows/checksum-manifest.json"
+      ],
+      "reviewChecks": [
+        "seal manifest linked",
+        "integrity manifest path declared",
+        "digest source manifests declared",
+        "promotion evidence anchors recorded"
+      ],
+      "blockedBy": [
+        "sealed bundle remains metadata-only",
+        "digest publication remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canVerify": false
+    },
+    {
+      "id": "integrity-contract-macos",
+      "platform": "macos",
+      "channel": "alpha",
+      "stagedOutputId": "staged-output-macos",
+      "bundleSealingId": "bundle-sealing-macos",
+      "installerFlowId": "orchestrate-macos-builders",
+      "promotionEvidenceIds": [
+        "promotion-evidence-alpha-to-beta",
+        "promotion-evidence-beta-to-stable"
+      ],
+      "rollbackCheckpointId": "sealed-bundle-checkpoint-macos",
+      "status": "planned",
+      "contractManifestPath": "future/sealed-bundles/macos/integrity-contract.json",
+      "integrityManifestPath": "future/sealed-bundles/macos/bundle-integrity-manifest.json",
+      "auditManifestPath": "future/sealed-bundles/macos/integrity-audit.json",
+      "hashSources": [
+        "future/staged-output/macos/output-manifest.json",
+        "future/staged-output/macos/checksum-manifest.json"
+      ],
+      "reviewChecks": [
+        "seal manifest linked",
+        "integrity manifest path declared",
+        "digest source manifests declared",
+        "promotion evidence anchors recorded"
+      ],
+      "blockedBy": [
+        "sealed bundle remains metadata-only",
+        "digest publication remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canVerify": false
+    },
+    {
+      "id": "integrity-contract-linux",
+      "platform": "linux",
+      "channel": "alpha",
+      "stagedOutputId": "staged-output-linux",
+      "bundleSealingId": "bundle-sealing-linux",
+      "installerFlowId": "orchestrate-linux-builders",
+      "promotionEvidenceIds": [
+        "promotion-evidence-alpha-to-beta",
+        "promotion-evidence-beta-to-stable"
+      ],
+      "rollbackCheckpointId": "sealed-bundle-checkpoint-linux",
+      "status": "planned",
+      "contractManifestPath": "future/sealed-bundles/linux/integrity-contract.json",
+      "integrityManifestPath": "future/sealed-bundles/linux/bundle-integrity-manifest.json",
+      "auditManifestPath": "future/sealed-bundles/linux/integrity-audit.json",
+      "hashSources": [
+        "future/staged-output/linux/output-manifest.json",
+        "future/staged-output/linux/checksum-manifest.json"
+      ],
+      "reviewChecks": [
+        "seal manifest linked",
+        "integrity manifest path declared",
+        "digest source manifests declared",
+        "promotion evidence anchors recorded"
+      ],
+      "blockedBy": [
+        "sealed bundle remains metadata-only",
+        "digest publication remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canVerify": false
+    }
+  ]
+}

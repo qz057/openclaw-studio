@@ -133,7 +133,7 @@
 - smoke 已提升到验证 phase35 bundle assembly skeleton / signing-ready metadata / release promotion gating contract 与 renderer markers
 - README / HANDOFF / package snapshot 已同步反映 phase35 reality
 
-### Phase 40（当前已完成）
+### Phase 40（已完成）
 - phase39 的 formal-release skeleton 已继续下沉成更明确的 packaged-app bundle sealing / installer channel routing / signing-publish promotion handshake layer
 - release skeleton 现在补齐 PACKAGED-APP-BUNDLE-SEALING-SKELETON / INSTALLER-CHANNEL-ROUTING / SIGNING-PUBLISH-PROMOTION-HANDSHAKE
 - shell 现在补齐 Packaged-app Bundle Sealing Skeleton / Installer Channel Routing / Signing-publish Promotion Handshake 可见性
@@ -141,6 +141,15 @@
 - 全部仍然保持 `local-only`，不做真实 host-side execution 或系统级窗口操作
 - smoke 已提升到验证 phase40 packaged-app bundle sealing skeleton / installer channel routing / signing-publish promotion handshake contract 与 renderer markers
 - README / HANDOFF / package snapshot 已同步反映 phase40 reality
+
+### Phase 41（当前已完成）
+- phase40 的 formal-release skeleton 已继续下沉成更明确的 sealed-bundle integrity / channel promotion evidence / publish rollback handshake layer
+- release skeleton 现在补齐 SEALED-BUNDLE-INTEGRITY-CONTRACT / CHANNEL-PROMOTION-EVIDENCE / PUBLISH-ROLLBACK-HANDSHAKE
+- shell 现在补齐 Sealed-bundle Integrity Contract / Channel Promotion Evidence / Publish Rollback Handshake 可见性
+- package snapshot 现在具备 sealed-bundle integrity contract / channel promotion evidence / publish rollback handshake，但仍不做真实 installer / approval / publish / rollback
+- 全部仍然保持 `local-only`，不做真实 host-side execution 或系统级窗口操作
+- smoke 已提升到验证 phase41 sealed-bundle integrity / channel promotion evidence / publish rollback handshake contract 与 renderer markers
+- README / HANDOFF / package snapshot 已同步反映 phase41 reality
 
 ## 当前明确边界
 
@@ -150,7 +159,7 @@
 - dry-run / preview / simulate
 - Studio-local execute（只改应用内 in-memory state/history）
 - phase27 command surface / layout persistence / window intent staging
-- phase40 packaged-app bundle sealing skeleton / installer channel routing / signing-publish promotion handshake
+- phase41 sealed-bundle integrity contract / channel promotion evidence / publish rollback handshake
 - phase26/27/28 release skeleton / artifact review / handoff docs / package metadata
 
 当前明确禁止：
@@ -172,7 +181,7 @@ npm run start:smoke
 npm run package:alpha
 ```
 
-phase40 可额外跑：
+phase41 可额外跑：
 
 ```bash
 npm run release:plan
@@ -180,13 +189,13 @@ npm run release:plan
 
 ## 下一阶段（建议）
 
-### Phase 41
-目标：在不开放危险执行的前提下，继续把 phase40 foundations 推进为更完整的产品能力与交付链路。
+### Phase 42
+目标：在不开放危险执行的前提下，继续把 phase41 foundations 推进为更完整的产品能力与交付链路。
 
 范围建议：
 - 更深的 Inspector / command depth / trace drill-down
 - 更真实的 multi-window orchestration 与跨窗口共享状态
-- 把当前 skeleton 继续推进为 executable review-only bundle sealing / installer channel routing enforcement / signing-publish promotion evidence / release approval pipeline
+- 把当前 skeleton 继续推进为 executable review-only integrity attestation / promotion evidence apply / publish rollback execution / release approval pipeline
 - 在 approval / lifecycle / rollback 真实闭环前继续提升 observability，而不是开启真实 host-side execution
 
 ### 后续阶段

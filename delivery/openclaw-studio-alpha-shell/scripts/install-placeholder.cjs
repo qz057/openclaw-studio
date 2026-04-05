@@ -16,15 +16,18 @@ console.log(`packaged app directory materialization metadata: ${manifest.package
 console.log(`packaged app materialization metadata: ${manifest.packagedAppMaterializationSkeletonPath}`);
 console.log(`packaged app staged output metadata: ${manifest.packagedAppStagedOutputSkeletonPath}`);
 console.log(`packaged app bundle sealing metadata: ${manifest.packagedAppBundleSealingSkeletonPath}`);
+console.log(`sealed-bundle integrity metadata: ${manifest.sealedBundleIntegrityContractPath}`);
 console.log(`installer targets metadata: ${manifest.installerTargetsPath}`);
 console.log(`installer builder execution metadata: ${manifest.installerBuilderExecutionSkeletonPath}`);
 console.log(`installer-target builder metadata: ${manifest.installerTargetBuilderSkeletonPath}`);
 console.log(`installer builder orchestration metadata: ${manifest.installerBuilderOrchestrationPath}`);
 console.log(`installer channel routing metadata: ${manifest.installerChannelRoutingPath}`);
+console.log(`channel promotion evidence metadata: ${manifest.channelPromotionEvidencePath}`);
 console.log(`signing-publish gating handshake metadata: ${manifest.signingPublishGatingHandshakePath}`);
 console.log(`signing & publish pipeline metadata: ${manifest.signingPublishPipelinePath}`);
 console.log(`signing-publish approval bridge metadata: ${manifest.signingPublishApprovalBridgePath}`);
 console.log(`signing-publish promotion handshake metadata: ${manifest.signingPublishPromotionHandshakePath}`);
+console.log(`publish rollback handshake metadata: ${manifest.publishRollbackHandshakePath}`);
 console.log(`approval workflow metadata: ${manifest.approvalWorkflowPath}`);
 console.log("missing capabilities:");
 for (const item of manifest.missingCapabilities) {
