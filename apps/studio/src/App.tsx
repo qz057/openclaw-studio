@@ -779,8 +779,8 @@ export function App() {
     {
       id: "cross-view-slot-release",
       label: "Focused slot -> Release posture",
-      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase42 integrity attestation evidence`,
-      detail: "Focused-slot review and release review now sit in the same local-only handoff story without enabling host execution, installer work, promotion routing, or publish rollback."
+      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase43 attestation verification packs`,
+      detail: "Focused-slot review and release review now sit in the same local-only handoff story without enabling host execution, installer work, promotion apply, rollback rehearsal, or publish rollback."
     }
   ];
   const inspectorCommandLinkage = [
@@ -808,7 +808,7 @@ export function App() {
       id: "release-depth-manifest",
       label: "Formal Release Readiness",
       value: "RELEASE-MANIFEST / BUILD-METADATA / REVIEW-MANIFEST",
-      detail: "Phase42 keeps the manifest spine and extends it into integrity attestation evidence, promotion apply readiness, and rollback recovery ledger metadata without executing anything."
+      detail: "Phase43 keeps the manifest spine and extends it into attestation verification packs, promotion apply manifests, and rollback execution rehearsal ledger metadata without executing anything."
     },
     {
       id: "release-depth-bundles",
@@ -836,7 +836,7 @@ export function App() {
     },
     {
       id: "release-depth-bundle-integrity",
-      label: "Integrity Attestation Evidence",
+      label: "Sealed-bundle Integrity Contract",
       value: "SEALED-BUNDLE-INTEGRITY-CONTRACT",
       detail: "Bundle sealing metadata now feeds explicit integrity, digest, and audit checkpoints without attesting any real packaged bundle."
     },
@@ -845,6 +845,12 @@ export function App() {
       label: "Integrity Attestation Evidence",
       value: "INTEGRITY-ATTESTATION-EVIDENCE / SEALED-BUNDLE-INTEGRITY-CONTRACT",
       detail: "Integrity contracts now feed explicit attestation packets, verifier inputs, and audit receipts without attesting any live release for real."
+    },
+    {
+      id: "release-depth-attestation-verification-packs",
+      label: "Attestation Verification Packs",
+      value: "ATTESTATION-VERIFICATION-PACKS / INTEGRITY-ATTESTATION-EVIDENCE",
+      detail: "Integrity attestation evidence now feeds verifier-ready packs, checklists, and audit handoff payloads without executing any live verification for real."
     },
     {
       id: "release-depth-installer-builders",
@@ -883,6 +889,12 @@ export function App() {
       detail: "Promotion evidence now feeds explicit apply-readiness manifests, reviewer inputs, and channel preflight packets without applying any promotion for real."
     },
     {
+      id: "release-depth-promotion-apply-manifests",
+      label: "Promotion Apply Manifests",
+      value: "PROMOTION-APPLY-MANIFESTS / PROMOTION-APPLY-READINESS",
+      detail: "Promotion readiness now feeds explicit apply manifests, rollout ordering, and rollback anchors without applying any promotion for real."
+    },
+    {
       id: "release-depth-signing-publish",
       label: "Signing & Publish Pipeline",
       value: "SIGNING-METADATA / NOTARIZATION-PLAN / SIGNING-PUBLISH-PIPELINE",
@@ -919,6 +931,12 @@ export function App() {
       detail: "Rollback checkpoints now feed explicit recovery ledgers, operator notes, and channel recovery manifests without recovering any live publish state."
     },
     {
+      id: "release-depth-rollback-execution-rehearsal-ledger",
+      label: "Rollback Execution Rehearsal Ledger",
+      value: "ROLLBACK-EXECUTION-REHEARSAL-LEDGER / ROLLBACK-RECOVERY-LEDGER",
+      detail: "Rollback recovery ledgers now feed rehearsal manifests, dry-run traces, and operator rehearsal notes without executing any live rollback for real."
+    },
+    {
       id: "release-depth-approval",
       label: "Release Approval Workflow",
       value: "RELEASE-APPROVAL-WORKFLOW / PUBLISH-GATES / PUBLISH-ROLLBACK-HANDSHAKE",
@@ -934,7 +952,7 @@ export function App() {
       id: "release-depth-safety",
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
-      detail: "Phase42 increases release structure only; it still does not install, publish, sign, promote channels, roll back publish state, or enable host-side execution."
+      detail: "Phase43 increases release structure only; it still does not install, publish, sign, promote channels, rehearse live rollback execution, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -1755,30 +1773,30 @@ export function App() {
               <div className="card-header card-header--stack">
                 <div>
                   <p className="eyebrow">Release Pipeline Depth</p>
-                  <h2>Sealed-bundle Integrity Contract</h2>
+                  <h2>Attestation Verification Packs</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but the release skeleton now pushes further with sealed-bundle
-                  integrity contracts, channel promotion evidence, and publish rollback handshake metadata while staying entirely
+                  The alpha shell still does not build a real installer, but the release skeleton now pushes further with attestation
+                  verification packs, promotion apply manifests, and rollback execution rehearsal metadata while staying entirely
                   local-only and non-executing.
                 </p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
                   <span>Phase</span>
-                  <strong>Phase42</strong>
+                  <strong>Phase43</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Packaged app</span>
-                  <strong>Integrity contract</strong>
+                  <strong>Verification packs</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Installer</span>
-                  <strong>Promotion evidence</strong>
+                  <strong>Apply manifests</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Pipeline</span>
-                  <strong>Rollback handshake</strong>
+                  <strong>Rollback rehearsal</strong>
                 </div>
               </div>
               <div className="workflow-readiness-list">

@@ -7,7 +7,7 @@ const require = createRequire(import.meta.url);
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repoRoot = path.resolve(appRoot, "..", "..");
 const { getPreflightSummary } = require(path.join(appRoot, "scripts", "studio-preflight.cjs"));
-const { createReleaseSkeleton } = require(path.join(appRoot, "scripts", "release-skeleton.cjs"));
+const { createReleaseSkeleton, PHASE_ID, REVIEW_STAGE_ID } = require(path.join(appRoot, "scripts", "release-skeleton.cjs"));
 const rendererRoot = path.join(appRoot, "dist-renderer");
 const electronRuntimePath = path.join(appRoot, "dist-electron", "electron", "runtime", "studio-runtime.js");
 const sharedDistPath = path.join(repoRoot, "packages", "shared", "dist", "index.js");
@@ -89,26 +89,29 @@ async function verifyRendererFocusedSlotUi() {
     "Packaged-app Bundle Sealing Skeleton",
     "Sealed-bundle Integrity Contract",
     "Integrity Attestation Evidence",
+    "Attestation Verification Packs",
     "Installer-target Builder Skeleton",
     "Installer Builder Execution Skeleton",
     "Installer Builder Orchestration",
     "Installer Channel Routing",
     "Channel Promotion Evidence",
     "Promotion Apply Readiness",
+    "Promotion Apply Manifests",
     "Signing & Publish Pipeline",
     "Signing-publish Gating Handshake",
     "Signing-publish Approval Bridge",
     "Signing-publish Promotion Handshake",
     "Publish Rollback Handshake",
     "Rollback Recovery Ledger",
+    "Rollback Execution Rehearsal Ledger",
     "Release Approval Workflow",
     "Release Promotion Gating",
-    "Phase42"
+    "Phase43"
   ];
 
   for (const marker of requiredMarkers) {
     if (!bundle.includes(marker)) {
-      throw new Error(`Renderer build is missing phase42 shell UI marker: ${marker}.`);
+      throw new Error(`Renderer build is missing ${PHASE_ID} shell UI marker: ${marker}.`);
     }
   }
 
@@ -1121,6 +1124,7 @@ function verifyReleaseSkeletonContract() {
     "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
     "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
     "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
+    "release/ATTESTATION-VERIFICATION-PACKS.json",
     "release/INSTALLER-TARGETS.json",
     "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
     "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
@@ -1128,6 +1132,7 @@ function verifyReleaseSkeletonContract() {
     "release/INSTALLER-CHANNEL-ROUTING.json",
     "release/CHANNEL-PROMOTION-EVIDENCE.json",
     "release/PROMOTION-APPLY-READINESS.json",
+    "release/PROMOTION-APPLY-MANIFESTS.json",
     "release/SIGNING-METADATA.json",
     "release/NOTARIZATION-PLAN.json",
     "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
@@ -1136,6 +1141,7 @@ function verifyReleaseSkeletonContract() {
     "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
     "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
     "release/ROLLBACK-RECOVERY-LEDGER.json",
+    "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
     "release/RELEASE-APPROVAL-WORKFLOW.json",
     "release/RELEASE-NOTES.md",
     "release/PUBLISH-GATES.json",
@@ -1146,12 +1152,12 @@ function verifyReleaseSkeletonContract() {
   const requiredArtifactGroups = new Set(["renderer", "electron"]);
   const actualArtifactGroups = new Map((skeleton.releaseManifest.artifactGroups ?? []).map((group) => [group.id, group]));
 
-  if (skeleton.releaseManifest.phase !== "phase42" || skeleton.releaseManifest.packageKind !== "alpha-shell-release-skeleton") {
-    throw new Error("Release skeleton manifest does not reflect the expected phase42 alpha-shell package kind.");
+  if (skeleton.releaseManifest.phase !== PHASE_ID || skeleton.releaseManifest.packageKind !== "alpha-shell-release-skeleton") {
+    throw new Error(`Release skeleton manifest does not reflect the expected ${PHASE_ID} alpha-shell package kind.`);
   }
 
-  if (skeleton.buildMetadata.app?.phase !== "phase42" || skeleton.buildMetadata.preflight?.buildReady !== true) {
-    throw new Error("Release build metadata is missing the expected phase42/preflight markers.");
+  if (skeleton.buildMetadata.app?.phase !== PHASE_ID || skeleton.buildMetadata.preflight?.buildReady !== true) {
+    throw new Error(`Release build metadata is missing the expected ${PHASE_ID}/preflight markers.`);
   }
 
   if (skeleton.installerPlaceholder.status !== "placeholder" || skeleton.installerPlaceholder.canInstall !== false) {
@@ -1170,6 +1176,7 @@ function verifyReleaseSkeletonContract() {
     skeleton.installerPlaceholder.packagedAppBundleSealingSkeletonPath !== "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json" ||
     skeleton.installerPlaceholder.sealedBundleIntegrityContractPath !== "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json" ||
     skeleton.installerPlaceholder.integrityAttestationEvidencePath !== "release/INTEGRITY-ATTESTATION-EVIDENCE.json" ||
+    skeleton.installerPlaceholder.attestationVerificationPacksPath !== "release/ATTESTATION-VERIFICATION-PACKS.json" ||
     skeleton.installerPlaceholder.installerTargetsPath !== "release/INSTALLER-TARGETS.json" ||
     skeleton.installerPlaceholder.installerBuilderExecutionSkeletonPath !== "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json" ||
     skeleton.installerPlaceholder.installerTargetBuilderSkeletonPath !== "release/INSTALLER-TARGET-BUILDER-SKELETON.json" ||
@@ -1177,15 +1184,17 @@ function verifyReleaseSkeletonContract() {
     skeleton.installerPlaceholder.installerChannelRoutingPath !== "release/INSTALLER-CHANNEL-ROUTING.json" ||
     skeleton.installerPlaceholder.channelPromotionEvidencePath !== "release/CHANNEL-PROMOTION-EVIDENCE.json" ||
     skeleton.installerPlaceholder.promotionApplyReadinessPath !== "release/PROMOTION-APPLY-READINESS.json" ||
+    skeleton.installerPlaceholder.promotionApplyManifestsPath !== "release/PROMOTION-APPLY-MANIFESTS.json" ||
     skeleton.installerPlaceholder.signingPublishGatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
     skeleton.installerPlaceholder.signingPublishPipelinePath !== "release/SIGNING-PUBLISH-PIPELINE.json" ||
     skeleton.installerPlaceholder.signingPublishApprovalBridgePath !== "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json" ||
     skeleton.installerPlaceholder.signingPublishPromotionHandshakePath !== "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json" ||
     skeleton.installerPlaceholder.publishRollbackHandshakePath !== "release/PUBLISH-ROLLBACK-HANDSHAKE.json" ||
     skeleton.installerPlaceholder.rollbackRecoveryLedgerPath !== "release/ROLLBACK-RECOVERY-LEDGER.json" ||
+    skeleton.installerPlaceholder.rollbackExecutionRehearsalLedgerPath !== "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json" ||
     skeleton.installerPlaceholder.approvalWorkflowPath !== "release/RELEASE-APPROVAL-WORKFLOW.json"
   ) {
-    throw new Error("Installer placeholder is missing phase42 integrity / routing / promotion / rollback paths.");
+    throw new Error(`Installer placeholder is missing ${PHASE_ID} verification / apply-manifest / rollback rehearsal paths.`);
   }
 
   for (const requiredLayoutPath of requiredLayoutPaths) {
@@ -1226,169 +1235,193 @@ function verifyReleaseSkeletonContract() {
 
   if (
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-VERIFICATION-PACKS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
-    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PUBLISH-ROLLBACK-HANDSHAKE.json")
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PUBLISH-ROLLBACK-HANDSHAKE.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json")
   ) {
-    throw new Error("Release build metadata is missing phase42 formal release artifacts.");
+    throw new Error(`Release build metadata is missing ${PHASE_ID} formal release artifacts.`);
   }
 
   if (!Array.isArray(skeleton.releaseManifest.reviewArtifacts) || !skeleton.releaseManifest.reviewArtifacts.includes("release/RELEASE-SUMMARY.md")) {
-    throw new Error("Release manifest is missing phase42 review artifacts.");
+    throw new Error(`Release manifest is missing ${PHASE_ID} review artifacts.`);
   }
 
   if (
     !Array.isArray(skeleton.releaseManifest.formalReleaseArtifacts) ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-VERIFICATION-PACKS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
-    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PUBLISH-ROLLBACK-HANDSHAKE.json")
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PUBLISH-ROLLBACK-HANDSHAKE.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json")
   ) {
-    throw new Error("Release manifest is missing phase42 formal release artifacts.");
+    throw new Error(`Release manifest is missing ${PHASE_ID} formal release artifacts.`);
   }
 
-  if (!Array.isArray(skeleton.releaseManifest.pipelineStages) || skeleton.releaseManifest.pipelineStages.length < 21) {
-    throw new Error("Release manifest is missing phase42 pipeline stage declarations.");
+  if (!Array.isArray(skeleton.releaseManifest.pipelineStages) || skeleton.releaseManifest.pipelineStages.length < 24) {
+    throw new Error(`Release manifest is missing ${PHASE_ID} pipeline stage declarations.`);
   }
 
   if (
-    skeleton.reviewManifest?.pipeline?.stage !== "integrity-attestation-promotion-apply-readiness-rollback-recovery-ledger-skeleton" ||
+    skeleton.reviewManifest?.pipeline?.stage !== REVIEW_STAGE_ID ||
     !Array.isArray(skeleton.reviewManifest?.pipeline?.stages) ||
-    skeleton.reviewManifest.pipeline.stages.length < 21
+    skeleton.reviewManifest.pipeline.stages.length < 24
   ) {
-    throw new Error("Review manifest is missing phase42 review pipeline depth.");
+    throw new Error(`Review manifest is missing ${PHASE_ID} review pipeline depth.`);
   }
 
   if (!Array.isArray(skeleton.bundleMatrix?.bundles) || skeleton.bundleMatrix.bundles.length < 3) {
-    throw new Error("Bundle matrix is missing phase42 per-platform bundle declarations.");
+    throw new Error(`Bundle matrix is missing ${PHASE_ID} per-platform bundle declarations.`);
   }
 
   if (!Array.isArray(skeleton.bundleAssembly?.assemblies) || skeleton.bundleAssembly.assemblies.length < 3) {
-    throw new Error("Bundle assembly is missing phase42 assembly declarations.");
+    throw new Error(`Bundle assembly is missing ${PHASE_ID} assembly declarations.`);
   }
 
   if (!Array.isArray(skeleton.packagedAppDirectorySkeleton?.directories) || skeleton.packagedAppDirectorySkeleton.directories.length < 3) {
-    throw new Error("Packaged app directory skeleton is missing phase42 directory declarations.");
+    throw new Error(`Packaged app directory skeleton is missing ${PHASE_ID} directory declarations.`);
   }
 
   if (!Array.isArray(skeleton.packagedAppDirectoryMaterialization?.directories) || skeleton.packagedAppDirectoryMaterialization.directories.length < 3) {
-    throw new Error("Packaged app directory materialization is missing phase42 directory materialization declarations.");
+    throw new Error(`Packaged app directory materialization is missing ${PHASE_ID} directory materialization declarations.`);
   }
 
   if (!Array.isArray(skeleton.packagedAppMaterializationSkeleton?.materializations) || skeleton.packagedAppMaterializationSkeleton.materializations.length < 3) {
-    throw new Error("Packaged app materialization skeleton is missing phase42 materialization declarations.");
+    throw new Error(`Packaged app materialization skeleton is missing ${PHASE_ID} materialization declarations.`);
   }
 
   if (!Array.isArray(skeleton.packagedAppStagedOutputSkeleton?.outputs) || skeleton.packagedAppStagedOutputSkeleton.outputs.length < 3) {
-    throw new Error("Packaged-app staged output skeleton is missing phase42 staged-output declarations.");
+    throw new Error(`Packaged-app staged output skeleton is missing ${PHASE_ID} staged-output declarations.`);
   }
 
   if (!Array.isArray(skeleton.packagedAppBundleSealingSkeleton?.bundles) || skeleton.packagedAppBundleSealingSkeleton.bundles.length < 3) {
-    throw new Error("Packaged-app bundle sealing skeleton is missing phase42 sealing declarations.");
+    throw new Error(`Packaged-app bundle sealing skeleton is missing ${PHASE_ID} sealing declarations.`);
   }
 
   if (!Array.isArray(skeleton.sealedBundleIntegrityContract?.contracts) || skeleton.sealedBundleIntegrityContract.contracts.length < 3) {
-    throw new Error("Sealed-bundle integrity contract is missing phase42 integrity declarations.");
+    throw new Error(`Sealed-bundle integrity contract is missing ${PHASE_ID} integrity declarations.`);
   }
 
   if (!Array.isArray(skeleton.integrityAttestationEvidence?.attestations) || skeleton.integrityAttestationEvidence.attestations.length < 3) {
-    throw new Error("Integrity attestation evidence is missing phase42 attestation declarations.");
+    throw new Error(`Integrity attestation evidence is missing ${PHASE_ID} attestation declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.attestationVerificationPacks?.packs) || skeleton.attestationVerificationPacks.packs.length < 3) {
+    throw new Error(`Attestation verification packs are missing ${PHASE_ID} verification declarations.`);
   }
 
   if (!Array.isArray(skeleton.installerTargets?.targets) || skeleton.installerTargets.targets.length < 7) {
-    throw new Error("Installer targets are missing phase42 target declarations.");
+    throw new Error(`Installer targets are missing ${PHASE_ID} target declarations.`);
   }
 
   if (!Array.isArray(skeleton.installerBuilderExecutionSkeleton?.executions) || skeleton.installerBuilderExecutionSkeleton.executions.length < 7) {
-    throw new Error("Installer builder execution skeleton is missing phase42 execution declarations.");
+    throw new Error(`Installer builder execution skeleton is missing ${PHASE_ID} execution declarations.`);
   }
 
   if (!Array.isArray(skeleton.installerTargetBuilderSkeleton?.builders) || skeleton.installerTargetBuilderSkeleton.builders.length < 7) {
-    throw new Error("Installer-target builder skeleton is missing phase42 builder declarations.");
+    throw new Error(`Installer-target builder skeleton is missing ${PHASE_ID} builder declarations.`);
   }
 
   if (!Array.isArray(skeleton.installerBuilderOrchestration?.flows) || skeleton.installerBuilderOrchestration.flows.length < 3) {
-    throw new Error("Installer builder orchestration is missing phase42 orchestration declarations.");
+    throw new Error(`Installer builder orchestration is missing ${PHASE_ID} orchestration declarations.`);
   }
 
   if (!Array.isArray(skeleton.installerChannelRouting?.routes) || skeleton.installerChannelRouting.routes.length < 3) {
-    throw new Error("Installer channel routing is missing phase42 routing declarations.");
+    throw new Error(`Installer channel routing is missing ${PHASE_ID} routing declarations.`);
   }
 
   if (!Array.isArray(skeleton.channelPromotionEvidence?.promotions) || skeleton.channelPromotionEvidence.promotions.length < 2) {
-    throw new Error("Channel promotion evidence is missing phase42 promotion declarations.");
+    throw new Error(`Channel promotion evidence is missing ${PHASE_ID} promotion declarations.`);
   }
 
   if (!Array.isArray(skeleton.promotionApplyReadiness?.readiness) || skeleton.promotionApplyReadiness.readiness.length < 2) {
-    throw new Error("Promotion apply readiness is missing phase42 readiness declarations.");
+    throw new Error(`Promotion apply readiness is missing ${PHASE_ID} readiness declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.promotionApplyManifests?.manifests) || skeleton.promotionApplyManifests.manifests.length < 2) {
+    throw new Error(`Promotion apply manifests are missing ${PHASE_ID} manifest declarations.`);
   }
 
   if (!Array.isArray(skeleton.signingMetadata?.readiness) || skeleton.signingMetadata.readiness.length < 3) {
-    throw new Error("Signing metadata is missing phase42 readiness declarations.");
+    throw new Error(`Signing metadata is missing ${PHASE_ID} readiness declarations.`);
   }
 
   if (!Array.isArray(skeleton.notarizationPlan?.platforms) || skeleton.notarizationPlan.platforms.length < 3) {
-    throw new Error("Notarization plan is missing phase42 platform declarations.");
+    throw new Error(`Notarization plan is missing ${PHASE_ID} platform declarations.`);
   }
 
   if (
     skeleton.signingPublishGatingHandshake?.canHandshake !== false ||
     skeleton.signingPublishGatingHandshake?.sealedBundleIntegrityContractPath !== "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json" ||
+    skeleton.signingPublishGatingHandshake?.attestationVerificationPacksPath !== "release/ATTESTATION-VERIFICATION-PACKS.json" ||
     skeleton.signingPublishGatingHandshake?.channelPromotionEvidencePath !== "release/CHANNEL-PROMOTION-EVIDENCE.json" ||
     skeleton.signingPublishGatingHandshake?.publishRollbackHandshakePath !== "release/PUBLISH-ROLLBACK-HANDSHAKE.json" ||
     !Array.isArray(skeleton.signingPublishGatingHandshake?.stages) ||
-    skeleton.signingPublishGatingHandshake.stages.length < 10 ||
+    skeleton.signingPublishGatingHandshake.stages.length < 11 ||
     !Array.isArray(skeleton.signingPublishGatingHandshake?.acknowledgements) ||
-    skeleton.signingPublishGatingHandshake.acknowledgements.length < 9
+    skeleton.signingPublishGatingHandshake.acknowledgements.length < 10
   ) {
-    throw new Error("Signing-publish gating handshake is missing phase42 handshake declarations.");
+    throw new Error(`Signing-publish gating handshake is missing ${PHASE_ID} handshake declarations.`);
   }
 
   if (
     skeleton.signingPublishPipeline?.sealedBundleIntegrityContractPath !== "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json" ||
+    skeleton.signingPublishPipeline?.attestationVerificationPacksPath !== "release/ATTESTATION-VERIFICATION-PACKS.json" ||
     skeleton.signingPublishPipeline?.gatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
     skeleton.signingPublishPipeline?.approvalBridgePath !== "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json" ||
     skeleton.signingPublishPipeline?.channelRoutingPath !== "release/INSTALLER-CHANNEL-ROUTING.json" ||
     skeleton.signingPublishPipeline?.channelPromotionEvidencePath !== "release/CHANNEL-PROMOTION-EVIDENCE.json" ||
+    skeleton.signingPublishPipeline?.promotionApplyManifestsPath !== "release/PROMOTION-APPLY-MANIFESTS.json" ||
     skeleton.signingPublishPipeline?.promotionHandshakePath !== "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json" ||
     skeleton.signingPublishPipeline?.publishRollbackHandshakePath !== "release/PUBLISH-ROLLBACK-HANDSHAKE.json" ||
+    skeleton.signingPublishPipeline?.rollbackExecutionRehearsalLedgerPath !== "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json" ||
     !Array.isArray(skeleton.signingPublishPipeline?.stages) ||
-    skeleton.signingPublishPipeline.stages.length < 17
+    skeleton.signingPublishPipeline.stages.length < 20
   ) {
-    throw new Error("Signing & publish pipeline is missing phase42 pipeline declarations.");
+    throw new Error(`Signing & publish pipeline is missing ${PHASE_ID} pipeline declarations.`);
   }
 
-  if (!Array.isArray(skeleton.signingPublishApprovalBridge?.bridge) || skeleton.signingPublishApprovalBridge.bridge.length < 7) {
-    throw new Error("Signing-publish approval bridge is missing phase42 bridge declarations.");
+  if (!Array.isArray(skeleton.signingPublishApprovalBridge?.bridge) || skeleton.signingPublishApprovalBridge.bridge.length < 9) {
+    throw new Error(`Signing-publish approval bridge is missing ${PHASE_ID} bridge declarations.`);
   }
 
   if (
     skeleton.signingPublishPromotionHandshake?.channelRoutingPath !== "release/INSTALLER-CHANNEL-ROUTING.json" ||
     skeleton.signingPublishPromotionHandshake?.sealedBundleIntegrityContractPath !== "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json" ||
     skeleton.signingPublishPromotionHandshake?.channelPromotionEvidencePath !== "release/CHANNEL-PROMOTION-EVIDENCE.json" ||
+    skeleton.signingPublishPromotionHandshake?.promotionApplyManifestsPath !== "release/PROMOTION-APPLY-MANIFESTS.json" ||
     skeleton.signingPublishPromotionHandshake?.publishRollbackHandshakePath !== "release/PUBLISH-ROLLBACK-HANDSHAKE.json" ||
     !Array.isArray(skeleton.signingPublishPromotionHandshake?.stages) ||
-    skeleton.signingPublishPromotionHandshake.stages.length < 8 ||
+    skeleton.signingPublishPromotionHandshake.stages.length < 9 ||
     !Array.isArray(skeleton.signingPublishPromotionHandshake?.acknowledgements) ||
-    skeleton.signingPublishPromotionHandshake.acknowledgements.length < 8
+    skeleton.signingPublishPromotionHandshake.acknowledgements.length < 9
   ) {
-    throw new Error("Signing-publish promotion handshake is missing phase42 promotion declarations.");
+    throw new Error(`Signing-publish promotion handshake is missing ${PHASE_ID} promotion declarations.`);
   }
 
   if (
     skeleton.publishRollbackHandshake?.sealedBundleIntegrityContractPath !== "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json" ||
     skeleton.publishRollbackHandshake?.channelPromotionEvidencePath !== "release/CHANNEL-PROMOTION-EVIDENCE.json" ||
     skeleton.publishRollbackHandshake?.promotionHandshakePath !== "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json" ||
+    skeleton.publishRollbackHandshake?.rollbackExecutionRehearsalLedgerPath !== "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json" ||
     !Array.isArray(skeleton.publishRollbackHandshake?.paths) ||
     skeleton.publishRollbackHandshake.paths.length < 2 ||
     !Array.isArray(skeleton.publishRollbackHandshake?.stages) ||
-    skeleton.publishRollbackHandshake.stages.length < 6 ||
+    skeleton.publishRollbackHandshake.stages.length < 7 ||
     !Array.isArray(skeleton.publishRollbackHandshake?.acknowledgements) ||
-    skeleton.publishRollbackHandshake.acknowledgements.length < 6
+    skeleton.publishRollbackHandshake.acknowledgements.length < 7
   ) {
-    throw new Error("Publish rollback handshake is missing phase42 rollback declarations.");
+    throw new Error(`Publish rollback handshake is missing ${PHASE_ID} rollback declarations.`);
   }
 
   if (!Array.isArray(skeleton.rollbackRecoveryLedger?.ledgers) || skeleton.rollbackRecoveryLedger.ledgers.length < 2) {
-    throw new Error("Rollback recovery ledger is missing phase42 recovery declarations.");
+    throw new Error(`Rollback recovery ledger is missing ${PHASE_ID} recovery declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.rollbackExecutionRehearsalLedger?.rehearsals) || skeleton.rollbackExecutionRehearsalLedger.rehearsals.length < 2) {
+    throw new Error(`Rollback execution rehearsal ledger is missing ${PHASE_ID} rehearsal declarations.`);
   }
 
   if (
@@ -1397,44 +1430,47 @@ function verifyReleaseSkeletonContract() {
     skeleton.releaseApprovalWorkflow?.approvalBridgePath !== "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json" ||
     skeleton.releaseApprovalWorkflow?.promotionHandshakePath !== "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json" ||
     !Array.isArray(skeleton.releaseApprovalWorkflow?.stages) ||
-    skeleton.releaseApprovalWorkflow.stages.length < 6
+    skeleton.releaseApprovalWorkflow.stages.length < 8
   ) {
-    throw new Error("Release approval workflow is missing phase42 approval declarations.");
+    throw new Error(`Release approval workflow is missing ${PHASE_ID} approval declarations.`);
   }
 
-  if (!Array.isArray(skeleton.publishGates?.gates) || skeleton.publishGates.gates.length < 18) {
-    throw new Error("Publish gates are missing phase42 gating declarations.");
+  if (!Array.isArray(skeleton.publishGates?.gates) || skeleton.publishGates.gates.length < 21) {
+    throw new Error(`Publish gates are missing ${PHASE_ID} gating declarations.`);
   }
 
   if (!Array.isArray(skeleton.promotionGates?.promotions) || skeleton.promotionGates.promotions.length < 2) {
-    throw new Error("Promotion gates are missing phase42 promotion declarations.");
+    throw new Error(`Promotion gates are missing ${PHASE_ID} promotion declarations.`);
   }
 
   if (
-    !skeleton.packageReadme.includes("phase42 alpha-shell release skeleton") ||
+    !skeleton.packageReadme.includes(`${PHASE_ID} alpha-shell release skeleton`) ||
     !skeleton.packageReadme.includes("正式 installer 仍缺什么") ||
     !skeleton.packageReadme.includes("artifacts/renderer") ||
     !skeleton.packageReadme.includes("release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json") ||
     !skeleton.packageReadme.includes("release/INTEGRITY-ATTESTATION-EVIDENCE.json") ||
+    !skeleton.packageReadme.includes("release/ATTESTATION-VERIFICATION-PACKS.json") ||
     !skeleton.packageReadme.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.packageReadme.includes("release/PROMOTION-APPLY-READINESS.json") ||
+    !skeleton.packageReadme.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
     !skeleton.packageReadme.includes("release/PUBLISH-ROLLBACK-HANDSHAKE.json") ||
     !skeleton.packageReadme.includes("release/ROLLBACK-RECOVERY-LEDGER.json") ||
+    !skeleton.packageReadme.includes("release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json") ||
     !skeleton.packageReadme.includes("scripts/install-placeholder.cjs")
   ) {
-    throw new Error("Generated package README is missing required phase42 packaging markers.");
+    throw new Error(`Generated package README is missing required ${PHASE_ID} packaging markers.`);
   }
 
   if (
-    !skeleton.releaseSummary?.includes("Phase42 Release Summary") ||
-    !skeleton.releaseSummary?.includes("integrity-attestation-promotion-apply-readiness-rollback-recovery-ledger-skeleton")
+    !skeleton.releaseSummary?.includes("Phase43 Release Summary") ||
+    !skeleton.releaseSummary?.includes(REVIEW_STAGE_ID)
   ) {
-    throw new Error("Generated release summary is missing required phase42 review markers.");
+    throw new Error(`Generated release summary is missing required ${PHASE_ID} review markers.`);
   }
 
   if (
-    !skeleton.releaseNotes?.includes("Phase42 Release Notes") ||
-    !skeleton.releaseNotes?.includes("integrity attestation evidence") ||
+    !skeleton.releaseNotes?.includes("Phase43 Release Notes") ||
+    !skeleton.releaseNotes?.includes("attestation verification packs") ||
     !Array.isArray(skeleton.releaseApprovalWorkflow?.stages) ||
     !skeleton.releaseApprovalWorkflow.stages.length ||
     !skeleton.signingPublishApprovalBridge?.bridge?.length ||
@@ -1443,7 +1479,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.publishGates?.gates?.length ||
     !skeleton.promotionGates?.promotions?.length
   ) {
-    throw new Error("Generated release notes or promotion gating are missing required phase42 markers.");
+    throw new Error(`Generated release notes or promotion gating are missing required ${PHASE_ID} markers.`);
   }
 
   if (
@@ -1451,15 +1487,18 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseChecklist.includes("npm run release:plan") ||
     !skeleton.releaseChecklist.includes("SEALED-BUNDLE-INTEGRITY-CONTRACT.json") ||
     !skeleton.releaseChecklist.includes("INTEGRITY-ATTESTATION-EVIDENCE.json") ||
+    !skeleton.releaseChecklist.includes("ATTESTATION-VERIFICATION-PACKS.json") ||
     !skeleton.releaseChecklist.includes("CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-APPLY-READINESS.json") ||
+    !skeleton.releaseChecklist.includes("PROMOTION-APPLY-MANIFESTS.json") ||
     !skeleton.releaseChecklist.includes("PUBLISH-ROLLBACK-HANDSHAKE.json") ||
     !skeleton.releaseChecklist.includes("ROLLBACK-RECOVERY-LEDGER.json") ||
+    !skeleton.releaseChecklist.includes("ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json") ||
     !skeleton.releaseChecklist.includes("RELEASE-APPROVAL-WORKFLOW.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-GATES.json") ||
     !skeleton.releaseChecklist.includes("INSTALLER-PLACEHOLDER.json")
   ) {
-    throw new Error("Generated release checklist is missing required phase42 verification commands or metadata files.");
+    throw new Error(`Generated release checklist is missing required ${PHASE_ID} verification commands or metadata files.`);
   }
 
   return {
@@ -1482,7 +1521,7 @@ async function main() {
 
   console.log("OpenClaw Studio alpha smoke passed.");
   console.log(
-    `Renderer: ${renderer.indexHtmlPath} (${renderer.assetCount} assets, phase42-markers=${rendererFocusedSlotUi.markerCount})`
+    `Renderer: ${renderer.indexHtmlPath} (${renderer.assetCount} assets, ${PHASE_ID}-markers=${rendererFocusedSlotUi.markerCount})`
   );
   console.log(`Bridge fallback: ${bridge.appName} (${bridge.pageCount} pages)`);
   console.log(

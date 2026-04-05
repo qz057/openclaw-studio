@@ -1,5 +1,5 @@
 const { getPreflightSummary } = require("./studio-preflight.cjs");
-const { createReleaseSkeleton, formatReleasePlanSummary } = require("./release-skeleton.cjs");
+const { createReleaseSkeleton, formatReleasePlanSummary, PHASE_ID } = require("./release-skeleton.cjs");
 
 function main() {
   const summary = getPreflightSummary();
@@ -12,9 +12,9 @@ function main() {
 
   const skeleton = createReleaseSkeleton(summary);
 
-  console.log("OpenClaw Studio phase42 release plan ready.");
+  console.log(`OpenClaw Studio ${PHASE_ID} release plan ready.`);
   console.log(formatReleasePlanSummary(skeleton));
-  console.log("This is a dry-run phase42 release skeleton summary. No installer was built.");
+  console.log(`This is a dry-run ${PHASE_ID} release skeleton summary. No installer was built.`);
 }
 
 main();
