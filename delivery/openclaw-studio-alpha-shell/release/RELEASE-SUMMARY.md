@@ -1,11 +1,11 @@
-# OpenClaw Studio Phase46 Release Summary
+# OpenClaw Studio Phase47 Release Summary
 
-Milestone: phase46 attestation operator worklists / promotion staged-apply ledgers / rollback cutover readiness maps + docs / smoke / package / release-plan / UI / shared data closeout
-Review stage: attestation-operator-worklists-promotion-staged-apply-ledgers-rollback-cutover-readiness-maps-skeleton
-Review docs: README.md, HANDOFF.md, IMPLEMENTATION-PLAN.md, PACKAGE-README.md, release/RELEASE-SUMMARY.md, release/REVIEW-MANIFEST.json, release/BUNDLE-MATRIX.json, release/BUNDLE-ASSEMBLY.json, release/PACKAGED-APP-DIRECTORY-SKELETON.json, release/PACKAGED-APP-MATERIALIZATION-SKELETON.json, release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json, release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json, release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json, release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json, release/INTEGRITY-ATTESTATION-EVIDENCE.json, release/ATTESTATION-VERIFICATION-PACKS.json, release/ATTESTATION-APPLY-AUDIT-PACKS.json, release/ATTESTATION-APPLY-EXECUTION-PACKETS.json, release/ATTESTATION-OPERATOR-WORKLISTS.json, release/INSTALLER-TARGETS.json, release/INSTALLER-TARGET-BUILDER-SKELETON.json, release/INSTALLER-BUILDER-EXECUTION-SKELETON.json, release/INSTALLER-BUILDER-ORCHESTRATION.json, release/INSTALLER-CHANNEL-ROUTING.json, release/CHANNEL-PROMOTION-EVIDENCE.json, release/PROMOTION-APPLY-READINESS.json, release/PROMOTION-APPLY-MANIFESTS.json, release/PROMOTION-EXECUTION-CHECKPOINTS.json, release/PROMOTION-OPERATOR-HANDOFF-RAILS.json, release/PROMOTION-STAGED-APPLY-LEDGERS.json, release/SIGNING-METADATA.json, release/NOTARIZATION-PLAN.json, release/SIGNING-PUBLISH-PIPELINE.json, release/SIGNING-PUBLISH-GATING-HANDSHAKE.json, release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json, release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json, release/PUBLISH-ROLLBACK-HANDSHAKE.json, release/ROLLBACK-RECOVERY-LEDGER.json, release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json, release/ROLLBACK-OPERATOR-DRILLBOOKS.json, release/ROLLBACK-LIVE-READINESS-CONTRACTS.json, release/ROLLBACK-CUTOVER-READINESS-MAPS.json, release/RELEASE-APPROVAL-WORKFLOW.json, release/RELEASE-NOTES.md, release/PUBLISH-GATES.json, release/PROMOTION-GATES.json, release/RELEASE-CHECKLIST.md
+Milestone: phase47 attestation operator dispatch manifests / promotion staged-apply runsheets / rollback cutover handoff plans + docs / smoke / package / release-plan / UI / shared data closeout
+Review stage: attestation-operator-dispatch-manifests-promotion-staged-apply-runsheets-rollback-cutover-handoff-plans-skeleton
+Review docs: README.md, HANDOFF.md, IMPLEMENTATION-PLAN.md, PACKAGE-README.md, release/RELEASE-SUMMARY.md, release/REVIEW-MANIFEST.json, release/BUNDLE-MATRIX.json, release/BUNDLE-ASSEMBLY.json, release/PACKAGED-APP-DIRECTORY-SKELETON.json, release/PACKAGED-APP-MATERIALIZATION-SKELETON.json, release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json, release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json, release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json, release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json, release/INTEGRITY-ATTESTATION-EVIDENCE.json, release/ATTESTATION-VERIFICATION-PACKS.json, release/ATTESTATION-APPLY-AUDIT-PACKS.json, release/ATTESTATION-APPLY-EXECUTION-PACKETS.json, release/ATTESTATION-OPERATOR-WORKLISTS.json, release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json, release/INSTALLER-TARGETS.json, release/INSTALLER-TARGET-BUILDER-SKELETON.json, release/INSTALLER-BUILDER-EXECUTION-SKELETON.json, release/INSTALLER-BUILDER-ORCHESTRATION.json, release/INSTALLER-CHANNEL-ROUTING.json, release/CHANNEL-PROMOTION-EVIDENCE.json, release/PROMOTION-APPLY-READINESS.json, release/PROMOTION-APPLY-MANIFESTS.json, release/PROMOTION-EXECUTION-CHECKPOINTS.json, release/PROMOTION-OPERATOR-HANDOFF-RAILS.json, release/PROMOTION-STAGED-APPLY-LEDGERS.json, release/PROMOTION-STAGED-APPLY-RUNSHEETS.json, release/SIGNING-METADATA.json, release/NOTARIZATION-PLAN.json, release/SIGNING-PUBLISH-PIPELINE.json, release/SIGNING-PUBLISH-GATING-HANDSHAKE.json, release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json, release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json, release/PUBLISH-ROLLBACK-HANDSHAKE.json, release/ROLLBACK-RECOVERY-LEDGER.json, release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json, release/ROLLBACK-OPERATOR-DRILLBOOKS.json, release/ROLLBACK-LIVE-READINESS-CONTRACTS.json, release/ROLLBACK-CUTOVER-READINESS-MAPS.json, release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json, release/RELEASE-APPROVAL-WORKFLOW.json, release/RELEASE-NOTES.md, release/PUBLISH-GATES.json, release/PROMOTION-GATES.json, release/RELEASE-CHECKLIST.md
 
 ## Artifact groups
-- Renderer bundle: 3 files, 357.6 KiB, output=artifacts/renderer
+- Renderer bundle: 3 files, 358.7 KiB, output=artifacts/renderer
 - Electron bundle: 10 files, 314.2 KiB, output=artifacts/electron
 
 ## Pipeline depth
@@ -22,6 +22,7 @@ Review docs: README.md, HANDOFF.md, IMPLEMENTATION-PLAN.md, PACKAGE-README.md, r
 - pipeline-attestation-apply-audit-packs: Attestation apply audit packs (ready) · Verification packs now feed route-aware apply-audit bundles, reviewer checklists, and audit receipts without executing any live apply step for real.
 - pipeline-attestation-apply-execution-packets: Attestation apply execution packets (ready) · Apply-audit bundles now feed operator-reviewed execution packets, packet receipts, and pre-apply envelopes without executing any live apply step for real.
 - pipeline-attestation-operator-worklists: Attestation operator worklists (ready) · Execution packets now feed per-role operator intake queues, acknowledgement slots, and ownership handoff scaffolds without dispatching any live operator action for real.
+- pipeline-attestation-operator-dispatch-manifests: Attestation operator dispatch manifests (ready) · Operator worklists now feed explicit dispatch envelopes, acknowledgement deadlines, and escalation routes without dispatching any live operator action for real.
 - pipeline-installer-builders: Installer-target builder skeleton (ready) · Installer targets still map cleanly to per-platform builder identities without invoking a real builder.
 - pipeline-installer-builder-execution: Installer builder execution skeleton (ready) · Future builder commands, environment, outputs, and review checks are now declared without executing any builder.
 - pipeline-installer-builder-orchestration: Installer builder orchestration (ready) · Builder execution skeletons now sit inside per-platform orchestration flows without invoking any real builder.
@@ -32,6 +33,7 @@ Review docs: README.md, HANDOFF.md, IMPLEMENTATION-PLAN.md, PACKAGE-README.md, r
 - pipeline-promotion-execution-checkpoints: Promotion execution checkpoints (ready) · Promotion apply manifests now feed explicit execution hold points, checkpoint manifests, and rollback drillbook anchors without executing any promotion for real.
 - pipeline-promotion-operator-handoff-rails: Promotion operator handoff rails (ready) · Promotion execution checkpoints now feed operator routing rails, role handoff segments, and rollback readiness anchors without executing any promotion for real.
 - pipeline-promotion-staged-apply-ledgers: Promotion staged-apply ledgers (ready) · Operator handoff rails now feed ordered staged apply journals, freeze windows, and cutover evidence slots without applying any promotion for real.
+- pipeline-promotion-staged-apply-runsheets: Promotion staged-apply runsheets (ready) · Staged-apply ledgers now feed operator-ready stage sequencing, hold points, and cutover baton scripts without applying any promotion for real.
 - pipeline-signing-publish: Signing & publish pipeline (ready) · Signing, notarization, checksums, upload, and promotion stages remain reviewable as a structured pipeline contract.
 - pipeline-signing-gating: Signing-publish gating handshake (ready) · Signing, publish, approval, and promotion evidence now flow through a structured handshake contract without approving or publishing anything.
 - pipeline-signing-approval-bridge: Signing-publish approval bridge (ready) · Gating handshake, approval workflow, and promotion evidence are now bridged as one reviewable approval flow.
@@ -42,6 +44,7 @@ Review docs: README.md, HANDOFF.md, IMPLEMENTATION-PLAN.md, PACKAGE-README.md, r
 - pipeline-rollback-operator-drillbooks: Rollback operator drillbooks (ready) · Rollback rehearsal ledgers now feed operator drillbooks, handoff sections, and response checklists without operating on any live publish state for real.
 - pipeline-rollback-live-readiness-contracts: Rollback live-readiness contracts (ready) · Rollback drillbooks now feed live-readiness gates, recovery proofs, and operator entry checks without enabling any live rollback or publish state mutation.
 - pipeline-rollback-cutover-readiness-maps: Rollback cutover readiness maps (ready) · Rollback live-readiness contracts now feed channel/platform cutover topology, rollback checkpoint maps, and go/no-go review surfaces without mutating any live publish state.
+- pipeline-rollback-cutover-handoff-plans: Rollback cutover handoff plans (ready) · Rollback cutover readiness maps now feed owner baton transfers, recovery fallback entries, and cutover handoff sections without mutating any live publish state.
 - pipeline-approval: Release approval workflow (ready) · Release approval remains metadata-only and blocks any live signing, publish, or host-side execution.
 - pipeline-publish: Promotion gating (blocked) · Installer build, signing, upload, and channel promotion remain intentionally out of scope.
 
@@ -51,19 +54,19 @@ Review docs: README.md, HANDOFF.md, IMPLEMENTATION-PLAN.md, PACKAGE-README.md, r
 - no per-platform sealed-bundle integrity attestation or digest publication yet; integrity contract remains review-only metadata
 - no attestation verification pack emission or verifier handoff yet; verification packs remain review-only metadata
 - no executable attestation apply audit or apply-execution packet handoff yet; audit packs and execution packets remain review-only metadata
-- no executable attestation operator dispatch or operator receipt capture yet; operator worklists remain review-only metadata
+- no executable attestation operator dispatch, dispatch-envelope emission, or operator receipt capture yet; operator worklists and dispatch manifests remain review-only metadata
 - no Windows / macOS / Linux installer builder orchestration and channel routing wiring yet; routing remains review-only skeleton
 - no executable channel promotion evidence pack or promotion routing apply yet; evidence remains review-only metadata
 - no executable promotion apply manifests or channel apply execution yet; apply manifests remain review-only metadata
 - no executable promotion execution checkpoints or operator handoff rails yet; checkpoints and handoff rails remain review-only metadata
-- no executable promotion staged-apply journaling or staged cutover entry yet; staged-apply ledgers remain review-only metadata
+- no executable promotion staged-apply journaling, operator runsheet entry, or staged cutover entry yet; staged-apply ledgers and runsheets remain review-only metadata
 - no signing / notarization / hash publication workflow yet; approval bridge remains metadata-only
 - no executable signing-publish gating handshake yet; handshake remains metadata-only
 - no executable release approval handshake yet; workflow remains metadata-only
 - no rollback execution rehearsal or rollback apply automation yet; rehearsal ledger remains review-only metadata
 - no rollback operator drillbooks or live-readiness contracts yet; drillbooks and live-readiness contracts remain review-only metadata
-- no executable rollback cutover readiness evaluation or cutover topology handoff yet; cutover readiness maps remain review-only metadata
+- no executable rollback cutover readiness evaluation, ownership baton transfer, or cutover topology handoff yet; cutover readiness maps and handoff plans remain review-only metadata
 - no release publishing / artifact upload / promotion handshake / rollback apply automation yet; publish rollback handshake remains metadata-only
 - real host-side execution remains disabled until approval / lifecycle / rollback close the loop
 
-Generated: 2026-04-05T11:40:59.272Z
+Generated: 2026-04-05T12:16:22.489Z

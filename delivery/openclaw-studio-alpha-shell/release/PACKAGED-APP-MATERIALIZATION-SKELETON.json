@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-packaged-app-materialization-skeleton/v1",
-  "generatedAt": "2026-04-05T11:40:59.272Z",
-  "phase": "phase46",
+  "generatedAt": "2026-04-05T12:16:22.489Z",
+  "phase": "phase47",
   "materializations": [
     {
       "id": "materialize-windows-packaged-app",

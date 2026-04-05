@@ -1,0 +1,124 @@
+{
+  "schemaVersion": "openclaw-studio-rollback-cutover-handoff-plans/v1",
+  "generatedAt": "2026-04-05T12:16:22.489Z",
+  "phase": "phase47",
+  "mode": "local-only-review",
+  "plans": [
+    {
+      "id": "rollback-handoff-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "publishRollbackPathId": "publish-rollback-alpha-to-beta",
+      "rollbackCutoverReadinessMapId": "rollback-cutover-map-alpha-to-beta",
+      "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
+      "promotionStagedApplyRunsheetId": "promotion-runsheet-alpha-to-beta",
+      "attestationOperatorDispatchManifestId": "attestation-dispatch-alpha-to-beta",
+      "status": "blocked",
+      "handoffPlanPath": "future/publish/alpha-to-beta/rollback-cutover-handoff-plan.json",
+      "handoffBaton": [
+        {
+          "id": "handoff-alpha-to-beta-freeze-desk",
+          "label": "Freeze desk handoff",
+          "fromRole": "release-manager",
+          "toRole": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "promotion-runsheet-alpha-to-beta",
+            "rollback-cutover-map-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "handoff-alpha-to-beta-platform-baton",
+          "label": "Platform checkpoint baton",
+          "fromRole": "runtime-owner",
+          "toRole": "release-engineering",
+          "status": "blocked",
+          "evidence": [
+            "rollback-readiness-alpha-to-beta",
+            "publish-rollback-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "handoff-alpha-to-beta-recovery-baton",
+          "label": "Recovery fallback baton",
+          "fromRole": "support-operator",
+          "toRole": "runtime-owner",
+          "status": "blocked",
+          "evidence": [
+            "attestation-dispatch-alpha-to-beta",
+            "rollback-cutover-map-alpha-to-beta"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "rollback cutover readiness map linked",
+        "promotion staged-apply runsheet linked",
+        "attestation dispatch manifest linked"
+      ],
+      "blockedBy": [
+        "rollback cutover handoff remains metadata-only",
+        "live publish remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canHandOffCutover": false
+    },
+    {
+      "id": "rollback-handoff-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "publishRollbackPathId": "publish-rollback-beta-to-stable",
+      "rollbackCutoverReadinessMapId": "rollback-cutover-map-beta-to-stable",
+      "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
+      "promotionStagedApplyRunsheetId": "promotion-runsheet-beta-to-stable",
+      "attestationOperatorDispatchManifestId": "attestation-dispatch-beta-to-stable",
+      "status": "blocked",
+      "handoffPlanPath": "future/publish/beta-to-stable/rollback-cutover-handoff-plan.json",
+      "handoffBaton": [
+        {
+          "id": "handoff-beta-to-stable-freeze-desk",
+          "label": "Freeze desk handoff",
+          "fromRole": "release-manager",
+          "toRole": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "promotion-runsheet-beta-to-stable",
+            "rollback-cutover-map-beta-to-stable"
+          ]
+        },
+        {
+          "id": "handoff-beta-to-stable-platform-baton",
+          "label": "Platform checkpoint baton",
+          "fromRole": "runtime-owner",
+          "toRole": "release-engineering",
+          "status": "blocked",
+          "evidence": [
+            "rollback-readiness-beta-to-stable",
+            "publish-rollback-beta-to-stable"
+          ]
+        },
+        {
+          "id": "handoff-beta-to-stable-recovery-baton",
+          "label": "Recovery fallback baton",
+          "fromRole": "support-operator",
+          "toRole": "runtime-owner",
+          "status": "blocked",
+          "evidence": [
+            "attestation-dispatch-beta-to-stable",
+            "rollback-cutover-map-beta-to-stable"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "rollback cutover readiness map linked",
+        "promotion staged-apply runsheet linked",
+        "attestation dispatch manifest linked"
+      ],
+      "blockedBy": [
+        "rollback cutover handoff remains metadata-only",
+        "live publish remains blocked",
+        "host-side execution remains disabled"
+      ],
+      "canHandOffCutover": false
+    }
+  ]
+}

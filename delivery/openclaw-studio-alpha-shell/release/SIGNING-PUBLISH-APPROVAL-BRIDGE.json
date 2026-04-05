@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-approval-bridge/v1",
-  "generatedAt": "2026-04-05T11:40:59.272Z",
-  "phase": "phase46",
+  "generatedAt": "2026-04-05T12:16:22.489Z",
+  "phase": "phase47",
   "mode": "review-only",
   "bridge": [
     {
@@ -29,8 +29,14 @@
       "status": "planned"
     },
     {
-      "id": "bridge-operator-worklists-to-gating",
+      "id": "bridge-operator-worklists-to-dispatch-manifests",
       "from": "release/ATTESTATION-OPERATOR-WORKLISTS.json",
+      "to": "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-dispatch-manifests-to-gating",
+      "from": "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json",
       "to": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
       "status": "blocked"
     },
@@ -77,8 +83,14 @@
       "status": "blocked"
     },
     {
-      "id": "bridge-staged-apply-ledgers-to-promotion-handshake",
+      "id": "bridge-staged-apply-ledgers-to-runsheets",
       "from": "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
+      "to": "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-runsheets-to-promotion-handshake",
+      "from": "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json",
       "to": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
       "status": "blocked"
     },
@@ -113,8 +125,14 @@
       "status": "blocked"
     },
     {
-      "id": "bridge-cutover-readiness-maps-to-publish",
+      "id": "bridge-cutover-readiness-maps-to-handoff-plans",
       "from": "release/ROLLBACK-CUTOVER-READINESS-MAPS.json",
+      "to": "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-cutover-handoff-plans-to-publish",
+      "from": "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
       "to": "release/PUBLISH-GATES.json",
       "status": "blocked"
     },

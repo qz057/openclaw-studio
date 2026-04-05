@@ -1,12 +1,13 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-pipeline/v1",
-  "generatedAt": "2026-04-05T11:40:59.272Z",
-  "phase": "phase46",
+  "generatedAt": "2026-04-05T12:16:22.489Z",
+  "phase": "phase47",
   "sealedBundleIntegrityContractPath": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
   "attestationVerificationPacksPath": "release/ATTESTATION-VERIFICATION-PACKS.json",
   "attestationApplyAuditPacksPath": "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
   "attestationApplyExecutionPacketsPath": "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json",
   "attestationOperatorWorklistsPath": "release/ATTESTATION-OPERATOR-WORKLISTS.json",
+  "attestationOperatorDispatchManifestsPath": "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json",
   "gatingHandshakePath": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
   "approvalBridgePath": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
   "channelRoutingPath": "release/INSTALLER-CHANNEL-ROUTING.json",
@@ -15,12 +16,14 @@
   "promotionExecutionCheckpointsPath": "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
   "promotionOperatorHandoffRailsPath": "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json",
   "promotionStagedApplyLedgersPath": "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
+  "promotionStagedApplyRunsheetsPath": "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json",
   "promotionHandshakePath": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
   "publishRollbackHandshakePath": "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
   "rollbackExecutionRehearsalLedgerPath": "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
   "rollbackOperatorDrillbooksPath": "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
   "rollbackLiveReadinessContractsPath": "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
   "rollbackCutoverReadinessMapsPath": "release/ROLLBACK-CUTOVER-READINESS-MAPS.json",
+  "rollbackCutoverHandoffPlansPath": "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
   "stages": [
     {
       "id": "pipeline-packaged-app-directory-materialization",
@@ -63,6 +66,11 @@
       "status": "planned"
     },
     {
+      "id": "pipeline-attestation-operator-dispatch-manifests",
+      "label": "Attestation operator dispatch manifests",
+      "status": "blocked"
+    },
+    {
       "id": "pipeline-installer-builder-execution",
       "label": "Installer builder execution skeleton",
       "status": "planned"
@@ -100,6 +108,11 @@
     {
       "id": "pipeline-promotion-staged-apply-ledgers",
       "label": "Promotion staged-apply ledgers",
+      "status": "blocked"
+    },
+    {
+      "id": "pipeline-promotion-staged-apply-runsheets",
+      "label": "Promotion staged-apply runsheets",
       "status": "blocked"
     },
     {
@@ -160,6 +173,11 @@
     {
       "id": "pipeline-rollback-cutover-readiness-maps",
       "label": "Rollback cutover readiness maps",
+      "status": "blocked"
+    },
+    {
+      "id": "pipeline-rollback-cutover-handoff-plans",
+      "label": "Rollback cutover handoff plans",
       "status": "blocked"
     },
     {

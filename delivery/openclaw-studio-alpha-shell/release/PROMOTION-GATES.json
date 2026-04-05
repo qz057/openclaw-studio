@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-promotion-gates/v1",
-  "generatedAt": "2026-04-05T11:40:59.272Z",
-  "phase": "phase46",
+  "generatedAt": "2026-04-05T12:16:22.489Z",
+  "phase": "phase47",
   "promotions": [
     {
       "from": "alpha",
@@ -17,6 +17,7 @@
         "attestation apply audit packs",
         "attestation apply execution packets",
         "attestation operator worklists",
+        "attestation operator dispatch manifests",
         "installer targets",
         "installer builder execution",
         "installer channel routing",
@@ -25,6 +26,7 @@
         "promotion execution checkpoints",
         "promotion operator handoff rails",
         "promotion staged-apply ledgers",
+        "promotion staged-apply runsheets",
         "signing",
         "signing-publish gating handshake",
         "signing-publish promotion handshake",
@@ -33,6 +35,7 @@
         "rollback operator drillbooks",
         "rollback live-readiness contracts",
         "rollback cutover readiness maps",
+        "rollback cutover handoff plans",
         "release approval workflow",
         "release notes",
         "upload"
@@ -51,12 +54,14 @@
         "attestation apply audit packs",
         "attestation apply execution packets",
         "attestation operator worklists",
+        "attestation operator dispatch manifests",
         "installer channel routing",
         "channel promotion evidence",
         "promotion apply manifests",
         "promotion execution checkpoints",
         "promotion operator handoff rails",
         "promotion staged-apply ledgers",
+        "promotion staged-apply runsheets",
         "signing-publish gating handshake",
         "signing-publish promotion handshake",
         "publish rollback handshake",
@@ -64,6 +69,7 @@
         "rollback operator drillbooks",
         "rollback live-readiness contracts",
         "rollback cutover readiness maps",
+        "rollback cutover handoff plans",
         "release approval workflow",
         "rollback plan"
       ]

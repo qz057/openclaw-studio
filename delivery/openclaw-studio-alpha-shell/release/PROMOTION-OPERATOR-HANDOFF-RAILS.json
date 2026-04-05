@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-promotion-operator-handoff-rails/v1",
-  "generatedAt": "2026-04-05T11:40:59.272Z",
-  "phase": "phase46",
+  "generatedAt": "2026-04-05T12:16:22.489Z",
+  "phase": "phase47",
   "mode": "local-only-review",
   "rails": [
     {
@@ -9,10 +9,12 @@
       "from": "alpha",
       "to": "beta",
       "attestationApplyExecutionPacketId": "attestation-execution-alpha-to-beta",
+      "attestationOperatorDispatchManifestId": "attestation-dispatch-alpha-to-beta",
       "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
       "rollbackOperatorDrillbookId": "rollback-drillbook-alpha-to-beta",
       "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-alpha-to-beta",
+      "promotionStagedApplyRunsheetId": "promotion-runsheet-alpha-to-beta",
       "status": "planned",
       "handoffRailPath": "future/channels/alpha-to-beta/promotion-operator-handoff-rail.json",
       "operatorRoles": [
@@ -31,7 +33,8 @@
         "attestation apply execution packet linked",
         "promotion execution checkpoint linked",
         "rollback live-readiness anchor declared",
-        "promotion staged-apply ledger anchor declared"
+        "promotion staged-apply ledger anchor declared",
+        "staged-apply runsheet anchor declared"
       ],
       "blockedBy": [
         "promotion operator handoff remains metadata-only",
@@ -45,10 +48,12 @@
       "from": "beta",
       "to": "stable",
       "attestationApplyExecutionPacketId": "attestation-execution-beta-to-stable",
+      "attestationOperatorDispatchManifestId": "attestation-dispatch-beta-to-stable",
       "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
       "rollbackOperatorDrillbookId": "rollback-drillbook-beta-to-stable",
       "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-beta-to-stable",
+      "promotionStagedApplyRunsheetId": "promotion-runsheet-beta-to-stable",
       "status": "blocked",
       "handoffRailPath": "future/channels/beta-to-stable/promotion-operator-handoff-rail.json",
       "operatorRoles": [
@@ -67,7 +72,8 @@
         "attestation apply execution packet linked",
         "promotion execution checkpoint linked",
         "rollback live-readiness anchor declared",
-        "promotion staged-apply ledger anchor declared"
+        "promotion staged-apply ledger anchor declared",
+        "staged-apply runsheet anchor declared"
       ],
       "blockedBy": [
         "promotion operator handoff remains metadata-only",

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-promotion-staged-apply-ledgers/v1",
-  "generatedAt": "2026-04-05T11:40:59.272Z",
-  "phase": "phase46",
+  "generatedAt": "2026-04-05T12:16:22.489Z",
+  "phase": "phase47",
   "mode": "local-only-review",
   "ledgers": [
     {
@@ -9,10 +9,12 @@
       "from": "alpha",
       "to": "beta",
       "attestationOperatorWorklistId": "attestation-worklist-alpha-to-beta",
+      "attestationOperatorDispatchManifestId": "attestation-dispatch-alpha-to-beta",
       "promotionApplyManifestId": "promotion-manifest-alpha-to-beta",
       "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
       "promotionOperatorHandoffRailId": "promotion-handoff-alpha-to-beta",
       "rollbackCutoverReadinessMapId": "rollback-cutover-map-alpha-to-beta",
+      "promotionStagedApplyRunsheetId": "promotion-runsheet-alpha-to-beta",
       "status": "blocked",
       "ledgerPath": "future/channels/alpha-to-beta/promotion-staged-apply-ledger.json",
       "stages": [
@@ -60,7 +62,8 @@
       "reviewChecks": [
         "attestation operator worklist linked",
         "promotion operator handoff rail linked",
-        "rollback cutover readiness anchor declared"
+        "rollback cutover readiness anchor declared",
+        "staged-apply runsheet anchor declared"
       ],
       "blockedBy": [
         "promotion staged apply remains metadata-only",
@@ -74,10 +77,12 @@
       "from": "beta",
       "to": "stable",
       "attestationOperatorWorklistId": "attestation-worklist-beta-to-stable",
+      "attestationOperatorDispatchManifestId": "attestation-dispatch-beta-to-stable",
       "promotionApplyManifestId": "promotion-manifest-beta-to-stable",
       "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
       "promotionOperatorHandoffRailId": "promotion-handoff-beta-to-stable",
       "rollbackCutoverReadinessMapId": "rollback-cutover-map-beta-to-stable",
+      "promotionStagedApplyRunsheetId": "promotion-runsheet-beta-to-stable",
       "status": "blocked",
       "ledgerPath": "future/channels/beta-to-stable/promotion-staged-apply-ledger.json",
       "stages": [
@@ -125,7 +130,8 @@
       "reviewChecks": [
         "attestation operator worklist linked",
         "promotion operator handoff rail linked",
-        "rollback cutover readiness anchor declared"
+        "rollback cutover readiness anchor declared",
+        "staged-apply runsheet anchor declared"
       ],
       "blockedBy": [
         "promotion staged apply remains metadata-only",

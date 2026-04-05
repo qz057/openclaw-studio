@@ -1,0 +1,192 @@
+{
+  "schemaVersion": "openclaw-studio-promotion-staged-apply-runsheets/v1",
+  "generatedAt": "2026-04-05T12:16:22.489Z",
+  "phase": "phase47",
+  "mode": "local-only-review",
+  "runsheets": [
+    {
+      "id": "promotion-runsheet-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "attestationOperatorDispatchManifestId": "attestation-dispatch-alpha-to-beta",
+      "promotionStagedApplyLedgerId": "promotion-staged-ledger-alpha-to-beta",
+      "promotionApplyManifestId": "promotion-manifest-alpha-to-beta",
+      "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
+      "rollbackCutoverReadinessMapId": "rollback-cutover-map-alpha-to-beta",
+      "rollbackCutoverHandoffPlanId": "rollback-handoff-alpha-to-beta",
+      "status": "blocked",
+      "runsheetPath": "future/channels/alpha-to-beta/promotion-staged-apply-runsheet.json",
+      "executionWindows": [
+        {
+          "id": "runsheet-alpha-to-beta-window-dispatch",
+          "label": "Dispatch intake",
+          "owner": "security-reviewer",
+          "status": "planned"
+        },
+        {
+          "id": "runsheet-alpha-to-beta-window-freeze",
+          "label": "Freeze hold",
+          "owner": "release-manager",
+          "status": "blocked"
+        },
+        {
+          "id": "runsheet-alpha-to-beta-window-apply",
+          "label": "Apply hold",
+          "owner": "release-engineering",
+          "status": "blocked"
+        },
+        {
+          "id": "runsheet-alpha-to-beta-window-cutover",
+          "label": "Cutover baton",
+          "owner": "support-operator",
+          "status": "blocked"
+        }
+      ],
+      "stages": [
+        {
+          "id": "runsheet-alpha-to-beta-dispatch-intake",
+          "label": "Dispatch intake",
+          "owner": "security-reviewer",
+          "status": "planned",
+          "evidence": [
+            "attestation-dispatch-alpha-to-beta",
+            "attestation-worklist-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "runsheet-alpha-to-beta-freeze",
+          "label": "Freeze and receipt sweep",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "promotion-staged-ledger-alpha-to-beta",
+            "promotion-handoff-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "runsheet-alpha-to-beta-apply",
+          "label": "Staged apply baton",
+          "owner": "release-engineering",
+          "status": "blocked",
+          "evidence": [
+            "promotion-manifest-alpha-to-beta",
+            "promotion-checkpoint-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "runsheet-alpha-to-beta-cutover",
+          "label": "Cutover handoff",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "rollback-cutover-map-alpha-to-beta",
+            "rollback-handoff-alpha-to-beta"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "staged-apply ledger linked",
+        "dispatch manifest linked",
+        "rollback cutover handoff plan anchor declared"
+      ],
+      "blockedBy": [
+        "promotion staged-apply runsheets remain metadata-only",
+        "promotion apply remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canRun": false
+    },
+    {
+      "id": "promotion-runsheet-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "attestationOperatorDispatchManifestId": "attestation-dispatch-beta-to-stable",
+      "promotionStagedApplyLedgerId": "promotion-staged-ledger-beta-to-stable",
+      "promotionApplyManifestId": "promotion-manifest-beta-to-stable",
+      "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
+      "rollbackCutoverReadinessMapId": "rollback-cutover-map-beta-to-stable",
+      "rollbackCutoverHandoffPlanId": "rollback-handoff-beta-to-stable",
+      "status": "blocked",
+      "runsheetPath": "future/channels/beta-to-stable/promotion-staged-apply-runsheet.json",
+      "executionWindows": [
+        {
+          "id": "runsheet-beta-to-stable-window-dispatch",
+          "label": "Dispatch intake",
+          "owner": "security-reviewer",
+          "status": "blocked"
+        },
+        {
+          "id": "runsheet-beta-to-stable-window-freeze",
+          "label": "Freeze hold",
+          "owner": "release-manager",
+          "status": "blocked"
+        },
+        {
+          "id": "runsheet-beta-to-stable-window-apply",
+          "label": "Apply hold",
+          "owner": "release-engineering",
+          "status": "blocked"
+        },
+        {
+          "id": "runsheet-beta-to-stable-window-cutover",
+          "label": "Cutover baton",
+          "owner": "support-operator",
+          "status": "blocked"
+        }
+      ],
+      "stages": [
+        {
+          "id": "runsheet-beta-to-stable-dispatch-intake",
+          "label": "Dispatch intake",
+          "owner": "security-reviewer",
+          "status": "blocked",
+          "evidence": [
+            "attestation-dispatch-beta-to-stable",
+            "attestation-worklist-beta-to-stable"
+          ]
+        },
+        {
+          "id": "runsheet-beta-to-stable-freeze",
+          "label": "Freeze and receipt sweep",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "promotion-staged-ledger-beta-to-stable",
+            "promotion-handoff-beta-to-stable"
+          ]
+        },
+        {
+          "id": "runsheet-beta-to-stable-apply",
+          "label": "Staged apply baton",
+          "owner": "release-engineering",
+          "status": "blocked",
+          "evidence": [
+            "promotion-manifest-beta-to-stable",
+            "promotion-checkpoint-beta-to-stable"
+          ]
+        },
+        {
+          "id": "runsheet-beta-to-stable-cutover",
+          "label": "Cutover handoff",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "rollback-cutover-map-beta-to-stable",
+            "rollback-handoff-beta-to-stable"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "staged-apply ledger linked",
+        "dispatch manifest linked",
+        "rollback cutover handoff plan anchor declared"
+      ],
+      "blockedBy": [
+        "promotion staged-apply runsheets remain metadata-only",
+        "promotion apply remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canRun": false
+    }
+  ]
+}

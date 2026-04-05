@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "openclaw-studio-attestation-operator-dispatch-manifests/v1",
+  "generatedAt": "2026-04-05T12:16:22.489Z",
+  "phase": "phase47",
+  "mode": "local-only-review",
+  "manifests": [
+    {
+      "id": "attestation-dispatch-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "attestationOperatorWorklistId": "attestation-worklist-alpha-to-beta",
+      "attestationApplyExecutionPacketId": "attestation-execution-alpha-to-beta",
+      "promotionExecutionCheckpointId": "promotion-checkpoint-alpha-to-beta",
+      "promotionStagedApplyLedgerId": "promotion-staged-ledger-alpha-to-beta",
+      "promotionStagedApplyRunsheetId": "promotion-runsheet-alpha-to-beta",
+      "rollbackCutoverHandoffPlanId": "rollback-handoff-alpha-to-beta",
+      "status": "blocked",
+      "dispatchManifestPath": "future/channels/alpha-to-beta/attestation-operator-dispatch-manifest.json",
+      "dispatchWindow": {
+        "id": "dispatch-window-alpha-to-beta",
+        "label": "Alpha -> Beta dispatch window",
+        "owner": "release-manager",
+        "status": "planned",
+        "receiptDeadlineMode": "review-only"
+      },
+      "dispatchTracks": [
+        {
+          "id": "dispatch-alpha-to-beta-security-review",
+          "role": "security-reviewer",
+          "packetSource": "attestation-execution-alpha-to-beta",
+          "receiptPath": "future/channels/alpha-to-beta/dispatch-receipts/security-reviewer.json",
+          "escalationOwner": "release-manager",
+          "runsheetStageId": "runsheet-alpha-to-beta-dispatch-intake",
+          "status": "planned"
+        },
+        {
+          "id": "dispatch-alpha-to-beta-release-manager",
+          "role": "release-manager",
+          "packetSource": "attestation-worklist-alpha-to-beta",
+          "receiptPath": "future/channels/alpha-to-beta/dispatch-receipts/release-manager.json",
+          "escalationOwner": "product-owner",
+          "runsheetStageId": "runsheet-alpha-to-beta-freeze",
+          "status": "blocked"
+        },
+        {
+          "id": "dispatch-alpha-to-beta-release-engineering",
+          "role": "release-engineering",
+          "packetSource": "promotion-checkpoint-alpha-to-beta",
+          "receiptPath": "future/channels/alpha-to-beta/dispatch-receipts/release-engineering.json",
+          "escalationOwner": "release-manager",
+          "runsheetStageId": "runsheet-alpha-to-beta-apply",
+          "status": "blocked"
+        }
+      ],
+      "reviewChecks": [
+        "attestation operator worklist linked",
+        "promotion staged-apply runsheet anchor declared",
+        "rollback cutover handoff plan anchor declared"
+      ],
+      "blockedBy": [
+        "attestation operator dispatch remains metadata-only",
+        "promotion apply remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canDispatch": false
+    },
+    {
+      "id": "attestation-dispatch-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "attestationOperatorWorklistId": "attestation-worklist-beta-to-stable",
+      "attestationApplyExecutionPacketId": "attestation-execution-beta-to-stable",
+      "promotionExecutionCheckpointId": "promotion-checkpoint-beta-to-stable",
+      "promotionStagedApplyLedgerId": "promotion-staged-ledger-beta-to-stable",
+      "promotionStagedApplyRunsheetId": "promotion-runsheet-beta-to-stable",
+      "rollbackCutoverHandoffPlanId": "rollback-handoff-beta-to-stable",
+      "status": "blocked",
+      "dispatchManifestPath": "future/channels/beta-to-stable/attestation-operator-dispatch-manifest.json",
+      "dispatchWindow": {
+        "id": "dispatch-window-beta-to-stable",
+        "label": "Beta -> Stable dispatch window",
+        "owner": "release-manager",
+        "status": "blocked",
+        "receiptDeadlineMode": "review-only"
+      },
+      "dispatchTracks": [
+        {
+          "id": "dispatch-beta-to-stable-security-review",
+          "role": "security-reviewer",
+          "packetSource": "attestation-execution-beta-to-stable",
+          "receiptPath": "future/channels/beta-to-stable/dispatch-receipts/security-reviewer.json",
+          "escalationOwner": "release-manager",
+          "runsheetStageId": "runsheet-beta-to-stable-dispatch-intake",
+          "status": "blocked"
+        },
+        {
+          "id": "dispatch-beta-to-stable-release-manager",
+          "role": "release-manager",
+          "packetSource": "attestation-worklist-beta-to-stable",
+          "receiptPath": "future/channels/beta-to-stable/dispatch-receipts/release-manager.json",
+          "escalationOwner": "product-owner",
+          "runsheetStageId": "runsheet-beta-to-stable-freeze",
+          "status": "blocked"
+        },
+        {
+          "id": "dispatch-beta-to-stable-release-engineering",
+          "role": "release-engineering",
+          "packetSource": "promotion-checkpoint-beta-to-stable",
+          "receiptPath": "future/channels/beta-to-stable/dispatch-receipts/release-engineering.json",
+          "escalationOwner": "release-manager",
+          "runsheetStageId": "runsheet-beta-to-stable-apply",
+          "status": "blocked"
+        }
+      ],
+      "reviewChecks": [
+        "attestation operator worklist linked",
+        "promotion staged-apply runsheet anchor declared",
+        "rollback cutover handoff plan anchor declared"
+      ],
+      "blockedBy": [
+        "attestation operator dispatch remains metadata-only",
+        "promotion apply remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canDispatch": false
+    }
+  ]
+}

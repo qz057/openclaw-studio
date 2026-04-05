@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-rollback-execution-rehearsal-ledger/v1",
-  "generatedAt": "2026-04-05T11:40:59.272Z",
-  "phase": "phase46",
+  "generatedAt": "2026-04-05T12:16:22.489Z",
+  "phase": "phase47",
   "mode": "local-only-review",
   "rehearsals": [
     {
@@ -12,19 +12,24 @@
       "publishRollbackPathId": "publish-rollback-alpha-to-beta",
       "promotionApplyManifestId": "promotion-manifest-alpha-to-beta",
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-alpha-to-beta",
+      "attestationOperatorDispatchManifestId": "attestation-dispatch-alpha-to-beta",
+      "promotionStagedApplyRunsheetId": "promotion-runsheet-alpha-to-beta",
       "rollbackOperatorDrillbookId": "rollback-drillbook-alpha-to-beta",
       "rollbackLiveReadinessContractId": "rollback-readiness-alpha-to-beta",
       "rollbackCutoverReadinessMapId": "rollback-cutover-map-alpha-to-beta",
+      "rollbackCutoverHandoffPlanId": "rollback-handoff-alpha-to-beta",
       "status": "blocked",
       "rehearsalManifestPath": "future/publish/alpha-to-beta/rollback-execution-rehearsal-ledger.json",
       "rehearsalSteps": [
         "load rollback checkpoints",
         "replay recovery channel selection",
         "verify staged-apply ledger anchors",
+        "verify dispatch manifest anchors",
         "verify attestation pack anchors",
         "record dry-run rollback notes",
         "anchor operator drillbook handoff",
-        "anchor cutover readiness map"
+        "anchor cutover readiness map",
+        "anchor cutover handoff plan"
       ],
       "blockedBy": [
         "rollback rehearsal remains non-executable",
@@ -41,19 +46,24 @@
       "publishRollbackPathId": "publish-rollback-beta-to-stable",
       "promotionApplyManifestId": "promotion-manifest-beta-to-stable",
       "promotionStagedApplyLedgerId": "promotion-staged-ledger-beta-to-stable",
+      "attestationOperatorDispatchManifestId": "attestation-dispatch-beta-to-stable",
+      "promotionStagedApplyRunsheetId": "promotion-runsheet-beta-to-stable",
       "rollbackOperatorDrillbookId": "rollback-drillbook-beta-to-stable",
       "rollbackLiveReadinessContractId": "rollback-readiness-beta-to-stable",
       "rollbackCutoverReadinessMapId": "rollback-cutover-map-beta-to-stable",
+      "rollbackCutoverHandoffPlanId": "rollback-handoff-beta-to-stable",
       "status": "blocked",
       "rehearsalManifestPath": "future/publish/beta-to-stable/rollback-execution-rehearsal-ledger.json",
       "rehearsalSteps": [
         "load rollback checkpoints",
         "replay recovery channel selection",
         "verify staged-apply ledger anchors",
+        "verify dispatch manifest anchors",
         "verify attestation pack anchors",
         "record dry-run rollback notes",
         "anchor operator drillbook handoff",
-        "anchor cutover readiness map"
+        "anchor cutover readiness map",
+        "anchor cutover handoff plan"
       ],
       "blockedBy": [
         "rollback rehearsal remains non-executable",

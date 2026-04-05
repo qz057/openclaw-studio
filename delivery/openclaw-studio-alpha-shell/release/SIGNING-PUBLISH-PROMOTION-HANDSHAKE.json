@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-promotion-handshake/v1",
-  "generatedAt": "2026-04-05T11:40:59.272Z",
-  "phase": "phase46",
+  "generatedAt": "2026-04-05T12:16:22.489Z",
+  "phase": "phase47",
   "mode": "local-only-review",
   "canPromote": false,
   "channelRoutingPath": "release/INSTALLER-CHANNEL-ROUTING.json",
@@ -9,15 +9,18 @@
   "channelPromotionEvidencePath": "release/CHANNEL-PROMOTION-EVIDENCE.json",
   "attestationApplyExecutionPacketsPath": "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json",
   "attestationOperatorWorklistsPath": "release/ATTESTATION-OPERATOR-WORKLISTS.json",
+  "attestationOperatorDispatchManifestsPath": "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json",
   "promotionApplyManifestsPath": "release/PROMOTION-APPLY-MANIFESTS.json",
   "attestationApplyAuditPacksPath": "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
   "promotionExecutionCheckpointsPath": "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
   "promotionOperatorHandoffRailsPath": "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json",
   "promotionStagedApplyLedgersPath": "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
+  "promotionStagedApplyRunsheetsPath": "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json",
   "approvalBridgePath": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
   "publishGatesPath": "release/PUBLISH-GATES.json",
   "promotionGatesPath": "release/PROMOTION-GATES.json",
   "publishRollbackHandshakePath": "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+  "rollbackCutoverHandoffPlansPath": "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
   "participants": [
     "release-engineering",
     "security",
@@ -74,6 +77,11 @@
         "required": true
       },
       {
+        "id": "request-attestation-operator-dispatch-manifests",
+        "label": "Attestation operator dispatch manifests",
+        "required": true
+      },
+      {
         "id": "request-promotion-apply-manifests",
         "label": "Promotion apply manifests",
         "required": true
@@ -94,6 +102,11 @@
         "required": true
       },
       {
+        "id": "request-promotion-staged-apply-runsheets",
+        "label": "Promotion staged-apply runsheets",
+        "required": true
+      },
+      {
         "id": "request-publish-evidence",
         "label": "Publish evidence",
         "required": true
@@ -101,6 +114,11 @@
       {
         "id": "request-publish-rollback",
         "label": "Publish rollback handshake",
+        "required": true
+      },
+      {
+        "id": "request-rollback-cutover-handoff-plans",
+        "label": "Rollback cutover handoff plans",
         "required": true
       },
       {
@@ -185,6 +203,12 @@
       "artifact": "release/ATTESTATION-OPERATOR-WORKLISTS.json"
     },
     {
+      "id": "promotion-ack-attestation-operator-dispatch-manifests",
+      "label": "Attestation operator dispatch manifests reviewed",
+      "status": "blocked",
+      "artifact": "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json"
+    },
+    {
       "id": "promotion-ack-apply-manifests",
       "label": "Promotion apply manifests reviewed",
       "status": "planned",
@@ -209,6 +233,12 @@
       "artifact": "release/PROMOTION-STAGED-APPLY-LEDGERS.json"
     },
     {
+      "id": "promotion-ack-staged-apply-runsheets",
+      "label": "Promotion staged-apply runsheets reviewed",
+      "status": "blocked",
+      "artifact": "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json"
+    },
+    {
       "id": "promotion-ack-approval-bridge",
       "label": "Approval bridge reviewed",
       "status": "blocked",
@@ -225,6 +255,12 @@
       "label": "Publish rollback handshake reviewed",
       "status": "blocked",
       "artifact": "release/PUBLISH-ROLLBACK-HANDSHAKE.json"
+    },
+    {
+      "id": "promotion-ack-rollback-cutover-handoff-plans",
+      "label": "Rollback cutover handoff plans reviewed",
+      "status": "blocked",
+      "artifact": "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json"
     },
     {
       "id": "promotion-ack-promotion-gates",
@@ -298,6 +334,15 @@
       ]
     },
     {
+      "id": "promotion-handshake-attestation-dispatch-manifests",
+      "label": "Attestation operator dispatch manifest review",
+      "status": "blocked",
+      "evidence": [
+        "release/ATTESTATION-OPERATOR-WORKLISTS.json",
+        "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json"
+      ]
+    },
+    {
       "id": "promotion-handshake-apply-manifests",
       "label": "Promotion apply manifest review",
       "status": "planned",
@@ -334,6 +379,15 @@
       ]
     },
     {
+      "id": "promotion-handshake-staged-apply-runsheets",
+      "label": "Promotion staged-apply runsheet review",
+      "status": "blocked",
+      "evidence": [
+        "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
+        "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json"
+      ]
+    },
+    {
       "id": "promotion-handshake-approval",
       "label": "Approval bridge review",
       "status": "blocked",
@@ -361,6 +415,15 @@
       ]
     },
     {
+      "id": "promotion-handshake-rollback-cutover-handoff-plans",
+      "label": "Rollback cutover handoff plan review",
+      "status": "blocked",
+      "evidence": [
+        "release/ROLLBACK-CUTOVER-READINESS-MAPS.json",
+        "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json"
+      ]
+    },
+    {
       "id": "promotion-handshake-promotion",
       "label": "Promotion gate review",
       "status": "blocked",
@@ -378,13 +441,16 @@
     "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
     "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json",
     "release/ATTESTATION-OPERATOR-WORKLISTS.json",
+    "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json",
     "release/PROMOTION-APPLY-MANIFESTS.json",
     "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
     "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json",
     "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
+    "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json",
     "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
     "release/PUBLISH-GATES.json",
     "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+    "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
     "release/PROMOTION-GATES.json",
     "release/RELEASE-APPROVAL-WORKFLOW.json"
   ],
