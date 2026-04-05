@@ -779,8 +779,8 @@ export function App() {
     {
       id: "cross-view-slot-release",
       label: "Focused slot -> Release posture",
-      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase46 attestation operator worklists`,
-      detail: "Focused-slot review and release review now sit in the same local-only handoff story without enabling host execution, installer work, staged apply, cutover entry, or publish rollback."
+      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase47 attestation operator dispatch manifests`,
+      detail: "Focused-slot review and release review now sit in the same local-only dispatch and handoff story without enabling host execution, installer work, staged apply entry, cutover handoff, or publish rollback."
     }
   ];
   const inspectorCommandLinkage = [
@@ -808,7 +808,7 @@ export function App() {
       id: "release-depth-manifest",
       label: "Formal Release Readiness",
       value: "RELEASE-MANIFEST / BUILD-METADATA / REVIEW-MANIFEST",
-      detail: "Phase46 keeps the manifest spine and extends it into attestation operator worklists, promotion staged-apply ledgers, and rollback cutover readiness maps without executing anything."
+      detail: "Phase47 keeps the manifest spine and extends it into attestation operator dispatch manifests, promotion staged-apply runsheets, and rollback cutover handoff plans without executing anything."
     },
     {
       id: "release-depth-bundles",
@@ -868,7 +868,13 @@ export function App() {
       id: "release-depth-attestation-operator-worklists",
       label: "Attestation Operator Worklists",
       value: "ATTESTATION-OPERATOR-WORKLISTS / ATTESTATION-APPLY-EXECUTION-PACKETS",
-      detail: "Execution packets now feed per-role intake queues, acknowledgement slots, and ownership scaffolds without dispatching any live operator action for real."
+      detail: "Execution packets now feed per-role intake queues, acknowledgement slots, and ownership scaffolds that anchor later dispatch manifests without dispatching any live operator action for real."
+    },
+    {
+      id: "release-depth-attestation-operator-dispatch-manifests",
+      label: "Attestation Operator Dispatch Manifests",
+      value: "ATTESTATION-OPERATOR-DISPATCH-MANIFESTS / ATTESTATION-OPERATOR-WORKLISTS",
+      detail: "Operator worklists now feed explicit dispatch envelopes, acknowledgement deadlines, and escalation routes without dispatching any live operator action for real."
     },
     {
       id: "release-depth-installer-builders",
@@ -928,7 +934,13 @@ export function App() {
       id: "release-depth-promotion-staged-apply-ledgers",
       label: "Promotion Staged-apply Ledgers",
       value: "PROMOTION-STAGED-APPLY-LEDGERS / PROMOTION-OPERATOR-HANDOFF-RAILS",
-      detail: "Operator handoff rails now feed ordered staged apply journals, freeze windows, and cutover evidence slots without applying any promotion for real."
+      detail: "Operator handoff rails now feed ordered staged apply journals, freeze windows, and cutover evidence slots that anchor later runsheets without applying any promotion for real."
+    },
+    {
+      id: "release-depth-promotion-staged-apply-runsheets",
+      label: "Promotion Staged-apply Runsheets",
+      value: "PROMOTION-STAGED-APPLY-RUNSHEETS / PROMOTION-STAGED-APPLY-LEDGERS",
+      detail: "Staged-apply ledgers now feed operator-ready stage sequencing, hold points, and cutover baton scripts without applying any promotion for real."
     },
     {
       id: "release-depth-signing-publish",
@@ -988,7 +1000,13 @@ export function App() {
       id: "release-depth-rollback-cutover-readiness-maps",
       label: "Rollback Cutover Readiness Maps",
       value: "ROLLBACK-CUTOVER-READINESS-MAPS / ROLLBACK-LIVE-READINESS-CONTRACTS",
-      detail: "Rollback live-readiness contracts now feed channel/platform cutover topology, checkpoint maps, and go/no-go review surfaces without mutating any live publish state."
+      detail: "Rollback live-readiness contracts now feed channel/platform cutover topology, checkpoint maps, and go/no-go review surfaces that anchor later handoff plans without mutating any live publish state."
+    },
+    {
+      id: "release-depth-rollback-cutover-handoff-plans",
+      label: "Rollback Cutover Handoff Plans",
+      value: "ROLLBACK-CUTOVER-HANDOFF-PLANS / ROLLBACK-CUTOVER-READINESS-MAPS",
+      detail: "Rollback cutover readiness maps now feed owner baton transfers, fallback paths, and recovery handoff sections without mutating any live publish state."
     },
     {
       id: "release-depth-approval",
@@ -1006,7 +1024,7 @@ export function App() {
       id: "release-depth-safety",
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
-      detail: "Phase46 increases release structure only; it still does not install, publish, sign, dispatch operator worklists, stage promotion apply, enter rollback cutover, roll back publish state, or enable host-side execution."
+      detail: "Phase47 increases release structure only; it still does not install, publish, sign, dispatch operators, run staged apply, hand off rollback cutover, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -1827,30 +1845,30 @@ export function App() {
               <div className="card-header card-header--stack">
                 <div>
                   <p className="eyebrow">Release Pipeline Depth</p>
-                  <h2>Attestation Operator Worklists</h2>
+                  <h2>Attestation Operator Dispatch Manifests</h2>
                 </div>
                 <p>
                   The alpha shell still does not build a real installer, but the release skeleton now pushes further with attestation
-                  operator worklists, promotion staged-apply ledgers, and rollback cutover readiness maps while staying entirely
-                  local-only and non-executing.
+                  operator dispatch manifests, promotion staged-apply runsheets, and rollback cutover handoff plans while staying
+                  entirely local-only and non-executing.
                 </p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
                   <span>Phase</span>
-                  <strong>Phase46</strong>
+                  <strong>Phase47</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Packaged app</span>
-                  <strong>Operator worklists</strong>
+                  <strong>Dispatch manifests</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Installer</span>
-                  <strong>Staged-apply ledgers</strong>
+                  <strong>Staged-apply runsheets</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Pipeline</span>
-                  <strong>Cutover readiness maps</strong>
+                  <strong>Cutover handoff plans</strong>
                 </div>
               </div>
               <div className="workflow-readiness-list">
