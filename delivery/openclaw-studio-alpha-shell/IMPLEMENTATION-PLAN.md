@@ -232,6 +232,15 @@
 - smoke 已提升到验证 phase52 attestation operator approval execution envelopes / promotion staged-apply release decision records / rollback cutover publication recovery receipts contract 与 renderer markers
 - README / HANDOFF / package snapshot 已同步反映 phase52 reality
 
+### Phase 53（当前已完成）
+- phase52 的 formal-release skeleton 已继续下沉成更明确的 attestation operator approval routing contracts / promotion staged-apply release decision enforcement contracts / rollback cutover publication receipt closeout contracts layer
+- release skeleton 现在补齐 ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS / PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS / ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS
+- shell 现在补齐 Attestation Operator Approval Routing Contracts / Promotion Staged-apply Release Decision Enforcement Contracts / Rollback Cutover Publication Receipt Closeout Contracts 可见性
+- package snapshot 现在具备 attestation operator approval routing contracts / promotion staged-apply release decision enforcement contracts / rollback cutover publication receipt closeout contracts，但仍不做真实 installer / approval / publish / approval routing contract issuance / staged release decision enforcement / publication receipt closeout contract emission
+- 全部仍然保持 `local-only`，不做真实 host-side execution 或系统级窗口操作
+- smoke 已提升到验证 phase53 attestation operator approval routing contracts / promotion staged-apply release decision enforcement contracts / rollback cutover publication receipt closeout contracts contract 与 renderer markers
+- README / HANDOFF / package snapshot 已同步反映 phase53 reality
+
 ## 当前明确边界
 
 当前只允许：
@@ -240,7 +249,7 @@
 - dry-run / preview / simulate
 - Studio-local execute（只改应用内 in-memory state/history）
 - phase27 command surface / layout persistence / window intent staging
-- phase52 attestation operator approval execution envelopes / promotion staged-apply release decision records / rollback cutover publication recovery receipts
+- phase53 attestation operator approval routing contracts / promotion staged-apply release decision enforcement contracts / rollback cutover publication receipt closeout contracts
 - phase26/27/28 release skeleton / artifact review / handoff docs / package metadata
 
 当前明确禁止：
@@ -262,7 +271,7 @@ npm run start:smoke
 npm run package:alpha
 ```
 
-phase52 可额外跑：
+phase53 可额外跑：
 
 ```bash
 npm run release:plan
@@ -270,13 +279,13 @@ npm run release:plan
 
 ## 下一阶段（建议）
 
-### Phase 53
-目标：在不开放危险执行的前提下，继续把 phase52 foundations 推进为更完整的产品能力与交付链路。
+### Phase 54
+目标：在不开放危险执行的前提下，继续把 phase53 foundations 推进为更完整的产品能力与交付链路。
 
 范围建议：
 - 更深的 Inspector / command depth / trace drill-down
 - 更真实的 multi-window orchestration 与跨窗口共享状态
-- 把当前 skeleton 继续推进为 executable review-only attestation operator approval envelope routing / promotion staged release decision enforcement / rollback cutover publication recovery closeout / release approval pipeline
+- 把当前 skeleton 继续推进为 executable review-only attestation operator approval routing / promotion staged release decision enforcement / rollback cutover publication receipt closeout / release approval pipeline
 - 在 approval / lifecycle / rollback 真实闭环前继续提升 observability，而不是开启真实 host-side execution
 
 ### 后续阶段

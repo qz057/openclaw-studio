@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-gating-handshake/v1",
-  "generatedAt": "2026-04-06T00:44:51.028Z",
-  "phase": "phase52",
+  "generatedAt": "2026-04-06T01:32:55.453Z",
+  "phase": "phase53",
   "mode": "local-only-review",
   "canHandshake": false,
   "sealedBundleIntegrityContractPath": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
@@ -14,21 +14,21 @@
   "attestationOperatorDispatchReceiptsPath": "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
   "attestationOperatorReconciliationLedgersPath": "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
   "attestationOperatorSettlementPacksPath": "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
-  "attestationOperatorApprovalExecutionEnvelopesPath": "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
+  "attestationOperatorApprovalRoutingContractsPath": "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
   "channelPromotionEvidencePath": "release/CHANNEL-PROMOTION-EVIDENCE.json",
   "promotionStagedApplyRunsheetsPath": "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json",
   "promotionStagedApplyCommandSheetsPath": "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
   "promotionStagedApplyConfirmationLedgersPath": "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
   "promotionStagedApplyCloseoutJournalsPath": "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
   "promotionStagedApplySignoffSheetsPath": "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
-  "promotionStagedApplyReleaseDecisionRecordsPath": "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
+  "promotionStagedApplyReleaseDecisionEnforcementContractsPath": "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
   "publishRollbackHandshakePath": "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
   "rollbackCutoverHandoffPlansPath": "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
   "rollbackCutoverExecutionChecklistsPath": "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
   "rollbackCutoverExecutionRecordsPath": "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
   "rollbackCutoverOutcomeReportsPath": "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
   "rollbackCutoverPublicationBundlesPath": "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
-  "rollbackCutoverPublicationRecoveryReceiptsPath": "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json",
+  "rollbackCutoverPublicationReceiptCloseoutContractsPath": "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
   "participants": [
     "release-engineering",
     "security",
@@ -105,18 +105,8 @@
         "required": true
       },
       {
-        "id": "request-attestation-operator-approval-execution-envelopes",
-        "label": "Attestation operator approval execution envelopes",
-        "required": true
-      },
-      {
-        "id": "request-attestation-operator-approval-execution-envelopes",
-        "label": "Attestation operator approval execution envelopes",
-        "required": true
-      },
-      {
-        "id": "request-attestation-operator-approval-execution-envelopes",
-        "label": "Attestation operator approval execution envelopes",
+        "id": "request-attestation-operator-approval-routing-contracts",
+        "label": "Attestation operator approval routing contracts",
         "required": true
       },
       {
@@ -155,18 +145,8 @@
         "required": true
       },
       {
-        "id": "request-promotion-staged-apply-release-decision-records",
-        "label": "Promotion staged-apply release decision records",
-        "required": true
-      },
-      {
-        "id": "request-promotion-staged-apply-release-decision-records",
-        "label": "Promotion staged-apply release decision records",
-        "required": true
-      },
-      {
-        "id": "request-promotion-staged-apply-release-decision-records",
-        "label": "Promotion staged-apply release decision records",
+        "id": "request-promotion-staged-apply-release-decision-enforcement-contracts",
+        "label": "Promotion staged-apply release decision enforcement contracts",
         "required": true
       },
       {
@@ -210,8 +190,8 @@
         "required": true
       },
       {
-        "id": "request-rollback-cutover-publication-recovery-receipts",
-        "label": "Rollback cutover publication recovery receipts",
+        "id": "request-rollback-cutover-publication-receipt-closeout-contracts",
+        "label": "Rollback cutover publication receipt closeout contracts",
         "required": true
       },
       {
@@ -321,10 +301,10 @@
       "artifact": "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json"
     },
     {
-      "id": "ack-attestation-operator-approval-execution-envelopes",
-      "label": "Attestation operator approval execution envelopes reviewed",
+      "id": "ack-attestation-operator-approval-routing-contracts",
+      "label": "Attestation operator approval routing contracts reviewed",
       "status": "blocked",
-      "artifact": "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json"
+      "artifact": "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json"
     },
     {
       "id": "ack-builders",
@@ -375,10 +355,10 @@
       "artifact": "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json"
     },
     {
-      "id": "ack-promotion-staged-apply-release-decision-records",
-      "label": "Promotion staged-apply release decision records reviewed",
+      "id": "ack-promotion-staged-apply-release-decision-enforcement-contracts",
+      "label": "Promotion staged-apply release decision enforcement contracts reviewed",
       "status": "blocked",
-      "artifact": "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json"
+      "artifact": "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json"
     },
     {
       "id": "ack-signing",
@@ -429,10 +409,10 @@
       "artifact": "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json"
     },
     {
-      "id": "ack-rollback-cutover-publication-recovery-receipts",
-      "label": "Rollback cutover publication recovery receipts reviewed",
+      "id": "ack-rollback-cutover-publication-receipt-closeout-contracts",
+      "label": "Rollback cutover publication receipt closeout contracts reviewed",
       "status": "blocked",
-      "artifact": "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json"
+      "artifact": "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json"
     }
   ],
   "stages": [
@@ -545,12 +525,12 @@
       ]
     },
     {
-      "id": "handshake-attestation-operator-approval-execution-envelopes",
-      "label": "Attestation operator approval execution envelope review",
+      "id": "handshake-attestation-operator-approval-routing-contracts",
+      "label": "Attestation operator approval routing contract review",
       "status": "blocked",
       "evidence": [
         "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
-        "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json"
+        "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json"
       ]
     },
     {
@@ -626,12 +606,12 @@
       ]
     },
     {
-      "id": "handshake-promotion-staged-apply-release-decision-records",
-      "label": "Promotion staged-apply release decision record review",
+      "id": "handshake-promotion-staged-apply-release-decision-enforcement-contracts",
+      "label": "Promotion staged-apply release decision enforcement contract review",
       "status": "blocked",
       "evidence": [
         "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
-        "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json"
+        "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json"
       ]
     },
     {
@@ -717,12 +697,12 @@
       ]
     },
     {
-      "id": "handshake-rollback-cutover-publication-recovery-receipts",
-      "label": "Rollback cutover publication recovery receipt review",
+      "id": "handshake-rollback-cutover-publication-receipt-closeout-contracts",
+      "label": "Rollback cutover publication receipt closeout contract review",
       "status": "blocked",
       "evidence": [
         "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
-        "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json"
+        "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json"
       ]
     }
   ],
@@ -739,7 +719,7 @@
     "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
     "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
     "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
-    "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
+    "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
     "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
     "release/INSTALLER-CHANNEL-ROUTING.json",
     "release/CHANNEL-PROMOTION-EVIDENCE.json",
@@ -748,7 +728,7 @@
     "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
     "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
     "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
-    "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
+    "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
     "release/SIGNING-METADATA.json",
     "release/SIGNING-PUBLISH-PIPELINE.json",
     "release/PUBLISH-GATES.json",
@@ -759,15 +739,15 @@
     "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
     "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
     "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
-    "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json",
+    "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
     "release/RELEASE-APPROVAL-WORKFLOW.json"
   ],
   "blockedBy": [
     "signing and notarization remain metadata-only",
     "artifact upload remains blocked",
-    "attestation operator approval execution envelopes remain metadata-only",
-    "promotion staged-apply release decision records remain metadata-only",
-    "rollback cutover publication recovery receipts remain metadata-only",
+    "attestation operator approval routing contracts remain metadata-only",
+    "promotion staged-apply release decision enforcement contracts remain metadata-only",
+    "rollback cutover publication receipt closeout contracts remain metadata-only",
     "publish rollback remains metadata-only",
     "release approval remains non-executable",
     "host-side execution remains disabled"

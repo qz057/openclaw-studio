@@ -1,32 +1,32 @@
 {
-  "schemaVersion": "openclaw-studio-attestation-operator-approval-execution-envelopes/v1",
-  "generatedAt": "2026-04-06T00:44:51.028Z",
-  "phase": "phase52",
+  "schemaVersion": "openclaw-studio-attestation-operator-approval-routing-contracts/v1",
+  "generatedAt": "2026-04-06T01:32:55.453Z",
+  "phase": "phase53",
   "mode": "local-only-review",
-  "envelopes": [
+  "contracts": [
     {
-      "id": "attestation-approval-envelope-alpha-to-beta",
+      "id": "attestation-approval-routing-contract-alpha-to-beta",
       "from": "alpha",
       "to": "beta",
       "attestationOperatorSettlementPackId": "attestation-settlement-pack-alpha-to-beta",
       "promotionStagedApplySignoffSheetId": "promotion-signoff-sheet-alpha-to-beta",
       "rollbackCutoverPublicationBundleId": "rollback-publication-bundle-alpha-to-beta",
       "releaseApprovalStageId": "approval-decision-receipts",
-      "gatingStageId": "handshake-attestation-operator-approval-execution-envelopes",
-      "publishGateId": "gate-attestation-operator-approval-execution-envelopes",
+      "gatingStageId": "handshake-attestation-operator-approval-routing-contracts",
+      "publishGateId": "gate-attestation-operator-approval-routing-contracts",
       "status": "blocked",
-      "approvalExecutionEnvelopePath": "future/channels/alpha-to-beta/attestation-operator-approval-execution-envelope.json",
-      "executionWindowPath": "future/channels/alpha-to-beta/attestation-operator-approval-execution-window.json",
-      "approvalRoutePath": "future/channels/alpha-to-beta/attestation-operator-approval-route.json",
+      "approvalRoutingContractPath": "future/channels/alpha-to-beta/attestation-operator-approval-routing-contract.json",
+      "approvalWindowPath": "future/channels/alpha-to-beta/attestation-operator-approval-window.json",
+      "approvalRoutingMapPath": "future/channels/alpha-to-beta/attestation-operator-approval-routing-map.json",
       "handoffTargets": [
         "release-engineering",
         "release-manager",
         "security"
       ],
-      "approvals": [
+      "routes": [
         {
-          "id": "attestation-approval-envelope-alpha-to-beta-security",
-          "label": "Security approval envelope",
+          "id": "attestation-approval-routing-contract-alpha-to-beta-security",
+          "label": "Security routing contract",
           "owner": "security-reviewer",
           "status": "planned",
           "evidence": [
@@ -35,8 +35,8 @@
           ]
         },
         {
-          "id": "attestation-approval-envelope-alpha-to-beta-release-manager",
-          "label": "Release routing approval envelope",
+          "id": "attestation-approval-routing-contract-alpha-to-beta-release-manager",
+          "label": "Release routing contract",
           "owner": "release-manager",
           "status": "blocked",
           "evidence": [
@@ -45,8 +45,8 @@
           ]
         },
         {
-          "id": "attestation-approval-envelope-alpha-to-beta-release-engineering",
-          "label": "Execution-window approval envelope",
+          "id": "attestation-approval-routing-contract-alpha-to-beta-release-engineering",
+          "label": "Approval-window routing contract",
           "owner": "release-engineering",
           "status": "blocked",
           "evidence": [
@@ -59,40 +59,40 @@
         "settlement pack linked",
         "promotion signoff sheet linked",
         "rollback publication bundle linked",
-        "execution window path declared",
-        "approval route path declared"
+        "approval window path declared",
+        "approval routing map path declared"
       ],
       "blockedBy": [
-        "attestation operator approval execution envelopes remain metadata-only",
+        "attestation operator approval routing contracts remain metadata-only",
         "release approval remains non-executable",
         "publish rollback remains non-executable",
         "host-side execution remains disabled"
       ],
-      "canIssueEnvelope": false
+      "canRouteApproval": false
     },
     {
-      "id": "attestation-approval-envelope-beta-to-stable",
+      "id": "attestation-approval-routing-contract-beta-to-stable",
       "from": "beta",
       "to": "stable",
       "attestationOperatorSettlementPackId": "attestation-settlement-pack-beta-to-stable",
       "promotionStagedApplySignoffSheetId": "promotion-signoff-sheet-beta-to-stable",
       "rollbackCutoverPublicationBundleId": "rollback-publication-bundle-beta-to-stable",
       "releaseApprovalStageId": "approval-decision-receipts",
-      "gatingStageId": "handshake-attestation-operator-approval-execution-envelopes",
-      "publishGateId": "gate-attestation-operator-approval-execution-envelopes",
+      "gatingStageId": "handshake-attestation-operator-approval-routing-contracts",
+      "publishGateId": "gate-attestation-operator-approval-routing-contracts",
       "status": "blocked",
-      "approvalExecutionEnvelopePath": "future/channels/beta-to-stable/attestation-operator-approval-execution-envelope.json",
-      "executionWindowPath": "future/channels/beta-to-stable/attestation-operator-approval-execution-window.json",
-      "approvalRoutePath": "future/channels/beta-to-stable/attestation-operator-approval-route.json",
+      "approvalRoutingContractPath": "future/channels/beta-to-stable/attestation-operator-approval-routing-contract.json",
+      "approvalWindowPath": "future/channels/beta-to-stable/attestation-operator-approval-window.json",
+      "approvalRoutingMapPath": "future/channels/beta-to-stable/attestation-operator-approval-routing-map.json",
       "handoffTargets": [
         "release-engineering",
         "release-manager",
         "security"
       ],
-      "approvals": [
+      "routes": [
         {
-          "id": "attestation-approval-envelope-beta-to-stable-security",
-          "label": "Security approval envelope",
+          "id": "attestation-approval-routing-contract-beta-to-stable-security",
+          "label": "Security routing contract",
           "owner": "security-reviewer",
           "status": "blocked",
           "evidence": [
@@ -101,8 +101,8 @@
           ]
         },
         {
-          "id": "attestation-approval-envelope-beta-to-stable-release-manager",
-          "label": "Release routing approval envelope",
+          "id": "attestation-approval-routing-contract-beta-to-stable-release-manager",
+          "label": "Release routing contract",
           "owner": "release-manager",
           "status": "blocked",
           "evidence": [
@@ -111,8 +111,8 @@
           ]
         },
         {
-          "id": "attestation-approval-envelope-beta-to-stable-release-engineering",
-          "label": "Execution-window approval envelope",
+          "id": "attestation-approval-routing-contract-beta-to-stable-release-engineering",
+          "label": "Approval-window routing contract",
           "owner": "release-engineering",
           "status": "blocked",
           "evidence": [
@@ -125,16 +125,16 @@
         "settlement pack linked",
         "promotion signoff sheet linked",
         "rollback publication bundle linked",
-        "execution window path declared",
-        "approval route path declared"
+        "approval window path declared",
+        "approval routing map path declared"
       ],
       "blockedBy": [
-        "attestation operator approval execution envelopes remain metadata-only",
+        "attestation operator approval routing contracts remain metadata-only",
         "release approval remains non-executable",
         "publish rollback remains non-executable",
         "host-side execution remains disabled"
       ],
-      "canIssueEnvelope": false
+      "canRouteApproval": false
     }
   ]
 }

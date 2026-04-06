@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-publish-gates/v1",
-  "generatedAt": "2026-04-06T00:44:51.028Z",
-  "phase": "phase52",
+  "generatedAt": "2026-04-06T01:32:55.453Z",
+  "phase": "phase53",
   "gates": [
     {
       "id": "gate-bundles",
@@ -79,8 +79,8 @@
       "status": "blocked"
     },
     {
-      "id": "gate-attestation-operator-approval-execution-envelopes",
-      "label": "Attestation operator approval execution envelopes reviewed",
+      "id": "gate-attestation-operator-approval-routing-contracts",
+      "label": "Attestation operator approval routing contracts reviewed",
       "status": "blocked"
     },
     {
@@ -154,8 +154,8 @@
       "status": "blocked"
     },
     {
-      "id": "gate-promotion-staged-apply-release-decision-records",
-      "label": "Promotion staged-apply release decision records reviewed",
+      "id": "gate-promotion-staged-apply-release-decision-enforcement-contracts",
+      "label": "Promotion staged-apply release decision enforcement contracts reviewed",
       "status": "blocked"
     },
     {
@@ -229,8 +229,8 @@
       "status": "blocked"
     },
     {
-      "id": "gate-rollback-cutover-publication-recovery-receipts",
-      "label": "Rollback cutover publication recovery receipts reviewed",
+      "id": "gate-rollback-cutover-publication-receipt-closeout-contracts",
+      "label": "Rollback cutover publication receipt closeout contracts reviewed",
       "status": "blocked"
     },
     {
