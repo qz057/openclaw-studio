@@ -1,0 +1,130 @@
+{
+  "schemaVersion": "openclaw-studio-promotion-staged-apply-release-decision-enforcement-lifecycle/v1",
+  "generatedAt": "2026-04-06T02:29:15.586Z",
+  "phase": "phase54",
+  "mode": "local-only-review",
+  "lifecycles": [
+    {
+      "id": "promotion-release-decision-enforcement-lifecycle-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "promotionStagedApplyReleaseDecisionEnforcementContractId": "promotion-release-decision-enforcement-contract-alpha-to-beta",
+      "attestationOperatorApprovalOrchestrationId": "attestation-approval-orchestration-alpha-to-beta",
+      "rollbackCutoverPublicationReceiptCloseoutContractId": "rollback-publication-receipt-closeout-contract-alpha-to-beta",
+      "releaseApprovalStageId": "approval-decision-receipts",
+      "promotionHandshakeStageId": "promotion-handshake-staged-release-decision-enforcement-lifecycle",
+      "publishGateId": "gate-promotion-staged-apply-release-decision-enforcement-lifecycle",
+      "status": "blocked",
+      "lifecyclePath": "future/channels/alpha-to-beta/promotion-staged-release-decision-enforcement-lifecycle.json",
+      "lifecycleLedgerPath": "future/channels/alpha-to-beta/promotion-staged-release-decision-enforcement-lifecycle-ledger.json",
+      "lifecycleCloseoutPath": "future/channels/alpha-to-beta/promotion-staged-release-decision-enforcement-lifecycle-closeout.json",
+      "lifecyclePhases": [
+        {
+          "id": "promotion-release-decision-lifecycle-alpha-to-beta-intake",
+          "label": "Decision intake lifecycle",
+          "owner": "security-reviewer",
+          "status": "planned",
+          "evidence": [
+            "promotion-release-decision-enforcement-contract-alpha-to-beta",
+            "attestation-approval-orchestration-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "promotion-release-decision-lifecycle-alpha-to-beta-window",
+          "label": "Enforcement window lifecycle",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "promotion-release-decision-enforcement-contract-alpha-to-beta",
+            "rollback-publication-receipt-closeout-contract-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "promotion-release-decision-lifecycle-alpha-to-beta-closeout",
+          "label": "Lifecycle expiry closeout",
+          "owner": "release-engineering",
+          "status": "blocked",
+          "evidence": [
+            "attestation-approval-orchestration-alpha-to-beta",
+            "rollback-publication-receipt-closeout-contract-alpha-to-beta"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "release decision enforcement contract linked",
+        "approval orchestration linked",
+        "publication receipt closeout contract linked",
+        "lifecycle ledger path declared",
+        "lifecycle closeout path declared"
+      ],
+      "blockedBy": [
+        "promotion staged-apply release decision enforcement lifecycle remains metadata-only",
+        "release approval remains non-executable",
+        "promotion gating remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canAdvanceLifecycle": false
+    },
+    {
+      "id": "promotion-release-decision-enforcement-lifecycle-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "promotionStagedApplyReleaseDecisionEnforcementContractId": "promotion-release-decision-enforcement-contract-beta-to-stable",
+      "attestationOperatorApprovalOrchestrationId": "attestation-approval-orchestration-beta-to-stable",
+      "rollbackCutoverPublicationReceiptCloseoutContractId": "rollback-publication-receipt-closeout-contract-beta-to-stable",
+      "releaseApprovalStageId": "approval-decision-receipts",
+      "promotionHandshakeStageId": "promotion-handshake-staged-release-decision-enforcement-lifecycle",
+      "publishGateId": "gate-promotion-staged-apply-release-decision-enforcement-lifecycle",
+      "status": "blocked",
+      "lifecyclePath": "future/channels/beta-to-stable/promotion-staged-release-decision-enforcement-lifecycle.json",
+      "lifecycleLedgerPath": "future/channels/beta-to-stable/promotion-staged-release-decision-enforcement-lifecycle-ledger.json",
+      "lifecycleCloseoutPath": "future/channels/beta-to-stable/promotion-staged-release-decision-enforcement-lifecycle-closeout.json",
+      "lifecyclePhases": [
+        {
+          "id": "promotion-release-decision-lifecycle-beta-to-stable-intake",
+          "label": "Decision intake lifecycle",
+          "owner": "security-reviewer",
+          "status": "blocked",
+          "evidence": [
+            "promotion-release-decision-enforcement-contract-beta-to-stable",
+            "attestation-approval-orchestration-beta-to-stable"
+          ]
+        },
+        {
+          "id": "promotion-release-decision-lifecycle-beta-to-stable-window",
+          "label": "Enforcement window lifecycle",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "promotion-release-decision-enforcement-contract-beta-to-stable",
+            "rollback-publication-receipt-closeout-contract-beta-to-stable"
+          ]
+        },
+        {
+          "id": "promotion-release-decision-lifecycle-beta-to-stable-closeout",
+          "label": "Lifecycle expiry closeout",
+          "owner": "release-engineering",
+          "status": "blocked",
+          "evidence": [
+            "attestation-approval-orchestration-beta-to-stable",
+            "rollback-publication-receipt-closeout-contract-beta-to-stable"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "release decision enforcement contract linked",
+        "approval orchestration linked",
+        "publication receipt closeout contract linked",
+        "lifecycle ledger path declared",
+        "lifecycle closeout path declared"
+      ],
+      "blockedBy": [
+        "promotion staged-apply release decision enforcement lifecycle remains metadata-only",
+        "release approval remains non-executable",
+        "promotion gating remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canAdvanceLifecycle": false
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "schemaVersion": "openclaw-studio-rollback-cutover-publication-receipt-settlement-closeout/v1",
+  "generatedAt": "2026-04-06T02:29:15.586Z",
+  "phase": "phase54",
+  "mode": "local-only-review",
+  "closeouts": [
+    {
+      "id": "rollback-publication-receipt-settlement-closeout-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "rollbackCutoverPublicationReceiptCloseoutContractId": "rollback-publication-receipt-closeout-contract-alpha-to-beta",
+      "attestationOperatorApprovalOrchestrationId": "attestation-approval-orchestration-alpha-to-beta",
+      "promotionStagedApplyReleaseDecisionEnforcementLifecycleId": "promotion-release-decision-enforcement-lifecycle-alpha-to-beta",
+      "publishRollbackPathId": "publish-rollback-alpha-to-beta",
+      "releaseApprovalStageId": "approval-decision-receipts",
+      "publishGateId": "gate-rollback-cutover-publication-receipt-settlement-closeout",
+      "status": "blocked",
+      "settlementCloseoutPath": "future/publish/alpha-to-beta/rollback-cutover-publication-receipt-settlement-closeout.json",
+      "settlementLedgerPath": "future/publish/alpha-to-beta/rollback-cutover-publication-receipt-settlement-ledger.json",
+      "recoveryCloseoutPath": "future/publish/alpha-to-beta/rollback-cutover-publication-receipt-recovery-closeout.json",
+      "settlementSteps": [
+        {
+          "id": "rollback-publication-settlement-alpha-to-beta-release-manager",
+          "label": "Receipt settlement acknowledgement",
+          "owner": "release-manager",
+          "status": "planned",
+          "evidence": [
+            "rollback-publication-receipt-closeout-contract-alpha-to-beta",
+            "promotion-release-decision-enforcement-lifecycle-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "rollback-publication-settlement-alpha-to-beta-runtime-owner",
+          "label": "Settlement ledger evidence",
+          "owner": "runtime-owner",
+          "status": "blocked",
+          "evidence": [
+            "rollback-publication-receipt-closeout-contract-alpha-to-beta",
+            "publish-rollback-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "rollback-publication-settlement-alpha-to-beta-support-operator",
+          "label": "Receipt recovery closeout",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "attestation-approval-orchestration-alpha-to-beta",
+            "promotion-release-decision-enforcement-lifecycle-alpha-to-beta"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "publication receipt closeout contract linked",
+        "approval orchestration linked",
+        "release decision enforcement lifecycle linked",
+        "settlement ledger path declared",
+        "recovery closeout path declared"
+      ],
+      "blockedBy": [
+        "rollback cutover publication receipt settlement closeout remains metadata-only",
+        "publish rollback remains non-executable",
+        "release approval remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canCloseReceiptSettlement": false
+    },
+    {
+      "id": "rollback-publication-receipt-settlement-closeout-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "rollbackCutoverPublicationReceiptCloseoutContractId": "rollback-publication-receipt-closeout-contract-beta-to-stable",
+      "attestationOperatorApprovalOrchestrationId": "attestation-approval-orchestration-beta-to-stable",
+      "promotionStagedApplyReleaseDecisionEnforcementLifecycleId": "promotion-release-decision-enforcement-lifecycle-beta-to-stable",
+      "publishRollbackPathId": "publish-rollback-beta-to-stable",
+      "releaseApprovalStageId": "approval-decision-receipts",
+      "publishGateId": "gate-rollback-cutover-publication-receipt-settlement-closeout",
+      "status": "blocked",
+      "settlementCloseoutPath": "future/publish/beta-to-stable/rollback-cutover-publication-receipt-settlement-closeout.json",
+      "settlementLedgerPath": "future/publish/beta-to-stable/rollback-cutover-publication-receipt-settlement-ledger.json",
+      "recoveryCloseoutPath": "future/publish/beta-to-stable/rollback-cutover-publication-receipt-recovery-closeout.json",
+      "settlementSteps": [
+        {
+          "id": "rollback-publication-settlement-beta-to-stable-release-manager",
+          "label": "Receipt settlement acknowledgement",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "rollback-publication-receipt-closeout-contract-beta-to-stable",
+            "promotion-release-decision-enforcement-lifecycle-beta-to-stable"
+          ]
+        },
+        {
+          "id": "rollback-publication-settlement-beta-to-stable-runtime-owner",
+          "label": "Settlement ledger evidence",
+          "owner": "runtime-owner",
+          "status": "blocked",
+          "evidence": [
+            "rollback-publication-receipt-closeout-contract-beta-to-stable",
+            "publish-rollback-beta-to-stable"
+          ]
+        },
+        {
+          "id": "rollback-publication-settlement-beta-to-stable-support-operator",
+          "label": "Receipt recovery closeout",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "attestation-approval-orchestration-beta-to-stable",
+            "promotion-release-decision-enforcement-lifecycle-beta-to-stable"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "publication receipt closeout contract linked",
+        "approval orchestration linked",
+        "release decision enforcement lifecycle linked",
+        "settlement ledger path declared",
+        "recovery closeout path declared"
+      ],
+      "blockedBy": [
+        "rollback cutover publication receipt settlement closeout remains metadata-only",
+        "publish rollback remains non-executable",
+        "release approval remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canCloseReceiptSettlement": false
+    }
+  ]
+}

@@ -27,6 +27,7 @@ console.log(`attestation operator dispatch receipts metadata: ${manifest.attesta
 console.log(`attestation operator reconciliation ledgers metadata: ${manifest.attestationOperatorReconciliationLedgersPath}`);
 console.log(`attestation operator settlement packs metadata: ${manifest.attestationOperatorSettlementPacksPath}`);
 console.log(`attestation operator approval routing contracts metadata: ${manifest.attestationOperatorApprovalRoutingContractsPath}`);
+console.log(`attestation operator approval orchestration metadata: ${manifest.attestationOperatorApprovalOrchestrationPath}`);
 console.log(`installer targets metadata: ${manifest.installerTargetsPath}`);
 console.log(`installer builder execution metadata: ${manifest.installerBuilderExecutionSkeletonPath}`);
 console.log(`installer-target builder metadata: ${manifest.installerTargetBuilderSkeletonPath}`);
@@ -43,6 +44,7 @@ console.log(`promotion staged-apply confirmation ledgers metadata: ${manifest.pr
 console.log(`promotion staged-apply closeout journals metadata: ${manifest.promotionStagedApplyCloseoutJournalsPath}`);
 console.log(`promotion staged-apply signoff sheets metadata: ${manifest.promotionStagedApplySignoffSheetsPath}`);
 console.log(`promotion staged-apply release decision enforcement contracts metadata: ${manifest.promotionStagedApplyReleaseDecisionEnforcementContractsPath}`);
+console.log(`promotion staged-apply release decision enforcement lifecycle metadata: ${manifest.promotionStagedApplyReleaseDecisionEnforcementLifecyclePath}`);
 console.log(`signing-publish gating handshake metadata: ${manifest.signingPublishGatingHandshakePath}`);
 console.log(`signing & publish pipeline metadata: ${manifest.signingPublishPipelinePath}`);
 console.log(`signing-publish approval bridge metadata: ${manifest.signingPublishApprovalBridgePath}`);
@@ -58,6 +60,7 @@ console.log(`rollback cutover execution records metadata: ${manifest.rollbackCut
 console.log(`rollback cutover outcome reports metadata: ${manifest.rollbackCutoverOutcomeReportsPath}`);
 console.log(`rollback cutover publication bundles metadata: ${manifest.rollbackCutoverPublicationBundlesPath}`);
 console.log(`rollback cutover publication receipt closeout contracts metadata: ${manifest.rollbackCutoverPublicationReceiptCloseoutContractsPath}`);
+console.log(`rollback cutover publication receipt settlement closeout metadata: ${manifest.rollbackCutoverPublicationReceiptSettlementCloseoutPath}`);
 console.log(`approval workflow metadata: ${manifest.approvalWorkflowPath}`);
 console.log("missing capabilities:");
 for (const item of manifest.missingCapabilities) {

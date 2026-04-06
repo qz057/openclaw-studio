@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-approval-bridge/v1",
-  "generatedAt": "2026-04-06T01:32:55.453Z",
-  "phase": "phase53",
+  "generatedAt": "2026-04-06T02:29:15.586Z",
+  "phase": "phase54",
   "mode": "review-only",
   "bridge": [
     {
@@ -65,8 +65,14 @@
       "status": "blocked"
     },
     {
-      "id": "bridge-approval-routing-contracts-to-gating",
+      "id": "bridge-approval-routing-contracts-to-approval-orchestration",
       "from": "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
+      "to": "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-approval-orchestration-to-gating",
+      "from": "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
       "to": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
       "status": "blocked"
     },
@@ -149,8 +155,14 @@
       "status": "blocked"
     },
     {
-      "id": "bridge-release-decision-enforcement-contracts-to-promotion-handshake",
+      "id": "bridge-release-decision-enforcement-contracts-to-lifecycle",
       "from": "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+      "to": "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-release-decision-enforcement-lifecycle-to-promotion-handshake",
+      "from": "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json",
       "to": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
       "status": "blocked"
     },
@@ -221,8 +233,14 @@
       "status": "blocked"
     },
     {
-      "id": "bridge-publication-receipt-closeout-contracts-to-publish",
+      "id": "bridge-publication-receipt-closeout-contracts-to-settlement-closeout",
       "from": "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
+      "to": "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
+      "status": "blocked"
+    },
+    {
+      "id": "bridge-publication-receipt-settlement-closeout-to-publish",
+      "from": "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
       "to": "release/PUBLISH-GATES.json",
       "status": "blocked"
     },
