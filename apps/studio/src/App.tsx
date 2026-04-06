@@ -827,6 +827,20 @@ export function App() {
       tone: selectedWindowIntent ? workflowReadinessTone : "neutral"
     },
     {
+      id: "flow-state-delivery",
+      label: "Delivery coverage",
+      value: currentDeliveryStage ? `${currentDeliveryStage.label} / ${currentDeliveryStage.phase}` : "No delivery stage",
+      tone: currentDeliveryStage?.status === "ready" ? "positive" : currentDeliveryStage ? "warning" : "neutral"
+    },
+    {
+      id: "flow-state-observability",
+      label: "Observability path",
+      value: activeObservabilityMapping
+        ? `${activeObservabilityMapping.label} / ${formatReviewPostureRelationship(activeObservabilityMapping.relationship)}`
+        : "No active observability path",
+      tone: activeObservabilityMapping ? activeObservabilityMapping.tone : "neutral"
+    },
+    {
       id: "flow-state-detached",
       label: "Detached candidate",
       value: selectedDetachedPanel?.label ?? "No detached candidate",
@@ -1749,15 +1763,20 @@ export function App() {
         }
         break;
       case "show-boundary":
-      case "show-trace":
+      case "show-trace": {
+        const surfacedRightRailTab = action.rightRailTabId ?? resolvedLayoutState.rightRailTabId;
+        const surfacedRailLabel =
+          surfacedRightRailTab === "windows" ? "Windows" : surfacedRightRailTab === "trace" ? "Trace" : "Inspector";
+
         applyLayoutPatch({
           rightRailVisible: true,
           bottomDockVisible: true,
-          rightRailTabId: action.rightRailTabId ?? resolvedLayoutState.rightRailTabId,
+          rightRailTabId: surfacedRightRailTab,
           bottomDockTabId: action.bottomDockTabId ?? resolvedLayoutState.bottomDockTabId
         });
-        recordCommand(action, `${action.kind === "show-boundary" ? "Inspector" : "Trace"} rail surfaced.`);
+        recordCommand(action, `${surfacedRailLabel} rail surfaced.`);
         break;
+      }
       case "show-preview":
         if (action.routeId) {
           navigateToPage(action.routeId);

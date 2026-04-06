@@ -14,8 +14,8 @@ import { mockBoundarySummary } from "./mock-host.js";
 const mockCommandSurface: StudioCommandSurface = {
   title: "Command Palette",
   summary:
-    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, recent command history, inspector-command linkage, review-posture ownership, and delivery-stage exploration now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
-  placeholder: "Search orchestration, navigation, next steps, flow state, detached workspace, or keyboard routes",
+    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
+  placeholder: "Search orchestration, delivery coverage, observability, navigation, next steps, flow state, detached workspace, or keyboard routes",
   quickActionIds: [
     "command-open-home",
     "command-inspect-boundary",
@@ -212,6 +212,29 @@ const mockCommandSurface: StudioCommandSurface = {
       workspaceViewId: "review-deck"
     },
     {
+      id: "command-open-windows-observability",
+      label: "Inspect Cross-window Observability",
+      description: "Surface the windows rail and dock so delivery coverage, shared-state lanes, and observability mappings stay visible together.",
+      kind: "show-boundary",
+      scope: "window",
+      safety: "local-only",
+      tone: "positive",
+      keywords: ["windows", "observability", "delivery", "coverage", "shared-state", "review"],
+      rightRailTabId: "windows",
+      bottomDockTabId: "windows"
+    },
+    {
+      id: "command-stage-review-window",
+      label: "Focus Review Workspace Intent",
+      description: "Focus the review-deck intent so delivery coverage and window-aware review posture stay aligned.",
+      kind: "stage-window-intent",
+      scope: "window",
+      safety: "local-only",
+      tone: "neutral",
+      keywords: ["review", "workspace", "intent", "delivery", "coverage", "windows"],
+      windowIntentId: "window-intent-review-workspace"
+    },
+    {
       id: "command-stage-inspector-window",
       label: "Stage Inspector Detach Intent",
       description: "Record the detached-inspector placeholder intent without opening a real window.",
@@ -243,6 +266,7 @@ const mockCommandSurface: StudioCommandSurface = {
         "command-open-home",
         "command-inspect-boundary",
         "command-show-trace",
+        "command-open-windows-observability",
         "command-advance-workflow",
         "command-toggle-right-rail",
         "command-toggle-bottom-dock",
@@ -286,13 +310,27 @@ const mockCommandSurface: StudioCommandSurface = {
       id: "agents",
       label: "Agents route actions",
       summary: "Actions that keep the shell in review and window-aware posture.",
-      actionIds: ["command-open-review-view", "command-stage-inspector-window", "command-advance-workflow", "command-toggle-compact-mode"]
+      actionIds: [
+        "command-open-review-view",
+        "command-open-windows-observability",
+        "command-stage-review-window",
+        "command-stage-inspector-window",
+        "command-advance-workflow",
+        "command-toggle-compact-mode"
+      ]
     },
     {
       id: "codex",
       label: "Codex route actions",
       summary: "Actions that bias the shell toward compact review and route switching.",
-      actionIds: ["command-open-review-view", "command-toggle-compact-mode", "command-open-settings", "command-advance-workflow"]
+      actionIds: [
+        "command-open-review-view",
+        "command-open-windows-observability",
+        "command-stage-review-window",
+        "command-toggle-compact-mode",
+        "command-open-settings",
+        "command-advance-workflow"
+      ]
     },
     {
       id: "skills",
@@ -315,6 +353,8 @@ const mockCommandSurface: StudioCommandSurface = {
       actionIds: [
         "command-open-settings",
         "command-open-review-view",
+        "command-open-windows-observability",
+        "command-stage-review-window",
         "command-stage-trace-window",
         "command-advance-workflow",
         "command-toggle-compact-mode"
@@ -352,9 +392,17 @@ const mockCommandSurface: StudioCommandSurface = {
         "command-open-operator-view",
         "command-open-trace-view",
         "command-open-review-view",
+        "command-stage-review-window",
         "command-stage-inspector-window",
         "command-stage-trace-window"
       ]
+    },
+    {
+      id: "group-review-coverage",
+      label: "Review Coverage Routing",
+      summary: "Keep review-deck intent, delivery coverage, and cross-window observability visible as one local-only command surface.",
+      tone: "positive",
+      actionIds: ["command-open-review-view", "command-stage-review-window", "command-open-windows-observability", "command-advance-workflow"]
     },
     {
       id: "group-layout-routing",
@@ -408,14 +456,30 @@ const mockCommandSurface: StudioCommandSurface = {
       id: "sequence-settings-review-deck",
       label: "Review Deck Coordination",
       summary:
-        "Keep Settings in a window-aware coordination posture: move into Review Deck, stage the inspector candidate, then advance the local orchestration board without opening a native window.",
+        "Keep Settings in a window-aware coordination posture: move into Review Deck, focus the review workspace intent, open cross-window observability, then advance the local orchestration board without opening a native window.",
       tone: "neutral",
       safety: "local-only",
-      actionIds: ["command-open-review-view", "command-stage-inspector-window", "command-advance-workflow"],
+      actionIds: ["command-open-review-view", "command-stage-review-window", "command-open-windows-observability", "command-advance-workflow"],
       recommendedActionId: "command-open-review-view",
-      followUpActionIds: ["command-toggle-right-rail", "command-stage-trace-window"],
+      followUpActionIds: ["command-stage-review-window", "command-open-windows-observability"],
       match: {
         routeIds: ["settings"]
+      }
+    },
+    {
+      id: "sequence-review-coverage-flow",
+      label: "Review Coverage Flow",
+      summary:
+        "When Review Deck is active, focus the review workspace intent, surface cross-window observability, and keep delivery coverage visible while the current lane advances locally.",
+      tone: "positive",
+      safety: "local-only",
+      actionIds: ["command-stage-review-window", "command-open-windows-observability", "command-advance-workflow"],
+      recommendedActionId: "command-stage-review-window",
+      followUpActionIds: ["command-open-windows-observability", "command-open-review-view"],
+      match: {
+        routeIds: ["settings", "agents", "codex"],
+        workspaceViewIds: ["review-deck"],
+        windowIntentIds: ["window-intent-review-workspace"]
       }
     }
   ],
@@ -467,14 +531,31 @@ const mockCommandSurface: StudioCommandSurface = {
       surfaceIds: ["shell", "settings"],
       label: "Settings Coordination Flow",
       summary:
-        "Settings now exposes a review-deck coordination flow so route, workflow lane, staged intent, and detached candidate feedback stay synchronized in one local orchestration board.",
+        "Settings now exposes a review-deck coordination flow so route, workflow lane, staged intent, delivery coverage, and detached candidate feedback stay synchronized in one local orchestration board.",
       sequenceId: "sequence-settings-review-deck",
       recommendedActionId: "command-open-review-view",
-      followUpActionIds: ["command-toggle-right-rail", "command-stage-trace-window"],
-      groupIds: ["group-workflow-lane", "group-layout-routing"],
+      followUpActionIds: ["command-stage-review-window", "command-open-windows-observability"],
+      groupIds: ["group-review-coverage", "group-layout-routing"],
       keyboardShortcutIds: ["keyboard-run-active-flow", "keyboard-open-settings", "keyboard-run-review-sequence"],
       match: {
         routeIds: ["settings"]
+      }
+    },
+    {
+      id: "flow-review-deck-coverage",
+      surfaceIds: ["shell", "settings", "agents", "codex"],
+      label: "Review Coverage Flow",
+      summary:
+        "When Review Deck and its review-workspace intent are active, command-surface pivots into delivery coverage and cross-window observability instead of staying in generic route recovery mode.",
+      sequenceId: "sequence-review-coverage-flow",
+      recommendedActionId: "command-stage-review-window",
+      followUpActionIds: ["command-open-windows-observability", "command-advance-workflow"],
+      groupIds: ["group-review-coverage", "group-workflow-lane"],
+      keyboardShortcutIds: ["keyboard-run-active-flow", "keyboard-run-review-sequence", "keyboard-open-settings"],
+      match: {
+        routeIds: ["settings", "agents", "codex"],
+        workspaceViewIds: ["review-deck"],
+        windowIntentIds: ["window-intent-review-workspace"]
       }
     }
   ],
@@ -560,12 +641,20 @@ const mockCommandSurface: StudioCommandSurface = {
       actionId: "command-open-review-view"
     },
     {
-      id: "next-step-settings-inspector",
-      label: "Stage boundary candidate",
-      detail: "Keep the detached inspector candidate linked to the active review lane without creating a real window.",
-      tone: "neutral",
+      id: "next-step-settings-intent",
+      label: "Focus review workspace intent",
+      detail: "Keep the review-workspace intent active so delivery coverage and cross-window posture stay aligned.",
+      tone: "positive",
       kind: "window",
-      actionId: "command-stage-inspector-window"
+      actionId: "command-stage-review-window"
+    },
+    {
+      id: "next-step-settings-observability",
+      label: "Open windows observability",
+      detail: "Surface the windows rail and dock so delivery coverage matrix, shared-state lanes, and observability mappings stay visible together.",
+      tone: "positive",
+      kind: "trace",
+      actionId: "command-open-windows-observability"
     },
     {
       id: "next-step-settings-lane",
@@ -613,12 +702,25 @@ const mockCommandSurface: StudioCommandSurface = {
     {
       id: "board-settings-review-deck",
       label: "Settings Route-aware Next-step Board",
-      summary: "Settings groups review-deck entry, staged inspector candidate, and lane advance into one coordination board.",
+      summary: "Settings groups review-deck entry, review-workspace intent, windows observability, and lane advance into one coordination board.",
       flowId: "flow-settings-review-deck",
       sequenceId: "sequence-settings-review-deck",
-      stepIds: ["next-step-settings-review", "next-step-settings-inspector", "next-step-settings-lane"],
+      stepIds: ["next-step-settings-review", "next-step-settings-intent", "next-step-settings-observability", "next-step-settings-lane"],
       match: {
         routeIds: ["settings"]
+      }
+    },
+    {
+      id: "board-review-deck-coverage",
+      label: "Review Deck Coverage Board",
+      summary: "When Review Deck is active, keep review intent, windows observability, and lane advance grouped as one local-only coverage board.",
+      flowId: "flow-review-deck-coverage",
+      sequenceId: "sequence-review-coverage-flow",
+      stepIds: ["next-step-settings-intent", "next-step-settings-observability", "next-step-settings-lane"],
+      match: {
+        routeIds: ["settings", "agents", "codex"],
+        workspaceViewIds: ["review-deck"],
+        windowIntentIds: ["window-intent-review-workspace"]
       }
     }
   ],
@@ -704,12 +806,12 @@ const mockCommandSurface: StudioCommandSurface = {
       },
       {
         id: "keyboard-run-review-sequence",
-        label: "Run review coordination sequence",
+        label: "Run review coverage sequence",
         combo: "Alt+0",
         key: "0",
         scope: "route",
         target: "sequence",
-        sequenceId: "sequence-settings-review-deck",
+        sequenceId: "sequence-review-coverage-flow",
         altKey: true
       },
       {

@@ -294,13 +294,14 @@
 - smoke 已提升到验证 phase58 review-only delivery-chain renderer markers、runtime contract、以及 release artifact contract
 - README / HANDOFF / package snapshot 已同步反映 phase58 slice 3 reality
 
-### Phase 60（当前已完成，slice 1-2）
+### Phase 60（当前已完成，slice 1-3）
 - phase58 slice 3 的 review-only delivery chain 已继续推进成更明确的 delivery-chain workspace / stage explorer
 - shared / runtime / renderer 现在显式带出 selected delivery stage、artifact coverage、related review surfaces、blockers / handoff posture、以及 observability mapping，并把它们收敛到同一个 shell explorer
 - App 主 shell 现在能直接在 operator review board 之后切换 attestation / review / promotion / publish / rollback stages，并看到同一阶段的 ownership、artifact groups、queue / handoff / closeout posture、以及跨窗口映射
 - phase60 slice2 继续补齐 Review Flow Ladder 与 Delivery Coverage Matrix，让每个 delivery stage 的 reviewer queue、decision baton、closeout window、以及 mapped window / lane / board coverage 直接可见
-- smoke 已提升到验证 phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / artifact coverage / blockers / handoff posture renderer markers
-- README / HANDOFF / package snapshot 已同步反映 phase60 slice2 reality
+- phase60 slice3 继续把 review-deck intent / delivery coverage / cross-window observability 接进 command surface，让 review-deck posture 下的 Settings / Agents / Codex 能切到更专门的 coverage flow、next-step board、keyboard routing、以及 active-flow state
+- smoke 已提升到验证 phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review coverage flow / command-surface observability linkage / artifact coverage / blockers / handoff posture renderer markers
+- README / HANDOFF / package snapshot 已同步反映 phase60 slice3 reality
 
 ## 当前明确边界
 
