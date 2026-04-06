@@ -35,7 +35,7 @@ export function SettingsPage({ settings, windowing, releaseApprovalPipeline, win
         activeBoardId={windowingSurface.activeBoardId}
         compact
         title="Settings Coordination Surface"
-        summary="Settings now exposes the same phase58 window roster, shared-state lane, operator review lane, reviewer queue, acknowledgement state, escalation/closeout windows, sync health, and local-only blockers that drive the main shell coordination board."
+        summary="Settings now exposes the same phase58 window roster, shared-state lane, orchestration board, review posture ownership map, reviewer queue, acknowledgement state, escalation/closeout windows, sync health, and local-only blockers that drive the main shell coordination board."
       />
 
       <div className="section-stack">

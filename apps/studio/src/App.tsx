@@ -4,6 +4,7 @@ import {
   selectStudioReleaseEscalationWindow,
   selectStudioReleaseApprovalPipelineStage,
   selectStudioReleaseReviewerQueue,
+  selectStudioWindowObservabilityActiveMapping,
   studioPageIds,
   type StudioCommandAction,
   type StudioCommandActionGroup,
@@ -296,6 +297,25 @@ function formatWorkflowPosture(posture: StudioShellState["windowing"]["workflow"
       return "Trace";
     default:
       return "Preview";
+  }
+}
+
+function formatReviewPostureRelationship(
+  relationship: StudioShellState["windowing"]["observability"]["mappings"][number]["relationship"]
+): string {
+  switch (relationship) {
+    case "owns-current-posture":
+      return "Owns current posture";
+    case "mirrors-current-posture":
+      return "Mirrors current posture";
+    case "staged-for-handoff":
+      return "Staged for handoff";
+    case "blocked-upstream":
+      return "Blocked upstream";
+    case "escalation-shadow":
+      return "Escalation shadow";
+    default:
+      return "Blocked decision gate";
   }
 }
 
@@ -625,6 +645,7 @@ export function App() {
     resolveActiveWindowRosterEntry(data.windowing, activeSharedStateLane?.windowId ?? null, activeSharedStateLane, activePage) ??
     data.windowing.roster.windows[0] ??
     null;
+  const activeObservabilityMapping = selectStudioWindowObservabilityActiveMapping(data.windowing) ?? null;
   const windowingSurface: AppWindowingSurfaceProps = {
     activeRouteId: activePage,
     activeWindowId: activeWindowRosterEntry?.id ?? null,
@@ -856,6 +877,15 @@ export function App() {
       detail: "Ownership, sync health, last handoff, and blockers now stay explicit instead of being implied by the active tab posture."
     },
     {
+      id: "cross-view-review-posture",
+      label: "Review Posture Ownership",
+      value: activeObservabilityMapping
+        ? `${activeObservabilityMapping.owner} -> ${activeObservabilityMapping.reviewPosture.stageLabel}`
+        : "No active review posture",
+      detail:
+        "The active route, window, lane, orchestration board, reviewer queue, acknowledgement, escalation, closeout, and focused slot now resolve through one explicit observability row."
+    },
+    {
       id: "cross-view-slot-release",
       label: "Focused slot -> Release posture",
       value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> ${currentReleaseStage?.label ?? "Operator review board"} / ${currentDecisionHandoff.posture}`,
@@ -887,6 +917,14 @@ export function App() {
       label: "Inspector -> Shared-state lane",
       value: `${activeWindowRosterEntry?.label ?? "No window"} / ${activeSharedStateLane?.label ?? "No shared-state lane"}`,
       detail: "The right rail now mirrors the same window roster, sync health, last handoff, reviewer queue, and operator review posture shown in the phase58 cross-window board."
+    },
+    {
+      id: "inspector-linkage-review-posture",
+      label: "Inspector -> Review posture",
+      value: activeObservabilityMapping
+        ? `${activeObservabilityMapping.label} / ${formatReviewPostureRelationship(activeObservabilityMapping.relationship)}`
+        : "No active review posture",
+      detail: "The right rail now calls out which route, window, lane, and board currently own the live review posture and which other windows map to it."
     }
   ];
   const releasePipelineDepth = [
@@ -908,6 +946,13 @@ export function App() {
       label: "Reviewer Queue",
       value: "queue ownership / acknowledgement state",
       detail: "Reviewer queues now expose who owns the current board, who is waiting to acknowledge, and which window/shared-state lane is carrying the queue."
+    },
+    {
+      id: "release-depth-observability",
+      label: "Cross-window Observability Map",
+      value: "route / window / lane / board ownership",
+      detail:
+        "The current slice adds an explicit ownership map so the shell can show which route, window, shared-state lane, orchestration board, queue, acknowledgement, escalation window, closeout window, and focused slot currently own the review posture."
     },
     {
       id: "release-depth-escalation-window",
@@ -2170,9 +2215,10 @@ export function App() {
 
           <OperatorReviewBoard
             pipeline={releaseApprovalPipeline}
+            windowing={data.windowing}
             eyebrow="Phase58"
             title="Operator Review Board"
-            summary="The same review-only release pipeline now reads like an operator board with explicit stage ownership, review packets, reviewer queues, acknowledgement state, escalation windows, closeout windows, evidence sealing, reviewer notes, and cross-links back into windows and trace."
+            summary="The same review-only release pipeline now reads like an operator board with explicit stage ownership, review packets, reviewer queues, acknowledgement state, escalation windows, closeout windows, evidence sealing, reviewer notes, review posture ownership, and cross-links back into windows and trace."
           />
 
           <section className="surface card window-workbench">
@@ -2198,6 +2244,28 @@ export function App() {
                   <button type="button" className="secondary-button" onClick={() => advanceWorkflowLane()}>
                     Advance Workflow
                   </button>
+                </div>
+              </article>
+
+              <article className="windowing-summary-card windowing-summary-card--active">
+                <span>Review Posture Ownership</span>
+                <strong>
+                  {activeObservabilityMapping
+                    ? `${activeObservabilityMapping.label} / ${formatReviewPostureRelationship(activeObservabilityMapping.relationship)}`
+                    : "No active review posture"}
+                </strong>
+                <p>
+                  {activeObservabilityMapping?.summary ??
+                    "Cross-window review posture ownership is unavailable, so the shell cannot show which window, lane, and board currently own the live review posture."}
+                </p>
+                <div className="windowing-preview-list">
+                  {data.windowing.observability.signals.slice(0, 4).map((signal) => (
+                    <div key={signal.id} className="windowing-preview-line windowing-preview-line--stacked">
+                      <span>{signal.label}</span>
+                      <strong>{signal.value}</strong>
+                      <p>{signal.detail}</p>
+                    </div>
+                  ))}
                 </div>
               </article>
 
@@ -2242,7 +2310,7 @@ export function App() {
               activeBoardId={windowingSurface.activeBoardId}
               eyebrow="Phase58"
               title="Cross-window Coordination Board"
-              summary="Window roster, shared-state lane ownership, reviewer queue posture, acknowledgement state, escalation windows, closeout windows, sync health, last handoff, route/workspace intent links, and local-only blockers now stay visible inside the same shell runtime."
+              summary="Window roster, shared-state lane ownership, orchestration board ownership, review posture ownership, reviewer queue posture, acknowledgement state, escalation windows, closeout windows, sync health, last handoff, route/workspace intent links, and local-only blockers now stay visible inside the same shell runtime."
             />
             <div className="workflow-lane-strip">
               {data.windowing.workflow.lanes.map((lane) => (
@@ -2460,6 +2528,28 @@ export function App() {
                   </div>
                 </article>
 
+                <article className="windowing-summary-card windowing-summary-card--active">
+                  <span>Review Posture Ownership</span>
+                  <strong>
+                    {activeObservabilityMapping
+                      ? `${activeObservabilityMapping.label} / ${formatReviewPostureRelationship(activeObservabilityMapping.relationship)}`
+                      : "No active review posture"}
+                  </strong>
+                  <p>
+                    {activeObservabilityMapping?.summary ??
+                      "Cross-window review posture ownership is unavailable, so the windows rail cannot show which surface currently owns the review posture."}
+                  </p>
+                  <div className="windowing-preview-list">
+                    {data.windowing.observability.signals.slice(0, 4).map((signal) => (
+                      <div key={signal.id} className="windowing-preview-line windowing-preview-line--stacked">
+                        <span>{signal.label}</span>
+                        <strong>{signal.value}</strong>
+                        <p>{signal.detail}</p>
+                      </div>
+                    ))}
+                  </div>
+                </article>
+
                 <WindowSharedStateBoard
                   windowing={data.windowing}
                   releaseApprovalPipeline={releaseApprovalPipeline}
@@ -2471,7 +2561,7 @@ export function App() {
                   nested
                   eyebrow="Phase58"
                   title="Cross-window Shared State"
-                  summary="The windows rail now exposes explicit ownership, reviewer queue posture, acknowledgement state, escalation/closeout windows, sync health, route/workspace intent links, and local-only blockers for the active coordination lane."
+                  summary="The windows rail now exposes explicit ownership, orchestration board linkage, review posture ownership, reviewer queue posture, acknowledgement state, escalation/closeout windows, sync health, route/workspace intent links, and local-only blockers for the active coordination lane."
                 />
 
                 <div className="workflow-step-grid workflow-step-grid--compact">
@@ -2710,6 +2800,19 @@ export function App() {
 
             {resolvedLayoutState.bottomDockTabId === "windows" ? (
               <div className="dock-list">
+                <article className="dock-card dock-card--warning">
+                  <span>Review Posture Ownership</span>
+                  <strong>
+                    {activeObservabilityMapping
+                      ? `${activeObservabilityMapping.owner} / ${activeObservabilityMapping.reviewPosture.stageLabel}`
+                      : "Unavailable"}
+                  </strong>
+                  <p>
+                    {activeObservabilityMapping
+                      ? `${activeObservabilityMapping.label} · ${formatReviewPostureRelationship(activeObservabilityMapping.relationship)} · ${activeObservabilityMapping.windowId} -> ${activeObservabilityMapping.sharedStateLaneId}`
+                      : "No active cross-window ownership map is available."}
+                  </p>
+                </article>
                 <article className="dock-card dock-card--neutral">
                   <span>Workflow Timeline</span>
                   <strong>{selectedWorkflowLane?.label ?? resolvedWindowPosture.label}</strong>

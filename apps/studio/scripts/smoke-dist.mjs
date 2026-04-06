@@ -93,8 +93,12 @@ async function verifyRendererFocusedSlotUi() {
     "Readiness Board",
     "Cross-window Coordination Board",
     "Cross-window Shared State",
+    "Cross-window Observability Map",
     "Window Roster",
     "Shared-state lane",
+    "Orchestration board",
+    "Review posture owner",
+    "Review Posture Ownership",
     "Sync Health",
     "Last handoff",
     "Route / workspace intent links",
@@ -111,6 +115,7 @@ async function verifyRendererFocusedSlotUi() {
     "Escalation Window",
     "Evidence Closeout",
     "Closeout Window",
+    "Cross-window Observability",
     "Stage Ownership",
     "Attestation intake board",
     "Approval orchestration board",
@@ -638,6 +643,21 @@ function assertWindowingContract(windowing, layout, hostBridge) {
     throw new Error("Shell state is missing the phase35 detached workspace contract.");
   }
 
+  const assertReviewPosture = (label, reviewPosture) => {
+    if (
+      !reviewPosture?.stageId ||
+      !reviewPosture?.stageLabel ||
+      !reviewPosture?.reviewerQueueId ||
+      !reviewPosture?.decisionHandoffId ||
+      !reviewPosture?.evidenceCloseoutId ||
+      !reviewPosture?.escalationWindowId ||
+      !reviewPosture?.closeoutWindowId ||
+      !reviewPosture?.summary
+    ) {
+      throw new Error(`${label} is missing cross-window review posture linkage.`);
+    }
+  };
+
   if (!Array.isArray(windowing.views) || windowing.views.length < 2) {
     throw new Error("Shell multi-window contract is missing workspace views.");
   }
@@ -672,6 +692,16 @@ function assertWindowingContract(windowing, layout, hostBridge) {
 
   if (!windowing.sharedState || !Array.isArray(windowing.sharedState.lanes) || windowing.sharedState.lanes.length === 0) {
     throw new Error("Shell multi-window contract is missing the phase58 shared-state lanes.");
+  }
+
+  if (
+    !windowing.observability ||
+    !Array.isArray(windowing.observability.mappings) ||
+    windowing.observability.mappings.length === 0 ||
+    !Array.isArray(windowing.observability.signals) ||
+    windowing.observability.signals.length === 0
+  ) {
+    throw new Error("Shell multi-window contract is missing the phase58 cross-window observability map.");
   }
 
   const rightRailTabIds = new Set((layout?.rightRailTabs ?? []).map((tab) => tab.id));
@@ -799,10 +829,13 @@ function assertWindowingContract(windowing, layout, hostBridge) {
     if (!intent.shellLink?.pageId || !rightRailTabIds.has(intent.shellLink.rightRailTabId) || !bottomDockTabIds.has(intent.shellLink.bottomDockTabId)) {
       throw new Error(`Window intent ${intent.id} is missing a valid shell linkage contract.`);
     }
+
+    assertReviewPosture(`Window intent ${intent.id}`, intent.reviewPosture);
   }
 
   const boardIds = new Set(windowing.orchestration.boards.map((board) => board.id));
   const checkpointIds = new Set(windowing.orchestration.checkpoints.map((checkpoint) => checkpoint.id));
+  const observabilityMappingIds = new Set(windowing.observability.mappings.map((mapping) => mapping.id));
 
   if (!boardIds.has(windowing.orchestration.activeBoardId)) {
     throw new Error("Shell orchestration points at an unknown active board.");
@@ -814,6 +847,10 @@ function assertWindowingContract(windowing, layout, hostBridge) {
 
   if (!sharedStateLaneIds.has(windowing.sharedState.activeLaneId)) {
     throw new Error("Shell shared-state contract points at an unknown active lane.");
+  }
+
+  if (!observabilityMappingIds.has(windowing.observability.activeMappingId)) {
+    throw new Error("Shell observability contract points at an unknown active mapping.");
   }
 
   for (const board of windowing.orchestration.boards) {
@@ -830,6 +867,8 @@ function assertWindowingContract(windowing, layout, hostBridge) {
         throw new Error(`Window orchestration board ${board.id} points at unknown checkpoint ${checkpointId}.`);
       }
     }
+
+    assertReviewPosture(`Window orchestration board ${board.id}`, board.reviewPosture);
   }
 
   for (const entry of windowing.roster.windows) {
@@ -864,6 +903,8 @@ function assertWindowingContract(windowing, layout, hostBridge) {
     if (entry.focusedSlotId && focusSlotIds.size > 0 && !focusSlotIds.has(entry.focusedSlotId)) {
       throw new Error(`Window roster entry ${entry.id} points at an unknown focused slot ${entry.focusedSlotId}.`);
     }
+
+    assertReviewPosture(`Window roster entry ${entry.id}`, entry.reviewPosture);
   }
 
   for (const lane of windowing.sharedState.lanes) {
@@ -906,6 +947,36 @@ function assertWindowingContract(windowing, layout, hostBridge) {
     if (!Array.isArray(lane.blockers) || lane.blockers.length === 0) {
       throw new Error(`Shared-state lane ${lane.id} is missing local-only blockers.`);
     }
+
+    assertReviewPosture(`Shared-state lane ${lane.id}`, lane.reviewPosture);
+  }
+
+  for (const mapping of windowing.observability.mappings) {
+    if (!rosterWindowIds.has(mapping.windowId)) {
+      throw new Error(`Observability mapping ${mapping.id} points at unknown window ${mapping.windowId}.`);
+    }
+
+    if (!sharedStateLaneIds.has(mapping.sharedStateLaneId)) {
+      throw new Error(`Observability mapping ${mapping.id} points at unknown shared-state lane ${mapping.sharedStateLaneId}.`);
+    }
+
+    if (!boardIds.has(mapping.orchestrationBoardId)) {
+      throw new Error(`Observability mapping ${mapping.id} points at unknown orchestration board ${mapping.orchestrationBoardId}.`);
+    }
+
+    if (mapping.windowIntentId && !windowIntentIds.has(mapping.windowIntentId)) {
+      throw new Error(`Observability mapping ${mapping.id} points at unknown window intent ${mapping.windowIntentId}.`);
+    }
+
+    if (mapping.detachedPanelId && !detachedPanelIds.has(mapping.detachedPanelId)) {
+      throw new Error(`Observability mapping ${mapping.id} points at unknown detached panel ${mapping.detachedPanelId}.`);
+    }
+
+    if (focusSlotIds.size > 0 && !focusSlotIds.has(mapping.focusedSlotId)) {
+      throw new Error(`Observability mapping ${mapping.id} points at unknown focused slot ${mapping.focusedSlotId}.`);
+    }
+
+    assertReviewPosture(`Observability mapping ${mapping.id}`, mapping.reviewPosture);
   }
 }
 
@@ -1232,6 +1303,8 @@ function assertInspectorContract(inspector) {
     "closeout-window",
     "window-focus",
     "shared-state",
+    "orchestration-board",
+    "review-posture",
     "rollback",
     "audit",
     "blocked",
@@ -1254,7 +1327,18 @@ function assertInspectorContract(inspector) {
     throw new Error("Shell inspector is missing the phase58 operator review drilldown.");
   }
 
-  if (!inspector.linkage?.windowId || !inspector.linkage?.sharedStateLaneId || !inspector.linkage?.orchestrationBoardId) {
+  if (!inspector.drilldowns.some((drilldown) => drilldown.id === "drilldown-cross-window-observability")) {
+    throw new Error("Shell inspector is missing the phase58 cross-window observability drilldown.");
+  }
+
+  if (
+    !inspector.linkage?.windowId ||
+    !inspector.linkage?.sharedStateLaneId ||
+    !inspector.linkage?.orchestrationBoardId ||
+    !inspector.linkage?.reviewStageId ||
+    !inspector.linkage?.reviewerQueueId ||
+    !inspector.linkage?.observabilityMappingId
+  ) {
     throw new Error("Shell inspector is missing the phase58 cross-window linkage metadata.");
   }
 

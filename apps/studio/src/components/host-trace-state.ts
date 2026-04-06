@@ -14,7 +14,8 @@ import {
   selectStudioReleaseApprovalPipelineStage,
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseEscalationWindow,
-  selectStudioReleaseReviewerQueue
+  selectStudioReleaseReviewerQueue,
+  selectStudioWindowObservabilityActiveMapping
 } from "@openclaw/shared";
 
 export interface ResolvedHostTraceFocus {
@@ -73,6 +74,25 @@ function formatBoundaryLayerLabel(value: StudioBoundarySummary["currentLayer"]):
       return "Withheld";
     default:
       return "Future executor";
+  }
+}
+
+function formatReviewPostureRelationship(
+  relationship: StudioShellState["windowing"]["observability"]["mappings"][number]["relationship"]
+): string {
+  switch (relationship) {
+    case "owns-current-posture":
+      return "Owns current posture";
+    case "mirrors-current-posture":
+      return "Mirrors current posture";
+    case "staged-for-handoff":
+      return "Staged for handoff";
+    case "blocked-upstream":
+      return "Blocked upstream";
+    case "escalation-shadow":
+      return "Escalation shadow";
+    default:
+      return "Blocked decision gate";
   }
 }
 
@@ -157,6 +177,11 @@ export function createInspectorSections(
     (activeLane && windowing ? windowing.roster.windows.find((entry) => entry.id === activeLane.windowId) : undefined) ??
     (windowing ? windowing.roster.windows.find((entry) => entry.id === windowing.roster.activeWindowId) : undefined) ??
     null;
+  const activeBoard =
+    (activeLane && windowing ? windowing.orchestration.boards.find((board) => board.laneId === activeLane.workflowLaneId) : undefined) ??
+    (windowing ? windowing.orchestration.boards.find((board) => board.id === windowing.orchestration.activeBoardId) : undefined) ??
+    null;
+  const activeObservabilityMapping = windowing ? selectStudioWindowObservabilityActiveMapping(windowing) ?? null : null;
 
   return [
     {
@@ -233,6 +258,18 @@ export function createInspectorSections(
       id: "shared-state",
       label: "Shared-state lane",
       value: activeLane ? `${activeLane.label} / ${activeLane.sync.health}` : "Unavailable"
+    },
+    {
+      id: "orchestration-board",
+      label: "Orchestration board",
+      value: activeBoard ? `${activeBoard.label} / ${activeBoard.reviewPosture.stageLabel}` : "Unavailable"
+    },
+    {
+      id: "review-posture",
+      label: "Review posture owner",
+      value: activeObservabilityMapping
+        ? `${activeObservabilityMapping.owner} / ${formatReviewPostureRelationship(activeObservabilityMapping.relationship)}`
+        : "Unavailable"
     },
     {
       id: "rollback",

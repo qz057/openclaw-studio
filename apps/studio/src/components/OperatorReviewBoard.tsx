@@ -3,15 +3,18 @@ import {
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseEscalationWindow,
   selectStudioReleaseReviewerQueue,
+  selectStudioWindowObservabilityActiveMapping,
   type StudioReleaseAcknowledgementState,
   type StudioReleaseApprovalPipeline,
   type StudioReleaseCloseoutWindowState,
   type StudioReleaseEscalationWindowState,
-  type StudioReleaseReviewerQueueStatus
+  type StudioReleaseReviewerQueueStatus,
+  type StudioShellState
 } from "@openclaw/shared";
 
 interface OperatorReviewBoardProps {
   pipeline: StudioReleaseApprovalPipeline;
+  windowing?: StudioShellState["windowing"];
   compact?: boolean;
   nested?: boolean;
   eyebrow?: string;
@@ -120,8 +123,28 @@ function resolveCloseoutWindowTone(state: StudioReleaseCloseoutWindowState): "po
   }
 }
 
+function formatReviewPostureRelationship(
+  relationship: StudioShellState["windowing"]["observability"]["mappings"][number]["relationship"]
+): string {
+  switch (relationship) {
+    case "owns-current-posture":
+      return "Owns current posture";
+    case "mirrors-current-posture":
+      return "Mirrors current posture";
+    case "staged-for-handoff":
+      return "Staged for handoff";
+    case "blocked-upstream":
+      return "Blocked upstream";
+    case "escalation-shadow":
+      return "Escalation shadow";
+    default:
+      return "Blocked decision gate";
+  }
+}
+
 export function OperatorReviewBoard({
   pipeline,
+  windowing,
   compact = false,
   nested = false,
   eyebrow = "Review",
@@ -139,6 +162,7 @@ export function OperatorReviewBoard({
   const currentPacket = currentStage?.packet ?? null;
   const currentHandoff = pipeline.decisionHandoff;
   const currentCloseout = pipeline.evidenceCloseout;
+  const activeObservabilityMapping = windowing ? selectStudioWindowObservabilityActiveMapping(windowing) ?? null : null;
   const panelClassName = [
     nested ? "operator-review-board operator-review-board--nested" : "surface card operator-review-board",
     compact ? "operator-review-board--compact" : ""
@@ -203,6 +227,59 @@ export function OperatorReviewBoard({
             ))}
           </div>
         </article>
+
+        {windowing ? (
+          <article className="windowing-summary-card">
+            <span>Review Posture Ownership</span>
+            <strong>
+              {activeObservabilityMapping
+                ? `${activeObservabilityMapping.label} / ${formatReviewPostureRelationship(activeObservabilityMapping.relationship)}`
+                : "No active ownership map"}
+            </strong>
+            <p>
+              {activeObservabilityMapping?.summary ??
+                "Cross-window review posture ownership is unavailable, so the board cannot show which route, window, lane, and board currently own the review posture."}
+            </p>
+            <div className="workflow-readiness-list">
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Owner</span>
+                <strong>{activeObservabilityMapping?.owner ?? "Unavailable"}</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Route / window</span>
+                <strong>
+                  {activeObservabilityMapping
+                    ? `${activeObservabilityMapping.routeId} / ${
+                        windowing.roster.windows.find((entry) => entry.id === activeObservabilityMapping.windowId)?.label ?? activeObservabilityMapping.windowId
+                      }`
+                    : "Unavailable"}
+                </strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Lane / board</span>
+                <strong>
+                  {activeObservabilityMapping
+                    ? `${
+                        windowing.sharedState.lanes.find((lane) => lane.id === activeObservabilityMapping.sharedStateLaneId)?.label ??
+                        activeObservabilityMapping.sharedStateLaneId
+                      } / ${
+                        windowing.orchestration.boards.find((board) => board.id === activeObservabilityMapping.orchestrationBoardId)?.label ??
+                        activeObservabilityMapping.orchestrationBoardId
+                      }`
+                    : "Unavailable"}
+                </strong>
+              </div>
+              <div className={`workflow-readiness-line workflow-readiness-line--${resolveAcknowledgementTone(activeObservabilityMapping?.reviewPosture.acknowledgementState ?? "blocked")}`}>
+                <span>Queue / acknowledgement</span>
+                <strong>
+                  {activeObservabilityMapping
+                    ? `${activeObservabilityMapping.reviewPosture.reviewerQueueId} / ${activeObservabilityMapping.reviewPosture.acknowledgementState}`
+                    : "Unavailable"}
+                </strong>
+              </div>
+            </div>
+          </article>
+        ) : null}
 
         <article className="windowing-summary-card">
           <span>Active Review Packet</span>
@@ -440,6 +517,8 @@ export function OperatorReviewBoard({
           const stageQueue = selectStudioReleaseReviewerQueue(pipeline, stage);
           const stageEscalationWindow = selectStudioReleaseEscalationWindow(pipeline, stage);
           const stageCloseoutWindow = selectStudioReleaseCloseoutWindow(pipeline, stage);
+          const stageMapping =
+            windowing?.observability.mappings.find((mapping) => mapping.reviewPosture.stageId === stage.id) ?? null;
 
           return (
             <article
@@ -496,6 +575,30 @@ export function OperatorReviewBoard({
                     <strong>{stageQueue ? `${stageQueue.label} / ${stageQueue.sharedStateLaneId}` : "Unavailable"}</strong>
                   </div>
                   <div className="windowing-preview-line">
+                    <span>Route / board</span>
+                    <strong>
+                      {stageMapping
+                        ? `${stageMapping.routeId} / ${
+                            windowing?.orchestration.boards.find((board) => board.id === stageMapping.orchestrationBoardId)?.label ??
+                            stageMapping.orchestrationBoardId
+                          }`
+                        : "Unavailable"}
+                    </strong>
+                  </div>
+                  <div className="windowing-preview-line">
+                    <span>Window / lane</span>
+                    <strong>
+                      {stageMapping
+                        ? `${
+                            windowing?.roster.windows.find((entry) => entry.id === stageMapping.windowId)?.label ?? stageMapping.windowId
+                          } / ${
+                            windowing?.sharedState.lanes.find((lane) => lane.id === stageMapping.sharedStateLaneId)?.label ??
+                            stageMapping.sharedStateLaneId
+                          }`
+                        : "Unavailable"}
+                    </strong>
+                  </div>
+                  <div className="windowing-preview-line">
                     <span>Escalation window</span>
                     <strong>{stageEscalationWindow ? `${stageEscalationWindow.label} / ${stageEscalationWindow.deadlineLabel}` : "Unavailable"}</strong>
                   </div>
@@ -514,6 +617,10 @@ export function OperatorReviewBoard({
                     <strong>
                       {stage.closeout.sealedEvidence.length} sealed / {stage.closeout.pendingEvidence.length} pending
                     </strong>
+                  </div>
+                  <div className="windowing-preview-line">
+                    <span>Focused slot</span>
+                    <strong>{stageMapping?.focusedSlotId ?? "Unavailable"}</strong>
                   </div>
                 </div>
               ) : null}

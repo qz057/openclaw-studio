@@ -3,6 +3,7 @@ import {
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseEscalationWindow,
   selectStudioReleaseReviewerQueue,
+  selectStudioWindowObservabilityActiveMapping,
   type StudioPageId,
   type StudioReleaseAcknowledgementState,
   type StudioReleaseApprovalPipeline,
@@ -113,6 +114,25 @@ function formatWindowKind(kind: StudioShellState["windowing"]["roster"]["windows
       return "Workspace";
     default:
       return "Detached Candidate";
+  }
+}
+
+function formatReviewPostureRelationship(
+  relationship: StudioShellState["windowing"]["observability"]["mappings"][number]["relationship"]
+): string {
+  switch (relationship) {
+    case "owns-current-posture":
+      return "Owns current posture";
+    case "mirrors-current-posture":
+      return "Mirrors current posture";
+    case "staged-for-handoff":
+      return "Staged for handoff";
+    case "blocked-upstream":
+      return "Blocked upstream";
+    case "escalation-shadow":
+      return "Escalation shadow";
+    default:
+      return "Blocked decision gate";
   }
 }
 
@@ -227,6 +247,8 @@ export function WindowSharedStateBoard({
   const activeLane = resolveActiveWindowSharedStateLane(windowing, activeLaneId, activeBoardId, activeRouteId);
   const activeWindow = resolveActiveWindowRosterEntry(windowing, activeWindowId, activeLane, activeRouteId);
   const activeBoard = resolveActiveOrchestrationBoard(windowing, activeBoardId, activeLane, activeRouteId);
+  const activeObservabilityMapping = selectStudioWindowObservabilityActiveMapping(windowing) ?? null;
+  const observabilityMappings = windowing.observability.mappings;
   const currentReleaseStage = releaseApprovalPipeline ? selectStudioReleaseApprovalPipelineStage(releaseApprovalPipeline) : null;
   const currentReviewerQueue = releaseApprovalPipeline ? selectStudioReleaseReviewerQueue(releaseApprovalPipeline, currentReleaseStage ?? undefined) : null;
   const currentEscalationWindow =
@@ -258,6 +280,28 @@ export function WindowSharedStateBoard({
       </div>
 
       <div className="window-shared-detail-grid">
+        <article className="windowing-summary-card windowing-summary-card--active">
+          <span>Review Posture Ownership</span>
+          <strong>
+            {activeObservabilityMapping
+              ? `${activeObservabilityMapping.label} / ${formatReviewPostureRelationship(activeObservabilityMapping.relationship)}`
+              : "No active review posture"}
+          </strong>
+          <p>
+            {activeObservabilityMapping?.summary ??
+              "Cross-window review posture ownership is unavailable, so the shell cannot show which route, window, lane, and board currently own the active review posture."}
+          </p>
+          <div className="windowing-preview-list">
+            {(compact ? windowing.observability.signals.slice(0, 4) : windowing.observability.signals).map((signal) => (
+              <div key={signal.id} className="windowing-preview-line windowing-preview-line--stacked">
+                <span>{signal.label}</span>
+                <strong>{signal.value}</strong>
+                <p>{signal.detail}</p>
+              </div>
+            ))}
+          </div>
+        </article>
+
         <article className="windowing-summary-card windowing-summary-card--active">
           <span>Cross-window Coordination Board</span>
           <strong>{activeBoard?.label ?? activeLane?.label ?? activeWindow?.label ?? "No active coordination board"}</strong>
@@ -411,6 +455,81 @@ export function WindowSharedStateBoard({
       </div>
 
       <div className="panel-title-row">
+        <h3>{windowing.observability.title}</h3>
+        <span>{observabilityMappings.length} posture paths</span>
+      </div>
+
+      <div className="window-roster-grid">
+        {observabilityMappings.map((mapping) => {
+          const mappingWindow = windowing.roster.windows.find((entry) => entry.id === mapping.windowId);
+          const mappingLane = windowing.sharedState.lanes.find((lane) => lane.id === mapping.sharedStateLaneId);
+          const mappingBoard = windowing.orchestration.boards.find((board) => board.id === mapping.orchestrationBoardId);
+          const mappingIntent = mapping.windowIntentId
+            ? windowing.windowIntents.find((intent) => intent.id === mapping.windowIntentId) ?? null
+            : null;
+          const active = mapping.id === activeObservabilityMapping?.id;
+
+          return (
+            <article
+              key={mapping.id}
+              className={active ? "windowing-summary-card windowing-summary-card--active" : "windowing-summary-card"}
+            >
+              <span>{formatReviewPostureRelationship(mapping.relationship)}</span>
+              <strong>{mapping.label}</strong>
+              <p>{mapping.summary}</p>
+              <div className="windowing-card__meta">
+                <span className={`windowing-badge${active ? " windowing-badge--active" : ""}`}>{mapping.reviewPosture.stageLabel}</span>
+                <span className="windowing-badge">{mappingWindow?.label ?? mapping.windowId}</span>
+                <span className="windowing-badge">{mappingLane?.label ?? mapping.sharedStateLaneId}</span>
+              </div>
+              <div className="workflow-readiness-list">
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveAcknowledgementTone(mapping.reviewPosture.acknowledgementState)}`}>
+                  <span>Queue / acknowledgement</span>
+                  <strong>
+                    {mapping.reviewPosture.reviewerQueueId} / {mapping.reviewPosture.acknowledgementState}
+                  </strong>
+                </div>
+                <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                  <span>Route / board</span>
+                  <strong>
+                    {mapping.routeId} / {mappingBoard?.label ?? mapping.orchestrationBoardId}
+                  </strong>
+                </div>
+                <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                  <span>Focused slot</span>
+                  <strong>{mapping.focusedSlotId}</strong>
+                </div>
+              </div>
+              {!compact ? (
+                <div className="windowing-preview-list">
+                  <div className="windowing-preview-line">
+                    <span>Owner</span>
+                    <strong>{mapping.owner}</strong>
+                  </div>
+                  <div className="windowing-preview-line">
+                    <span>Escalation / closeout</span>
+                    <strong>
+                      {mapping.reviewPosture.escalationWindowId} / {mapping.reviewPosture.closeoutWindowId}
+                    </strong>
+                  </div>
+                  <div className="windowing-preview-line">
+                    <span>Decision / evidence</span>
+                    <strong>
+                      {mapping.reviewPosture.decisionHandoffId} / {mapping.reviewPosture.evidenceCloseoutId}
+                    </strong>
+                  </div>
+                  <div className="windowing-preview-line">
+                    <span>Intent</span>
+                    <strong>{mappingIntent?.label ?? mapping.windowIntentId ?? "shell-linked"}</strong>
+                  </div>
+                </div>
+              ) : null}
+            </article>
+          );
+        })}
+      </div>
+
+      <div className="panel-title-row">
         <h3>{windowing.roster.title}</h3>
         <span>{windowing.roster.windows.length} windows</span>
       </div>
@@ -438,6 +557,12 @@ export function WindowSharedStateBoard({
                   <div className="windowing-preview-line">
                     <span>Ownership</span>
                     <strong>{entry.ownership.owner}</strong>
+                  </div>
+                  <div className="windowing-preview-line">
+                    <span>Review posture</span>
+                    <strong>
+                      {entry.reviewPosture.stageLabel} / {entry.reviewPosture.acknowledgementState}
+                    </strong>
                   </div>
                   <div className="windowing-preview-line">
                     <span>Sync Health</span>
@@ -481,6 +606,12 @@ export function WindowSharedStateBoard({
                   <span>Ownership</span>
                   <strong>
                     {lane.ownership.owner} / {formatOwnershipMode(lane.ownership.mode)}
+                  </strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveAcknowledgementTone(lane.reviewPosture.acknowledgementState)}`}>
+                  <span>Review posture</span>
+                  <strong>
+                    {lane.reviewPosture.stageLabel} / {lane.reviewPosture.acknowledgementState}
                   </strong>
                 </div>
                 <div className={`workflow-readiness-line workflow-readiness-line--${syncTone}`}>

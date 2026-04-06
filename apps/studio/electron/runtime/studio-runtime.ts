@@ -16,6 +16,7 @@ import {
   selectStudioReleaseEscalationWindow,
   selectStudioReleaseApprovalPipelineStage,
   selectStudioReleaseReviewerQueue,
+  selectStudioWindowObservabilityActiveMapping,
   type StudioShellState
 } from "@openclaw/shared";
 import { probeLiveCodex } from "./probes/codex";
@@ -152,6 +153,25 @@ function formatBoundaryLayerLabel(layer: StudioShellState["boundary"]["currentLa
 
 function formatBoundaryHostState(hostState: StudioShellState["boundary"]["hostState"]): string {
   return hostState === "future-executor" ? "Future executor" : "Withheld";
+}
+
+function formatReviewPostureRelationship(
+  relationship: StudioShellState["windowing"]["observability"]["mappings"][number]["relationship"]
+): string {
+  switch (relationship) {
+    case "owns-current-posture":
+      return "Owns current posture";
+    case "mirrors-current-posture":
+      return "Mirrors current posture";
+    case "staged-for-handoff":
+      return "Staged for handoff";
+    case "blocked-upstream":
+      return "Blocked upstream";
+    case "escalation-shadow":
+      return "Escalation shadow";
+    default:
+      return "Blocked decision gate";
+  }
 }
 
 function createInspectorTraceFocus(boundary: StudioShellState["boundary"]) {
@@ -1314,7 +1334,7 @@ function buildShellState(
 
   shellState.inspector.summary =
     hasLiveToolsMcp || hasLiveRuntime
-      ? "Shared boundary state now summarizes the live local-only layer, preview-host contract, per-slot trace focus, operator review loop posture, reviewer queues, acknowledgement state, escalation windows, closeout windows, decision handoff, evidence closeout, cross-window shared-state posture, dock linkage, blockers, and future executor posture."
+      ? "Shared boundary state now summarizes the live local-only layer, preview-host contract, per-slot trace focus, operator review loop posture, review posture ownership, reviewer queues, acknowledgement state, escalation windows, closeout windows, decision handoff, evidence closeout, cross-window shared-state posture, dock linkage, blockers, and future executor posture."
       : baseState.inspector.summary;
   shellState.inspector.boundary = shellState.boundary;
   const traceFocus = createInspectorTraceFocus(shellState.boundary);
@@ -1335,6 +1355,7 @@ function buildShellState(
     shellState.windowing.orchestration.boards.find((board) => board.laneId === activeSharedStateLane?.workflowLaneId) ??
     shellState.windowing.orchestration.boards.find((board) => board.id === shellState.windowing.orchestration.activeBoardId) ??
     shellState.windowing.orchestration.boards[0];
+  const activeObservabilityMapping = selectStudioWindowObservabilityActiveMapping(shellState.windowing) ?? null;
   shellState.inspector.sections = [
     {
       id: "layer",
@@ -1412,6 +1433,18 @@ function buildShellState(
       value: activeSharedStateLane ? `${activeSharedStateLane.label} / ${activeSharedStateLane.sync.health}` : "Unavailable"
     },
     {
+      id: "orchestration-board",
+      label: "Orchestration board",
+      value: activeOrchestrationBoard ? `${activeOrchestrationBoard.label} / ${activeOrchestrationBoard.reviewPosture.stageLabel}` : "Unavailable"
+    },
+    {
+      id: "review-posture",
+      label: "Review posture owner",
+      value: activeObservabilityMapping
+        ? `${activeObservabilityMapping.owner} / ${formatReviewPostureRelationship(activeObservabilityMapping.relationship)}`
+        : "Unavailable"
+    },
+    {
       id: "rollback",
       label: "Rollback posture",
       value: traceFocus ? `${traceFocus.rollbackDisposition} / ${traceFocus.terminalStatus}` : "Unavailable"
@@ -1434,13 +1467,25 @@ function buildShellState(
   ];
   shellState.inspector.linkage = {
     ...shellState.inspector.linkage,
+    routeId: activeObservabilityMapping?.routeId ?? activeWindow?.routeId ?? shellState.inspector.linkage.routeId,
     workspaceViewId: shellState.windowing.posture.activeWorkspaceViewId,
     windowIntentId: shellState.windowing.posture.focusedIntentId ?? shellState.inspector.linkage.windowIntentId,
     detachedPanelId: shellState.windowing.posture.activeDetachedPanelId ?? shellState.inspector.linkage.detachedPanelId,
     focusedSlotId: traceFocus?.slotId ?? shellState.inspector.linkage.focusedSlotId,
     windowId: activeWindow?.id ?? shellState.inspector.linkage.windowId,
     sharedStateLaneId: activeSharedStateLane?.id ?? shellState.inspector.linkage.sharedStateLaneId,
-    orchestrationBoardId: activeOrchestrationBoard?.id ?? shellState.inspector.linkage.orchestrationBoardId
+    orchestrationBoardId: activeOrchestrationBoard?.id ?? shellState.inspector.linkage.orchestrationBoardId,
+    reviewStageId: activeObservabilityMapping?.reviewPosture.stageId ?? currentReleaseStage?.id ?? shellState.inspector.linkage.reviewStageId,
+    reviewerQueueId: activeObservabilityMapping?.reviewPosture.reviewerQueueId ?? currentReviewerQueue?.id ?? shellState.inspector.linkage.reviewerQueueId,
+    decisionHandoffId:
+      activeObservabilityMapping?.reviewPosture.decisionHandoffId ?? currentDecisionHandoff.id ?? shellState.inspector.linkage.decisionHandoffId,
+    evidenceCloseoutId:
+      activeObservabilityMapping?.reviewPosture.evidenceCloseoutId ?? currentEvidenceCloseout.id ?? shellState.inspector.linkage.evidenceCloseoutId,
+    escalationWindowId:
+      activeObservabilityMapping?.reviewPosture.escalationWindowId ?? currentEscalationWindow?.id ?? shellState.inspector.linkage.escalationWindowId,
+    closeoutWindowId:
+      activeObservabilityMapping?.reviewPosture.closeoutWindowId ?? currentCloseoutWindow?.id ?? shellState.inspector.linkage.closeoutWindowId,
+    observabilityMappingId: activeObservabilityMapping?.id ?? shellState.inspector.linkage.observabilityMappingId
   };
   shellState.inspector.drilldowns = shellState.inspector.drilldowns.map((drilldown) => {
     if (drilldown.id === "drilldown-active-flow-insight") {
@@ -1513,6 +1558,63 @@ function buildShellState(
               detail: currentCloseoutWindow
                 ? `${currentCloseoutWindow.state} · ${currentCloseoutWindow.deadlineLabel} · ${currentCloseoutWindow.pendingEvidence.length} pending evidence`
                 : line.detail
+            };
+          }
+
+          return line;
+        })
+      };
+    }
+
+    if (drilldown.id === "drilldown-cross-window-observability") {
+      return {
+        ...drilldown,
+        lines: drilldown.lines.map((line) => {
+          if (line.id === "drilldown-observability-owner") {
+            return {
+              ...line,
+              value: activeObservabilityMapping
+                ? `${activeWindow?.label ?? activeObservabilityMapping.windowId} -> ${activeSharedStateLane?.label ?? activeObservabilityMapping.sharedStateLaneId} -> ${
+                    activeOrchestrationBoard?.label ?? activeObservabilityMapping.orchestrationBoardId
+                  }`
+                : line.value,
+              detail: activeObservabilityMapping?.summary ?? line.detail
+            };
+          }
+
+          if (line.id === "drilldown-observability-queue") {
+            return {
+              ...line,
+              value: activeObservabilityMapping
+                ? `${activeObservabilityMapping.reviewPosture.reviewerQueueId} / ${activeObservabilityMapping.reviewPosture.acknowledgementState}`
+                : line.value,
+              detail: activeObservabilityMapping
+                ? `${activeObservabilityMapping.owner} · ${formatReviewPostureRelationship(activeObservabilityMapping.relationship)} · ${activeObservabilityMapping.reviewPosture.summary}`
+                : line.detail
+            };
+          }
+
+          if (line.id === "drilldown-observability-windows") {
+            return {
+              ...line,
+              value: activeObservabilityMapping
+                ? `${activeObservabilityMapping.reviewPosture.escalationWindowId} / ${activeObservabilityMapping.reviewPosture.closeoutWindowId}`
+                : line.value,
+              detail: activeObservabilityMapping
+                ? `${activeObservabilityMapping.reviewPosture.stageLabel} · ${activeObservabilityMapping.focusedSlotId} · ${activeObservabilityMapping.reviewPosture.summary}`
+                : line.detail
+            };
+          }
+
+          if (line.id === "drilldown-observability-shadow") {
+            const relatedMappings = shellState.windowing.observability.mappings.filter((mapping) => mapping.id !== activeObservabilityMapping?.id);
+            return {
+              ...line,
+              value: relatedMappings.map((mapping) => mapping.label).join(" / ") || line.value,
+              detail:
+                relatedMappings.length > 0
+                  ? relatedMappings.map((mapping) => `${mapping.owner} · ${mapping.reviewPosture.stageLabel}`).join(" · ")
+                  : line.detail
             };
           }
 

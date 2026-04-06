@@ -46,7 +46,14 @@ export type StudioContractLinkKind =
   | "release-artifact"
   | "audit"
   | "trace-slot"
+  | "review-stage"
+  | "reviewer-queue"
+  | "decision-handoff"
+  | "evidence-closeout"
+  | "escalation-window"
+  | "closeout-window"
   | "window-intent"
+  | "orchestration-board"
   | "window-roster"
   | "shared-state-lane";
 export type StudioReleaseApprovalPipelineMode = "review-only";
@@ -604,6 +611,7 @@ export interface StudioInspectorFlowDetail {
 }
 
 export interface StudioInspectorLinkage {
+  routeId?: StudioPageId;
   workflowLaneId?: string;
   workspaceViewId?: StudioWorkspaceViewId;
   windowIntentId?: string;
@@ -612,6 +620,13 @@ export interface StudioInspectorLinkage {
   windowId?: string;
   sharedStateLaneId?: string;
   orchestrationBoardId?: string;
+  reviewStageId?: string;
+  reviewerQueueId?: string;
+  decisionHandoffId?: string;
+  evidenceCloseoutId?: string;
+  escalationWindowId?: string;
+  closeoutWindowId?: string;
+  observabilityMappingId?: string;
 }
 
 export interface StudioReleaseReviewPacket {
@@ -1111,6 +1126,7 @@ export interface StudioWindowOrchestrationBoard {
   detachedPanelId: string;
   windowIntentId: string;
   focusedSlotId: string;
+  reviewPosture: StudioWindowReviewPostureLink;
   recommendedActionId?: string;
   checkpointIds: string[];
 }
@@ -1164,6 +1180,7 @@ export interface StudioWindowIntent {
   workflowStep: StudioWindowIntentWorkflowStep;
   readiness: StudioWindowIntentReadiness;
   handoff: StudioWindowIntentHandoff;
+  reviewPosture: StudioWindowReviewPostureLink;
   workspaceViewId?: StudioWorkspaceViewId;
   detachedPanelId?: string;
   pageId?: StudioPageId;
@@ -1210,6 +1227,60 @@ export interface StudioWindowRouteIntentLink {
   detachedPanelId?: string;
 }
 
+export interface StudioWindowReviewPostureLink {
+  stageId: string;
+  stageLabel: string;
+  reviewerQueueId: string;
+  acknowledgementState: StudioReleaseAcknowledgementState;
+  decisionHandoffId: string;
+  evidenceCloseoutId: string;
+  escalationWindowId: string;
+  closeoutWindowId: string;
+  summary: string;
+}
+
+export type StudioWindowReviewPostureRelationship =
+  | "owns-current-posture"
+  | "mirrors-current-posture"
+  | "staged-for-handoff"
+  | "blocked-upstream"
+  | "escalation-shadow"
+  | "blocked-decision-gate";
+
+export interface StudioWindowObservabilitySignal {
+  id: string;
+  label: string;
+  value: string;
+  detail: string;
+  tone: StudioTone;
+}
+
+export interface StudioWindowObservabilityMapping {
+  id: string;
+  label: string;
+  relationship: StudioWindowReviewPostureRelationship;
+  summary: string;
+  owner: string;
+  routeId: StudioPageId;
+  workspaceViewId: StudioWorkspaceViewId;
+  windowId: string;
+  sharedStateLaneId: string;
+  orchestrationBoardId: string;
+  focusedSlotId: string;
+  reviewPosture: StudioWindowReviewPostureLink;
+  tone: StudioTone;
+  windowIntentId?: string;
+  detachedPanelId?: string;
+}
+
+export interface StudioWindowObservability {
+  title: string;
+  summary: string;
+  activeMappingId: string;
+  signals: StudioWindowObservabilitySignal[];
+  mappings: StudioWindowObservabilityMapping[];
+}
+
 export interface StudioWindowLocalBlocker {
   id: string;
   label: string;
@@ -1238,6 +1309,7 @@ export interface StudioWindowRosterEntry {
   sync: StudioWindowSyncState;
   lastHandoff: StudioWindowLastHandoff;
   routeLinks: StudioWindowRouteIntentLink[];
+  reviewPosture: StudioWindowReviewPostureLink;
   blockers: StudioWindowLocalBlocker[];
   detachedPanelId?: string;
   windowIntentId?: string;
@@ -1267,6 +1339,7 @@ export interface StudioWindowSharedStateLane {
   sync: StudioWindowSyncState;
   lastHandoff: StudioWindowLastHandoff;
   routeLinks: StudioWindowRouteIntentLink[];
+  reviewPosture: StudioWindowReviewPostureLink;
   stateFields: StudioWindowSharedStateField[];
   blockers: StudioWindowLocalBlocker[];
   detachedPanelId?: string;
@@ -1288,6 +1361,7 @@ export interface StudioWindowing {
   sharedState: StudioWindowSharedState;
   workflow: StudioWindowWorkflow;
   orchestration: StudioWindowOrchestration;
+  observability: StudioWindowObservability;
   views: StudioWorkspaceView[];
   detachedPanels: StudioDetachedPanelPlaceholder[];
   windowIntents: StudioWindowIntent[];
@@ -1448,22 +1522,46 @@ function createStudioWindowCrossLinks(intent: StudioHostMutationIntent): StudioC
     case "root-connect":
       return [
         { id: "window-link-shell-main", label: "Main Shell Window", kind: "window-roster", target: "window-shell-main" },
-        { id: "window-link-boundary-lane", label: "Boundary Review Lane", kind: "shared-state-lane", target: "shared-state-lane-boundary-review" }
+        { id: "window-link-boundary-lane", label: "Boundary Review Lane", kind: "shared-state-lane", target: "shared-state-lane-boundary-review" },
+        {
+          id: "window-link-boundary-board",
+          label: "Boundary Review Orchestration",
+          kind: "orchestration-board",
+          target: "orchestration-board-boundary-review"
+        }
       ];
     case "bridge-attach":
       return [
         { id: "window-link-inspector-candidate", label: "Detached Inspector Candidate", kind: "window-roster", target: "window-inspector-candidate" },
-        { id: "window-link-boundary-handoff", label: "Boundary Review Lane", kind: "shared-state-lane", target: "shared-state-lane-boundary-review" }
+        { id: "window-link-boundary-handoff", label: "Boundary Review Lane", kind: "shared-state-lane", target: "shared-state-lane-boundary-review" },
+        {
+          id: "window-link-boundary-board-handoff",
+          label: "Boundary Review Orchestration",
+          kind: "orchestration-board",
+          target: "orchestration-board-boundary-review"
+        }
       ];
     case "connector-activate":
       return [
         { id: "window-link-review-board", label: "Review Deck Window", kind: "window-roster", target: "window-review-board" },
-        { id: "window-link-preview-lane", label: "Preview Review Lane", kind: "shared-state-lane", target: "shared-state-lane-preview-review" }
+        { id: "window-link-preview-lane", label: "Preview Review Lane", kind: "shared-state-lane", target: "shared-state-lane-preview-review" },
+        {
+          id: "window-link-preview-board",
+          label: "Preview Review Orchestration",
+          kind: "orchestration-board",
+          target: "orchestration-board-preview-review"
+        }
       ];
     default:
       return [
         { id: "window-link-trace-window", label: "Trace Review Window", kind: "window-roster", target: "window-trace-review" },
-        { id: "window-link-trace-lane", label: "Trace Review Lane", kind: "shared-state-lane", target: "shared-state-lane-trace-review" }
+        { id: "window-link-trace-lane", label: "Trace Review Lane", kind: "shared-state-lane", target: "shared-state-lane-trace-review" },
+        {
+          id: "window-link-trace-board",
+          label: "Trace Review Orchestration",
+          kind: "orchestration-board",
+          target: "orchestration-board-trace-review"
+        }
       ];
   }
 }
@@ -2910,6 +3008,30 @@ export function selectStudioReleaseCloseoutWindow(
   );
 }
 
+export function selectStudioWindowObservabilityActiveMapping(
+  windowing: Pick<StudioWindowing, "observability">
+): StudioWindowObservabilityMapping | undefined {
+  return (
+    windowing.observability.mappings.find((mapping) => mapping.id === windowing.observability.activeMappingId) ??
+    windowing.observability.mappings[0]
+  );
+}
+
+export function selectStudioWindowObservabilityMapping(
+  windowing: Pick<StudioWindowing, "observability">,
+  mappingId?: string | null
+): StudioWindowObservabilityMapping | undefined {
+  if (mappingId) {
+    const mapping = windowing.observability.mappings.find((entry) => entry.id === mappingId);
+
+    if (mapping) {
+      return mapping;
+    }
+  }
+
+  return selectStudioWindowObservabilityActiveMapping(windowing);
+}
+
 function createMockSimulatedOutcomes(slotId: string): StudioHostBridgeSimulatedOutcome[] {
   switch (slotId) {
     case "slot-root-connect":
@@ -3758,7 +3880,7 @@ const mockBoundarySummary: StudioBoundarySummary = {
 const mockCommandSurface: StudioCommandSurface = {
   title: "Command Palette",
   summary:
-    "Phase 32 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, recent command history, and inspector-command linkage now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
+    "Phase58 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, recent command history, inspector-command linkage, and review-posture ownership now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
   placeholder: "Search orchestration, navigation, next steps, flow state, detached workspace, or keyboard routes",
   quickActionIds: [
     "command-open-home",
@@ -4375,7 +4497,7 @@ const mockCommandSurface: StudioCommandSurface = {
   keyboardRouting: {
     title: "Keyboard Routing",
     summary:
-      "Phase 32 keeps keyboard routing local-only: palette open/close, contextual flow advance, direct sequence launch, route shortcuts, and slot/trace hotkeys all stay inside the shell UI while cross-view coordination remains reviewable.",
+      "Phase58 keeps keyboard routing local-only: palette open/close, contextual flow advance, direct sequence launch, route shortcuts, and slot/trace hotkeys all stay inside the shell UI while cross-view coordination and review-posture ownership remain reviewable.",
     shortcuts: [
       {
         id: "keyboard-open-palette",
@@ -4523,7 +4645,7 @@ const mockCommandSurface: StudioCommandSurface = {
 const mockLayout: StudioShellLayout = {
   title: "Layout Persistence",
   summary:
-    "Right rail visibility, bottom dock visibility, compact mode, selected tabs, and the current workspace view continue to persist in localStorage while phase32 layers deeper cross-view coordination and release-review boards on top of the same local-only shell posture.",
+    "Right rail visibility, bottom dock visibility, compact mode, selected tabs, and the current workspace view continue to persist in localStorage while phase58 layers deeper cross-view coordination, review-posture ownership, and release-review boards on top of the same local-only shell posture.",
   persistence: {
     storageKey: "openclaw-studio.shell-layout",
     strategy: "localStorage",
@@ -4574,10 +4696,222 @@ const mockLayout: StudioShellLayout = {
   ]
 };
 
+function createStudioWindowReviewPostureLink(
+  stageId: string,
+  stageLabel: string,
+  reviewerQueueId: string,
+  acknowledgementState: StudioReleaseAcknowledgementState,
+  decisionHandoffId: string,
+  evidenceCloseoutId: string,
+  escalationWindowId: string,
+  closeoutWindowId: string,
+  summary: string
+): StudioWindowReviewPostureLink {
+  return {
+    stageId,
+    stageLabel,
+    reviewerQueueId,
+    acknowledgementState,
+    decisionHandoffId,
+    evidenceCloseoutId,
+    escalationWindowId,
+    closeoutWindowId,
+    summary
+  };
+}
+
+function createStudioWindowObservability(windowing: StudioWindowing): StudioWindowObservability {
+  const boundaryLane = windowing.sharedState.lanes.find((lane) => lane.id === "shared-state-lane-boundary-review");
+  const traceLane = windowing.sharedState.lanes.find((lane) => lane.id === "shared-state-lane-trace-review");
+  const previewLane = windowing.sharedState.lanes.find((lane) => lane.id === "shared-state-lane-preview-review");
+  const boundaryBoard = windowing.orchestration.boards.find((board) => board.id === "orchestration-board-boundary-review");
+  const traceBoard = windowing.orchestration.boards.find((board) => board.id === "orchestration-board-trace-review");
+  const previewBoard = windowing.orchestration.boards.find((board) => board.id === "orchestration-board-preview-review");
+  const boundaryWindow = windowing.roster.windows.find((entry) => entry.id === boundaryLane?.windowId);
+  const traceWindow = windowing.roster.windows.find((entry) => entry.id === traceLane?.windowId);
+  const previewWindow = windowing.roster.windows.find((entry) => entry.id === previewLane?.windowId);
+
+  if (!boundaryLane || !traceLane || !previewLane || !boundaryBoard || !traceBoard || !previewBoard || !boundaryWindow || !traceWindow || !previewWindow) {
+    throw new Error("Cross-window observability requires boundary, trace, and preview lane/window/board wiring.");
+  }
+
+  const rollbackShadowReviewPosture = createStudioWindowReviewPostureLink(
+    "release-pipeline-rollback-settlement",
+    "Rollback settlement closeout",
+    "reviewer-queue-rollback-settlement",
+    "overdue",
+    "decision-handoff-rollback-settlement",
+    "evidence-closeout-rollback-settlement",
+    "escalation-window-rollback-settlement",
+    "closeout-window-rollback-settlement",
+    "The active trace lane also carries the rollback settlement shadow posture, so overdue acknowledgement and ready-to-seal closeout remain visible beside the active approval board."
+  );
+  const finalDecisionReviewPosture = createStudioWindowReviewPostureLink(
+    "release-pipeline-release-decision",
+    "Final release decision board",
+    "reviewer-queue-final-release-decision",
+    "blocked",
+    "decision-handoff-final-release-decision",
+    "evidence-closeout-final-release-decision",
+    "escalation-window-final-release-decision",
+    "closeout-window-final-release-decision",
+    "The main shell keeps the blocked final release decision gate visible so publish/signing blockers remain explicit even while other windows own the active review posture."
+  );
+  const mappings: StudioWindowObservabilityMapping[] = [
+    {
+      id: "observability-mapping-approval-active",
+      label: "Active approval posture",
+      relationship: "owns-current-posture",
+      summary:
+        "Trace Review Window, Trace Review Lane, and Trace Review Orchestration currently own the live review posture, so the active reviewer queue, acknowledgement state, escalation window, closeout window, and focused slot all resolve through one explicit cross-window map.",
+      owner: "release-manager",
+      routeId: traceLane.routeId,
+      workspaceViewId: traceLane.workspaceViewId,
+      windowId: traceWindow.id,
+      sharedStateLaneId: traceLane.id,
+      orchestrationBoardId: traceBoard.id,
+      focusedSlotId: traceLane.focusedSlotId,
+      reviewPosture: traceBoard.reviewPosture,
+      tone: "warning",
+      windowIntentId: traceLane.windowIntentId,
+      detachedPanelId: traceLane.detachedPanelId
+    },
+    {
+      id: "observability-mapping-boundary-intake",
+      label: "Boundary intake handoff",
+      relationship: "staged-for-handoff",
+      summary:
+        "Main Shell Window and the detached inspector candidate still mirror the attestation intake handoff, so upstream review posture remains visible while the active board sits elsewhere.",
+      owner: "release-engineering",
+      routeId: boundaryLane.routeId,
+      workspaceViewId: boundaryLane.workspaceViewId,
+      windowId: boundaryWindow.id,
+      sharedStateLaneId: boundaryLane.id,
+      orchestrationBoardId: boundaryBoard.id,
+      focusedSlotId: boundaryLane.focusedSlotId,
+      reviewPosture: boundaryBoard.reviewPosture,
+      tone: "neutral",
+      windowIntentId: boundaryLane.windowIntentId,
+      detachedPanelId: boundaryLane.detachedPanelId
+    },
+    {
+      id: "observability-mapping-lifecycle-preview",
+      label: "Preview lifecycle blocker",
+      relationship: "blocked-upstream",
+      summary:
+        "Review Deck Window, Preview Review Lane, and Preview Review Orchestration show the downstream lifecycle board that is still blocked behind the active approval posture.",
+      owner: "product-owner",
+      routeId: previewLane.routeId,
+      workspaceViewId: previewLane.workspaceViewId,
+      windowId: previewWindow.id,
+      sharedStateLaneId: previewLane.id,
+      orchestrationBoardId: previewBoard.id,
+      focusedSlotId: previewLane.focusedSlotId,
+      reviewPosture: previewBoard.reviewPosture,
+      tone: "warning",
+      windowIntentId: previewLane.windowIntentId,
+      detachedPanelId: previewLane.detachedPanelId
+    },
+    {
+      id: "observability-mapping-rollback-shadow",
+      label: "Rollback settlement shadow",
+      relationship: "escalation-shadow",
+      summary:
+        "The active trace lane also casts the rollback settlement shadow, making overdue acknowledgement, escalated timing, and ready-to-seal closeout visible without changing windows or opening execution.",
+      owner: "runtime-owner",
+      routeId: traceLane.routeId,
+      workspaceViewId: traceLane.workspaceViewId,
+      windowId: traceWindow.id,
+      sharedStateLaneId: traceLane.id,
+      orchestrationBoardId: traceBoard.id,
+      focusedSlotId: traceLane.focusedSlotId,
+      reviewPosture: rollbackShadowReviewPosture,
+      tone: "warning",
+      windowIntentId: traceLane.windowIntentId,
+      detachedPanelId: traceLane.detachedPanelId
+    },
+    {
+      id: "observability-mapping-final-gate",
+      label: "Blocked final decision gate",
+      relationship: "blocked-decision-gate",
+      summary:
+        "Main Shell Window keeps the final release decision gate visible as a blocked downstream map, so the shell shows where the current review posture would land next even though publish and signing remain metadata-only.",
+      owner: "release-manager",
+      routeId: boundaryLane.routeId,
+      workspaceViewId: boundaryLane.workspaceViewId,
+      windowId: boundaryWindow.id,
+      sharedStateLaneId: boundaryLane.id,
+      orchestrationBoardId: boundaryBoard.id,
+      focusedSlotId: boundaryLane.focusedSlotId,
+      reviewPosture: finalDecisionReviewPosture,
+      tone: "warning",
+      windowIntentId: boundaryLane.windowIntentId,
+      detachedPanelId: boundaryLane.detachedPanelId
+    }
+  ];
+  const activeMapping = mappings[0];
+
+  if (!activeMapping) {
+    throw new Error("Cross-window observability requires at least one mapping.");
+  }
+
+  return {
+    title: "Cross-window Observability Map",
+    summary:
+      "Route, window, shared-state lane, orchestration board, reviewer queue, acknowledgement state, escalation window, closeout window, and focused-slot ownership now resolve through one explicit observability map so every window can be related back to the current review posture.",
+    activeMappingId: activeMapping.id,
+    signals: [
+      {
+        id: "observability-signal-owner",
+        label: "Review posture owner",
+        value: `${activeMapping.owner} / ${activeMapping.reviewPosture.stageLabel}`,
+        detail: "The active route, window, lane, and board all point at the same live review posture owner instead of forcing the shell to infer ownership from scattered cards.",
+        tone: "warning"
+      },
+      {
+        id: "observability-signal-route-window",
+        label: "Active route -> window",
+        value: `${activeMapping.routeId} -> ${traceWindow.label}`,
+        detail: "The current review posture is rooted in the Skills route but explicitly owned by Trace Review Window.",
+        tone: "positive"
+      },
+      {
+        id: "observability-signal-lane-board",
+        label: "Shared lane -> board",
+        value: `${traceLane.label} -> ${traceBoard.label}`,
+        detail: "Shared-state ownership and orchestration ownership are now declared side by side so board drift is easier to spot.",
+        tone: "positive"
+      },
+      {
+        id: "observability-signal-queue",
+        label: "Reviewer queue / acknowledgement",
+        value: `${activeMapping.reviewPosture.reviewerQueueId} / ${activeMapping.reviewPosture.acknowledgementState}`,
+        detail: "The active queue and acknowledgement state are attached directly to the same map row as the owning window and board.",
+        tone: "warning"
+      },
+      {
+        id: "observability-signal-escalation-closeout",
+        label: "Escalation / closeout",
+        value: `${activeMapping.reviewPosture.escalationWindowId} / ${activeMapping.reviewPosture.closeoutWindowId}`,
+        detail: "Escalation and closeout windows now stay visible as first-class posture links instead of hiding inside review notes.",
+        tone: "warning"
+      },
+      {
+        id: "observability-signal-mapped-windows",
+        label: "Mapped windows",
+        value: `${mappings.length} posture paths`,
+        detail: "Boundary intake, active approval, blocked lifecycle, rollback settlement shadow, and the final decision gate all stay visible as one cross-window map.",
+        tone: "neutral"
+      }
+    ],
+    mappings
+  };
+}
+
 const mockWindowing: StudioWindowing = {
   title: "Multi-window Coordination",
   summary:
-    "Phase58 turns the earlier detached-workspace foundation into a more explicit cross-window review surface: a local-only window roster, shared-state lanes, sync health, ownership, last handoff, route/workspace intent links, focused-slot posture, reviewer queues, acknowledgement state, escalation windows, closeout windows, and operator review-loop linkage now read like one coordination board while staying inside the same safe shell.",
+    "Phase58 turns the earlier detached-workspace foundation into a deeper cross-window observability surface: a local-only window roster, shared-state lanes, sync health, ownership, last handoff, route/workspace intent links, focused-slot posture, reviewer queues, acknowledgement state, escalation windows, closeout windows, operator review-loop linkage, and explicit review-posture ownership maps now read like one coordination board while staying inside the same safe shell.",
   readiness: "contract-ready",
   posture: {
     mode: "intent-focused",
@@ -4632,6 +4966,17 @@ const mockWindowing: StudioWindowing = {
             summary: "Dashboard anchors Operator Shell while staging the detached inspector candidate."
           }
         ],
+        reviewPosture: createStudioWindowReviewPostureLink(
+          "release-pipeline-attestation-intake",
+          "Attestation intake board",
+          "reviewer-queue-attestation-intake",
+          "acknowledged",
+          "decision-handoff-attestation-intake",
+          "evidence-closeout-attestation-intake",
+          "escalation-window-attestation-intake",
+          "closeout-window-attestation-intake",
+          "Main Shell Window anchors the boundary intake posture and keeps the acknowledged intake queue visible before the active review board takes ownership."
+        ),
         blockers: [
           {
             id: "window-shell-blocker-native-detach",
@@ -4689,6 +5034,17 @@ const mockWindowing: StudioWindowing = {
             summary: "Dashboard and the detached inspector candidate share the same boundary review route linkage."
           }
         ],
+        reviewPosture: createStudioWindowReviewPostureLink(
+          "release-pipeline-attestation-intake",
+          "Attestation intake board",
+          "reviewer-queue-attestation-intake",
+          "acknowledged",
+          "decision-handoff-attestation-intake",
+          "evidence-closeout-attestation-intake",
+          "escalation-window-attestation-intake",
+          "closeout-window-attestation-intake",
+          "Detached Inspector Candidate mirrors the same intake handoff posture as the main shell so the upstream queue can be audited from either surface."
+        ),
         blockers: [
           {
             id: "window-inspector-blocker-native-window",
@@ -4740,6 +5096,17 @@ const mockWindowing: StudioWindowing = {
             summary: "Skills, Trace Deck, Detached Trace, and the trace workspace intent are locked together."
           }
         ],
+        reviewPosture: createStudioWindowReviewPostureLink(
+          "release-pipeline-approval-orchestration",
+          "Approval orchestration board",
+          "reviewer-queue-approval-orchestration",
+          "pending",
+          "decision-handoff-approval-orchestration",
+          "evidence-closeout-approval-orchestration",
+          "escalation-window-approval-orchestration",
+          "closeout-window-approval-orchestration",
+          "Trace Review Window currently owns the live approval posture, so the active reviewer queue, acknowledgement timing, escalation window, and closeout window all resolve through this window."
+        ),
         blockers: [
           {
             id: "window-trace-blocker-native-window",
@@ -4791,6 +5158,17 @@ const mockWindowing: StudioWindowing = {
             summary: "Settings, Review Deck, and the detached preview candidate stay linked for readiness review."
           }
         ],
+        reviewPosture: createStudioWindowReviewPostureLink(
+          "release-pipeline-lifecycle-enforcement",
+          "Release decision lifecycle",
+          "reviewer-queue-lifecycle-enforcement",
+          "blocked",
+          "decision-handoff-lifecycle-enforcement",
+          "evidence-closeout-lifecycle-enforcement",
+          "escalation-window-lifecycle-enforcement",
+          "closeout-window-lifecycle-enforcement",
+          "Review Deck Window exposes the downstream lifecycle board that is still blocked behind the active approval posture."
+        ),
         blockers: [
           {
             id: "window-review-blocker-intent",
@@ -4814,7 +5192,7 @@ const mockWindowing: StudioWindowing = {
   sharedState: {
     title: "Cross-window Shared State",
     summary:
-      "Ownership, sync health, last handoff, route/workspace focus, intent linkage, focused slot, reviewer queues, acknowledgement state, escalation windows, closeout windows, and local-only blockers are now explicit as shared-state lanes instead of implied shell posture.",
+      "Ownership, sync health, last handoff, route/workspace focus, intent linkage, focused slot, reviewer queues, acknowledgement state, escalation windows, closeout windows, review-posture ownership, and local-only blockers are now explicit as shared-state lanes instead of implied shell posture.",
     activeLaneId: "shared-state-lane-trace-review",
     lanes: [
       {
@@ -4859,6 +5237,17 @@ const mockWindowing: StudioWindowing = {
             summary: "Dashboard -> Operator Shell -> Detached Inspector keeps the review baton anchored."
           }
         ],
+        reviewPosture: createStudioWindowReviewPostureLink(
+          "release-pipeline-attestation-intake",
+          "Attestation intake board",
+          "reviewer-queue-attestation-intake",
+          "acknowledged",
+          "decision-handoff-attestation-intake",
+          "evidence-closeout-attestation-intake",
+          "escalation-window-attestation-intake",
+          "closeout-window-attestation-intake",
+          "Boundary Review Lane still carries the acknowledged intake posture, so the upstream queue, watch window, and scheduled closeout remain visible before the active approval board takes over."
+        ),
         stateFields: [
           {
             id: "shared-boundary-route",
@@ -4955,6 +5344,17 @@ const mockWindowing: StudioWindowing = {
             summary: "Skills -> Trace Deck -> Detached Trace keeps slot review and window posture aligned."
           }
         ],
+        reviewPosture: createStudioWindowReviewPostureLink(
+          "release-pipeline-approval-orchestration",
+          "Approval orchestration board",
+          "reviewer-queue-approval-orchestration",
+          "pending",
+          "decision-handoff-approval-orchestration",
+          "evidence-closeout-approval-orchestration",
+          "escalation-window-approval-orchestration",
+          "closeout-window-approval-orchestration",
+          "Trace Review Lane owns the current approval posture, so queue ownership, pending acknowledgement, escalation timing, and closeout timing all resolve through this active shared-state lane."
+        ),
         stateFields: [
           {
             id: "shared-trace-route",
@@ -5058,6 +5458,17 @@ const mockWindowing: StudioWindowing = {
             summary: "Settings -> Review Deck -> Detached Preview keeps readiness review explicit."
           }
         ],
+        reviewPosture: createStudioWindowReviewPostureLink(
+          "release-pipeline-lifecycle-enforcement",
+          "Release decision lifecycle",
+          "reviewer-queue-lifecycle-enforcement",
+          "blocked",
+          "decision-handoff-lifecycle-enforcement",
+          "evidence-closeout-lifecycle-enforcement",
+          "escalation-window-lifecycle-enforcement",
+          "closeout-window-lifecycle-enforcement",
+          "Preview Review Lane makes the blocked lifecycle posture explicit so downstream review ownership remains visible even while the active approval board is elsewhere."
+        ),
         stateFields: [
           {
             id: "shared-preview-route",
@@ -5244,7 +5655,7 @@ const mockWindowing: StudioWindowing = {
   orchestration: {
     title: "Local Orchestration Board",
     summary:
-      "Phase 32 links route, workflow lane, command flow, focused slot, workspace, detached candidate, intent posture, and release-review posture into one local-only orchestration map so the shell reads like a staged multi-window board without opening a native window.",
+      "Phase58 links route, workflow lane, command flow, focused slot, workspace, detached candidate, intent posture, review-posture ownership, and release-review posture into one local-only orchestration map so the shell reads like a staged multi-window board without opening a native window.",
     activeBoardId: "orchestration-board-trace-review",
     checkpoints: [
       {
@@ -5428,6 +5839,17 @@ const mockWindowing: StudioWindowing = {
         detachedPanelId: "detached-inspector",
         windowIntentId: "window-intent-inspector-detach",
         focusedSlotId: "slot-lane-apply",
+        reviewPosture: createStudioWindowReviewPostureLink(
+          "release-pipeline-attestation-intake",
+          "Attestation intake board",
+          "reviewer-queue-attestation-intake",
+          "acknowledged",
+          "decision-handoff-attestation-intake",
+          "evidence-closeout-attestation-intake",
+          "escalation-window-attestation-intake",
+          "closeout-window-attestation-intake",
+          "Boundary Review Orchestration keeps the intake handoff visible as the upstream posture that still feeds the active review board."
+        ),
         recommendedActionId: "command-stage-inspector-window",
         checkpointIds: [
           "orchestration-boundary-route",
@@ -5450,6 +5872,17 @@ const mockWindowing: StudioWindowing = {
         detachedPanelId: "detached-trace",
         windowIntentId: "window-intent-trace-workspace",
         focusedSlotId: "slot-lane-apply",
+        reviewPosture: createStudioWindowReviewPostureLink(
+          "release-pipeline-approval-orchestration",
+          "Approval orchestration board",
+          "reviewer-queue-approval-orchestration",
+          "pending",
+          "decision-handoff-approval-orchestration",
+          "evidence-closeout-approval-orchestration",
+          "escalation-window-approval-orchestration",
+          "closeout-window-approval-orchestration",
+          "Trace Review Orchestration is the active board that owns the current reviewer queue, acknowledgement timing, escalation window, and closeout window."
+        ),
         recommendedActionId: "command-open-trace-view",
         checkpointIds: [
           "orchestration-trace-route",
@@ -5472,6 +5905,17 @@ const mockWindowing: StudioWindowing = {
         detachedPanelId: "detached-preview",
         windowIntentId: "window-intent-review-workspace",
         focusedSlotId: "slot-connector-activate",
+        reviewPosture: createStudioWindowReviewPostureLink(
+          "release-pipeline-lifecycle-enforcement",
+          "Release decision lifecycle",
+          "reviewer-queue-lifecycle-enforcement",
+          "blocked",
+          "decision-handoff-lifecycle-enforcement",
+          "evidence-closeout-lifecycle-enforcement",
+          "escalation-window-lifecycle-enforcement",
+          "closeout-window-lifecycle-enforcement",
+          "Preview Review Orchestration shows the downstream lifecycle board that remains blocked until the active approval posture clears."
+        ),
         recommendedActionId: "command-open-review-view",
         checkpointIds: [
           "orchestration-preview-route",
@@ -5484,6 +5928,13 @@ const mockWindowing: StudioWindowing = {
         ]
       }
     ]
+  },
+  observability: {
+    title: "",
+    summary: "",
+    activeMappingId: "",
+    signals: [],
+    mappings: []
   },
   views: [
     {
@@ -5601,6 +6052,17 @@ const mockWindowing: StudioWindowing = {
         destination: "dashboard -> inspector/windows",
         safeMode: "local-only"
       },
+      reviewPosture: createStudioWindowReviewPostureLink(
+        "release-pipeline-attestation-intake",
+        "Attestation intake board",
+        "reviewer-queue-attestation-intake",
+        "acknowledged",
+        "decision-handoff-attestation-intake",
+        "evidence-closeout-attestation-intake",
+        "escalation-window-attestation-intake",
+        "closeout-window-attestation-intake",
+        "Detach Inspector Intent keeps the upstream intake posture visible so the boundary handoff still points at a concrete review board, queue, and timing window."
+      ),
       detachedPanelId: "detached-inspector",
       pageId: "dashboard"
     },
@@ -5649,6 +6111,17 @@ const mockWindowing: StudioWindowing = {
         destination: "skills -> trace/windows",
         safeMode: "local-only"
       },
+      reviewPosture: createStudioWindowReviewPostureLink(
+        "release-pipeline-approval-orchestration",
+        "Approval orchestration board",
+        "reviewer-queue-approval-orchestration",
+        "pending",
+        "decision-handoff-approval-orchestration",
+        "evidence-closeout-approval-orchestration",
+        "escalation-window-approval-orchestration",
+        "closeout-window-approval-orchestration",
+        "Trace Workspace Intent is the focused intent behind the active approval posture, so its shell linkage now resolves directly to the active board, queue, acknowledgement, escalation, and closeout state."
+      ),
       workspaceViewId: "trace-deck",
       pageId: "skills"
     },
@@ -5697,11 +6170,24 @@ const mockWindowing: StudioWindowing = {
         destination: "settings -> windows/windows",
         safeMode: "local-only"
       },
+      reviewPosture: createStudioWindowReviewPostureLink(
+        "release-pipeline-lifecycle-enforcement",
+        "Release decision lifecycle",
+        "reviewer-queue-lifecycle-enforcement",
+        "blocked",
+        "decision-handoff-lifecycle-enforcement",
+        "evidence-closeout-lifecycle-enforcement",
+        "escalation-window-lifecycle-enforcement",
+        "closeout-window-lifecycle-enforcement",
+        "Review Workspace Intent keeps the downstream lifecycle posture explicit so the shell can show where blocked preview ownership would land next."
+      ),
       workspaceViewId: "review-deck",
       pageId: "settings"
     }
   ]
 };
+
+mockWindowing.observability = createStudioWindowObservability(mockWindowing);
 
 export const mockShellState: StudioShellState = {
   appName: "OpenClaw Studio",
@@ -5726,7 +6212,7 @@ export const mockShellState: StudioShellState = {
   boundary: mockBoundarySummary,
   dashboard: {
     headline:
-      "Phase 29 keeps the shell on a safe control boundary: runtime-backed detail, dry-runs, Studio-local execution, detached workspace workflows, readiness-aware window intents, and shell-level multi-window feedback are available, while real host execution remains explicitly withheld.",
+      "Phase58 keeps the shell on a safe control boundary: runtime-backed detail, dry-runs, Studio-local execution, detached workspace workflows, readiness-aware window intents, review-posture ownership, and shell-level multi-window feedback are available, while real host execution remains explicitly withheld.",
     metrics: [
       {
         id: "metric-bridge",
@@ -5826,14 +6312,14 @@ export const mockShellState: StudioShellState = {
         id: "check-runtime",
         label: "Runtime Source",
         value: "Mock runtime",
-        detail: "Fallback mode still reflects the phase29 disabled bridge contract even when live probes are unavailable.",
+        detail: "Fallback mode still reflects the phase58 disabled bridge and cross-window observability contract even when live probes are unavailable.",
         tone: "warning"
       }
     ]
   },
   home: {
     headline:
-      "The validated shell now carries a structured phase29 disabled bridge contract with simulated outcomes, detached workspace workflows, persisted layout controls, and dock/inspector-synced window posture, without turning on live host-side execution.",
+      "The validated shell now carries a structured phase58 disabled bridge contract with simulated outcomes, detached workspace workflows, persisted layout controls, dock/inspector-synced window posture, and review-posture ownership mapping without turning on live host-side execution.",
     panels: [
       {
         id: "system",
@@ -5883,7 +6369,7 @@ export const mockShellState: StudioShellState = {
         id: "activity-3",
         title: "Host runtime stays isolated",
         detail:
-          "Phase29 expands the contract with route-aware commands, persisted layout controls, detached workspace workflows, and readiness-aware window intents while keeping live host-side mutation outside the renderer and outside scope.",
+          "Phase58 expands the contract with route-aware commands, persisted layout controls, detached workspace workflows, review-posture ownership, and readiness-aware window intents while keeping live host-side mutation outside the renderer and outside scope.",
         timestamp: "Next"
       }
     ]
@@ -6181,7 +6667,7 @@ export const mockShellState: StudioShellState = {
   },
   skills: {
     summary:
-      "This combined inventory page now pairs runtime-backed detail with a shared phase29 boundary summary so users can see the current layer, blockers, focused-slot scope, simulated bridge linkage, window posture, and future executor requirements in one place.",
+      "This combined inventory page now pairs runtime-backed detail with a shared phase58 boundary summary so users can see the current layer, blockers, focused-slot scope, simulated bridge linkage, window posture, review-posture ownership, and future executor requirements in one place.",
     sections: [
       {
         id: "skills-skill",
@@ -6409,7 +6895,7 @@ export const mockShellState: StudioShellState = {
   inspector: {
     title: "Inspector",
     summary:
-      "Boundary policy, active flow state, focused-slot posture, release approval pipeline state, reviewer queues, acknowledgement windows, and cross-window shared-state linkage stay visible here across the shell.",
+      "Boundary policy, active flow state, focused-slot posture, review posture ownership, release approval pipeline state, reviewer queues, acknowledgement windows, and cross-window shared-state linkage stay visible here across the shell.",
     boundary: mockBoundarySummary,
     route: {
       routeId: "dashboard",
@@ -6425,6 +6911,7 @@ export const mockShellState: StudioShellState = {
       followUpActionIds: ["command-show-trace", "command-stage-inspector-window"]
     },
     linkage: {
+      routeId: "skills",
       workflowLaneId: "lane-trace-review",
       workspaceViewId: "trace-deck",
       windowIntentId: "window-intent-trace-workspace",
@@ -6432,7 +6919,14 @@ export const mockShellState: StudioShellState = {
       focusedSlotId: "slot-lane-apply",
       windowId: "window-trace-review",
       sharedStateLaneId: "shared-state-lane-trace-review",
-      orchestrationBoardId: "orchestration-board-trace-review"
+      orchestrationBoardId: "orchestration-board-trace-review",
+      reviewStageId: "release-pipeline-approval-orchestration",
+      reviewerQueueId: "reviewer-queue-approval-orchestration",
+      decisionHandoffId: "decision-handoff-approval-orchestration",
+      evidenceCloseoutId: "evidence-closeout-approval-orchestration",
+      escalationWindowId: "escalation-window-approval-orchestration",
+      closeoutWindowId: "closeout-window-approval-orchestration",
+      observabilityMappingId: "observability-mapping-approval-active"
     },
     sections: [
       { id: "layer", label: "Current layer", value: "Local-only" },
@@ -6450,6 +6944,8 @@ export const mockShellState: StudioShellState = {
       { id: "closeout-window", label: "Closeout window", value: "Approval closeout window / open" },
       { id: "window-focus", label: "Window focus", value: "Trace Review Window" },
       { id: "shared-state", label: "Shared-state lane", value: "Trace Review Lane / synced" },
+      { id: "orchestration-board", label: "Orchestration board", value: "Trace Review Orchestration / approval orchestration" },
+      { id: "review-posture", label: "Review posture owner", value: "release-manager / owns-current-posture" },
       { id: "rollback", label: "Rollback posture", value: "Incomplete / rollback-incomplete" },
       { id: "audit", label: "Audit posture", value: "Placeholder linked" },
       { id: "blocked", label: "Blocked reasons", value: "4 active" },
@@ -6596,6 +7092,90 @@ export const mockShellState: StudioShellState = {
             value: "Approval closeout window / open",
             detail: "Closeout timing is surfaced as its own review-loop object so evidence sealing is tied back to the active queue and acknowledgement state.",
             tone: "warning"
+          }
+        ]
+      },
+      {
+        id: "drilldown-cross-window-observability",
+        label: "Cross-window Observability",
+        summary:
+          "The active review posture now resolves through an explicit route, window, shared-state lane, orchestration board, reviewer queue, acknowledgement state, escalation window, closeout window, and focused-slot ownership map.",
+        lines: [
+          {
+            id: "drilldown-observability-owner",
+            label: "Active ownership",
+            value: "Trace Review Window -> Trace Review Lane -> Trace Review Orchestration",
+            detail: "The active review posture is owned by the trace window/lane/board chain instead of being inferred from whichever tab happens to be visible.",
+            tone: "warning",
+            links: [
+              { id: "inspector-link-observability-window", label: "window-trace-review", kind: "window-roster", target: "window-trace-review" },
+              { id: "inspector-link-observability-lane", label: "shared-state-lane-trace-review", kind: "shared-state-lane", target: "shared-state-lane-trace-review" },
+              {
+                id: "inspector-link-observability-board",
+                label: "orchestration-board-trace-review",
+                kind: "orchestration-board",
+                target: "orchestration-board-trace-review"
+              }
+            ]
+          },
+          {
+            id: "drilldown-observability-queue",
+            label: "Queue / acknowledgement",
+            value: "reviewer-queue-approval-orchestration / pending",
+            detail: "The same observability row now carries the live reviewer queue and acknowledgement posture, not just the owning lane.",
+            tone: "warning",
+            links: [
+              {
+                id: "inspector-link-observability-reviewer-queue",
+                label: "reviewer-queue-approval-orchestration",
+                kind: "reviewer-queue",
+                target: "reviewer-queue-approval-orchestration"
+              },
+              {
+                id: "inspector-link-observability-decision-handoff",
+                label: "decision-handoff-approval-orchestration",
+                kind: "decision-handoff",
+                target: "decision-handoff-approval-orchestration"
+              }
+            ]
+          },
+          {
+            id: "drilldown-observability-windows",
+            label: "Escalation / closeout windows",
+            value: "escalation-window-approval-orchestration / closeout-window-approval-orchestration",
+            detail: "Escalation and closeout windows are attached to the active map row so timing posture can be audited from the same cross-window ownership view.",
+            tone: "warning",
+            links: [
+              {
+                id: "inspector-link-observability-escalation-window",
+                label: "escalation-window-approval-orchestration",
+                kind: "escalation-window",
+                target: "escalation-window-approval-orchestration"
+              },
+              {
+                id: "inspector-link-observability-closeout-window",
+                label: "closeout-window-approval-orchestration",
+                kind: "closeout-window",
+                target: "closeout-window-approval-orchestration"
+              }
+            ]
+          },
+          {
+            id: "drilldown-observability-shadow",
+            label: "Mapped shadow paths",
+            value: "Boundary intake / blocked lifecycle / rollback settlement / final decision gate",
+            detail: "Other windows now describe exactly how they map to the current posture, including upstream handoff, blocked downstream ownership, escalated rollback shadowing, and the blocked final decision gate.",
+            tone: "neutral",
+            links: [
+              { id: "inspector-link-observability-boundary-window", label: "window-shell-main", kind: "window-roster", target: "window-shell-main" },
+              { id: "inspector-link-observability-preview-window", label: "window-review-board", kind: "window-roster", target: "window-review-board" },
+              {
+                id: "inspector-link-observability-evidence-closeout",
+                label: "evidence-closeout-approval-orchestration",
+                kind: "evidence-closeout",
+                target: "evidence-closeout-approval-orchestration"
+              }
+            ]
           }
         ]
       },
