@@ -5,9 +5,31 @@ interface CodexPageProps {
   stats: StudioStat[];
   tasks: CodexTaskSummary[];
   observations: SettingItem[];
+  loopSummary: string;
+  loopStats: StudioStat[];
+  loopSignals: SettingItem[];
+  contextSummary: string;
+  contextNotes: SettingItem[];
 }
 
-export function CodexPage({ summary, stats, tasks, observations }: CodexPageProps) {
+function formatLoopState(state: CodexTaskSummary["loopState"]): string {
+  switch (state) {
+    case "stable":
+      return "Stable";
+    case "continuing":
+      return "Continuing";
+    case "recovering":
+      return "Recovering";
+    case "interrupted":
+      return "Interrupted";
+    case "complete":
+      return "Complete";
+    default:
+      return "Observed";
+  }
+}
+
+export function CodexPage({ summary, stats, tasks, observations, loopSummary, loopStats, loopSignals, contextSummary, contextNotes }: CodexPageProps) {
   const leadTask = tasks[0] ?? null;
 
   return (
@@ -46,6 +68,7 @@ export function CodexPage({ summary, stats, tasks, observations }: CodexPageProp
                     {task.id} · {task.target}
                   </p>
                   {task.detail ? <p>{task.detail}</p> : null}
+                  {task.continuation ? <p>{task.continuation}</p> : null}
                   {task.workdir ? (
                     <div className="row-meta row-meta--compact">
                       <span>{task.workdir}</span>
@@ -56,6 +79,8 @@ export function CodexPage({ summary, stats, tasks, observations }: CodexPageProp
                   <span>{task.model}</span>
                   <span>{task.source}</span>
                   <span className={`status-chip status-chip--${task.status}`}>{task.status}</span>
+                  {task.loopState ? <span>{formatLoopState(task.loopState)}</span> : null}
+                  {typeof task.turnCount === "number" ? <span>{task.turnCount} turns</span> : null}
                   <span>{task.updatedAt}</span>
                 </div>
               </article>
@@ -78,6 +103,7 @@ export function CodexPage({ summary, stats, tasks, observations }: CodexPageProp
                 <div className="row-meta row-meta--compact">
                   <span>{leadTask.target}</span>
                   <span>{leadTask.status}</span>
+                  {leadTask.loopState ? <span>{formatLoopState(leadTask.loopState)}</span> : null}
                   <span>{leadTask.updatedAt}</span>
                 </div>
                 {leadTask.workdir ? (
@@ -94,6 +120,58 @@ export function CodexPage({ summary, stats, tasks, observations }: CodexPageProp
             )}
 
             {observations.map((item) => (
+              <div key={item.id} className="placeholder-block">
+                <strong>{item.label}</strong>
+                <p>{item.value}</p>
+                <p>{item.detail}</p>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="surface card">
+          <div className="card-header">
+            <div>
+              <h2>Turn Lifecycle</h2>
+              <p>Read-only loop audit of turn state, tool continuation, recovery markers, and interruption handling.</p>
+            </div>
+          </div>
+          <div className="panel-grid">
+            {loopStats.map((stat) => (
+              <article key={stat.label} className={`surface stat-pill stat-pill--${stat.tone}`}>
+                <span>{stat.label}</span>
+                <strong>{stat.value}</strong>
+              </article>
+            ))}
+          </div>
+          <div className="section-stack">
+            <div className="placeholder-block">
+              <strong>Loop Summary</strong>
+              <p>{loopSummary}</p>
+            </div>
+            {loopSignals.map((item) => (
+              <div key={item.id} className="placeholder-block">
+                <strong>{item.label}</strong>
+                <p>{item.value}</p>
+                <p>{item.detail}</p>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="surface card">
+          <div className="card-header">
+            <div>
+              <h2>Project Context</h2>
+              <p>Repo-local context memory assembled from stable docs, workspace metadata, and recent session continuity.</p>
+            </div>
+          </div>
+          <div className="section-stack">
+            <div className="placeholder-block">
+              <strong>Context Summary</strong>
+              <p>{contextSummary}</p>
+            </div>
+            {contextNotes.map((item) => (
               <div key={item.id} className="placeholder-block">
                 <strong>{item.label}</strong>
                 <p>{item.value}</p>

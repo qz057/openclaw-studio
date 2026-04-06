@@ -52,6 +52,8 @@ export function AgentsPage({ agents }: AgentsPageProps) {
                   <span>{agent.model}</span>
                   <span>{agent.workspace}</span>
                   <span>{agent.approvals}</span>
+                  {agent.isolation ? <span>{agent.isolation}</span> : null}
+                  {agent.handoff ? <span>{agent.handoff}</span> : null}
                   <span>{agent.updatedAt}</span>
                 </div>
               </article>
@@ -75,6 +77,28 @@ export function AgentsPage({ agents }: AgentsPageProps) {
                   <p>{item.detail}</p>
                 </div>
                 <span className="timestamp">{item.timestamp}</span>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="surface card">
+          <div className="card-header">
+            <div>
+              <h2>Delegation Topology</h2>
+              <p>Spawn path, isolation posture, background lanes, and result handoff stay explicit even though Studio does not launch host-side workers.</p>
+            </div>
+          </div>
+          <div className="section-stack">
+            <div className="placeholder-block">
+              <strong>Delegation Summary</strong>
+              <p>{agents.delegationSummary}</p>
+            </div>
+            {agents.delegationNotes.map((item) => (
+              <div key={item.id} className="placeholder-block">
+                <strong>{item.label}</strong>
+                <p>{item.value}</p>
+                <p>{item.detail}</p>
               </div>
             ))}
           </div>

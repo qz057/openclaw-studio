@@ -338,7 +338,19 @@ function renderPage(
     case "agents":
       return <AgentsPage agents={data.agents} />;
     case "codex":
-      return <CodexPage summary={data.codex.summary} stats={data.codex.stats} tasks={data.codex.tasks} observations={data.codex.observations} />;
+      return (
+        <CodexPage
+          summary={data.codex.summary}
+          stats={data.codex.stats}
+          tasks={data.codex.tasks}
+          observations={data.codex.observations}
+          loopSummary={data.codex.loopSummary}
+          loopStats={data.codex.loopStats}
+          loopSignals={data.codex.loopSignals}
+          contextSummary={data.codex.contextSummary}
+          contextNotes={data.codex.contextNotes}
+        />
+      );
     case "skills":
       return (
         <SkillsPage

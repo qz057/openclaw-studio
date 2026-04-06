@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { loadRuntimeItemAction, loadRuntimeItemDetail } from "@openclaw/bridge";
-import type { SkillCatalogItem, StudioRuntimeActionResult, StudioRuntimeDetail, StudioShellState } from "@openclaw/shared";
+import type { SkillCatalogItem, StudioRuntimeAction, StudioRuntimeActionResult, StudioRuntimeDetail, StudioShellState } from "@openclaw/shared";
 import { BoundarySummaryCard } from "../components/BoundarySummaryCard";
 import { ContextualCommandPanel, type ContextualCommandPanelProps } from "../components/ContextualCommandPanel";
 import { FocusedSlotToolbar } from "../components/FocusedSlotToolbar";
@@ -68,12 +68,13 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
     }
   }
 
-  async function runAction(actionId: string) {
+  async function runAction(action: StudioRuntimeAction) {
     if (!selectedItemId) {
       return;
     }
 
     const itemId = selectedItemId;
+    const { id: actionId } = action;
 
     setActionLoadingId(actionId);
     setActionError(null);
@@ -87,8 +88,10 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
         onFocusedSlotChange(nextSlotId);
       }
 
-      const refreshedDetail = await loadRuntimeItemDetail(itemId);
-      setDetail(refreshedDetail);
+      if (action.refreshDetailOnSuccess) {
+        const refreshedDetail = await loadRuntimeItemDetail(itemId);
+        setDetail(refreshedDetail);
+      }
     } catch (error) {
       setActionResult(null);
       setActionError(error instanceof Error ? error.message : "Failed to run action.");
@@ -267,7 +270,13 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
             {detail.actions?.length ? (
               <div className="placeholder-block">
                 <strong>Safe actions, dry-runs, local execution, and blocked host previews</strong>
-                <p>Read-only actions inspect runtime state, dry-runs stage plans, execute-local actions mutate only Studio-local control state, and preview-host actions now also map into a default-disabled slot handoff placeholder flow without touching host state.</p>
+                <p>
+                  Read-only actions inspect runtime state, dry-runs stage plans, execute-local actions mutate only Studio-local control
+                  state, and preview-host actions map into the disabled slot handoff placeholder flow without touching host state.
+                  This item exposes {detail.actions.length} actions across{" "}
+                  {Array.from(new Set(detail.actions.map((action) => action.kind))).join(" · ")} with{" "}
+                  {Array.from(new Set(detail.actions.map((action) => action.safety))).join(" · ")} safety ranges.
+                </p>
                 <div className="action-toolbar">
                   {detail.actions.map((action) => (
                     <button
@@ -275,10 +284,10 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
                       type="button"
                       className="action-button"
                       onClick={() => {
-                        void runAction(action.id);
+                        void runAction(action);
                       }}
                       disabled={Boolean(actionLoadingId)}
-                      title={action.description}
+                      title={`${action.kind} · ${action.safety} · ${action.description}`}
                     >
                       {actionLoadingId === action.id ? `Running ${action.label}…` : action.label}
                     </button>
@@ -315,6 +324,12 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
                 <div className="placeholder-block">
                   <strong>{actionResult.title}</strong>
                   <p>{actionResult.summary}</p>
+                  <div className="row-meta row-meta--compact">
+                    <span>{actionResult.action.kind}</span>
+                    <span>{actionResult.action.safety}</span>
+                    <span>{actionResult.execution.status}</span>
+                    <span>{actionResult.execution.detailRefresh === "required" ? "detail refresh required" : "no detail refresh"}</span>
+                  </div>
                   {actionResult.notices?.length ? (
                     <div className="detail-notice-list">
                       {actionResult.notices.map((notice) => (
