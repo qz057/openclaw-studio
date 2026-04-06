@@ -1,6 +1,6 @@
 # OpenClaw Studio Phase58 Release Notes
 
-Milestone: phase58 operator review loop / reviewer queues / acknowledgement state / escalation windows / closeout windows / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout
+Milestone: phase58 operator review loop / reviewer queues / acknowledgement state / escalation windows / closeout windows / deeper cross-window observability / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout
 
 ## Highlights
 - operator review board now turns the earlier review-only approval pipeline into a clearer operator-facing loop with explicit stage ownership, reviewer queues, acknowledgement state, and cross-links back into trace and window review surfaces
@@ -15,4 +15,4 @@ Milestone: phase58 operator review loop / reviewer queues / acknowledgement stat
 - still not an installer
 - still no real publish/upload/sign/notarize actions
 
-Generated: 2026-04-06T10:41:01.137Z
+Generated: 2026-04-06T13:34:37.011Z

@@ -2,7 +2,7 @@
 
 ## Snapshot
 
-- 当前已验证里程碑：**phase58 operator review loop / reviewer queues / acknowledgement state / escalation windows / closeout windows / local-only multi-window shared-state review surface + docs / smoke / package / release-plan / UI / shared data closeout**
+- 当前已验证里程碑：**phase58 operator review loop / reviewer queues / acknowledgement state / escalation windows / closeout windows / deeper cross-window observability / local-only multi-window shared-state review surface + docs / smoke / package / release-plan / UI / shared data closeout**
 - 当前主视图：
   - `Dashboard`
   - `Home`
@@ -37,7 +37,7 @@
   - phase55 已把 phase54 approval / lifecycle / rollback layers 串成 review-only release approval pipeline，并补齐 trace phase stage metadata、linked notes、以及 inspector release-pipeline drilldowns
   - phase56 已把 multi-window foundation 继续推进成 local-only multi-window orchestration / cross-window shared-state review surface，并补齐 window roster、shared-state lanes、ownership / sync health / last handoff、route/workspace intent links、以及跨窗口 observability
   - phase57 已把 review-only release approval pipeline 继续推进成 operator review board、decision handoff、evidence closeout，并把同一条 local-only review chain 连到 trace / inspector / windows / package artifacts
-  - phase58 已把同一条 review chain 继续推进成 reviewer queues、acknowledgement state、escalation windows、closeout windows，并把这些 review-loop objects 连到 App / pages / inspector / windows / package artifacts
+  - phase58 已把同一条 review chain 继续推进成 reviewer queues、acknowledgement state、escalation windows、closeout windows、review-posture ownership maps、以及更深的 cross-window observability，并把这些 review-loop objects 连到 App / pages / inspector / windows / package artifacts
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline
@@ -99,7 +99,7 @@ npm run release:plan
 - phase55 进一步补齐 Review-only Release Approval Pipeline、Attestation Intake Board、Final Release Decision Board、以及更深的 Trace / Inspector Drill-down
 - phase56 进一步补齐 Cross-window Coordination Board、Window Roster、Shared-state Lanes、Sync Health / Last Handoff、以及 Dashboard / Home / Settings / Inspector / Windows rail 的统一 shared-state review surface
 - phase57 进一步补齐 Operator Review Board、Decision Handoff、Evidence Closeout、Active Review Packet、以及与 Cross-window Shared State / Trace / Inspector 的统一审阅闭环
-- phase58 进一步补齐 Reviewer Queue、Acknowledgement State、Escalation Window、Closeout Window、以及与 Operator Review Board / Shared-state Lanes / Inspector 的统一审阅闭环
+- phase58 进一步补齐 Reviewer Queue、Acknowledgement State、Escalation Window、Closeout Window、Review Posture Ownership、Cross-window Observability Map、以及与 Operator Review Board / Shared-state Lanes / Inspector 的统一审阅闭环
 - 仍然不做真实外部窗口编排
 
 ## Phase25 Boundary Model

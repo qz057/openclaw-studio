@@ -280,6 +280,13 @@
 - smoke 已提升到验证 phase58 reviewer queue / acknowledgement / escalation window / closeout window renderer markers、runtime contract、以及 release artifact contract
 - README / HANDOFF / package snapshot 已同步反映 phase58 reality
 
+### Phase 58（当前已完成，slice 2）
+- phase58 slice 1 的 operator review loop 已继续推进成更明确的 deeper cross-window observability
+- shared / runtime / renderer 现在显式带出 review-posture ownership links、cross-window observability map、route/window/lane/board ownership、以及 reviewer queue / acknowledgement / escalation / closeout / focused-slot 的统一映射
+- Windowing board、Windows rail、Inspector、Operator Review Board、Dashboard / Home / Settings、以及 bottom dock 现在都能更直接看出哪个 route / window / lane / board 正在持有当前 review posture，以及其他窗口如何映射到它
+- smoke 已提升到验证 phase58 cross-window observability map、review-posture ownership、inspector linkage、以及 richer windowing contract
+- README / HANDOFF / package snapshot 已同步反映 phase58 slice 2 reality
+
 ## 当前明确边界
 
 当前只允许：
@@ -288,7 +295,7 @@
 - dry-run / preview / simulate
 - Studio-local execute（只改应用内 in-memory state/history）
 - phase27 command surface / layout persistence / window intent staging
-- phase58 operator review loop / reviewer queues / acknowledgement state / escalation windows / closeout windows / local-only multi-window shared-state review surface
+- phase58 operator review loop / reviewer queues / acknowledgement state / escalation windows / closeout windows / deeper cross-window observability / local-only multi-window shared-state review surface
 - phase26/27/28 release skeleton / artifact review / handoff docs / package metadata
 
 当前明确禁止：
