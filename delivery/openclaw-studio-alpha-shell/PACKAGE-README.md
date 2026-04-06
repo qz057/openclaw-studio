@@ -1,8 +1,8 @@
-# OpenClaw Studio Phase55 Package Snapshot
+# OpenClaw Studio Phase56 Package Snapshot
 
-这是一个 **phase55 alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47/48/49/50/51/52/53/54 packaging 与 shell foundations 的基础上，把 attestation operator approval orchestration、promotion staged-apply release decision enforcement lifecycle 与 rollback cutover publication receipt settlement closeout 进一步串成 review-only release approval pipeline，并补齐更深的 trace / inspector drill-down，但它依然 **不是 installer**。
+这是一个 **phase56 alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47/48/49/50/51/52/53/54/55 packaging 与 shell foundations 的基础上，把 local-only multi-window orchestration、cross-window shared-state review surface、以及 review-only release approval pipeline / trace / inspector drill-down 继续收紧成更真实的审阅壳，但它依然 **不是 installer**。
 
-当前已验证里程碑：phase55 review-only release approval pipeline / deeper trace inspector drill-down / docs / smoke / package / release-plan / UI / shared data closeout。
+当前已验证里程碑：phase56 local-only multi-window orchestration / cross-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout。
 
 ## 当前能交付什么
 
@@ -13,7 +13,7 @@
 - deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references
 - deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, and inspector-command linkage
 - persisted shell layout foundation backed by localStorage
-- cross-view local orchestration boards linking route, workflow lane, workspace, detached candidate, intent focus, focused slot, and handoff posture
+- cross-window coordination board with explicit window roster, shared-state lanes, sync health, ownership, last handoff, route/workspace intent links, focused-slot linkage, and local-only blockers
 - release manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged app materialization skeleton / packaged app directory materialization / packaged app staged output skeleton / packaged app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / attestation apply audit packs / attestation apply execution packets / attestation operator worklists / attestation operator dispatch manifests / attestation operator dispatch packets / attestation operator dispatch receipts / attestation operator reconciliation ledgers / attestation operator settlement packs / attestation operator approval routing contracts / attestation operator approval orchestration / installer targets / installer-target builder skeleton / installer builder execution skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / promotion apply readiness / promotion apply manifests / promotion execution checkpoints / promotion operator handoff rails / promotion staged-apply ledgers / promotion staged-apply runsheets / promotion staged-apply command sheets / promotion staged-apply confirmation ledgers / promotion staged-apply closeout journals / promotion staged-apply signoff sheets / promotion staged-apply release decision enforcement contracts / promotion staged-apply release decision enforcement lifecycle / signing-ready metadata / signing-publish pipeline / signing-publish gating handshake / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / rollback recovery ledger / rollback execution rehearsal ledger / rollback operator drillbooks / rollback live-readiness contracts / rollback cutover readiness maps / rollback cutover handoff plans / rollback cutover execution checklists / rollback cutover execution records / rollback cutover outcome reports / rollback cutover publication bundles / rollback cutover publication receipt closeout contracts / rollback cutover publication receipt settlement closeout / release approval workflow / release notes / publish gates / promotion gates under release/
 - docs closeout: README / HANDOFF / IMPLEMENTATION-PLAN / PACKAGE-README / RELEASE-SUMMARY / REVIEW-MANIFEST / BUNDLE-MATRIX / BUNDLE-ASSEMBLY / PACKAGED-APP-DIRECTORY-SKELETON / PACKAGED-APP-MATERIALIZATION-SKELETON / PACKAGED-APP-DIRECTORY-MATERIALIZATION / PACKAGED-APP-STAGED-OUTPUT-SKELETON.json / PACKAGED-APP-BUNDLE-SEALING-SKELETON.json / SEALED-BUNDLE-INTEGRITY-CONTRACT.json / INTEGRITY-ATTESTATION-EVIDENCE.json / ATTESTATION-VERIFICATION-PACKS.json / ATTESTATION-APPLY-AUDIT-PACKS.json / ATTESTATION-APPLY-EXECUTION-PACKETS.json / ATTESTATION-OPERATOR-WORKLISTS.json / ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json / ATTESTATION-OPERATOR-DISPATCH-PACKETS.json / ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json / ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json / ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json / ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json / ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json / INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON / INSTALLER-BUILDER-EXECUTION-SKELETON / INSTALLER-BUILDER-ORCHESTRATION.json / INSTALLER-CHANNEL-ROUTING.json / CHANNEL-PROMOTION-EVIDENCE.json / PROMOTION-APPLY-READINESS.json / PROMOTION-APPLY-MANIFESTS.json / PROMOTION-EXECUTION-CHECKPOINTS.json / PROMOTION-OPERATOR-HANDOFF-RAILS.json / PROMOTION-STAGED-APPLY-LEDGERS.json / PROMOTION-STAGED-APPLY-RUNSHEETS.json / PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json / PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json / PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json / PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json / PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json / PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json / SIGNING-METADATA / NOTARIZATION-PLAN / SIGNING-PUBLISH-PIPELINE / SIGNING-PUBLISH-GATING-HANDSHAKE / SIGNING-PUBLISH-APPROVAL-BRIDGE.json / SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json / PUBLISH-ROLLBACK-HANDSHAKE.json / ROLLBACK-RECOVERY-LEDGER.json / ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json / ROLLBACK-OPERATOR-DRILLBOOKS.json / ROLLBACK-LIVE-READINESS-CONTRACTS.json / ROLLBACK-CUTOVER-READINESS-MAPS.json / ROLLBACK-CUTOVER-HANDOFF-PLANS.json / ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json / ROLLBACK-CUTOVER-EXECUTION-RECORDS.json / ROLLBACK-CUTOVER-OUTCOME-REPORTS.json / ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json / ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json / ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json / RELEASE-APPROVAL-WORKFLOW / RELEASE-NOTES / PUBLISH-GATES / PROMOTION-GATES
 - placeholder installer explainer script that never installs anything
@@ -151,8 +151,8 @@ openclaw-studio-alpha-shell/
 
 ## 已复制的 artifact 组
 
-- Renderer bundle: 3 files, 393.0 KiB, output=artifacts/renderer
-- Electron bundle: 15 files, 368.4 KiB, output=artifacts/electron
+- Renderer bundle: 3 files, 423.8 KiB, output=artifacts/renderer
+- Electron bundle: 15 files, 369.9 KiB, output=artifacts/electron
 
 ## 已包含的文档
 
@@ -301,4 +301,4 @@ openclaw-studio-alpha-shell/
 - `scripts/install-placeholder.cjs` 只解释当前 installer 仍缺什么，不执行安装
 - 如需重新生成整个 snapshot，请回到 repo root 运行 `npm run package:alpha`
 
-Generated: 2026-04-06T05:53:20.510Z
+Generated: 2026-04-06T07:28:21.575Z

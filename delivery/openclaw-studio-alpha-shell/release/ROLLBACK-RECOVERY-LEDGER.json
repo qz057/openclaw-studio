@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-rollback-recovery-ledger/v1",
-  "generatedAt": "2026-04-06T05:53:20.510Z",
-  "phase": "phase55",
+  "generatedAt": "2026-04-06T07:28:21.575Z",
+  "phase": "phase56",
   "mode": "local-only-review",
   "ledgers": [
     {

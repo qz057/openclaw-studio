@@ -1,8 +1,8 @@
 {
   "schemaVersion": "openclaw-studio-review-manifest/v1",
-  "generatedAt": "2026-04-06T05:53:20.510Z",
-  "phase": "phase55",
-  "milestone": "phase55 review-only release approval pipeline / deeper trace inspector drill-down / docs / smoke / package / release-plan / UI / shared data closeout",
+  "generatedAt": "2026-04-06T07:28:21.575Z",
+  "phase": "phase56",
+  "milestone": "phase56 local-only multi-window orchestration / cross-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout",
   "reviewDocs": [
     "README.md",
     "HANDOFF.md",

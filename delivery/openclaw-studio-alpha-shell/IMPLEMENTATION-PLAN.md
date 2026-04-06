@@ -258,6 +258,14 @@
 - smoke 已提升到验证 phase55 review-only release approval pipeline posture、structured trace phase drill-down、以及 inspector release pipeline drilldowns
 - README / HANDOFF / package snapshot 已同步反映 phase55 reality
 
+### Phase 56（当前已完成，first slice）
+- phase55 的 shell foundation 已继续推进成更明确的 local-only multi-window orchestration / cross-window shared-state review surface
+- shared / runtime / renderer 现在显式带出 window roster、shared-state lanes、ownership、sync health、last handoff、route/workspace intent links、focused-slot linkage、以及 local-only blockers
+- Windowing Workbench、Windows rail、Dashboard、Home、Settings、以及 Inspector linkage 现在共用同一套 cross-window coordination board / shared-state surface
+- trace / inspector drill-down 现在可 cross-link 到 shared-state lane 与 window roster，而不只是停留在 slot / lifecycle / rollback
+- smoke 已提升到验证 phase56 window roster / shared-state contract、renderer markers、以及 inspector cross-window linkage
+- README / HANDOFF / package snapshot 已同步反映 phase56 reality
+
 ## 当前明确边界
 
 当前只允许：
@@ -266,7 +274,7 @@
 - dry-run / preview / simulate
 - Studio-local execute（只改应用内 in-memory state/history）
 - phase27 command surface / layout persistence / window intent staging
-- phase55 review-only release approval pipeline / deeper trace inspector drill-down
+- phase56 local-only multi-window orchestration / cross-window shared-state review surface / review-only release approval pipeline
 - phase26/27/28 release skeleton / artifact review / handoff docs / package metadata
 
 当前明确禁止：
@@ -288,7 +296,7 @@ npm run start:smoke
 npm run package:alpha
 ```
 
-phase55 可额外跑：
+phase56 可额外跑：
 
 ```bash
 npm run release:plan
@@ -296,8 +304,8 @@ npm run release:plan
 
 ## 下一阶段（建议）
 
-### Phase 56
-目标：在不开放危险执行的前提下，继续把 phase55 foundations 推进为更完整的产品能力与交付链路。
+### Phase56 后续 slices
+目标：在不开放危险执行的前提下，继续把 phase56 foundations 推进为更完整的产品能力与交付链路。
 
 范围建议：
 - 更真实的 multi-window orchestration 与跨窗口共享状态
