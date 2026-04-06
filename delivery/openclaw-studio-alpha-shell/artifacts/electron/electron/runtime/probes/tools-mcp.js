@@ -15,6 +15,8 @@ const promises_1 = __importDefault(require("node:fs/promises"));
 const node_os_1 = __importDefault(require("node:os"));
 const node_path_1 = __importDefault(require("node:path"));
 const shared_1 = require("@openclaw/shared");
+const runtime_command_policy_1 = require("./runtime-command-policy");
+const tools_mcp_actions_1 = require("./tools-mcp-actions");
 const homeDirectory = node_os_1.default.homedir();
 const openclawRoot = node_path_1.default.join(homeDirectory, ".openclaw");
 const openclawConfigPath = node_path_1.default.join(openclawRoot, "openclaw.json");
@@ -2387,113 +2389,21 @@ function createHostBoundaryResult(itemId, actionId, spec) {
     };
 }
 function getDetailActions(itemId) {
-    switch (itemId) {
-        case "tool-openclaw-runtime":
-            return [
-                { id: "probe-config", label: "Probe config", description: "Refresh a compact safe summary of tool, web, and hook settings." },
-                { id: "list-hooks", label: "List hooks", description: "List the currently detected workspace hook directories." },
-                { id: "test-web-readiness", label: "Test web readiness", description: "Validate search/fetch runtime readiness without making outbound requests." }
-            ];
-        case "tool-openclaw-plugins":
-            return [
-                { id: "list-installs", label: "List installs", description: "Show sanitized OpenClaw plugin install manifests." },
-                { id: "list-entries", label: "List entries", description: "Show the current plugin entry enabled-state inventory." },
-                { id: "validate-plugin-bridge", label: "Validate bridge", description: "Check whether plugin bridge prerequisites are present without changing anything." }
-            ];
-        case "tool-codex-runtime":
-            return [
-                { id: "probe-presence", label: "Probe presence", description: "Re-check local Codex config/auth/session/cache presence." },
-                { id: "list-curated-plugins", label: "List curated plugins", description: "List the currently cached curated plugin directories." },
-                { id: "validate-runtime-readiness", label: "Validate runtime", description: "Evaluate whether Codex runtime prerequisites look ready from local state." }
-            ];
-        case "tool-workspace-tooling":
-            return [
-                { id: "list-hooks", label: "List hooks", description: "List detected hook directories under the shared workspace." },
-                { id: "list-manifests", label: "List manifests", description: "Show the safe package manifest summary for tooling roots." },
-                { id: "test-tooling-readiness", label: "Test tooling", description: "Validate workspace tooling readiness without executing external tools." }
-            ];
-        case "mcp-root-scan":
-            return [
-                { id: "rescan-roots", label: "Rescan roots", description: "Re-run the dedicated MCP root scan and show current path status." },
-                { id: "validate-root-candidates", label: "Validate roots", description: "Evaluate whether any dedicated MCP root candidates are currently usable." },
-                { id: "list-root-candidates", label: "List root candidates", description: "List root candidates with richer file/directory status." },
-                { id: "test-discovery-flow", label: "Test discovery flow", description: "Test the connector discovery flow using current root and bridge inputs without changing anything." },
-                { id: "preview-root-resolution", label: "Preview root resolution", description: "Preview which root resolution path the shell would choose right now." },
-                { id: "preview-discovery-plan", label: "Preview discovery plan", description: "Preview the discovery steps the shell would follow using current roots and bridge inputs." },
-                {
-                    id: "dry-run-connect-root",
-                    label: "Dry-run connect",
-                    description: "Stage a control-shaped root connect plan with target, inputs, blockers, and an explicit execution hold."
-                },
-                {
-                    id: "execute-local-root-select",
-                    label: "Execute local root select",
-                    description: "Select the preferred root inside the Studio-local control session only, without attaching anything outside the app."
-                },
-                {
-                    id: "preview-host-root-connect",
-                    label: "Preview host connect",
-                    description: "Show the blocked host/runtime root connect path, why it is withheld, and what would be required before enabling it."
-                }
-            ];
-        case "mcp-adjacent-runtime":
-            return [
-                { id: "list-bridge-surfaces", label: "List bridge surfaces", description: "List current OpenClaw bridge surfaces and load paths." },
-                { id: "list-curated-plugins", label: "List curated plugins", description: "List the Codex curated plugin cache visible to the bridge." },
-                { id: "validate-connector-readiness", label: "Validate connector", description: "Evaluate connector-adjacent readiness from current cache, installs, load paths, and root scan state." },
-                { id: "list-connector-inputs", label: "List connector inputs", description: "List bridge inputs and manifests currently feeding the connector lane." },
-                { id: "test-lane-composition", label: "Test lane composition", description: "Test the connector lane composition from current cache, installs, load paths, and roots." },
-                { id: "preview-bridge-plan", label: "Preview bridge plan", description: "Preview the bridge plan the shell would assemble from current connector inputs." },
-                { id: "simulate-connector-lane", label: "Simulate connector lane", description: "Simulate how the connector-adjacent lane would be composed using the current inputs." },
-                {
-                    id: "dry-run-bridge-attach",
-                    label: "Dry-run attach",
-                    description: "Stage a bridge attach plan that shows source order, predicted outcome, blockers, and why execution stops."
-                },
-                {
-                    id: "dry-run-connector-activate",
-                    label: "Dry-run activate",
-                    description: "Stage a connector activation plan without changing runtime, lifecycle, or install state."
-                },
-                {
-                    id: "dry-run-lane-apply",
-                    label: "Dry-run apply",
-                    description: "Stage a lane apply plan that predicts the final connector posture while keeping execution fully withheld."
-                },
-                {
-                    id: "execute-local-bridge-stage",
-                    label: "Execute local bridge stage",
-                    description: "Stage connector bridge inputs inside the Studio-local control session only."
-                },
-                {
-                    id: "execute-local-connector-activate",
-                    label: "Execute local activate",
-                    description: "Mark a connector as locally active inside Studio without starting or registering anything externally."
-                },
-                {
-                    id: "execute-local-lane-apply",
-                    label: "Execute local apply",
-                    description: "Apply the connector lane inside the Studio-local control session only."
-                },
-                {
-                    id: "preview-host-bridge-attach",
-                    label: "Preview host attach",
-                    description: "Show the blocked host/runtime bridge attach path, the permission boundary, and required enablement conditions."
-                },
-                {
-                    id: "preview-host-connector-activate",
-                    label: "Preview host activate",
-                    description: "Show the blocked host/runtime connector activate path and the conditions that would be required before enabling it."
-                },
-                {
-                    id: "preview-host-lane-apply",
-                    label: "Preview host apply",
-                    description: "Show the blocked host/runtime lane apply path, why it is withheld, and what would be required before enabling it."
-                }
-            ];
-        default:
-            return [];
-    }
+    return (0, tools_mcp_actions_1.listToolsMcpActions)(itemId);
+}
+function createActionExecution(action) {
+    return {
+        status: action.safety === "preview-host" ? "blocked" : "completed",
+        safety: action.safety,
+        detailRefresh: action.refreshDetailOnSuccess ? "required" : "not-needed"
+    };
+}
+function attachToolsMcpActionContract(result, action) {
+    return {
+        ...result,
+        action,
+        execution: createActionExecution(action)
+    };
 }
 async function probeLiveToolsMcp() {
     const [openclawConfig, codexConfigPresent, codexAuthPresent, codexSessionsPresent, codexShellSnapshotsPresent, codexPluginCachePresent, codexPluginTempRepoPresent, toolingRootPresent, playwrightRunnerPresent, hookNames, discoveredMcpRoots] = await Promise.all([
@@ -2598,6 +2508,16 @@ async function readToolsMcpDetail(itemId, controlSession) {
                             `internal hooks · ${openclawConfig?.hooks?.internal?.enabled === false ? "disabled" : "enabled"}`,
                             ...(probe.hookNames.length > 0 ? probe.hookNames.map((hook) => `hook · ${hook}`) : ["hook · none"])
                         ]
+                    },
+                    {
+                        id: "tool-permissions",
+                        title: "Permission regression matrix",
+                        lines: (0, runtime_command_policy_1.buildRuntimePermissionMatrix)(probe.openclawAlsoAllow).map((assessment) => (0, runtime_command_policy_1.formatRuntimeCommandAssessment)(assessment))
+                    },
+                    {
+                        id: "tool-allow-rules",
+                        title: "Allow rules",
+                        lines: (0, runtime_command_policy_1.buildRuntimeRuleMatchLines)(probe.openclawAlsoAllow)
                     }
                 ]
             };
@@ -2807,7 +2727,7 @@ async function readToolsMcpDetail(itemId, controlSession) {
             return null;
     }
 }
-async function runToolsMcpAction(itemId, actionId, controlSession) {
+async function runToolsMcpActionInternal(itemId, actionId, controlSession) {
     const probe = await probeLiveToolsMcp();
     if (probe.source !== "live") {
         return null;
@@ -2825,7 +2745,7 @@ async function runToolsMcpAction(itemId, actionId, controlSession) {
                 itemId,
                 actionId,
                 title: "OpenClaw config probe",
-                summary: "Refreshed safe summary of tool, web, and hook settings.",
+                summary: "Refreshed safe summary of tool, web, hook, and permission settings.",
                 source: "runtime",
                 tone: probe.openclawToolProfile ? "positive" : "warning",
                 sections: [
@@ -2839,6 +2759,16 @@ async function runToolsMcpAction(itemId, actionId, controlSession) {
                             `search · ${probe.webSearchEnabled ? `enabled (${probe.webSearchProvider ?? "configured"})` : "disabled"}`,
                             `fetch · ${probe.webFetchEnabled ? "enabled" : "disabled"}`
                         ]
+                    },
+                    {
+                        id: "action-command-policy",
+                        title: "Permission regression matrix",
+                        lines: (0, runtime_command_policy_1.buildRuntimePermissionMatrix)(probe.openclawAlsoAllow).map((assessment) => (0, runtime_command_policy_1.formatRuntimeCommandAssessment)(assessment))
+                    },
+                    {
+                        id: "action-allow-rules",
+                        title: "Allow rules",
+                        lines: (0, runtime_command_policy_1.buildRuntimeRuleMatchLines)(probe.openclawAlsoAllow)
                     }
                 ]
             };
@@ -4048,4 +3978,12 @@ async function runToolsMcpAction(itemId, actionId, controlSession) {
         default:
             return null;
     }
+}
+async function runToolsMcpAction(itemId, actionId, controlSession) {
+    const action = (0, tools_mcp_actions_1.getToolsMcpAction)(itemId, actionId);
+    if (!action) {
+        return null;
+    }
+    const result = await runToolsMcpActionInternal(itemId, actionId, controlSession);
+    return result ? attachToolsMcpActionContract(result, action) : null;
 }

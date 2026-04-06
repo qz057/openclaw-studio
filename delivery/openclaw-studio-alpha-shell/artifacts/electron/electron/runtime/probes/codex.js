@@ -7,6 +7,7 @@ exports.probeLiveCodex = probeLiveCodex;
 const promises_1 = __importDefault(require("node:fs/promises"));
 const node_os_1 = __importDefault(require("node:os"));
 const node_path_1 = __importDefault(require("node:path"));
+const codex_agent_loop_1 = require("./codex-agent-loop");
 const homeDirectory = node_os_1.default.homedir();
 const codexRoot = node_path_1.default.join(homeDirectory, ".codex");
 const codexConfigPath = node_path_1.default.join(codexRoot, "config.toml");
@@ -282,6 +283,14 @@ function createCodexStats(probe) {
         }
     ];
 }
+function createLoopFallback() {
+    const fallback = (0, codex_agent_loop_1.buildCodexAgentLoopOverview)([]);
+    return {
+        loopSummary: fallback.summary,
+        loopStats: fallback.stats,
+        loopSignals: fallback.signals
+    };
+}
 async function probeLiveCodex() {
     const [config, authPresent, sessionFiles, shellSnapshotsCount] = await Promise.all([
         readCodexConfig(),
@@ -311,6 +320,7 @@ async function probeLiveCodex() {
         const lastEventType = [...events].reverse().find((event) => event.type === "event_msg")?.payload?.type ??
             [...events].reverse().find((event) => event.type === "response_item")?.payload?.type ??
             null;
+        const loop = (0, codex_agent_loop_1.analyzeCodexAgentLoop)(events, status, latestTimestamp);
         const task = {
             id: sessionId,
             title: deriveTitle(userPrompt, workdir, sessionId),
@@ -320,11 +330,21 @@ async function probeLiveCodex() {
             updatedAt: formatRelativeTime(latestTimestamp),
             source: "runtime",
             workdir: shortenHomePath(workdir),
-            detail: deriveDetail(cliVersion, lastEventType, sessionMeta?.source)
+            detail: deriveDetail(cliVersion, lastEventType, sessionMeta?.source),
+            loopState: loop.state,
+            turnCount: loop.turnCount,
+            continuation: loop.continuation,
+            recoveryCount: loop.recoveryCount,
+            interruptionCount: loop.interruptionCount
         };
-        return task;
+        return {
+            task,
+            loop
+        };
     }));
-    const tasks = tasksWithNulls.filter((task) => task !== null);
+    const tasksWithLoops = tasksWithNulls.filter((entry) => entry !== null);
+    const tasks = tasksWithLoops.map((entry) => entry.task);
+    const loopOverview = tasksWithLoops.length > 0 ? (0, codex_agent_loop_1.buildCodexAgentLoopOverview)(tasksWithLoops.map((entry) => entry.loop)) : null;
     const runningTasks = tasks.filter((task) => task.status === "running").length;
     const recentTasks = tasks.filter((task) => task.status === "recent").length;
     const completedTasks = tasks.filter((task) => task.status === "complete").length;
@@ -354,7 +374,10 @@ async function probeLiveCodex() {
         runningTasks,
         recentTasks,
         completedTasks,
-        tasks
+        tasks,
+        loopSummary: loopOverview?.summary ?? createLoopFallback().loopSummary,
+        loopStats: loopOverview?.stats ?? createLoopFallback().loopStats,
+        loopSignals: loopOverview?.signals ?? createLoopFallback().loopSignals
     };
     return {
         ...probeWithoutStats,

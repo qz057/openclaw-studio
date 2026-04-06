@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-release-manifest/v1",
-  "generatedAt": "2026-04-06T02:29:15.586Z",
+  "generatedAt": "2026-04-06T03:43:51.277Z",
   "packageId": "openclaw-studio-alpha-shell",
   "packageName": "OpenClaw Studio Alpha Shell",
   "packageKind": "alpha-shell-release-skeleton",
@@ -456,7 +456,7 @@
       "label": "Renderer bundle",
       "outputRoot": "artifacts/renderer",
       "fileCount": 3,
-      "totalBytes": 374694,
+      "totalBytes": 384331,
       "entrypoints": [
         "artifacts/renderer/index.html"
       ]
@@ -465,8 +465,8 @@
       "id": "electron",
       "label": "Electron bundle",
       "outputRoot": "artifacts/electron",
-      "fileCount": 10,
-      "totalBytes": 321764,
+      "fileCount": 15,
+      "totalBytes": 372605,
       "entrypoints": [
         "artifacts/electron/electron/main.js",
         "artifacts/electron/electron/preload.js",
@@ -475,15 +475,6 @@
     }
   ],
   "artifacts": [
-    {
-      "id": "renderer:assets/index-COp1MEZU.js",
-      "groupId": "renderer",
-      "role": "asset",
-      "path": "artifacts/renderer/assets/index-COp1MEZU.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-COp1MEZU.js",
-      "sizeBytes": 354753,
-      "sha256": "abac08020437221aecd314013a576f6e56f4d6a60cf6db78af63dbaaa3de76b0"
-    },
     {
       "id": "renderer:assets/index-Dm4t7r-s.css",
       "groupId": "renderer",
@@ -494,13 +485,22 @@
       "sha256": "92f6f78fe050fb7a26949f81fdd0b8ea4f4e9a613d0ed72fdd65abfe291e9fdc"
     },
     {
+      "id": "renderer:assets/index-DNfvEJ8Y.js",
+      "groupId": "renderer",
+      "role": "asset",
+      "path": "artifacts/renderer/assets/index-DNfvEJ8Y.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-DNfvEJ8Y.js",
+      "sizeBytes": 364390,
+      "sha256": "baa211fb4197d2641ef68b6cece5b7f503c1708134af8468101cb9b4f7b3c094"
+    },
+    {
       "id": "renderer:index.html",
       "groupId": "renderer",
       "role": "entrypoint",
       "path": "artifacts/renderer/index.html",
       "sourceRelativePath": "apps/studio/dist-renderer/index.html",
       "sizeBytes": 418,
-      "sha256": "e7b75d2d10c77158f3934563e599d69de3217bddd30f57918f7af0d0ac069277"
+      "sha256": "ba6c219da0e9b2e97b0092882c8bd0c9531d71551b87761780854ad5c08b9a09"
     },
     {
       "id": "electron:electron/main.js",
@@ -530,13 +530,40 @@
       "sha256": "f9eb306e073f2f460b131909a2cd132f14d5e76880c8b7f94209d629f3d3b3b4"
     },
     {
+      "id": "electron:electron/runtime/probes/codex-agent-loop.js",
+      "groupId": "electron",
+      "role": "asset",
+      "path": "artifacts/electron/electron/runtime/probes/codex-agent-loop.js",
+      "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/probes/codex-agent-loop.js",
+      "sizeBytes": 13058,
+      "sha256": "9ed57ec913d81f87a644129cea14523f23cb6b2be7d9fba64172e13d6b04b471"
+    },
+    {
       "id": "electron:electron/runtime/probes/codex.js",
       "groupId": "electron",
       "role": "asset",
       "path": "artifacts/electron/electron/runtime/probes/codex.js",
       "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/probes/codex.js",
-      "sizeBytes": 13500,
-      "sha256": "9b54a98aae754e553361054f8f55c2475ee17de054040a8bfe30a4d0358f2d3f"
+      "sizeBytes": 14628,
+      "sha256": "0247b6ce6191528d0cac58b4bebedd67569ffd34fc5e9e599f4bab6046add01c"
+    },
+    {
+      "id": "electron:electron/runtime/probes/project-context.js",
+      "groupId": "electron",
+      "role": "asset",
+      "path": "artifacts/electron/electron/runtime/probes/project-context.js",
+      "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/probes/project-context.js",
+      "sizeBytes": 6616,
+      "sha256": "cea1f8f36d16e0c818551e471408ed70b41075c4d5d6d6d1c744845bfc6ed4d7"
+    },
+    {
+      "id": "electron:electron/runtime/probes/runtime-command-policy.js",
+      "groupId": "electron",
+      "role": "asset",
+      "path": "artifacts/electron/electron/runtime/probes/runtime-command-policy.js",
+      "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/probes/runtime-command-policy.js",
+      "sizeBytes": 7388,
+      "sha256": "ff1807601ab71d4e48eb3376bc42c7c5a463a10af89b06c4bfea8d129f2f079e"
     },
     {
       "id": "electron:electron/runtime/probes/runtime-observations.js",
@@ -566,6 +593,15 @@
       "sha256": "aec9d00177d0bc128e37cc15734971ebf1a41a0a6073984161a66e05559ecb14"
     },
     {
+      "id": "electron:electron/runtime/probes/startup-routing.js",
+      "groupId": "electron",
+      "role": "asset",
+      "path": "artifacts/electron/electron/runtime/probes/startup-routing.js",
+      "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/probes/startup-routing.js",
+      "sizeBytes": 3100,
+      "sha256": "06340bd4b30ff3ec3e3a2a24268c662a5d356ef61522ad545077ea60b4f1e2cb"
+    },
+    {
       "id": "electron:electron/runtime/probes/system-status.js",
       "groupId": "electron",
       "role": "asset",
@@ -575,13 +611,22 @@
       "sha256": "7ea46deac755db3ff5a9a9182701eacc327bb92bd576e6564da7be44188c188b"
     },
     {
+      "id": "electron:electron/runtime/probes/tools-mcp-actions.js",
+      "groupId": "electron",
+      "role": "asset",
+      "path": "artifacts/electron/electron/runtime/probes/tools-mcp-actions.js",
+      "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/probes/tools-mcp-actions.js",
+      "sizeBytes": 12416,
+      "sha256": "37c20fc6b79efb12c7dd55a06c1d8861725a9e89cdf2cfef5c7c9d10dd263515"
+    },
+    {
       "id": "electron:electron/runtime/probes/tools-mcp.js",
       "groupId": "electron",
       "role": "asset",
       "path": "artifacts/electron/electron/runtime/probes/tools-mcp.js",
       "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/probes/tools-mcp.js",
-      "sizeBytes": 224614,
-      "sha256": "4944559b1c782b6a23668c0bf9caca2b78136f955fd4260d23f43c4f4f473a35"
+      "sizeBytes": 219020,
+      "sha256": "62356cfdd606a30d0f3385efa2d98c1a053c2db1be8d488e13d12a277e1b7e1a"
     },
     {
       "id": "electron:electron/runtime/studio-runtime.js",
@@ -589,8 +634,8 @@
       "role": "entrypoint",
       "path": "artifacts/electron/electron/runtime/studio-runtime.js",
       "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/studio-runtime.js",
-      "sizeBytes": 52745,
-      "sha256": "f99d9bfeb1fcc867cdf8a787a7b58eee055701f47ba4f5f56140a9efe0d19953"
+      "sizeBytes": 65474,
+      "sha256": "3823c42be34955b148574c15117034e447fc8386a55064c6a2917308a789044d"
     }
   ],
   "currentDeliverySurfaces": [

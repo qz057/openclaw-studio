@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-review-manifest/v1",
-  "generatedAt": "2026-04-06T02:29:15.586Z",
+  "generatedAt": "2026-04-06T03:43:51.277Z",
   "phase": "phase54",
   "milestone": "phase54 attestation operator approval orchestration / promotion staged-apply release decision enforcement lifecycle / rollback cutover publication receipt settlement closeout + docs / smoke / package / release-plan / UI / shared data closeout",
   "reviewDocs": [
@@ -87,7 +87,7 @@
       "id": "electron",
       "label": "Electron bundle",
       "outputRoot": "artifacts/electron",
-      "fileCount": 10,
+      "fileCount": 15,
       "entrypoints": [
         "artifacts/electron/electron/main.js",
         "artifacts/electron/electron/preload.js",
