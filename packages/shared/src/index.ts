@@ -133,6 +133,11 @@ export interface CodexTaskSummary {
   source: "mock" | "runtime";
   workdir?: string;
   detail?: string;
+  loopState?: "stable" | "continuing" | "recovering" | "interrupted" | "complete";
+  turnCount?: number;
+  continuation?: string;
+  recoveryCount?: number;
+  interruptionCount?: number;
 }
 
 export interface DashboardWorkstream {
@@ -161,6 +166,8 @@ export interface AgentSummary {
   status: SessionSummary["status"];
   focus: string;
   approvals: string;
+  isolation?: string;
+  handoff?: string;
   updatedAt: string;
 }
 
@@ -989,10 +996,22 @@ export interface StudioDetailSection {
   lines: string[];
 }
 
+export type StudioRuntimeActionKind = "probe" | "validate" | "dry-run" | "execute-local" | "preview-host";
+export type StudioRuntimeActionSafety = "read-only" | "dry-run" | "local-only" | "preview-host";
+
 export interface StudioRuntimeAction {
   id: string;
   label: string;
   description: string;
+  kind: StudioRuntimeActionKind;
+  safety: StudioRuntimeActionSafety;
+  refreshDetailOnSuccess: boolean;
+}
+
+export interface StudioRuntimeActionExecution {
+  status: "completed" | "blocked";
+  safety: StudioRuntimeActionSafety;
+  detailRefresh: "required" | "not-needed";
 }
 
 export interface StudioRuntimeDetail {
@@ -1012,6 +1031,8 @@ export interface StudioRuntimeDetail {
 export interface StudioRuntimeActionResult {
   itemId: string;
   actionId: string;
+  action: StudioRuntimeAction;
+  execution: StudioRuntimeActionExecution;
   title: string;
   summary: string;
   source: "runtime" | "mock";
@@ -1054,12 +1075,19 @@ export interface StudioShellState {
     metrics: StudioMetric[];
     roster: AgentSummary[];
     recentActivity: HomeActivity[];
+    delegationSummary: string;
+    delegationNotes: SettingItem[];
   };
   codex: {
     summary: string;
     stats: StudioStat[];
     tasks: CodexTaskSummary[];
     observations: SettingItem[];
+    loopSummary: string;
+    loopStats: StudioStat[];
+    loopSignals: SettingItem[];
+    contextSummary: string;
+    contextNotes: SettingItem[];
   };
   skills: {
     summary: string;
@@ -3630,6 +3658,8 @@ export const mockShellState: StudioShellState = {
         status: "active",
         focus: "Extending the route shell and page registry.",
         approvals: "None pending",
+        isolation: "session-local lane",
+        handoff: "UI shell handoff active",
         updatedAt: "Now"
       },
       {
@@ -3641,6 +3671,8 @@ export const mockShellState: StudioShellState = {
         status: "waiting",
         focus: "Tracking approval and future-executor requirements for withheld host-side actions.",
         approvals: "Waiting for runtime data surface",
+        isolation: "config-scoped lane",
+        handoff: "Awaiting runtime signal",
         updatedAt: "14 min ago"
       },
       {
@@ -3652,6 +3684,8 @@ export const mockShellState: StudioShellState = {
         status: "complete",
         focus: "Mock runtime path is stable and buildable.",
         approvals: "Closed",
+        isolation: "background lane",
+        handoff: "Result handoff sealed",
         updatedAt: "39 min ago"
       }
     ],
@@ -3667,6 +3701,38 @@ export const mockShellState: StudioShellState = {
         title: "Bridge Watcher queued live probes",
         detail: "System status and sessions are the first safe real integrations.",
         timestamp: "Next"
+      }
+    ],
+    delegationSummary:
+      "Fallback delegation topology keeps spawn path, isolation posture, background lanes, and handoff state visible without launching any real subagents or host-side workers.",
+    delegationNotes: [
+      {
+        id: "agent-delegation-spawn",
+        label: "Spawn path",
+        value: "Roster lanes only",
+        detail: "Fallback models delegation as configured lanes and observed sessions rather than real subagent execution.",
+        tone: "neutral"
+      },
+      {
+        id: "agent-delegation-isolation",
+        label: "Isolation",
+        value: "local-only / shared repo",
+        detail: "No worktree, tmux, or remote executor is created in the fallback shell.",
+        tone: "warning"
+      },
+      {
+        id: "agent-delegation-background",
+        label: "Background",
+        value: "1 background lane",
+        detail: "Fallback keeps a background/runtime lane visible to mirror future delegated work without running it.",
+        tone: "neutral"
+      },
+      {
+        id: "agent-delegation-handoff",
+        label: "Result handoff",
+        value: "Local handoff only",
+        detail: "Task results stay on typed shell surfaces and do not cross into a real host-side coordinator.",
+        tone: "neutral"
       }
     ]
   },
@@ -3688,7 +3754,12 @@ export const mockShellState: StudioShellState = {
         updatedAt: "Now",
         source: "mock",
         workdir: "apps/studio",
-        detail: "Mock task lane keeps the page stable until local Codex session data is available."
+        detail: "Mock task lane keeps the page stable until local Codex session data is available.",
+        loopState: "continuing",
+        turnCount: 3,
+        continuation: "Tool chain settled (2/2 results observed).",
+        recoveryCount: 0,
+        interruptionCount: 0
       },
       {
         id: "CDX-18",
@@ -3699,7 +3770,12 @@ export const mockShellState: StudioShellState = {
         updatedAt: "11 min ago",
         source: "mock",
         workdir: "packages/bridge",
-        detail: "Illustrative review lane for future live approvals and trace metadata."
+        detail: "Illustrative review lane for future live approvals and trace metadata.",
+        loopState: "recovering",
+        turnCount: 4,
+        continuation: "Multi-turn continuation with 4 turns.",
+        recoveryCount: 1,
+        interruptionCount: 0
       },
       {
         id: "CDX-11",
@@ -3710,7 +3786,12 @@ export const mockShellState: StudioShellState = {
         updatedAt: "Queued",
         source: "mock",
         workdir: "apps/studio/electron",
-        detail: "Mock queue item shows fallback behavior when no live Codex signals are readable."
+        detail: "Mock queue item shows fallback behavior when no live Codex signals are readable.",
+        loopState: "stable",
+        turnCount: 1,
+        continuation: "Single-turn direct response path.",
+        recoveryCount: 0,
+        interruptionCount: 0
       }
     ],
     observations: [
@@ -3733,6 +3814,76 @@ export const mockShellState: StudioShellState = {
         label: "Paths",
         value: "Typed fallback",
         detail: "Config and sessions roots stay placeholder-backed until the runtime probe can read them safely.",
+        tone: "neutral"
+      }
+    ],
+    loopSummary:
+      "The fallback shell keeps a typed turn-lifecycle contract ready for live Codex data: turn count, tool follow-up balance, recovery markers, stop gates, and interruptions are all surfaced without replaying or mutating any task.",
+    loopStats: [
+      { label: "Loop State", value: "Fallback", tone: "warning" },
+      { label: "Turns", value: "8 turns", tone: "positive" },
+      { label: "Tool Chain", value: "2 / 2", tone: "positive" },
+      { label: "Recovery / Stop", value: "1 / 0", tone: "warning" }
+    ],
+    loopSignals: [
+      {
+        id: "codex-loop-state",
+        label: "State",
+        value: "Fallback contract",
+        detail: "The renderer already exposes a stable view of turn state, continuation, and recovery posture before any live Codex session logs are observed.",
+        tone: "warning"
+      },
+      {
+        id: "codex-loop-continuation",
+        label: "Continuation",
+        value: "Tool chain settled (2/2 results observed).",
+        detail: "Fallback data models a balanced tool-follow-up turn so the page layout and smoke checks stay deterministic.",
+        tone: "positive"
+      },
+      {
+        id: "codex-loop-recovery",
+        label: "Recovery / Stop",
+        value: "1 recovery · 0 stop",
+        detail: "Retry, compaction, token-budget, and stop-gate signals stay local-only and observational in this shell.",
+        tone: "warning"
+      },
+      {
+        id: "codex-loop-interruptions",
+        label: "Interruptions",
+        value: "None observed",
+        detail: "Interruption handling remains visible in the contract without enabling any resume or host-side replay path.",
+        tone: "positive"
+      }
+    ],
+    contextSummary:
+      "Fallback context memory keeps repo docs, git posture, and recent session continuity visible as typed notes until the runtime can assemble the live project context directly from the repository.",
+    contextNotes: [
+      {
+        id: "codex-context-docs",
+        label: "Docs",
+        value: "3 core docs",
+        detail: "README.md, HANDOFF.md, and IMPLEMENTATION-PLAN.md are the stable project memory sources surfaced through the fallback shell.",
+        tone: "positive"
+      },
+      {
+        id: "codex-context-git",
+        label: "Git / Layout",
+        value: "branch unknown",
+        detail: "Fallback keeps the layout contract visible even when live git metadata has not been re-read yet.",
+        tone: "neutral"
+      },
+      {
+        id: "codex-context-session",
+        label: "Session continuity",
+        value: "Mock continuity",
+        detail: "Recent session and task continuity will switch from fallback to live repo-local observations when available.",
+        tone: "neutral"
+      },
+      {
+        id: "codex-context-focus",
+        label: "Project focus",
+        value: "renderer/shell",
+        detail: "Fallback keeps the current shell focus aligned with the Codex task lane and implementation docs.",
         tone: "neutral"
       }
     ]
@@ -3763,6 +3914,63 @@ export const mockShellState: StudioShellState = {
             source: "mock",
             detail: "Useful for local plugin creation flows once tool actions are exposed.",
             tone: "neutral"
+          }
+        ]
+      },
+      {
+        id: "skills-sources",
+        label: "Extension Sources",
+        description: "Capability provenance across local skill roots, extension bundles, plugin caches, and MCP roots.",
+        items: [
+          {
+            id: "skill-source-openclaw-home",
+            name: "OpenClaw home skills",
+            surface: "Skill root",
+            status: "Fallback",
+            source: "mock",
+            detail: "Fallback keeps the OpenClaw home skill root visible until the runtime re-reads local directories.",
+            origin: "OpenClaw Home",
+            tone: "neutral"
+          },
+          {
+            id: "skill-source-workspace",
+            name: "Workspace skills",
+            surface: "Skill root",
+            status: "Fallback",
+            source: "mock",
+            detail: "Workspace-managed skill roots will be surfaced here when local discovery is available.",
+            origin: "Workspace",
+            tone: "neutral"
+          },
+          {
+            id: "skill-source-extensions",
+            name: "Extension bundles",
+            surface: "Extension root",
+            status: "Fallback",
+            source: "mock",
+            detail: "Extension-bundled skills remain explicitly tracked as a separate provenance source.",
+            origin: "Extensions",
+            tone: "neutral"
+          },
+          {
+            id: "skill-source-plugin-load-paths",
+            name: "Plugin load paths",
+            surface: "Plugin source",
+            status: "Fallback",
+            source: "mock",
+            detail: "OpenClaw plugin load paths and curated cache fallback will populate here from local runtime data.",
+            origin: "OpenClaw Plugins",
+            tone: "neutral"
+          },
+          {
+            id: "skill-source-mcp-roots",
+            name: "Dedicated MCP roots",
+            surface: "MCP source",
+            status: "Fallback",
+            source: "mock",
+            detail: "Dedicated MCP root discovery remains visible as part of the extension model even before live probes run.",
+            origin: "MCP Runtime",
+            tone: "warning"
           }
         ]
       },
@@ -3851,6 +4059,34 @@ export const mockShellState: StudioShellState = {
             label: "Fallback policy",
             value: "Renderer-safe",
             detail: "Renderer keeps rendering if runtime access is unavailable.",
+            tone: "positive"
+          }
+        ]
+      },
+      {
+        id: "settings-startup",
+        title: "Startup Routing",
+        description: "Build/start path, display posture, and command entrypoints.",
+        items: [
+          {
+            id: "settings-start-ready",
+            label: "Startup path",
+            value: "Review-only",
+            detail: "Fallback keeps the local start chain visible before live preflight data is read.",
+            tone: "neutral"
+          },
+          {
+            id: "settings-display",
+            label: "Display route",
+            value: "Unknown",
+            detail: "Display preflight will populate here from the local startup summary.",
+            tone: "neutral"
+          },
+          {
+            id: "settings-command-path",
+            label: "Command path",
+            value: "Scripts staged",
+            detail: "Root and app scripts remain part of the typed startup contract even before live preflight reads them.",
             tone: "positive"
           }
         ]

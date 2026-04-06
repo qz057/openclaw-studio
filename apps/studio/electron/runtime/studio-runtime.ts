@@ -15,9 +15,11 @@ import {
   type StudioShellState
 } from "@openclaw/shared";
 import { probeLiveCodex } from "./probes/codex";
+import { probeProjectContext } from "./probes/project-context";
 import { probeLiveRuntimeObservations } from "./probes/runtime-observations";
 import { probeLiveSessions, type LiveSessionProbe, type LiveSessionRecord } from "./probes/sessions";
 import { probeLiveSkills } from "./probes/skills";
+import { probeStartupRouting } from "./probes/startup-routing";
 import { probeLiveSystemStatus } from "./probes/system-status";
 import {
   buildToolsMcpHostExecutorState,
@@ -547,6 +549,8 @@ function createAgentRoster(
         runtimeObservations.cronJobsCount > 0
           ? `${formatCount(runtimeObservations.cronJobsCount, "cron job")} configured`
           : "No approval surface detected",
+      isolation: "config-scoped lane",
+      handoff: latestAgentSession ? `Session ${latestAgentSession.id.slice(0, 8)}` : "Awaiting session handoff",
       updatedAt:
         latestAgentSession?.updatedAt ?? formatRelativeTime(parseIsoTimestamp(runtimeObservations.lastTouchedAt))
     });
@@ -562,6 +566,8 @@ function createAgentRoster(
       status: latestInteractiveSession.status,
       focus: `${formatCount(interactiveSessions.length, "recent session")} detected outside cron-driven runs.`,
       approvals: "Session titles are derived from local JSONL content",
+      isolation: "session-local lane",
+      handoff: "Runtime session handoff active",
       updatedAt: latestInteractiveSession.updatedAt
     });
   }
@@ -590,6 +596,8 @@ function createAgentRoster(
         runtimeObservations.cronDeliveredRuns > 0
           ? `${formatCount(runtimeObservations.cronDeliveredRuns, "delivered output")} recorded`
           : "No delivered outputs recorded",
+      isolation: "background lane",
+      handoff: latestCronRun ? `Cron ${latestCronRun.jobId}` : "Background handoff pending",
       updatedAt: formatRelativeTime(latestCronRun?.runAtMs ?? cronBackedSessions[0]?.updatedAtMs ?? null)
     });
   }
@@ -688,14 +696,76 @@ function createAgentActivity(
   return [...items, ...baseActivity].slice(0, 3);
 }
 
+function createAgentDelegationState(
+  baseAgents: StudioShellState["agents"],
+  roster: StudioShellState["agents"]["roster"],
+  interactiveSessions: LiveSessionRecord[],
+  runtimeObservations: Awaited<ReturnType<typeof probeLiveRuntimeObservations>>,
+  codexProbe: Awaited<ReturnType<typeof probeLiveCodex>>
+): Pick<StudioShellState["agents"], "delegationSummary" | "delegationNotes"> {
+  if (runtimeObservations.source !== "live" && interactiveSessions.length === 0) {
+    return {
+      delegationSummary: baseAgents.delegationSummary,
+      delegationNotes: baseAgents.delegationNotes
+    };
+  }
+
+  const latestInteractiveSession = interactiveSessions[0] ?? null;
+  const latestCronRun = runtimeObservations.recentCronRuns[0] ?? null;
+  const latestTask = codexProbe.tasks[0] ?? null;
+
+  return {
+    delegationSummary:
+      `Delegation remains local-only and observational: ${formatCount(roster.length, "lane")} are visible, ` +
+      `${formatCount(runtimeObservations.cronJobsCount, "background cron path")} are tracked, and result handoff stays on shell surfaces instead of spawning host-side workers.`,
+    delegationNotes: [
+      {
+        id: "agent-delegation-spawn",
+        label: "Spawn path",
+        value: `${formatCount(roster.length, "lane")} observed`,
+        detail: "Configured agents, runtime session lanes, and cron-backed lanes are modeled as delegation paths; Studio does not spawn worktrees, tmux panes, or remote workers.",
+        tone: "neutral"
+      },
+      {
+        id: "agent-delegation-isolation",
+        label: "Isolation",
+        value: "local-only / shared repo",
+        detail: "Isolation is expressed as lane ownership and workspace scoping only. Real subagent process isolation remains outside this shell.",
+        tone: "warning"
+      },
+      {
+        id: "agent-delegation-background",
+        label: "Background",
+        value: latestCronRun ? `${latestCronRun.jobId} ${latestCronRun.status}` : `${runtimeObservations.cronJobsCount} configured`,
+        detail:
+          runtimeObservations.cronJobsCount > 0
+            ? `${runtimeObservations.cronDeliveredRuns} delivered outputs recorded across ${runtimeObservations.cronTotalRuns} logged runs.`
+            : "No background cron path is currently configured.",
+        tone: runtimeObservations.cronJobsCount > 0 ? "neutral" : "warning"
+      },
+      {
+        id: "agent-delegation-handoff",
+        label: "Result handoff",
+        value: latestInteractiveSession && latestTask ? `${latestInteractiveSession.workspace} -> ${latestTask.target}` : "No active handoff",
+        detail:
+          latestInteractiveSession && latestTask
+            ? `Latest runtime session “${latestInteractiveSession.title}” aligns with Codex task “${latestTask.title}”.`
+            : "Result handoff is currently represented only by the observed shell surfaces.",
+        tone: latestInteractiveSession && latestTask ? "positive" : "neutral"
+      }
+    ]
+  };
+}
+
 function createSkillsState(
   baseSkills: StudioShellState["skills"],
   skillProbe: Awaited<ReturnType<typeof probeLiveSkills>>,
   toolsMcpProbe: Awaited<ReturnType<typeof probeLiveToolsMcp>>
 ): StudioShellState["skills"] {
-  const baseSkillSections = baseSkills.sections.filter((section) => section.id !== "skills-tools" && section.id !== "skills-mcp");
+  const baseSkillSections = baseSkills.sections.filter((section) => section.id !== "skills-tools" && section.id !== "skills-mcp" && section.id !== "skills-sources");
   const baseToolsSection = baseSkills.sections.find((section) => section.id === "skills-tools") ?? null;
   const baseMcpSection = baseSkills.sections.find((section) => section.id === "skills-mcp") ?? null;
+  const baseSourcesSection = baseSkills.sections.find((section) => section.id === "skills-sources") ?? null;
   const skillSections = skillProbe.source === "live" && skillProbe.sections.length > 0 ? skillProbe.sections : baseSkillSections;
 
   if (skillSections.length === 0 && toolsMcpProbe.source !== "live") {
@@ -887,6 +957,120 @@ function createSkillsState(
       }
     : null;
 
+  const sourceFallbackItems = new Map((baseSourcesSection?.items ?? []).map((item) => [item.id, item]));
+  const getSkillSourceCount = (sectionId: string) => skillProbe.sections.find((section) => section.id === sectionId)?.items.length ?? 0;
+  const sourcesSection: SkillCatalogSection | null =
+    skillProbe.source === "live" || toolsMcpProbe.source === "live" || baseSourcesSection
+      ? {
+          id: "skills-sources",
+          label: "Extension Sources",
+          description: "Capability provenance across local skill roots, extension bundles, plugin caches, and MCP roots.",
+          items: [
+            {
+              ...(sourceFallbackItems.get("skill-source-openclaw-home") ?? {}),
+              id: "skill-source-openclaw-home",
+              name: "OpenClaw home skills",
+              surface: "Skill root",
+              status: getSkillSourceCount("skills-openclaw-home") > 0 ? `${getSkillSourceCount("skills-openclaw-home")} indexed` : "Not found",
+              source: skillProbe.source === "live" ? "runtime" : "mock",
+              detail:
+                skillProbe.source === "live"
+                  ? `Root ${shortenHomePath(skillProbe.rootsScanned[0] ?? "")} -> ${getSkillSourceCount("skills-openclaw-home")} indexed skills.`
+                  : sourceFallbackItems.get("skill-source-openclaw-home")?.detail ?? "OpenClaw home skill root fallback.",
+              origin: "OpenClaw Home",
+              path: skillProbe.source === "live" ? shortenHomePath(skillProbe.rootsScanned[0] ?? "") : sourceFallbackItems.get("skill-source-openclaw-home")?.path,
+              tone: getSkillSourceCount("skills-openclaw-home") > 0 ? "positive" : "neutral"
+            },
+            {
+              ...(sourceFallbackItems.get("skill-source-workspace") ?? {}),
+              id: "skill-source-workspace",
+              name: "Workspace skills",
+              surface: "Skill root",
+              status: getSkillSourceCount("skills-workspace") > 0 ? `${getSkillSourceCount("skills-workspace")} indexed` : "Not found",
+              source: skillProbe.source === "live" ? "runtime" : "mock",
+              detail:
+                skillProbe.source === "live"
+                  ? `Root ${shortenHomePath(skillProbe.rootsScanned[1] ?? "")} -> ${getSkillSourceCount("skills-workspace")} indexed skills.`
+                  : sourceFallbackItems.get("skill-source-workspace")?.detail ?? "Workspace skill root fallback.",
+              origin: "Workspace",
+              path: skillProbe.source === "live" ? shortenHomePath(skillProbe.rootsScanned[1] ?? "") : sourceFallbackItems.get("skill-source-workspace")?.path,
+              tone: getSkillSourceCount("skills-workspace") > 0 ? "positive" : "neutral"
+            },
+            {
+              ...(sourceFallbackItems.get("skill-source-extensions") ?? {}),
+              id: "skill-source-extensions",
+              name: "Extension bundles",
+              surface: "Extension root",
+              status: getSkillSourceCount("skills-extensions") > 0 ? `${getSkillSourceCount("skills-extensions")} indexed` : "Not found",
+              source: skillProbe.source === "live" ? "runtime" : "mock",
+              detail:
+                skillProbe.source === "live"
+                  ? `Root ${shortenHomePath(skillProbe.rootsScanned[2] ?? "")} -> ${getSkillSourceCount("skills-extensions")} extension-bundled skills.`
+                  : sourceFallbackItems.get("skill-source-extensions")?.detail ?? "Extension bundle fallback.",
+              origin: "Extensions",
+              path: skillProbe.source === "live" ? shortenHomePath(skillProbe.rootsScanned[2] ?? "") : sourceFallbackItems.get("skill-source-extensions")?.path,
+              tone: getSkillSourceCount("skills-extensions") > 0 ? "positive" : "neutral"
+            },
+            {
+              ...(sourceFallbackItems.get("skill-source-plugin-load-paths") ?? {}),
+              id: "skill-source-plugin-load-paths",
+              name: "Plugin load paths",
+              surface: "Plugin source",
+              status:
+                toolsMcpProbe.source === "live"
+                  ? toolsMcpProbe.pluginLoadPaths.length > 0 || toolsMcpProbe.codexPluginCachePresent
+                    ? "Observed"
+                    : "Fallback"
+                  : sourceFallbackItems.get("skill-source-plugin-load-paths")?.status ?? "Fallback",
+              source: toolsMcpProbe.source === "live" ? "runtime" : "mock",
+              detail:
+                toolsMcpProbe.source === "live"
+                  ? `Load paths ${toolsMcpProbe.pluginLoadPaths.length} · curated cache ${toolsMcpProbe.codexPluginCachePresent ? "present" : "missing"} · installs ${toolsMcpProbe.pluginInstallCount}.`
+                  : sourceFallbackItems.get("skill-source-plugin-load-paths")?.detail ?? "Plugin source fallback.",
+              origin: "OpenClaw Plugins",
+              path:
+                toolsMcpProbe.source === "live"
+                  ? shortenHomePath(toolsMcpProbe.pluginLoadPaths[0] ?? toolsMcpProbe.codexConfigPath)
+                  : sourceFallbackItems.get("skill-source-plugin-load-paths")?.path,
+              tone:
+                toolsMcpProbe.source === "live"
+                  ? toolsMcpProbe.pluginLoadPaths.length > 0 || toolsMcpProbe.codexPluginCachePresent || toolsMcpProbe.pluginInstallCount > 0
+                    ? "positive"
+                    : "neutral"
+                  : sourceFallbackItems.get("skill-source-plugin-load-paths")?.tone ?? "neutral"
+            },
+            {
+              ...(sourceFallbackItems.get("skill-source-mcp-roots") ?? {}),
+              id: "skill-source-mcp-roots",
+              name: "Dedicated MCP roots",
+              surface: "MCP source",
+              status:
+                toolsMcpProbe.source === "live"
+                  ? toolsMcpProbe.discoveredMcpRoots.length > 0
+                    ? `${toolsMcpProbe.discoveredMcpRoots.length} detected`
+                    : "Not found"
+                  : sourceFallbackItems.get("skill-source-mcp-roots")?.status ?? "Fallback",
+              source: toolsMcpProbe.source === "live" ? "runtime" : "mock",
+              detail:
+                toolsMcpProbe.source === "live"
+                  ? `Scanned ${toolsMcpProbe.mcpRootsScanned.map((root) => shortenHomePath(root)).join(" · ")} -> ${toolsMcpProbe.discoveredMcpRoots.length > 0 ? toolsMcpProbe.discoveredMcpRoots.map((root) => shortenHomePath(root)).join(" · ") : "no dedicated roots"}.`
+                  : sourceFallbackItems.get("skill-source-mcp-roots")?.detail ?? "MCP root fallback.",
+              origin: "MCP Runtime",
+              path:
+                toolsMcpProbe.source === "live" && toolsMcpProbe.discoveredMcpRoots.length > 0
+                  ? shortenHomePath(toolsMcpProbe.discoveredMcpRoots[0])
+                  : sourceFallbackItems.get("skill-source-mcp-roots")?.path,
+              tone:
+                toolsMcpProbe.source === "live"
+                  ? toolsMcpProbe.discoveredMcpRoots.length > 0
+                    ? "positive"
+                    : "warning"
+                  : sourceFallbackItems.get("skill-source-mcp-roots")?.tone ?? "warning"
+            }
+          ]
+        }
+      : null;
+
   const summaryParts = [];
 
   if (skillProbe.source === "live" && skillProbe.sections.length > 0) {
@@ -903,10 +1087,15 @@ function createSkillsState(
     );
   }
 
+  if (sourcesSection) {
+    summaryParts.push("Extension provenance now distinguishes bundled skill roots, external extension bundles, plugin load-path sources, and dedicated MCP roots.");
+  }
+
   return {
     summary: summaryParts.length > 0 ? summaryParts.join(" ") : baseSkills.summary,
     sections: [
       ...skillSections,
+      ...(sourcesSection ? [sourcesSection] : []),
       ...(toolsSection ? [toolsSection] : []),
       ...(mcpSection ? [mcpSection] : [])
     ]
@@ -955,10 +1144,15 @@ function createCodexObservations(codexProbe: Awaited<ReturnType<typeof probeLive
 
 function createCodexState(
   baseCodex: StudioShellState["codex"],
-  codexProbe: Awaited<ReturnType<typeof probeLiveCodex>>
+  codexProbe: Awaited<ReturnType<typeof probeLiveCodex>>,
+  projectContext: Awaited<ReturnType<typeof probeProjectContext>>
 ): StudioShellState["codex"] {
   if (codexProbe.source !== "live") {
-    return baseCodex;
+    return {
+      ...baseCodex,
+      contextSummary: projectContext.summary,
+      contextNotes: projectContext.notes
+    };
   }
 
   const hasLiveTasks = codexProbe.tasks.length > 0;
@@ -966,10 +1160,15 @@ function createCodexState(
   return {
     summary: hasLiveTasks
       ? "Recent Codex task sessions are now read from local ~/.codex session logs, and the detail panel also reflects local config, auth, plugin, and shell-snapshot metadata. Status stays heuristic and safe: unfinished logs updated recently show as running, older unfinished logs show as recent, and completed logs stay complete."
-      : "Codex config and auth readiness are observable locally even when no recent session logs were readable, so the page now surfaces local config/auth/plugin roots instead of staying on a generic placeholder.",
+      : "Codex config and auth readiness are observable locally even when no recent session logs were readable, so the page now surfaces local config/auth/plugin roots instead of staying on a generic placeholder. The agent-loop surface also remains read-only and observational: it summarizes turn continuity, recovery hints, and interruptions without replaying any session.",
     stats: codexProbe.stats,
     tasks: hasLiveTasks ? codexProbe.tasks : baseCodex.tasks,
-    observations: createCodexObservations(codexProbe)
+    observations: createCodexObservations(codexProbe),
+    loopSummary: codexProbe.loopSummary,
+    loopStats: codexProbe.loopStats,
+    loopSignals: codexProbe.loopSignals,
+    contextSummary: projectContext.summary,
+    contextNotes: projectContext.notes
   };
 }
 
@@ -980,6 +1179,8 @@ function buildShellState(
   runtimeObservations: Awaited<ReturnType<typeof probeLiveRuntimeObservations>>,
   skillProbe: Awaited<ReturnType<typeof probeLiveSkills>>,
   codexProbe: Awaited<ReturnType<typeof probeLiveCodex>>,
+  projectContext: Awaited<ReturnType<typeof probeProjectContext>>,
+  startupRouting: Awaited<ReturnType<typeof probeStartupRouting>>,
   toolsMcpProbe: Awaited<ReturnType<typeof probeLiveToolsMcp>>,
   toolsMcpControlSession: ToolsMcpLocalControlSession
 ): StudioShellState {
@@ -1064,38 +1265,47 @@ function buildShellState(
     recentActivity:
       hasLiveSessions || hasLiveRuntime
         ? createAgentActivity(baseState.agents.recentActivity, interactiveSessions, runtimeObservations)
-        : baseState.agents.recentActivity
+        : baseState.agents.recentActivity,
+    ...createAgentDelegationState(baseState.agents, roster, interactiveSessions, runtimeObservations, codexProbe)
   };
-  shellState.codex = createCodexState(baseState.codex, codexProbe);
+  shellState.codex = createCodexState(baseState.codex, codexProbe, projectContext);
   shellState.skills = createSkillsState(baseState.skills, skillProbe, toolsMcpProbe);
 
+  shellState.settings.summary = `${baseState.settings.summary} ${startupRouting.summary}`;
   shellState.settings.sections = shellState.settings.sections.map((section) => {
-    if (section.id !== "settings-runtime") {
-      return section;
+    if (section.id === "settings-runtime") {
+      return {
+        ...section,
+        items: updateSettingItem(
+          updateSettingItem(section.items, "settings-bridge", {
+            value: bridgeMode === "hybrid" ? "Hybrid" : "Mock",
+            detail:
+              bridgeMode === "hybrid"
+                ? "Dashboard, Agents, Codex, Skills, and Tools/MCP now mix local runtime observations with typed fallback where probes stay intentionally read-only."
+                : "Live runtime probes were unavailable, so the shell stayed mock-backed.",
+            tone: bridgeMode === "hybrid" ? "positive" : "warning"
+          }),
+          "settings-fallback",
+          {
+            value: hasLiveSessions || hasLiveRuntime || hasLiveCodex || hasLiveToolsMcp ? "Active" : "Renderer-safe",
+            detail:
+              hasLiveSessions || hasLiveRuntime || hasLiveCodex || hasLiveToolsMcp
+                ? "Renderer is receiving live-backed observations with typed fallback still available for missing probes."
+                : "Renderer keeps rendering even when live runtime access is unavailable.",
+            tone: "positive"
+          }
+        )
+      };
     }
 
-    return {
-      ...section,
-      items: updateSettingItem(
-        updateSettingItem(section.items, "settings-bridge", {
-          value: bridgeMode === "hybrid" ? "Hybrid" : "Mock",
-          detail:
-            bridgeMode === "hybrid"
-              ? "Dashboard, Agents, Codex, Skills, and Tools/MCP now mix local runtime observations with typed fallback where probes stay intentionally read-only."
-              : "Live runtime probes were unavailable, so the shell stayed mock-backed.",
-          tone: bridgeMode === "hybrid" ? "positive" : "warning"
-        }),
-        "settings-fallback",
-        {
-          value: hasLiveSessions || hasLiveRuntime || hasLiveCodex || hasLiveToolsMcp ? "Active" : "Renderer-safe",
-          detail:
-            hasLiveSessions || hasLiveRuntime || hasLiveCodex || hasLiveToolsMcp
-              ? "Renderer is receiving live-backed observations with typed fallback still available for missing probes."
-              : "Renderer keeps rendering even when live runtime access is unavailable.",
-          tone: "positive"
-        }
-      )
-    };
+    if (section.id === "settings-startup") {
+      return {
+        ...section,
+        items: startupRouting.items.map((item) => ({ ...item }))
+      };
+    }
+
+    return section;
   });
 
   shellState.inspector.summary =
@@ -1220,16 +1430,18 @@ export function createStudioRuntime(): StudioRuntime {
   return {
     async getShellState(): Promise<StudioShellState> {
       const baseState = cloneState();
-      const [systemStatus, sessionProbe, runtimeObservations, skillProbe, codexProbe, toolsMcpProbe] = await Promise.all([
+      const [systemStatus, sessionProbe, runtimeObservations, skillProbe, codexProbe, toolsMcpProbe, startupRouting] = await Promise.all([
         probeLiveSystemStatus(),
         probeLiveSessions(),
         probeLiveRuntimeObservations(),
         probeLiveSkills(),
         probeLiveCodex(),
-        probeLiveToolsMcp()
+        probeLiveToolsMcp(),
+        probeStartupRouting()
       ]);
+      const projectContext = await probeProjectContext(sessionProbe, codexProbe);
 
-      return buildShellState(baseState, systemStatus, sessionProbe, runtimeObservations, skillProbe, codexProbe, toolsMcpProbe, toolsMcpControlSession);
+      return buildShellState(baseState, systemStatus, sessionProbe, runtimeObservations, skillProbe, codexProbe, projectContext, startupRouting, toolsMcpProbe, toolsMcpControlSession);
     },
     async listSessions(): Promise<SessionSummary[]> {
       const liveSessions = await probeLiveSessions();

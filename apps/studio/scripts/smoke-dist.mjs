@@ -10,6 +10,8 @@ const { getPreflightSummary } = require(path.join(appRoot, "scripts", "studio-pr
 const { createReleaseSkeleton, PHASE_ID, PHASE_TITLE, REVIEW_STAGE_ID } = require(path.join(appRoot, "scripts", "release-skeleton.cjs"));
 const rendererRoot = path.join(appRoot, "dist-renderer");
 const electronRuntimePath = path.join(appRoot, "dist-electron", "electron", "runtime", "studio-runtime.js");
+const codexAgentLoopPath = path.join(appRoot, "dist-electron", "electron", "runtime", "probes", "codex-agent-loop.js");
+const runtimeCommandPolicyPath = path.join(appRoot, "dist-electron", "electron", "runtime", "probes", "runtime-command-policy.js");
 const sharedDistPath = path.join(repoRoot, "packages", "shared", "dist", "index.js");
 const bridgeDistPath = path.join(repoRoot, "packages", "bridge", "dist", "index.js");
 
@@ -68,6 +70,16 @@ async function verifyRendererFocusedSlotUi() {
     "Recommended Next Action",
     "Active Flow State",
     "Sequence Preview",
+    "Turn Lifecycle",
+    "Loop Summary",
+    "Project Context",
+    "Context Summary",
+    "Extension Sources",
+    "Delegation Topology",
+    "Delegation Summary",
+    "Startup Routing",
+    "Read-only loop audit",
+    "Recovery / Stop",
     "Route-aware Next-step Board",
     "Keyboard Routing",
     "Layout Persistence",
@@ -166,8 +178,10 @@ async function verifyBridgeFallback() {
 
 async function verifyElectronRuntime() {
   await ensureFile(electronRuntimePath);
+  await ensureFile(codexAgentLoopPath);
 
   const { createStudioRuntime } = require(electronRuntimePath);
+  const { analyzeCodexAgentLoop } = require(codexAgentLoopPath);
   const runtime = createStudioRuntime();
   const [shellState, sessions, codexTasks, hostExecutor, hostBridge] = await Promise.all([
     runtime.getShellState(),
@@ -187,19 +201,201 @@ async function verifyElectronRuntime() {
   assertCommandSurfaceContract(shellState.commandSurface, shellState);
   assertLayoutContract(shellState.layout, shellState.windowing);
   assertWindowingContract(shellState.windowing, shellState.layout);
+  assertCodexLoopContract(shellState.codex, codexTasks);
+  assertCodexContextContract(shellState.codex);
+  assertSkillExtensionContract(shellState.skills);
+  assertAgentDelegationContract(shellState.agents);
+  assertStartupRoutingContract(shellState.settings);
   assertHostExecutorContract(hostExecutor, "runtime host executor state");
   assertHostBridgeContract(hostBridge, "runtime host bridge state");
+  const loopBehavior = verifyCodexAgentLoopBehavior(analyzeCodexAgentLoop);
 
   return {
     bridge: shellState.status.bridge,
     runtime: shellState.status.runtime,
     sessions: sessions.length,
     codexTasks: codexTasks.length,
+    codexLoopCases: loopBehavior.checkedCases,
     hostExecutorMode: hostExecutor.mode,
     hostExecutorSlots: hostExecutor.mutationSlots.length,
     hostBridgeHandlers: hostBridge.slotHandlers.length,
     commandActions: shellState.commandSurface.actions.length,
     windowIntents: shellState.windowing.windowIntents.length
+  };
+}
+
+function assertCodexLoopContract(codexState, codexTasks) {
+  if (!codexState?.loopSummary || !Array.isArray(codexState.loopStats) || !Array.isArray(codexState.loopSignals)) {
+    throw new Error("Codex state is missing the agent-loop contract.");
+  }
+
+  const requiredLoopStats = new Set(["Loop State", "Turns", "Tool Chain", "Recovery / Stop"]);
+  const actualLoopStats = new Set(codexState.loopStats.map((stat) => stat.label));
+
+  for (const label of requiredLoopStats) {
+    if (!actualLoopStats.has(label)) {
+      throw new Error(`Codex loop stats are missing required marker ${label}.`);
+    }
+  }
+
+  const requiredLoopSignals = new Set([
+    "codex-loop-state",
+    "codex-loop-continuation",
+    "codex-loop-recovery"
+  ]);
+  const actualLoopSignals = new Set(codexState.loopSignals.map((signal) => signal.id));
+
+  for (const signalId of requiredLoopSignals) {
+    if (!actualLoopSignals.has(signalId)) {
+      throw new Error(`Codex loop signals are missing required item ${signalId}.`);
+    }
+  }
+
+  const annotatedTask = codexTasks.find(
+    (task) => task.loopState && typeof task.turnCount === "number" && typeof task.continuation === "string"
+  );
+
+  if (!annotatedTask) {
+    throw new Error("Codex tasks are missing turn-lifecycle annotations.");
+  }
+}
+
+function assertCodexContextContract(codexState) {
+  if (!codexState?.contextSummary || !Array.isArray(codexState.contextNotes) || codexState.contextNotes.length < 3) {
+    throw new Error("Codex state is missing the project-context contract.");
+  }
+
+  const contextNoteIds = new Set(codexState.contextNotes.map((note) => note.id));
+
+  for (const noteId of ["codex-context-docs", "codex-context-git", "codex-context-session"]) {
+    if (!contextNoteIds.has(noteId)) {
+      throw new Error(`Codex context notes are missing required item ${noteId}.`);
+    }
+  }
+}
+
+function assertSkillExtensionContract(skillsState) {
+  const sourceSection = skillsState?.sections?.find((section) => section.id === "skills-sources");
+
+  if (!sourceSection || !Array.isArray(sourceSection.items) || sourceSection.items.length < 4) {
+    throw new Error("Skills state is missing the extension-source contract.");
+  }
+
+  const itemIds = new Set(sourceSection.items.map((item) => item.id));
+
+  for (const itemId of [
+    "skill-source-openclaw-home",
+    "skill-source-workspace",
+    "skill-source-extensions",
+    "skill-source-plugin-load-paths",
+    "skill-source-mcp-roots"
+  ]) {
+    if (!itemIds.has(itemId)) {
+      throw new Error(`Extension source section is missing required item ${itemId}.`);
+    }
+  }
+}
+
+function assertAgentDelegationContract(agentState) {
+  if (!agentState?.delegationSummary || !Array.isArray(agentState.delegationNotes) || agentState.delegationNotes.length < 3) {
+    throw new Error("Agent state is missing the delegation topology contract.");
+  }
+
+  const delegationNoteIds = new Set(agentState.delegationNotes.map((note) => note.id));
+
+  for (const noteId of [
+    "agent-delegation-spawn",
+    "agent-delegation-isolation",
+    "agent-delegation-background",
+    "agent-delegation-handoff"
+  ]) {
+    if (!delegationNoteIds.has(noteId)) {
+      throw new Error(`Agent delegation notes are missing required item ${noteId}.`);
+    }
+  }
+
+  const annotatedRosterEntry = agentState.roster?.find((agent) => agent.isolation && agent.handoff);
+
+  if (!annotatedRosterEntry) {
+    throw new Error("Agent roster entries are missing isolation/handoff annotations.");
+  }
+}
+
+function assertStartupRoutingContract(settingsState) {
+  const startupSection = settingsState?.sections?.find((section) => section.id === "settings-startup");
+
+  if (!startupSection || !Array.isArray(startupSection.items) || startupSection.items.length < 3) {
+    throw new Error("Settings state is missing the startup routing contract.");
+  }
+
+  const startupItemIds = new Set(startupSection.items.map((item) => item.id));
+
+  for (const itemId of ["settings-start-ready", "settings-display", "settings-command-path"]) {
+    if (!startupItemIds.has(itemId)) {
+      throw new Error(`Startup routing section is missing required item ${itemId}.`);
+    }
+  }
+}
+
+function verifyCodexAgentLoopBehavior(analyzeCodexAgentLoop) {
+  const now = Date.now();
+  const settledTool = analyzeCodexAgentLoop(
+    [
+      { type: "turn_context", timestamp: new Date(now - 5_000).toISOString() },
+      { type: "response_item", timestamp: new Date(now - 4_000).toISOString(), payload: { type: "tool_use" } },
+      { type: "response_item", timestamp: new Date(now - 3_000).toISOString(), payload: { type: "tool_result" } }
+    ],
+    "running",
+    now - 2_000,
+    now
+  );
+
+  if (settledTool.state !== "continuing" || settledTool.toolCallCount !== 1 || settledTool.toolResultCount !== 1) {
+    throw new Error("Codex agent-loop analysis failed to keep a balanced tool continuation in the continuing state.");
+  }
+
+  const recovering = analyzeCodexAgentLoop(
+    [
+      { type: "turn_context", timestamp: new Date(now - 5_000).toISOString() },
+      { type: "event_msg", timestamp: new Date(now - 4_000).toISOString(), payload: { type: "retry_request" } },
+      { type: "event_msg", timestamp: new Date(now - 3_000).toISOString(), payload: { type: "max_output_tokens" } }
+    ],
+    "running",
+    now - 2_000,
+    now
+  );
+
+  if (recovering.state !== "recovering" || recovering.recoveryCount < 2) {
+    throw new Error("Codex agent-loop analysis failed to surface retry and token-budget recovery markers.");
+  }
+
+  const interrupted = analyzeCodexAgentLoop(
+    [
+      { type: "turn_context", timestamp: new Date(now - 4_000).toISOString() },
+      { type: "event_msg", timestamp: new Date(now - 3_000).toISOString(), payload: { type: "abort_requested" } }
+    ],
+    "running",
+    now - 2_000,
+    now
+  );
+
+  if (interrupted.state !== "interrupted" || interrupted.interruptionCount < 1) {
+    throw new Error("Codex agent-loop analysis failed to surface interruption handling.");
+  }
+
+  const completed = analyzeCodexAgentLoop(
+    [{ type: "event_msg", timestamp: new Date(now - 3_000).toISOString(), payload: { type: "task_complete" } }],
+    "complete",
+    now - 2_000,
+    now
+  );
+
+  if (completed.state !== "complete") {
+    throw new Error("Codex agent-loop analysis failed to stop on completion.");
+  }
+
+  return {
+    checkedCases: 4
   };
 }
 
@@ -859,10 +1055,64 @@ function assertBoundaryContract(boundary, label) {
   assertHostExecutorContract(boundary.hostExecutor, label);
 }
 
+function assertRuntimeActionContract(action, label) {
+  if (!action?.id || !action?.label || !action?.description || !action?.kind || !action?.safety || typeof action.refreshDetailOnSuccess !== "boolean") {
+    throw new Error(`${label} is missing the normalized runtime action contract.`);
+  }
+
+  if (!["probe", "validate", "dry-run", "execute-local", "preview-host"].includes(action.kind)) {
+    throw new Error(`${label} exposed an unknown runtime action kind ${action.kind}.`);
+  }
+
+  if (!["read-only", "dry-run", "local-only", "preview-host"].includes(action.safety)) {
+    throw new Error(`${label} exposed an unknown runtime action safety ${action.safety}.`);
+  }
+}
+
+function assertRuntimeActionCatalog(detail, label) {
+  for (const action of detail.actions ?? []) {
+    assertRuntimeActionContract(action, `${label} action ${action.id}`);
+  }
+}
+
+function assertRuntimeActionResultContract(result, itemId, actionId, expectedSafety) {
+  if (!result?.action || !result?.execution) {
+    throw new Error(`Runtime action ${itemId}:${actionId} is missing normalized action execution metadata.`);
+  }
+
+  assertRuntimeActionContract(result.action, `runtime action result ${itemId}:${actionId}`);
+
+  if (result.action.id !== actionId) {
+    throw new Error(`Runtime action ${itemId}:${actionId} returned mismatched action metadata (${result.action.id}).`);
+  }
+
+  if (result.execution.safety !== result.action.safety || result.execution.safety !== expectedSafety) {
+    throw new Error(`Runtime action ${itemId}:${actionId} returned mismatched safety metadata.`);
+  }
+
+  if (result.execution.detailRefresh === "required" && result.action.refreshDetailOnSuccess !== true) {
+    throw new Error(`Runtime action ${itemId}:${actionId} drifted on detail-refresh policy.`);
+  }
+
+  if (result.execution.detailRefresh === "not-needed" && result.action.refreshDetailOnSuccess !== false) {
+    throw new Error(`Runtime action ${itemId}:${actionId} drifted on detail-refresh policy.`);
+  }
+
+  if (expectedSafety === "preview-host" && result.execution.status !== "blocked") {
+    throw new Error(`Runtime action ${itemId}:${actionId} should stay blocked on the preview-host boundary.`);
+  }
+
+  if (expectedSafety !== "preview-host" && result.execution.status !== "completed") {
+    throw new Error(`Runtime action ${itemId}:${actionId} should complete inside the ${expectedSafety} contract.`);
+  }
+}
+
 function assertHostBoundaryResult(result, itemId, actionId) {
   if (!result) {
     throw new Error(`Host boundary action ${itemId}:${actionId} returned no result.`);
   }
+
+  assertRuntimeActionResultContract(result, itemId, actionId, "preview-host");
 
   assertBoundaryContract(result.boundary, `host boundary action ${itemId}:${actionId}`);
 
@@ -964,6 +1214,8 @@ async function verifyHostBoundaryActions() {
     };
   }
 
+  assertRuntimeActionCatalog(rootDetail, "root detail");
+  assertRuntimeActionCatalog(connectorDetail, "connector detail");
   assertBoundaryContract(rootDetail.boundary, "root detail");
   assertBoundaryContract(connectorDetail.boundary, "connector detail");
 
@@ -1074,6 +1326,8 @@ async function verifyLocalConnectorControls() {
     };
   }
 
+  assertRuntimeActionCatalog(rootDetail, "root detail");
+  assertRuntimeActionCatalog(connectorDetail, "connector detail");
   const rootActionIds = new Set((rootDetail.actions ?? []).map((action) => action.id));
   const connectorActionIds = new Set((connectorDetail.actions ?? []).map((action) => action.id));
   const requiredRootAction = "execute-local-root-select";
@@ -1106,6 +1360,12 @@ async function verifyLocalConnectorControls() {
   }
 
   for (const [index, result] of executedResults.entries()) {
+    assertRuntimeActionResultContract(
+      result,
+      index === 0 ? "mcp-root-scan" : "mcp-adjacent-runtime",
+      index === 0 ? requiredRootAction : requiredConnectorActions[index - 1],
+      "local-only"
+    );
     assertBoundaryContract(result.boundary, `local connector control result ${index + 1}`);
   }
 
@@ -1128,6 +1388,85 @@ async function verifyLocalConnectorControls() {
     status: "verified",
     detail: laneLine ?? "lane apply · unknown",
     historyCount: localHistorySection.lines.length
+  };
+}
+
+async function verifyRuntimeActionContracts() {
+  await ensureFile(electronRuntimePath);
+  await ensureFile(runtimeCommandPolicyPath);
+
+  const { createStudioRuntime } = require(electronRuntimePath);
+  const { assessRuntimeCommand, matchRuntimeShellRule } = require(runtimeCommandPolicyPath);
+  const runtime = createStudioRuntime();
+  const [toolDetail, rootDetail] = await Promise.all([
+    runtime.getRuntimeItemDetail("tool-openclaw-runtime"),
+    runtime.getRuntimeItemDetail("mcp-root-scan")
+  ]);
+
+  if (!toolDetail || !rootDetail) {
+    return {
+      status: "skipped",
+      detail: "live tools/MCP detail unavailable"
+    };
+  }
+
+  assertRuntimeActionCatalog(toolDetail, "tool runtime detail");
+  assertRuntimeActionCatalog(rootDetail, "root detail");
+
+  const toolSectionIds = new Set(toolDetail.sections.map((section) => section.id));
+
+  for (const sectionId of ["tool-permissions", "tool-allow-rules"]) {
+    if (!toolSectionIds.has(sectionId)) {
+      throw new Error(`Tool runtime detail is missing permission section ${sectionId}.`);
+    }
+  }
+
+  const readOnlyResult = await runtime.runRuntimeItemAction("tool-openclaw-runtime", "probe-config");
+  const dryRunResult = await runtime.runRuntimeItemAction("mcp-root-scan", "dry-run-connect-root");
+
+  if (!readOnlyResult || !dryRunResult) {
+    throw new Error("Runtime action contract verification could not execute the expected read-only and dry-run actions.");
+  }
+
+  assertRuntimeActionResultContract(readOnlyResult, "tool-openclaw-runtime", "probe-config", "read-only");
+  assertRuntimeActionResultContract(dryRunResult, "mcp-root-scan", "dry-run-connect-root", "dry-run");
+
+  const readOnlySectionIds = new Set(readOnlyResult.sections.map((section) => section.id));
+
+  for (const sectionId of ["action-command-policy", "action-allow-rules"]) {
+    if (!readOnlySectionIds.has(sectionId)) {
+      throw new Error(`Tool runtime action probe-config is missing permission section ${sectionId}.`);
+    }
+  }
+
+  const readOnlyAssessment = assessRuntimeCommand("rg --files apps/studio", ["git:*"]);
+  const protectedWriteAssessment = assessRuntimeCommand("mkdir -p ~/.openclaw/plugins", []);
+  const dangerousRemovalAssessment = assessRuntimeCommand("rm -rf ~/.openclaw", []);
+  const dangerousServiceAssessment = assessRuntimeCommand("systemctl restart openclaw", []);
+
+  if (readOnlyAssessment.classification !== "read-only" || readOnlyAssessment.approval !== "not-required") {
+    throw new Error("Runtime command policy failed to classify a read-only workspace command.");
+  }
+
+  if (protectedWriteAssessment.classification !== "protected-write" || protectedWriteAssessment.approval !== "required") {
+    throw new Error("Runtime command policy failed to classify a protected write.");
+  }
+
+  if (dangerousRemovalAssessment.classification !== "dangerous" || dangerousRemovalAssessment.approval !== "blocked") {
+    throw new Error("Runtime command policy failed to block a dangerous removal.");
+  }
+
+  if (dangerousServiceAssessment.classification !== "dangerous" || dangerousServiceAssessment.approval !== "blocked") {
+    throw new Error("Runtime command policy failed to block a service-control mutation.");
+  }
+
+  if (!matchRuntimeShellRule("git:*", "git status") || matchRuntimeShellRule("git:*", "npm run build")) {
+    throw new Error("Runtime shell rule matching drifted from expected exact/prefix behavior.");
+  }
+
+  return {
+    status: "verified",
+    detail: `read-only=${readOnlyResult.action.kind}/${readOnlyResult.action.safety}, dry-run=${dryRunResult.action.kind}/${dryRunResult.action.safety}, permissions=5 checks`
   };
 }
 
@@ -1915,6 +2254,7 @@ async function main() {
   const rendererFocusedSlotUi = await verifyRendererFocusedSlotUi();
   const bridge = await verifyBridgeFallback();
   const runtime = await verifyElectronRuntime();
+  const runtimeActions = await verifyRuntimeActionContracts();
   const hostBoundary = await verifyHostBoundaryActions();
   const localControls = await verifyLocalConnectorControls();
   const releaseSkeleton = verifyReleaseSkeletonContract();
@@ -1928,6 +2268,7 @@ async function main() {
   console.log(
     `Electron runtime: bridge=${runtime.bridge}, runtime=${runtime.runtime}, sessions=${runtime.sessions}, codexTasks=${runtime.codexTasks}, hostExecutor=${runtime.hostExecutorMode}, slots=${runtime.hostExecutorSlots}, handlers=${runtime.hostBridgeHandlers}, commands=${runtime.commandActions}, intents=${runtime.windowIntents}`
   );
+  console.log(`Runtime action contracts: ${runtimeActions.status}${runtimeActions.detail ? ` (${runtimeActions.detail})` : ""}`);
   console.log(`Host boundary actions: ${hostBoundary.status}${hostBoundary.detail ? ` (${hostBoundary.detail})` : ""}`);
   console.log(
     `Local connector controls: ${localControls.status}${localControls.detail ? ` (${localControls.detail})` : ""}${

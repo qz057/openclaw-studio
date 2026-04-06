@@ -1,7 +1,8 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { CodexTaskSummary, StudioStat } from "@openclaw/shared";
+import type { CodexTaskSummary, SettingItem, StudioStat } from "@openclaw/shared";
+import { analyzeCodexAgentLoop, buildCodexAgentLoopOverview, type CodexAgentLoopEvent } from "./codex-agent-loop";
 
 const homeDirectory = os.homedir();
 const codexRoot = path.join(homeDirectory, ".codex");
@@ -61,6 +62,9 @@ export interface LiveCodexProbe {
   completedTasks: number;
   stats: StudioStat[];
   tasks: CodexTaskSummary[];
+  loopSummary: string;
+  loopStats: StudioStat[];
+  loopSignals: SettingItem[];
 }
 
 function parseTimestamp(value: string | null | undefined): number | null {
@@ -405,6 +409,15 @@ function createCodexStats(probe: Omit<LiveCodexProbe, "stats">): StudioStat[] {
   ];
 }
 
+function createLoopFallback(): Pick<LiveCodexProbe, "loopSummary" | "loopStats" | "loopSignals"> {
+  const fallback = buildCodexAgentLoopOverview([]);
+  return {
+    loopSummary: fallback.summary,
+    loopStats: fallback.stats,
+    loopSignals: fallback.signals
+  };
+}
+
 export async function probeLiveCodex(): Promise<LiveCodexProbe> {
   const [config, authPresent, sessionFiles, shellSnapshotsCount] = await Promise.all([
     readCodexConfig(),
@@ -413,7 +426,7 @@ export async function probeLiveCodex(): Promise<LiveCodexProbe> {
     countEntries(shellSnapshotsRoot)
   ]);
 
-  const tasksWithNulls: Array<CodexTaskSummary | null> = await Promise.all(
+  const tasksWithNulls: Array<{ task: CodexTaskSummary; loop: ReturnType<typeof analyzeCodexAgentLoop> } | null> = await Promise.all(
     sessionFiles.map(async (sessionFile) => {
       const events = await readJsonlLines(sessionFile.path);
 
@@ -439,6 +452,7 @@ export async function probeLiveCodex(): Promise<LiveCodexProbe> {
         [...events].reverse().find((event) => event.type === "event_msg")?.payload?.type ??
         [...events].reverse().find((event) => event.type === "response_item")?.payload?.type ??
         null;
+      const loop = analyzeCodexAgentLoop(events as CodexAgentLoopEvent[], status, latestTimestamp);
 
       const task: CodexTaskSummary = {
         id: sessionId,
@@ -449,14 +463,26 @@ export async function probeLiveCodex(): Promise<LiveCodexProbe> {
         updatedAt: formatRelativeTime(latestTimestamp),
         source: "runtime",
         workdir: shortenHomePath(workdir),
-        detail: deriveDetail(cliVersion, lastEventType, sessionMeta?.source)
+        detail: deriveDetail(cliVersion, lastEventType, sessionMeta?.source),
+        loopState: loop.state,
+        turnCount: loop.turnCount,
+        continuation: loop.continuation,
+        recoveryCount: loop.recoveryCount,
+        interruptionCount: loop.interruptionCount
       };
 
-      return task;
+      return {
+        task,
+        loop
+      };
     })
   );
 
-  const tasks = tasksWithNulls.filter((task): task is CodexTaskSummary => task !== null);
+  const tasksWithLoops = tasksWithNulls.filter(
+    (entry): entry is { task: CodexTaskSummary; loop: ReturnType<typeof analyzeCodexAgentLoop> } => entry !== null
+  );
+  const tasks = tasksWithLoops.map((entry) => entry.task);
+  const loopOverview = tasksWithLoops.length > 0 ? buildCodexAgentLoopOverview(tasksWithLoops.map((entry) => entry.loop)) : null;
 
   const runningTasks = tasks.filter((task) => task.status === "running").length;
   const recentTasks = tasks.filter((task) => task.status === "recent").length;
@@ -489,7 +515,10 @@ export async function probeLiveCodex(): Promise<LiveCodexProbe> {
     runningTasks,
     recentTasks,
     completedTasks,
-    tasks
+    tasks,
+    loopSummary: loopOverview?.summary ?? createLoopFallback().loopSummary,
+    loopStats: loopOverview?.stats ?? createLoopFallback().loopStats,
+    loopSignals: loopOverview?.signals ?? createLoopFallback().loopSignals
   };
 
   return {
