@@ -1,8 +1,8 @@
 {
   "schemaVersion": "openclaw-studio-review-manifest/v1",
-  "generatedAt": "2026-04-06T03:43:51.277Z",
-  "phase": "phase54",
-  "milestone": "phase54 attestation operator approval orchestration / promotion staged-apply release decision enforcement lifecycle / rollback cutover publication receipt settlement closeout + docs / smoke / package / release-plan / UI / shared data closeout",
+  "generatedAt": "2026-04-06T05:53:20.510Z",
+  "phase": "phase55",
+  "milestone": "phase55 review-only release approval pipeline / deeper trace inspector drill-down / docs / smoke / package / release-plan / UI / shared data closeout",
   "reviewDocs": [
     "README.md",
     "HANDOFF.md",
@@ -96,7 +96,7 @@
     }
   ],
   "pipeline": {
-    "stage": "attestation-operator-approval-orchestration-promotion-staged-apply-release-decision-enforcement-lifecycle-rollback-cutover-publication-receipt-settlement-closeout-skeleton",
+    "stage": "review-only-release-approval-pipeline-skeleton",
     "stages": [
       {
         "id": "pipeline-docs",
@@ -462,7 +462,7 @@
     "no executable promotion staged release decision enforcement lifecycle advancement, expiry closeout, or lifecycle baton transfer yet; release decision enforcement lifecycle remains review-only metadata",
     "no signing / notarization / hash publication workflow yet; approval bridge remains metadata-only",
     "no executable signing-publish gating handshake yet; handshake remains metadata-only",
-    "no executable release approval handshake yet; workflow remains metadata-only",
+    "no executable release approval pipeline approval handoff, reviewer quorum, or final release-decision gate yet; workflow remains metadata-only",
     "no rollback execution rehearsal or rollback apply automation yet; rehearsal ledger remains review-only metadata",
     "no rollback operator drillbooks or live-readiness contracts yet; drillbooks and live-readiness contracts remain review-only metadata",
     "no executable rollback cutover readiness evaluation, ownership baton transfer, or cutover topology handoff yet; cutover readiness maps and handoff plans remain review-only metadata",
@@ -473,6 +473,6 @@
     "no executable rollback cutover publication receipt closeout contract issuance, closeout acknowledgement sealing, or publication receipt closeout routing yet; publication receipt closeout contracts remain review-only metadata",
     "no executable rollback cutover publication receipt settlement closeout issuance, settlement ledger sealing, or receipt recovery closeout routing yet; receipt settlement closeout remains review-only metadata",
     "no release publishing / artifact upload / promotion handshake / rollback apply automation yet; publish rollback handshake remains metadata-only",
-    "real host-side execution remains disabled until approval / lifecycle / rollback close the loop"
+    "real host-side execution remains disabled until the review-only approval / lifecycle / rollback loop becomes executable end-to-end"
   ]
 }

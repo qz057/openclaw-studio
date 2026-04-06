@@ -2,7 +2,7 @@
 
 ## Snapshot
 
-- 当前已验证里程碑：**phase54 attestation operator approval orchestration / promotion staged-apply release decision enforcement lifecycle / rollback cutover publication receipt settlement closeout + docs / smoke / package / release-plan / UI / shared data closeout**
+- 当前已验证里程碑：**phase55 review-only release approval pipeline / deeper trace inspector drill-down + docs / smoke / package / release-plan / UI / shared data closeout**
 - 当前主视图：
   - `Dashboard`
   - `Home`
@@ -34,6 +34,7 @@
   - phase52 已把交付层继续下沉成 attestation operator approval execution envelopes、promotion staged-apply release decision records 与 rollback cutover publication recovery receipts
   - phase53 已把交付层继续下沉成 attestation operator approval routing contracts、promotion staged-apply release decision enforcement contracts 与 rollback cutover publication receipt closeout contracts
   - phase54 已把交付层继续下沉成 attestation operator approval orchestration、promotion staged-apply release decision enforcement lifecycle 与 rollback cutover publication receipt settlement closeout
+  - phase55 已把 phase54 approval / lifecycle / rollback layers 串成 review-only release approval pipeline，并补齐 trace phase stage metadata、linked notes、以及 inspector release-pipeline drilldowns
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline
@@ -48,7 +49,7 @@ npm run start:smoke
 npm run package:alpha
 ```
 
-phase54 额外 dry-run：
+phase55 额外 dry-run：
 
 ```bash
 npm run release:plan
@@ -60,7 +61,7 @@ npm run release:plan
 
 在当前这类受限 Linux sandbox 中，如果 Electron 已到达启动路径但 Chromium sandbox host 被容器拦截，`start:smoke` 会以 sandbox-limited fallback 通过并明确标注原因。
 
-`npm run release:plan` 只输出 phase54 release skeleton 汇总，不会写 installer，也不会发布任何 artifact。
+`npm run release:plan` 只输出 phase55 release skeleton 汇总，不会写 installer，也不会发布任何 artifact。
 
 ## Phase27/28/29/30/31/32/33 Shell Surface
 
@@ -92,6 +93,7 @@ npm run release:plan
 - phase52 进一步补齐 Attestation Operator Approval Execution Envelopes、Promotion Staged-apply Release Decision Records、Rollback Cutover Publication Recovery Receipts
 - phase53 进一步补齐 Attestation Operator Approval Routing Contracts、Promotion Staged-apply Release Decision Enforcement Contracts、Rollback Cutover Publication Receipt Closeout Contracts
 - phase54 进一步补齐 Attestation Operator Approval Orchestration、Promotion Staged-apply Release Decision Enforcement Lifecycle、Rollback Cutover Publication Receipt Settlement Closeout
+- phase55 进一步补齐 Review-only Release Approval Pipeline、Attestation Intake Board、Final Release Decision Board、以及更深的 Trace / Inspector Drill-down
 - 仍然不做真实外部窗口编排
 
 ## Phase25 Boundary Model
@@ -178,11 +180,11 @@ Tools / MCP 当前深度：
 - Studio-local execute
 - preview-host contract surfaces
 
-## Phase54 Delivery Skeleton
+## Phase55 Delivery Skeleton
 
 - `npm run package:alpha`
 - 输出到：`delivery/openclaw-studio-alpha-shell`
-- 这是 phase54 结构化 alpha-shell snapshot，不是 installer
+- 这是 phase55 结构化 alpha-shell snapshot，不是 installer
 
 ### 当前能交付
 
@@ -282,7 +284,7 @@ Tools / MCP 当前深度：
 - 不开放真实 host-side execution
 - bridge 虽已存在，但仍然 default-disabled 且只返回 placeholder result
 - placeholder result 带有 focused-slot page interactions、slot-state timeline、dock / inspector / trace panel 可见性与轻量 persistence，但仍然只是 simulated / traceable outcome，不代表真实 host 执行
-- release approval workflow、installer channel routing、attestation operator approval orchestration、promotion staged-apply release decision enforcement lifecycle、rollback cutover publication receipt settlement closeout、publish rollback handshake 与 signing-publish handshakes 现在都存在 metadata contract，但 approval / publish / promotion / rollback 仍尚不存在可执行链路
+- review-only release approval pipeline、release approval workflow、installer channel routing、attestation operator approval orchestration、promotion staged-apply release decision enforcement lifecycle、rollback cutover publication receipt settlement closeout、publish rollback handshake 与 signing-publish handshakes 现在都存在 metadata contract，但 approval / publish / promotion / rollback 仍尚不存在可执行链路
 - lifecycle runner 尚不存在
 - rollback-aware apply 尚不存在
 - package 已具备更清晰的 bundle-assembly + packaged-app materialization + packaged-app-directory materialization + packaged-app bundle sealing + installer builder execution skeleton + installer channel routing，但仍不是 release publish pipeline，也不是 installer
@@ -294,4 +296,4 @@ Tools / MCP 当前深度：
 
 1. 在保持 disabled 的前提下继续提升 validator / observability / command-surface / multi-window coverage
 2. 只有在 approval / lifecycle / rollback 真实闭环成型后，才评估任何 live host execution
-3. 把 phase54 shell foundations 继续推进成真正的多窗口编排与 attestation operator approval orchestration / promotion staged release decision enforcement lifecycle / rollback cutover publication receipt settlement closeout / approval pipeline
+3. 把 phase55 shell foundations 继续推进成真正的多窗口编排、跨窗口共享状态，以及 review-only release approval pipeline 的更完整审阅闭环

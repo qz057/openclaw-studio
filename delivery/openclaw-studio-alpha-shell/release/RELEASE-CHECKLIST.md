@@ -1,4 +1,4 @@
-# OpenClaw Studio Phase54 Release Checklist
+# OpenClaw Studio Phase55 Release Checklist
 
 ## Required Commands
 
@@ -18,7 +18,7 @@
 - `artifacts/electron/electron/main.js` 与 `artifacts/electron/electron/preload.js` 必须存在
 - `release/RELEASE-MANIFEST.json` 必须列出 docs、artifact groups、installer placeholder contract
 - `release/BUILD-METADATA.json` 必须记录 build/preflight/toolchain 元数据
-- `release/REVIEW-MANIFEST.json` 必须列出 attestation-operator-approval-orchestration-promotion-staged-apply-release-decision-enforcement-lifecycle-rollback-cutover-publication-receipt-settlement-closeout-skeleton pipeline stage、review docs、artifact groups、blocked 发布动作
+- `release/REVIEW-MANIFEST.json` 必须列出 review-only-release-approval-pipeline-skeleton pipeline stage、review docs、artifact groups、blocked 发布动作
 - `release/BUNDLE-MATRIX.json` 必须列出 per-platform bundle skeleton
 - `release/BUNDLE-ASSEMBLY.json` 必须列出 bundle assembly skeleton
 - `release/PACKAGED-APP-DIRECTORY-SKELETON.json` 必须列出 per-platform packaged app directory skeleton
@@ -89,7 +89,9 @@
 - structured alpha-shell snapshot under delivery/openclaw-studio-alpha-shell
 - built renderer bundle copied into artifacts/renderer
 - built Electron bundle copied into artifacts/electron
-- deeper inspector drilldowns, active flow state, route-aware next-step boards, and inspector-command linkage
+- review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, and the final release-decision gate without executing anything
+- deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references
+- deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, and inspector-command linkage
 - persisted shell layout foundation backed by localStorage
 - cross-view local orchestration boards linking route, workflow lane, workspace, detached candidate, intent focus, focused slot, and handoff posture
 - release manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged app materialization skeleton / packaged app directory materialization / packaged app staged output skeleton / packaged app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / attestation apply audit packs / attestation apply execution packets / attestation operator worklists / attestation operator dispatch manifests / attestation operator dispatch packets / attestation operator dispatch receipts / attestation operator reconciliation ledgers / attestation operator settlement packs / attestation operator approval routing contracts / attestation operator approval orchestration / installer targets / installer-target builder skeleton / installer builder execution skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / promotion apply readiness / promotion apply manifests / promotion execution checkpoints / promotion operator handoff rails / promotion staged-apply ledgers / promotion staged-apply runsheets / promotion staged-apply command sheets / promotion staged-apply confirmation ledgers / promotion staged-apply closeout journals / promotion staged-apply signoff sheets / promotion staged-apply release decision enforcement contracts / promotion staged-apply release decision enforcement lifecycle / signing-ready metadata / signing-publish pipeline / signing-publish gating handshake / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / rollback recovery ledger / rollback execution rehearsal ledger / rollback operator drillbooks / rollback live-readiness contracts / rollback cutover readiness maps / rollback cutover handoff plans / rollback cutover execution checklists / rollback cutover execution records / rollback cutover outcome reports / rollback cutover publication bundles / rollback cutover publication receipt closeout contracts / rollback cutover publication receipt settlement closeout / release approval workflow / release notes / publish gates / promotion gates under release/
@@ -123,7 +125,7 @@
 - no executable promotion staged release decision enforcement lifecycle advancement, expiry closeout, or lifecycle baton transfer yet; release decision enforcement lifecycle remains review-only metadata
 - no signing / notarization / hash publication workflow yet; approval bridge remains metadata-only
 - no executable signing-publish gating handshake yet; handshake remains metadata-only
-- no executable release approval handshake yet; workflow remains metadata-only
+- no executable release approval pipeline approval handoff, reviewer quorum, or final release-decision gate yet; workflow remains metadata-only
 - no rollback execution rehearsal or rollback apply automation yet; rehearsal ledger remains review-only metadata
 - no rollback operator drillbooks or live-readiness contracts yet; drillbooks and live-readiness contracts remain review-only metadata
 - no executable rollback cutover readiness evaluation, ownership baton transfer, or cutover topology handoff yet; cutover readiness maps and handoff plans remain review-only metadata
@@ -134,7 +136,7 @@
 - no executable rollback cutover publication receipt closeout contract issuance, closeout acknowledgement sealing, or publication receipt closeout routing yet; publication receipt closeout contracts remain review-only metadata
 - no executable rollback cutover publication receipt settlement closeout issuance, settlement ledger sealing, or receipt recovery closeout routing yet; receipt settlement closeout remains review-only metadata
 - no release publishing / artifact upload / promotion handshake / rollback apply automation yet; publish rollback handshake remains metadata-only
-- real host-side execution remains disabled until approval / lifecycle / rollback close the loop
+- real host-side execution remains disabled until the review-only approval / lifecycle / rollback loop becomes executable end-to-end
 
 ## Safety Boundaries
 
