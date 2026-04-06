@@ -1,0 +1,150 @@
+{
+  "schemaVersion": "openclaw-studio-promotion-staged-apply-release-decision-records/v1",
+  "generatedAt": "2026-04-06T00:44:51.028Z",
+  "phase": "phase52",
+  "mode": "local-only-review",
+  "decisionRecords": [
+    {
+      "id": "promotion-release-decision-record-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "promotionStagedApplySignoffSheetId": "promotion-signoff-sheet-alpha-to-beta",
+      "attestationOperatorApprovalExecutionEnvelopeId": "attestation-approval-envelope-alpha-to-beta",
+      "rollbackCutoverPublicationBundleId": "rollback-publication-bundle-alpha-to-beta",
+      "releaseApprovalStageId": "approval-decision-receipts",
+      "promotionHandshakeStageId": "promotion-handshake-staged-release-decision-records",
+      "publishGateId": "gate-promotion-staged-apply-release-decision-records",
+      "status": "blocked",
+      "decisionRecordPath": "future/channels/alpha-to-beta/promotion-staged-release-decision-record.json",
+      "decisionExpiryPath": "future/channels/alpha-to-beta/promotion-staged-release-decision-expiry.json",
+      "publishRoutePath": "future/channels/alpha-to-beta/promotion-staged-release-route.json",
+      "decisions": [
+        {
+          "id": "promotion-release-decision-alpha-to-beta-security",
+          "label": "Security disposition record",
+          "owner": "security-reviewer",
+          "status": "planned",
+          "evidence": [
+            "promotion-signoff-sheet-alpha-to-beta",
+            "attestation-approval-envelope-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "promotion-release-decision-alpha-to-beta-release-manager",
+          "label": "Staged release go/no-go record",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "promotion-signoff-sheet-alpha-to-beta",
+            "rollback-publication-bundle-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "promotion-release-decision-alpha-to-beta-release-engineering",
+          "label": "Execution route decision record",
+          "owner": "release-engineering",
+          "status": "blocked",
+          "evidence": [
+            "attestation-approval-envelope-alpha-to-beta",
+            "rollback-publication-bundle-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "promotion-release-decision-alpha-to-beta-product-owner",
+          "label": "Promotion target decision record",
+          "owner": "product-owner",
+          "status": "blocked",
+          "evidence": [
+            "promotion-signoff-sheet-alpha-to-beta",
+            "attestation-approval-envelope-alpha-to-beta"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "promotion signoff sheet linked",
+        "approval execution envelope linked",
+        "rollback publication bundle linked",
+        "decision expiry path declared",
+        "publish route path declared"
+      ],
+      "blockedBy": [
+        "promotion staged-apply release decision records remain metadata-only",
+        "release approval remains non-executable",
+        "promotion gating remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canRecordDecision": false
+    },
+    {
+      "id": "promotion-release-decision-record-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "promotionStagedApplySignoffSheetId": "promotion-signoff-sheet-beta-to-stable",
+      "attestationOperatorApprovalExecutionEnvelopeId": "attestation-approval-envelope-beta-to-stable",
+      "rollbackCutoverPublicationBundleId": "rollback-publication-bundle-beta-to-stable",
+      "releaseApprovalStageId": "approval-decision-receipts",
+      "promotionHandshakeStageId": "promotion-handshake-staged-release-decision-records",
+      "publishGateId": "gate-promotion-staged-apply-release-decision-records",
+      "status": "blocked",
+      "decisionRecordPath": "future/channels/beta-to-stable/promotion-staged-release-decision-record.json",
+      "decisionExpiryPath": "future/channels/beta-to-stable/promotion-staged-release-decision-expiry.json",
+      "publishRoutePath": "future/channels/beta-to-stable/promotion-staged-release-route.json",
+      "decisions": [
+        {
+          "id": "promotion-release-decision-beta-to-stable-security",
+          "label": "Security disposition record",
+          "owner": "security-reviewer",
+          "status": "blocked",
+          "evidence": [
+            "promotion-signoff-sheet-beta-to-stable",
+            "attestation-approval-envelope-beta-to-stable"
+          ]
+        },
+        {
+          "id": "promotion-release-decision-beta-to-stable-release-manager",
+          "label": "Staged release go/no-go record",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "promotion-signoff-sheet-beta-to-stable",
+            "rollback-publication-bundle-beta-to-stable"
+          ]
+        },
+        {
+          "id": "promotion-release-decision-beta-to-stable-release-engineering",
+          "label": "Execution route decision record",
+          "owner": "release-engineering",
+          "status": "blocked",
+          "evidence": [
+            "attestation-approval-envelope-beta-to-stable",
+            "rollback-publication-bundle-beta-to-stable"
+          ]
+        },
+        {
+          "id": "promotion-release-decision-beta-to-stable-product-owner",
+          "label": "Promotion target decision record",
+          "owner": "product-owner",
+          "status": "blocked",
+          "evidence": [
+            "promotion-signoff-sheet-beta-to-stable",
+            "attestation-approval-envelope-beta-to-stable"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "promotion signoff sheet linked",
+        "approval execution envelope linked",
+        "rollback publication bundle linked",
+        "decision expiry path declared",
+        "publish route path declared"
+      ],
+      "blockedBy": [
+        "promotion staged-apply release decision records remain metadata-only",
+        "release approval remains non-executable",
+        "promotion gating remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canRecordDecision": false
+    }
+  ]
+}

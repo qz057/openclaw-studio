@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-installer-builder-execution-skeleton/v1",
-  "generatedAt": "2026-04-05T15:12:45.054Z",
-  "phase": "phase51",
+  "generatedAt": "2026-04-06T00:44:51.028Z",
+  "phase": "phase52",
   "mode": "review-only",
   "executions": [
     {
@@ -25,7 +25,7 @@
       },
       "environment": [
         "OC_RELEASE_CHANNEL=alpha",
-        "OC_RELEASE_PHASE=phase51"
+        "OC_RELEASE_PHASE=phase52"
       ],
       "plannedOutput": "future/installers/windows/OpenClaw Studio-portable",
       "reviewChecks": [
@@ -56,7 +56,7 @@
       },
       "environment": [
         "OC_RELEASE_CHANNEL=alpha",
-        "OC_RELEASE_PHASE=phase51"
+        "OC_RELEASE_PHASE=phase52"
       ],
       "plannedOutput": "future/installers/windows/OpenClaw Studio Setup.exe",
       "reviewChecks": [
@@ -87,7 +87,7 @@
       },
       "environment": [
         "OC_RELEASE_CHANNEL=alpha",
-        "OC_RELEASE_PHASE=phase51"
+        "OC_RELEASE_PHASE=phase52"
       ],
       "plannedOutput": "future/installers/macos/OpenClaw Studio.app",
       "reviewChecks": [
@@ -118,7 +118,7 @@
       },
       "environment": [
         "OC_RELEASE_CHANNEL=alpha",
-        "OC_RELEASE_PHASE=phase51"
+        "OC_RELEASE_PHASE=phase52"
       ],
       "plannedOutput": "future/installers/macos/OpenClaw Studio.dmg",
       "reviewChecks": [
@@ -149,7 +149,7 @@
       },
       "environment": [
         "OC_RELEASE_CHANNEL=alpha",
-        "OC_RELEASE_PHASE=phase51"
+        "OC_RELEASE_PHASE=phase52"
       ],
       "plannedOutput": "future/installers/linux/OpenClaw Studio.AppImage",
       "reviewChecks": [
@@ -180,7 +180,7 @@
       },
       "environment": [
         "OC_RELEASE_CHANNEL=alpha",
-        "OC_RELEASE_PHASE=phase51"
+        "OC_RELEASE_PHASE=phase52"
       ],
       "plannedOutput": "future/installers/linux/openclaw-studio.deb",
       "reviewChecks": [
@@ -211,7 +211,7 @@
       },
       "environment": [
         "OC_RELEASE_CHANNEL=alpha",
-        "OC_RELEASE_PHASE=phase51"
+        "OC_RELEASE_PHASE=phase52"
       ],
       "plannedOutput": "future/installers/linux/openclaw-studio.rpm",
       "reviewChecks": [

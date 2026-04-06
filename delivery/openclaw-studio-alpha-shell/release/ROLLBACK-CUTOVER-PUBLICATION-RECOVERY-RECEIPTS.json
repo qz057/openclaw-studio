@@ -1,0 +1,130 @@
+{
+  "schemaVersion": "openclaw-studio-rollback-cutover-publication-recovery-receipts/v1",
+  "generatedAt": "2026-04-06T00:44:51.028Z",
+  "phase": "phase52",
+  "mode": "local-only-review",
+  "receipts": [
+    {
+      "id": "rollback-publication-recovery-receipt-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "rollbackCutoverPublicationBundleId": "rollback-publication-bundle-alpha-to-beta",
+      "attestationOperatorApprovalExecutionEnvelopeId": "attestation-approval-envelope-alpha-to-beta",
+      "promotionStagedApplyReleaseDecisionRecordId": "promotion-release-decision-record-alpha-to-beta",
+      "publishRollbackPathId": "publish-rollback-alpha-to-beta",
+      "releaseApprovalStageId": "approval-decision-receipts",
+      "publishGateId": "gate-rollback-cutover-publication-recovery-receipts",
+      "status": "blocked",
+      "publicationRecoveryReceiptPath": "future/publish/alpha-to-beta/rollback-cutover-publication-recovery-receipt.json",
+      "recoveryAcknowledgementPath": "future/publish/alpha-to-beta/rollback-cutover-publication-recovery-ack.json",
+      "recoveryEvidencePath": "future/publish/alpha-to-beta/rollback-cutover-publication-recovery-evidence.json",
+      "recoveryReceipts": [
+        {
+          "id": "rollback-publication-recovery-alpha-to-beta-release-manager",
+          "label": "Publication recovery acknowledgement",
+          "owner": "release-manager",
+          "status": "planned",
+          "evidence": [
+            "rollback-publication-bundle-alpha-to-beta",
+            "promotion-release-decision-record-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "rollback-publication-recovery-alpha-to-beta-runtime-owner",
+          "label": "Recovery evidence receipt",
+          "owner": "runtime-owner",
+          "status": "blocked",
+          "evidence": [
+            "rollback-publication-bundle-alpha-to-beta",
+            "publish-rollback-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "rollback-publication-recovery-alpha-to-beta-support-operator",
+          "label": "Publication closeout receipt",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "attestation-approval-envelope-alpha-to-beta",
+            "promotion-release-decision-record-alpha-to-beta"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "rollback publication bundle linked",
+        "approval execution envelope linked",
+        "staged release decision record linked",
+        "recovery acknowledgement path declared",
+        "recovery evidence path declared"
+      ],
+      "blockedBy": [
+        "rollback cutover publication recovery receipts remain metadata-only",
+        "publish rollback remains non-executable",
+        "release approval remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canReceiveRecoveryReceipt": false
+    },
+    {
+      "id": "rollback-publication-recovery-receipt-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "rollbackCutoverPublicationBundleId": "rollback-publication-bundle-beta-to-stable",
+      "attestationOperatorApprovalExecutionEnvelopeId": "attestation-approval-envelope-beta-to-stable",
+      "promotionStagedApplyReleaseDecisionRecordId": "promotion-release-decision-record-beta-to-stable",
+      "publishRollbackPathId": "publish-rollback-beta-to-stable",
+      "releaseApprovalStageId": "approval-decision-receipts",
+      "publishGateId": "gate-rollback-cutover-publication-recovery-receipts",
+      "status": "blocked",
+      "publicationRecoveryReceiptPath": "future/publish/beta-to-stable/rollback-cutover-publication-recovery-receipt.json",
+      "recoveryAcknowledgementPath": "future/publish/beta-to-stable/rollback-cutover-publication-recovery-ack.json",
+      "recoveryEvidencePath": "future/publish/beta-to-stable/rollback-cutover-publication-recovery-evidence.json",
+      "recoveryReceipts": [
+        {
+          "id": "rollback-publication-recovery-beta-to-stable-release-manager",
+          "label": "Publication recovery acknowledgement",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "rollback-publication-bundle-beta-to-stable",
+            "promotion-release-decision-record-beta-to-stable"
+          ]
+        },
+        {
+          "id": "rollback-publication-recovery-beta-to-stable-runtime-owner",
+          "label": "Recovery evidence receipt",
+          "owner": "runtime-owner",
+          "status": "blocked",
+          "evidence": [
+            "rollback-publication-bundle-beta-to-stable",
+            "publish-rollback-beta-to-stable"
+          ]
+        },
+        {
+          "id": "rollback-publication-recovery-beta-to-stable-support-operator",
+          "label": "Publication closeout receipt",
+          "owner": "support-operator",
+          "status": "blocked",
+          "evidence": [
+            "attestation-approval-envelope-beta-to-stable",
+            "promotion-release-decision-record-beta-to-stable"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "rollback publication bundle linked",
+        "approval execution envelope linked",
+        "staged release decision record linked",
+        "recovery acknowledgement path declared",
+        "recovery evidence path declared"
+      ],
+      "blockedBy": [
+        "rollback cutover publication recovery receipts remain metadata-only",
+        "publish rollback remains non-executable",
+        "release approval remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canReceiveRecoveryReceipt": false
+    }
+  ]
+}

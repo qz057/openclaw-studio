@@ -1,0 +1,140 @@
+{
+  "schemaVersion": "openclaw-studio-attestation-operator-approval-execution-envelopes/v1",
+  "generatedAt": "2026-04-06T00:44:51.028Z",
+  "phase": "phase52",
+  "mode": "local-only-review",
+  "envelopes": [
+    {
+      "id": "attestation-approval-envelope-alpha-to-beta",
+      "from": "alpha",
+      "to": "beta",
+      "attestationOperatorSettlementPackId": "attestation-settlement-pack-alpha-to-beta",
+      "promotionStagedApplySignoffSheetId": "promotion-signoff-sheet-alpha-to-beta",
+      "rollbackCutoverPublicationBundleId": "rollback-publication-bundle-alpha-to-beta",
+      "releaseApprovalStageId": "approval-decision-receipts",
+      "gatingStageId": "handshake-attestation-operator-approval-execution-envelopes",
+      "publishGateId": "gate-attestation-operator-approval-execution-envelopes",
+      "status": "blocked",
+      "approvalExecutionEnvelopePath": "future/channels/alpha-to-beta/attestation-operator-approval-execution-envelope.json",
+      "executionWindowPath": "future/channels/alpha-to-beta/attestation-operator-approval-execution-window.json",
+      "approvalRoutePath": "future/channels/alpha-to-beta/attestation-operator-approval-route.json",
+      "handoffTargets": [
+        "release-engineering",
+        "release-manager",
+        "security"
+      ],
+      "approvals": [
+        {
+          "id": "attestation-approval-envelope-alpha-to-beta-security",
+          "label": "Security approval envelope",
+          "owner": "security-reviewer",
+          "status": "planned",
+          "evidence": [
+            "attestation-settlement-pack-alpha-to-beta",
+            "promotion-signoff-sheet-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "attestation-approval-envelope-alpha-to-beta-release-manager",
+          "label": "Release routing approval envelope",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "attestation-settlement-pack-alpha-to-beta",
+            "rollback-publication-bundle-alpha-to-beta"
+          ]
+        },
+        {
+          "id": "attestation-approval-envelope-alpha-to-beta-release-engineering",
+          "label": "Execution-window approval envelope",
+          "owner": "release-engineering",
+          "status": "blocked",
+          "evidence": [
+            "promotion-signoff-sheet-alpha-to-beta",
+            "rollback-publication-bundle-alpha-to-beta"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "settlement pack linked",
+        "promotion signoff sheet linked",
+        "rollback publication bundle linked",
+        "execution window path declared",
+        "approval route path declared"
+      ],
+      "blockedBy": [
+        "attestation operator approval execution envelopes remain metadata-only",
+        "release approval remains non-executable",
+        "publish rollback remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canIssueEnvelope": false
+    },
+    {
+      "id": "attestation-approval-envelope-beta-to-stable",
+      "from": "beta",
+      "to": "stable",
+      "attestationOperatorSettlementPackId": "attestation-settlement-pack-beta-to-stable",
+      "promotionStagedApplySignoffSheetId": "promotion-signoff-sheet-beta-to-stable",
+      "rollbackCutoverPublicationBundleId": "rollback-publication-bundle-beta-to-stable",
+      "releaseApprovalStageId": "approval-decision-receipts",
+      "gatingStageId": "handshake-attestation-operator-approval-execution-envelopes",
+      "publishGateId": "gate-attestation-operator-approval-execution-envelopes",
+      "status": "blocked",
+      "approvalExecutionEnvelopePath": "future/channels/beta-to-stable/attestation-operator-approval-execution-envelope.json",
+      "executionWindowPath": "future/channels/beta-to-stable/attestation-operator-approval-execution-window.json",
+      "approvalRoutePath": "future/channels/beta-to-stable/attestation-operator-approval-route.json",
+      "handoffTargets": [
+        "release-engineering",
+        "release-manager",
+        "security"
+      ],
+      "approvals": [
+        {
+          "id": "attestation-approval-envelope-beta-to-stable-security",
+          "label": "Security approval envelope",
+          "owner": "security-reviewer",
+          "status": "blocked",
+          "evidence": [
+            "attestation-settlement-pack-beta-to-stable",
+            "promotion-signoff-sheet-beta-to-stable"
+          ]
+        },
+        {
+          "id": "attestation-approval-envelope-beta-to-stable-release-manager",
+          "label": "Release routing approval envelope",
+          "owner": "release-manager",
+          "status": "blocked",
+          "evidence": [
+            "attestation-settlement-pack-beta-to-stable",
+            "rollback-publication-bundle-beta-to-stable"
+          ]
+        },
+        {
+          "id": "attestation-approval-envelope-beta-to-stable-release-engineering",
+          "label": "Execution-window approval envelope",
+          "owner": "release-engineering",
+          "status": "blocked",
+          "evidence": [
+            "promotion-signoff-sheet-beta-to-stable",
+            "rollback-publication-bundle-beta-to-stable"
+          ]
+        }
+      ],
+      "reviewChecks": [
+        "settlement pack linked",
+        "promotion signoff sheet linked",
+        "rollback publication bundle linked",
+        "execution window path declared",
+        "approval route path declared"
+      ],
+      "blockedBy": [
+        "attestation operator approval execution envelopes remain metadata-only",
+        "release approval remains non-executable",
+        "publish rollback remains non-executable",
+        "host-side execution remains disabled"
+      ],
+      "canIssueEnvelope": false
+    }
+  ]
+}

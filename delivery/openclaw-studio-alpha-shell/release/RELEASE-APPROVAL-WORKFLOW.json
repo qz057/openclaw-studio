@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-release-approval-workflow/v1",
-  "generatedAt": "2026-04-05T15:12:45.054Z",
-  "phase": "phase51",
+  "generatedAt": "2026-04-06T00:44:51.028Z",
+  "phase": "phase52",
   "mode": "local-only-review",
   "canApprove": false,
   "gatingHandshakePath": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
@@ -48,7 +48,7 @@
     },
     {
       "id": "approval-attestation-verification",
-      "label": "Attestation verification, dispatch, reconciliation, and receipt review",
+      "label": "Attestation verification, dispatch, reconciliation, envelope, and receipt review",
       "status": "planned",
       "approverRoles": [
         "release-engineering",
@@ -64,7 +64,8 @@
         "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json",
         "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
         "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
-        "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json"
+        "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+        "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json"
       ]
     },
     {
@@ -84,7 +85,7 @@
     },
     {
       "id": "approval-promotion-apply",
-      "label": "Promotion apply, command-sheet, closeout-journal, and execution checkpoint review",
+      "label": "Promotion apply, command-sheet, closeout-journal, decision-record, and execution checkpoint review",
       "status": "planned",
       "approverRoles": [
         "release-manager",
@@ -100,7 +101,25 @@
         "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
         "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
         "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
-        "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json"
+        "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+        "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json"
+      ]
+    },
+    {
+      "id": "approval-decision-receipts",
+      "label": "Approval execution envelopes, staged release decisions, and publication recovery receipt review",
+      "status": "blocked",
+      "approverRoles": [
+        "release-engineering",
+        "release-manager",
+        "product-owner"
+      ],
+      "evidence": [
+        "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
+        "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
+        "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json",
+        "release/RELEASE-APPROVAL-WORKFLOW.json",
+        "release/PUBLISH-GATES.json"
       ]
     },
     {
@@ -120,7 +139,7 @@
     },
     {
       "id": "approval-publish-promotion",
-      "label": "Publish, rollback, outcome-report, and promotion review",
+      "label": "Publish, rollback, outcome-report, recovery-receipt, and promotion review",
       "status": "blocked",
       "approverRoles": [
         "release-manager",
@@ -144,7 +163,8 @@
         "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
         "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
         "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
-        "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json"
+        "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+        "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json"
       ]
     },
     {

@@ -1,15 +1,15 @@
-# OpenClaw Studio Phase51 Release Notes
+# OpenClaw Studio Phase52 Release Notes
 
-Milestone: phase51 attestation operator settlement packs / promotion staged-apply signoff sheets / rollback cutover publication bundles + docs / smoke / package / release-plan / UI / shared data closeout
+Milestone: phase52 attestation operator approval execution envelopes / promotion staged-apply release decision records / rollback cutover publication recovery receipts + docs / smoke / package / release-plan / UI / shared data closeout
 
 ## Highlights
-- attestation operator settlement packs now turn reconciliation ledgers into operator clearance packets, escalation disposition bundles, and release approval attachments without dispatching or reconciling any live operator action for real
-- promotion staged-apply signoff sheets now turn closeout journals into staged approver sheets, release-ready packets, and go/no-go evidence without applying any live promotion for real
-- rollback cutover publication bundles now turn outcome reports into release-note attachments, publication digests, and rollback handoff bundles without mutating any live publish state
+- attestation operator approval execution envelopes now turn settlement packs into operator-ready approval packets, execution windows, and release-approval handoff routes without dispatching any live approval or execution for real
+- promotion staged-apply release decision records now turn signoff sheets into staged go/no-go captures, expiry tracks, and publish-route decisions without applying any live promotion for real
+- rollback cutover publication recovery receipts now turn publication bundles into recovery acknowledgements, publication-closeout receipts, and rollback recovery evidence without mutating any live publish state
 
 ## Current posture
 - still local-only
 - still not an installer
 - still no real publish/upload/sign/notarize actions
 
-Generated: 2026-04-05T15:12:45.054Z
+Generated: 2026-04-06T00:44:51.028Z

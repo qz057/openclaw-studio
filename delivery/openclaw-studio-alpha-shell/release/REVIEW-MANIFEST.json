@@ -1,8 +1,8 @@
 {
   "schemaVersion": "openclaw-studio-review-manifest/v1",
-  "generatedAt": "2026-04-05T15:12:45.054Z",
-  "phase": "phase51",
-  "milestone": "phase51 attestation operator settlement packs / promotion staged-apply signoff sheets / rollback cutover publication bundles + docs / smoke / package / release-plan / UI / shared data closeout",
+  "generatedAt": "2026-04-06T00:44:51.028Z",
+  "phase": "phase52",
+  "milestone": "phase52 attestation operator approval execution envelopes / promotion staged-apply release decision records / rollback cutover publication recovery receipts + docs / smoke / package / release-plan / UI / shared data closeout",
   "reviewDocs": [
     "README.md",
     "HANDOFF.md",
@@ -28,6 +28,7 @@
     "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
     "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
     "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+    "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
     "release/INSTALLER-TARGETS.json",
     "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
     "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
@@ -44,6 +45,7 @@
     "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
     "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
     "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+    "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
     "release/SIGNING-METADATA.json",
     "release/NOTARIZATION-PLAN.json",
     "release/SIGNING-PUBLISH-PIPELINE.json",
@@ -61,6 +63,7 @@
     "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
     "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
     "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+    "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json",
     "release/RELEASE-APPROVAL-WORKFLOW.json",
     "release/RELEASE-NOTES.md",
     "release/PUBLISH-GATES.json",
@@ -90,7 +93,7 @@
     }
   ],
   "pipeline": {
-    "stage": "attestation-operator-settlement-packs-promotion-staged-apply-signoff-sheets-rollback-cutover-publication-bundles-skeleton",
+    "stage": "attestation-operator-approval-execution-envelopes-promotion-staged-apply-release-decision-records-rollback-cutover-publication-recovery-receipts-skeleton",
     "stages": [
       {
         "id": "pipeline-docs",
@@ -201,6 +204,12 @@
         "detail": "Reconciliation ledgers now feed operator clearance packets, escalation disposition bundles, and approval attachments without routing any live operator settlement for real."
       },
       {
+        "id": "pipeline-attestation-operator-approval-execution-envelopes",
+        "label": "Attestation operator approval execution envelopes",
+        "status": "ready",
+        "detail": "Settlement packs now feed operator-ready approval packets, execution windows, and approval handoff routes without dispatching any live approval or execution for real."
+      },
+      {
         "id": "pipeline-installer-builders",
         "label": "Installer-target builder skeleton",
         "status": "ready",
@@ -289,6 +298,12 @@
         "label": "Promotion staged-apply signoff sheets",
         "status": "ready",
         "detail": "Closeout journals now feed staged approver sheets, release-ready packets, and go/no-go evidence without applying any promotion for real."
+      },
+      {
+        "id": "pipeline-promotion-staged-apply-release-decision-records",
+        "label": "Promotion staged-apply release decision records",
+        "status": "ready",
+        "detail": "Signoff sheets now feed staged release go/no-go captures, decision expiry tracks, and publish-route decisions without applying any promotion for real."
       },
       {
         "id": "pipeline-signing-publish",
@@ -381,6 +396,12 @@
         "detail": "Outcome reports now feed release-note attachments, publication digests, and rollback publication bundles without mutating any live publish state."
       },
       {
+        "id": "pipeline-rollback-cutover-publication-recovery-receipts",
+        "label": "Rollback cutover publication recovery receipts",
+        "status": "ready",
+        "detail": "Publication bundles now feed recovery acknowledgements, publication-closeout receipts, and rollback recovery evidence without mutating any live publish state."
+      },
+      {
         "id": "pipeline-approval",
         "label": "Release approval workflow",
         "status": "ready",
@@ -405,6 +426,7 @@
     "no executable attestation operator dispatch receipt capture, acknowledgement reconciliation closeout, or escalation settlement yet; dispatch receipts remain review-only metadata",
     "no executable attestation operator reconciliation settlement, escalation clear, or approval-ready closeout yet; reconciliation ledgers remain review-only metadata",
     "no executable attestation operator settlement pack assembly, operator clearance routing, or approval attachment emission yet; settlement packs remain review-only metadata",
+    "no executable attestation operator approval envelope issue, approval-window routing, or operator execution handoff yet; approval execution envelopes remain review-only metadata",
     "no Windows / macOS / Linux installer builder orchestration and channel routing wiring yet; routing remains review-only skeleton",
     "no executable channel promotion evidence pack or promotion routing apply yet; evidence remains review-only metadata",
     "no executable promotion apply manifests or channel apply execution yet; apply manifests remain review-only metadata",
@@ -414,6 +436,7 @@
     "no executable promotion staged-apply confirmation capture, stage acceptance journaling, or cutover closeout reconciliation yet; confirmation ledgers remain review-only metadata",
     "no executable promotion staged-apply closeout sealing, recovery baton handoff, or publish-ready closeout yet; closeout journals remain review-only metadata",
     "no executable promotion staged-apply signoff capture, approver expiry enforcement, or release-ready signoff emission yet; signoff sheets remain review-only metadata",
+    "no executable promotion staged release decision capture, staged go/no-go enforcement, or release decision routing yet; staged release decision records remain review-only metadata",
     "no signing / notarization / hash publication workflow yet; approval bridge remains metadata-only",
     "no executable signing-publish gating handshake yet; handshake remains metadata-only",
     "no executable release approval handshake yet; workflow remains metadata-only",
@@ -424,6 +447,7 @@
     "no executable rollback cutover execution record emission, evidence closeout, or recovery-state publication yet; execution records remain review-only metadata",
     "no executable rollback cutover outcome publication, recovery digest seal, or rollback release report emission yet; outcome reports remain review-only metadata",
     "no executable rollback cutover publication bundle assembly, release-note attachment, or publication handoff yet; publication bundles remain review-only metadata",
+    "no executable rollback cutover publication recovery receipt emission, recovery acknowledgement closeout, or publication receipt routing yet; publication recovery receipts remain review-only metadata",
     "no release publishing / artifact upload / promotion handshake / rollback apply automation yet; publish rollback handshake remains metadata-only",
     "real host-side execution remains disabled until approval / lifecycle / rollback close the loop"
   ]

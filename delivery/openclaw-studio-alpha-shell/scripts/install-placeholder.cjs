@@ -26,6 +26,7 @@ console.log(`attestation operator dispatch packets metadata: ${manifest.attestat
 console.log(`attestation operator dispatch receipts metadata: ${manifest.attestationOperatorDispatchReceiptsPath}`);
 console.log(`attestation operator reconciliation ledgers metadata: ${manifest.attestationOperatorReconciliationLedgersPath}`);
 console.log(`attestation operator settlement packs metadata: ${manifest.attestationOperatorSettlementPacksPath}`);
+console.log(`attestation operator approval execution envelopes metadata: ${manifest.attestationOperatorApprovalExecutionEnvelopesPath}`);
 console.log(`installer targets metadata: ${manifest.installerTargetsPath}`);
 console.log(`installer builder execution metadata: ${manifest.installerBuilderExecutionSkeletonPath}`);
 console.log(`installer-target builder metadata: ${manifest.installerTargetBuilderSkeletonPath}`);
@@ -41,6 +42,7 @@ console.log(`promotion staged-apply command sheets metadata: ${manifest.promotio
 console.log(`promotion staged-apply confirmation ledgers metadata: ${manifest.promotionStagedApplyConfirmationLedgersPath}`);
 console.log(`promotion staged-apply closeout journals metadata: ${manifest.promotionStagedApplyCloseoutJournalsPath}`);
 console.log(`promotion staged-apply signoff sheets metadata: ${manifest.promotionStagedApplySignoffSheetsPath}`);
+console.log(`promotion staged-apply release decision records metadata: ${manifest.promotionStagedApplyReleaseDecisionRecordsPath}`);
 console.log(`signing-publish gating handshake metadata: ${manifest.signingPublishGatingHandshakePath}`);
 console.log(`signing & publish pipeline metadata: ${manifest.signingPublishPipelinePath}`);
 console.log(`signing-publish approval bridge metadata: ${manifest.signingPublishApprovalBridgePath}`);
@@ -55,6 +57,7 @@ console.log(`rollback cutover execution checklists metadata: ${manifest.rollback
 console.log(`rollback cutover execution records metadata: ${manifest.rollbackCutoverExecutionRecordsPath}`);
 console.log(`rollback cutover outcome reports metadata: ${manifest.rollbackCutoverOutcomeReportsPath}`);
 console.log(`rollback cutover publication bundles metadata: ${manifest.rollbackCutoverPublicationBundlesPath}`);
+console.log(`rollback cutover publication recovery receipts metadata: ${manifest.rollbackCutoverPublicationRecoveryReceiptsPath}`);
 console.log(`approval workflow metadata: ${manifest.approvalWorkflowPath}`);
 console.log("missing capabilities:");
 for (const item of manifest.missingCapabilities) {
