@@ -7,7 +7,7 @@ const APP_NAME = "OpenClaw Studio";
 const PHASE_ID = "phase60";
 const PHASE_TITLE = "Phase60";
 const PHASE_MILESTONE =
-  "phase60 delivery-chain workspace / stage explorer / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout";
+  "phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout";
 const RELEASE_CHANNEL = "alpha";
 const PACKAGE_ID = "openclaw-studio-alpha-shell";
 const PACKAGE_KIND = "alpha-shell-release-skeleton";
@@ -25,7 +25,7 @@ const CURRENT_DELIVERY_SURFACES = [
   "built renderer bundle copied into artifacts/renderer",
   "built Electron bundle copied into artifacts/electron",
   "review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase60 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything",
-  "delivery-chain workspace and stage explorer linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, and observability mapping into one staged local-only workflow without executing anything",
+  "delivery-chain workspace, stage explorer, review flow ladder, and delivery coverage matrix linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, and observability mapping into one staged local-only workflow without executing anything",
   "deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references",
   "deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, review-posture ownership, and inspector-command linkage",
   "persisted shell layout foundation backed by localStorage",

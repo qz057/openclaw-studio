@@ -247,6 +247,21 @@ export function DeliveryChainWorkspace({
     windowing?.observability.mappings.filter((mapping) => mapping.reviewPosture.deliveryChainStageId === selectedDeliveryStage?.id) ?? [];
   const activeStageMapping =
     stageMappings.find((mapping) => mapping.id === windowing?.observability.activeMappingId) ?? stageMappings[0] ?? null;
+  const reviewFlowLadder = pipeline.deliveryChain.stages.map((stage) => {
+    const pipelineStage = pipeline.stages.find((entry) => entry.id === stage.pipelineStageId) ?? null;
+    const reviewerQueue = pipelineStage ? selectStudioReleaseReviewerQueue(pipeline, pipelineStage) ?? null : null;
+    const closeoutWindow = pipelineStage ? selectStudioReleaseCloseoutWindow(pipeline, pipelineStage) ?? null : null;
+    const observabilityPaths =
+      windowing?.observability.mappings.filter((mapping) => mapping.reviewPosture.deliveryChainStageId === stage.id).length ?? 0;
+
+    return {
+      stage,
+      pipelineStage,
+      reviewerQueue,
+      closeoutWindow,
+      observabilityPaths
+    };
+  });
   const upstreamStages = (selectedDeliveryStage?.upstreamStageIds ?? [])
     .map((stageId) => selectStudioReleaseDeliveryChainStage(pipeline, stageId))
     .filter((stage): stage is NonNullable<typeof stage> => Boolean(stage));
@@ -341,6 +356,57 @@ export function DeliveryChainWorkspace({
                 <span className="windowing-badge">{stageQueue ? stageQueue.acknowledgementState : "no queue"}</span>
               </div>
             </button>
+          );
+        })}
+      </div>
+
+      <div className="panel-title-row">
+        <h3>Review Flow Ladder</h3>
+        <span>{reviewFlowLadder.length} staged checkpoints</span>
+      </div>
+
+      <div className="workflow-step-grid">
+        {reviewFlowLadder.map(({ stage, pipelineStage, reviewerQueue, closeoutWindow, observabilityPaths }) => {
+          const active = stage.id === selectedDeliveryStage?.id;
+
+          return (
+            <article
+              key={`${stage.id}-ladder`}
+              className={`workflow-step-card workflow-step-card--${resolveStageTone(stage.status)}${active ? " workflow-step-card--active" : ""}`}
+            >
+              <div className="workflow-step-card__meta">
+                <span>{stage.phase}</span>
+                <strong>{stage.status}</strong>
+              </div>
+              <h3>{stage.label}</h3>
+              <p>
+                Review Flow Ladder keeps queue posture, baton posture, closeout state, and mapped window coverage visible for every delivery-chain stage
+                instead of making the operator board the only obvious checkpoint.
+              </p>
+              <div className="windowing-card__meta">
+                <span className={`windowing-badge${active ? " windowing-badge--active" : ""}`}>{stage.owner}</span>
+                <span className="windowing-badge">{reviewerQueue ? reviewerQueue.acknowledgementState : "no queue"}</span>
+                <span className="windowing-badge">{observabilityPaths} mapped surfaces</span>
+              </div>
+              <div className="workflow-readiness-list">
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveReviewerQueueTone(reviewerQueue?.status ?? "escalated")}`}>
+                  <span>Reviewer queue</span>
+                  <strong>{reviewerQueue ? `${reviewerQueue.status} / ${reviewerQueue.owner}` : "No reviewer queue"}</strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveAcknowledgementTone(reviewerQueue?.acknowledgementState ?? "blocked")}`}>
+                  <span>Acknowledgement</span>
+                  <strong>{reviewerQueue?.acknowledgementState ?? "Unavailable"}</strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveBatonTone(pipelineStage?.handoff.batonState ?? "blocked")}`}>
+                  <span>Decision baton</span>
+                  <strong>{pipelineStage ? `${pipelineStage.handoff.batonState} / ${pipelineStage.handoff.targetOwner}` : "Unavailable"}</strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveCloseoutWindowTone(closeoutWindow?.state ?? "blocked")}`}>
+                  <span>Closeout window</span>
+                  <strong>{closeoutWindow ? `${closeoutWindow.state} / ${closeoutWindow.deadlineLabel}` : "Unavailable"}</strong>
+                </div>
+              </div>
+            </article>
           );
         })}
       </div>

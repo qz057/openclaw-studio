@@ -2,7 +2,7 @@
 
 ## Snapshot
 
-- 当前已验证里程碑：**phase60 delivery-chain workspace / stage explorer / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface + docs / smoke / package / release-plan / UI / shared data closeout**
+- 当前已验证里程碑：**phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface + docs / smoke / package / release-plan / UI / shared data closeout**
 - 当前主视图：
   - `Dashboard`
   - `Home`
@@ -39,6 +39,7 @@
   - phase57 已把 review-only release approval pipeline 继续推进成 operator review board、decision handoff、evidence closeout，并把同一条 local-only review chain 连到 trace / inspector / windows / package artifacts
   - phase58 已把同一条 review chain 继续推进成 reviewer queues、acknowledgement state、delivery-chain stages、promotion / publish / rollback review flow、escalation windows、closeout windows、review-posture ownership maps、以及更深的 cross-window observability，并把这些 review-loop objects 连到 App / pages / inspector / windows / package artifacts
   - phase60 slice1 已把 review-only delivery chain 继续推进成 delivery-chain workspace / stage explorer，并把 stage ownership、artifact groups、blockers、handoff posture、review surfaces、以及 observability mapping 收敛进同一个 shell explorer
+  - phase60 slice2 已继续补齐 Review Flow Ladder 与 Delivery Coverage Matrix，把每个 delivery stage 的 queue / baton / closeout / mapped window coverage 收进更直接的 review surface
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline
@@ -102,6 +103,7 @@ npm run release:plan
 - phase57 进一步补齐 Operator Review Board、Decision Handoff、Evidence Closeout、Active Review Packet、以及与 Cross-window Shared State / Trace / Inspector 的统一审阅闭环
 - phase58 进一步补齐 Reviewer Queue、Acknowledgement State、Review-only Delivery Chain、Promotion / Publish / Rollback Review Flow、Escalation Window、Closeout Window、Review Posture Ownership、Cross-window Observability Map、以及与 Operator Review Board / Shared-state Lanes / Inspector 的统一审阅闭环
 - phase60 slice1 进一步补齐 Delivery-chain Workspace、Stage Explorer、Artifact Coverage、Blockers / Handoff Posture、Related Review Surfaces、以及与 observability mapping 的统一审阅闭环
+- phase60 slice2 进一步补齐 Review Flow Ladder、Delivery Coverage Matrix、以及 delivery stage 到 window / lane / board / acknowledgement posture 的更直接可见性
 - 仍然不做真实外部窗口编排
 
 ## Phase25 Boundary Model

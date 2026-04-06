@@ -263,6 +263,35 @@ export function WindowSharedStateBoard({
     releaseApprovalPipeline ? selectStudioReleaseCloseoutWindow(releaseApprovalPipeline, currentReleaseStage ?? undefined) : null;
   const activeQueueEntry =
     currentReviewerQueue?.entries.find((entry) => entry.id === currentReviewerQueue.activeEntryId) ?? currentReviewerQueue?.entries[0] ?? null;
+  const deliveryCoverageEntries = releaseApprovalPipeline
+    ? [currentDeliveryStage, publishDeliveryStage, rollbackDeliveryStage]
+        .filter((stage, index, stages): stage is NonNullable<typeof stage> => Boolean(stage) && stages.findIndex((entry) => entry?.id === stage?.id) === index)
+        .map((stage) => {
+          const mappings = observabilityMappings.filter((mapping) => mapping.reviewPosture.deliveryChainStageId === stage.id);
+          const primaryMapping = mappings.find((mapping) => mapping.id === activeObservabilityMapping?.id) ?? mappings[0] ?? null;
+          const primaryWindow = primaryMapping
+            ? windowing.roster.windows.find((entry) => entry.id === primaryMapping.windowId) ?? null
+            : null;
+          const primaryLane = primaryMapping
+            ? windowing.sharedState.lanes.find((entry) => entry.id === primaryMapping.sharedStateLaneId) ?? null
+            : null;
+          const primaryBoard = primaryMapping
+            ? windowing.orchestration.boards.find((entry) => entry.id === primaryMapping.orchestrationBoardId) ?? null
+            : null;
+          const pipelineStage = releaseApprovalPipeline.stages.find((entry) => entry.id === stage.pipelineStageId) ?? null;
+          const reviewerQueue = pipelineStage ? selectStudioReleaseReviewerQueue(releaseApprovalPipeline, pipelineStage) ?? null : null;
+
+          return {
+            stage,
+            primaryMapping,
+            primaryWindow,
+            primaryLane,
+            primaryBoard,
+            reviewerQueue,
+            mappings
+          };
+        })
+    : [];
   const panelClassName = [
     nested ? "window-shared-board window-shared-board--nested" : "surface card window-shared-board",
     compact ? "window-shared-board--compact" : ""
@@ -484,6 +513,64 @@ export function WindowSharedStateBoard({
           </article>
         ) : null}
       </div>
+
+      {deliveryCoverageEntries.length > 0 ? (
+        <>
+          <div className="panel-title-row">
+            <h3>Delivery Coverage Matrix</h3>
+            <span>{deliveryCoverageEntries.length} staged surfaces</span>
+          </div>
+
+          <div className="window-roster-grid">
+            {deliveryCoverageEntries.map(({ stage, primaryMapping, primaryWindow, primaryLane, primaryBoard, reviewerQueue, mappings }) => {
+              const active = stage.id === currentDeliveryStage?.id;
+
+              return (
+                <article
+                  key={`${stage.id}-coverage`}
+                  className={active ? "windowing-summary-card windowing-summary-card--active" : "windowing-summary-card"}
+                >
+                  <span>{stage.phase}</span>
+                  <strong>{stage.label}</strong>
+                  <p>
+                    Delivery Coverage Matrix keeps the selected delivery stage tied to a concrete window, shared-state lane, orchestration board, and
+                    acknowledgement posture instead of leaving publish / rollback coverage buried in separate cards.
+                  </p>
+                  <div className="windowing-card__meta">
+                    <span className={`windowing-badge${active ? " windowing-badge--active" : ""}`}>{stage.status}</span>
+                    <span className="windowing-badge">{mappings.length} mapped paths</span>
+                    <span className="windowing-badge">{reviewerQueue?.acknowledgementState ?? "no queue"}</span>
+                  </div>
+                  <div className="workflow-readiness-list">
+                    <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                      <span>Primary window</span>
+                      <strong>{primaryWindow?.label ?? "No mapped window"}</strong>
+                    </div>
+                    <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                      <span>Lane / board</span>
+                      <strong>{primaryLane ? `${primaryLane.label} / ${primaryBoard?.label ?? primaryMapping?.orchestrationBoardId ?? "No board"}` : "No mapped lane"}</strong>
+                    </div>
+                    <div className={`workflow-readiness-line workflow-readiness-line--${resolveAcknowledgementTone(primaryMapping?.reviewPosture.acknowledgementState ?? reviewerQueue?.acknowledgementState ?? "blocked")}`}>
+                      <span>Queue / acknowledgement</span>
+                      <strong>
+                        {primaryMapping
+                          ? `${primaryMapping.reviewPosture.reviewerQueueId} / ${primaryMapping.reviewPosture.acknowledgementState}`
+                          : reviewerQueue
+                            ? `${reviewerQueue.label} / ${reviewerQueue.acknowledgementState}`
+                            : "Unavailable"}
+                      </strong>
+                    </div>
+                    <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                      <span>Route / slot</span>
+                      <strong>{primaryMapping ? `${primaryMapping.routeId} / ${primaryMapping.focusedSlotId}` : "Unavailable"}</strong>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </>
+      ) : null}
 
       <div className="panel-title-row">
         <h3>{windowing.observability.title}</h3>
