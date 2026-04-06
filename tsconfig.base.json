@@ -13,6 +13,7 @@
     "baseUrl": ".",
     "paths": {
       "@openclaw/shared": ["packages/shared/src/index.ts"],
+      "@openclaw/shared/*": ["packages/shared/src/*"],
       "@openclaw/bridge": ["packages/bridge/src/index.ts"]
     }
   }

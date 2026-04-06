@@ -27,7 +27,8 @@ import type {
   StudioRuntimeActionResult,
   StudioRuntimeDetail
 } from "@openclaw/shared";
-import { createStudioHostTraceState, createStudioReleaseApprovalPipeline, studioHostBridgeSlotChannels } from "@openclaw/shared";
+import { studioHostBridgeSlotChannels } from "@openclaw/shared";
+import { createStudioHostTraceState, createStudioReleaseApprovalPipeline } from "@openclaw/shared/host-runtime";
 import {
   buildRuntimePermissionMatrix,
   buildRuntimeRuleMatchLines,

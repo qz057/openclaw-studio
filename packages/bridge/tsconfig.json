@@ -8,7 +8,10 @@
     "outDir": "dist",
     "rootDir": "src",
     "lib": ["ES2022", "DOM"],
-    "paths": {}
+    "paths": {
+      "@openclaw/shared": ["../shared/dist/index.d.ts"],
+      "@openclaw/shared/*": ["../shared/dist/*"]
+    }
   },
   "include": ["src/**/*.ts"]
 }

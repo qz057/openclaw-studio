@@ -6,7 +6,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
-      "@openclaw/shared": path.resolve(__dirname, "../../packages/shared/src/index.ts"),
+      "@openclaw/shared": path.resolve(__dirname, "../../packages/shared/src"),
       "@openclaw/bridge": path.resolve(__dirname, "../../packages/bridge/src/index.ts")
     }
   },

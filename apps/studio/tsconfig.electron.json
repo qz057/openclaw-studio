@@ -7,7 +7,10 @@
     "outDir": "dist-electron",
     "rootDir": ".",
     "lib": ["ES2022"],
-    "paths": {},
+    "paths": {
+      "@openclaw/shared": ["../../packages/shared/dist/index.d.ts"],
+      "@openclaw/shared/*": ["../../packages/shared/dist/*"]
+    },
     "types": ["node"],
     "noEmit": false
   },

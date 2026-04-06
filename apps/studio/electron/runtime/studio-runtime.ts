@@ -1,6 +1,5 @@
 import {
   type DockItem,
-  mockShellState,
   type HomeActivity,
   type SessionSummary,
   type SettingItem,
@@ -19,6 +18,7 @@ import {
   selectStudioWindowObservabilityActiveMapping,
   type StudioShellState
 } from "@openclaw/shared";
+import { mockShellState } from "@openclaw/shared/mock-shell-state";
 import { probeLiveCodex } from "./probes/codex";
 import { probeProjectContext } from "./probes/project-context";
 import { probeLiveRuntimeObservations } from "./probes/runtime-observations";

@@ -1,5 +1,4 @@
 import {
-  mockShellState,
   type CodexTaskSummary,
   type SessionSummary,
   type StudioApi,
@@ -10,6 +9,7 @@ import {
   type StudioRuntimeDetail,
   type StudioShellState
 } from "@openclaw/shared";
+import { mockShellState } from "@openclaw/shared/mock-shell-state";
 
 export function createFallbackApi(): StudioApi {
   return {

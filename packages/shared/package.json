@@ -4,6 +4,20 @@
   "private": true,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./host-runtime": {
+      "types": "./dist/host-runtime.d.ts",
+      "default": "./dist/host-runtime.js"
+    },
+    "./mock-shell-state": {
+      "types": "./dist/mock-shell-state.d.ts",
+      "default": "./dist/mock-shell-state.js"
+    }
+  },
   "files": [
     "dist"
   ],
