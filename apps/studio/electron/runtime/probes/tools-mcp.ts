@@ -1035,6 +1035,36 @@ export function buildToolsMcpHostExecutorState(
       summary: "",
       mode: "review-only",
       currentStageId: "",
+      reviewBoard: {
+        id: "",
+        title: "",
+        summary: "",
+        posture: "",
+        activeOwner: "",
+        reviewerNotes: []
+      },
+      decisionHandoff: {
+        id: "",
+        label: "",
+        batonState: "held",
+        sourceOwner: "",
+        targetOwner: "",
+        posture: "",
+        summary: "",
+        packetId: "",
+        pending: [],
+        reviewerNotes: []
+      },
+      evidenceCloseout: {
+        id: "",
+        label: "",
+        sealingState: "open",
+        owner: "",
+        summary: "",
+        sealedEvidence: [],
+        pendingEvidence: [],
+        reviewerNotes: []
+      },
       stages: [],
       blockedBy: []
     },

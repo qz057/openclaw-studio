@@ -86,13 +86,14 @@ export function HomePage({ state, focusedSlotId, onFocusedSlotChange, commandPan
 
       <WindowSharedStateBoard
         windowing={state.windowing}
+        releaseApprovalPipeline={state.boundary.hostExecutor.releaseApprovalPipeline}
         activeRouteId={windowingSurface.activeRouteId}
         activeWindowId={windowingSurface.activeWindowId}
         activeLaneId={windowingSurface.activeLaneId}
         activeBoardId={windowingSurface.activeBoardId}
         compact
         title="Home Cross-window Review"
-        summary="Home keeps the active window roster, shared-state lane, and local-only blockers visible so the shell can be revisited without losing orchestration context."
+        summary="Home keeps the active window roster, shared-state lane, operator review posture, and local-only blockers visible so the shell can be revisited without losing orchestration context."
       />
 
       <article className="surface card">

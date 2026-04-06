@@ -102,9 +102,15 @@ async function verifyRendererFocusedSlotUi() {
     "Cross-view Coordination Matrix",
     "Inspector-Command Linkage",
     "Release Pipeline Depth",
-    "Review-only Release Approval Pipeline",
+    "Review-only Operator Review Board",
+    "Operator Review Board",
+    "Active Review Packet",
+    "Decision Handoff",
+    "Evidence Closeout",
+    "Stage Ownership",
     "Attestation intake board",
     "Approval orchestration board",
+    "Release decision lifecycle",
     "Final release decision board",
     "Rollback settlement closeout",
     "Formal Release Readiness",
@@ -657,11 +663,11 @@ function assertWindowingContract(windowing, layout, hostBridge) {
   }
 
   if (!windowing.roster || !Array.isArray(windowing.roster.windows) || windowing.roster.windows.length === 0) {
-    throw new Error("Shell multi-window contract is missing the phase56 window roster.");
+    throw new Error("Shell multi-window contract is missing the phase57 window roster.");
   }
 
   if (!windowing.sharedState || !Array.isArray(windowing.sharedState.lanes) || windowing.sharedState.lanes.length === 0) {
-    throw new Error("Shell multi-window contract is missing the phase56 shared-state lanes.");
+    throw new Error("Shell multi-window contract is missing the phase57 shared-state lanes.");
   }
 
   const rightRailTabIds = new Set((layout?.rightRailTabs ?? []).map((tab) => tab.id));
@@ -1000,11 +1006,11 @@ function assertHostExecutorContract(hostExecutor, label) {
   }
 
   if (hostExecutor.releaseApprovalPipeline?.mode !== "review-only" || !hostExecutor.releaseApprovalPipeline?.currentStageId) {
-    throw new Error(`${label} host executor contract is missing the phase55 review-only release approval pipeline posture.`);
+    throw new Error(`${label} host executor contract is missing the phase57 review-only operator review board posture.`);
   }
 
   if (!hostExecutor.releaseApprovalPipeline.stages.some((stage) => stage.id === hostExecutor.releaseApprovalPipeline.currentStageId)) {
-    throw new Error(`${label} host executor contract points at a missing phase55 release approval pipeline stage.`);
+    throw new Error(`${label} host executor contract points at a missing phase57 operator review stage.`);
   }
 
   if (!Array.isArray(hostExecutor.releaseApprovalPipeline.blockedBy) || hostExecutor.releaseApprovalPipeline.blockedBy.length === 0) {
@@ -1012,11 +1018,59 @@ function assertHostExecutorContract(hostExecutor, label) {
   }
 
   if (
+    !hostExecutor.releaseApprovalPipeline.reviewBoard?.title ||
+    !Array.isArray(hostExecutor.releaseApprovalPipeline.reviewBoard?.reviewerNotes) ||
+    hostExecutor.releaseApprovalPipeline.reviewBoard.reviewerNotes.length === 0
+  ) {
+    throw new Error(`${label} host executor contract is missing the phase57 operator review board metadata.`);
+  }
+
+  if (
+    !hostExecutor.releaseApprovalPipeline.decisionHandoff?.label ||
+    !Array.isArray(hostExecutor.releaseApprovalPipeline.decisionHandoff?.pending) ||
+    !Array.isArray(hostExecutor.releaseApprovalPipeline.decisionHandoff?.reviewerNotes)
+  ) {
+    throw new Error(`${label} host executor contract is missing the phase57 decision handoff metadata.`);
+  }
+
+  if (
+    !hostExecutor.releaseApprovalPipeline.evidenceCloseout?.label ||
+    !Array.isArray(hostExecutor.releaseApprovalPipeline.evidenceCloseout?.sealedEvidence) ||
+    !Array.isArray(hostExecutor.releaseApprovalPipeline.evidenceCloseout?.pendingEvidence) ||
+    !Array.isArray(hostExecutor.releaseApprovalPipeline.evidenceCloseout?.reviewerNotes)
+  ) {
+    throw new Error(`${label} host executor contract is missing the phase57 evidence closeout metadata.`);
+  }
+
+  if (
     !hostExecutor.releaseApprovalPipeline.stages.every(
-      (stage) => Array.isArray(stage.evidence) && stage.evidence.length > 0 && Array.isArray(stage.notes) && stage.notes.length > 0
+      (stage) =>
+        Array.isArray(stage.evidence) &&
+        stage.evidence.length > 0 &&
+        Array.isArray(stage.notes) &&
+        stage.notes.length > 0 &&
+        stage.packet?.label &&
+        Array.isArray(stage.packet?.evidence) &&
+        stage.packet.evidence.length > 0 &&
+        stage.handoff?.label &&
+        Array.isArray(stage.handoff?.pending) &&
+        stage.closeout?.label &&
+        Array.isArray(stage.closeout?.pendingEvidence)
     )
   ) {
-    throw new Error(`${label} host executor contract is missing structured release-approval pipeline evidence or notes.`);
+    throw new Error(`${label} host executor contract is missing structured phase57 review packet, handoff, closeout, evidence, or note metadata.`);
+  }
+
+  const currentStage = hostExecutor.releaseApprovalPipeline.stages.find(
+    (stage) => stage.id === hostExecutor.releaseApprovalPipeline.currentStageId
+  );
+
+  if (
+    !currentStage ||
+    hostExecutor.releaseApprovalPipeline.decisionHandoff.id !== currentStage.handoff.id ||
+    hostExecutor.releaseApprovalPipeline.evidenceCloseout.id !== currentStage.closeout.id
+  ) {
+    throw new Error(`${label} host executor contract lost alignment between the active stage, decision handoff, and evidence closeout.`);
   }
 
   assertHostBridgeContract(hostExecutor.bridge, `${label} bridge`);
@@ -1111,6 +1165,8 @@ function assertInspectorContract(inspector) {
     "handler",
     "validator",
     "approval-pipeline",
+    "decision-handoff",
+    "evidence-closeout",
     "window-focus",
     "shared-state",
     "rollback",
@@ -1132,11 +1188,11 @@ function assertInspectorContract(inspector) {
   }
 
   if (!inspector.drilldowns.some((drilldown) => drilldown.id === "drilldown-release-approval-pipeline")) {
-    throw new Error("Shell inspector is missing the phase55 release approval pipeline drilldown.");
+    throw new Error("Shell inspector is missing the phase57 operator review drilldown.");
   }
 
   if (!inspector.linkage?.windowId || !inspector.linkage?.sharedStateLaneId || !inspector.linkage?.orchestrationBoardId) {
-    throw new Error("Shell inspector is missing the phase56 cross-window linkage metadata.");
+    throw new Error("Shell inspector is missing the phase57 cross-window linkage metadata.");
   }
 
   if (!inspector.drilldowns.some((drilldown) => drilldown.lines.some((line) => Array.isArray(line.links) && line.links.length > 0))) {
@@ -1668,6 +1724,9 @@ function verifyReleaseSkeletonContract() {
     "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
     "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
     "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+    "release/OPERATOR-REVIEW-BOARD.json",
+    "release/RELEASE-DECISION-HANDOFF.json",
+    "release/REVIEW-EVIDENCE-CLOSEOUT.json",
     "release/INSTALLER-TARGETS.json",
     "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
     "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
@@ -1744,6 +1803,9 @@ function verifyReleaseSkeletonContract() {
     skeleton.installerPlaceholder.attestationOperatorDispatchReceiptsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" ||
     skeleton.installerPlaceholder.attestationOperatorReconciliationLedgersPath !== "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" ||
     skeleton.installerPlaceholder.attestationOperatorSettlementPacksPath !== "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" ||
+    skeleton.installerPlaceholder.operatorReviewBoardPath !== "release/OPERATOR-REVIEW-BOARD.json" ||
+    skeleton.installerPlaceholder.releaseDecisionHandoffPath !== "release/RELEASE-DECISION-HANDOFF.json" ||
+    skeleton.installerPlaceholder.reviewEvidenceCloseoutPath !== "release/REVIEW-EVIDENCE-CLOSEOUT.json" ||
     skeleton.installerPlaceholder.installerTargetsPath !== "release/INSTALLER-TARGETS.json" ||
     skeleton.installerPlaceholder.installerBuilderExecutionSkeletonPath !== "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json" ||
     skeleton.installerPlaceholder.installerTargetBuilderSkeletonPath !== "release/INSTALLER-TARGET-BUILDER-SKELETON.json" ||
@@ -1827,6 +1889,9 @@ function verifyReleaseSkeletonContract() {
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/OPERATOR-REVIEW-BOARD.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/RELEASE-DECISION-HANDOFF.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/REVIEW-EVIDENCE-CLOSEOUT.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-EXECUTION-CHECKPOINTS.json") ||
@@ -1867,6 +1932,9 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/OPERATOR-REVIEW-BOARD.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/RELEASE-DECISION-HANDOFF.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/REVIEW-EVIDENCE-CLOSEOUT.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-EXECUTION-CHECKPOINTS.json") ||
@@ -1981,6 +2049,37 @@ function verifyReleaseSkeletonContract() {
 
   if (!Array.isArray(skeleton.attestationOperatorApprovalOrchestration?.orchestrations) || skeleton.attestationOperatorApprovalOrchestration.orchestrations.length < 2) {
     throw new Error(`Attestation operator approval orchestration is missing ${PHASE_ID} orchestration declarations.`);
+  }
+
+  if (
+    skeleton.operatorReviewBoard?.board?.decisionHandoffPath !== "release/RELEASE-DECISION-HANDOFF.json" ||
+    skeleton.operatorReviewBoard?.board?.evidenceCloseoutPath !== "release/REVIEW-EVIDENCE-CLOSEOUT.json" ||
+    !Array.isArray(skeleton.operatorReviewBoard?.stages) ||
+    skeleton.operatorReviewBoard.stages.length < 5 ||
+    !Array.isArray(skeleton.operatorReviewBoard?.reviewerNotes) ||
+    skeleton.operatorReviewBoard.reviewerNotes.length < 3
+  ) {
+    throw new Error(`Operator review board metadata is missing ${PHASE_ID} board declarations.`);
+  }
+
+  if (
+    skeleton.releaseDecisionHandoff?.activeHandoffId !== "decision-handoff-approval-orchestration" ||
+    !Array.isArray(skeleton.releaseDecisionHandoff?.handoffs) ||
+    skeleton.releaseDecisionHandoff.handoffs.length < 5 ||
+    !Array.isArray(skeleton.releaseDecisionHandoff?.blockedBy) ||
+    skeleton.releaseDecisionHandoff.blockedBy.length < 3
+  ) {
+    throw new Error(`Release decision handoff metadata is missing ${PHASE_ID} handoff declarations.`);
+  }
+
+  if (
+    skeleton.reviewEvidenceCloseout?.activeCloseoutId !== "evidence-closeout-approval-orchestration" ||
+    !Array.isArray(skeleton.reviewEvidenceCloseout?.closeouts) ||
+    skeleton.reviewEvidenceCloseout.closeouts.length < 5 ||
+    !Array.isArray(skeleton.reviewEvidenceCloseout?.blockedBy) ||
+    skeleton.reviewEvidenceCloseout.blockedBy.length < 3
+  ) {
+    throw new Error(`Review evidence closeout metadata is missing ${PHASE_ID} closeout declarations.`);
   }
 
   if (!Array.isArray(skeleton.installerTargets?.targets) || skeleton.installerTargets.targets.length < 7) {
@@ -2276,6 +2375,9 @@ function verifyReleaseSkeletonContract() {
     skeleton.releaseApprovalWorkflow?.gatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
     skeleton.releaseApprovalWorkflow?.approvalBridgePath !== "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json" ||
     skeleton.releaseApprovalWorkflow?.promotionHandshakePath !== "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json" ||
+    skeleton.releaseApprovalWorkflow?.operatorReviewBoardPath !== "release/OPERATOR-REVIEW-BOARD.json" ||
+    skeleton.releaseApprovalWorkflow?.releaseDecisionHandoffPath !== "release/RELEASE-DECISION-HANDOFF.json" ||
+    skeleton.releaseApprovalWorkflow?.reviewEvidenceCloseoutPath !== "release/REVIEW-EVIDENCE-CLOSEOUT.json" ||
     !Array.isArray(skeleton.releaseApprovalWorkflow?.stages) ||
     skeleton.releaseApprovalWorkflow.stages.length < 8
   ) {
@@ -2307,6 +2409,9 @@ function verifyReleaseSkeletonContract() {
     !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json") ||
     !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json") ||
     !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json") ||
+    !skeleton.packageReadme.includes("release/OPERATOR-REVIEW-BOARD.json") ||
+    !skeleton.packageReadme.includes("release/RELEASE-DECISION-HANDOFF.json") ||
+    !skeleton.packageReadme.includes("release/REVIEW-EVIDENCE-CLOSEOUT.json") ||
     !skeleton.packageReadme.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.packageReadme.includes("release/PROMOTION-APPLY-READINESS.json") ||
     !skeleton.packageReadme.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
@@ -2348,6 +2453,9 @@ function verifyReleaseSkeletonContract() {
   if (
     !skeleton.releaseNotes?.includes(`${PHASE_TITLE} Release Notes`) ||
     !skeleton.releaseNotes?.includes("attestation operator approval orchestration") ||
+    !skeleton.releaseNotes?.includes("operator review board") ||
+    !skeleton.releaseNotes?.includes("release decision handoff") ||
+    !skeleton.releaseNotes?.includes("review evidence closeout") ||
     !skeleton.releaseNotes?.includes("promotion staged-apply release decision enforcement lifecycle") ||
     !skeleton.releaseNotes?.includes("rollback cutover publication receipt settlement closeout") ||
     !Array.isArray(skeleton.releaseApprovalWorkflow?.stages) ||
@@ -2377,6 +2485,9 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseChecklist.includes("ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json") ||
     !skeleton.releaseChecklist.includes("ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json") ||
     !skeleton.releaseChecklist.includes("ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json") ||
+    !skeleton.releaseChecklist.includes("OPERATOR-REVIEW-BOARD.json") ||
+    !skeleton.releaseChecklist.includes("RELEASE-DECISION-HANDOFF.json") ||
+    !skeleton.releaseChecklist.includes("REVIEW-EVIDENCE-CLOSEOUT.json") ||
     !skeleton.releaseChecklist.includes("CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-APPLY-READINESS.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-APPLY-MANIFESTS.json") ||

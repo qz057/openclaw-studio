@@ -119,13 +119,14 @@ export function DashboardPage({
 
       <WindowSharedStateBoard
         windowing={windowing}
+        releaseApprovalPipeline={boundary.hostExecutor.releaseApprovalPipeline}
         activeRouteId={windowingSurface.activeRouteId}
         activeWindowId={windowingSurface.activeWindowId}
         activeLaneId={windowingSurface.activeLaneId}
         activeBoardId={windowingSurface.activeBoardId}
         compact
         title="Dashboard Cross-window Board"
-        summary="Program-level review now includes the same window roster, shared-state lane, sync health, and blocker posture shown in the shell workbench."
+        summary="Program-level review now includes the same window roster, shared-state lane, operator review lane, sync health, and blocker posture shown in the shell workbench."
       />
 
       <div className="metric-grid">

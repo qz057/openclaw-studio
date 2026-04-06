@@ -11,10 +11,11 @@ interface SettingsWindowingSurfaceProps {
 interface SettingsPageProps {
   settings: StudioShellState["settings"];
   windowing: StudioShellState["windowing"];
+  releaseApprovalPipeline: StudioShellState["boundary"]["hostExecutor"]["releaseApprovalPipeline"];
   windowingSurface: SettingsWindowingSurfaceProps;
 }
 
-export function SettingsPage({ settings, windowing, windowingSurface }: SettingsPageProps) {
+export function SettingsPage({ settings, windowing, releaseApprovalPipeline, windowingSurface }: SettingsPageProps) {
   return (
     <section className="page">
       <div className="page-header">
@@ -27,13 +28,14 @@ export function SettingsPage({ settings, windowing, windowingSurface }: Settings
 
       <WindowSharedStateBoard
         windowing={windowing}
+        releaseApprovalPipeline={releaseApprovalPipeline}
         activeRouteId={windowingSurface.activeRouteId}
         activeWindowId={windowingSurface.activeWindowId}
         activeLaneId={windowingSurface.activeLaneId}
         activeBoardId={windowingSurface.activeBoardId}
         compact
         title="Settings Coordination Surface"
-        summary="Settings now exposes the same phase56 window roster, shared-state lane, sync health, and local-only blockers that drive the main shell coordination board."
+        summary="Settings now exposes the same phase57 window roster, shared-state lane, operator review lane, sync health, and local-only blockers that drive the main shell coordination board."
       />
 
       <div className="section-stack">

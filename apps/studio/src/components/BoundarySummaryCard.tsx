@@ -57,6 +57,8 @@ export function BoundarySummaryCard({
     new Set(boundary.hostExecutor.bridge.slotHandlers.flatMap((handler) => handler.simulatedOutcomes.map((outcome) => outcome.status)))
   );
   const currentReleaseStage = selectStudioReleaseApprovalPipelineStage(boundary.hostExecutor.releaseApprovalPipeline);
+  const currentDecisionHandoff = boundary.hostExecutor.releaseApprovalPipeline.decisionHandoff;
+  const currentEvidenceCloseout = boundary.hostExecutor.releaseApprovalPipeline.evidenceCloseout;
 
   return (
     <article className={cardClassName}>
@@ -191,7 +193,7 @@ export function BoundarySummaryCard({
               lifecycle stages · {boundary.hostExecutor.lifecycle.length} · failure cases · {boundary.hostExecutor.failureTaxonomy.length}
             </li>
             <li>
-              release pipeline · {boundary.hostExecutor.releaseApprovalPipeline.mode} · {boundary.hostExecutor.releaseApprovalPipeline.stages.length} stages
+              operator board · {boundary.hostExecutor.releaseApprovalPipeline.mode} · {boundary.hostExecutor.releaseApprovalPipeline.stages.length} stages
             </li>
             <li>
               simulated outcomes · {simulatedOutcomeStatuses.join(" / ")}
@@ -216,6 +218,12 @@ export function BoundarySummaryCard({
             </li>
             <li>
               pipeline · {currentReleaseStage?.label ?? "Unavailable"} · {currentReleaseStage?.status ?? "unknown"}
+            </li>
+            <li>
+              handoff · {currentDecisionHandoff.batonState} · {currentDecisionHandoff.sourceOwner} -&gt; {currentDecisionHandoff.targetOwner}
+            </li>
+            <li>
+              closeout · {currentEvidenceCloseout.sealingState} · {currentEvidenceCloseout.sealedEvidence.length} sealed / {currentEvidenceCloseout.pendingEvidence.length} pending
             </li>
             <li>
               blockers · {boundary.hostExecutor.releaseApprovalPipeline.blockedBy.length} · review-only release decision remains blocked

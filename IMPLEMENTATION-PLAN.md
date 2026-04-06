@@ -266,6 +266,13 @@
 - smoke 已提升到验证 phase56 window roster / shared-state contract、renderer markers、以及 inspector cross-window linkage
 - README / HANDOFF / package snapshot 已同步反映 phase56 reality
 
+### Phase 57（当前已完成）
+- phase56 的 shared-state / multi-window review surface 已继续推进成更明确的 operator review board / decision handoff / evidence closeout
+- shared / runtime / renderer 现在把 review packet、baton posture、closeout sealing、reviewer notes、以及 current board ownership 明确暴露成同一条 local-only review chain
+- Windowing board、Inspector sections、trace linkage、Dashboard / Home / Settings markers、以及 package/release artifacts 现在都显式携带 phase57 operator-review posture
+- smoke 已提升到验证 phase57 operator review board / decision handoff / evidence closeout renderer markers、runtime contract、以及 release artifact contract
+- README / HANDOFF / package snapshot 已同步反映 phase57 reality
+
 ## 当前明确边界
 
 当前只允许：
@@ -274,7 +281,7 @@
 - dry-run / preview / simulate
 - Studio-local execute（只改应用内 in-memory state/history）
 - phase27 command surface / layout persistence / window intent staging
-- phase56 local-only multi-window orchestration / cross-window shared-state review surface / review-only release approval pipeline
+- phase57 operator review board / decision handoff / evidence closeout / local-only multi-window shared-state review surface
 - phase26/27/28 release skeleton / artifact review / handoff docs / package metadata
 
 当前明确禁止：
@@ -296,7 +303,7 @@ npm run start:smoke
 npm run package:alpha
 ```
 
-phase56 可额外跑：
+phase57 可额外跑：
 
 ```bash
 npm run release:plan
@@ -304,8 +311,8 @@ npm run release:plan
 
 ## 下一阶段（建议）
 
-### Phase56 后续 slices
-目标：在不开放危险执行的前提下，继续把 phase56 foundations 推进为更完整的产品能力与交付链路。
+### Phase57 后续 slices
+目标：在不开放危险执行的前提下，继续把 phase57 foundations 推进为更完整的产品能力与交付链路。
 
 范围建议：
 - 更真实的 multi-window orchestration 与跨窗口共享状态

@@ -138,6 +138,8 @@ export function createInspectorSections(
     : "Unavailable";
   const auditValue = focus ? (focus.usesHandoff ? focus.rollbackAuditDetail : "Placeholder linked") : "Unavailable";
   const currentReleaseStage = selectStudioReleaseApprovalPipelineStage(boundary.hostExecutor.releaseApprovalPipeline);
+  const currentDecisionHandoff = boundary.hostExecutor.releaseApprovalPipeline.decisionHandoff;
+  const currentEvidenceCloseout = boundary.hostExecutor.releaseApprovalPipeline.evidenceCloseout;
   const activeLane =
     (activeLaneId ? windowing?.sharedState.lanes.find((lane) => lane.id === activeLaneId) : undefined) ??
     (windowing ? windowing.sharedState.lanes.find((lane) => lane.id === windowing.sharedState.activeLaneId) : undefined) ??
@@ -181,8 +183,18 @@ export function createInspectorSections(
     },
     {
       id: "approval-pipeline",
-      label: "Approval pipeline",
+      label: "Operator review board",
       value: currentReleaseStage ? `${currentReleaseStage.label} / ${currentReleaseStage.status}` : "Unavailable"
+    },
+    {
+      id: "decision-handoff",
+      label: "Decision handoff",
+      value: `${currentDecisionHandoff.batonState} / ${currentDecisionHandoff.targetOwner}`
+    },
+    {
+      id: "evidence-closeout",
+      label: "Evidence closeout",
+      value: `${currentEvidenceCloseout.sealingState} / ${currentEvidenceCloseout.owner}`
     },
     {
       id: "window-focus",

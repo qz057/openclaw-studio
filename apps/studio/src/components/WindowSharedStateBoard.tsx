@@ -1,7 +1,8 @@
-import type { StudioPageId, StudioShellState } from "@openclaw/shared";
+import { selectStudioReleaseApprovalPipelineStage, type StudioPageId, type StudioReleaseApprovalPipeline, type StudioShellState } from "@openclaw/shared";
 
 interface WindowSharedStateBoardProps {
   windowing: StudioShellState["windowing"];
+  releaseApprovalPipeline?: StudioReleaseApprovalPipeline;
   activeRouteId?: StudioPageId;
   activeWindowId?: string | null;
   activeLaneId?: string | null;
@@ -154,6 +155,7 @@ function resolveActiveOrchestrationBoard(
 
 export function WindowSharedStateBoard({
   windowing,
+  releaseApprovalPipeline,
   activeRouteId,
   activeWindowId,
   activeLaneId,
@@ -167,6 +169,7 @@ export function WindowSharedStateBoard({
   const activeLane = resolveActiveWindowSharedStateLane(windowing, activeLaneId, activeBoardId, activeRouteId);
   const activeWindow = resolveActiveWindowRosterEntry(windowing, activeWindowId, activeLane, activeRouteId);
   const activeBoard = resolveActiveOrchestrationBoard(windowing, activeBoardId, activeLane, activeRouteId);
+  const currentReleaseStage = releaseApprovalPipeline ? selectStudioReleaseApprovalPipelineStage(releaseApprovalPipeline) : null;
   const panelClassName = [
     nested ? "window-shared-board window-shared-board--nested" : "surface card window-shared-board",
     compact ? "window-shared-board--compact" : ""
@@ -250,6 +253,28 @@ export function WindowSharedStateBoard({
             ))}
           </div>
         </article>
+
+        {releaseApprovalPipeline ? (
+          <article className="windowing-summary-card">
+            <span>Operator review lane</span>
+            <strong>{currentReleaseStage?.label ?? releaseApprovalPipeline.reviewBoard.title}</strong>
+            <p>{releaseApprovalPipeline.reviewBoard.summary}</p>
+            <div className="windowing-preview-list">
+              <div className="windowing-preview-line">
+                <span>Stage ownership</span>
+                <strong>{currentReleaseStage ? `${currentReleaseStage.owner} / ${currentReleaseStage.status}` : "Unavailable"}</strong>
+              </div>
+              <div className="windowing-preview-line">
+                <span>Decision handoff</span>
+                <strong>{releaseApprovalPipeline.decisionHandoff.posture}</strong>
+              </div>
+              <div className="windowing-preview-line">
+                <span>Evidence closeout</span>
+                <strong>{releaseApprovalPipeline.evidenceCloseout.sealingState}</strong>
+              </div>
+            </div>
+          </article>
+        ) : null}
       </div>
 
       <div className="panel-title-row">

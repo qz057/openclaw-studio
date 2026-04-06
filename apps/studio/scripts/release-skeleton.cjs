@@ -4,10 +4,10 @@ const path = require("node:path");
 const { getPaths, getPreflightSummary } = require("./studio-preflight.cjs");
 
 const APP_NAME = "OpenClaw Studio";
-const PHASE_ID = "phase56";
-const PHASE_TITLE = "Phase56";
+const PHASE_ID = "phase57";
+const PHASE_TITLE = "Phase57";
 const PHASE_MILESTONE =
-  "phase56 local-only multi-window orchestration / cross-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout";
+  "phase57 operator review board / decision handoff / evidence closeout / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout";
 const RELEASE_CHANNEL = "alpha";
 const PACKAGE_ID = "openclaw-studio-alpha-shell";
 const PACKAGE_KIND = "alpha-shell-release-skeleton";
@@ -23,13 +23,13 @@ const CURRENT_DELIVERY_SURFACES = [
   "structured alpha-shell snapshot under delivery/openclaw-studio-alpha-shell",
   "built renderer bundle copied into artifacts/renderer",
   "built Electron bundle copied into artifacts/electron",
-  "review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, and the final release-decision gate without executing anything",
+  "review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase57 operator review board / decision handoff / evidence closeout artifacts without executing anything",
   "deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references",
   "deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, and inspector-command linkage",
   "persisted shell layout foundation backed by localStorage",
   "cross-window coordination board with explicit window roster, shared-state lanes, sync health, ownership, last handoff, route/workspace intent links, focused-slot linkage, and local-only blockers",
-  "release manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged app materialization skeleton / packaged app directory materialization / packaged app staged output skeleton / packaged app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / attestation apply audit packs / attestation apply execution packets / attestation operator worklists / attestation operator dispatch manifests / attestation operator dispatch packets / attestation operator dispatch receipts / attestation operator reconciliation ledgers / attestation operator settlement packs / attestation operator approval routing contracts / attestation operator approval orchestration / installer targets / installer-target builder skeleton / installer builder execution skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / promotion apply readiness / promotion apply manifests / promotion execution checkpoints / promotion operator handoff rails / promotion staged-apply ledgers / promotion staged-apply runsheets / promotion staged-apply command sheets / promotion staged-apply confirmation ledgers / promotion staged-apply closeout journals / promotion staged-apply signoff sheets / promotion staged-apply release decision enforcement contracts / promotion staged-apply release decision enforcement lifecycle / signing-ready metadata / signing-publish pipeline / signing-publish gating handshake / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / rollback recovery ledger / rollback execution rehearsal ledger / rollback operator drillbooks / rollback live-readiness contracts / rollback cutover readiness maps / rollback cutover handoff plans / rollback cutover execution checklists / rollback cutover execution records / rollback cutover outcome reports / rollback cutover publication bundles / rollback cutover publication receipt closeout contracts / rollback cutover publication receipt settlement closeout / release approval workflow / release notes / publish gates / promotion gates under release/",
-  "docs closeout: README / HANDOFF / IMPLEMENTATION-PLAN / PACKAGE-README / RELEASE-SUMMARY / REVIEW-MANIFEST / BUNDLE-MATRIX / BUNDLE-ASSEMBLY / PACKAGED-APP-DIRECTORY-SKELETON / PACKAGED-APP-MATERIALIZATION-SKELETON / PACKAGED-APP-DIRECTORY-MATERIALIZATION / PACKAGED-APP-STAGED-OUTPUT-SKELETON.json / PACKAGED-APP-BUNDLE-SEALING-SKELETON.json / SEALED-BUNDLE-INTEGRITY-CONTRACT.json / INTEGRITY-ATTESTATION-EVIDENCE.json / ATTESTATION-VERIFICATION-PACKS.json / ATTESTATION-APPLY-AUDIT-PACKS.json / ATTESTATION-APPLY-EXECUTION-PACKETS.json / ATTESTATION-OPERATOR-WORKLISTS.json / ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json / ATTESTATION-OPERATOR-DISPATCH-PACKETS.json / ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json / ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json / ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json / ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json / ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json / INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON / INSTALLER-BUILDER-EXECUTION-SKELETON / INSTALLER-BUILDER-ORCHESTRATION.json / INSTALLER-CHANNEL-ROUTING.json / CHANNEL-PROMOTION-EVIDENCE.json / PROMOTION-APPLY-READINESS.json / PROMOTION-APPLY-MANIFESTS.json / PROMOTION-EXECUTION-CHECKPOINTS.json / PROMOTION-OPERATOR-HANDOFF-RAILS.json / PROMOTION-STAGED-APPLY-LEDGERS.json / PROMOTION-STAGED-APPLY-RUNSHEETS.json / PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json / PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json / PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json / PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json / PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json / PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json / SIGNING-METADATA / NOTARIZATION-PLAN / SIGNING-PUBLISH-PIPELINE / SIGNING-PUBLISH-GATING-HANDSHAKE / SIGNING-PUBLISH-APPROVAL-BRIDGE.json / SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json / PUBLISH-ROLLBACK-HANDSHAKE.json / ROLLBACK-RECOVERY-LEDGER.json / ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json / ROLLBACK-OPERATOR-DRILLBOOKS.json / ROLLBACK-LIVE-READINESS-CONTRACTS.json / ROLLBACK-CUTOVER-READINESS-MAPS.json / ROLLBACK-CUTOVER-HANDOFF-PLANS.json / ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json / ROLLBACK-CUTOVER-EXECUTION-RECORDS.json / ROLLBACK-CUTOVER-OUTCOME-REPORTS.json / ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json / ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json / ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json / RELEASE-APPROVAL-WORKFLOW / RELEASE-NOTES / PUBLISH-GATES / PROMOTION-GATES",
+  "release manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged app materialization skeleton / packaged app directory materialization / packaged app staged output skeleton / packaged app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / attestation apply audit packs / attestation apply execution packets / attestation operator worklists / attestation operator dispatch manifests / attestation operator dispatch packets / attestation operator dispatch receipts / attestation operator reconciliation ledgers / attestation operator settlement packs / attestation operator approval routing contracts / attestation operator approval orchestration / operator review board / release decision handoff / review evidence closeout / installer targets / installer-target builder skeleton / installer builder execution skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / promotion apply readiness / promotion apply manifests / promotion execution checkpoints / promotion operator handoff rails / promotion staged-apply ledgers / promotion staged-apply runsheets / promotion staged-apply command sheets / promotion staged-apply confirmation ledgers / promotion staged-apply closeout journals / promotion staged-apply signoff sheets / promotion staged-apply release decision enforcement contracts / promotion staged-apply release decision enforcement lifecycle / signing-ready metadata / signing-publish pipeline / signing-publish gating handshake / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / rollback recovery ledger / rollback execution rehearsal ledger / rollback operator drillbooks / rollback live-readiness contracts / rollback cutover readiness maps / rollback cutover handoff plans / rollback cutover execution checklists / rollback cutover execution records / rollback cutover outcome reports / rollback cutover publication bundles / rollback cutover publication receipt closeout contracts / rollback cutover publication receipt settlement closeout / release approval workflow / release notes / publish gates / promotion gates under release/",
+  "docs closeout: README / HANDOFF / IMPLEMENTATION-PLAN / PACKAGE-README / RELEASE-SUMMARY / REVIEW-MANIFEST / BUNDLE-MATRIX / BUNDLE-ASSEMBLY / PACKAGED-APP-DIRECTORY-SKELETON / PACKAGED-APP-MATERIALIZATION-SKELETON / PACKAGED-APP-DIRECTORY-MATERIALIZATION / PACKAGED-APP-STAGED-OUTPUT-SKELETON.json / PACKAGED-APP-BUNDLE-SEALING-SKELETON.json / SEALED-BUNDLE-INTEGRITY-CONTRACT.json / INTEGRITY-ATTESTATION-EVIDENCE.json / ATTESTATION-VERIFICATION-PACKS.json / ATTESTATION-APPLY-AUDIT-PACKS.json / ATTESTATION-APPLY-EXECUTION-PACKETS.json / ATTESTATION-OPERATOR-WORKLISTS.json / ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json / ATTESTATION-OPERATOR-DISPATCH-PACKETS.json / ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json / ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json / ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json / ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json / ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json / OPERATOR-REVIEW-BOARD.json / RELEASE-DECISION-HANDOFF.json / REVIEW-EVIDENCE-CLOSEOUT.json / INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON / INSTALLER-BUILDER-EXECUTION-SKELETON / INSTALLER-BUILDER-ORCHESTRATION.json / INSTALLER-CHANNEL-ROUTING.json / CHANNEL-PROMOTION-EVIDENCE.json / PROMOTION-APPLY-READINESS.json / PROMOTION-APPLY-MANIFESTS.json / PROMOTION-EXECUTION-CHECKPOINTS.json / PROMOTION-OPERATOR-HANDOFF-RAILS.json / PROMOTION-STAGED-APPLY-LEDGERS.json / PROMOTION-STAGED-APPLY-RUNSHEETS.json / PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json / PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json / PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json / PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json / PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json / PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json / SIGNING-METADATA / NOTARIZATION-PLAN / SIGNING-PUBLISH-PIPELINE / SIGNING-PUBLISH-GATING-HANDSHAKE / SIGNING-PUBLISH-APPROVAL-BRIDGE.json / SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json / PUBLISH-ROLLBACK-HANDSHAKE.json / ROLLBACK-RECOVERY-LEDGER.json / ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json / ROLLBACK-OPERATOR-DRILLBOOKS.json / ROLLBACK-LIVE-READINESS-CONTRACTS.json / ROLLBACK-CUTOVER-READINESS-MAPS.json / ROLLBACK-CUTOVER-HANDOFF-PLANS.json / ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json / ROLLBACK-CUTOVER-EXECUTION-RECORDS.json / ROLLBACK-CUTOVER-OUTCOME-REPORTS.json / ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json / ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json / ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json / RELEASE-APPROVAL-WORKFLOW / RELEASE-NOTES / PUBLISH-GATES / PROMOTION-GATES",
   "placeholder installer explainer script that never installs anything"
 ];
 const FORMAL_INSTALLER_GAPS = [
@@ -150,6 +150,9 @@ const FORMAL_RELEASE_ARTIFACTS = [
   "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
   "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
   "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+  "release/OPERATOR-REVIEW-BOARD.json",
+  "release/RELEASE-DECISION-HANDOFF.json",
+  "release/REVIEW-EVIDENCE-CLOSEOUT.json",
   "release/INSTALLER-TARGETS.json",
   "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
   "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
@@ -214,6 +217,9 @@ const RELEASE_PIPELINE_STAGES = [
   "attestation-operator-settlement-packs",
   "attestation-operator-approval-routing-contracts",
   "attestation-operator-approval-orchestration",
+  "operator-review-board",
+  "release-decision-handoff",
+  "review-evidence-closeout",
   "installer-target-metadata",
   "installer-target-builder-skeleton",
   "installer-builder-execution-skeleton",
@@ -279,7 +285,7 @@ const PACKAGE_LAYOUT = [
     label: "Release metadata",
     path: "release",
     description:
-      "Manifest, build metadata, attestation verification packs, attestation apply audit packs, attestation apply execution packets, attestation operator worklists, attestation operator dispatch manifests, attestation operator dispatch packets, attestation operator dispatch receipts, attestation operator reconciliation ledgers, attestation operator settlement packs, attestation operator approval routing contracts, attestation operator approval orchestration, promotion apply manifests, promotion execution checkpoints, promotion operator handoff rails, promotion staged-apply ledgers, promotion staged-apply runsheets, promotion staged-apply command sheets, promotion staged-apply confirmation ledgers, promotion staged-apply closeout journals, promotion staged-apply signoff sheets, promotion staged-apply release decision enforcement contracts, promotion staged-apply release decision enforcement lifecycle, rollback rehearsal ledgers, rollback operator drillbooks, rollback live-readiness contracts, rollback cutover readiness maps, rollback cutover handoff plans, rollback cutover execution checklists, rollback cutover execution records, rollback cutover outcome reports, rollback cutover publication bundles, rollback cutover publication receipt closeout contracts, rollback cutover publication receipt settlement closeout, packaged app directory skeletons, signing/publish handshake metadata, installer targets, approval workflow, installer placeholder contract, and release checklist."
+      "Manifest, build metadata, attestation verification packs, attestation apply audit packs, attestation apply execution packets, attestation operator worklists, attestation operator dispatch manifests, attestation operator dispatch packets, attestation operator dispatch receipts, attestation operator reconciliation ledgers, attestation operator settlement packs, attestation operator approval routing contracts, attestation operator approval orchestration, operator review board, release decision handoff, review evidence closeout, promotion apply manifests, promotion execution checkpoints, promotion operator handoff rails, promotion staged-apply ledgers, promotion staged-apply runsheets, promotion staged-apply command sheets, promotion staged-apply confirmation ledgers, promotion staged-apply closeout journals, promotion staged-apply signoff sheets, promotion staged-apply release decision enforcement contracts, promotion staged-apply release decision enforcement lifecycle, rollback rehearsal ledgers, rollback operator drillbooks, rollback live-readiness contracts, rollback cutover readiness maps, rollback cutover handoff plans, rollback cutover execution checklists, rollback cutover execution records, rollback cutover outcome reports, rollback cutover publication bundles, rollback cutover publication receipt closeout contracts, rollback cutover publication receipt settlement closeout, packaged app directory skeletons, signing/publish handshake metadata, installer targets, approval workflow, installer placeholder contract, and release checklist."
   },
   {
     id: "release-scripts",
@@ -522,6 +528,24 @@ function buildGeneratedDocs() {
       id: "attestation-operator-approval-orchestration",
       label: "Attestation operator approval orchestration",
       outputPath: "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+      generated: true
+    },
+    {
+      id: "operator-review-board",
+      label: "Operator review board",
+      outputPath: "release/OPERATOR-REVIEW-BOARD.json",
+      generated: true
+    },
+    {
+      id: "release-decision-handoff",
+      label: "Release decision handoff",
+      outputPath: "release/RELEASE-DECISION-HANDOFF.json",
+      generated: true
+    },
+    {
+      id: "review-evidence-closeout",
+      label: "Review evidence closeout",
+      outputPath: "release/REVIEW-EVIDENCE-CLOSEOUT.json",
       generated: true
     },
     {
@@ -825,6 +849,9 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
     "    ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
     "    ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
     "    ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+    "    OPERATOR-REVIEW-BOARD.json",
+    "    RELEASE-DECISION-HANDOFF.json",
+    "    REVIEW-EVIDENCE-CLOSEOUT.json",
     "    INSTALLER-TARGETS.json",
     "    INSTALLER-TARGET-BUILDER-SKELETON.json",
     "    INSTALLER-BUILDER-EXECUTION-SKELETON.json",
@@ -876,7 +903,7 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
   return [
     `# OpenClaw Studio ${PHASE_TITLE} Package Snapshot`,
     "",
-    "这是一个 **phase56 alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47/48/49/50/51/52/53/54/55 packaging 与 shell foundations 的基础上，把 local-only multi-window orchestration、cross-window shared-state review surface、以及 review-only release approval pipeline / trace / inspector drill-down 继续收紧成更真实的审阅壳，但它依然 **不是 installer**。",
+    `这是一个 **${PHASE_ID} alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47/48/49/50/51/52/53/54/55/56 packaging 与 shell foundations 的基础上，把 local-only multi-window orchestration、cross-window shared-state review surface、以及 review-only release approval pipeline 继续推进成更明确的 operator review board / decision handoff / evidence closeout 审阅壳，但它依然 **不是 installer**。`,
     "",
     `当前已验证里程碑：${PHASE_MILESTONE}。`,
     "",
@@ -938,6 +965,9 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
     "- 再看 `release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json`",
     "- 再看 `release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json`",
     "- 再看 `release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json`",
+    "- 再看 `release/OPERATOR-REVIEW-BOARD.json`",
+    "- 再看 `release/RELEASE-DECISION-HANDOFF.json`",
+    "- 再看 `release/REVIEW-EVIDENCE-CLOSEOUT.json`",
     "- 再看 `release/INSTALLER-TARGETS.json`",
     "- 再看 `release/INSTALLER-TARGET-BUILDER-SKELETON.json`",
     "- 再看 `release/INSTALLER-BUILDER-EXECUTION-SKELETON.json`",
@@ -1032,6 +1062,9 @@ function renderReleaseChecklist() {
     "- `release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json` 必须列出 attestation operator settlement packs metadata",
     "- `release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json` 必须列出 attestation operator approval routing contracts metadata",
     "- `release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json` 必须列出 attestation operator approval orchestration metadata",
+    "- `release/OPERATOR-REVIEW-BOARD.json` 必须列出 operator review board metadata",
+    "- `release/RELEASE-DECISION-HANDOFF.json` 必须列出 release decision handoff metadata",
+    "- `release/REVIEW-EVIDENCE-CLOSEOUT.json` 必须列出 review evidence closeout metadata",
     "- `release/INSTALLER-TARGETS.json` 必须列出 installer target metadata",
     "- `release/INSTALLER-TARGET-BUILDER-SKELETON.json` 必须列出 installer-target builder skeleton",
     "- `release/INSTALLER-BUILDER-EXECUTION-SKELETON.json` 必须列出 installer builder execution skeleton",
@@ -1119,6 +1152,9 @@ function renderReleaseNotes({ generatedAt }) {
     `Milestone: ${PHASE_MILESTONE}`,
     "",
     "## Highlights",
+    "- operator review board now turns the earlier review-only approval pipeline into a clearer operator-facing board with explicit stage ownership, active review packet posture, and cross-links back into trace and window review surfaces",
+    "- release decision handoff now keeps the reviewer baton explicit between approval, lifecycle, rollback, and final decision stages without enabling any live signing, publish, or host-side execution",
+    "- review evidence closeout now exposes sealing state, sealed evidence, pending evidence, and reviewer notes as first-class local-only review artifacts instead of burying closeout posture inside larger release metadata",
     "- attestation operator approval orchestration now turns phase53 approval routing contracts into reviewer baton sequencing, approval quorum timing, and orchestration closeout paths without dispatching any live approval or execution for real",
     "- promotion staged-apply release decision enforcement lifecycle now turns phase53 enforcement contracts into lifecycle checkpoints, reviewer baton transitions, and expiry closeout without applying any live promotion for real",
     "- rollback cutover publication receipt settlement closeout now turns phase53 receipt closeout contracts into settlement ledgers, receipt closeout acknowledgements, and recovery-ready closeout evidence without mutating any live publish state",
@@ -7239,8 +7275,12 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
     gatingHandshakePath: "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
     approvalBridgePath: "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
     promotionHandshakePath: "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+    operatorReviewBoardPath: "release/OPERATOR-REVIEW-BOARD.json",
+    releaseDecisionHandoffPath: "release/RELEASE-DECISION-HANDOFF.json",
+    reviewEvidenceCloseoutPath: "release/REVIEW-EVIDENCE-CLOSEOUT.json",
     blockedBy: [
       "approval handshake is not executable yet",
+      "operator review board remains local-only metadata",
       "signing / notarization remain metadata-only",
       "signing-publish gating handshake remains metadata-only",
       "publish rollback handshake remains metadata-only",
@@ -7286,7 +7326,20 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
           "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
           "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
           "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
-          "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json"
+          "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+          "release/OPERATOR-REVIEW-BOARD.json"
+        ]
+      },
+      {
+        id: "approval-operator-board",
+        label: "Operator review board, decision handoff, and evidence closeout review",
+        status: "in-review",
+        approverRoles: ["release-manager", "product-owner", "runtime-owner"],
+        evidence: [
+          "release/OPERATOR-REVIEW-BOARD.json",
+          "release/RELEASE-DECISION-HANDOFF.json",
+          "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+          "release/RELEASE-APPROVAL-WORKFLOW.json"
         ]
       },
       {
@@ -7329,6 +7382,9 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
         evidence: [
           "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
           "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+          "release/OPERATOR-REVIEW-BOARD.json",
+          "release/RELEASE-DECISION-HANDOFF.json",
+          "release/REVIEW-EVIDENCE-CLOSEOUT.json",
           "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
           "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
           "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json",
@@ -7385,6 +7441,291 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
         evidence: ["release/INSTALLER-PLACEHOLDER.json"],
         blockers: ["approval / lifecycle / rollback remain placeholder-only", "host-side execution remains disabled"]
       }
+    ]
+  };
+}
+
+function buildOperatorReviewBoard({ generatedAt }) {
+  return {
+    schemaVersion: "openclaw-studio-operator-review-board/v1",
+    generatedAt,
+    phase: PHASE_ID,
+    mode: "local-only-review",
+    board: {
+      id: "operator-review-board-release-approval",
+      title: "Operator Review Board",
+      posture: "release-manager baton active / review-only handoff",
+      activeOwner: "release-manager",
+      activeStageId: "stage-approval-orchestration",
+      activePacketId: "review-packet-approval-orchestration",
+      sharedStateLaneId: "shared-state-lane-trace-review",
+      windowId: "window-trace-review",
+      decisionHandoffPath: "release/RELEASE-DECISION-HANDOFF.json",
+      evidenceCloseoutPath: "release/REVIEW-EVIDENCE-CLOSEOUT.json"
+    },
+    reviewerNotes: [
+      {
+        id: "board-note-windowing",
+        label: "Cross-window review lane",
+        value: "Trace Review Lane / window-trace-review",
+        detail: "Operator ownership is intentionally tied to the same shared-state lane and review window surfaced in the phase57 shell."
+      },
+      {
+        id: "board-note-baton",
+        label: "Decision baton",
+        value: "release-manager -> product-owner",
+        detail: "The active baton remains metadata-only and local-only, but reviewer ownership and next-stage posture are explicit."
+      },
+      {
+        id: "board-note-closeout",
+        label: "Evidence sealing",
+        value: "open / visible before execution",
+        detail: "Evidence closeout is promoted to a first-class review object so pending artifacts stay visible before any future executor exists."
+      }
+    ],
+    stages: [
+      {
+        id: "stage-attestation-intake",
+        label: "Attestation intake board",
+        status: "ready",
+        owner: "release-engineering",
+        packetId: "review-packet-attestation-intake",
+        handoffId: "decision-handoff-attestation-intake",
+        closeoutId: "evidence-closeout-attestation-intake",
+        evidence: [
+          "release/RELEASE-MANIFEST.json",
+          "release/ATTESTATION-VERIFICATION-PACKS.json",
+          "release/ATTESTATION-APPLY-AUDIT-PACKS.json"
+        ]
+      },
+      {
+        id: "stage-approval-orchestration",
+        label: "Approval orchestration board",
+        status: "in-review",
+        owner: "release-manager",
+        packetId: "review-packet-approval-orchestration",
+        handoffId: "decision-handoff-approval-orchestration",
+        closeoutId: "evidence-closeout-approval-orchestration",
+        evidence: [
+          "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
+          "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+          "release/OPERATOR-REVIEW-BOARD.json",
+          "release/RELEASE-DECISION-HANDOFF.json",
+          "release/REVIEW-EVIDENCE-CLOSEOUT.json"
+        ]
+      },
+      {
+        id: "stage-lifecycle-enforcement",
+        label: "Release decision lifecycle",
+        status: "planned",
+        owner: "product-owner",
+        packetId: "review-packet-lifecycle-enforcement",
+        handoffId: "decision-handoff-lifecycle-enforcement",
+        closeoutId: "evidence-closeout-lifecycle-enforcement",
+        evidence: [
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json",
+          "release/RELEASE-DECISION-HANDOFF.json"
+        ]
+      },
+      {
+        id: "stage-rollback-settlement",
+        label: "Rollback settlement closeout",
+        status: "planned",
+        owner: "runtime-owner",
+        packetId: "review-packet-rollback-settlement",
+        handoffId: "decision-handoff-rollback-settlement",
+        closeoutId: "evidence-closeout-rollback-settlement",
+        evidence: [
+          "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+        ]
+      },
+      {
+        id: "stage-final-release-decision",
+        label: "Final release decision board",
+        status: "blocked",
+        owner: "release-manager",
+        packetId: "review-packet-final-release-decision",
+        handoffId: "decision-handoff-final-release-decision",
+        closeoutId: "evidence-closeout-final-release-decision",
+        evidence: [
+          "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+          "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+          "release/PUBLISH-GATES.json",
+          "release/PROMOTION-GATES.json"
+        ]
+      }
+    ],
+    blockedBy: [
+      "operator review board remains review-only",
+      "decision baton remains metadata-only",
+      "evidence sealing remains descriptive only",
+      "host-side execution remains disabled"
+    ]
+  };
+}
+
+function buildReleaseDecisionHandoff({ generatedAt }) {
+  return {
+    schemaVersion: "openclaw-studio-release-decision-handoff/v1",
+    generatedAt,
+    phase: PHASE_ID,
+    mode: "local-only-review",
+    activeHandoffId: "decision-handoff-approval-orchestration",
+    handoffs: [
+      {
+        id: "decision-handoff-attestation-intake",
+        label: "Intake to approval handoff",
+        batonState: "handoff-ready",
+        sourceOwner: "release-engineering",
+        targetOwner: "release-manager",
+        posture: "intake packet ready for approval routing",
+        packetId: "review-packet-attestation-intake",
+        pending: ["approval acknowledgement stays metadata-only", "host-side execution remains disabled"],
+        linkedArtifacts: ["release/RELEASE-MANIFEST.json", "release/OPERATOR-REVIEW-BOARD.json"]
+      },
+      {
+        id: "decision-handoff-approval-orchestration",
+        label: "Approval to lifecycle handoff",
+        batonState: "awaiting-ack",
+        sourceOwner: "release-manager",
+        targetOwner: "product-owner",
+        posture: "reviewer baton waiting on decision-lifecycle acknowledgement",
+        packetId: "review-packet-approval-orchestration",
+        pending: [
+          "product-owner acknowledgement remains metadata-only",
+          "signing-publish gating handshake remains blocked",
+          "host-side execution remains disabled"
+        ],
+        linkedArtifacts: ["release/OPERATOR-REVIEW-BOARD.json", "release/RELEASE-DECISION-HANDOFF.json"]
+      },
+      {
+        id: "decision-handoff-lifecycle-enforcement",
+        label: "Lifecycle to rollback handoff",
+        batonState: "held",
+        sourceOwner: "product-owner",
+        targetOwner: "runtime-owner",
+        posture: "lifecycle packet held until approval board closes",
+        packetId: "review-packet-lifecycle-enforcement",
+        pending: ["approval board closeout remains open", "rollback closeout remains metadata-only"],
+        linkedArtifacts: [
+          "release/RELEASE-DECISION-HANDOFF.json",
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+        ]
+      },
+      {
+        id: "decision-handoff-rollback-settlement",
+        label: "Rollback closeout to final decision handoff",
+        batonState: "held",
+        sourceOwner: "runtime-owner",
+        targetOwner: "release-manager",
+        posture: "rollback closeout queued behind lifecycle evidence",
+        packetId: "review-packet-rollback-settlement",
+        pending: ["rollback publication remains review-only", "final decision board remains blocked"],
+        linkedArtifacts: [
+          "release/RELEASE-DECISION-HANDOFF.json",
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+        ]
+      },
+      {
+        id: "decision-handoff-final-release-decision",
+        label: "Final decision handoff",
+        batonState: "blocked",
+        sourceOwner: "release-manager",
+        targetOwner: "signing-gate",
+        posture: "blocked by publish and signing gates",
+        packetId: "review-packet-final-release-decision",
+        pending: [
+          "signing-publish gating handshake remains metadata-only",
+          "publish rollback handshake remains metadata-only",
+          "real publish automation remains blocked"
+        ],
+        linkedArtifacts: ["release/SIGNING-PUBLISH-GATING-HANDSHAKE.json", "release/PUBLISH-GATES.json"]
+      }
+    ],
+    blockedBy: [
+      "all decision handoffs remain local-only metadata",
+      "signing / publish / rollback execution remain blocked",
+      "host-side execution remains disabled"
+    ]
+  };
+}
+
+function buildReviewEvidenceCloseout({ generatedAt }) {
+  return {
+    schemaVersion: "openclaw-studio-review-evidence-closeout/v1",
+    generatedAt,
+    phase: PHASE_ID,
+    mode: "local-only-review",
+    activeCloseoutId: "evidence-closeout-approval-orchestration",
+    closeouts: [
+      {
+        id: "evidence-closeout-attestation-intake",
+        label: "Intake evidence closeout",
+        sealingState: "pending-seal",
+        owner: "release-engineering",
+        sealedEvidence: ["release/RELEASE-MANIFEST.json"],
+        pendingEvidence: ["release/ATTESTATION-VERIFICATION-PACKS.json", "release/ATTESTATION-APPLY-AUDIT-PACKS.json"],
+        linkedHandoffId: "decision-handoff-attestation-intake"
+      },
+      {
+        id: "evidence-closeout-approval-orchestration",
+        label: "Approval evidence closeout",
+        sealingState: "open",
+        owner: "release-manager",
+        sealedEvidence: ["release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json"],
+        pendingEvidence: [
+          "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+          "release/RELEASE-DECISION-HANDOFF.json",
+          "release/REVIEW-EVIDENCE-CLOSEOUT.json"
+        ],
+        linkedHandoffId: "decision-handoff-approval-orchestration"
+      },
+      {
+        id: "evidence-closeout-lifecycle-enforcement",
+        label: "Lifecycle evidence closeout",
+        sealingState: "open",
+        owner: "product-owner",
+        sealedEvidence: [],
+        pendingEvidence: [
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+        ],
+        linkedHandoffId: "decision-handoff-lifecycle-enforcement"
+      },
+      {
+        id: "evidence-closeout-rollback-settlement",
+        label: "Rollback evidence closeout",
+        sealingState: "pending-seal",
+        owner: "runtime-owner",
+        sealedEvidence: ["release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json"],
+        pendingEvidence: [
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
+          "release/REVIEW-EVIDENCE-CLOSEOUT.json"
+        ],
+        linkedHandoffId: "decision-handoff-rollback-settlement"
+      },
+      {
+        id: "evidence-closeout-final-release-decision",
+        label: "Final decision closeout",
+        sealingState: "blocked",
+        owner: "release-manager",
+        sealedEvidence: [],
+        pendingEvidence: [
+          "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+          "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+          "release/PUBLISH-GATES.json",
+          "release/PROMOTION-GATES.json"
+        ],
+        linkedHandoffId: "decision-handoff-final-release-decision"
+      }
+    ],
+    blockedBy: [
+      "evidence sealing remains review-only",
+      "publish / promotion closeout remains blocked",
+      "host-side execution remains disabled"
     ]
   };
 }
@@ -7601,6 +7942,9 @@ function renderInstallerPlaceholderScript() {
     "console.log(`attestation operator settlement packs metadata: ${manifest.attestationOperatorSettlementPacksPath}`);",
     "console.log(`attestation operator approval routing contracts metadata: ${manifest.attestationOperatorApprovalRoutingContractsPath}`);",
     "console.log(`attestation operator approval orchestration metadata: ${manifest.attestationOperatorApprovalOrchestrationPath}`);",
+    "console.log(`operator review board metadata: ${manifest.operatorReviewBoardPath}`);",
+    "console.log(`release decision handoff metadata: ${manifest.releaseDecisionHandoffPath}`);",
+    "console.log(`review evidence closeout metadata: ${manifest.reviewEvidenceCloseoutPath}`);",
     "console.log(`installer targets metadata: ${manifest.installerTargetsPath}`);",
     "console.log(`installer builder execution metadata: ${manifest.installerBuilderExecutionSkeletonPath}`);",
     "console.log(`installer-target builder metadata: ${manifest.installerTargetBuilderSkeletonPath}`);",
@@ -7798,6 +8142,9 @@ function buildInstallerPlaceholder({ generatedAt, studioPackage }) {
     attestationOperatorSettlementPacksPath: "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
     attestationOperatorApprovalRoutingContractsPath: "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
     attestationOperatorApprovalOrchestrationPath: "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+    operatorReviewBoardPath: "release/OPERATOR-REVIEW-BOARD.json",
+    releaseDecisionHandoffPath: "release/RELEASE-DECISION-HANDOFF.json",
+    reviewEvidenceCloseoutPath: "release/REVIEW-EVIDENCE-CLOSEOUT.json",
     installerTargetsPath: "release/INSTALLER-TARGETS.json",
     installerBuilderExecutionSkeletonPath: "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
     installerTargetBuilderSkeletonPath: "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
@@ -8056,6 +8403,15 @@ function createReleaseSkeleton(summary = getPreflightSummary()) {
   const releaseApprovalWorkflow = buildReleaseApprovalWorkflow({
     generatedAt
   });
+  const operatorReviewBoard = buildOperatorReviewBoard({
+    generatedAt
+  });
+  const releaseDecisionHandoff = buildReleaseDecisionHandoff({
+    generatedAt
+  });
+  const reviewEvidenceCloseout = buildReviewEvidenceCloseout({
+    generatedAt
+  });
   const publishGates = buildPublishGates({
     generatedAt
   });
@@ -8152,6 +8508,9 @@ function createReleaseSkeleton(summary = getPreflightSummary()) {
     rollbackCutoverPublicationReceiptCloseoutContracts,
     rollbackCutoverPublicationReceiptSettlementCloseout,
     releaseApprovalWorkflow,
+    operatorReviewBoard,
+    releaseDecisionHandoff,
+    reviewEvidenceCloseout,
     publishGates,
     promotionGates,
     releaseManifest,
@@ -8395,6 +8754,9 @@ function writeReleaseSkeleton(destinationRoot, skeleton) {
     path.join(destinationRoot, "release", "ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"),
     skeleton.rollbackCutoverPublicationReceiptSettlementCloseout
   );
+  writeJsonFile(path.join(destinationRoot, "release", "OPERATOR-REVIEW-BOARD.json"), skeleton.operatorReviewBoard);
+  writeJsonFile(path.join(destinationRoot, "release", "RELEASE-DECISION-HANDOFF.json"), skeleton.releaseDecisionHandoff);
+  writeJsonFile(path.join(destinationRoot, "release", "REVIEW-EVIDENCE-CLOSEOUT.json"), skeleton.reviewEvidenceCloseout);
   writeJsonFile(
     path.join(destinationRoot, "release", "RELEASE-APPROVAL-WORKFLOW.json"),
     skeleton.releaseApprovalWorkflow
@@ -8437,6 +8799,10 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
     "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
     "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
+    "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+    "release/OPERATOR-REVIEW-BOARD.json",
+    "release/RELEASE-DECISION-HANDOFF.json",
+    "release/REVIEW-EVIDENCE-CLOSEOUT.json",
     "release/INSTALLER-TARGETS.json",
     "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
     "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
@@ -8454,6 +8820,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
     "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
     "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+    "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json",
     "release/SIGNING-METADATA.json",
     "release/NOTARIZATION-PLAN.json",
     "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
@@ -8472,6 +8839,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
     "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
     "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
+    "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
     "release/RELEASE-APPROVAL-WORKFLOW.json",
     "release/RELEASE-NOTES.md",
     "release/PUBLISH-GATES.json",
