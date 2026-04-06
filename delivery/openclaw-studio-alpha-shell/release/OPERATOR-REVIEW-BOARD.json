@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "openclaw-studio-operator-review-board/v1",
+  "generatedAt": "2026-04-06T09:26:36.378Z",
+  "phase": "phase57",
+  "mode": "local-only-review",
+  "board": {
+    "id": "operator-review-board-release-approval",
+    "title": "Operator Review Board",
+    "posture": "release-manager baton active / review-only handoff",
+    "activeOwner": "release-manager",
+    "activeStageId": "stage-approval-orchestration",
+    "activePacketId": "review-packet-approval-orchestration",
+    "sharedStateLaneId": "shared-state-lane-trace-review",
+    "windowId": "window-trace-review",
+    "decisionHandoffPath": "release/RELEASE-DECISION-HANDOFF.json",
+    "evidenceCloseoutPath": "release/REVIEW-EVIDENCE-CLOSEOUT.json"
+  },
+  "reviewerNotes": [
+    {
+      "id": "board-note-windowing",
+      "label": "Cross-window review lane",
+      "value": "Trace Review Lane / window-trace-review",
+      "detail": "Operator ownership is intentionally tied to the same shared-state lane and review window surfaced in the phase57 shell."
+    },
+    {
+      "id": "board-note-baton",
+      "label": "Decision baton",
+      "value": "release-manager -> product-owner",
+      "detail": "The active baton remains metadata-only and local-only, but reviewer ownership and next-stage posture are explicit."
+    },
+    {
+      "id": "board-note-closeout",
+      "label": "Evidence sealing",
+      "value": "open / visible before execution",
+      "detail": "Evidence closeout is promoted to a first-class review object so pending artifacts stay visible before any future executor exists."
+    }
+  ],
+  "stages": [
+    {
+      "id": "stage-attestation-intake",
+      "label": "Attestation intake board",
+      "status": "ready",
+      "owner": "release-engineering",
+      "packetId": "review-packet-attestation-intake",
+      "handoffId": "decision-handoff-attestation-intake",
+      "closeoutId": "evidence-closeout-attestation-intake",
+      "evidence": [
+        "release/RELEASE-MANIFEST.json",
+        "release/ATTESTATION-VERIFICATION-PACKS.json",
+        "release/ATTESTATION-APPLY-AUDIT-PACKS.json"
+      ]
+    },
+    {
+      "id": "stage-approval-orchestration",
+      "label": "Approval orchestration board",
+      "status": "in-review",
+      "owner": "release-manager",
+      "packetId": "review-packet-approval-orchestration",
+      "handoffId": "decision-handoff-approval-orchestration",
+      "closeoutId": "evidence-closeout-approval-orchestration",
+      "evidence": [
+        "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
+        "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+        "release/OPERATOR-REVIEW-BOARD.json",
+        "release/RELEASE-DECISION-HANDOFF.json",
+        "release/REVIEW-EVIDENCE-CLOSEOUT.json"
+      ]
+    },
+    {
+      "id": "stage-lifecycle-enforcement",
+      "label": "Release decision lifecycle",
+      "status": "planned",
+      "owner": "product-owner",
+      "packetId": "review-packet-lifecycle-enforcement",
+      "handoffId": "decision-handoff-lifecycle-enforcement",
+      "closeoutId": "evidence-closeout-lifecycle-enforcement",
+      "evidence": [
+        "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+        "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json",
+        "release/RELEASE-DECISION-HANDOFF.json"
+      ]
+    },
+    {
+      "id": "stage-rollback-settlement",
+      "label": "Rollback settlement closeout",
+      "status": "planned",
+      "owner": "runtime-owner",
+      "packetId": "review-packet-rollback-settlement",
+      "handoffId": "decision-handoff-rollback-settlement",
+      "closeoutId": "evidence-closeout-rollback-settlement",
+      "evidence": [
+        "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+        "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
+        "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+      ]
+    },
+    {
+      "id": "stage-final-release-decision",
+      "label": "Final release decision board",
+      "status": "blocked",
+      "owner": "release-manager",
+      "packetId": "review-packet-final-release-decision",
+      "handoffId": "decision-handoff-final-release-decision",
+      "closeoutId": "evidence-closeout-final-release-decision",
+      "evidence": [
+        "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+        "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+        "release/PUBLISH-GATES.json",
+        "release/PROMOTION-GATES.json"
+      ]
+    }
+  ],
+  "blockedBy": [
+    "operator review board remains review-only",
+    "decision baton remains metadata-only",
+    "evidence sealing remains descriptive only",
+    "host-side execution remains disabled"
+  ]
+}

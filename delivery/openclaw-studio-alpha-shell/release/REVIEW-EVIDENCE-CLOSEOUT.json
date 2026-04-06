@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "openclaw-studio-review-evidence-closeout/v1",
+  "generatedAt": "2026-04-06T09:26:36.378Z",
+  "phase": "phase57",
+  "mode": "local-only-review",
+  "activeCloseoutId": "evidence-closeout-approval-orchestration",
+  "closeouts": [
+    {
+      "id": "evidence-closeout-attestation-intake",
+      "label": "Intake evidence closeout",
+      "sealingState": "pending-seal",
+      "owner": "release-engineering",
+      "sealedEvidence": [
+        "release/RELEASE-MANIFEST.json"
+      ],
+      "pendingEvidence": [
+        "release/ATTESTATION-VERIFICATION-PACKS.json",
+        "release/ATTESTATION-APPLY-AUDIT-PACKS.json"
+      ],
+      "linkedHandoffId": "decision-handoff-attestation-intake"
+    },
+    {
+      "id": "evidence-closeout-approval-orchestration",
+      "label": "Approval evidence closeout",
+      "sealingState": "open",
+      "owner": "release-manager",
+      "sealedEvidence": [
+        "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json"
+      ],
+      "pendingEvidence": [
+        "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+        "release/RELEASE-DECISION-HANDOFF.json",
+        "release/REVIEW-EVIDENCE-CLOSEOUT.json"
+      ],
+      "linkedHandoffId": "decision-handoff-approval-orchestration"
+    },
+    {
+      "id": "evidence-closeout-lifecycle-enforcement",
+      "label": "Lifecycle evidence closeout",
+      "sealingState": "open",
+      "owner": "product-owner",
+      "sealedEvidence": [],
+      "pendingEvidence": [
+        "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+        "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+      ],
+      "linkedHandoffId": "decision-handoff-lifecycle-enforcement"
+    },
+    {
+      "id": "evidence-closeout-rollback-settlement",
+      "label": "Rollback evidence closeout",
+      "sealingState": "pending-seal",
+      "owner": "runtime-owner",
+      "sealedEvidence": [
+        "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json"
+      ],
+      "pendingEvidence": [
+        "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
+        "release/REVIEW-EVIDENCE-CLOSEOUT.json"
+      ],
+      "linkedHandoffId": "decision-handoff-rollback-settlement"
+    },
+    {
+      "id": "evidence-closeout-final-release-decision",
+      "label": "Final decision closeout",
+      "sealingState": "blocked",
+      "owner": "release-manager",
+      "sealedEvidence": [],
+      "pendingEvidence": [
+        "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+        "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+        "release/PUBLISH-GATES.json",
+        "release/PROMOTION-GATES.json"
+      ],
+      "linkedHandoffId": "decision-handoff-final-release-decision"
+    }
+  ],
+  "blockedBy": [
+    "evidence sealing remains review-only",
+    "publish / promotion closeout remains blocked",
+    "host-side execution remains disabled"
+  ]
+}

@@ -1000,11 +1000,13 @@ function buildShellState(baseState, systemStatus, sessionProbe, runtimeObservati
     });
     shellState.inspector.summary =
         hasLiveToolsMcp || hasLiveRuntime
-            ? "Shared boundary state now summarizes the live local-only layer, preview-host contract, per-slot trace focus, release approval pipeline posture, cross-window shared-state posture, dock linkage, blockers, and future executor posture."
+            ? "Shared boundary state now summarizes the live local-only layer, preview-host contract, per-slot trace focus, operator review board posture, decision handoff, evidence closeout, cross-window shared-state posture, dock linkage, blockers, and future executor posture."
             : baseState.inspector.summary;
     shellState.inspector.boundary = shellState.boundary;
     const traceFocus = createInspectorTraceFocus(shellState.boundary);
     const currentReleaseStage = (0, shared_1.selectStudioReleaseApprovalPipelineStage)(shellState.boundary.hostExecutor.releaseApprovalPipeline);
+    const currentDecisionHandoff = shellState.boundary.hostExecutor.releaseApprovalPipeline.decisionHandoff;
+    const currentEvidenceCloseout = shellState.boundary.hostExecutor.releaseApprovalPipeline.evidenceCloseout;
     const activeSharedStateLane = shellState.windowing.sharedState.lanes.find((lane) => lane.id === shellState.windowing.sharedState.activeLaneId) ??
         shellState.windowing.sharedState.lanes[0];
     const activeWindow = shellState.windowing.roster.windows.find((entry) => entry.id === activeSharedStateLane?.windowId) ??
@@ -1046,8 +1048,18 @@ function buildShellState(baseState, systemStatus, sessionProbe, runtimeObservati
         },
         {
             id: "approval-pipeline",
-            label: "Approval pipeline",
+            label: "Operator review board",
             value: currentReleaseStage ? `${currentReleaseStage.label} / ${currentReleaseStage.status}` : "Unavailable"
+        },
+        {
+            id: "decision-handoff",
+            label: "Decision handoff",
+            value: `${currentDecisionHandoff.batonState} / ${currentDecisionHandoff.targetOwner}`
+        },
+        {
+            id: "evidence-closeout",
+            label: "Evidence closeout",
+            value: `${currentEvidenceCloseout.sealingState} / ${currentEvidenceCloseout.owner}`
         },
         {
             id: "window-focus",
@@ -1091,23 +1103,51 @@ function buildShellState(baseState, systemStatus, sessionProbe, runtimeObservati
         orchestrationBoardId: activeOrchestrationBoard?.id ?? shellState.inspector.linkage.orchestrationBoardId
     };
     shellState.inspector.drilldowns = shellState.inspector.drilldowns.map((drilldown) => {
-        if (drilldown.id !== "drilldown-active-flow-insight") {
-            return drilldown;
+        if (drilldown.id === "drilldown-active-flow-insight") {
+            return {
+                ...drilldown,
+                lines: drilldown.lines.map((line) => {
+                    if (line.id !== "drilldown-flow-slot") {
+                        return line;
+                    }
+                    return {
+                        ...line,
+                        value: traceFocus?.label ?? line.value,
+                        detail: traceFocus?.summary ?? line.detail
+                    };
+                })
+            };
         }
-        return {
-            ...drilldown,
-            lines: drilldown.lines.map((line) => {
-                if (line.id !== "drilldown-flow-slot") {
+        if (drilldown.id === "drilldown-release-approval-pipeline") {
+            return {
+                ...drilldown,
+                lines: drilldown.lines.map((line) => {
+                    if (line.id === "drilldown-pipeline-current") {
+                        return {
+                            ...line,
+                            value: currentReleaseStage?.label ?? line.value,
+                            detail: `${shellState.boundary.hostExecutor.releaseApprovalPipeline.reviewBoard.posture}. ${line.detail}`
+                        };
+                    }
+                    if (line.id === "drilldown-pipeline-lifecycle") {
+                        return {
+                            ...line,
+                            value: currentDecisionHandoff.label,
+                            detail: `${currentDecisionHandoff.sourceOwner} -> ${currentDecisionHandoff.targetOwner} · ${currentDecisionHandoff.posture}`
+                        };
+                    }
+                    if (line.id === "drilldown-pipeline-rollback") {
+                        return {
+                            ...line,
+                            value: currentEvidenceCloseout.label,
+                            detail: `${currentEvidenceCloseout.sealingState} · ${currentEvidenceCloseout.owner} · ${currentEvidenceCloseout.pendingEvidence.length} pending evidence`
+                        };
+                    }
                     return line;
-                }
-                return {
-                    ...line,
-                    value: traceFocus?.label ?? line.value,
-                    detail: traceFocus?.summary ??
-                        line.detail
-                };
-            })
-        };
+                })
+            };
+        }
+        return drilldown;
     });
     shellState.dock = createDockItemsFromTraceFocus(traceFocus);
     return shellState;
