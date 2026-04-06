@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-review-manifest/v1",
-  "generatedAt": "2026-04-06T14:32:54.667Z",
+  "generatedAt": "2026-04-06T14:54:49.806Z",
   "phase": "phase58",
   "milestone": "phase58 review-only delivery chain / operator review loop / reviewer queues / acknowledgement state / escalation windows / closeout windows / deeper cross-window observability / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout",
   "reviewDocs": [
@@ -82,7 +82,7 @@
       "id": "renderer",
       "label": "Renderer bundle",
       "outputRoot": "artifacts/renderer",
-      "fileCount": 3,
+      "fileCount": 11,
       "entrypoints": [
         "artifacts/renderer/index.html"
       ]
