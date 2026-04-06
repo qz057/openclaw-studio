@@ -14,7 +14,7 @@ import { mockBoundarySummary } from "./mock-host.js";
 const mockCommandSurface: StudioCommandSurface = {
   title: "Command Palette",
   summary:
-    "Phase58 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, recent command history, inspector-command linkage, and review-posture ownership now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
+    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, recent command history, inspector-command linkage, review-posture ownership, and delivery-stage exploration now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
   placeholder: "Search orchestration, navigation, next steps, flow state, detached workspace, or keyboard routes",
   quickActionIds: [
     "command-open-home",
@@ -631,7 +631,7 @@ const mockCommandSurface: StudioCommandSurface = {
   keyboardRouting: {
     title: "Keyboard Routing",
     summary:
-      "Phase58 keeps keyboard routing local-only: palette open/close, contextual flow advance, direct sequence launch, route shortcuts, and slot/trace hotkeys all stay inside the shell UI while cross-view coordination and review-posture ownership remain reviewable.",
+      "Phase60 keeps keyboard routing local-only: palette open/close, contextual flow advance, direct sequence launch, route shortcuts, and slot/trace hotkeys all stay inside the shell UI while cross-view coordination and review-posture ownership remain reviewable.",
     shortcuts: [
       {
         id: "keyboard-open-palette",
@@ -779,7 +779,7 @@ const mockCommandSurface: StudioCommandSurface = {
 const mockLayout: StudioShellLayout = {
   title: "Layout Persistence",
   summary:
-    "Right rail visibility, bottom dock visibility, compact mode, selected tabs, and the current workspace view continue to persist in localStorage while phase58 layers deeper cross-view coordination, review-posture ownership, and release-review boards on top of the same local-only shell posture.",
+    "Right rail visibility, bottom dock visibility, compact mode, selected tabs, and the current workspace view continue to persist in localStorage while phase60 layers deeper cross-view coordination, review-posture ownership, and release-review boards on top of the same local-only shell posture.",
   persistence: {
     storageKey: "openclaw-studio.shell-layout",
     strategy: "localStorage",
@@ -1047,7 +1047,7 @@ function createStudioWindowObservability(windowing: StudioWindowing): StudioWind
 const mockWindowing: StudioWindowing = {
   title: "Multi-window Coordination",
   summary:
-    "Phase58 turns the earlier detached-workspace foundation into a deeper cross-window observability surface: a local-only window roster, shared-state lanes, sync health, ownership, last handoff, route/workspace intent links, focused-slot posture, reviewer queues, acknowledgement state, escalation windows, closeout windows, operator review-loop linkage, and explicit review-posture ownership maps now read like one coordination board while staying inside the same safe shell.",
+    "Phase60 turns the earlier detached-workspace foundation into a deeper cross-window observability surface: a local-only window roster, shared-state lanes, sync health, ownership, last handoff, route/workspace intent links, focused-slot posture, reviewer queues, acknowledgement state, escalation windows, closeout windows, operator review-loop linkage, and explicit review-posture ownership maps now read like one coordination board while staying inside the same safe shell.",
   readiness: "contract-ready",
   posture: {
     mode: "intent-focused",
@@ -1791,7 +1791,7 @@ const mockWindowing: StudioWindowing = {
   orchestration: {
     title: "Local Orchestration Board",
     summary:
-      "Phase58 links route, workflow lane, command flow, focused slot, workspace, detached candidate, intent posture, review-posture ownership, and release-review posture into one local-only orchestration map so the shell reads like a staged multi-window board without opening a native window.",
+      "Phase60 links route, workflow lane, command flow, focused slot, workspace, detached candidate, intent posture, review-posture ownership, and release-review posture into one local-only orchestration map so the shell reads like a staged multi-window board without opening a native window.",
     activeBoardId: "orchestration-board-trace-review",
     checkpoints: [
       {
@@ -2348,7 +2348,7 @@ export const mockShellState: StudioShellState = {
   boundary: mockBoundarySummary,
   dashboard: {
     headline:
-      "Phase58 keeps the shell on a safe control boundary: runtime-backed detail, dry-runs, Studio-local execution, detached workspace workflows, readiness-aware window intents, review-posture ownership, and shell-level multi-window feedback are available, while real host execution remains explicitly withheld.",
+      "Phase60 keeps the shell on a safe control boundary: runtime-backed detail, dry-runs, Studio-local execution, detached workspace workflows, readiness-aware window intents, review-posture ownership, shell-level multi-window feedback, and delivery-stage exploration are available, while real host execution remains explicitly withheld.",
     metrics: [
       {
         id: "metric-bridge",
@@ -2448,14 +2448,14 @@ export const mockShellState: StudioShellState = {
         id: "check-runtime",
         label: "Runtime Source",
         value: "Mock runtime",
-        detail: "Fallback mode still reflects the phase58 disabled bridge and cross-window observability contract even when live probes are unavailable.",
+        detail: "Fallback mode still reflects the phase60 disabled bridge and cross-window observability contract even when live probes are unavailable.",
         tone: "warning"
       }
     ]
   },
   home: {
     headline:
-      "The validated shell now carries a structured phase58 disabled bridge contract with simulated outcomes, detached workspace workflows, persisted layout controls, dock/inspector-synced window posture, and review-posture ownership mapping without turning on live host-side execution.",
+      "The validated shell now carries a structured phase60 disabled bridge contract with simulated outcomes, detached workspace workflows, persisted layout controls, dock/inspector-synced window posture, and review-posture ownership mapping without turning on live host-side execution.",
     panels: [
       {
         id: "system",
@@ -2505,7 +2505,7 @@ export const mockShellState: StudioShellState = {
         id: "activity-3",
         title: "Host runtime stays isolated",
         detail:
-          "Phase58 expands the contract with route-aware commands, persisted layout controls, detached workspace workflows, review-posture ownership, and readiness-aware window intents while keeping live host-side mutation outside the renderer and outside scope.",
+          "Phase60 expands the contract with route-aware commands, persisted layout controls, detached workspace workflows, review-posture ownership, and readiness-aware window intents while keeping live host-side mutation outside the renderer and outside scope.",
         timestamp: "Next"
       }
     ]
@@ -2803,7 +2803,7 @@ export const mockShellState: StudioShellState = {
   },
   skills: {
     summary:
-      "This combined inventory page now pairs runtime-backed detail with a shared phase58 boundary summary so users can see the current layer, blockers, focused-slot scope, simulated bridge linkage, window posture, review-posture ownership, and future executor requirements in one place.",
+      "This combined inventory page now pairs runtime-backed detail with a shared phase60 boundary summary so users can see the current layer, blockers, focused-slot scope, simulated bridge linkage, window posture, review-posture ownership, and future executor requirements in one place.",
     sections: [
       {
         id: "skills-skill",
@@ -3019,9 +3019,9 @@ export const mockShellState: StudioShellState = {
           {
             id: "settings-advanced",
             label: "Product foundations",
-            value: "Phase58 active",
+            value: "Phase60 active",
             detail:
-              "A review-only operator review loop now sits beside the phase58 cross-window shared-state review surface, so window roster, sync health, handoff posture, reviewer queues, escalation windows, closeout windows, review packets, and release evidence stay visible together while every stage remains local-only and non-executing.",
+              "A review-only operator review loop now sits beside the phase60 cross-window shared-state review surface, so window roster, sync health, handoff posture, reviewer queues, escalation windows, closeout windows, review packets, release evidence, and delivery-stage artifacts stay visible together while every stage remains local-only and non-executing.",
             tone: "positive"
           }
         ]
@@ -3031,7 +3031,7 @@ export const mockShellState: StudioShellState = {
   inspector: {
     title: "Inspector",
     summary:
-      "Boundary policy, active flow state, focused-slot posture, review posture ownership, review-only delivery chain state, reviewer queues, acknowledgement windows, and cross-window shared-state linkage stay visible here across the shell.",
+      "Boundary policy, active flow state, focused-slot posture, review posture ownership, delivery-chain workspace state, reviewer queues, acknowledgement windows, and cross-window shared-state linkage stay visible here across the shell.",
     boundary: mockBoundarySummary,
     route: {
       routeId: "dashboard",
@@ -3162,7 +3162,7 @@ export const mockShellState: StudioShellState = {
             id: "drilldown-pipeline-current",
             label: "Current board",
             value: "Approval orchestration board",
-            detail: "Phase58 keeps the reviewer baton board visible while tying it into the cross-window shared-state review surface with explicit queue, acknowledgement, escalation, handoff, and closeout state.",
+            detail: "Phase60 keeps the reviewer baton board visible while tying it into the cross-window shared-state review surface with explicit queue, acknowledgement, escalation, handoff, and closeout state.",
             tone: "positive",
             links: [
               {
@@ -3236,9 +3236,9 @@ export const mockShellState: StudioShellState = {
       },
       {
         id: "drilldown-review-only-delivery-chain",
-        label: "Review-only Delivery Chain",
+        label: "Delivery-chain Workspace",
         summary:
-          "Operator review board, promotion readiness, publish gating, and rollback readiness now read like one richer delivery workflow instead of a disconnected tail of release files.",
+          "Stage Explorer keeps operator review, promotion readiness, publish gating, rollback readiness, stage-level artifacts, blockers, handoff posture, and observability mapping visible as one richer delivery workflow instead of a disconnected tail of release files.",
         lines: [
           {
             id: "drilldown-delivery-chain-current",

@@ -1,16 +1,16 @@
-# OpenClaw Studio Phase58 Package Snapshot
+# OpenClaw Studio Phase60 Package Snapshot
 
-这是一个 **phase58 alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47/48/49/50/51/52/53/54/55/56/57 packaging 与 shell foundations 的基础上，把 local-only multi-window orchestration、cross-window shared-state review surface、以及 review-only release approval pipeline 继续推进成更明确的 operator review loop / reviewer queue / acknowledgement / escalation window / closeout window 审阅壳，但它依然 **不是 installer**。
+这是一个 **phase60 alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47/48/49/50/51/52/53/54/55/56/57/58 packaging 与 shell foundations 的基础上，把 local-only multi-window orchestration、cross-window shared-state review surface、以及 review-only release approval pipeline 继续推进成更明确的 Delivery-chain Workspace / Stage Explorer / artifact coverage / blockers / handoff posture / observability mapping 审阅壳，但它依然 **不是 installer**。
 
-当前已验证里程碑：phase58 review-only delivery chain / operator review loop / reviewer queues / acknowledgement state / escalation windows / closeout windows / deeper cross-window observability / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout。
+当前已验证里程碑：phase60 delivery-chain workspace / stage explorer / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout。
 
 ## 当前能交付什么
 
 - structured alpha-shell snapshot under delivery/openclaw-studio-alpha-shell
 - built renderer bundle copied into artifacts/renderer
 - built Electron bundle copied into artifacts/electron
-- review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase58 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything
-- review-only delivery chain linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, and rollback readiness into one staged local-only workflow without executing anything
+- review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase60 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything
+- delivery-chain workspace and stage explorer linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, and observability mapping into one staged local-only workflow without executing anything
 - deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references
 - deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, review-posture ownership, and inspector-command linkage
 - persisted shell layout foundation backed by localStorage
@@ -102,6 +102,7 @@ openclaw-studio-alpha-shell/
     ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json
     ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json
     ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json
+    REVIEW-ONLY-DELIVERY-CHAIN.json
     OPERATOR-REVIEW-BOARD.json
     RELEASE-DECISION-HANDOFF.json
     REVIEW-EVIDENCE-CLOSEOUT.json
@@ -155,7 +156,7 @@ openclaw-studio-alpha-shell/
 
 ## 已复制的 artifact 组
 
-- Renderer bundle: 11 files, 548.3 KiB, output=artifacts/renderer
+- Renderer bundle: 11 files, 567.8 KiB, output=artifacts/renderer
 - Electron bundle: 15 files, 382.4 KiB, output=artifacts/electron
 
 ## 已包含的文档
@@ -313,4 +314,4 @@ openclaw-studio-alpha-shell/
 - `scripts/install-placeholder.cjs` 只解释当前 installer 仍缺什么，不执行安装
 - 如需重新生成整个 snapshot，请回到 repo root 运行 `npm run package:alpha`
 
-Generated: 2026-04-06T15:48:49.232Z
+Generated: 2026-04-06T16:40:53.523Z

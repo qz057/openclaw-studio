@@ -1,12 +1,12 @@
 {
   "schemaVersion": "openclaw-studio-release-manifest/v1",
-  "generatedAt": "2026-04-06T15:48:49.232Z",
+  "generatedAt": "2026-04-06T16:40:53.523Z",
   "packageId": "openclaw-studio-alpha-shell",
   "packageName": "OpenClaw Studio Alpha Shell",
   "packageKind": "alpha-shell-release-skeleton",
   "channel": "alpha",
-  "phase": "phase58",
-  "milestone": "phase58 review-only delivery chain / operator review loop / reviewer queues / acknowledgement state / escalation windows / closeout windows / deeper cross-window observability / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout",
+  "phase": "phase60",
+  "milestone": "phase60 delivery-chain workspace / stage explorer / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout",
   "version": "0.1.0",
   "docs": [
     {
@@ -167,7 +167,7 @@
     },
     {
       "id": "review-only-delivery-chain",
-      "label": "Review-only delivery chain",
+      "label": "Delivery-chain workspace",
       "path": "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
       "generated": true
     },
@@ -480,7 +480,7 @@
       "label": "Renderer bundle",
       "outputRoot": "artifacts/renderer",
       "fileCount": 11,
-      "totalBytes": 561454,
+      "totalBytes": 581402,
       "entrypoints": [
         "artifacts/renderer/index.html"
       ]
@@ -518,40 +518,40 @@
       "sha256": "cb7ae03992daad83f5279a53c1754c93a60195f17c7d3ee587eb908c0138bd55"
     },
     {
-      "id": "renderer:assets/fallback-m12f5zYn.js",
+      "id": "renderer:assets/fallback-DukMJxOQ.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/fallback-m12f5zYn.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/fallback-m12f5zYn.js",
-      "sizeBytes": 210705,
-      "sha256": "bd2e5a16c140329dcd9f793d5c6ae86b2d006d52481b3e18553af5e2a28c934b"
+      "path": "artifacts/renderer/assets/fallback-DukMJxOQ.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/fallback-DukMJxOQ.js",
+      "sizeBytes": 210918,
+      "sha256": "f56d7207e1eedfc402a141776288cf0a5f2bac92a6f666a81937b92740d3150a"
     },
     {
-      "id": "renderer:assets/HomePage-Dd4nr3dQ.js",
+      "id": "renderer:assets/HomePage-BwSoOHp4.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/HomePage-Dd4nr3dQ.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/HomePage-Dd4nr3dQ.js",
+      "path": "artifacts/renderer/assets/HomePage-BwSoOHp4.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/HomePage-BwSoOHp4.js",
       "sizeBytes": 3031,
-      "sha256": "1dddc44b89df60be1c1582e2eb4ebd252f71b21ef8afea5524a743051491b5b7"
+      "sha256": "110649fb86553c843866c5057e679b60aaf702602a43599737727f5969a6a6bf"
     },
     {
-      "id": "renderer:assets/index-aWh4eSnu.css",
+      "id": "renderer:assets/index-9mfeNXmb.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/index-aWh4eSnu.css",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-aWh4eSnu.css",
-      "sizeBytes": 20892,
-      "sha256": "d90600ce82650fc6d199314caddf33a46f3dceabd60dd2cdc66aaea85a011e90"
+      "path": "artifacts/renderer/assets/index-9mfeNXmb.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-9mfeNXmb.js",
+      "sizeBytes": 182975,
+      "sha256": "ca559e7c3127ac743e0fbecbb81d73906119f86880aa4a4323c550545d914c81"
     },
     {
-      "id": "renderer:assets/index-BlaC-A9l.js",
+      "id": "renderer:assets/index-DoEL3P9P.css",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/index-BlaC-A9l.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-BlaC-A9l.js",
-      "sizeBytes": 164404,
-      "sha256": "3129c694ef92335a15f29ea641103e29b7fe2f327e4c7266927419d91ff50082"
+      "path": "artifacts/renderer/assets/index-DoEL3P9P.css",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-DoEL3P9P.css",
+      "sizeBytes": 22032,
+      "sha256": "55ee80b0ef16619181212472ff8bb3c125532d4b52c1889509d5bb09499a6828"
     },
     {
       "id": "renderer:assets/SessionsPage-CeRZOu_6.js",
@@ -563,22 +563,22 @@
       "sha256": "54e5f8966e3a61a332401dc09750246fa9ca2aea2468085b38fcbb5f11184452"
     },
     {
-      "id": "renderer:assets/SettingsPage-Dv5qrdA2.js",
+      "id": "renderer:assets/SettingsPage-MHFuPjIH.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/SettingsPage-Dv5qrdA2.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/SettingsPage-Dv5qrdA2.js",
-      "sizeBytes": 1663,
-      "sha256": "5b074b087443182c9e20204ac3bda24e0c14741cda6fff08c8fe3c393f2c8c7c"
+      "path": "artifacts/renderer/assets/SettingsPage-MHFuPjIH.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/SettingsPage-MHFuPjIH.js",
+      "sizeBytes": 1687,
+      "sha256": "55842d2fb852a87f3d9ddbec446a3fbe0597a45c8a5ae846fb960ba7000a87bd"
     },
     {
-      "id": "renderer:assets/SkillsPage-BULx2y8j.js",
+      "id": "renderer:assets/SkillsPage-9BmTsZCQ.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/SkillsPage-BULx2y8j.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/SkillsPage-BULx2y8j.js",
+      "path": "artifacts/renderer/assets/SkillsPage-9BmTsZCQ.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/SkillsPage-9BmTsZCQ.js",
       "sizeBytes": 9335,
-      "sha256": "83a5d6c618fa480b22e24f7d063a1c6fff2a1f682cfaba1a4fe5309437ca36de"
+      "sha256": "5751526b5f46ec8921b4e7cc5def233a9bfb8cd9ff2dcee1a47c9c9887598def"
     },
     {
       "id": "renderer:assets/vendor-D7f9BLy3.js",
@@ -596,7 +596,7 @@
       "path": "artifacts/renderer/index.html",
       "sourceRelativePath": "apps/studio/dist-renderer/index.html",
       "sizeBytes": 496,
-      "sha256": "96e7e2759f6a6110bf08196ed682ac4b823848f3a474f8d6f099d0faf6d0ac57"
+      "sha256": "4e460f986085a09f2d1b31e7327ff95dd6d2a1e849fdbac4cbdad6de29466003"
     },
     {
       "id": "electron:electron/main.js",
@@ -738,8 +738,8 @@
     "structured alpha-shell snapshot under delivery/openclaw-studio-alpha-shell",
     "built renderer bundle copied into artifacts/renderer",
     "built Electron bundle copied into artifacts/electron",
-    "review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase58 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything",
-    "review-only delivery chain linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, and rollback readiness into one staged local-only workflow without executing anything",
+    "review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase60 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything",
+    "delivery-chain workspace and stage explorer linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, and observability mapping into one staged local-only workflow without executing anything",
     "deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references",
     "deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, review-posture ownership, and inspector-command linkage",
     "persisted shell layout foundation backed by localStorage",

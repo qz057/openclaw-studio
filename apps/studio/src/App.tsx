@@ -22,6 +22,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { BoundarySummaryCard } from "./components/BoundarySummaryCard";
 import { HostTracePanel } from "./components/HostTracePanel";
 import { OperatorReviewBoard } from "./components/OperatorReviewBoard";
+import { DeliveryChainWorkspace } from "./components/DeliveryChainWorkspace";
 import {
   WindowSharedStateBoard,
   resolveActiveWindowRosterEntry,
@@ -930,7 +931,7 @@ export function App() {
       label: "Focused slot -> Release posture",
       value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> ${currentReleaseStage?.label ?? "Operator review board"} / ${currentDecisionHandoff.posture}`,
       detail:
-        "Focused-slot review, operator board ownership, reviewer queue state, escalation timing, decision handoff posture, and evidence closeout now sit in the same phase58 local-only review chain without enabling host execution, installer work, staged apply entry, cutover execution, or publish rollback."
+        "Focused-slot review, operator board ownership, reviewer queue state, escalation timing, decision handoff posture, evidence closeout, and the delivery-chain stage explorer now sit in the same phase60 local-only review chain without enabling host execution, installer work, staged apply entry, cutover execution, or publish rollback."
     }
   ];
   const inspectorCommandLinkage = [
@@ -956,7 +957,7 @@ export function App() {
       id: "inspector-linkage-shared-state",
       label: "Inspector -> Shared-state lane",
       value: `${activeWindowRosterEntry?.label ?? "No window"} / ${activeSharedStateLane?.label ?? "No shared-state lane"}`,
-      detail: "The right rail now mirrors the same window roster, sync health, last handoff, reviewer queue, and operator review posture shown in the phase58 cross-window board."
+      detail: "The right rail now mirrors the same window roster, sync health, last handoff, reviewer queue, and operator review posture shown in the phase60 cross-window board."
     },
     {
       id: "inspector-linkage-review-posture",
@@ -973,11 +974,11 @@ export function App() {
       label: "Formal Release Readiness",
       value: "RELEASE-MANIFEST / BUILD-METADATA / REVIEW-MANIFEST",
       detail:
-        "Phase58 keeps the manifest spine and now layers a clearer review-only delivery chain on top of the operator review loop, so board ownership, queues, acknowledgement timing, delivery stages, and cross-window review posture stay linked without executing anything."
+        "Phase60 keeps the manifest spine and now layers a clearer delivery-chain workspace on top of the operator review loop, so board ownership, queues, acknowledgement timing, delivery stages, artifacts, and cross-window review posture stay linked without executing anything."
     },
     {
       id: "release-depth-delivery-chain",
-      label: "Review-only Delivery Chain",
+      label: "Delivery-chain Workspace",
       value: currentDeliveryStage ? `${currentDeliveryStage.label} / ${currentDeliveryStage.phase}` : "Unavailable",
       detail:
         "The active board now resolves into a typed delivery-chain stage, so attestation intake, operator review, promotion readiness, publish gating, and rollback readiness read like one delivery workflow instead of a disconnected artifact tail."
@@ -1382,7 +1383,7 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase58 slice 3 deepens delivery-chain structure only; it still does not install, publish, sign, orchestrate live approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
+        "Phase60 slice 1 adds a stage explorer on top of the review-only delivery chain; it still does not install, publish, sign, orchestrate live approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -2203,18 +2204,19 @@ export function App() {
               <div className="card-header card-header--stack">
                 <div>
                   <p className="eyebrow">Release Pipeline Depth</p>
-                  <h2>Review-only Delivery Chain</h2>
+                  <h2>Delivery-chain Workspace</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but phase58 slice 3 now exposes operator board ownership, reviewer
-                  queues, acknowledgement state, delivery-chain stages, promotion review flow, publish gating, rollback readiness, and the
-                  cross-window shared-state review layer as one local-only non-executing surface.
+                  The alpha shell still does not build a real installer, but phase60 slice 1 now turns the review-only delivery chain into a
+                  usable stage explorer, so operator board ownership, reviewer queues, acknowledgement state, stage-level artifacts, promotion
+                  review flow, publish gating, rollback readiness, blockers, handoff posture, and the cross-window shared-state review layer
+                  stay visible as one local-only non-executing surface.
                 </p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
                   <span>Phase</span>
-                  <strong>Phase58</strong>
+                  <strong>Phase60</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Delivery stage</span>
@@ -2285,9 +2287,17 @@ export function App() {
           <OperatorReviewBoard
             pipeline={releaseApprovalPipeline}
             windowing={data.windowing}
-            eyebrow="Phase58"
+            eyebrow="Phase60"
             title="Operator Review Board"
-            summary="The same review-only release pipeline now reads like an operator board inside a fuller delivery chain, with explicit stage ownership, review packets, reviewer queues, acknowledgement state, delivery-stage posture, escalation windows, closeout windows, evidence sealing, reviewer notes, review posture ownership, and cross-links back into windows and trace."
+            summary="The same review-only release pipeline now reads like an operator board inside a fuller delivery chain, with explicit stage ownership, review packets, reviewer queues, acknowledgement state, delivery-stage posture, escalation windows, closeout windows, evidence sealing, reviewer notes, review posture ownership, and direct handoff into the stage explorer."
+          />
+
+          <DeliveryChainWorkspace
+            pipeline={releaseApprovalPipeline}
+            windowing={data.windowing}
+            eyebrow="Phase60"
+            title="Delivery-chain Workspace"
+            summary="Phase60 slice 1 adds a Stage Explorer so the shell can pivot across attestation, operator review, promotion, publish, and rollback stages while keeping ownership, review surfaces, linked artifacts, blockers, handoff posture, and observability mapping together."
           />
 
           <section className="surface card window-workbench">
@@ -2377,9 +2387,9 @@ export function App() {
               activeWindowId={windowingSurface.activeWindowId}
               activeLaneId={windowingSurface.activeLaneId}
               activeBoardId={windowingSurface.activeBoardId}
-              eyebrow="Phase58"
+              eyebrow="Phase60"
               title="Cross-window Coordination Board"
-              summary="Window roster, shared-state lane ownership, orchestration board ownership, review posture ownership, reviewer queue posture, acknowledgement state, escalation windows, closeout windows, sync health, last handoff, route/workspace intent links, and local-only blockers now stay visible inside the same shell runtime."
+              summary="Window roster, shared-state lane ownership, orchestration board ownership, review posture ownership, reviewer queue posture, acknowledgement state, escalation windows, closeout windows, sync health, last handoff, route/workspace intent links, the delivery-chain workspace, and local-only blockers now stay visible inside the same shell runtime."
             />
             <div className="workflow-lane-strip">
               {data.windowing.workflow.lanes.map((lane) => (
@@ -2630,9 +2640,9 @@ export function App() {
                   activeBoardId={windowingSurface.activeBoardId}
                   compact
                   nested
-                  eyebrow="Phase58"
+                  eyebrow="Phase60"
                   title="Cross-window Shared State"
-                  summary="The windows rail now exposes explicit ownership, orchestration board linkage, review posture ownership, reviewer queue posture, acknowledgement state, escalation/closeout windows, sync health, route/workspace intent links, and local-only blockers for the active coordination lane."
+                  summary="The windows rail now exposes explicit ownership, orchestration board linkage, review posture ownership, reviewer queue posture, acknowledgement state, escalation/closeout windows, sync health, route/workspace intent links, delivery-stage mapping, and local-only blockers for the active coordination lane."
                 />
 
                 <div className="workflow-step-grid workflow-step-grid--compact">

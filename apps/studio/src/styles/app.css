@@ -389,6 +389,19 @@ button:disabled {
   gap: 18px;
 }
 
+.delivery-chain-workspace {
+  display: grid;
+  gap: 18px;
+}
+
+.delivery-chain-workspace--nested {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid rgba(148, 176, 208, 0.16);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 18px;
+}
+
 .window-workbench__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -398,9 +411,31 @@ button:disabled {
 .workflow-lane-strip,
 .workflow-support-grid,
 .workflow-step-grid,
-.workflow-readiness-list {
+.workflow-readiness-list,
+.delivery-chain-workspace__metrics,
+.delivery-chain-workspace__stage-strip,
+.delivery-chain-workspace__detail-grid,
+.delivery-chain-workspace__explorer-grid,
+.delivery-chain-workspace__artifact-groups {
   display: grid;
   gap: 16px;
+}
+
+.delivery-chain-workspace__metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.delivery-chain-workspace__stage-strip {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.delivery-chain-workspace__detail-grid,
+.delivery-chain-workspace__explorer-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.delivery-chain-workspace__artifact-groups {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .workflow-lane-strip {
@@ -1102,6 +1137,11 @@ button:disabled {
   .workflow-lane-strip,
   .workflow-step-grid,
   .workflow-support-grid,
+  .delivery-chain-workspace__metrics,
+  .delivery-chain-workspace__stage-strip,
+  .delivery-chain-workspace__detail-grid,
+  .delivery-chain-workspace__explorer-grid,
+  .delivery-chain-workspace__artifact-groups,
   .window-shared-detail-grid,
   .window-roster-grid,
   .window-shared-lane-grid {
@@ -1533,6 +1573,11 @@ button:disabled {
   .workflow-lane-strip,
   .workflow-step-grid,
   .workflow-support-grid,
+  .delivery-chain-workspace__metrics,
+  .delivery-chain-workspace__stage-strip,
+  .delivery-chain-workspace__detail-grid,
+  .delivery-chain-workspace__explorer-grid,
+  .delivery-chain-workspace__artifact-groups,
   .window-shared-detail-grid,
   .window-roster-grid,
   .window-shared-lane-grid {

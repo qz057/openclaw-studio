@@ -290,7 +290,7 @@ export function OperatorReviewBoard({
           <strong>{currentDeliveryStage?.label ?? "No delivery-chain stage"}</strong>
           <p>
             {currentDeliveryStage?.summary ??
-              "The wider review-only delivery chain is unavailable, so the board cannot show how promotion, publish, and rollback flow attach to the active operator board."}
+              "The wider delivery-chain workspace is unavailable, so the board cannot show how promotion, publish, and rollback flow attach to the active operator board."}
           </p>
           <div className="workflow-readiness-list">
             <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(currentDeliveryStage?.status ?? "blocked")}`}>

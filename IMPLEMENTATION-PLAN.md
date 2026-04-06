@@ -294,6 +294,13 @@
 - smoke 已提升到验证 phase58 review-only delivery-chain renderer markers、runtime contract、以及 release artifact contract
 - README / HANDOFF / package snapshot 已同步反映 phase58 slice 3 reality
 
+### Phase 60（当前已完成，slice 1）
+- phase58 slice 3 的 review-only delivery chain 已继续推进成更明确的 delivery-chain workspace / stage explorer
+- shared / runtime / renderer 现在显式带出 selected delivery stage、artifact coverage、related review surfaces、blockers / handoff posture、以及 observability mapping，并把它们收敛到同一个 shell explorer
+- App 主 shell 现在能直接在 operator review board 之后切换 attestation / review / promotion / publish / rollback stages，并看到同一阶段的 ownership、artifact groups、queue / handoff / closeout posture、以及跨窗口映射
+- smoke 已提升到验证 phase60 delivery-chain workspace / stage explorer / artifact coverage / blockers / handoff posture renderer markers
+- README / HANDOFF / package snapshot 已同步反映 phase60 slice1 reality
+
 ## 当前明确边界
 
 当前只允许：
@@ -302,7 +309,7 @@
 - dry-run / preview / simulate
 - Studio-local execute（只改应用内 in-memory state/history）
 - phase27 command surface / layout persistence / window intent staging
-- phase58 review-only delivery chain / operator review loop / reviewer queues / acknowledgement state / escalation windows / closeout windows / deeper cross-window observability / local-only multi-window shared-state review surface
+- phase60 delivery-chain workspace / stage explorer / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface
 - phase26/27/28 release skeleton / artifact review / handoff docs / package metadata
 
 当前明确禁止：
@@ -324,7 +331,7 @@ npm run start:smoke
 npm run package:alpha
 ```
 
-phase58 可额外跑：
+phase60 可额外跑：
 
 ```bash
 npm run release:plan
@@ -332,8 +339,8 @@ npm run release:plan
 
 ## 下一阶段（建议）
 
-### Phase58 后续 slices
-目标：在不开放危险执行的前提下，继续把 phase58 foundations 推进为更完整的产品能力与交付链路。
+### Phase60 后续 slices
+目标：在不开放危险执行的前提下，继续把 phase60 foundations 推进为更完整的产品能力与交付链路。
 
 范围建议：
 - 更真实的 multi-window orchestration 与跨窗口共享状态

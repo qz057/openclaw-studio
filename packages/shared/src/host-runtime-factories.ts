@@ -112,7 +112,7 @@ function createStudioHostTracePhases(
           id: `${slot.id}-trace-preview-pipeline`,
           label: "Pipeline lane",
           value: "approval orchestration / lifecycle / rollback",
-          detail: "Phase58 keeps preview posture tied to the richer operator review loop so approval, lifecycle, rollback, reviewer queues, escalation windows, closeout windows, decision handoff, and cross-window review evidence stay cross-linked.",
+          detail: "Phase60 keeps preview posture tied to the richer operator review loop so approval, lifecycle, rollback, reviewer queues, escalation windows, closeout windows, decision handoff, and cross-window review evidence stay cross-linked.",
           tone: "neutral",
           links: [
             {
@@ -332,10 +332,10 @@ function createStudioReleaseDeliveryChain(
   const currentDeliveryStageId = currentStage.deliveryChainStageId;
 
   return {
-    id: "release-delivery-chain-phase58",
-    title: "Review-only Delivery Chain",
+    id: "release-delivery-chain-phase60",
+    title: "Delivery-chain Workspace",
     summary:
-      "Phase58 slice 3 turns the operator review loop into a fuller review-only delivery chain, so attestation intake, operator review, promotion readiness, publish gating, and rollback readiness all stay linked through the same local-only metadata spine.",
+      "Phase60 slice 1 turns the review-only delivery chain into a usable stage explorer, so attestation intake, operator review, promotion readiness, publish gating, rollback readiness, artifacts, blockers, and observability mapping all stay linked through the same local-only metadata spine.",
     mode: "review-only",
     currentStageId: currentDeliveryStageId,
     promotionStageIds: ["delivery-chain-promotion-readiness"],
@@ -706,7 +706,7 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
       label: "Approval orchestration board",
       status: "in-review",
       owner: "release-manager",
-      summary: "Phase58 turns approval routing into a clearer operator review loop with typed review packets, explicit reviewer queues, acknowledgement state, baton posture, escalation windows, and evidence closeout visibility.",
+      summary: "Phase60 keeps approval routing explicit with typed review packets, reviewer queues, acknowledgement state, baton posture, escalation windows, and evidence closeout visibility.",
       deliveryChainStageId: "delivery-chain-operator-review",
       deliveryPhase: "review",
       evidence: [
@@ -833,7 +833,7 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
           id: "release-pipeline-approval-baton",
           label: "Reviewer baton",
           value: "routing -> board -> lifecycle handoff",
-          detail: "Phase58 keeps approval routing, board ownership, reviewer queues, acknowledgement posture, and explicit baton posture visible as one operator review chain while cross-window review ownership becomes more concrete.",
+          detail: "Phase60 keeps approval routing, board ownership, reviewer queues, acknowledgement posture, and explicit baton posture visible as one operator review chain while cross-window review ownership becomes more concrete.",
           tone: "neutral",
           links: [
             { id: "release-pipeline-link-lifecycle-approval", label: "Lifecycle request-approval", kind: "lifecycle", target: "lifecycle.request-approval" },
@@ -848,7 +848,7 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
       label: "Release decision lifecycle",
       status: "planned",
       owner: "product-owner",
-      summary: "Staged release decision enforcement remains review-only, but phase58 now carries a dedicated packet, queue posture, acknowledgement blocker, and closeout expectation into the lifecycle board.",
+      summary: "Staged release decision enforcement remains review-only, but phase60 now carries a dedicated packet, queue posture, acknowledgement blocker, and closeout expectation into the lifecycle board.",
       deliveryChainStageId: "delivery-chain-promotion-readiness",
       deliveryPhase: "promotion",
       evidence: [
@@ -957,7 +957,7 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
       label: "Rollback settlement closeout",
       status: "planned",
       owner: "runtime-owner",
-      summary: "Rollback publication receipt closeout and settlement evidence remain blocked from execution, but phase58 promotes evidence closeout into a first-class operator review-loop state with overdue acknowledgement and escalation timing.",
+      summary: "Rollback publication receipt closeout and settlement evidence remain blocked from execution, but phase60 promotes evidence closeout into a first-class operator review-loop state with overdue acknowledgement and escalation timing.",
       deliveryChainStageId: "delivery-chain-rollback-readiness",
       deliveryPhase: "rollback",
       evidence: [
@@ -1684,10 +1684,10 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
   const deliveryChain = createStudioReleaseDeliveryChain(currentStage, stages);
 
   return {
-    id: "release-approval-pipeline-phase58",
+    id: "release-approval-pipeline-phase60",
     title: "Review-only operator review board",
     summary:
-      "Phase58 keeps the structured release approval pipeline in place while extending it into a fuller operator review loop with explicit reviewer queues, acknowledgement state, escalation windows, and closeout windows across the same local-only shell.",
+      "Phase60 keeps the structured release approval pipeline in place while extending it into a fuller operator review loop with explicit reviewer queues, acknowledgement state, escalation windows, closeout windows, and delivery-stage exploration across the same local-only shell.",
     mode: "review-only",
     currentStageId: currentStage.id,
     reviewBoard: {
@@ -1757,7 +1757,7 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
     closeoutWindows,
     deliveryChain,
     blockedBy: [
-      "review-only delivery chain remains metadata-only",
+      "delivery-chain workspace remains metadata-only",
       "reviewer acknowledgement remains local-only metadata",
       "escalation and closeout windows remain review-only",
       "signing-publish gating handshake remains review-only",

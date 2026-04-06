@@ -397,7 +397,7 @@ export function WindowSharedStateBoard({
             <strong>{currentDeliveryStage?.label ?? "No delivery stage"}</strong>
             <p>
               {currentDeliveryStage?.summary ??
-                "The wider review-only delivery chain is unavailable, so this board cannot show how promotion, publish, and rollback stay attached to the active review posture."}
+                "The wider delivery-chain workspace is unavailable, so this board cannot show how promotion, publish, and rollback stay attached to the active review posture."}
             </p>
             <div className="workflow-readiness-list">
               <div className="workflow-readiness-line workflow-readiness-line--neutral">

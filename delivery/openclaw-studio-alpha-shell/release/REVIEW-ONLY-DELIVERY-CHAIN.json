@@ -1,10 +1,10 @@
 {
   "schemaVersion": "openclaw-studio-review-only-delivery-chain/v1",
-  "generatedAt": "2026-04-06T15:48:49.232Z",
-  "phase": "phase58",
+  "generatedAt": "2026-04-06T16:40:53.523Z",
+  "phase": "phase60",
   "mode": "local-only-review",
-  "title": "Review-only Delivery Chain",
-  "summary": "Operator review board, promotion readiness, publish decision gates, and rollback readiness are grouped into one staged local-only delivery workflow.",
+  "title": "Delivery-chain Workspace",
+  "summary": "Stage Explorer keeps operator review board, promotion readiness, publish decision gates, rollback readiness, stage-level artifacts, blockers, handoff posture, and observability mapping grouped into one staged local-only delivery workflow.",
   "activeStageId": "delivery-chain-operator-review",
   "operatorReviewBoardPath": "release/OPERATOR-REVIEW-BOARD.json",
   "releaseDecisionHandoffPath": "release/RELEASE-DECISION-HANDOFF.json",
@@ -274,7 +274,7 @@
     }
   ],
   "blockedBy": [
-    "delivery chain remains review-only metadata",
+    "delivery-chain workspace remains review-only metadata",
     "promotion, publish, and rollback execution remain blocked",
     "host-side execution remains disabled"
   ]

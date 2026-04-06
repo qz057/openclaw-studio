@@ -4,10 +4,10 @@ const path = require("node:path");
 const { getPaths, getPreflightSummary } = require("./studio-preflight.cjs");
 
 const APP_NAME = "OpenClaw Studio";
-const PHASE_ID = "phase58";
-const PHASE_TITLE = "Phase58";
+const PHASE_ID = "phase60";
+const PHASE_TITLE = "Phase60";
 const PHASE_MILESTONE =
-  "phase58 review-only delivery chain / operator review loop / reviewer queues / acknowledgement state / escalation windows / closeout windows / deeper cross-window observability / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout";
+  "phase60 delivery-chain workspace / stage explorer / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout";
 const RELEASE_CHANNEL = "alpha";
 const PACKAGE_ID = "openclaw-studio-alpha-shell";
 const PACKAGE_KIND = "alpha-shell-release-skeleton";
@@ -16,15 +16,16 @@ const REQUIRED_RELEASE_COMMANDS = [
   "npm run build",
   "npm run smoke",
   "npm run start:smoke",
-  "npm run package:alpha"
+  "npm run package:alpha",
+  "npm run release:plan"
 ];
-const OPTIONAL_RELEASE_COMMANDS = ["npm run release:plan"];
+const OPTIONAL_RELEASE_COMMANDS = [];
 const CURRENT_DELIVERY_SURFACES = [
   "structured alpha-shell snapshot under delivery/openclaw-studio-alpha-shell",
   "built renderer bundle copied into artifacts/renderer",
   "built Electron bundle copied into artifacts/electron",
-  "review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase58 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything",
-  "review-only delivery chain linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, and rollback readiness into one staged local-only workflow without executing anything",
+  "review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase60 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything",
+  "delivery-chain workspace and stage explorer linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, and observability mapping into one staged local-only workflow without executing anything",
   "deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references",
   "deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, review-posture ownership, and inspector-command linkage",
   "persisted shell layout foundation backed by localStorage",
@@ -535,7 +536,7 @@ function buildGeneratedDocs() {
     },
     {
       id: "review-only-delivery-chain",
-      label: "Review-only delivery chain",
+      label: "Delivery-chain workspace",
       outputPath: "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
       generated: true
     },
@@ -858,6 +859,7 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
     "    ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
     "    ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
     "    ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+    "    REVIEW-ONLY-DELIVERY-CHAIN.json",
     "    OPERATOR-REVIEW-BOARD.json",
     "    RELEASE-DECISION-HANDOFF.json",
     "    REVIEW-EVIDENCE-CLOSEOUT.json",
@@ -912,7 +914,7 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
   return [
     `# OpenClaw Studio ${PHASE_TITLE} Package Snapshot`,
     "",
-    `这是一个 **${PHASE_ID} alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47/48/49/50/51/52/53/54/55/56/57 packaging 与 shell foundations 的基础上，把 local-only multi-window orchestration、cross-window shared-state review surface、以及 review-only release approval pipeline 继续推进成更明确的 operator review loop / reviewer queue / acknowledgement / escalation window / closeout window 审阅壳，但它依然 **不是 installer**。`,
+    `这是一个 **${PHASE_ID} alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47/48/49/50/51/52/53/54/55/56/57/58 packaging 与 shell foundations 的基础上，把 local-only multi-window orchestration、cross-window shared-state review surface、以及 review-only release approval pipeline 继续推进成更明确的 Delivery-chain Workspace / Stage Explorer / artifact coverage / blockers / handoff posture / observability mapping 审阅壳，但它依然 **不是 installer**。`,
     "",
     `当前已验证里程碑：${PHASE_MILESTONE}。`,
     "",
@@ -1072,7 +1074,7 @@ function renderReleaseChecklist() {
     "- `release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json` 必须列出 attestation operator settlement packs metadata",
     "- `release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json` 必须列出 attestation operator approval routing contracts metadata",
     "- `release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json` 必须列出 attestation operator approval orchestration metadata",
-    "- `release/REVIEW-ONLY-DELIVERY-CHAIN.json` 必须列出 review-only delivery chain metadata",
+    "- `release/REVIEW-ONLY-DELIVERY-CHAIN.json` 必须列出 delivery-chain workspace / stage explorer metadata",
     "- `release/OPERATOR-REVIEW-BOARD.json` 必须列出 operator review board metadata",
     "- `release/RELEASE-DECISION-HANDOFF.json` 必须列出 release decision handoff metadata",
     "- `release/REVIEW-EVIDENCE-CLOSEOUT.json` 必须列出 review evidence closeout metadata",
@@ -1163,10 +1165,10 @@ function renderReleaseNotes({ generatedAt }) {
     `Milestone: ${PHASE_MILESTONE}`,
     "",
     "## Highlights",
-    "- review-only delivery chain now groups operator review, promotion readiness, publish gating, and rollback readiness into one staged workflow so downstream release posture feels like a delivery chain instead of a disconnected list of files",
-    "- operator review board now turns the earlier review-only approval pipeline into a clearer operator-facing loop with explicit stage ownership, reviewer queues, acknowledgement state, and cross-links back into trace and window review surfaces",
-    "- release decision handoff now keeps the reviewer baton explicit between approval, lifecycle, rollback, and final decision stages while surfacing acknowledgement state and escalation windows without enabling any live signing, publish, or host-side execution",
-    "- review evidence closeout now exposes sealing state, sealed evidence, pending evidence, closeout windows, and reviewer notes as first-class local-only review artifacts instead of burying closeout posture inside larger release metadata",
+    "- Delivery-chain Workspace now turns the earlier review-only delivery chain into a Stage Explorer with stage-level artifacts, blockers, handoff posture, and observability mapping kept in one local-only workflow",
+    "- operator review board now sits inside that workspace with explicit stage ownership, reviewer queues, acknowledgement state, and direct cross-links back into trace, window review, and artifact groups",
+    "- release decision handoff now keeps the reviewer baton explicit between approval, lifecycle, rollback, and final decision stages while also holding the selected delivery stage and downstream posture in view without enabling any live signing, publish, or host-side execution",
+    "- review evidence closeout now exposes sealing state, sealed evidence, pending evidence, closeout windows, reviewer notes, and linked stage artifacts as first-class local-only review metadata instead of burying closeout posture inside larger release files",
     "- attestation operator approval orchestration now turns phase53 approval routing contracts into reviewer baton sequencing, approval quorum timing, and orchestration closeout paths without dispatching any live approval or execution for real",
     "- promotion staged-apply release decision enforcement lifecycle now turns phase53 enforcement contracts into lifecycle checkpoints, reviewer baton transitions, and expiry closeout without applying any live promotion for real",
     "- rollback cutover publication receipt settlement closeout now turns phase53 receipt closeout contracts into settlement ledgers, receipt closeout acknowledgements, and recovery-ready closeout evidence without mutating any live publish state",
@@ -1217,7 +1219,7 @@ function buildReviewManifest({ generatedAt, artifactGroups, allDocs }) {
         { id: "pipeline-attestation-operator-settlement-packs", label: "Attestation operator settlement packs", status: "ready", detail: "Reconciliation ledgers now feed operator clearance packets, escalation disposition bundles, and approval attachments without routing any live operator settlement for real." },
         { id: "pipeline-attestation-operator-approval-routing-contracts", label: "Attestation operator approval routing contracts", status: "ready", detail: "Settlement packs now feed reviewer-ready routing tables, approval windows, and approval handoff routes without dispatching any live approval or execution for real." },
         { id: "pipeline-attestation-operator-approval-orchestration", label: "Attestation operator approval orchestration", status: "ready", detail: "Approval routing contracts now feed reviewer baton sequencing, quorum timing, and orchestration closeout paths without dispatching any live approval or execution for real." },
-        { id: "pipeline-review-only-delivery-chain", label: "Review-only delivery chain", status: "ready", detail: "Operator review board, decision handoff, evidence closeout, promotion readiness, publish gating, and rollback readiness now read like one staged delivery workflow without executing anything." },
+        { id: "pipeline-review-only-delivery-chain", label: "Delivery-chain workspace", status: "ready", detail: "Operator review board, decision handoff, evidence closeout, promotion readiness, publish gating, rollback readiness, stage-level artifacts, blockers, and observability mapping now read like one staged delivery workflow without executing anything." },
         { id: "pipeline-installer-builders", label: "Installer-target builder skeleton", status: "ready", detail: "Installer targets still map cleanly to per-platform builder identities without invoking a real builder." },
         { id: "pipeline-installer-builder-execution", label: "Installer builder execution skeleton", status: "ready", detail: "Future builder commands, environment, outputs, and review checks are now declared without executing any builder." },
         { id: "pipeline-installer-builder-orchestration", label: "Installer builder orchestration", status: "ready", detail: "Builder execution skeletons now sit inside per-platform orchestration flows without invoking any real builder." },
@@ -7465,9 +7467,9 @@ function buildReviewOnlyDeliveryChain({ generatedAt }) {
     generatedAt,
     phase: PHASE_ID,
     mode: "local-only-review",
-    title: "Review-only Delivery Chain",
+    title: "Delivery-chain Workspace",
     summary:
-      "Operator review board, promotion readiness, publish decision gates, and rollback readiness are grouped into one staged local-only delivery workflow.",
+      "Stage Explorer keeps operator review board, promotion readiness, publish decision gates, rollback readiness, stage-level artifacts, blockers, handoff posture, and observability mapping grouped into one staged local-only delivery workflow.",
     activeStageId: "delivery-chain-operator-review",
     operatorReviewBoardPath: "release/OPERATOR-REVIEW-BOARD.json",
     releaseDecisionHandoffPath: "release/RELEASE-DECISION-HANDOFF.json",
@@ -7693,7 +7695,7 @@ function buildReviewOnlyDeliveryChain({ generatedAt }) {
       }
     ],
     blockedBy: [
-      "delivery chain remains review-only metadata",
+      "delivery-chain workspace remains review-only metadata",
       "promotion, publish, and rollback execution remain blocked",
       "host-side execution remains disabled"
     ]
@@ -7729,7 +7731,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         id: "board-note-windowing",
         label: "Cross-window review lane",
         value: "Trace Review Lane / window-trace-review",
-        detail: "Operator ownership is intentionally tied to the same shared-state lane and review window surfaced in the phase58 shell."
+        detail: "Operator ownership is intentionally tied to the same shared-state lane and review window surfaced in the phase60 shell."
       },
       {
         id: "board-note-queue",
@@ -7747,7 +7749,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         id: "board-note-delivery-chain",
         label: "Delivery chain",
         value: "operator review -> promotion -> publish -> rollback",
-        detail: "The board now points into a dedicated review-only delivery chain artifact instead of stopping at the operator-review loop."
+        detail: "The board now points into a dedicated delivery-chain workspace artifact instead of stopping at the operator-review loop."
       },
       {
         id: "board-note-windows",
@@ -8578,7 +8580,7 @@ function renderInstallerPlaceholderScript() {
     "console.log(`attestation operator settlement packs metadata: ${manifest.attestationOperatorSettlementPacksPath}`);",
     "console.log(`attestation operator approval routing contracts metadata: ${manifest.attestationOperatorApprovalRoutingContractsPath}`);",
     "console.log(`attestation operator approval orchestration metadata: ${manifest.attestationOperatorApprovalOrchestrationPath}`);",
-    "console.log(`review-only delivery chain metadata: ${manifest.reviewOnlyDeliveryChainPath}`);",
+    "console.log(`delivery-chain workspace metadata: ${manifest.reviewOnlyDeliveryChainPath}`);",
     "console.log(`operator review board metadata: ${manifest.operatorReviewBoardPath}`);",
     "console.log(`release decision handoff metadata: ${manifest.releaseDecisionHandoffPath}`);",
     "console.log(`review evidence closeout metadata: ${manifest.reviewEvidenceCloseoutPath}`);",
@@ -10493,6 +10495,7 @@ function formatReleasePlanSummary(skeleton) {
     `Attestation operator settlement packs: ${skeleton.attestationOperatorSettlementPacks.packs.length}`,
     `Attestation operator approval routing contracts: ${skeleton.attestationOperatorApprovalRoutingContracts.contracts.length}`,
     `Attestation operator approval orchestration: ${skeleton.attestationOperatorApprovalOrchestration.orchestrations.length}`,
+    `Delivery-chain workspace stages: ${skeleton.reviewOnlyDeliveryChain.stages.length} (${skeleton.reviewOnlyDeliveryChain.mode})`,
     `Installer targets: ${skeleton.installerTargets.targets.length}`,
     `Installer execution skeletons: ${skeleton.installerBuilderExecutionSkeleton.executions.length}`,
     `Installer builders: ${skeleton.installerTargetBuilderSkeleton.builders.length}`,

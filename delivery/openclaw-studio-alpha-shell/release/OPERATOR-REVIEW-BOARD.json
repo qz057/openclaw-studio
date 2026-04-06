@@ -1,7 +1,7 @@
 {
   "schemaVersion": "openclaw-studio-operator-review-board/v1",
-  "generatedAt": "2026-04-06T15:48:49.232Z",
-  "phase": "phase58",
+  "generatedAt": "2026-04-06T16:40:53.523Z",
+  "phase": "phase60",
   "mode": "local-only-review",
   "board": {
     "id": "operator-review-board-release-approval",
@@ -26,7 +26,7 @@
       "id": "board-note-windowing",
       "label": "Cross-window review lane",
       "value": "Trace Review Lane / window-trace-review",
-      "detail": "Operator ownership is intentionally tied to the same shared-state lane and review window surfaced in the phase58 shell."
+      "detail": "Operator ownership is intentionally tied to the same shared-state lane and review window surfaced in the phase60 shell."
     },
     {
       "id": "board-note-queue",
@@ -44,7 +44,7 @@
       "id": "board-note-delivery-chain",
       "label": "Delivery chain",
       "value": "operator review -> promotion -> publish -> rollback",
-      "detail": "The board now points into a dedicated review-only delivery chain artifact instead of stopping at the operator-review loop."
+      "detail": "The board now points into a dedicated delivery-chain workspace artifact instead of stopping at the operator-review loop."
     },
     {
       "id": "board-note-windows",

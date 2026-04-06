@@ -80,7 +80,7 @@ export const mockHostBridgeState: StudioHostBridgeState = {
   id: "host-bridge-phase27",
   title: "Disabled host bridge skeleton",
   summary:
-    "Phase58 keeps the bridge default-disabled while layering review-only delivery-chain posture, operator review loop visibility, reviewer queues, acknowledgement state, escalation and closeout windows, richer trace drill-down, decision handoff posture, evidence closeout, and cross-window shared-state observability on top of the existing per-slot focus flow.",
+    "Phase60 keeps the bridge default-disabled while layering review-only delivery-chain posture, operator review loop visibility, reviewer queues, acknowledgement state, escalation and closeout windows, richer trace drill-down, decision handoff posture, evidence closeout, and cross-window shared-state observability on top of the existing per-slot focus flow.",
   mode: "disabled",
   defaultEnabled: false,
   previewHandoff: "placeholder",
@@ -175,7 +175,7 @@ export const mockHostExecutorState: StudioHostExecutorState = {
   id: "host-executor-phase27",
   title: "Disabled host bridge skeleton",
   summary:
-    "Phase58 keeps the typed executor contract default-disabled while adding review-only delivery-chain posture, cross-window shared-state review, richer trace drill-down, operator review-loop posture, and deeper inspector visibility without enabling host mutation.",
+    "Phase60 keeps the typed executor contract default-disabled while adding a delivery-chain workspace / stage explorer, cross-window shared-state review, richer trace drill-down, operator review-loop posture, and deeper inspector visibility without enabling host mutation.",
   mode: "disabled",
   transport: "electron-ipc-skeleton",
   defaultEnabled: false,
@@ -680,7 +680,7 @@ export const mockBoundarySummary: StudioBoundarySummary = {
   id: "shell-host-runtime-boundary",
   title: "Host/runtime boundary",
   summary:
-    "Phase58 keeps host execution withheld while extending the default-disabled bridge skeleton with a review-only delivery chain, explicit reviewer queues, acknowledgement state, escalation and closeout windows, decision handoff and evidence closeout state, deeper trace contracts, readiness-aware window intents, and explicit cross-window shared-state review.",
+    "Phase60 keeps host execution withheld while extending the default-disabled bridge skeleton with a delivery-chain workspace / stage explorer, explicit reviewer queues, acknowledgement state, escalation and closeout windows, decision handoff and evidence closeout state, deeper trace contracts, readiness-aware window intents, and explicit cross-window shared-state review.",
   currentLayer: "local-only",
   nextLayer: "preview-host",
   hostState: "withheld",

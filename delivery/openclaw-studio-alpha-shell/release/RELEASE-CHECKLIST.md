@@ -1,4 +1,4 @@
-# OpenClaw Studio Phase58 Release Checklist
+# OpenClaw Studio Phase60 Release Checklist
 
 ## Required Commands
 
@@ -7,10 +7,10 @@
 - `npm run smoke`
 - `npm run start:smoke`
 - `npm run package:alpha`
+- `npm run release:plan`
 
 ## Optional Dry-Run
 
-- `npm run release:plan`
 
 ## Artifact Contract
 
@@ -39,7 +39,7 @@
 - `release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json` 必须列出 attestation operator settlement packs metadata
 - `release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json` 必须列出 attestation operator approval routing contracts metadata
 - `release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json` 必须列出 attestation operator approval orchestration metadata
-- `release/REVIEW-ONLY-DELIVERY-CHAIN.json` 必须列出 review-only delivery chain metadata
+- `release/REVIEW-ONLY-DELIVERY-CHAIN.json` 必须列出 delivery-chain workspace / stage explorer metadata
 - `release/OPERATOR-REVIEW-BOARD.json` 必须列出 operator review board metadata
 - `release/RELEASE-DECISION-HANDOFF.json` 必须列出 release decision handoff metadata
 - `release/REVIEW-EVIDENCE-CLOSEOUT.json` 必须列出 review evidence closeout metadata
@@ -93,8 +93,8 @@
 - structured alpha-shell snapshot under delivery/openclaw-studio-alpha-shell
 - built renderer bundle copied into artifacts/renderer
 - built Electron bundle copied into artifacts/electron
-- review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase58 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything
-- review-only delivery chain linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, and rollback readiness into one staged local-only workflow without executing anything
+- review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase60 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything
+- delivery-chain workspace and stage explorer linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, and observability mapping into one staged local-only workflow without executing anything
 - deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references
 - deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, review-posture ownership, and inspector-command linkage
 - persisted shell layout foundation backed by localStorage
