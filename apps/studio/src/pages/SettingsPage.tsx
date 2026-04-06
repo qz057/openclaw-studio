@@ -1,10 +1,20 @@
-import type { StudioShellState } from "@openclaw/shared";
+import type { StudioPageId, StudioShellState } from "@openclaw/shared";
+import { WindowSharedStateBoard } from "../components/WindowSharedStateBoard";
+
+interface SettingsWindowingSurfaceProps {
+  activeRouteId: StudioPageId;
+  activeWindowId: string | null;
+  activeLaneId: string | null;
+  activeBoardId: string | null;
+}
 
 interface SettingsPageProps {
   settings: StudioShellState["settings"];
+  windowing: StudioShellState["windowing"];
+  windowingSurface: SettingsWindowingSurfaceProps;
 }
 
-export function SettingsPage({ settings }: SettingsPageProps) {
+export function SettingsPage({ settings, windowing, windowingSurface }: SettingsPageProps) {
   return (
     <section className="page">
       <div className="page-header">
@@ -14,6 +24,17 @@ export function SettingsPage({ settings }: SettingsPageProps) {
         </div>
         <p className="page-summary">{settings.summary}</p>
       </div>
+
+      <WindowSharedStateBoard
+        windowing={windowing}
+        activeRouteId={windowingSurface.activeRouteId}
+        activeWindowId={windowingSurface.activeWindowId}
+        activeLaneId={windowingSurface.activeLaneId}
+        activeBoardId={windowingSurface.activeBoardId}
+        compact
+        title="Settings Coordination Surface"
+        summary="Settings now exposes the same phase56 window roster, shared-state lane, sync health, and local-only blockers that drive the main shell coordination board."
+      />
 
       <div className="section-stack">
         {settings.sections.map((section) => (

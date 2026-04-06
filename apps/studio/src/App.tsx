@@ -25,6 +25,11 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { BoundarySummaryCard } from "./components/BoundarySummaryCard";
 import { HostTracePanel } from "./components/HostTracePanel";
 import {
+  WindowSharedStateBoard,
+  resolveActiveWindowRosterEntry,
+  resolveActiveWindowSharedStateLane
+} from "./components/WindowSharedStateBoard";
+import {
   CommandPalette,
   type CommandPaletteEntry,
   type CommandPaletteSection,
@@ -162,6 +167,13 @@ function isTypingTarget(target: EventTarget | null): boolean {
 interface AppFocusedSlotProps {
   focusedSlotId: string | null;
   onFocusedSlotChange: (slotId: string) => void;
+}
+
+interface AppWindowingSurfaceProps {
+  activeRouteId: StudioPageId;
+  activeWindowId: string | null;
+  activeLaneId: string | null;
+  activeBoardId: string | null;
 }
 
 interface CommandContextState {
@@ -311,7 +323,8 @@ function renderPage(
   activePage: StudioPageId,
   data: StudioShellState,
   focusedSlot: AppFocusedSlotProps,
-  commandPanel: ContextualCommandPanelProps
+  commandPanel: ContextualCommandPanelProps,
+  windowingSurface: AppWindowingSurfaceProps
 ) {
   switch (activePage) {
     case "dashboard":
@@ -319,10 +332,12 @@ function renderPage(
         <DashboardPage
           dashboard={data.dashboard}
           boundary={data.boundary}
+          windowing={data.windowing}
           status={data.status}
           focusedSlotId={focusedSlot.focusedSlotId}
           onFocusedSlotChange={focusedSlot.onFocusedSlotChange}
           commandPanel={commandPanel}
+          windowingSurface={windowingSurface}
         />
       );
     case "home":
@@ -332,6 +347,7 @@ function renderPage(
           focusedSlotId={focusedSlot.focusedSlotId}
           onFocusedSlotChange={focusedSlot.onFocusedSlotChange}
           commandPanel={commandPanel}
+          windowingSurface={windowingSurface}
         />
       );
     case "sessions":
@@ -363,7 +379,7 @@ function renderPage(
         />
       );
     case "settings":
-      return <SettingsPage settings={data.settings} />;
+      return <SettingsPage settings={data.settings} windowing={data.windowing} windowingSurface={windowingSurface} />;
   }
 }
 
@@ -470,7 +486,6 @@ export function App() {
   const hostTraceFocus = resolveHostTraceFocus(data.boundary.hostExecutor, resolvedFocusSlotId);
   const releaseApprovalPipeline = data.boundary.hostExecutor.releaseApprovalPipeline;
   const currentReleaseStage = selectStudioReleaseApprovalPipelineStage(releaseApprovalPipeline);
-  const inspectorSections = createInspectorSections(data.boundary, hostTraceFocus);
   const dockItems = createDockItems(hostTraceFocus);
   const activePageMeta = data.pages.find((page) => page.id === activePage) ?? {
     id: activePage,
@@ -580,6 +595,33 @@ export function App() {
   const workflowLinkedShell = workflowIntent
     ? `${workflowIntent.shellLink.pageId} · ${workflowIntent.shellLink.rightRailTabId} / ${workflowIntent.shellLink.bottomDockTabId}`
     : "Unavailable";
+  const activeOrchestrationBoard =
+    data.windowing.orchestration.boards.find((board) => board.laneId === selectedWorkflowLane?.id) ??
+    data.windowing.orchestration.boards.find((board) => board.routeId === activePage) ??
+    data.windowing.orchestration.boards.find((board) => board.id === data.windowing.orchestration.activeBoardId) ??
+    data.windowing.orchestration.boards[0] ??
+    null;
+  const activeSharedStateLane =
+    resolveActiveWindowSharedStateLane(data.windowing, undefined, activeOrchestrationBoard?.id ?? null, activePage) ??
+    data.windowing.sharedState.lanes[0] ??
+    null;
+  const activeWindowRosterEntry =
+    resolveActiveWindowRosterEntry(data.windowing, activeSharedStateLane?.windowId ?? null, activeSharedStateLane, activePage) ??
+    data.windowing.roster.windows[0] ??
+    null;
+  const windowingSurface: AppWindowingSurfaceProps = {
+    activeRouteId: activePage,
+    activeWindowId: activeWindowRosterEntry?.id ?? null,
+    activeLaneId: activeSharedStateLane?.id ?? null,
+    activeBoardId: activeOrchestrationBoard?.id ?? null
+  };
+  const inspectorSections = createInspectorSections(
+    data.boundary,
+    hostTraceFocus,
+    data.windowing,
+    windowingSurface.activeLaneId,
+    windowingSurface.activeWindowId
+  );
   const actionById = new Map(data.commandSurface.actions.map((action) => [action.id, action]));
   const activeContexts = data.commandSurface.contexts.filter((context) => context.id === "global" || context.id === activePage);
   const contextualActions = dedupeCommandActions(activeContexts.flatMap((context) => context.actionIds.map((actionId) => actionById.get(actionId))));
@@ -792,11 +834,17 @@ export function App() {
       detail: "Workspace entry, detached candidate, and intent focus stay synchronized across the main panel, windows rail, and dock."
     },
     {
+      id: "cross-view-window-shared-state",
+      label: "Window roster -> Shared-state lane",
+      value: `${activeWindowRosterEntry?.label ?? "No window"} -> ${activeSharedStateLane?.label ?? "No shared-state lane"}`,
+      detail: "Ownership, sync health, last handoff, and blockers now stay explicit instead of being implied by the active tab posture."
+    },
+    {
       id: "cross-view-slot-release",
       label: "Focused slot -> Release posture",
       value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> ${currentReleaseStage?.label ?? "Review-only release approval pipeline"}`,
       detail:
-        "Focused-slot review and release review now sit in the same phase55 local-only approval-pipeline, decision-enforcement-lifecycle, and receipt-settlement-closeout story without enabling host execution, installer work, staged apply entry, cutover execution, or publish rollback."
+        "Focused-slot review and release review now sit in the same phase56 local-only approval-pipeline, decision-enforcement-lifecycle, and receipt-settlement-closeout story without enabling host execution, installer work, staged apply entry, cutover execution, or publish rollback."
     }
   ];
   const inspectorCommandLinkage = [
@@ -817,6 +865,12 @@ export function App() {
       label: "Inspector -> Orchestration board",
       value: `${selectedWorkflowLane?.label ?? "No workflow lane"} / ${selectedWindowIntent?.label ?? "No intent"}`,
       detail: "Workflow lane, intent focus, and detached candidate posture are surfaced together instead of living in separate shell areas."
+    },
+    {
+      id: "inspector-linkage-shared-state",
+      label: "Inspector -> Shared-state lane",
+      value: `${activeWindowRosterEntry?.label ?? "No window"} / ${activeSharedStateLane?.label ?? "No shared-state lane"}`,
+      detail: "The right rail now mirrors the same window roster, sync health, and last handoff posture shown in the phase56 cross-window board."
     }
   ];
   const releasePipelineDepth = [
@@ -825,7 +879,7 @@ export function App() {
       label: "Formal Release Readiness",
       value: "RELEASE-MANIFEST / BUILD-METADATA / REVIEW-MANIFEST",
       detail:
-        "Phase55 keeps the manifest spine and turns the phase54 approval orchestration, staged release decision lifecycle, and publication receipt settlement closeout layers into a clearer review-only release approval pipeline without executing anything."
+        "Phase56 keeps the manifest spine and turns the phase54 approval orchestration, staged release decision lifecycle, and publication receipt settlement closeout layers into a clearer review-only release approval pipeline while the shell now adds cross-window shared-state review without executing anything."
     },
     {
       id: "release-depth-bundles",
@@ -1163,7 +1217,7 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase55 increases release review structure only; it still does not install, publish, sign, orchestrate live approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
+        "Phase56 increases release review and cross-window coordination structure only; it still does not install, publish, sign, orchestrate live approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -1987,15 +2041,15 @@ export function App() {
                   <h2>Review-only Release Approval Pipeline</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but phase55 now exposes approval orchestration, staged release
-                  decision lifecycle, rollback settlement closeout, and the final release-decision gate as one review-only pipeline while
-                  staying entirely local-only and non-executing.
+                  The alpha shell still does not build a real installer, but phase56 now exposes approval orchestration, staged release
+                  decision lifecycle, rollback settlement closeout, the final release-decision gate, and the new cross-window shared-state
+                  review layer as one local-only non-executing surface.
                 </p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
                   <span>Phase</span>
-                  <strong>Phase55</strong>
+                  <strong>Phase56</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Current stage</span>
@@ -2094,6 +2148,16 @@ export function App() {
                 </div>
               </article>
             </div>
+            <WindowSharedStateBoard
+              windowing={data.windowing}
+              activeRouteId={windowingSurface.activeRouteId}
+              activeWindowId={windowingSurface.activeWindowId}
+              activeLaneId={windowingSurface.activeLaneId}
+              activeBoardId={windowingSurface.activeBoardId}
+              eyebrow="Phase56"
+              title="Cross-window Coordination Board"
+              summary="Window roster, shared-state lane ownership, sync health, last handoff, route/workspace intent links, and local-only blockers now stay visible inside the same shell runtime."
+            />
             <div className="workflow-lane-strip">
               {data.windowing.workflow.lanes.map((lane) => (
                 <button
@@ -2177,10 +2241,16 @@ export function App() {
             </div>
           </section>
 
-          {renderPage(activePage, data, {
-            focusedSlotId: resolvedFocusSlotId,
-            onFocusedSlotChange: setFocusedSlotId
-          }, commandPanel)}
+          {renderPage(
+            activePage,
+            data,
+            {
+              focusedSlotId: resolvedFocusSlotId,
+              onFocusedSlotChange: setFocusedSlotId
+            },
+            commandPanel,
+            windowingSurface
+          )}
         </main>
 
         {resolvedLayoutState.rightRailVisible ? (
@@ -2303,6 +2373,19 @@ export function App() {
                     </button>
                   </div>
                 </article>
+
+                <WindowSharedStateBoard
+                  windowing={data.windowing}
+                  activeRouteId={windowingSurface.activeRouteId}
+                  activeWindowId={windowingSurface.activeWindowId}
+                  activeLaneId={windowingSurface.activeLaneId}
+                  activeBoardId={windowingSurface.activeBoardId}
+                  compact
+                  nested
+                  eyebrow="Phase56"
+                  title="Cross-window Shared State"
+                  summary="The windows rail now exposes explicit ownership, sync health, route/workspace intent links, and local-only blockers for the active coordination lane."
+                />
 
                 <div className="workflow-step-grid workflow-step-grid--compact">
                   {workflowStepCards.map((card) => (

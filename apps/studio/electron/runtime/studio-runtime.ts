@@ -1311,11 +1311,22 @@ function buildShellState(
 
   shellState.inspector.summary =
     hasLiveToolsMcp || hasLiveRuntime
-      ? "Shared boundary state now summarizes the live local-only layer, preview-host contract, per-slot trace focus, release approval pipeline posture, dock linkage, blockers, and future executor posture."
+      ? "Shared boundary state now summarizes the live local-only layer, preview-host contract, per-slot trace focus, release approval pipeline posture, cross-window shared-state posture, dock linkage, blockers, and future executor posture."
       : baseState.inspector.summary;
   shellState.inspector.boundary = shellState.boundary;
   const traceFocus = createInspectorTraceFocus(shellState.boundary);
   const currentReleaseStage = selectStudioReleaseApprovalPipelineStage(shellState.boundary.hostExecutor.releaseApprovalPipeline);
+  const activeSharedStateLane =
+    shellState.windowing.sharedState.lanes.find((lane) => lane.id === shellState.windowing.sharedState.activeLaneId) ??
+    shellState.windowing.sharedState.lanes[0];
+  const activeWindow =
+    shellState.windowing.roster.windows.find((entry) => entry.id === activeSharedStateLane?.windowId) ??
+    shellState.windowing.roster.windows.find((entry) => entry.id === shellState.windowing.roster.activeWindowId) ??
+    shellState.windowing.roster.windows[0];
+  const activeOrchestrationBoard =
+    shellState.windowing.orchestration.boards.find((board) => board.laneId === activeSharedStateLane?.workflowLaneId) ??
+    shellState.windowing.orchestration.boards.find((board) => board.id === shellState.windowing.orchestration.activeBoardId) ??
+    shellState.windowing.orchestration.boards[0];
   shellState.inspector.sections = [
     {
       id: "layer",
@@ -1353,6 +1364,16 @@ function buildShellState(
       value: currentReleaseStage ? `${currentReleaseStage.label} / ${currentReleaseStage.status}` : "Unavailable"
     },
     {
+      id: "window-focus",
+      label: "Window focus",
+      value: activeWindow?.label ?? "Unavailable"
+    },
+    {
+      id: "shared-state",
+      label: "Shared-state lane",
+      value: activeSharedStateLane ? `${activeSharedStateLane.label} / ${activeSharedStateLane.sync.health}` : "Unavailable"
+    },
+    {
       id: "rollback",
       label: "Rollback posture",
       value: traceFocus ? `${traceFocus.rollbackDisposition} / ${traceFocus.terminalStatus}` : "Unavailable"
@@ -1378,7 +1399,10 @@ function buildShellState(
     workspaceViewId: shellState.windowing.posture.activeWorkspaceViewId,
     windowIntentId: shellState.windowing.posture.focusedIntentId ?? shellState.inspector.linkage.windowIntentId,
     detachedPanelId: shellState.windowing.posture.activeDetachedPanelId ?? shellState.inspector.linkage.detachedPanelId,
-    focusedSlotId: traceFocus?.slotId ?? shellState.inspector.linkage.focusedSlotId
+    focusedSlotId: traceFocus?.slotId ?? shellState.inspector.linkage.focusedSlotId,
+    windowId: activeWindow?.id ?? shellState.inspector.linkage.windowId,
+    sharedStateLaneId: activeSharedStateLane?.id ?? shellState.inspector.linkage.sharedStateLaneId,
+    orchestrationBoardId: activeOrchestrationBoard?.id ?? shellState.inspector.linkage.orchestrationBoardId
   };
   shellState.inspector.drilldowns = shellState.inspector.drilldowns.map((drilldown) => {
     if (drilldown.id !== "drilldown-active-flow-insight") {

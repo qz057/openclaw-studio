@@ -46,7 +46,9 @@ export type StudioContractLinkKind =
   | "release-artifact"
   | "audit"
   | "trace-slot"
-  | "window-intent";
+  | "window-intent"
+  | "window-roster"
+  | "shared-state-lane";
 export type StudioReleaseApprovalPipelineMode = "review-only";
 export type StudioReleaseApprovalPipelineStageStatus = "ready" | "in-review" | "planned" | "blocked";
 export type StudioHostFailureCode =
@@ -599,6 +601,9 @@ export interface StudioInspectorLinkage {
   windowIntentId?: string;
   detachedPanelId?: string;
   focusedSlotId?: string;
+  windowId?: string;
+  sharedStateLaneId?: string;
+  orchestrationBoardId?: string;
 }
 
 export interface StudioReleaseApprovalPipelineStage {
@@ -684,6 +689,10 @@ export type StudioWindowIntentStatus = "ready" | "staged" | "focused";
 export type StudioDetachedWorkspaceState = "anchored" | "candidate" | "detached-local";
 export type StudioWindowIntentFocus = "secondary" | "primary";
 export type StudioWindowPostureMode = "anchored-shell" | "detached-candidate" | "intent-focused";
+export type StudioWindowSyncHealth = "synced" | "drift-watch" | "blocked";
+export type StudioWindowOwnershipMode = "owned" | "shared-review" | "handoff";
+export type StudioWindowRosterEntryKind = "main-shell" | "workspace" | "detached-candidate";
+export type StudioWindowSharedStateLaneStatus = "active" | "handoff-ready" | "blocked";
 
 export interface StudioCommandAction {
   id: string;
@@ -1026,11 +1035,114 @@ export interface StudioWindowPostureSummary {
   activeDetachedPanelId?: string;
 }
 
+export interface StudioWindowOwnership {
+  owner: string;
+  mode: StudioWindowOwnershipMode;
+  posture: string;
+  summary: string;
+}
+
+export interface StudioWindowSyncState {
+  health: StudioWindowSyncHealth;
+  summary: string;
+  updatedAt: string;
+}
+
+export interface StudioWindowLastHandoff {
+  label: string;
+  fromWindowId: string;
+  toWindowId: string;
+  summary: string;
+  timestamp: string;
+  linkedIntentId?: string;
+  linkedSlotId?: string;
+}
+
+export interface StudioWindowRouteIntentLink {
+  id: string;
+  routeId: StudioPageId;
+  workspaceViewId: StudioWorkspaceViewId;
+  summary: string;
+  windowIntentId?: string;
+  detachedPanelId?: string;
+}
+
+export interface StudioWindowLocalBlocker {
+  id: string;
+  label: string;
+  detail: string;
+  tone: StudioTone;
+}
+
+export interface StudioWindowSharedStateField {
+  id: string;
+  label: string;
+  value: string;
+  detail: string;
+  tone: StudioTone;
+}
+
+export interface StudioWindowRosterEntry {
+  id: string;
+  label: string;
+  kind: StudioWindowRosterEntryKind;
+  summary: string;
+  role: string;
+  routeId: StudioPageId;
+  workspaceViewId: StudioWorkspaceViewId;
+  workflowLaneId: string;
+  ownership: StudioWindowOwnership;
+  sync: StudioWindowSyncState;
+  lastHandoff: StudioWindowLastHandoff;
+  routeLinks: StudioWindowRouteIntentLink[];
+  blockers: StudioWindowLocalBlocker[];
+  detachedPanelId?: string;
+  windowIntentId?: string;
+  focusedSlotId?: string;
+}
+
+export interface StudioWindowRoster {
+  title: string;
+  summary: string;
+  activeWindowId: string;
+  windows: StudioWindowRosterEntry[];
+}
+
+export interface StudioWindowSharedStateLane {
+  id: string;
+  label: string;
+  summary: string;
+  status: StudioWindowSharedStateLaneStatus;
+  posture: StudioWindowWorkflowPosture;
+  workflowLaneId: string;
+  windowId: string;
+  routeId: StudioPageId;
+  workspaceViewId: StudioWorkspaceViewId;
+  windowIntentId: string;
+  focusedSlotId: string;
+  ownership: StudioWindowOwnership;
+  sync: StudioWindowSyncState;
+  lastHandoff: StudioWindowLastHandoff;
+  routeLinks: StudioWindowRouteIntentLink[];
+  stateFields: StudioWindowSharedStateField[];
+  blockers: StudioWindowLocalBlocker[];
+  detachedPanelId?: string;
+}
+
+export interface StudioWindowSharedState {
+  title: string;
+  summary: string;
+  activeLaneId: string;
+  lanes: StudioWindowSharedStateLane[];
+}
+
 export interface StudioWindowing {
   title: string;
   summary: string;
   readiness: "contract-ready";
   posture: StudioWindowPostureSummary;
+  roster: StudioWindowRoster;
+  sharedState: StudioWindowSharedState;
   workflow: StudioWindowWorkflow;
   orchestration: StudioWindowOrchestration;
   views: StudioWorkspaceView[];
@@ -1188,6 +1300,31 @@ function scoreStudioHostTraceSlot(entry: StudioHostTraceSlotState): number {
   return score;
 }
 
+function createStudioWindowCrossLinks(intent: StudioHostMutationIntent): StudioContractLink[] {
+  switch (intent) {
+    case "root-connect":
+      return [
+        { id: "window-link-shell-main", label: "Main Shell Window", kind: "window-roster", target: "window-shell-main" },
+        { id: "window-link-boundary-lane", label: "Boundary Review Lane", kind: "shared-state-lane", target: "shared-state-lane-boundary-review" }
+      ];
+    case "bridge-attach":
+      return [
+        { id: "window-link-inspector-candidate", label: "Detached Inspector Candidate", kind: "window-roster", target: "window-inspector-candidate" },
+        { id: "window-link-boundary-handoff", label: "Boundary Review Lane", kind: "shared-state-lane", target: "shared-state-lane-boundary-review" }
+      ];
+    case "connector-activate":
+      return [
+        { id: "window-link-review-board", label: "Review Deck Window", kind: "window-roster", target: "window-review-board" },
+        { id: "window-link-preview-lane", label: "Preview Review Lane", kind: "shared-state-lane", target: "shared-state-lane-preview-review" }
+      ];
+    default:
+      return [
+        { id: "window-link-trace-window", label: "Trace Review Window", kind: "window-roster", target: "window-trace-review" },
+        { id: "window-link-trace-lane", label: "Trace Review Lane", kind: "shared-state-lane", target: "shared-state-lane-trace-review" }
+      ];
+  }
+}
+
 function createStudioHostTracePhases(
   slot: StudioHostMutationSlot,
   handler: StudioHostBridgeSlotHandler,
@@ -1230,7 +1367,7 @@ function createStudioHostTracePhases(
           id: `${slot.id}-trace-preview-pipeline`,
           label: "Pipeline lane",
           value: "approval orchestration / lifecycle / rollback",
-          detail: "Phase55 ties preview posture to the review-only release approval pipeline so approval, lifecycle, and rollback evidence stay cross-linked.",
+          detail: "Phase56 keeps preview posture tied to the review-only release approval pipeline so approval, lifecycle, rollback, and cross-window review evidence stay cross-linked.",
           tone: "neutral",
           links: [
             {
@@ -1271,7 +1408,8 @@ function createStudioHostTracePhases(
           tone: validatorState === "registered" ? "positive" : "warning",
           links: [
             { id: `${slot.id}-link-slot`, label: slot.label, kind: "trace-slot", target: slot.id },
-            { id: `${slot.id}-link-lifecycle-handoff`, label: "Lifecycle handoff-slot", kind: "lifecycle", target: "lifecycle.handoff-slot" }
+            { id: `${slot.id}-link-lifecycle-handoff`, label: "Lifecycle handoff-slot", kind: "lifecycle", target: "lifecycle.handoff-slot" },
+            ...createStudioWindowCrossLinks(slot.intent)
           ]
         },
         {
@@ -1324,7 +1462,8 @@ function createStudioHostTracePhases(
               label: "Release decision lifecycle",
               kind: "release-artifact",
               target: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
-            }
+            },
+            ...createStudioWindowCrossLinks(slot.intent)
           ]
         }
       ]
@@ -1463,10 +1602,10 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
   const focusSlotId = focusSlot?.slotId ?? "slot-lane-apply";
 
   return {
-    id: "release-approval-pipeline-phase55",
+    id: "release-approval-pipeline-phase56",
     title: "Review-only release approval pipeline",
     summary:
-      "Phase55 layers a structured release approval pipeline on top of the existing approval orchestration, staged release decision lifecycle, and rollback receipt settlement closeout contracts without enabling signing, publish, rollback, or host execution.",
+      "Phase56 keeps the structured release approval pipeline in place while the shell adds a more concrete cross-window coordination and shared-state review layer without enabling signing, publish, rollback, or host execution.",
     mode: "review-only",
     currentStageId: "release-pipeline-approval-orchestration",
     blockedBy: [
@@ -1541,7 +1680,7 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
             id: "release-pipeline-approval-baton",
             label: "Reviewer baton",
             value: "routing -> orchestration -> decision board",
-            detail: "Phase55 makes approval routing, orchestration, and final release-decision review feel like one pipeline even though every stage is still non-executing.",
+            detail: "Phase56 keeps approval routing, orchestration, and final release-decision review feeling like one pipeline while cross-window review ownership becomes more explicit.",
             tone: "neutral",
             links: [
               { id: "release-pipeline-link-lifecycle-approval", label: "Lifecycle request-approval", kind: "lifecycle", target: "lifecycle.request-approval" },
@@ -1714,7 +1853,7 @@ const mockHostBridgeState: StudioHostBridgeState = {
   id: "host-bridge-phase27",
   title: "Disabled host bridge skeleton",
   summary:
-    "Phase55 keeps the bridge default-disabled while layering review-only release approval pipeline visibility, richer trace drill-down, and shell-level posture feedback on top of the existing per-slot focus flow.",
+    "Phase56 keeps the bridge default-disabled while layering review-only release approval pipeline visibility, richer trace drill-down, and cross-window shared-state observability on top of the existing per-slot focus flow.",
   mode: "disabled",
   defaultEnabled: false,
   previewHandoff: "placeholder",
@@ -1809,7 +1948,7 @@ const mockHostExecutorState: StudioHostExecutorState = {
   id: "host-executor-phase27",
   title: "Disabled host bridge skeleton",
   summary:
-    "Phase55 keeps the typed executor contract default-disabled while adding a review-only release approval pipeline, richer trace drill-down, and deeper inspector visibility without enabling host mutation.",
+    "Phase56 keeps the typed executor contract default-disabled while adding cross-window shared-state review, richer trace drill-down, and deeper inspector visibility without enabling host mutation.",
   mode: "disabled",
   transport: "electron-ipc-skeleton",
   defaultEnabled: false,
@@ -2255,7 +2394,7 @@ const mockBoundarySummary: StudioBoundarySummary = {
   id: "shell-host-runtime-boundary",
   title: "Host/runtime boundary",
   summary:
-    "Phase55 keeps host execution withheld while extending the default-disabled bridge skeleton with a review-only release approval pipeline, deeper trace contracts, readiness-aware window intents, and shell-level posture feedback.",
+    "Phase56 keeps host execution withheld while extending the default-disabled bridge skeleton with a review-only release approval pipeline, deeper trace contracts, readiness-aware window intents, and explicit cross-window shared-state review.",
   currentLayer: "local-only",
   nextLayer: "preview-host",
   hostState: "withheld",
@@ -3262,9 +3401,9 @@ const mockLayout: StudioShellLayout = {
 };
 
 const mockWindowing: StudioWindowing = {
-  title: "Detached Workspace Behavior",
+  title: "Multi-window Coordination",
   summary:
-    "Phase 32 turns detached workspace behavior into a clearer local orchestration shell: route, workflow lane, command flow, workspace entry, detached candidate, intent focus, focused-slot posture, and release-review posture now read like one coordination board while remaining local-only and non-executing.",
+    "Phase56 turns the earlier detached-workspace foundation into a more explicit cross-window review surface: a local-only window roster, shared-state lanes, sync health, ownership, last handoff, route/workspace intent links, and focused-slot posture now read like one coordination board while staying inside the same safe shell.",
   readiness: "contract-ready",
   posture: {
     mode: "intent-focused",
@@ -3273,6 +3412,497 @@ const mockWindowing: StudioWindowing = {
     activeWorkspaceViewId: "trace-deck",
     focusedIntentId: "window-intent-trace-workspace",
     activeDetachedPanelId: "detached-trace"
+  },
+  roster: {
+    title: "Window Roster",
+    summary:
+      "Each review surface now exposes explicit ownership, sync health, last handoff, route/workspace intent linkage, and local-only blockers without creating any new native window.",
+    activeWindowId: "window-trace-review",
+    windows: [
+      {
+        id: "window-shell-main",
+        label: "Main Shell Window",
+        kind: "main-shell",
+        summary: "Primary BrowserWindow keeps navigation, command flow, and boundary review anchored while detached candidates stay local placeholders.",
+        role: "Navigation anchor / operator shell",
+        routeId: "dashboard",
+        workspaceViewId: "operator-shell",
+        workflowLaneId: "lane-boundary-review",
+        ownership: {
+          owner: "shell-operator",
+          mode: "owned",
+          posture: "anchor control",
+          summary: "Navigation, quick actions, and approval review remain anchored in the main shell."
+        },
+        sync: {
+          health: "drift-watch",
+          summary: "The main shell is synchronized on route and focused slot, but the detached inspector candidate is still staged rather than natively detached.",
+          updatedAt: "Now"
+        },
+        lastHandoff: {
+          label: "Boundary review baton",
+          fromWindowId: "window-shell-main",
+          toWindowId: "window-inspector-candidate",
+          summary: "Dashboard route, lane-apply focus, and inspector posture were handed off into the detached inspector candidate as a local-only review baton.",
+          timestamp: "Now",
+          linkedIntentId: "window-intent-inspector-detach",
+          linkedSlotId: "slot-lane-apply"
+        },
+        routeLinks: [
+          {
+            id: "route-link-shell-dashboard",
+            routeId: "dashboard",
+            workspaceViewId: "operator-shell",
+            windowIntentId: "window-intent-inspector-detach",
+            detachedPanelId: "detached-inspector",
+            summary: "Dashboard anchors Operator Shell while staging the detached inspector candidate."
+          }
+        ],
+        blockers: [
+          {
+            id: "window-shell-blocker-native-detach",
+            label: "Native detach remains withheld",
+            detail: "Detached Inspector stays inside the same BrowserWindow; no host-side detached window control is enabled.",
+            tone: "warning"
+          },
+          {
+            id: "window-shell-blocker-host-execution",
+            label: "Host execution remains withheld",
+            detail: "Cross-window handoff can update shell review state only; no host-side apply or connector control is allowed.",
+            tone: "warning"
+          }
+        ],
+        detachedPanelId: "detached-inspector",
+        windowIntentId: "window-intent-inspector-detach",
+        focusedSlotId: "slot-lane-apply"
+      },
+      {
+        id: "window-inspector-candidate",
+        label: "Detached Inspector Candidate",
+        kind: "detached-candidate",
+        summary: "Inspector review is expressed as a dedicated local candidate with explicit handoff metadata, even though it still renders inside the same shell.",
+        role: "Boundary review handoff surface",
+        routeId: "dashboard",
+        workspaceViewId: "operator-shell",
+        workflowLaneId: "lane-boundary-review",
+        ownership: {
+          owner: "boundary-review-lane",
+          mode: "handoff",
+          posture: "review-ready",
+          summary: "The inspector candidate is owned by the boundary review lane and waits for a future native detach path."
+        },
+        sync: {
+          health: "drift-watch",
+          summary: "Inspector tabs, lane-apply focus, and review posture are linked, but the candidate still depends on shell-side routing instead of a native window.",
+          updatedAt: "Now"
+        },
+        lastHandoff: {
+          label: "Inspector candidate staged",
+          fromWindowId: "window-shell-main",
+          toWindowId: "window-inspector-candidate",
+          summary: "The main shell handed dashboard policy review into the detached inspector candidate without leaving local-only posture.",
+          timestamp: "Now",
+          linkedIntentId: "window-intent-inspector-detach",
+          linkedSlotId: "slot-lane-apply"
+        },
+        routeLinks: [
+          {
+            id: "route-link-inspector-dashboard",
+            routeId: "dashboard",
+            workspaceViewId: "operator-shell",
+            windowIntentId: "window-intent-inspector-detach",
+            detachedPanelId: "detached-inspector",
+            summary: "Dashboard and the detached inspector candidate share the same boundary review route linkage."
+          }
+        ],
+        blockers: [
+          {
+            id: "window-inspector-blocker-native-window",
+            label: "No native detached inspector",
+            detail: "The review surface is still a safe placeholder routed through the main shell instead of a real detached window.",
+            tone: "warning"
+          }
+        ],
+        detachedPanelId: "detached-inspector",
+        windowIntentId: "window-intent-inspector-detach",
+        focusedSlotId: "slot-lane-apply"
+      },
+      {
+        id: "window-trace-review",
+        label: "Trace Review Window",
+        kind: "workspace",
+        summary: "Trace Deck acts like a dedicated review window: slot focus, rollback posture, window linkage, and release review signals stay synchronized.",
+        role: "Trace-first review surface",
+        routeId: "skills",
+        workspaceViewId: "trace-deck",
+        workflowLaneId: "lane-trace-review",
+        ownership: {
+          owner: "trace-review-lane",
+          mode: "shared-review",
+          posture: "trace lock",
+          summary: "Trace Deck and Detached Trace share ownership of the current review posture."
+        },
+        sync: {
+          health: "synced",
+          summary: "Route, workspace focus, detached trace, intent focus, and lane-apply slot are synchronized inside the shell.",
+          updatedAt: "Now"
+        },
+        lastHandoff: {
+          label: "Trace review locked",
+          fromWindowId: "window-shell-main",
+          toWindowId: "window-trace-review",
+          summary: "The shell handed slot focus and trace posture into Trace Deck, then kept Detached Trace linked as the local review satellite.",
+          timestamp: "Now",
+          linkedIntentId: "window-intent-trace-workspace",
+          linkedSlotId: "slot-lane-apply"
+        },
+        routeLinks: [
+          {
+            id: "route-link-trace-skills",
+            routeId: "skills",
+            workspaceViewId: "trace-deck",
+            windowIntentId: "window-intent-trace-workspace",
+            detachedPanelId: "detached-trace",
+            summary: "Skills, Trace Deck, Detached Trace, and the trace workspace intent are locked together."
+          }
+        ],
+        blockers: [
+          {
+            id: "window-trace-blocker-native-window",
+            label: "Trace review stays shell-local",
+            detail: "The trace surface can coordinate multiple review panes, but it still cannot spawn or control a native detached window.",
+            tone: "neutral"
+          }
+        ],
+        detachedPanelId: "detached-trace",
+        windowIntentId: "window-intent-trace-workspace",
+        focusedSlotId: "slot-lane-apply"
+      },
+      {
+        id: "window-review-board",
+        label: "Review Deck Window",
+        kind: "workspace",
+        summary: "Review Deck is now modeled as a separate coordination surface for policy, readiness, preview posture, and handoff blockers.",
+        role: "Preview / readiness review surface",
+        routeId: "settings",
+        workspaceViewId: "review-deck",
+        workflowLaneId: "lane-preview-review",
+        ownership: {
+          owner: "preview-review-lane",
+          mode: "handoff",
+          posture: "preview-ready",
+          summary: "Review Deck owns the preview/readiness lane but is still waiting on a focused intent and a future native detach path."
+        },
+        sync: {
+          health: "blocked",
+          summary: "Review Deck keeps route and preview candidate linkage visible, but the review intent is not focused and the detached preview remains placeholder-only.",
+          updatedAt: "2 min ago"
+        },
+        lastHandoff: {
+          label: "Preview review staged",
+          fromWindowId: "window-trace-review",
+          toWindowId: "window-review-board",
+          summary: "Preview/readiness review was staged from the trace lane into Review Deck so policy blockers stay visible before any future handoff.",
+          timestamp: "2 min ago",
+          linkedIntentId: "window-intent-review-workspace",
+          linkedSlotId: "slot-connector-activate"
+        },
+        routeLinks: [
+          {
+            id: "route-link-review-settings",
+            routeId: "settings",
+            workspaceViewId: "review-deck",
+            windowIntentId: "window-intent-review-workspace",
+            detachedPanelId: "detached-preview",
+            summary: "Settings, Review Deck, and the detached preview candidate stay linked for readiness review."
+          }
+        ],
+        blockers: [
+          {
+            id: "window-review-blocker-intent",
+            label: "Review intent not focused",
+            detail: "The review workspace intent remains ready-only, so sync stays blocked until the shell focuses it locally.",
+            tone: "warning"
+          },
+          {
+            id: "window-review-blocker-native-window",
+            label: "Preview candidate is placeholder-only",
+            detail: "Detached Preview remains a shell-routed placeholder instead of a native detached review window.",
+            tone: "warning"
+          }
+        ],
+        detachedPanelId: "detached-preview",
+        windowIntentId: "window-intent-review-workspace",
+        focusedSlotId: "slot-connector-activate"
+      }
+    ]
+  },
+  sharedState: {
+    title: "Cross-window Shared State",
+    summary:
+      "Ownership, sync health, last handoff, route/workspace focus, intent linkage, focused slot, and local-only blockers are now explicit as shared-state lanes instead of implied shell posture.",
+    activeLaneId: "shared-state-lane-trace-review",
+    lanes: [
+      {
+        id: "shared-state-lane-boundary-review",
+        label: "Boundary Review Lane",
+        summary: "Dashboard policy review, inspector staging, and lane-apply focus stay grouped as one review baton.",
+        status: "handoff-ready",
+        posture: "review",
+        workflowLaneId: "lane-boundary-review",
+        windowId: "window-shell-main",
+        routeId: "dashboard",
+        workspaceViewId: "operator-shell",
+        windowIntentId: "window-intent-inspector-detach",
+        focusedSlotId: "slot-lane-apply",
+        ownership: {
+          owner: "release-manager",
+          mode: "handoff",
+          posture: "policy review",
+          summary: "Boundary review stays with the main shell until a future detached inspector can own the baton directly."
+        },
+        sync: {
+          health: "drift-watch",
+          summary: "Route, workspace, and focused slot are synchronized, but detached ownership is still simulated inside the same shell.",
+          updatedAt: "Now"
+        },
+        lastHandoff: {
+          label: "Boundary baton",
+          fromWindowId: "window-shell-main",
+          toWindowId: "window-inspector-candidate",
+          summary: "Dashboard policy state and lane-apply rollback posture are staged into the detached inspector candidate.",
+          timestamp: "Now",
+          linkedIntentId: "window-intent-inspector-detach",
+          linkedSlotId: "slot-lane-apply"
+        },
+        routeLinks: [
+          {
+            id: "shared-route-boundary-dashboard",
+            routeId: "dashboard",
+            workspaceViewId: "operator-shell",
+            windowIntentId: "window-intent-inspector-detach",
+            detachedPanelId: "detached-inspector",
+            summary: "Dashboard -> Operator Shell -> Detached Inspector keeps the review baton anchored."
+          }
+        ],
+        stateFields: [
+          {
+            id: "shared-boundary-route",
+            label: "Route focus",
+            value: "Dashboard",
+            detail: "Boundary review remains anchored to Dashboard for policy visibility and command linkage.",
+            tone: "neutral"
+          },
+          {
+            id: "shared-boundary-workspace",
+            label: "Workspace focus",
+            value: "Operator Shell",
+            detail: "The shell remains anchored while Detached Inspector behaves as a staged review candidate.",
+            tone: "positive"
+          },
+          {
+            id: "shared-boundary-intent",
+            label: "Intent posture",
+            value: "Detach Inspector Intent / staged",
+            detail: "The handoff is review-ready, but not natively detached.",
+            tone: "warning"
+          },
+          {
+            id: "shared-boundary-slot",
+            label: "Focused slot",
+            value: "Lane apply IPC slot",
+            detail: "Rollback-aware slot focus stays linked to the same boundary review lane.",
+            tone: "warning"
+          }
+        ],
+        blockers: [
+          {
+            id: "shared-boundary-blocker-native-window",
+            label: "Detached inspector stays simulated",
+            detail: "Boundary review can stage ownership and handoff, but it still cannot materialize a native detached inspector.",
+            tone: "warning"
+          }
+        ],
+        detachedPanelId: "detached-inspector"
+      },
+      {
+        id: "shared-state-lane-trace-review",
+        label: "Trace Review Lane",
+        summary: "Trace Deck, Detached Trace, route linkage, release review, and lane-apply rollback posture are synchronized as one active shared lane.",
+        status: "active",
+        posture: "trace",
+        workflowLaneId: "lane-trace-review",
+        windowId: "window-trace-review",
+        routeId: "skills",
+        workspaceViewId: "trace-deck",
+        windowIntentId: "window-intent-trace-workspace",
+        focusedSlotId: "slot-lane-apply",
+        ownership: {
+          owner: "trace-operator",
+          mode: "shared-review",
+          posture: "trace lock",
+          summary: "Trace Deck and Detached Trace currently share ownership of slot review and release evidence drill-down."
+        },
+        sync: {
+          health: "synced",
+          summary: "Current route, workspace, intent focus, detached trace, and lane-apply slot are all synchronized.",
+          updatedAt: "Now"
+        },
+        lastHandoff: {
+          label: "Trace lane sealed",
+          fromWindowId: "window-shell-main",
+          toWindowId: "window-trace-review",
+          summary: "Focused slot, trace tab, and release pipeline drill-down were handed into Trace Deck and kept in sync with Detached Trace.",
+          timestamp: "Now",
+          linkedIntentId: "window-intent-trace-workspace",
+          linkedSlotId: "slot-lane-apply"
+        },
+        routeLinks: [
+          {
+            id: "shared-route-trace-skills",
+            routeId: "skills",
+            workspaceViewId: "trace-deck",
+            windowIntentId: "window-intent-trace-workspace",
+            detachedPanelId: "detached-trace",
+            summary: "Skills -> Trace Deck -> Detached Trace keeps slot review and window posture aligned."
+          }
+        ],
+        stateFields: [
+          {
+            id: "shared-trace-route",
+            label: "Route focus",
+            value: "Skills",
+            detail: "The trace lane stays attached to Skills so preview, detail, and command surfaces share one route anchor.",
+            tone: "positive"
+          },
+          {
+            id: "shared-trace-workspace",
+            label: "Workspace focus",
+            value: "Trace Deck",
+            detail: "Trace Deck is the active review workspace and keeps detached trace surfaced locally.",
+            tone: "positive"
+          },
+          {
+            id: "shared-trace-intent",
+            label: "Intent posture",
+            value: "Trace Workspace Intent / focused",
+            detail: "The intent remains focused locally and drives the shell into intent-focused posture.",
+            tone: "positive"
+          },
+          {
+            id: "shared-trace-slot",
+            label: "Focused slot",
+            value: "Lane apply IPC slot",
+            detail: "The highest-risk rollback-aware slot stays in scope for both trace and release review.",
+            tone: "warning"
+          },
+          {
+            id: "shared-trace-release",
+            label: "Release linkage",
+            value: "Approval orchestration board",
+            detail: "Trace review cross-links directly into the review-only release approval pipeline.",
+            tone: "neutral"
+          }
+        ],
+        blockers: [
+          {
+            id: "shared-trace-blocker-native-window",
+            label: "Detached trace remains shell-routed",
+            detail: "Trace review feels multi-window, but native detached trace management is still intentionally disabled.",
+            tone: "neutral"
+          }
+        ],
+        detachedPanelId: "detached-trace"
+      },
+      {
+        id: "shared-state-lane-preview-review",
+        label: "Preview Review Lane",
+        summary: "Review Deck tracks readiness, preview candidate posture, and connector-focused handoff blockers as one blocked shared lane.",
+        status: "blocked",
+        posture: "preview",
+        workflowLaneId: "lane-preview-review",
+        windowId: "window-review-board",
+        routeId: "settings",
+        workspaceViewId: "review-deck",
+        windowIntentId: "window-intent-review-workspace",
+        focusedSlotId: "slot-connector-activate",
+        ownership: {
+          owner: "runtime-owner",
+          mode: "handoff",
+          posture: "preview readiness",
+          summary: "Review Deck is holding preview/readiness review until the shell focuses the review intent and future detach support exists."
+        },
+        sync: {
+          health: "blocked",
+          summary: "Route and workspace are visible, but the review intent is not focused and the detached preview remains placeholder-only.",
+          updatedAt: "2 min ago"
+        },
+        lastHandoff: {
+          label: "Preview lane staged",
+          fromWindowId: "window-trace-review",
+          toWindowId: "window-review-board",
+          summary: "Review Deck inherited preview/readiness context from the trace lane so policy blockers remain visible before any future host handoff.",
+          timestamp: "2 min ago",
+          linkedIntentId: "window-intent-review-workspace",
+          linkedSlotId: "slot-connector-activate"
+        },
+        routeLinks: [
+          {
+            id: "shared-route-preview-settings",
+            routeId: "settings",
+            workspaceViewId: "review-deck",
+            windowIntentId: "window-intent-review-workspace",
+            detachedPanelId: "detached-preview",
+            summary: "Settings -> Review Deck -> Detached Preview keeps readiness review explicit."
+          }
+        ],
+        stateFields: [
+          {
+            id: "shared-preview-route",
+            label: "Route focus",
+            value: "Settings",
+            detail: "Settings remains the route anchor for preview/readiness posture and safety controls.",
+            tone: "neutral"
+          },
+          {
+            id: "shared-preview-workspace",
+            label: "Workspace focus",
+            value: "Review Deck",
+            detail: "Review Deck keeps preview and readiness review visible, but it has not yet taken focused intent ownership.",
+            tone: "warning"
+          },
+          {
+            id: "shared-preview-intent",
+            label: "Intent posture",
+            value: "Review Workspace Intent / ready",
+            detail: "The shell knows where the handoff should land, but the intent is not yet focused locally.",
+            tone: "warning"
+          },
+          {
+            id: "shared-preview-slot",
+            label: "Focused slot",
+            value: "Connector activate IPC slot",
+            detail: "Connector activation remains the lighter review slot for readiness and policy gating.",
+            tone: "neutral"
+          }
+        ],
+        blockers: [
+          {
+            id: "shared-preview-blocker-intent",
+            label: "Review intent has not taken ownership",
+            detail: "The preview lane remains blocked until the review workspace intent becomes focused locally.",
+            tone: "warning"
+          },
+          {
+            id: "shared-preview-blocker-detached",
+            label: "Detached preview is placeholder-only",
+            detail: "The preview candidate remains shell-routed and cannot become a real native detached window in this phase.",
+            tone: "warning"
+          }
+        ],
+        detachedPanelId: "detached-preview"
+      }
+    ]
   },
   workflow: {
     title: "Workflow Timeline",
@@ -4551,9 +5181,9 @@ export const mockShellState: StudioShellState = {
           {
             id: "settings-advanced",
             label: "Product foundations",
-            value: "Phase55 active",
+            value: "Phase56 active",
             detail:
-              "A review-only release approval pipeline now sits on top of attestation operator approval orchestration, staged release decision enforcement lifecycle, rollback receipt settlement closeout, release approval workflow, and promotion gating, but every stage remains local-only and non-executing.",
+              "A review-only release approval pipeline now sits beside the phase56 cross-window shared-state review surface, so window roster, sync health, handoff posture, and release evidence stay visible together while every stage remains local-only and non-executing.",
             tone: "positive"
           }
         ]
@@ -4563,7 +5193,7 @@ export const mockShellState: StudioShellState = {
   inspector: {
     title: "Inspector",
     summary:
-      "Boundary policy, active flow state, focused-slot posture, release approval pipeline state, and window orchestration linkage stay visible here across the shell.",
+      "Boundary policy, active flow state, focused-slot posture, release approval pipeline state, and cross-window shared-state linkage stay visible here across the shell.",
     boundary: mockBoundarySummary,
     route: {
       routeId: "dashboard",
@@ -4583,7 +5213,10 @@ export const mockShellState: StudioShellState = {
       workspaceViewId: "trace-deck",
       windowIntentId: "window-intent-trace-workspace",
       detachedPanelId: "detached-trace",
-      focusedSlotId: "slot-lane-apply"
+      focusedSlotId: "slot-lane-apply",
+      windowId: "window-trace-review",
+      sharedStateLaneId: "shared-state-lane-trace-review",
+      orchestrationBoardId: "orchestration-board-trace-review"
     },
     sections: [
       { id: "layer", label: "Current layer", value: "Local-only" },
@@ -4593,6 +5226,8 @@ export const mockShellState: StudioShellState = {
       { id: "handler", label: "Handler state", value: "Registered / disabled" },
       { id: "validator", label: "Validator state", value: "Registered / slot-linked" },
       { id: "approval-pipeline", label: "Approval pipeline", value: "Approval orchestration board" },
+      { id: "window-focus", label: "Window focus", value: "Trace Review Window" },
+      { id: "shared-state", label: "Shared-state lane", value: "Trace Review Lane / synced" },
       { id: "rollback", label: "Rollback posture", value: "Incomplete / rollback-incomplete" },
       { id: "audit", label: "Audit posture", value: "Placeholder linked" },
       { id: "blocked", label: "Blocked reasons", value: "4 active" },
@@ -4646,7 +5281,11 @@ export const mockShellState: StudioShellState = {
             value: "Activate Trace Deck View",
             detail: "The next local-only move keeps trace posture and review orchestration in one shell board.",
             tone: "positive",
-            links: [{ id: "inspector-link-trace-workspace", label: "Trace workspace intent", kind: "window-intent", target: "window-intent-trace-workspace" }]
+            links: [
+              { id: "inspector-link-trace-workspace", label: "Trace workspace intent", kind: "window-intent", target: "window-intent-trace-workspace" },
+              { id: "inspector-link-trace-window", label: "Trace Review Window", kind: "window-roster", target: "window-trace-review" },
+              { id: "inspector-link-trace-shared-lane", label: "Trace Review Lane", kind: "shared-state-lane", target: "shared-state-lane-trace-review" }
+            ]
           },
           {
             id: "drilldown-flow-follow-up",
@@ -4666,7 +5305,7 @@ export const mockShellState: StudioShellState = {
             id: "drilldown-pipeline-current",
             label: "Current board",
             value: "Approval orchestration board",
-            detail: "Phase55 surfaces the reviewer baton board directly instead of scattering approval, lifecycle, and rollback documents across separate cards.",
+            detail: "Phase56 keeps the reviewer baton board visible while tying it into the new cross-window shared-state review surface.",
             tone: "positive",
             links: [
               {
@@ -4720,21 +5359,23 @@ export const mockShellState: StudioShellState = {
       {
         id: "drilldown-orchestration-state",
         label: "Orchestration State",
-        summary: "Workflow lane, workspace, detached candidate, and intent focus now read like one staged coordination chain.",
+        summary: "Workflow lane, workspace, detached candidate, intent focus, and the new cross-window shared-state lane now read like one staged coordination chain.",
         lines: [
           {
             id: "drilldown-orchestration-lane",
             label: "Workflow lane",
             value: "Trace Review Workflow",
             detail: "The shell is holding the trace review lane as the current orchestration posture.",
-            tone: "positive"
+            tone: "positive",
+            links: [{ id: "inspector-link-orchestration-lane", label: "Trace Review Lane", kind: "shared-state-lane", target: "shared-state-lane-trace-review" }]
           },
           {
             id: "drilldown-orchestration-workspace",
             label: "Workspace / detached candidate",
             value: "trace-deck -> detached-trace",
             detail: "Trace Deck and Detached Trace remain linked as one local detached workflow candidate.",
-            tone: "positive"
+            tone: "positive",
+            links: [{ id: "inspector-link-trace-window-roster", label: "Trace Review Window", kind: "window-roster", target: "window-trace-review" }]
           },
           {
             id: "drilldown-orchestration-intent",
@@ -4742,6 +5383,17 @@ export const mockShellState: StudioShellState = {
             value: "window-intent-trace-workspace",
             detail: "Intent focus stays local-only and keeps shell tabs synchronized for trace review.",
             tone: "warning"
+          },
+          {
+            id: "drilldown-orchestration-shared-state",
+            label: "Shared-state lane",
+            value: "Trace Review Lane / synced",
+            detail: "Ownership, sync health, last handoff, and focused-slot posture are explicit here instead of being implied by tab state.",
+            tone: "positive",
+            links: [
+              { id: "inspector-link-shared-state-trace", label: "shared-state-lane-trace-review", kind: "shared-state-lane", target: "shared-state-lane-trace-review" },
+              { id: "inspector-link-window-trace", label: "window-trace-review", kind: "window-roster", target: "window-trace-review" }
+            ]
           }
         ]
       }

@@ -575,6 +575,11 @@ button:disabled {
   background: rgba(255, 255, 255, 0.03);
 }
 
+.windowing-summary-card--active {
+  border-color: rgba(100, 236, 178, 0.24);
+  background: rgba(14, 32, 28, 0.62);
+}
+
 .windowing-card strong {
   display: block;
 }
@@ -646,6 +651,40 @@ button:disabled {
 .windowing-preview-line--stacked p {
   margin: 0;
   color: #8fa3ba;
+}
+
+.window-shared-board {
+  display: grid;
+  gap: 16px;
+}
+
+.window-shared-board--nested {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid rgba(148, 176, 208, 0.16);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 18px;
+}
+
+.window-shared-detail-grid,
+.window-roster-grid,
+.window-shared-lane-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.window-shared-detail-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.window-roster-grid,
+.window-shared-lane-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.window-shared-board--compact .window-roster-grid,
+.window-shared-board--compact .window-shared-lane-grid {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .command-palette-backdrop {
@@ -1062,7 +1101,10 @@ button:disabled {
   .window-workbench__grid,
   .workflow-lane-strip,
   .workflow-step-grid,
-  .workflow-support-grid {
+  .workflow-support-grid,
+  .window-shared-detail-grid,
+  .window-roster-grid,
+  .window-shared-lane-grid {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -1490,7 +1532,10 @@ button:disabled {
   .focus-context-grid,
   .workflow-lane-strip,
   .workflow-step-grid,
-  .workflow-support-grid {
+  .workflow-support-grid,
+  .window-shared-detail-grid,
+  .window-roster-grid,
+  .window-shared-lane-grid {
     grid-template-columns: minmax(0, 1fr);
   }
 

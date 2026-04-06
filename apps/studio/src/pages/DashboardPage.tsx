@@ -1,16 +1,26 @@
-import type { SettingItem, ShellStatus, StudioShellState } from "@openclaw/shared";
+import type { SettingItem, ShellStatus, StudioPageId, StudioShellState } from "@openclaw/shared";
 import { BoundarySummaryCard } from "../components/BoundarySummaryCard";
 import { ContextualCommandPanel, type ContextualCommandPanelProps } from "../components/ContextualCommandPanel";
 import { FocusedSlotToolbar } from "../components/FocusedSlotToolbar";
 import { formatHostTraceIntent, resolveHostTraceFocus, resolveHostTraceTone } from "../components/host-trace-state";
+import { WindowSharedStateBoard } from "../components/WindowSharedStateBoard";
+
+interface DashboardWindowingSurfaceProps {
+  activeRouteId: StudioPageId;
+  activeWindowId: string | null;
+  activeLaneId: string | null;
+  activeBoardId: string | null;
+}
 
 interface DashboardPageProps {
   dashboard: StudioShellState["dashboard"];
   boundary: StudioShellState["boundary"];
+  windowing: StudioShellState["windowing"];
   status: ShellStatus;
   focusedSlotId: string | null;
   onFocusedSlotChange: (slotId: string) => void;
   commandPanel: ContextualCommandPanelProps;
+  windowingSurface: DashboardWindowingSurfaceProps;
 }
 
 function SystemCheckCard({ check }: { check: SettingItem }) {
@@ -27,7 +37,16 @@ function SystemCheckCard({ check }: { check: SettingItem }) {
   );
 }
 
-export function DashboardPage({ dashboard, boundary, status, focusedSlotId, onFocusedSlotChange, commandPanel }: DashboardPageProps) {
+export function DashboardPage({
+  dashboard,
+  boundary,
+  windowing,
+  status,
+  focusedSlotId,
+  onFocusedSlotChange,
+  commandPanel,
+  windowingSurface
+}: DashboardPageProps) {
   const hostTraceFocus = resolveHostTraceFocus(boundary.hostExecutor, focusedSlotId);
 
   return (
@@ -97,6 +116,17 @@ export function DashboardPage({ dashboard, boundary, status, focusedSlotId, onFo
           </article>
         </div>
       ) : null}
+
+      <WindowSharedStateBoard
+        windowing={windowing}
+        activeRouteId={windowingSurface.activeRouteId}
+        activeWindowId={windowingSurface.activeWindowId}
+        activeLaneId={windowingSurface.activeLaneId}
+        activeBoardId={windowingSurface.activeBoardId}
+        compact
+        title="Dashboard Cross-window Board"
+        summary="Program-level review now includes the same window roster, shared-state lane, sync health, and blocker posture shown in the shell workbench."
+      />
 
       <div className="metric-grid">
         {dashboard.metrics.map((metric) => (

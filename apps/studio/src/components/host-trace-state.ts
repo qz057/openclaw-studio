@@ -7,6 +7,7 @@ import type {
   StudioHostPreviewHandoff,
   StudioHostPreviewTraceStep,
   StudioHostTraceSlotState,
+  StudioShellState,
   StudioTone
 } from "@openclaw/shared";
 import { selectStudioReleaseApprovalPipelineStage } from "@openclaw/shared";
@@ -123,7 +124,13 @@ export function resolveHostTraceFocus(
   };
 }
 
-export function createInspectorSections(boundary: StudioBoundarySummary, focus: ResolvedHostTraceFocus | null) {
+export function createInspectorSections(
+  boundary: StudioBoundarySummary,
+  focus: ResolvedHostTraceFocus | null,
+  windowing?: StudioShellState["windowing"],
+  activeLaneId?: string | null,
+  activeWindowId?: string | null
+) {
   const rollbackValue = focus
     ? focus.usesHandoff
       ? focus.rollbackAuditValue
@@ -131,6 +138,15 @@ export function createInspectorSections(boundary: StudioBoundarySummary, focus: 
     : "Unavailable";
   const auditValue = focus ? (focus.usesHandoff ? focus.rollbackAuditDetail : "Placeholder linked") : "Unavailable";
   const currentReleaseStage = selectStudioReleaseApprovalPipelineStage(boundary.hostExecutor.releaseApprovalPipeline);
+  const activeLane =
+    (activeLaneId ? windowing?.sharedState.lanes.find((lane) => lane.id === activeLaneId) : undefined) ??
+    (windowing ? windowing.sharedState.lanes.find((lane) => lane.id === windowing.sharedState.activeLaneId) : undefined) ??
+    null;
+  const activeWindow =
+    (activeWindowId ? windowing?.roster.windows.find((entry) => entry.id === activeWindowId) : undefined) ??
+    (activeLane && windowing ? windowing.roster.windows.find((entry) => entry.id === activeLane.windowId) : undefined) ??
+    (windowing ? windowing.roster.windows.find((entry) => entry.id === windowing.roster.activeWindowId) : undefined) ??
+    null;
 
   return [
     {
@@ -167,6 +183,16 @@ export function createInspectorSections(boundary: StudioBoundarySummary, focus: 
       id: "approval-pipeline",
       label: "Approval pipeline",
       value: currentReleaseStage ? `${currentReleaseStage.label} / ${currentReleaseStage.status}` : "Unavailable"
+    },
+    {
+      id: "window-focus",
+      label: "Window focus",
+      value: activeWindow?.label ?? "Unavailable"
+    },
+    {
+      id: "shared-state",
+      label: "Shared-state lane",
+      value: activeLane ? `${activeLane.label} / ${activeLane.sync.health}` : "Unavailable"
     },
     {
       id: "rollback",

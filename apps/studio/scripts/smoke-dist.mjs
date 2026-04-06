@@ -83,7 +83,7 @@ async function verifyRendererFocusedSlotUi() {
     "Route-aware Next-step Board",
     "Keyboard Routing",
     "Layout Persistence",
-    "Detached Workspace Behavior",
+    "Multi-window Coordination",
     "Detached Workspace Candidates",
     "Windowing Workbench",
     "Window Posture",
@@ -91,6 +91,14 @@ async function verifyRendererFocusedSlotUi() {
     "Workflow Timeline",
     "Workflow Lane",
     "Readiness Board",
+    "Cross-window Coordination Board",
+    "Cross-window Shared State",
+    "Window Roster",
+    "Shared-state lane",
+    "Sync Health",
+    "Last handoff",
+    "Route / workspace intent links",
+    "Local-only blockers",
     "Cross-view Coordination Matrix",
     "Inspector-Command Linkage",
     "Release Pipeline Depth",
@@ -205,7 +213,7 @@ async function verifyElectronRuntime() {
   assertBoundaryContract(shellState.boundary, "shell state");
   assertCommandSurfaceContract(shellState.commandSurface, shellState);
   assertLayoutContract(shellState.layout, shellState.windowing);
-  assertWindowingContract(shellState.windowing, shellState.layout);
+  assertWindowingContract(shellState.windowing, shellState.layout, shellState.boundary.hostExecutor.bridge);
   assertCodexLoopContract(shellState.codex, codexTasks);
   assertCodexContextContract(shellState.codex);
   assertSkillExtensionContract(shellState.skills);
@@ -225,7 +233,9 @@ async function verifyElectronRuntime() {
     hostExecutorSlots: hostExecutor.mutationSlots.length,
     hostBridgeHandlers: hostBridge.slotHandlers.length,
     commandActions: shellState.commandSurface.actions.length,
-    windowIntents: shellState.windowing.windowIntents.length
+    windowIntents: shellState.windowing.windowIntents.length,
+    rosterWindows: shellState.windowing.roster.windows.length,
+    sharedStateLanes: shellState.windowing.sharedState.lanes.length
   };
 }
 
@@ -613,7 +623,7 @@ function assertLayoutContract(layout, windowing) {
   }
 }
 
-function assertWindowingContract(windowing, layout) {
+function assertWindowingContract(windowing, layout, hostBridge) {
   if (!windowing || windowing.readiness !== "contract-ready") {
     throw new Error("Shell state is missing the phase35 detached workspace contract.");
   }
@@ -646,6 +656,14 @@ function assertWindowingContract(windowing, layout) {
     throw new Error("Shell multi-window contract is missing phase35 orchestration checkpoints.");
   }
 
+  if (!windowing.roster || !Array.isArray(windowing.roster.windows) || windowing.roster.windows.length === 0) {
+    throw new Error("Shell multi-window contract is missing the phase56 window roster.");
+  }
+
+  if (!windowing.sharedState || !Array.isArray(windowing.sharedState.lanes) || windowing.sharedState.lanes.length === 0) {
+    throw new Error("Shell multi-window contract is missing the phase56 shared-state lanes.");
+  }
+
   const rightRailTabIds = new Set((layout?.rightRailTabs ?? []).map((tab) => tab.id));
   const bottomDockTabIds = new Set((layout?.bottomDockTabs ?? []).map((tab) => tab.id));
   const workspaceViewIds = new Set(windowing.views.map((view) => view.id));
@@ -653,6 +671,9 @@ function assertWindowingContract(windowing, layout) {
   const windowIntentIds = new Set(windowing.windowIntents.map((intent) => intent.id));
   const workflowStepIds = new Set(windowing.workflow.steps.map((step) => step.id));
   const workflowLaneIds = new Set(windowing.workflow.lanes.map((lane) => lane.id));
+  const rosterWindowIds = new Set(windowing.roster.windows.map((entry) => entry.id));
+  const sharedStateLaneIds = new Set(windowing.sharedState.lanes.map((lane) => lane.id));
+  const focusSlotIds = new Set((hostBridge?.trace?.slotRoster ?? []).map((entry) => entry.slotId));
 
   if (!windowing.posture?.mode || !windowing.posture?.label || !windowing.posture?.summary) {
     throw new Error("Shell windowing contract is missing phase35 posture summary.");
@@ -777,6 +798,14 @@ function assertWindowingContract(windowing, layout) {
     throw new Error("Shell orchestration points at an unknown active board.");
   }
 
+  if (!rosterWindowIds.has(windowing.roster.activeWindowId)) {
+    throw new Error("Shell window roster points at an unknown active window.");
+  }
+
+  if (!sharedStateLaneIds.has(windowing.sharedState.activeLaneId)) {
+    throw new Error("Shell shared-state contract points at an unknown active lane.");
+  }
+
   for (const board of windowing.orchestration.boards) {
     if (!workflowLaneIds.has(board.laneId) || !workspaceViewIds.has(board.workspaceViewId) || !detachedPanelIds.has(board.detachedPanelId) || !windowIntentIds.has(board.windowIntentId)) {
       throw new Error(`Window orchestration board ${board.id} points at unknown workflow/window entities.`);
@@ -790,6 +819,82 @@ function assertWindowingContract(windowing, layout) {
       if (!checkpointIds.has(checkpointId)) {
         throw new Error(`Window orchestration board ${board.id} points at unknown checkpoint ${checkpointId}.`);
       }
+    }
+  }
+
+  for (const entry of windowing.roster.windows) {
+    if (!workflowLaneIds.has(entry.workflowLaneId)) {
+      throw new Error(`Window roster entry ${entry.id} points at an unknown workflow lane.`);
+    }
+
+    if (!workspaceViewIds.has(entry.workspaceViewId)) {
+      throw new Error(`Window roster entry ${entry.id} points at an unknown workspace view.`);
+    }
+
+    if (!entry.routeId || !entry.role || !entry.ownership?.owner || !entry.sync?.health || !entry.lastHandoff?.label) {
+      throw new Error(`Window roster entry ${entry.id} is missing ownership, sync, or handoff metadata.`);
+    }
+
+    if (!Array.isArray(entry.routeLinks) || entry.routeLinks.length === 0) {
+      throw new Error(`Window roster entry ${entry.id} is missing route/workspace intent links.`);
+    }
+
+    if (!Array.isArray(entry.blockers) || entry.blockers.length === 0) {
+      throw new Error(`Window roster entry ${entry.id} is missing local-only blockers.`);
+    }
+
+    if (entry.windowIntentId && !windowIntentIds.has(entry.windowIntentId)) {
+      throw new Error(`Window roster entry ${entry.id} points at an unknown window intent.`);
+    }
+
+    if (entry.detachedPanelId && !detachedPanelIds.has(entry.detachedPanelId)) {
+      throw new Error(`Window roster entry ${entry.id} points at an unknown detached panel.`);
+    }
+
+    if (entry.focusedSlotId && focusSlotIds.size > 0 && !focusSlotIds.has(entry.focusedSlotId)) {
+      throw new Error(`Window roster entry ${entry.id} points at an unknown focused slot ${entry.focusedSlotId}.`);
+    }
+  }
+
+  for (const lane of windowing.sharedState.lanes) {
+    if (!workflowLaneIds.has(lane.workflowLaneId)) {
+      throw new Error(`Shared-state lane ${lane.id} points at an unknown workflow lane.`);
+    }
+
+    if (!rosterWindowIds.has(lane.windowId)) {
+      throw new Error(`Shared-state lane ${lane.id} points at an unknown roster window.`);
+    }
+
+    if (!workspaceViewIds.has(lane.workspaceViewId)) {
+      throw new Error(`Shared-state lane ${lane.id} points at an unknown workspace view.`);
+    }
+
+    if (!windowIntentIds.has(lane.windowIntentId)) {
+      throw new Error(`Shared-state lane ${lane.id} points at an unknown window intent.`);
+    }
+
+    if (lane.detachedPanelId && !detachedPanelIds.has(lane.detachedPanelId)) {
+      throw new Error(`Shared-state lane ${lane.id} points at an unknown detached panel.`);
+    }
+
+    if (focusSlotIds.size > 0 && !focusSlotIds.has(lane.focusedSlotId)) {
+      throw new Error(`Shared-state lane ${lane.id} points at an unknown focused slot ${lane.focusedSlotId}.`);
+    }
+
+    if (!lane.status || !lane.ownership?.owner || !lane.sync?.health || !lane.lastHandoff?.label) {
+      throw new Error(`Shared-state lane ${lane.id} is missing status, ownership, sync, or handoff metadata.`);
+    }
+
+    if (!Array.isArray(lane.routeLinks) || lane.routeLinks.length === 0) {
+      throw new Error(`Shared-state lane ${lane.id} is missing route/workspace intent links.`);
+    }
+
+    if (!Array.isArray(lane.stateFields) || lane.stateFields.length === 0) {
+      throw new Error(`Shared-state lane ${lane.id} is missing explicit shared-state fields.`);
+    }
+
+    if (!Array.isArray(lane.blockers) || lane.blockers.length === 0) {
+      throw new Error(`Shared-state lane ${lane.id} is missing local-only blockers.`);
     }
   }
 }
@@ -998,7 +1103,21 @@ function assertInspectorContract(inspector) {
   }
 
   const sectionIds = new Set((inspector.sections ?? []).map((section) => section.id));
-  const requiredSectionIds = ["layer", "host", "next", "slot-focus", "handler", "validator", "approval-pipeline", "rollback", "audit", "blocked", "slots"];
+  const requiredSectionIds = [
+    "layer",
+    "host",
+    "next",
+    "slot-focus",
+    "handler",
+    "validator",
+    "approval-pipeline",
+    "window-focus",
+    "shared-state",
+    "rollback",
+    "audit",
+    "blocked",
+    "slots"
+  ];
 
   for (const sectionId of requiredSectionIds) {
     if (!sectionIds.has(sectionId)) {
@@ -1014,6 +1133,10 @@ function assertInspectorContract(inspector) {
 
   if (!inspector.drilldowns.some((drilldown) => drilldown.id === "drilldown-release-approval-pipeline")) {
     throw new Error("Shell inspector is missing the phase55 release approval pipeline drilldown.");
+  }
+
+  if (!inspector.linkage?.windowId || !inspector.linkage?.sharedStateLaneId || !inspector.linkage?.orchestrationBoardId) {
+    throw new Error("Shell inspector is missing the phase56 cross-window linkage metadata.");
   }
 
   if (!inspector.drilldowns.some((drilldown) => drilldown.lines.some((line) => Array.isArray(line.links) && line.links.length > 0))) {

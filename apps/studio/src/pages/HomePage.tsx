@@ -1,16 +1,25 @@
-import type { StudioShellState } from "@openclaw/shared";
+import type { StudioPageId, StudioShellState } from "@openclaw/shared";
 import { ContextualCommandPanel, type ContextualCommandPanelProps } from "../components/ContextualCommandPanel";
 import { FocusedSlotToolbar } from "../components/FocusedSlotToolbar";
 import { formatHostTraceIntent, resolveHostTraceFocus, resolveHostTraceTone } from "../components/host-trace-state";
+import { WindowSharedStateBoard } from "../components/WindowSharedStateBoard";
+
+interface HomeWindowingSurfaceProps {
+  activeRouteId: StudioPageId;
+  activeWindowId: string | null;
+  activeLaneId: string | null;
+  activeBoardId: string | null;
+}
 
 interface HomePageProps {
   state: StudioShellState;
   focusedSlotId: string | null;
   onFocusedSlotChange: (slotId: string) => void;
   commandPanel: ContextualCommandPanelProps;
+  windowingSurface: HomeWindowingSurfaceProps;
 }
 
-export function HomePage({ state, focusedSlotId, onFocusedSlotChange, commandPanel }: HomePageProps) {
+export function HomePage({ state, focusedSlotId, onFocusedSlotChange, commandPanel, windowingSurface }: HomePageProps) {
   const hostTraceFocus = resolveHostTraceFocus(state.boundary.hostExecutor, focusedSlotId);
   const visiblePanels = state.home.panels.map((panel) => {
     if (panel.id !== "focus" || !hostTraceFocus) {
@@ -74,6 +83,17 @@ export function HomePage({ state, focusedSlotId, onFocusedSlotChange, commandPan
           </article>
         ))}
       </div>
+
+      <WindowSharedStateBoard
+        windowing={state.windowing}
+        activeRouteId={windowingSurface.activeRouteId}
+        activeWindowId={windowingSurface.activeWindowId}
+        activeLaneId={windowingSurface.activeLaneId}
+        activeBoardId={windowingSurface.activeBoardId}
+        compact
+        title="Home Cross-window Review"
+        summary="Home keeps the active window roster, shared-state lane, and local-only blockers visible so the shell can be revisited without losing orchestration context."
+      />
 
       <article className="surface card">
         <div className="card-header">
