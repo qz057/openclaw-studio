@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import {
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseApprovalPipelineStage,
@@ -19,12 +19,6 @@ import {
 } from "@openclaw/shared";
 import { useStudioData } from "./hooks/useStudioData";
 import { DashboardPage } from "./pages/DashboardPage";
-import { HomePage } from "./pages/HomePage";
-import { SessionsPage } from "./pages/SessionsPage";
-import { AgentsPage } from "./pages/AgentsPage";
-import { CodexPage } from "./pages/CodexPage";
-import { SkillsPage } from "./pages/SkillsPage";
-import { SettingsPage } from "./pages/SettingsPage";
 import { BoundarySummaryCard } from "./components/BoundarySummaryCard";
 import { HostTracePanel } from "./components/HostTracePanel";
 import { OperatorReviewBoard } from "./components/OperatorReviewBoard";
@@ -52,6 +46,36 @@ import {
   resolvePersistedShellLayoutState,
   writePersistedShellLayoutState
 } from "./components/shell-layout-persistence";
+
+const LazyHomePage = lazy(async () => {
+  const { HomePage } = await import("./pages/HomePage");
+  return { default: HomePage };
+});
+
+const LazySessionsPage = lazy(async () => {
+  const { SessionsPage } = await import("./pages/SessionsPage");
+  return { default: SessionsPage };
+});
+
+const LazyAgentsPage = lazy(async () => {
+  const { AgentsPage } = await import("./pages/AgentsPage");
+  return { default: AgentsPage };
+});
+
+const LazyCodexPage = lazy(async () => {
+  const { CodexPage } = await import("./pages/CodexPage");
+  return { default: CodexPage };
+});
+
+const LazySkillsPage = lazy(async () => {
+  const { SkillsPage } = await import("./pages/SkillsPage");
+  return { default: SkillsPage };
+});
+
+const LazySettingsPage = lazy(async () => {
+  const { SettingsPage } = await import("./pages/SettingsPage");
+  return { default: SettingsPage };
+});
 
 function resolvePage(): StudioPageId {
   const route = window.location.hash.replace("#", "");
@@ -365,7 +389,7 @@ function renderPage(
       );
     case "home":
       return (
-        <HomePage
+        <LazyHomePage
           state={data}
           focusedSlotId={focusedSlot.focusedSlotId}
           onFocusedSlotChange={focusedSlot.onFocusedSlotChange}
@@ -374,12 +398,12 @@ function renderPage(
         />
       );
     case "sessions":
-      return <SessionsPage sessions={data.sessions} />;
+      return <LazySessionsPage sessions={data.sessions} />;
     case "agents":
-      return <AgentsPage agents={data.agents} />;
+      return <LazyAgentsPage agents={data.agents} />;
     case "codex":
       return (
-        <CodexPage
+        <LazyCodexPage
           summary={data.codex.summary}
           stats={data.codex.stats}
           tasks={data.codex.tasks}
@@ -393,7 +417,7 @@ function renderPage(
       );
     case "skills":
       return (
-        <SkillsPage
+        <LazySkillsPage
           skills={data.skills}
           boundary={data.boundary}
           focusedSlotId={focusedSlot.focusedSlotId}
@@ -403,7 +427,7 @@ function renderPage(
       );
     case "settings":
       return (
-        <SettingsPage
+        <LazySettingsPage
           settings={data.settings}
           windowing={data.windowing}
           releaseApprovalPipeline={data.boundary.hostExecutor.releaseApprovalPipeline}
@@ -411,6 +435,22 @@ function renderPage(
         />
       );
   }
+}
+
+function PageLoadingState() {
+  return (
+    <section className="page">
+      <article className="surface card">
+        <div className="card-header card-header--stack">
+          <div>
+            <p className="eyebrow">Route Transition</p>
+            <h2>Loading page</h2>
+          </div>
+          <p>Studio is loading the selected route into the current local-only shell.</p>
+        </div>
+      </article>
+    </section>
+  );
 }
 
 export function App() {
@@ -2424,16 +2464,18 @@ export function App() {
             </div>
           </section>
 
-          {renderPage(
-            activePage,
-            data,
-            {
-              focusedSlotId: resolvedFocusSlotId,
-              onFocusedSlotChange: setFocusedSlotId
-            },
-            commandPanel,
-            windowingSurface
-          )}
+          <Suspense fallback={<PageLoadingState />}>
+            {renderPage(
+              activePage,
+              data,
+              {
+                focusedSlotId: resolvedFocusSlotId,
+                onFocusedSlotChange: setFocusedSlotId
+              },
+              commandPanel,
+              windowingSurface
+            )}
+          </Suspense>
         </main>
 
         {resolvedLayoutState.rightRailVisible ? (

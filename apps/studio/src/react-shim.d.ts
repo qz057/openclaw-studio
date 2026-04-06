@@ -9,9 +9,13 @@ declare module "react" {
 
   export function useEffect(effect: () => void | (() => void), deps?: unknown[]): void;
   export function useState<S>(initialState: S | (() => S)): [S, Dispatch<SetStateAction<S>>];
+  export function lazy<T extends FunctionComponent<any>>(factory: () => Promise<{ default: T }>): T;
+  export const Suspense: FunctionComponent<{ fallback?: ReactNode }>;
 
   const React: {
     StrictMode: FunctionComponent;
+    Suspense: typeof Suspense;
+    lazy: typeof lazy;
   };
 
   export default React;

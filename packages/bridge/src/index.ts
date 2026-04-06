@@ -1,14 +1,10 @@
-import {
-  mockShellState,
-  type CodexTaskSummary,
-  type SessionSummary,
-  type StudioApi,
-  type StudioHostBridgeState,
-  type StudioHostExecutorState,
-  type StudioHostPreviewHandoff,
-  type StudioRuntimeActionResult,
-  type StudioRuntimeDetail,
-  type StudioShellState
+import type {
+  StudioApi,
+  StudioHostBridgeState,
+  StudioHostPreviewHandoff,
+  StudioRuntimeActionResult,
+  StudioRuntimeDetail,
+  StudioShellState
 } from "@openclaw/shared";
 
 declare global {
@@ -17,57 +13,38 @@ declare global {
   }
 }
 
-const fallbackApi: StudioApi = {
-  async getShellState(): Promise<StudioShellState> {
-    return mockShellState;
-  },
-  async listSessions(): Promise<SessionSummary[]> {
-    return mockShellState.sessions;
-  },
-  async listCodexTasks(): Promise<CodexTaskSummary[]> {
-    return mockShellState.codex.tasks;
-  },
-  async getHostExecutorState(): Promise<StudioHostExecutorState> {
-    return mockShellState.boundary.hostExecutor;
-  },
-  async getHostBridgeState(): Promise<StudioHostBridgeState> {
-    return mockShellState.boundary.hostExecutor.bridge;
-  },
-  async handoffHostPreview(): Promise<StudioHostPreviewHandoff | null> {
-    return null;
-  },
-  async getRuntimeItemDetail(): Promise<StudioRuntimeDetail | null> {
-    return null;
-  },
-  async runRuntimeItemAction(): Promise<StudioRuntimeActionResult | null> {
-    return null;
-  }
-};
+let fallbackApiPromise: Promise<StudioApi> | null = null;
 
-export function getStudioApi(): StudioApi {
-  if (typeof window === "undefined") {
-    return fallbackApi;
+async function loadFallbackApi(): Promise<StudioApi> {
+  fallbackApiPromise ??= import("./fallback.js").then(({ createFallbackApi }) => createFallbackApi());
+
+  return fallbackApiPromise;
+}
+
+export async function getStudioApi(): Promise<StudioApi> {
+  if (typeof window !== "undefined" && window.studio) {
+    return window.studio;
   }
 
-  return window.studio ?? fallbackApi;
+  return loadFallbackApi();
 }
 
 export async function loadStudioSnapshot(): Promise<StudioShellState> {
-  return getStudioApi().getShellState();
+  return (await getStudioApi()).getShellState();
 }
 
 export async function loadHostBridgeState(): Promise<StudioHostBridgeState> {
-  return getStudioApi().getHostBridgeState();
+  return (await getStudioApi()).getHostBridgeState();
 }
 
 export async function handoffHostPreview(itemId: string, actionId: string): Promise<StudioHostPreviewHandoff | null> {
-  return getStudioApi().handoffHostPreview(itemId, actionId);
+  return (await getStudioApi()).handoffHostPreview(itemId, actionId);
 }
 
 export async function loadRuntimeItemDetail(itemId: string): Promise<StudioRuntimeDetail | null> {
-  return getStudioApi().getRuntimeItemDetail(itemId);
+  return (await getStudioApi()).getRuntimeItemDetail(itemId);
 }
 
 export async function loadRuntimeItemAction(itemId: string, actionId: string): Promise<StudioRuntimeActionResult | null> {
-  return getStudioApi().runRuntimeItemAction(itemId, actionId);
+  return (await getStudioApi()).runRuntimeItemAction(itemId, actionId);
 }
