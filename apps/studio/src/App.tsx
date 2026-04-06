@@ -779,9 +779,9 @@ export function App() {
     {
       id: "cross-view-slot-release",
       label: "Focused slot -> Release posture",
-      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase52 attestation operator approval execution envelopes`,
+      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase53 attestation operator approval routing contracts`,
       detail:
-        "Focused-slot review and release review now sit in the same local-only approval-envelope, release-decision, and publication-recovery story without enabling host execution, installer work, staged apply entry, cutover execution, or publish rollback."
+        "Focused-slot review and release review now sit in the same local-only approval-routing, release-decision-enforcement, and publication-closeout story without enabling host execution, installer work, staged apply entry, cutover execution, or publish rollback."
     }
   ];
   const inspectorCommandLinkage = [
@@ -810,7 +810,7 @@ export function App() {
       label: "Formal Release Readiness",
       value: "RELEASE-MANIFEST / BUILD-METADATA / REVIEW-MANIFEST",
       detail:
-        "Phase52 keeps the manifest spine and extends settlement packs, signoff sheets, and publication bundles into operator approval execution envelopes, staged release decision records, and publication recovery receipts without executing anything."
+        "Phase53 keeps the manifest spine and extends phase52 approval execution envelopes, staged release decision records, and publication recovery receipts into operator approval routing contracts, staged release decision enforcement contracts, and publication receipt closeout contracts without executing anything."
     },
     {
       id: "release-depth-bundles",
@@ -905,11 +905,11 @@ export function App() {
         "Reconciliation ledgers now feed operator clearance packets, escalation disposition bundles, and release approval attachments without routing any live operator settlement for real."
     },
     {
-      id: "release-depth-attestation-operator-approval-execution-envelopes",
-      label: "Attestation Operator Approval Execution Envelopes",
-      value: "ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES / ATTESTATION-OPERATOR-SETTLEMENT-PACKS",
+      id: "release-depth-attestation-operator-approval-routing-contracts",
+      label: "Attestation Operator Approval Routing Contracts",
+      value: "ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS / ATTESTATION-OPERATOR-SETTLEMENT-PACKS",
       detail:
-        "Settlement packs now feed operator-ready approval packets, execution windows, and release-approval handoff routes without dispatching any live approval or execution for real."
+        "Settlement packs now feed reviewer-ready routing tables, approval windows, and release-approval handoff routes without dispatching any live approval or execution for real."
     },
     {
       id: "release-depth-installer-builders",
@@ -1004,11 +1004,11 @@ export function App() {
         "Closeout journals now feed staged approver sheets, release-ready packets, and go/no-go evidence without applying any promotion for real."
     },
     {
-      id: "release-depth-promotion-staged-apply-release-decision-records",
-      label: "Promotion Staged-apply Release Decision Records",
-      value: "PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS / PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS",
+      id: "release-depth-promotion-staged-apply-release-decision-enforcement-contracts",
+      label: "Promotion Staged-apply Release Decision Enforcement Contracts",
+      value: "PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS / PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS",
       detail:
-        "Signoff sheets now feed staged release go/no-go captures, decision expiry tracks, and publish-route decisions without applying any promotion for real."
+        "Signoff sheets now feed staged release guardrails, enforcement windows, and publish-route contracts without applying any promotion for real."
     },
     {
       id: "release-depth-signing-publish",
@@ -1104,11 +1104,11 @@ export function App() {
         "Outcome reports now feed release-note attachments, publication digests, and rollback publication bundles without mutating any live publish state."
     },
     {
-      id: "release-depth-rollback-cutover-publication-recovery-receipts",
-      label: "Rollback Cutover Publication Recovery Receipts",
-      value: "ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS / ROLLBACK-CUTOVER-PUBLICATION-BUNDLES",
+      id: "release-depth-rollback-cutover-publication-receipt-closeout-contracts",
+      label: "Rollback Cutover Publication Receipt Closeout Contracts",
+      value: "ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS / ROLLBACK-CUTOVER-PUBLICATION-BUNDLES",
       detail:
-        "Publication bundles now feed recovery acknowledgements, publication-closeout receipts, and rollback recovery evidence without mutating any live publish state."
+        "Publication bundles now feed closeout acknowledgements, publication-closeout contracts, and rollback recovery evidence without mutating any live publish state."
     },
     {
       id: "release-depth-approval",
@@ -1127,7 +1127,7 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase52 increases release structure only; it still does not install, publish, sign, issue approval execution envelopes, finalize staged release decisions, receive publication recovery receipts, roll back publish state, or enable host-side execution."
+        "Phase53 increases release structure only; it still does not install, publish, sign, issue approval routing contracts, finalize staged release decisions, receive publication receipt closeout contracts, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -1948,30 +1948,31 @@ export function App() {
               <div className="card-header card-header--stack">
                 <div>
                   <p className="eyebrow">Release Pipeline Depth</p>
-                  <h2>Attestation Operator Approval Execution Envelopes</h2>
+                  <h2>Attestation Operator Approval Routing Contracts</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but the release skeleton now pushes further with attestation
-                  operator approval execution envelopes, promotion staged-apply release decision records, and rollback cutover
-                  publication recovery receipts while staying entirely local-only and non-executing.
+                  The alpha shell still does not build a real installer, but the release skeleton now pushes phase52 approval execution
+                  envelopes, staged release decision records, and publication recovery receipts forward into attestation operator approval
+                  routing contracts, promotion staged-apply release decision enforcement contracts, and rollback cutover publication
+                  receipt closeout contracts while staying entirely local-only and non-executing.
                 </p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
                   <span>Phase</span>
-                  <strong>Phase52</strong>
+                  <strong>Phase53</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Attestation</span>
-                  <strong>Approval envelopes</strong>
+                  <strong>Routing contracts</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Promotion</span>
-                  <strong>Decision records</strong>
+                  <strong>Enforcement contracts</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Rollback</span>
-                  <strong>Recovery receipts</strong>
+                  <strong>Receipt closeout</strong>
                 </div>
               </div>
               <div className="workflow-readiness-list">
