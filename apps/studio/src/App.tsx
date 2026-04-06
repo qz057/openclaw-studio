@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  selectStudioReleaseCloseoutWindow,
-  selectStudioReleaseEscalationWindow,
+  selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseApprovalPipelineStage,
   selectStudioReleaseReviewerQueue,
   selectStudioWindowObservabilityActiveMapping,
@@ -517,11 +516,12 @@ export function App() {
   const hostTraceFocus = resolveHostTraceFocus(data.boundary.hostExecutor, resolvedFocusSlotId);
   const releaseApprovalPipeline = data.boundary.hostExecutor.releaseApprovalPipeline;
   const currentReleaseStage = selectStudioReleaseApprovalPipelineStage(releaseApprovalPipeline);
+  const currentDeliveryStage = selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, currentReleaseStage);
+  const publishDeliveryStage = selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, "delivery-chain-publish-decision");
+  const rollbackDeliveryStage = selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, "delivery-chain-rollback-readiness");
   const currentReviewerQueue = selectStudioReleaseReviewerQueue(releaseApprovalPipeline, currentReleaseStage);
   const currentDecisionHandoff = releaseApprovalPipeline.decisionHandoff;
-  const currentEscalationWindow = selectStudioReleaseEscalationWindow(releaseApprovalPipeline, currentReleaseStage);
   const currentEvidenceCloseout = releaseApprovalPipeline.evidenceCloseout;
-  const currentCloseoutWindow = selectStudioReleaseCloseoutWindow(releaseApprovalPipeline, currentReleaseStage);
   const dockItems = createDockItems(hostTraceFocus);
   const activePageMeta = data.pages.find((page) => page.id === activePage) ?? {
     id: activePage,
@@ -933,7 +933,35 @@ export function App() {
       label: "Formal Release Readiness",
       value: "RELEASE-MANIFEST / BUILD-METADATA / REVIEW-MANIFEST",
       detail:
-        "Phase58 keeps the manifest spine and turns the approval pipeline into a clearer operator review loop with explicit board ownership, reviewer queues, acknowledgement state, escalation windows, closeout windows, and cross-window shared-state review without executing anything."
+        "Phase58 keeps the manifest spine and now layers a clearer review-only delivery chain on top of the operator review loop, so board ownership, queues, acknowledgement timing, delivery stages, and cross-window review posture stay linked without executing anything."
+    },
+    {
+      id: "release-depth-delivery-chain",
+      label: "Review-only Delivery Chain",
+      value: currentDeliveryStage ? `${currentDeliveryStage.label} / ${currentDeliveryStage.phase}` : "Unavailable",
+      detail:
+        "The active board now resolves into a typed delivery-chain stage, so attestation intake, operator review, promotion readiness, publish gating, and rollback readiness read like one delivery workflow instead of a disconnected artifact tail."
+    },
+    {
+      id: "release-depth-promotion-flow",
+      label: "Promotion Review Flow",
+      value: "promotion readiness / staged apply closeout",
+      detail:
+        "Promotion evidence, apply readiness, checkpoints, staged apply ledgers, command sheets, confirmation ledgers, closeout journals, signoff sheets, and decision-enforcement lifecycle now sit in one explicit promotion review path."
+    },
+    {
+      id: "release-depth-publish-flow",
+      label: "Publish Review Flow",
+      value: publishDeliveryStage ? `${publishDeliveryStage.label} / ${publishDeliveryStage.status}` : "Unavailable",
+      detail:
+        "Signing metadata, notarization plan, signing-publish handshakes, release notes, publish gates, and promotion gates now read like one publish-facing decision gate."
+    },
+    {
+      id: "release-depth-rollback-flow",
+      label: "Rollback Review Flow",
+      value: rollbackDeliveryStage ? `${rollbackDeliveryStage.label} / ${rollbackDeliveryStage.status}` : "Unavailable",
+      detail:
+        "Publish rollback handshake, recovery ledgers, rehearsal drillbooks, live-readiness contracts, cutover records, outcome reports, and receipt settlement closeout now read like one recovery-facing review path."
     },
     {
       id: "release-depth-operator-review-board",
@@ -1314,7 +1342,7 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase58 increases release review and cross-window coordination structure only; it still does not install, publish, sign, orchestrate live approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
+        "Phase58 slice 3 deepens delivery-chain structure only; it still does not install, publish, sign, orchestrate live approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -2135,13 +2163,12 @@ export function App() {
               <div className="card-header card-header--stack">
                 <div>
                   <p className="eyebrow">Release Pipeline Depth</p>
-                  <h2>Review-only Operator Review Board</h2>
+                  <h2>Review-only Delivery Chain</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but phase58 now exposes operator board ownership, reviewer queues,
-                  acknowledgement state, escalation windows, closeout windows, decision handoff posture, evidence closeout, staged release
-                  decision lifecycle, rollback settlement closeout, the final release-decision gate, and the cross-window shared-state review
-                  layer as one local-only non-executing surface.
+                  The alpha shell still does not build a real installer, but phase58 slice 3 now exposes operator board ownership, reviewer
+                  queues, acknowledgement state, delivery-chain stages, promotion review flow, publish gating, rollback readiness, and the
+                  cross-window shared-state review layer as one local-only non-executing surface.
                 </p>
               </div>
               <div className="foundation-card__metrics">
@@ -2150,8 +2177,12 @@ export function App() {
                   <strong>Phase58</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Current board</span>
-                  <strong>{currentReleaseStage?.label ?? "Unavailable"}</strong>
+                  <span>Delivery stage</span>
+                  <strong>{currentDeliveryStage?.label ?? "Unavailable"}</strong>
+                </div>
+                <div className="foundation-pill">
+                  <span>Delivery phase</span>
+                  <strong>{currentDeliveryStage?.phase ?? "Unavailable"}</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Reviewer queue</span>
@@ -2162,44 +2193,42 @@ export function App() {
                   <strong>{currentReviewerQueue?.acknowledgementState ?? "Unavailable"}</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Decision handoff</span>
-                  <strong>{currentDecisionHandoff.batonState}</strong>
+                  <span>Publish gate</span>
+                  <strong>{publishDeliveryStage?.status ?? "Unavailable"}</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Escalation</span>
-                  <strong>{currentEscalationWindow?.state ?? "Unavailable"}</strong>
+                  <span>Rollback stage</span>
+                  <strong>{rollbackDeliveryStage?.status ?? "Unavailable"}</strong>
+                </div>
+                <div className="foundation-pill">
+                  <span>Decision handoff</span>
+                  <strong>{currentDecisionHandoff.batonState}</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Evidence closeout</span>
                   <strong>{currentEvidenceCloseout.sealingState}</strong>
                 </div>
-                <div className="foundation-pill">
-                  <span>Closeout window</span>
-                  <strong>{currentCloseoutWindow?.state ?? "Unavailable"}</strong>
-                </div>
               </div>
               <div className="workflow-readiness-list">
                 <div className="workflow-readiness-line workflow-readiness-line--neutral">
-                  <span>Review packet</span>
-                  <strong>{currentReleaseStage?.packet.label ?? "Unavailable"}</strong>
+                  <span>Current board</span>
+                  <strong>{currentReleaseStage?.label ?? "Unavailable"}</strong>
                 </div>
                 <div className="workflow-readiness-line workflow-readiness-line--neutral">
                   <span>Queue ownership</span>
                   <strong>{currentReviewerQueue ? `${currentReviewerQueue.owner} / ${currentReviewerQueue.status}` : "Unavailable"}</strong>
                 </div>
                 <div className="workflow-readiness-line workflow-readiness-line--neutral">
-                  <span>Baton posture</span>
-                  <strong>{currentDecisionHandoff.sourceOwner} -&gt; {currentDecisionHandoff.targetOwner}</strong>
+                  <span>Promotion path</span>
+                  <strong>{releaseApprovalPipeline.deliveryChain.promotionStageIds.length} linked stage</strong>
                 </div>
                 <div className="workflow-readiness-line workflow-readiness-line--warning">
-                  <span>Escalation / closeout</span>
-                  <strong>
-                    {currentEscalationWindow?.deadlineLabel ?? "Unavailable"} / {currentCloseoutWindow?.deadlineLabel ?? "Unavailable"}
-                  </strong>
+                  <span>Publish / rollback</span>
+                  <strong>{publishDeliveryStage?.label ?? "Unavailable"} / {rollbackDeliveryStage?.label ?? "Unavailable"}</strong>
                 </div>
                 <div className="workflow-readiness-line workflow-readiness-line--warning">
                   <span>Blocked by</span>
-                  <strong>{releaseApprovalPipeline.blockedBy.length} gates</strong>
+                  <strong>{releaseApprovalPipeline.deliveryChain.blockedBy.length} chain blockers</strong>
                 </div>
               </div>
               <div className="workflow-readiness-list">
@@ -2218,7 +2247,7 @@ export function App() {
             windowing={data.windowing}
             eyebrow="Phase58"
             title="Operator Review Board"
-            summary="The same review-only release pipeline now reads like an operator board with explicit stage ownership, review packets, reviewer queues, acknowledgement state, escalation windows, closeout windows, evidence sealing, reviewer notes, review posture ownership, and cross-links back into windows and trace."
+            summary="The same review-only release pipeline now reads like an operator board inside a fuller delivery chain, with explicit stage ownership, review packets, reviewer queues, acknowledgement state, delivery-stage posture, escalation windows, closeout windows, evidence sealing, reviewer notes, review posture ownership, and cross-links back into windows and trace."
           />
 
           <section className="surface card window-workbench">

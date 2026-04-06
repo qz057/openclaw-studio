@@ -7,7 +7,7 @@ const APP_NAME = "OpenClaw Studio";
 const PHASE_ID = "phase58";
 const PHASE_TITLE = "Phase58";
 const PHASE_MILESTONE =
-  "phase58 operator review loop / reviewer queues / acknowledgement state / escalation windows / closeout windows / deeper cross-window observability / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout";
+  "phase58 review-only delivery chain / operator review loop / reviewer queues / acknowledgement state / escalation windows / closeout windows / deeper cross-window observability / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout";
 const RELEASE_CHANNEL = "alpha";
 const PACKAGE_ID = "openclaw-studio-alpha-shell";
 const PACKAGE_KIND = "alpha-shell-release-skeleton";
@@ -24,12 +24,13 @@ const CURRENT_DELIVERY_SURFACES = [
   "built renderer bundle copied into artifacts/renderer",
   "built Electron bundle copied into artifacts/electron",
   "review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase58 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything",
+  "review-only delivery chain linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, and rollback readiness into one staged local-only workflow without executing anything",
   "deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references",
   "deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, review-posture ownership, and inspector-command linkage",
   "persisted shell layout foundation backed by localStorage",
   "cross-window coordination board with explicit window roster, shared-state lanes, orchestration boards, review-posture ownership maps, sync health, ownership, last handoff, route/workspace intent links, focused-slot linkage, and local-only blockers",
   "release manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged app materialization skeleton / packaged app directory materialization / packaged app staged output skeleton / packaged app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / attestation apply audit packs / attestation apply execution packets / attestation operator worklists / attestation operator dispatch manifests / attestation operator dispatch packets / attestation operator dispatch receipts / attestation operator reconciliation ledgers / attestation operator settlement packs / attestation operator approval routing contracts / attestation operator approval orchestration / operator review board / release decision handoff / review evidence closeout / installer targets / installer-target builder skeleton / installer builder execution skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / promotion apply readiness / promotion apply manifests / promotion execution checkpoints / promotion operator handoff rails / promotion staged-apply ledgers / promotion staged-apply runsheets / promotion staged-apply command sheets / promotion staged-apply confirmation ledgers / promotion staged-apply closeout journals / promotion staged-apply signoff sheets / promotion staged-apply release decision enforcement contracts / promotion staged-apply release decision enforcement lifecycle / signing-ready metadata / signing-publish pipeline / signing-publish gating handshake / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / rollback recovery ledger / rollback execution rehearsal ledger / rollback operator drillbooks / rollback live-readiness contracts / rollback cutover readiness maps / rollback cutover handoff plans / rollback cutover execution checklists / rollback cutover execution records / rollback cutover outcome reports / rollback cutover publication bundles / rollback cutover publication receipt closeout contracts / rollback cutover publication receipt settlement closeout / release approval workflow / release notes / publish gates / promotion gates under release/",
-  "docs closeout: README / HANDOFF / IMPLEMENTATION-PLAN / PACKAGE-README / RELEASE-SUMMARY / REVIEW-MANIFEST / BUNDLE-MATRIX / BUNDLE-ASSEMBLY / PACKAGED-APP-DIRECTORY-SKELETON / PACKAGED-APP-MATERIALIZATION-SKELETON / PACKAGED-APP-DIRECTORY-MATERIALIZATION / PACKAGED-APP-STAGED-OUTPUT-SKELETON.json / PACKAGED-APP-BUNDLE-SEALING-SKELETON.json / SEALED-BUNDLE-INTEGRITY-CONTRACT.json / INTEGRITY-ATTESTATION-EVIDENCE.json / ATTESTATION-VERIFICATION-PACKS.json / ATTESTATION-APPLY-AUDIT-PACKS.json / ATTESTATION-APPLY-EXECUTION-PACKETS.json / ATTESTATION-OPERATOR-WORKLISTS.json / ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json / ATTESTATION-OPERATOR-DISPATCH-PACKETS.json / ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json / ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json / ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json / ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json / ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json / OPERATOR-REVIEW-BOARD.json / RELEASE-DECISION-HANDOFF.json / REVIEW-EVIDENCE-CLOSEOUT.json / INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON / INSTALLER-BUILDER-EXECUTION-SKELETON / INSTALLER-BUILDER-ORCHESTRATION.json / INSTALLER-CHANNEL-ROUTING.json / CHANNEL-PROMOTION-EVIDENCE.json / PROMOTION-APPLY-READINESS.json / PROMOTION-APPLY-MANIFESTS.json / PROMOTION-EXECUTION-CHECKPOINTS.json / PROMOTION-OPERATOR-HANDOFF-RAILS.json / PROMOTION-STAGED-APPLY-LEDGERS.json / PROMOTION-STAGED-APPLY-RUNSHEETS.json / PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json / PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json / PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json / PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json / PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json / PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json / SIGNING-METADATA / NOTARIZATION-PLAN / SIGNING-PUBLISH-PIPELINE / SIGNING-PUBLISH-GATING-HANDSHAKE / SIGNING-PUBLISH-APPROVAL-BRIDGE.json / SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json / PUBLISH-ROLLBACK-HANDSHAKE.json / ROLLBACK-RECOVERY-LEDGER.json / ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json / ROLLBACK-OPERATOR-DRILLBOOKS.json / ROLLBACK-LIVE-READINESS-CONTRACTS.json / ROLLBACK-CUTOVER-READINESS-MAPS.json / ROLLBACK-CUTOVER-HANDOFF-PLANS.json / ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json / ROLLBACK-CUTOVER-EXECUTION-RECORDS.json / ROLLBACK-CUTOVER-OUTCOME-REPORTS.json / ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json / ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json / ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json / RELEASE-APPROVAL-WORKFLOW / RELEASE-NOTES / PUBLISH-GATES / PROMOTION-GATES",
+  "docs closeout: README / HANDOFF / IMPLEMENTATION-PLAN / PACKAGE-README / RELEASE-SUMMARY / REVIEW-MANIFEST / BUNDLE-MATRIX / BUNDLE-ASSEMBLY / PACKAGED-APP-DIRECTORY-SKELETON / PACKAGED-APP-MATERIALIZATION-SKELETON / PACKAGED-APP-DIRECTORY-MATERIALIZATION / PACKAGED-APP-STAGED-OUTPUT-SKELETON.json / PACKAGED-APP-BUNDLE-SEALING-SKELETON.json / SEALED-BUNDLE-INTEGRITY-CONTRACT.json / INTEGRITY-ATTESTATION-EVIDENCE.json / ATTESTATION-VERIFICATION-PACKS.json / ATTESTATION-APPLY-AUDIT-PACKS.json / ATTESTATION-APPLY-EXECUTION-PACKETS.json / ATTESTATION-OPERATOR-WORKLISTS.json / ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json / ATTESTATION-OPERATOR-DISPATCH-PACKETS.json / ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json / ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json / ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json / ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json / ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json / REVIEW-ONLY-DELIVERY-CHAIN.json / OPERATOR-REVIEW-BOARD.json / RELEASE-DECISION-HANDOFF.json / REVIEW-EVIDENCE-CLOSEOUT.json / INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON / INSTALLER-BUILDER-EXECUTION-SKELETON / INSTALLER-BUILDER-ORCHESTRATION.json / INSTALLER-CHANNEL-ROUTING.json / CHANNEL-PROMOTION-EVIDENCE.json / PROMOTION-APPLY-READINESS.json / PROMOTION-APPLY-MANIFESTS.json / PROMOTION-EXECUTION-CHECKPOINTS.json / PROMOTION-OPERATOR-HANDOFF-RAILS.json / PROMOTION-STAGED-APPLY-LEDGERS.json / PROMOTION-STAGED-APPLY-RUNSHEETS.json / PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json / PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json / PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json / PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json / PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json / PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json / SIGNING-METADATA / NOTARIZATION-PLAN / SIGNING-PUBLISH-PIPELINE / SIGNING-PUBLISH-GATING-HANDSHAKE / SIGNING-PUBLISH-APPROVAL-BRIDGE.json / SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json / PUBLISH-ROLLBACK-HANDSHAKE.json / ROLLBACK-RECOVERY-LEDGER.json / ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json / ROLLBACK-OPERATOR-DRILLBOOKS.json / ROLLBACK-LIVE-READINESS-CONTRACTS.json / ROLLBACK-CUTOVER-READINESS-MAPS.json / ROLLBACK-CUTOVER-HANDOFF-PLANS.json / ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json / ROLLBACK-CUTOVER-EXECUTION-RECORDS.json / ROLLBACK-CUTOVER-OUTCOME-REPORTS.json / ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json / ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json / ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json / RELEASE-APPROVAL-WORKFLOW / RELEASE-NOTES / PUBLISH-GATES / PROMOTION-GATES",
   "placeholder installer explainer script that never installs anything"
 ];
 const FORMAL_INSTALLER_GAPS = [
@@ -150,6 +151,7 @@ const FORMAL_RELEASE_ARTIFACTS = [
   "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
   "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
   "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+  "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
   "release/OPERATOR-REVIEW-BOARD.json",
   "release/RELEASE-DECISION-HANDOFF.json",
   "release/REVIEW-EVIDENCE-CLOSEOUT.json",
@@ -217,6 +219,7 @@ const RELEASE_PIPELINE_STAGES = [
   "attestation-operator-settlement-packs",
   "attestation-operator-approval-routing-contracts",
   "attestation-operator-approval-orchestration",
+  "review-only-delivery-chain",
   "operator-review-board",
   "release-decision-handoff",
   "review-evidence-closeout",
@@ -528,6 +531,12 @@ function buildGeneratedDocs() {
       id: "attestation-operator-approval-orchestration",
       label: "Attestation operator approval orchestration",
       outputPath: "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+      generated: true
+    },
+    {
+      id: "review-only-delivery-chain",
+      label: "Review-only delivery chain",
+      outputPath: "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
       generated: true
     },
     {
@@ -965,6 +974,7 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
     "- 再看 `release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json`",
     "- 再看 `release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json`",
     "- 再看 `release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json`",
+    "- 再看 `release/REVIEW-ONLY-DELIVERY-CHAIN.json`",
     "- 再看 `release/OPERATOR-REVIEW-BOARD.json`",
     "- 再看 `release/RELEASE-DECISION-HANDOFF.json`",
     "- 再看 `release/REVIEW-EVIDENCE-CLOSEOUT.json`",
@@ -1062,6 +1072,7 @@ function renderReleaseChecklist() {
     "- `release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json` 必须列出 attestation operator settlement packs metadata",
     "- `release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json` 必须列出 attestation operator approval routing contracts metadata",
     "- `release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json` 必须列出 attestation operator approval orchestration metadata",
+    "- `release/REVIEW-ONLY-DELIVERY-CHAIN.json` 必须列出 review-only delivery chain metadata",
     "- `release/OPERATOR-REVIEW-BOARD.json` 必须列出 operator review board metadata",
     "- `release/RELEASE-DECISION-HANDOFF.json` 必须列出 release decision handoff metadata",
     "- `release/REVIEW-EVIDENCE-CLOSEOUT.json` 必须列出 review evidence closeout metadata",
@@ -1152,6 +1163,7 @@ function renderReleaseNotes({ generatedAt }) {
     `Milestone: ${PHASE_MILESTONE}`,
     "",
     "## Highlights",
+    "- review-only delivery chain now groups operator review, promotion readiness, publish gating, and rollback readiness into one staged workflow so downstream release posture feels like a delivery chain instead of a disconnected list of files",
     "- operator review board now turns the earlier review-only approval pipeline into a clearer operator-facing loop with explicit stage ownership, reviewer queues, acknowledgement state, and cross-links back into trace and window review surfaces",
     "- release decision handoff now keeps the reviewer baton explicit between approval, lifecycle, rollback, and final decision stages while surfacing acknowledgement state and escalation windows without enabling any live signing, publish, or host-side execution",
     "- review evidence closeout now exposes sealing state, sealed evidence, pending evidence, closeout windows, and reviewer notes as first-class local-only review artifacts instead of burying closeout posture inside larger release metadata",
@@ -1205,6 +1217,7 @@ function buildReviewManifest({ generatedAt, artifactGroups, allDocs }) {
         { id: "pipeline-attestation-operator-settlement-packs", label: "Attestation operator settlement packs", status: "ready", detail: "Reconciliation ledgers now feed operator clearance packets, escalation disposition bundles, and approval attachments without routing any live operator settlement for real." },
         { id: "pipeline-attestation-operator-approval-routing-contracts", label: "Attestation operator approval routing contracts", status: "ready", detail: "Settlement packs now feed reviewer-ready routing tables, approval windows, and approval handoff routes without dispatching any live approval or execution for real." },
         { id: "pipeline-attestation-operator-approval-orchestration", label: "Attestation operator approval orchestration", status: "ready", detail: "Approval routing contracts now feed reviewer baton sequencing, quorum timing, and orchestration closeout paths without dispatching any live approval or execution for real." },
+        { id: "pipeline-review-only-delivery-chain", label: "Review-only delivery chain", status: "ready", detail: "Operator review board, decision handoff, evidence closeout, promotion readiness, publish gating, and rollback readiness now read like one staged delivery workflow without executing anything." },
         { id: "pipeline-installer-builders", label: "Installer-target builder skeleton", status: "ready", detail: "Installer targets still map cleanly to per-platform builder identities without invoking a real builder." },
         { id: "pipeline-installer-builder-execution", label: "Installer builder execution skeleton", status: "ready", detail: "Future builder commands, environment, outputs, and review checks are now declared without executing any builder." },
         { id: "pipeline-installer-builder-orchestration", label: "Installer builder orchestration", status: "ready", detail: "Builder execution skeletons now sit inside per-platform orchestration flows without invoking any real builder." },
@@ -7275,6 +7288,7 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
     gatingHandshakePath: "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
     approvalBridgePath: "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
     promotionHandshakePath: "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+    reviewOnlyDeliveryChainPath: "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
     operatorReviewBoardPath: "release/OPERATOR-REVIEW-BOARD.json",
     releaseDecisionHandoffPath: "release/RELEASE-DECISION-HANDOFF.json",
     reviewEvidenceCloseoutPath: "release/REVIEW-EVIDENCE-CLOSEOUT.json",
@@ -7445,6 +7459,247 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
   };
 }
 
+function buildReviewOnlyDeliveryChain({ generatedAt }) {
+  return {
+    schemaVersion: "openclaw-studio-review-only-delivery-chain/v1",
+    generatedAt,
+    phase: PHASE_ID,
+    mode: "local-only-review",
+    title: "Review-only Delivery Chain",
+    summary:
+      "Operator review board, promotion readiness, publish decision gates, and rollback readiness are grouped into one staged local-only delivery workflow.",
+    activeStageId: "delivery-chain-operator-review",
+    operatorReviewBoardPath: "release/OPERATOR-REVIEW-BOARD.json",
+    releaseDecisionHandoffPath: "release/RELEASE-DECISION-HANDOFF.json",
+    reviewEvidenceCloseoutPath: "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+    paths: {
+      promotionStageIds: ["delivery-chain-promotion-readiness"],
+      publishStageIds: ["delivery-chain-publish-decision"],
+      rollbackStageIds: ["delivery-chain-rollback-readiness"]
+    },
+    stages: [
+      {
+        id: "delivery-chain-attestation-intake",
+        label: "Attestation intake",
+        phase: "attestation",
+        status: "ready",
+        owner: "release-engineering",
+        posture: "manifest spine sealed for operator pickup",
+        summary: "Manifest, audit, and attestation evidence start the delivery chain from a typed intake packet instead of scattered files.",
+        pipelineStageId: "stage-attestation-intake",
+        reviewerQueueId: "reviewer-queue-attestation-intake",
+        decisionHandoffId: "decision-handoff-attestation-intake",
+        evidenceCloseoutId: "evidence-closeout-attestation-intake",
+        escalationWindowId: "escalation-window-attestation-intake",
+        closeoutWindowId: "closeout-window-attestation-intake",
+        upstreamStageIds: [],
+        downstreamStageIds: ["delivery-chain-operator-review"],
+        artifactGroups: [
+          {
+            id: "delivery-chain-attestation-manifest",
+            label: "Manifest spine",
+            summary: "Manifest and review docs establish the intake boundary before reviewer routing starts.",
+            artifacts: ["release/RELEASE-MANIFEST.json", "release/BUILD-METADATA.json", "release/REVIEW-MANIFEST.json"]
+          },
+          {
+            id: "delivery-chain-attestation-evidence",
+            label: "Attestation intake evidence",
+            summary: "Verification packs and apply-audit packs stay bundled as one review-only intake envelope.",
+            artifacts: ["release/ATTESTATION-VERIFICATION-PACKS.json", "release/ATTESTATION-APPLY-AUDIT-PACKS.json"]
+          }
+        ],
+        blockedBy: ["intake acknowledgement remains metadata-only", "host-side execution remains disabled"]
+      },
+      {
+        id: "delivery-chain-operator-review",
+        label: "Operator review",
+        phase: "review",
+        status: "in-review",
+        owner: "release-manager",
+        posture: "active reviewer queue / acknowledgement pending",
+        summary: "The active board now sits inside a wider delivery chain so reviewer ownership maps to a named delivery stage instead of stopping at the operator loop.",
+        pipelineStageId: "stage-approval-orchestration",
+        reviewerQueueId: "reviewer-queue-approval-orchestration",
+        decisionHandoffId: "decision-handoff-approval-orchestration",
+        evidenceCloseoutId: "evidence-closeout-approval-orchestration",
+        escalationWindowId: "escalation-window-approval-orchestration",
+        closeoutWindowId: "closeout-window-approval-orchestration",
+        upstreamStageIds: ["delivery-chain-attestation-intake"],
+        downstreamStageIds: ["delivery-chain-promotion-readiness"],
+        artifactGroups: [
+          {
+            id: "delivery-chain-review-board",
+            label: "Board / handoff / closeout",
+            summary: "Board posture, baton posture, and evidence closeout stay grouped as one delivery checkpoint.",
+            artifacts: [
+              "release/OPERATOR-REVIEW-BOARD.json",
+              "release/RELEASE-DECISION-HANDOFF.json",
+              "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+              "release/RELEASE-APPROVAL-WORKFLOW.json"
+            ]
+          },
+          {
+            id: "delivery-chain-review-routing",
+            label: "Approval routing",
+            summary: "Approval routing contracts and orchestration packs anchor reviewer ownership and queue timing.",
+            artifacts: [
+              "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
+              "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json"
+            ]
+          }
+        ],
+        blockedBy: [
+          "product-owner acknowledgement remains metadata-only",
+          "signing-publish gating handshake remains blocked",
+          "host-side execution remains disabled"
+        ]
+      },
+      {
+        id: "delivery-chain-promotion-readiness",
+        label: "Promotion readiness",
+        phase: "promotion",
+        status: "planned",
+        owner: "product-owner",
+        posture: "promotion path declared / staged apply still review-only",
+        summary: "Promotion evidence, apply manifests, staged apply closeout, and enforcement lifecycle are grouped as one promotion-review stage.",
+        pipelineStageId: "stage-lifecycle-enforcement",
+        reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
+        decisionHandoffId: "decision-handoff-lifecycle-enforcement",
+        evidenceCloseoutId: "evidence-closeout-lifecycle-enforcement",
+        escalationWindowId: "escalation-window-lifecycle-enforcement",
+        closeoutWindowId: "closeout-window-lifecycle-enforcement",
+        upstreamStageIds: ["delivery-chain-operator-review"],
+        downstreamStageIds: ["delivery-chain-publish-decision", "delivery-chain-rollback-readiness"],
+        artifactGroups: [
+          {
+            id: "delivery-chain-promotion-preflight",
+            label: "Promotion preflight",
+            summary: "Promotion evidence, apply readiness, manifests, checkpoints, and handoff rails define the pre-cutover review path.",
+            artifacts: [
+              "release/CHANNEL-PROMOTION-EVIDENCE.json",
+              "release/PROMOTION-APPLY-READINESS.json",
+              "release/PROMOTION-APPLY-MANIFESTS.json",
+              "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
+              "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json"
+            ]
+          },
+          {
+            id: "delivery-chain-promotion-closeout",
+            label: "Staged apply closeout",
+            summary: "Staged ledgers, runsheets, confirmations, signoffs, and enforcement lifecycle now read as one promotion-closeout path.",
+            artifacts: [
+              "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
+              "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json",
+              "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
+              "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
+              "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
+              "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+              "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+              "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+            ]
+          }
+        ],
+        blockedBy: ["promotion staged apply remains metadata-only", "approval closeout still blocks downstream acknowledgement"]
+      },
+      {
+        id: "delivery-chain-rollback-readiness",
+        label: "Rollback readiness",
+        phase: "rollback",
+        status: "planned",
+        owner: "runtime-owner",
+        posture: "rollback rehearsal visible / settlement still overdue",
+        summary: "Rollback handshake, rehearsal, cutover records, and receipt settlement closeout are grouped as one recovery-facing review stage.",
+        pipelineStageId: "stage-rollback-settlement",
+        reviewerQueueId: "reviewer-queue-rollback-settlement",
+        decisionHandoffId: "decision-handoff-rollback-settlement",
+        evidenceCloseoutId: "evidence-closeout-rollback-settlement",
+        escalationWindowId: "escalation-window-rollback-settlement",
+        closeoutWindowId: "closeout-window-rollback-settlement",
+        upstreamStageIds: ["delivery-chain-promotion-readiness"],
+        downstreamStageIds: ["delivery-chain-publish-decision"],
+        artifactGroups: [
+          {
+            id: "delivery-chain-rollback-recovery",
+            label: "Recovery posture",
+            summary: "Rollback handshake, recovery ledgers, rehearsal, drillbooks, and live-readiness checks define the recovery backbone.",
+            artifacts: [
+              "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+              "release/ROLLBACK-RECOVERY-LEDGER.json",
+              "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
+              "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
+              "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json"
+            ]
+          },
+          {
+            id: "delivery-chain-rollback-cutover",
+            label: "Cutover closeout",
+            summary: "Cutover readiness, execution, outcome reporting, publication bundles, and receipt settlement stay bundled as one rollback review path.",
+            artifacts: [
+              "release/ROLLBACK-CUTOVER-READINESS-MAPS.json",
+              "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
+              "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
+              "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
+              "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
+              "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+              "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
+              "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+            ]
+          }
+        ],
+        blockedBy: ["rollback publication remains review-only", "final decision board remains blocked"]
+      },
+      {
+        id: "delivery-chain-publish-decision",
+        label: "Publish decision gate",
+        phase: "publish",
+        status: "blocked",
+        owner: "release-manager",
+        posture: "signing / publish gates still metadata-only",
+        summary: "Signing metadata, publish gates, promotion gates, and release notes now read like one blocked publish-facing decision stage.",
+        pipelineStageId: "stage-final-release-decision",
+        reviewerQueueId: "reviewer-queue-final-release-decision",
+        decisionHandoffId: "decision-handoff-final-release-decision",
+        evidenceCloseoutId: "evidence-closeout-final-release-decision",
+        escalationWindowId: "escalation-window-final-release-decision",
+        closeoutWindowId: "closeout-window-final-release-decision",
+        upstreamStageIds: ["delivery-chain-promotion-readiness", "delivery-chain-rollback-readiness"],
+        downstreamStageIds: [],
+        artifactGroups: [
+          {
+            id: "delivery-chain-publish-signing",
+            label: "Signing / publish handshake",
+            summary: "Signing metadata, notarization, pipeline, approval bridge, and promotion handshake remain explicit publish inputs.",
+            artifacts: [
+              "release/SIGNING-METADATA.json",
+              "release/NOTARIZATION-PLAN.json",
+              "release/SIGNING-PUBLISH-PIPELINE.json",
+              "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+              "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
+              "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json"
+            ]
+          },
+          {
+            id: "delivery-chain-publish-gates",
+            label: "Release gates",
+            summary: "Release notes plus publish and promotion gates make the blocked final decision concrete.",
+            artifacts: ["release/RELEASE-NOTES.md", "release/PUBLISH-GATES.json", "release/PROMOTION-GATES.json"]
+          }
+        ],
+        blockedBy: [
+          "signing-publish gating handshake remains metadata-only",
+          "publish rollback handshake remains metadata-only",
+          "real publish automation remains blocked"
+        ]
+      }
+    ],
+    blockedBy: [
+      "delivery chain remains review-only metadata",
+      "promotion, publish, and rollback execution remain blocked",
+      "host-side execution remains disabled"
+    ]
+  };
+}
+
 function buildOperatorReviewBoard({ generatedAt }) {
   return {
     schemaVersion: "openclaw-studio-operator-review-board/v1",
@@ -7457,6 +7712,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
       posture: "release-manager queue active / acknowledgement pending / review-only handoff",
       activeOwner: "release-manager",
       activeStageId: "stage-approval-orchestration",
+      activeDeliveryChainStageId: "delivery-chain-operator-review",
       activePacketId: "review-packet-approval-orchestration",
       activeReviewerQueueId: "reviewer-queue-approval-orchestration",
       activeAcknowledgementState: "pending",
@@ -7464,6 +7720,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
       activeCloseoutWindowId: "closeout-window-approval-orchestration",
       sharedStateLaneId: "shared-state-lane-trace-review",
       windowId: "window-trace-review",
+      reviewOnlyDeliveryChainPath: "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
       decisionHandoffPath: "release/RELEASE-DECISION-HANDOFF.json",
       evidenceCloseoutPath: "release/REVIEW-EVIDENCE-CLOSEOUT.json"
     },
@@ -7487,6 +7744,12 @@ function buildOperatorReviewBoard({ generatedAt }) {
         detail: "The active baton remains metadata-only and local-only, but reviewer ownership, acknowledgement posture, and next-stage timing are explicit."
       },
       {
+        id: "board-note-delivery-chain",
+        label: "Delivery chain",
+        value: "operator review -> promotion -> publish -> rollback",
+        detail: "The board now points into a dedicated review-only delivery chain artifact instead of stopping at the operator-review loop."
+      },
+      {
         id: "board-note-windows",
         label: "Escalation / closeout windows",
         value: "open / open",
@@ -7499,6 +7762,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         label: "Attestation intake board",
         status: "ready",
         owner: "release-engineering",
+        deliveryChainStageId: "delivery-chain-attestation-intake",
         packetId: "review-packet-attestation-intake",
         reviewerQueueId: "reviewer-queue-attestation-intake",
         handoffId: "decision-handoff-attestation-intake",
@@ -7516,6 +7780,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         label: "Approval orchestration board",
         status: "in-review",
         owner: "release-manager",
+        deliveryChainStageId: "delivery-chain-operator-review",
         packetId: "review-packet-approval-orchestration",
         reviewerQueueId: "reviewer-queue-approval-orchestration",
         handoffId: "decision-handoff-approval-orchestration",
@@ -7535,6 +7800,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         label: "Release decision lifecycle",
         status: "planned",
         owner: "product-owner",
+        deliveryChainStageId: "delivery-chain-promotion-readiness",
         packetId: "review-packet-lifecycle-enforcement",
         reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
         handoffId: "decision-handoff-lifecycle-enforcement",
@@ -7552,6 +7818,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         label: "Rollback settlement closeout",
         status: "planned",
         owner: "runtime-owner",
+        deliveryChainStageId: "delivery-chain-rollback-readiness",
         packetId: "review-packet-rollback-settlement",
         reviewerQueueId: "reviewer-queue-rollback-settlement",
         handoffId: "decision-handoff-rollback-settlement",
@@ -7569,6 +7836,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         label: "Final release decision board",
         status: "blocked",
         owner: "release-manager",
+        deliveryChainStageId: "delivery-chain-publish-decision",
         packetId: "review-packet-final-release-decision",
         reviewerQueueId: "reviewer-queue-final-release-decision",
         handoffId: "decision-handoff-final-release-decision",
@@ -7590,6 +7858,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         status: "handoff-ready",
         owner: "release-engineering",
         acknowledgementState: "acknowledged",
+        deliveryChainStageId: "delivery-chain-attestation-intake",
         stageId: "stage-attestation-intake",
         windowId: "window-shell-main",
         sharedStateLaneId: "shared-state-lane-boundary-review",
@@ -7604,6 +7873,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         status: "active",
         owner: "release-manager",
         acknowledgementState: "pending",
+        deliveryChainStageId: "delivery-chain-operator-review",
         stageId: "stage-approval-orchestration",
         windowId: "window-trace-review",
         sharedStateLaneId: "shared-state-lane-trace-review",
@@ -7619,6 +7889,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         status: "handoff-ready",
         owner: "product-owner",
         acknowledgementState: "blocked",
+        deliveryChainStageId: "delivery-chain-promotion-readiness",
         stageId: "stage-lifecycle-enforcement",
         windowId: "window-review-board",
         sharedStateLaneId: "shared-state-lane-preview-review",
@@ -7633,6 +7904,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         status: "escalated",
         owner: "runtime-owner",
         acknowledgementState: "overdue",
+        deliveryChainStageId: "delivery-chain-rollback-readiness",
         stageId: "stage-rollback-settlement",
         windowId: "window-trace-review",
         sharedStateLaneId: "shared-state-lane-trace-review",
@@ -7647,6 +7919,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         status: "closed",
         owner: "release-manager",
         acknowledgementState: "blocked",
+        deliveryChainStageId: "delivery-chain-publish-decision",
         stageId: "stage-final-release-decision",
         windowId: "window-shell-main",
         sharedStateLaneId: "shared-state-lane-boundary-review",
@@ -7663,6 +7936,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         state: "watch",
         acknowledgementState: "acknowledged",
         owner: "release-engineering",
+        deliveryChainStageId: "delivery-chain-attestation-intake",
         stageId: "stage-attestation-intake",
         reviewerQueueId: "reviewer-queue-attestation-intake",
         deadlineLabel: "Before board pickup",
@@ -7674,6 +7948,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         state: "open",
         acknowledgementState: "pending",
         owner: "release-manager",
+        deliveryChainStageId: "delivery-chain-operator-review",
         stageId: "stage-approval-orchestration",
         reviewerQueueId: "reviewer-queue-approval-orchestration",
         deadlineLabel: "Next 30 min",
@@ -7685,6 +7960,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         state: "blocked",
         acknowledgementState: "blocked",
         owner: "product-owner",
+        deliveryChainStageId: "delivery-chain-promotion-readiness",
         stageId: "stage-lifecycle-enforcement",
         reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
         deadlineLabel: "After approval closeout",
@@ -7696,6 +7972,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         state: "escalated",
         acknowledgementState: "overdue",
         owner: "runtime-owner",
+        deliveryChainStageId: "delivery-chain-rollback-readiness",
         stageId: "stage-rollback-settlement",
         reviewerQueueId: "reviewer-queue-rollback-settlement",
         deadlineLabel: "Escalated now",
@@ -7707,6 +7984,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         state: "blocked",
         acknowledgementState: "blocked",
         owner: "release-manager",
+        deliveryChainStageId: "delivery-chain-publish-decision",
         stageId: "stage-final-release-decision",
         reviewerQueueId: "reviewer-queue-final-release-decision",
         deadlineLabel: "Blocked by gates",
@@ -7720,6 +7998,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         state: "scheduled",
         acknowledgementState: "acknowledged",
         owner: "release-engineering",
+        deliveryChainStageId: "delivery-chain-attestation-intake",
         stageId: "stage-attestation-intake",
         reviewerQueueId: "reviewer-queue-attestation-intake",
         sealedEvidence: ["release/RELEASE-MANIFEST.json"],
@@ -7731,6 +8010,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         state: "open",
         acknowledgementState: "pending",
         owner: "release-manager",
+        deliveryChainStageId: "delivery-chain-operator-review",
         stageId: "stage-approval-orchestration",
         reviewerQueueId: "reviewer-queue-approval-orchestration",
         sealedEvidence: ["release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json"],
@@ -7746,6 +8026,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         state: "scheduled",
         acknowledgementState: "blocked",
         owner: "product-owner",
+        deliveryChainStageId: "delivery-chain-promotion-readiness",
         stageId: "stage-lifecycle-enforcement",
         reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
         sealedEvidence: [],
@@ -7760,6 +8041,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         state: "ready-to-seal",
         acknowledgementState: "overdue",
         owner: "runtime-owner",
+        deliveryChainStageId: "delivery-chain-rollback-readiness",
         stageId: "stage-rollback-settlement",
         reviewerQueueId: "reviewer-queue-rollback-settlement",
         sealedEvidence: ["release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json"],
@@ -7774,6 +8056,7 @@ function buildOperatorReviewBoard({ generatedAt }) {
         state: "blocked",
         acknowledgementState: "blocked",
         owner: "release-manager",
+        deliveryChainStageId: "delivery-chain-publish-decision",
         stageId: "stage-final-release-decision",
         reviewerQueueId: "reviewer-queue-final-release-decision",
         sealedEvidence: [],
@@ -7803,6 +8086,8 @@ function buildReleaseDecisionHandoff({ generatedAt }) {
     mode: "local-only-review",
     activeHandoffId: "decision-handoff-approval-orchestration",
     activeReviewerQueueId: "reviewer-queue-approval-orchestration",
+    activeDeliveryChainStageId: "delivery-chain-operator-review",
+    reviewOnlyDeliveryChainPath: "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
     handoffs: [
       {
         id: "decision-handoff-attestation-intake",
@@ -7812,6 +8097,7 @@ function buildReleaseDecisionHandoff({ generatedAt }) {
         sourceOwner: "release-engineering",
         targetOwner: "release-manager",
         posture: "intake packet ready for approval routing",
+        deliveryChainStageId: "delivery-chain-attestation-intake",
         packetId: "review-packet-attestation-intake",
         reviewerQueueId: "reviewer-queue-attestation-intake",
         escalationWindowId: "escalation-window-attestation-intake",
@@ -7827,6 +8113,7 @@ function buildReleaseDecisionHandoff({ generatedAt }) {
         sourceOwner: "release-manager",
         targetOwner: "product-owner",
         posture: "reviewer baton waiting on decision-lifecycle acknowledgement",
+        deliveryChainStageId: "delivery-chain-operator-review",
         packetId: "review-packet-approval-orchestration",
         reviewerQueueId: "reviewer-queue-approval-orchestration",
         escalationWindowId: "escalation-window-approval-orchestration",
@@ -7846,6 +8133,7 @@ function buildReleaseDecisionHandoff({ generatedAt }) {
         sourceOwner: "product-owner",
         targetOwner: "runtime-owner",
         posture: "lifecycle packet held until approval board closes",
+        deliveryChainStageId: "delivery-chain-promotion-readiness",
         packetId: "review-packet-lifecycle-enforcement",
         reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
         escalationWindowId: "escalation-window-lifecycle-enforcement",
@@ -7864,6 +8152,7 @@ function buildReleaseDecisionHandoff({ generatedAt }) {
         sourceOwner: "runtime-owner",
         targetOwner: "release-manager",
         posture: "rollback closeout queued behind lifecycle evidence",
+        deliveryChainStageId: "delivery-chain-rollback-readiness",
         packetId: "review-packet-rollback-settlement",
         reviewerQueueId: "reviewer-queue-rollback-settlement",
         escalationWindowId: "escalation-window-rollback-settlement",
@@ -7882,6 +8171,7 @@ function buildReleaseDecisionHandoff({ generatedAt }) {
         sourceOwner: "release-manager",
         targetOwner: "signing-gate",
         posture: "blocked by publish and signing gates",
+        deliveryChainStageId: "delivery-chain-publish-decision",
         packetId: "review-packet-final-release-decision",
         reviewerQueueId: "reviewer-queue-final-release-decision",
         escalationWindowId: "escalation-window-final-release-decision",
@@ -7911,6 +8201,8 @@ function buildReviewEvidenceCloseout({ generatedAt }) {
     mode: "local-only-review",
     activeCloseoutId: "evidence-closeout-approval-orchestration",
     activeCloseoutWindowId: "closeout-window-approval-orchestration",
+    activeDeliveryChainStageId: "delivery-chain-operator-review",
+    reviewOnlyDeliveryChainPath: "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
     closeouts: [
       {
         id: "evidence-closeout-attestation-intake",
@@ -7918,6 +8210,7 @@ function buildReviewEvidenceCloseout({ generatedAt }) {
         sealingState: "pending-seal",
         acknowledgementState: "acknowledged",
         owner: "release-engineering",
+        deliveryChainStageId: "delivery-chain-attestation-intake",
         reviewerQueueId: "reviewer-queue-attestation-intake",
         closeoutWindowId: "closeout-window-attestation-intake",
         sealedEvidence: ["release/RELEASE-MANIFEST.json"],
@@ -7930,6 +8223,7 @@ function buildReviewEvidenceCloseout({ generatedAt }) {
         sealingState: "open",
         acknowledgementState: "pending",
         owner: "release-manager",
+        deliveryChainStageId: "delivery-chain-operator-review",
         reviewerQueueId: "reviewer-queue-approval-orchestration",
         closeoutWindowId: "closeout-window-approval-orchestration",
         sealedEvidence: ["release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json"],
@@ -7946,6 +8240,7 @@ function buildReviewEvidenceCloseout({ generatedAt }) {
         sealingState: "open",
         acknowledgementState: "blocked",
         owner: "product-owner",
+        deliveryChainStageId: "delivery-chain-promotion-readiness",
         reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
         closeoutWindowId: "closeout-window-lifecycle-enforcement",
         sealedEvidence: [],
@@ -7961,6 +8256,7 @@ function buildReviewEvidenceCloseout({ generatedAt }) {
         sealingState: "pending-seal",
         acknowledgementState: "overdue",
         owner: "runtime-owner",
+        deliveryChainStageId: "delivery-chain-rollback-readiness",
         reviewerQueueId: "reviewer-queue-rollback-settlement",
         closeoutWindowId: "closeout-window-rollback-settlement",
         sealedEvidence: ["release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json"],
@@ -7976,6 +8272,7 @@ function buildReviewEvidenceCloseout({ generatedAt }) {
         sealingState: "blocked",
         acknowledgementState: "blocked",
         owner: "release-manager",
+        deliveryChainStageId: "delivery-chain-publish-decision",
         reviewerQueueId: "reviewer-queue-final-release-decision",
         closeoutWindowId: "closeout-window-final-release-decision",
         sealedEvidence: [],
@@ -7995,6 +8292,7 @@ function buildReviewEvidenceCloseout({ generatedAt }) {
         state: "scheduled",
         acknowledgementState: "acknowledged",
         owner: "release-engineering",
+        deliveryChainStageId: "delivery-chain-attestation-intake",
         reviewerQueueId: "reviewer-queue-attestation-intake",
         sealedEvidence: ["release/RELEASE-MANIFEST.json"],
         pendingEvidence: ["release/ATTESTATION-VERIFICATION-PACKS.json", "release/ATTESTATION-APPLY-AUDIT-PACKS.json"]
@@ -8005,6 +8303,7 @@ function buildReviewEvidenceCloseout({ generatedAt }) {
         state: "open",
         acknowledgementState: "pending",
         owner: "release-manager",
+        deliveryChainStageId: "delivery-chain-operator-review",
         reviewerQueueId: "reviewer-queue-approval-orchestration",
         sealedEvidence: ["release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json"],
         pendingEvidence: [
@@ -8019,6 +8318,7 @@ function buildReviewEvidenceCloseout({ generatedAt }) {
         state: "scheduled",
         acknowledgementState: "blocked",
         owner: "product-owner",
+        deliveryChainStageId: "delivery-chain-promotion-readiness",
         reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
         sealedEvidence: [],
         pendingEvidence: [
@@ -8032,6 +8332,7 @@ function buildReviewEvidenceCloseout({ generatedAt }) {
         state: "ready-to-seal",
         acknowledgementState: "overdue",
         owner: "runtime-owner",
+        deliveryChainStageId: "delivery-chain-rollback-readiness",
         reviewerQueueId: "reviewer-queue-rollback-settlement",
         sealedEvidence: ["release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json"],
         pendingEvidence: [
@@ -8045,6 +8346,7 @@ function buildReviewEvidenceCloseout({ generatedAt }) {
         state: "blocked",
         acknowledgementState: "blocked",
         owner: "release-manager",
+        deliveryChainStageId: "delivery-chain-publish-decision",
         reviewerQueueId: "reviewer-queue-final-release-decision",
         sealedEvidence: [],
         pendingEvidence: [
@@ -8276,6 +8578,7 @@ function renderInstallerPlaceholderScript() {
     "console.log(`attestation operator settlement packs metadata: ${manifest.attestationOperatorSettlementPacksPath}`);",
     "console.log(`attestation operator approval routing contracts metadata: ${manifest.attestationOperatorApprovalRoutingContractsPath}`);",
     "console.log(`attestation operator approval orchestration metadata: ${manifest.attestationOperatorApprovalOrchestrationPath}`);",
+    "console.log(`review-only delivery chain metadata: ${manifest.reviewOnlyDeliveryChainPath}`);",
     "console.log(`operator review board metadata: ${manifest.operatorReviewBoardPath}`);",
     "console.log(`release decision handoff metadata: ${manifest.releaseDecisionHandoffPath}`);",
     "console.log(`review evidence closeout metadata: ${manifest.reviewEvidenceCloseoutPath}`);",
@@ -8476,6 +8779,7 @@ function buildInstallerPlaceholder({ generatedAt, studioPackage }) {
     attestationOperatorSettlementPacksPath: "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
     attestationOperatorApprovalRoutingContractsPath: "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
     attestationOperatorApprovalOrchestrationPath: "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+    reviewOnlyDeliveryChainPath: "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
     operatorReviewBoardPath: "release/OPERATOR-REVIEW-BOARD.json",
     releaseDecisionHandoffPath: "release/RELEASE-DECISION-HANDOFF.json",
     reviewEvidenceCloseoutPath: "release/REVIEW-EVIDENCE-CLOSEOUT.json",
@@ -8737,6 +9041,9 @@ function createReleaseSkeleton(summary = getPreflightSummary()) {
   const releaseApprovalWorkflow = buildReleaseApprovalWorkflow({
     generatedAt
   });
+  const reviewOnlyDeliveryChain = buildReviewOnlyDeliveryChain({
+    generatedAt
+  });
   const operatorReviewBoard = buildOperatorReviewBoard({
     generatedAt
   });
@@ -8804,6 +9111,7 @@ function createReleaseSkeleton(summary = getPreflightSummary()) {
     attestationOperatorSettlementPacks,
     attestationOperatorApprovalRoutingContracts,
     attestationOperatorApprovalOrchestration,
+    reviewOnlyDeliveryChain,
     installerTargets,
     installerBuilderExecutionSkeleton,
     installerTargetBuilderSkeleton,
@@ -8961,6 +9269,7 @@ function writeReleaseSkeleton(destinationRoot, skeleton) {
     path.join(destinationRoot, "release", "ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json"),
     skeleton.attestationOperatorApprovalOrchestration
   );
+  writeJsonFile(path.join(destinationRoot, "release", "REVIEW-ONLY-DELIVERY-CHAIN.json"), skeleton.reviewOnlyDeliveryChain);
   writeJsonFile(path.join(destinationRoot, "release", "INSTALLER-TARGETS.json"), skeleton.installerTargets);
   writeJsonFile(
     path.join(destinationRoot, "release", "INSTALLER-BUILDER-EXECUTION-SKELETON.json"),
@@ -9134,6 +9443,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
     "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
     "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+    "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
     "release/OPERATOR-REVIEW-BOARD.json",
     "release/RELEASE-DECISION-HANDOFF.json",
     "release/REVIEW-EVIDENCE-CLOSEOUT.json",
@@ -9262,6 +9572,9 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
   );
   const writtenAttestationOperatorApprovalOrchestration = readJson(
     path.join(destinationRoot, "release", "ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json")
+  );
+  const writtenReviewOnlyDeliveryChain = readJson(
+    path.join(destinationRoot, "release", "REVIEW-ONLY-DELIVERY-CHAIN.json")
   );
   const writtenInstallerTargets = readJson(path.join(destinationRoot, "release", "INSTALLER-TARGETS.json"));
   const writtenInstallerBuilderExecutionSkeleton = readJson(
@@ -9412,6 +9725,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     writtenInstaller.attestationOperatorSettlementPacksPath !== "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" ||
     writtenInstaller.attestationOperatorApprovalRoutingContractsPath !== "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json" ||
     writtenInstaller.attestationOperatorApprovalOrchestrationPath !== "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json" ||
+    writtenInstaller.reviewOnlyDeliveryChainPath !== "release/REVIEW-ONLY-DELIVERY-CHAIN.json" ||
     writtenInstaller.installerTargetsPath !== "release/INSTALLER-TARGETS.json" ||
     writtenInstaller.installerBuilderExecutionSkeletonPath !== "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json" ||
     writtenInstaller.installerTargetBuilderSkeletonPath !== "release/INSTALLER-TARGET-BUILDER-SKELETON.json" ||
@@ -9448,6 +9762,23 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     writtenInstaller.approvalWorkflowPath !== "release/RELEASE-APPROVAL-WORKFLOW.json"
   ) {
     throw new Error(`Installer placeholder is missing the expected ${PHASE_ID} dispatch / runsheet / handoff / handshake / approval paths.`);
+  }
+
+  if (
+    writtenReviewOnlyDeliveryChain.phase !== PHASE_ID ||
+    writtenReviewOnlyDeliveryChain.activeStageId !== "delivery-chain-operator-review" ||
+    writtenReviewOnlyDeliveryChain.operatorReviewBoardPath !== "release/OPERATOR-REVIEW-BOARD.json" ||
+    writtenReviewOnlyDeliveryChain.releaseDecisionHandoffPath !== "release/RELEASE-DECISION-HANDOFF.json" ||
+    writtenReviewOnlyDeliveryChain.reviewEvidenceCloseoutPath !== "release/REVIEW-EVIDENCE-CLOSEOUT.json" ||
+    !Array.isArray(writtenReviewOnlyDeliveryChain.stages) ||
+    writtenReviewOnlyDeliveryChain.stages.length < 5 ||
+    !Array.isArray(writtenReviewOnlyDeliveryChain.paths?.promotionStageIds) ||
+    !Array.isArray(writtenReviewOnlyDeliveryChain.paths?.publishStageIds) ||
+    !Array.isArray(writtenReviewOnlyDeliveryChain.paths?.rollbackStageIds) ||
+    !Array.isArray(writtenReviewOnlyDeliveryChain.blockedBy) ||
+    writtenReviewOnlyDeliveryChain.blockedBy.length < 3
+  ) {
+    throw new Error(`Review-only delivery chain does not reflect the expected ${PHASE_ID} staged workflow metadata.`);
   }
 
   if (
@@ -10096,6 +10427,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     writtenReleaseApprovalWorkflow.gatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
     writtenReleaseApprovalWorkflow.approvalBridgePath !== "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json" ||
     writtenReleaseApprovalWorkflow.promotionHandshakePath !== "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json" ||
+    writtenReleaseApprovalWorkflow.reviewOnlyDeliveryChainPath !== "release/REVIEW-ONLY-DELIVERY-CHAIN.json" ||
     !Array.isArray(writtenReleaseApprovalWorkflow.stages) ||
     writtenReleaseApprovalWorkflow.stages.length < 8
   ) {

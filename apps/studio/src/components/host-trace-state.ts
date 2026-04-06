@@ -13,6 +13,7 @@ import type {
 import {
   selectStudioReleaseApprovalPipelineStage,
   selectStudioReleaseCloseoutWindow,
+  selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseEscalationWindow,
   selectStudioReleaseReviewerQueue,
   selectStudioWindowObservabilityActiveMapping
@@ -164,10 +165,13 @@ export function createInspectorSections(
   const auditValue = focus ? (focus.usesHandoff ? focus.rollbackAuditDetail : "Placeholder linked") : "Unavailable";
   const currentReleaseStage = selectStudioReleaseApprovalPipelineStage(boundary.hostExecutor.releaseApprovalPipeline);
   const currentReviewerQueue = selectStudioReleaseReviewerQueue(boundary.hostExecutor.releaseApprovalPipeline, currentReleaseStage);
+  const currentDeliveryStage = selectStudioReleaseDeliveryChainStage(boundary.hostExecutor.releaseApprovalPipeline, currentReleaseStage);
   const currentDecisionHandoff = boundary.hostExecutor.releaseApprovalPipeline.decisionHandoff;
   const currentEscalationWindow = selectStudioReleaseEscalationWindow(boundary.hostExecutor.releaseApprovalPipeline, currentReleaseStage);
   const currentEvidenceCloseout = boundary.hostExecutor.releaseApprovalPipeline.evidenceCloseout;
   const currentCloseoutWindow = selectStudioReleaseCloseoutWindow(boundary.hostExecutor.releaseApprovalPipeline, currentReleaseStage);
+  const publishDeliveryStage = selectStudioReleaseDeliveryChainStage(boundary.hostExecutor.releaseApprovalPipeline, "delivery-chain-publish-decision");
+  const rollbackDeliveryStage = selectStudioReleaseDeliveryChainStage(boundary.hostExecutor.releaseApprovalPipeline, "delivery-chain-rollback-readiness");
   const activeLane =
     (activeLaneId ? windowing?.sharedState.lanes.find((lane) => lane.id === activeLaneId) : undefined) ??
     (windowing ? windowing.sharedState.lanes.find((lane) => lane.id === windowing.sharedState.activeLaneId) : undefined) ??
@@ -220,6 +224,11 @@ export function createInspectorSections(
       value: currentReleaseStage ? `${currentReleaseStage.label} / ${currentReleaseStage.status}` : "Unavailable"
     },
     {
+      id: "delivery-chain",
+      label: "Delivery chain",
+      value: currentDeliveryStage ? `${currentDeliveryStage.label} / ${currentDeliveryStage.phase}` : "Unavailable"
+    },
+    {
       id: "reviewer-queue",
       label: "Reviewer queue",
       value: currentReviewerQueue ? `${currentReviewerQueue.label} / ${currentReviewerQueue.status}` : "Unavailable"
@@ -248,6 +257,14 @@ export function createInspectorSections(
       id: "closeout-window",
       label: "Closeout window",
       value: currentCloseoutWindow ? `${currentCloseoutWindow.label} / ${currentCloseoutWindow.state}` : "Unavailable"
+    },
+    {
+      id: "publish-rollback",
+      label: "Publish / rollback",
+      value:
+        publishDeliveryStage && rollbackDeliveryStage
+          ? `${publishDeliveryStage.status} publish / ${rollbackDeliveryStage.status} rollback`
+          : "Unavailable"
     },
     {
       id: "window-focus",

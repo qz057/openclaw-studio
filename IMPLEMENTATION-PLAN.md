@@ -287,6 +287,13 @@
 - smoke 已提升到验证 phase58 cross-window observability map、review-posture ownership、inspector linkage、以及 richer windowing contract
 - README / HANDOFF / package snapshot 已同步反映 phase58 slice 2 reality
 
+### Phase 58（当前已完成，slice 3）
+- phase58 slice 2 的 shared review surface 已继续推进成更明确的 review-only delivery chain
+- shared / runtime / renderer 现在显式带出 delivery-chain stages、promotion / publish / rollback review flow、以及 operator review board / decision handoff / evidence closeout 与 formal release artifacts 的更明确链接
+- App release/readiness surfaces、Operator Review Board、Windowing board、Inspector sections / drilldowns、以及 package/release artifacts 现在都把同一条 local-only delivery workflow 表达成 staged metadata，而不只是更长的 artifact 列表
+- smoke 已提升到验证 phase58 review-only delivery-chain renderer markers、runtime contract、以及 release artifact contract
+- README / HANDOFF / package snapshot 已同步反映 phase58 slice 3 reality
+
 ## 当前明确边界
 
 当前只允许：
@@ -295,7 +302,7 @@
 - dry-run / preview / simulate
 - Studio-local execute（只改应用内 in-memory state/history）
 - phase27 command surface / layout persistence / window intent staging
-- phase58 operator review loop / reviewer queues / acknowledgement state / escalation windows / closeout windows / deeper cross-window observability / local-only multi-window shared-state review surface
+- phase58 review-only delivery chain / operator review loop / reviewer queues / acknowledgement state / escalation windows / closeout windows / deeper cross-window observability / local-only multi-window shared-state review surface
 - phase26/27/28 release skeleton / artifact review / handoff docs / package metadata
 
 当前明确禁止：

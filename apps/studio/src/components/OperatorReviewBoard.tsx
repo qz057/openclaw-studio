@@ -1,6 +1,7 @@
 import {
   selectStudioReleaseApprovalPipelineStage,
   selectStudioReleaseCloseoutWindow,
+  selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseEscalationWindow,
   selectStudioReleaseReviewerQueue,
   selectStudioWindowObservabilityActiveMapping,
@@ -153,6 +154,9 @@ export function OperatorReviewBoard({
 }: OperatorReviewBoardProps) {
   const currentStage = selectStudioReleaseApprovalPipelineStage(pipeline) ?? pipeline.stages[0] ?? null;
   const currentReviewerQueue = selectStudioReleaseReviewerQueue(pipeline, currentStage ?? undefined) ?? pipeline.reviewerQueues[0] ?? null;
+  const currentDeliveryStage = selectStudioReleaseDeliveryChainStage(pipeline, currentStage ?? undefined) ?? pipeline.deliveryChain.stages[0] ?? null;
+  const publishDeliveryStage = selectStudioReleaseDeliveryChainStage(pipeline, "delivery-chain-publish-decision") ?? null;
+  const rollbackDeliveryStage = selectStudioReleaseDeliveryChainStage(pipeline, "delivery-chain-rollback-readiness") ?? null;
   const currentEscalationWindow =
     selectStudioReleaseEscalationWindow(pipeline, currentStage ?? undefined) ?? pipeline.escalationWindows[0] ?? null;
   const currentCloseoutWindow = selectStudioReleaseCloseoutWindow(pipeline, currentStage ?? undefined) ?? pipeline.closeoutWindows[0] ?? null;
@@ -280,6 +284,40 @@ export function OperatorReviewBoard({
             </div>
           </article>
         ) : null}
+
+        <article className="windowing-summary-card">
+          <span>Delivery Chain Stage</span>
+          <strong>{currentDeliveryStage?.label ?? "No delivery-chain stage"}</strong>
+          <p>
+            {currentDeliveryStage?.summary ??
+              "The wider review-only delivery chain is unavailable, so the board cannot show how promotion, publish, and rollback flow attach to the active operator board."}
+          </p>
+          <div className="workflow-readiness-list">
+            <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(currentDeliveryStage?.status ?? "blocked")}`}>
+              <span>Current stage</span>
+              <strong>{currentDeliveryStage ? `${currentDeliveryStage.phase} / ${currentDeliveryStage.status}` : "Unavailable"}</strong>
+            </div>
+            <div className="workflow-readiness-line workflow-readiness-line--neutral">
+              <span>Promotion / publish</span>
+              <strong>{publishDeliveryStage ? `${currentDeliveryStage?.label ?? "current"} -> ${publishDeliveryStage.label}` : "Unavailable"}</strong>
+            </div>
+            <div className="workflow-readiness-line workflow-readiness-line--warning">
+              <span>Rollback posture</span>
+              <strong>{rollbackDeliveryStage ? `${rollbackDeliveryStage.label} / ${rollbackDeliveryStage.status}` : "Unavailable"}</strong>
+            </div>
+          </div>
+          {!compact && currentDeliveryStage ? (
+            <div className="windowing-preview-list">
+              {currentDeliveryStage.artifactGroups.map((group) => (
+                <div key={group.id} className="windowing-preview-line windowing-preview-line--stacked">
+                  <span>{group.label}</span>
+                  <strong>{group.artifacts.length} linked artifacts</strong>
+                  <p>{group.summary}</p>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </article>
 
         <article className="windowing-summary-card">
           <span>Active Review Packet</span>
@@ -515,6 +553,7 @@ export function OperatorReviewBoard({
       <div className="operator-review-board__stage-grid">
         {pipeline.stages.map((stage) => {
           const stageQueue = selectStudioReleaseReviewerQueue(pipeline, stage);
+          const stageDelivery = selectStudioReleaseDeliveryChainStage(pipeline, stage);
           const stageEscalationWindow = selectStudioReleaseEscalationWindow(pipeline, stage);
           const stageCloseoutWindow = selectStudioReleaseCloseoutWindow(pipeline, stage);
           const stageMapping =
@@ -538,6 +577,10 @@ export function OperatorReviewBoard({
                 <div className={`workflow-readiness-line workflow-readiness-line--${resolvePacketTone(stage.packet.status)}`}>
                   <span>Review packet</span>
                   <strong>{stage.packet.status}</strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(stageDelivery?.status ?? stage.status)}`}>
+                  <span>Delivery chain</span>
+                  <strong>{stageDelivery ? `${stageDelivery.label} / ${stageDelivery.phase}` : stage.deliveryPhase}</strong>
                 </div>
                 <div className={`workflow-readiness-line workflow-readiness-line--${resolveReviewerQueueTone(stageQueue?.status ?? "escalated")}`}>
                   <span>Reviewer queue</span>
@@ -566,6 +609,10 @@ export function OperatorReviewBoard({
               </div>
               {!compact ? (
                 <div className="windowing-preview-list">
+                  <div className="windowing-preview-line">
+                    <span>Delivery posture</span>
+                    <strong>{stageDelivery ? stageDelivery.posture : "Unavailable"}</strong>
+                  </div>
                   <div className="windowing-preview-line">
                     <span>Packet owner</span>
                     <strong>{stage.packet.owner}</strong>

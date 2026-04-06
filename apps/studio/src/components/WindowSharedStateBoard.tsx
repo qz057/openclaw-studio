@@ -1,6 +1,7 @@
 import {
   selectStudioReleaseApprovalPipelineStage,
   selectStudioReleaseCloseoutWindow,
+  selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseEscalationWindow,
   selectStudioReleaseReviewerQueue,
   selectStudioWindowObservabilityActiveMapping,
@@ -250,6 +251,11 @@ export function WindowSharedStateBoard({
   const activeObservabilityMapping = selectStudioWindowObservabilityActiveMapping(windowing) ?? null;
   const observabilityMappings = windowing.observability.mappings;
   const currentReleaseStage = releaseApprovalPipeline ? selectStudioReleaseApprovalPipelineStage(releaseApprovalPipeline) : null;
+  const currentDeliveryStage = releaseApprovalPipeline ? selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, currentReleaseStage ?? undefined) : null;
+  const publishDeliveryStage =
+    releaseApprovalPipeline ? selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, "delivery-chain-publish-decision") : null;
+  const rollbackDeliveryStage =
+    releaseApprovalPipeline ? selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, "delivery-chain-rollback-readiness") : null;
   const currentReviewerQueue = releaseApprovalPipeline ? selectStudioReleaseReviewerQueue(releaseApprovalPipeline, currentReleaseStage ?? undefined) : null;
   const currentEscalationWindow =
     releaseApprovalPipeline ? selectStudioReleaseEscalationWindow(releaseApprovalPipeline, currentReleaseStage ?? undefined) : null;
@@ -387,6 +393,31 @@ export function WindowSharedStateBoard({
 
         {releaseApprovalPipeline ? (
           <article className="windowing-summary-card">
+            <span>Delivery chain posture</span>
+            <strong>{currentDeliveryStage?.label ?? "No delivery stage"}</strong>
+            <p>
+              {currentDeliveryStage?.summary ??
+                "The wider review-only delivery chain is unavailable, so this board cannot show how promotion, publish, and rollback stay attached to the active review posture."}
+            </p>
+            <div className="workflow-readiness-list">
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Phase / status</span>
+                <strong>{currentDeliveryStage ? `${currentDeliveryStage.phase} / ${currentDeliveryStage.status}` : "Unavailable"}</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--warning">
+                <span>Publish flow</span>
+                <strong>{publishDeliveryStage ? `${publishDeliveryStage.label} / ${publishDeliveryStage.status}` : "Unavailable"}</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--warning">
+                <span>Rollback flow</span>
+                <strong>{rollbackDeliveryStage ? `${rollbackDeliveryStage.label} / ${rollbackDeliveryStage.status}` : "Unavailable"}</strong>
+              </div>
+            </div>
+          </article>
+        ) : null}
+
+        {releaseApprovalPipeline ? (
+          <article className="windowing-summary-card">
             <span>Reviewer queue</span>
             <strong>{currentReviewerQueue?.label ?? "No reviewer queue"}</strong>
             <p>{currentReviewerQueue?.summary ?? "No reviewer queue is currently active."}</p>
@@ -483,15 +514,21 @@ export function WindowSharedStateBoard({
                 <span className="windowing-badge">{mappingLane?.label ?? mapping.sharedStateLaneId}</span>
               </div>
               <div className="workflow-readiness-list">
-                <div className={`workflow-readiness-line workflow-readiness-line--${resolveAcknowledgementTone(mapping.reviewPosture.acknowledgementState)}`}>
-                  <span>Queue / acknowledgement</span>
-                  <strong>
-                    {mapping.reviewPosture.reviewerQueueId} / {mapping.reviewPosture.acknowledgementState}
-                  </strong>
-                </div>
-                <div className="workflow-readiness-line workflow-readiness-line--neutral">
-                  <span>Route / board</span>
-                  <strong>
+              <div className={`workflow-readiness-line workflow-readiness-line--${resolveAcknowledgementTone(mapping.reviewPosture.acknowledgementState)}`}>
+                <span>Queue / acknowledgement</span>
+                <strong>
+                  {mapping.reviewPosture.reviewerQueueId} / {mapping.reviewPosture.acknowledgementState}
+                </strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Delivery phase</span>
+                <strong>
+                  {mapping.reviewPosture.deliveryPhase} / {mapping.reviewPosture.deliveryChainStageId}
+                </strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Route / board</span>
+                <strong>
                     {mapping.routeId} / {mappingBoard?.label ?? mapping.orchestrationBoardId}
                   </strong>
                 </div>

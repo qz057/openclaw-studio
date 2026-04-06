@@ -106,7 +106,6 @@ async function verifyRendererFocusedSlotUi() {
     "Cross-view Coordination Matrix",
     "Inspector-Command Linkage",
     "Release Pipeline Depth",
-    "Review-only Operator Review Board",
     "Operator Review Board",
     "Active Review Packet",
     "Reviewer Queue",
@@ -117,6 +116,12 @@ async function verifyRendererFocusedSlotUi() {
     "Closeout Window",
     "Cross-window Observability",
     "Stage Ownership",
+    "Review-only Delivery Chain",
+    "Delivery Chain Stage",
+    "Delivery chain posture",
+    "Promotion Review Flow",
+    "Publish Review Flow",
+    "Rollback Review Flow",
     "Attestation intake board",
     "Approval orchestration board",
     "Release decision lifecycle",
@@ -1068,6 +1073,7 @@ function assertHostExecutorContract(hostExecutor, label) {
     ["releaseApprovalPipeline.reviewerQueues", hostExecutor.releaseApprovalPipeline?.reviewerQueues],
     ["releaseApprovalPipeline.escalationWindows", hostExecutor.releaseApprovalPipeline?.escalationWindows],
     ["releaseApprovalPipeline.closeoutWindows", hostExecutor.releaseApprovalPipeline?.closeoutWindows],
+    ["releaseApprovalPipeline.deliveryChain.stages", hostExecutor.releaseApprovalPipeline?.deliveryChain?.stages],
     ["failureTaxonomy", hostExecutor.failureTaxonomy],
     ["mutationSlots", hostExecutor.mutationSlots],
     ["rollback.stages", hostExecutor.rollback?.stages],
@@ -1096,7 +1102,17 @@ function assertHostExecutorContract(hostExecutor, label) {
   }
 
   if (
+    !hostExecutor.releaseApprovalPipeline.deliveryChain?.currentStageId ||
+    !hostExecutor.releaseApprovalPipeline.deliveryChain.stages.some(
+      (stage) => stage.id === hostExecutor.releaseApprovalPipeline.deliveryChain.currentStageId
+    )
+  ) {
+    throw new Error(`${label} host executor contract is missing the review-only delivery-chain posture.`);
+  }
+
+  if (
     !hostExecutor.releaseApprovalPipeline.reviewBoard?.title ||
+    !hostExecutor.releaseApprovalPipeline.reviewBoard?.activeDeliveryChainStageId ||
     !hostExecutor.releaseApprovalPipeline.reviewBoard?.activeReviewerQueueId ||
     !hostExecutor.releaseApprovalPipeline.reviewBoard?.activeEscalationWindowId ||
     !hostExecutor.releaseApprovalPipeline.reviewBoard?.activeCloseoutWindowId ||
@@ -1133,6 +1149,8 @@ function assertHostExecutorContract(hostExecutor, label) {
   if (
     !hostExecutor.releaseApprovalPipeline.stages.every(
       (stage) =>
+        stage.deliveryChainStageId &&
+        stage.deliveryPhase &&
         Array.isArray(stage.evidence) &&
         stage.evidence.length > 0 &&
         stage.reviewerQueueId &&
@@ -1158,10 +1176,28 @@ function assertHostExecutorContract(hostExecutor, label) {
 
   if (
     !currentStage ||
+    hostExecutor.releaseApprovalPipeline.reviewBoard.activeDeliveryChainStageId !== currentStage.deliveryChainStageId ||
     hostExecutor.releaseApprovalPipeline.decisionHandoff.id !== currentStage.handoff.id ||
     hostExecutor.releaseApprovalPipeline.evidenceCloseout.id !== currentStage.closeout.id
   ) {
     throw new Error(`${label} host executor contract lost alignment between the active stage, decision handoff, and evidence closeout.`);
+  }
+
+  if (
+    !hostExecutor.releaseApprovalPipeline.deliveryChain.stages.every(
+      (stage) =>
+        stage.phase &&
+        stage.pipelineStageId &&
+        stage.reviewerQueueId &&
+        stage.decisionHandoffId &&
+        stage.evidenceCloseoutId &&
+        Array.isArray(stage.artifactGroups) &&
+        stage.artifactGroups.length > 0 &&
+        stage.artifactGroups.every((group) => group.label && Array.isArray(group.artifacts) && group.artifacts.length > 0) &&
+        Array.isArray(stage.blockedBy)
+    )
+  ) {
+    throw new Error(`${label} host executor contract is missing structured review-only delivery-chain stage metadata.`);
   }
 
   if (
@@ -1871,6 +1907,7 @@ function verifyReleaseSkeletonContract() {
     "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
     "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
     "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+    "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
     "release/OPERATOR-REVIEW-BOARD.json",
     "release/RELEASE-DECISION-HANDOFF.json",
     "release/REVIEW-EVIDENCE-CLOSEOUT.json",
@@ -1950,6 +1987,7 @@ function verifyReleaseSkeletonContract() {
     skeleton.installerPlaceholder.attestationOperatorDispatchReceiptsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" ||
     skeleton.installerPlaceholder.attestationOperatorReconciliationLedgersPath !== "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" ||
     skeleton.installerPlaceholder.attestationOperatorSettlementPacksPath !== "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" ||
+    skeleton.installerPlaceholder.reviewOnlyDeliveryChainPath !== "release/REVIEW-ONLY-DELIVERY-CHAIN.json" ||
     skeleton.installerPlaceholder.operatorReviewBoardPath !== "release/OPERATOR-REVIEW-BOARD.json" ||
     skeleton.installerPlaceholder.releaseDecisionHandoffPath !== "release/RELEASE-DECISION-HANDOFF.json" ||
     skeleton.installerPlaceholder.reviewEvidenceCloseoutPath !== "release/REVIEW-EVIDENCE-CLOSEOUT.json" ||
@@ -2036,6 +2074,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/REVIEW-ONLY-DELIVERY-CHAIN.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/OPERATOR-REVIEW-BOARD.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/RELEASE-DECISION-HANDOFF.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/REVIEW-EVIDENCE-CLOSEOUT.json") ||
@@ -2079,6 +2118,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/REVIEW-ONLY-DELIVERY-CHAIN.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/OPERATOR-REVIEW-BOARD.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/RELEASE-DECISION-HANDOFF.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/REVIEW-EVIDENCE-CLOSEOUT.json") ||
@@ -2199,6 +2239,24 @@ function verifyReleaseSkeletonContract() {
   }
 
   if (
+    skeleton.reviewOnlyDeliveryChain?.activeStageId !== "delivery-chain-operator-review" ||
+    skeleton.reviewOnlyDeliveryChain?.operatorReviewBoardPath !== "release/OPERATOR-REVIEW-BOARD.json" ||
+    skeleton.reviewOnlyDeliveryChain?.releaseDecisionHandoffPath !== "release/RELEASE-DECISION-HANDOFF.json" ||
+    skeleton.reviewOnlyDeliveryChain?.reviewEvidenceCloseoutPath !== "release/REVIEW-EVIDENCE-CLOSEOUT.json" ||
+    !Array.isArray(skeleton.reviewOnlyDeliveryChain?.stages) ||
+    skeleton.reviewOnlyDeliveryChain.stages.length < 5 ||
+    !Array.isArray(skeleton.reviewOnlyDeliveryChain?.paths?.promotionStageIds) ||
+    !Array.isArray(skeleton.reviewOnlyDeliveryChain?.paths?.publishStageIds) ||
+    !Array.isArray(skeleton.reviewOnlyDeliveryChain?.paths?.rollbackStageIds) ||
+    !Array.isArray(skeleton.reviewOnlyDeliveryChain?.blockedBy) ||
+    skeleton.reviewOnlyDeliveryChain.blockedBy.length < 3
+  ) {
+    throw new Error(`Review-only delivery chain metadata is missing ${PHASE_ID} staged workflow declarations.`);
+  }
+
+  if (
+    skeleton.operatorReviewBoard?.board?.reviewOnlyDeliveryChainPath !== "release/REVIEW-ONLY-DELIVERY-CHAIN.json" ||
+    skeleton.operatorReviewBoard?.board?.activeDeliveryChainStageId !== "delivery-chain-operator-review" ||
     skeleton.operatorReviewBoard?.board?.decisionHandoffPath !== "release/RELEASE-DECISION-HANDOFF.json" ||
     skeleton.operatorReviewBoard?.board?.evidenceCloseoutPath !== "release/REVIEW-EVIDENCE-CLOSEOUT.json" ||
     skeleton.operatorReviewBoard?.board?.activeReviewerQueueId !== "reviewer-queue-approval-orchestration" ||
@@ -2221,6 +2279,8 @@ function verifyReleaseSkeletonContract() {
   if (
     skeleton.releaseDecisionHandoff?.activeHandoffId !== "decision-handoff-approval-orchestration" ||
     skeleton.releaseDecisionHandoff?.activeReviewerQueueId !== "reviewer-queue-approval-orchestration" ||
+    skeleton.releaseDecisionHandoff?.activeDeliveryChainStageId !== "delivery-chain-operator-review" ||
+    skeleton.releaseDecisionHandoff?.reviewOnlyDeliveryChainPath !== "release/REVIEW-ONLY-DELIVERY-CHAIN.json" ||
     !Array.isArray(skeleton.releaseDecisionHandoff?.handoffs) ||
     skeleton.releaseDecisionHandoff.handoffs.length < 5 ||
     !Array.isArray(skeleton.releaseDecisionHandoff?.blockedBy) ||
@@ -2232,6 +2292,8 @@ function verifyReleaseSkeletonContract() {
   if (
     skeleton.reviewEvidenceCloseout?.activeCloseoutId !== "evidence-closeout-approval-orchestration" ||
     skeleton.reviewEvidenceCloseout?.activeCloseoutWindowId !== "closeout-window-approval-orchestration" ||
+    skeleton.reviewEvidenceCloseout?.activeDeliveryChainStageId !== "delivery-chain-operator-review" ||
+    skeleton.reviewEvidenceCloseout?.reviewOnlyDeliveryChainPath !== "release/REVIEW-ONLY-DELIVERY-CHAIN.json" ||
     !Array.isArray(skeleton.reviewEvidenceCloseout?.closeouts) ||
     skeleton.reviewEvidenceCloseout.closeouts.length < 5 ||
     !Array.isArray(skeleton.reviewEvidenceCloseout?.closeoutWindows) ||
@@ -2535,6 +2597,7 @@ function verifyReleaseSkeletonContract() {
     skeleton.releaseApprovalWorkflow?.gatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
     skeleton.releaseApprovalWorkflow?.approvalBridgePath !== "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json" ||
     skeleton.releaseApprovalWorkflow?.promotionHandshakePath !== "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json" ||
+    skeleton.releaseApprovalWorkflow?.reviewOnlyDeliveryChainPath !== "release/REVIEW-ONLY-DELIVERY-CHAIN.json" ||
     skeleton.releaseApprovalWorkflow?.operatorReviewBoardPath !== "release/OPERATOR-REVIEW-BOARD.json" ||
     skeleton.releaseApprovalWorkflow?.releaseDecisionHandoffPath !== "release/RELEASE-DECISION-HANDOFF.json" ||
     skeleton.releaseApprovalWorkflow?.reviewEvidenceCloseoutPath !== "release/REVIEW-EVIDENCE-CLOSEOUT.json" ||
@@ -2569,6 +2632,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json") ||
     !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json") ||
     !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json") ||
+    !skeleton.packageReadme.includes("release/REVIEW-ONLY-DELIVERY-CHAIN.json") ||
     !skeleton.packageReadme.includes("release/OPERATOR-REVIEW-BOARD.json") ||
     !skeleton.packageReadme.includes("release/RELEASE-DECISION-HANDOFF.json") ||
     !skeleton.packageReadme.includes("release/REVIEW-EVIDENCE-CLOSEOUT.json") ||
