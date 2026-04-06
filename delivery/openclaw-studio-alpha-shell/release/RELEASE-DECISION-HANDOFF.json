@@ -1,18 +1,23 @@
 {
   "schemaVersion": "openclaw-studio-release-decision-handoff/v1",
-  "generatedAt": "2026-04-06T09:26:36.378Z",
-  "phase": "phase57",
+  "generatedAt": "2026-04-06T10:41:01.137Z",
+  "phase": "phase58",
   "mode": "local-only-review",
   "activeHandoffId": "decision-handoff-approval-orchestration",
+  "activeReviewerQueueId": "reviewer-queue-approval-orchestration",
   "handoffs": [
     {
       "id": "decision-handoff-attestation-intake",
       "label": "Intake to approval handoff",
       "batonState": "handoff-ready",
+      "acknowledgementState": "acknowledged",
       "sourceOwner": "release-engineering",
       "targetOwner": "release-manager",
       "posture": "intake packet ready for approval routing",
       "packetId": "review-packet-attestation-intake",
+      "reviewerQueueId": "reviewer-queue-attestation-intake",
+      "escalationWindowId": "escalation-window-attestation-intake",
+      "closeoutWindowId": "closeout-window-attestation-intake",
       "pending": [
         "approval acknowledgement stays metadata-only",
         "host-side execution remains disabled"
@@ -26,10 +31,14 @@
       "id": "decision-handoff-approval-orchestration",
       "label": "Approval to lifecycle handoff",
       "batonState": "awaiting-ack",
+      "acknowledgementState": "pending",
       "sourceOwner": "release-manager",
       "targetOwner": "product-owner",
       "posture": "reviewer baton waiting on decision-lifecycle acknowledgement",
       "packetId": "review-packet-approval-orchestration",
+      "reviewerQueueId": "reviewer-queue-approval-orchestration",
+      "escalationWindowId": "escalation-window-approval-orchestration",
+      "closeoutWindowId": "closeout-window-approval-orchestration",
       "pending": [
         "product-owner acknowledgement remains metadata-only",
         "signing-publish gating handshake remains blocked",
@@ -44,10 +53,14 @@
       "id": "decision-handoff-lifecycle-enforcement",
       "label": "Lifecycle to rollback handoff",
       "batonState": "held",
+      "acknowledgementState": "blocked",
       "sourceOwner": "product-owner",
       "targetOwner": "runtime-owner",
       "posture": "lifecycle packet held until approval board closes",
       "packetId": "review-packet-lifecycle-enforcement",
+      "reviewerQueueId": "reviewer-queue-lifecycle-enforcement",
+      "escalationWindowId": "escalation-window-lifecycle-enforcement",
+      "closeoutWindowId": "closeout-window-lifecycle-enforcement",
       "pending": [
         "approval board closeout remains open",
         "rollback closeout remains metadata-only"
@@ -61,10 +74,14 @@
       "id": "decision-handoff-rollback-settlement",
       "label": "Rollback closeout to final decision handoff",
       "batonState": "held",
+      "acknowledgementState": "overdue",
       "sourceOwner": "runtime-owner",
       "targetOwner": "release-manager",
       "posture": "rollback closeout queued behind lifecycle evidence",
       "packetId": "review-packet-rollback-settlement",
+      "reviewerQueueId": "reviewer-queue-rollback-settlement",
+      "escalationWindowId": "escalation-window-rollback-settlement",
+      "closeoutWindowId": "closeout-window-rollback-settlement",
       "pending": [
         "rollback publication remains review-only",
         "final decision board remains blocked"
@@ -78,10 +95,14 @@
       "id": "decision-handoff-final-release-decision",
       "label": "Final decision handoff",
       "batonState": "blocked",
+      "acknowledgementState": "blocked",
       "sourceOwner": "release-manager",
       "targetOwner": "signing-gate",
       "posture": "blocked by publish and signing gates",
       "packetId": "review-packet-final-release-decision",
+      "reviewerQueueId": "reviewer-queue-final-release-decision",
+      "escalationWindowId": "escalation-window-final-release-decision",
+      "closeoutWindowId": "closeout-window-final-release-decision",
       "pending": [
         "signing-publish gating handshake remains metadata-only",
         "publish rollback handshake remains metadata-only",
@@ -95,6 +116,7 @@
   ],
   "blockedBy": [
     "all decision handoffs remain local-only metadata",
+    "reviewer acknowledgement remains metadata-only",
     "signing / publish / rollback execution remain blocked",
     "host-side execution remains disabled"
   ]

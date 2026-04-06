@@ -1,15 +1,19 @@
 {
   "schemaVersion": "openclaw-studio-review-evidence-closeout/v1",
-  "generatedAt": "2026-04-06T09:26:36.378Z",
-  "phase": "phase57",
+  "generatedAt": "2026-04-06T10:41:01.137Z",
+  "phase": "phase58",
   "mode": "local-only-review",
   "activeCloseoutId": "evidence-closeout-approval-orchestration",
+  "activeCloseoutWindowId": "closeout-window-approval-orchestration",
   "closeouts": [
     {
       "id": "evidence-closeout-attestation-intake",
       "label": "Intake evidence closeout",
       "sealingState": "pending-seal",
+      "acknowledgementState": "acknowledged",
       "owner": "release-engineering",
+      "reviewerQueueId": "reviewer-queue-attestation-intake",
+      "closeoutWindowId": "closeout-window-attestation-intake",
       "sealedEvidence": [
         "release/RELEASE-MANIFEST.json"
       ],
@@ -23,7 +27,10 @@
       "id": "evidence-closeout-approval-orchestration",
       "label": "Approval evidence closeout",
       "sealingState": "open",
+      "acknowledgementState": "pending",
       "owner": "release-manager",
+      "reviewerQueueId": "reviewer-queue-approval-orchestration",
+      "closeoutWindowId": "closeout-window-approval-orchestration",
       "sealedEvidence": [
         "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json"
       ],
@@ -38,7 +45,10 @@
       "id": "evidence-closeout-lifecycle-enforcement",
       "label": "Lifecycle evidence closeout",
       "sealingState": "open",
+      "acknowledgementState": "blocked",
       "owner": "product-owner",
+      "reviewerQueueId": "reviewer-queue-lifecycle-enforcement",
+      "closeoutWindowId": "closeout-window-lifecycle-enforcement",
       "sealedEvidence": [],
       "pendingEvidence": [
         "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
@@ -50,7 +60,10 @@
       "id": "evidence-closeout-rollback-settlement",
       "label": "Rollback evidence closeout",
       "sealingState": "pending-seal",
+      "acknowledgementState": "overdue",
       "owner": "runtime-owner",
+      "reviewerQueueId": "reviewer-queue-rollback-settlement",
+      "closeoutWindowId": "closeout-window-rollback-settlement",
       "sealedEvidence": [
         "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json"
       ],
@@ -64,7 +77,10 @@
       "id": "evidence-closeout-final-release-decision",
       "label": "Final decision closeout",
       "sealingState": "blocked",
+      "acknowledgementState": "blocked",
       "owner": "release-manager",
+      "reviewerQueueId": "reviewer-queue-final-release-decision",
+      "closeoutWindowId": "closeout-window-final-release-decision",
       "sealedEvidence": [],
       "pendingEvidence": [
         "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
@@ -75,8 +91,85 @@
       "linkedHandoffId": "decision-handoff-final-release-decision"
     }
   ],
+  "closeoutWindows": [
+    {
+      "id": "closeout-window-attestation-intake",
+      "label": "Intake closeout window",
+      "state": "scheduled",
+      "acknowledgementState": "acknowledged",
+      "owner": "release-engineering",
+      "reviewerQueueId": "reviewer-queue-attestation-intake",
+      "sealedEvidence": [
+        "release/RELEASE-MANIFEST.json"
+      ],
+      "pendingEvidence": [
+        "release/ATTESTATION-VERIFICATION-PACKS.json",
+        "release/ATTESTATION-APPLY-AUDIT-PACKS.json"
+      ]
+    },
+    {
+      "id": "closeout-window-approval-orchestration",
+      "label": "Approval closeout window",
+      "state": "open",
+      "acknowledgementState": "pending",
+      "owner": "release-manager",
+      "reviewerQueueId": "reviewer-queue-approval-orchestration",
+      "sealedEvidence": [
+        "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json"
+      ],
+      "pendingEvidence": [
+        "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+        "release/RELEASE-APPROVAL-WORKFLOW.json",
+        "release/RELEASE-DECISION-HANDOFF.json"
+      ]
+    },
+    {
+      "id": "closeout-window-lifecycle-enforcement",
+      "label": "Lifecycle closeout window",
+      "state": "scheduled",
+      "acknowledgementState": "blocked",
+      "owner": "product-owner",
+      "reviewerQueueId": "reviewer-queue-lifecycle-enforcement",
+      "sealedEvidence": [],
+      "pendingEvidence": [
+        "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+        "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+      ]
+    },
+    {
+      "id": "closeout-window-rollback-settlement",
+      "label": "Rollback settlement closeout window",
+      "state": "ready-to-seal",
+      "acknowledgementState": "overdue",
+      "owner": "runtime-owner",
+      "reviewerQueueId": "reviewer-queue-rollback-settlement",
+      "sealedEvidence": [
+        "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json"
+      ],
+      "pendingEvidence": [
+        "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
+        "release/REVIEW-EVIDENCE-CLOSEOUT.json"
+      ]
+    },
+    {
+      "id": "closeout-window-final-release-decision",
+      "label": "Final decision closeout window",
+      "state": "blocked",
+      "acknowledgementState": "blocked",
+      "owner": "release-manager",
+      "reviewerQueueId": "reviewer-queue-final-release-decision",
+      "sealedEvidence": [],
+      "pendingEvidence": [
+        "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+        "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+        "release/PUBLISH-GATES.json",
+        "release/PROMOTION-GATES.json"
+      ]
+    }
+  ],
   "blockedBy": [
     "evidence sealing remains review-only",
+    "closeout windows remain metadata-only",
     "publish / promotion closeout remains blocked",
     "host-side execution remains disabled"
   ]

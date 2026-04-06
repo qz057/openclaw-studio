@@ -1,15 +1,19 @@
 {
   "schemaVersion": "openclaw-studio-operator-review-board/v1",
-  "generatedAt": "2026-04-06T09:26:36.378Z",
-  "phase": "phase57",
+  "generatedAt": "2026-04-06T10:41:01.137Z",
+  "phase": "phase58",
   "mode": "local-only-review",
   "board": {
     "id": "operator-review-board-release-approval",
     "title": "Operator Review Board",
-    "posture": "release-manager baton active / review-only handoff",
+    "posture": "release-manager queue active / acknowledgement pending / review-only handoff",
     "activeOwner": "release-manager",
     "activeStageId": "stage-approval-orchestration",
     "activePacketId": "review-packet-approval-orchestration",
+    "activeReviewerQueueId": "reviewer-queue-approval-orchestration",
+    "activeAcknowledgementState": "pending",
+    "activeEscalationWindowId": "escalation-window-approval-orchestration",
+    "activeCloseoutWindowId": "closeout-window-approval-orchestration",
     "sharedStateLaneId": "shared-state-lane-trace-review",
     "windowId": "window-trace-review",
     "decisionHandoffPath": "release/RELEASE-DECISION-HANDOFF.json",
@@ -20,19 +24,25 @@
       "id": "board-note-windowing",
       "label": "Cross-window review lane",
       "value": "Trace Review Lane / window-trace-review",
-      "detail": "Operator ownership is intentionally tied to the same shared-state lane and review window surfaced in the phase57 shell."
+      "detail": "Operator ownership is intentionally tied to the same shared-state lane and review window surfaced in the phase58 shell."
+    },
+    {
+      "id": "board-note-queue",
+      "label": "Reviewer queue",
+      "value": "Approval reviewer queue / pending acknowledgement",
+      "detail": "Queue ownership and acknowledgement state are explicit so the active review loop is auditable before any live reviewer dispatch exists."
     },
     {
       "id": "board-note-baton",
       "label": "Decision baton",
       "value": "release-manager -> product-owner",
-      "detail": "The active baton remains metadata-only and local-only, but reviewer ownership and next-stage posture are explicit."
+      "detail": "The active baton remains metadata-only and local-only, but reviewer ownership, acknowledgement posture, and next-stage timing are explicit."
     },
     {
-      "id": "board-note-closeout",
-      "label": "Evidence sealing",
-      "value": "open / visible before execution",
-      "detail": "Evidence closeout is promoted to a first-class review object so pending artifacts stay visible before any future executor exists."
+      "id": "board-note-windows",
+      "label": "Escalation / closeout windows",
+      "value": "open / open",
+      "detail": "Escalation and closeout timing are first-class review-loop objects instead of hidden note fields."
     }
   ],
   "stages": [
@@ -42,8 +52,11 @@
       "status": "ready",
       "owner": "release-engineering",
       "packetId": "review-packet-attestation-intake",
+      "reviewerQueueId": "reviewer-queue-attestation-intake",
       "handoffId": "decision-handoff-attestation-intake",
+      "escalationWindowId": "escalation-window-attestation-intake",
       "closeoutId": "evidence-closeout-attestation-intake",
+      "closeoutWindowId": "closeout-window-attestation-intake",
       "evidence": [
         "release/RELEASE-MANIFEST.json",
         "release/ATTESTATION-VERIFICATION-PACKS.json",
@@ -56,8 +69,11 @@
       "status": "in-review",
       "owner": "release-manager",
       "packetId": "review-packet-approval-orchestration",
+      "reviewerQueueId": "reviewer-queue-approval-orchestration",
       "handoffId": "decision-handoff-approval-orchestration",
+      "escalationWindowId": "escalation-window-approval-orchestration",
       "closeoutId": "evidence-closeout-approval-orchestration",
+      "closeoutWindowId": "closeout-window-approval-orchestration",
       "evidence": [
         "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
         "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
@@ -72,8 +88,11 @@
       "status": "planned",
       "owner": "product-owner",
       "packetId": "review-packet-lifecycle-enforcement",
+      "reviewerQueueId": "reviewer-queue-lifecycle-enforcement",
       "handoffId": "decision-handoff-lifecycle-enforcement",
+      "escalationWindowId": "escalation-window-lifecycle-enforcement",
       "closeoutId": "evidence-closeout-lifecycle-enforcement",
+      "closeoutWindowId": "closeout-window-lifecycle-enforcement",
       "evidence": [
         "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
         "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json",
@@ -86,8 +105,11 @@
       "status": "planned",
       "owner": "runtime-owner",
       "packetId": "review-packet-rollback-settlement",
+      "reviewerQueueId": "reviewer-queue-rollback-settlement",
       "handoffId": "decision-handoff-rollback-settlement",
+      "escalationWindowId": "escalation-window-rollback-settlement",
       "closeoutId": "evidence-closeout-rollback-settlement",
+      "closeoutWindowId": "closeout-window-rollback-settlement",
       "evidence": [
         "release/REVIEW-EVIDENCE-CLOSEOUT.json",
         "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
@@ -100,9 +122,278 @@
       "status": "blocked",
       "owner": "release-manager",
       "packetId": "review-packet-final-release-decision",
+      "reviewerQueueId": "reviewer-queue-final-release-decision",
       "handoffId": "decision-handoff-final-release-decision",
+      "escalationWindowId": "escalation-window-final-release-decision",
       "closeoutId": "evidence-closeout-final-release-decision",
+      "closeoutWindowId": "closeout-window-final-release-decision",
       "evidence": [
+        "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+        "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+        "release/PUBLISH-GATES.json",
+        "release/PROMOTION-GATES.json"
+      ]
+    }
+  ],
+  "reviewerQueues": [
+    {
+      "id": "reviewer-queue-attestation-intake",
+      "label": "Intake reviewer queue",
+      "status": "handoff-ready",
+      "owner": "release-engineering",
+      "acknowledgementState": "acknowledged",
+      "stageId": "stage-attestation-intake",
+      "windowId": "window-shell-main",
+      "sharedStateLaneId": "shared-state-lane-boundary-review",
+      "entries": [
+        {
+          "id": "queue-entry-attestation-intake-owner",
+          "owner": "release-engineering",
+          "status": "active",
+          "acknowledgementState": "acknowledged"
+        },
+        {
+          "id": "queue-entry-attestation-intake-board",
+          "owner": "release-manager",
+          "status": "queued",
+          "acknowledgementState": "pending"
+        }
+      ]
+    },
+    {
+      "id": "reviewer-queue-approval-orchestration",
+      "label": "Approval reviewer queue",
+      "status": "active",
+      "owner": "release-manager",
+      "acknowledgementState": "pending",
+      "stageId": "stage-approval-orchestration",
+      "windowId": "window-trace-review",
+      "sharedStateLaneId": "shared-state-lane-trace-review",
+      "entries": [
+        {
+          "id": "queue-entry-approval-owner",
+          "owner": "release-manager",
+          "status": "active",
+          "acknowledgementState": "pending"
+        },
+        {
+          "id": "queue-entry-approval-product-owner",
+          "owner": "product-owner",
+          "status": "awaiting-ack",
+          "acknowledgementState": "pending"
+        },
+        {
+          "id": "queue-entry-approval-runtime-owner",
+          "owner": "runtime-owner",
+          "status": "queued",
+          "acknowledgementState": "pending"
+        }
+      ]
+    },
+    {
+      "id": "reviewer-queue-lifecycle-enforcement",
+      "label": "Lifecycle reviewer queue",
+      "status": "handoff-ready",
+      "owner": "product-owner",
+      "acknowledgementState": "blocked",
+      "stageId": "stage-lifecycle-enforcement",
+      "windowId": "window-review-board",
+      "sharedStateLaneId": "shared-state-lane-preview-review",
+      "entries": [
+        {
+          "id": "queue-entry-lifecycle-owner",
+          "owner": "product-owner",
+          "status": "queued",
+          "acknowledgementState": "blocked"
+        },
+        {
+          "id": "queue-entry-lifecycle-runtime-owner",
+          "owner": "runtime-owner",
+          "status": "queued",
+          "acknowledgementState": "blocked"
+        }
+      ]
+    },
+    {
+      "id": "reviewer-queue-rollback-settlement",
+      "label": "Rollback settlement queue",
+      "status": "escalated",
+      "owner": "runtime-owner",
+      "acknowledgementState": "overdue",
+      "stageId": "stage-rollback-settlement",
+      "windowId": "window-trace-review",
+      "sharedStateLaneId": "shared-state-lane-trace-review",
+      "entries": [
+        {
+          "id": "queue-entry-rollback-owner",
+          "owner": "runtime-owner",
+          "status": "escalated",
+          "acknowledgementState": "overdue"
+        },
+        {
+          "id": "queue-entry-rollback-release-manager",
+          "owner": "release-manager",
+          "status": "queued",
+          "acknowledgementState": "overdue"
+        }
+      ]
+    },
+    {
+      "id": "reviewer-queue-final-release-decision",
+      "label": "Final decision queue",
+      "status": "closed",
+      "owner": "release-manager",
+      "acknowledgementState": "blocked",
+      "stageId": "stage-final-release-decision",
+      "windowId": "window-shell-main",
+      "sharedStateLaneId": "shared-state-lane-boundary-review",
+      "entries": [
+        {
+          "id": "queue-entry-final-owner",
+          "owner": "release-manager",
+          "status": "closed",
+          "acknowledgementState": "blocked"
+        },
+        {
+          "id": "queue-entry-final-signing",
+          "owner": "signing-gate",
+          "status": "queued",
+          "acknowledgementState": "blocked"
+        }
+      ]
+    }
+  ],
+  "escalationWindows": [
+    {
+      "id": "escalation-window-attestation-intake",
+      "label": "Intake escalation watch",
+      "state": "watch",
+      "acknowledgementState": "acknowledged",
+      "owner": "release-engineering",
+      "stageId": "stage-attestation-intake",
+      "reviewerQueueId": "reviewer-queue-attestation-intake",
+      "deadlineLabel": "Before board pickup",
+      "trigger": "Open only if release-manager pickup drifts past the local review window."
+    },
+    {
+      "id": "escalation-window-approval-orchestration",
+      "label": "Decision-lifecycle escalation window",
+      "state": "open",
+      "acknowledgementState": "pending",
+      "owner": "release-manager",
+      "stageId": "stage-approval-orchestration",
+      "reviewerQueueId": "reviewer-queue-approval-orchestration",
+      "deadlineLabel": "Next 30 min",
+      "trigger": "Escalate if product-owner acknowledgement remains pending after the current local review pass."
+    },
+    {
+      "id": "escalation-window-lifecycle-enforcement",
+      "label": "Lifecycle handoff escalation window",
+      "state": "blocked",
+      "acknowledgementState": "blocked",
+      "owner": "product-owner",
+      "stageId": "stage-lifecycle-enforcement",
+      "reviewerQueueId": "reviewer-queue-lifecycle-enforcement",
+      "deadlineLabel": "After approval closeout",
+      "trigger": "Blocked until approval closeout stops holding the lifecycle queue."
+    },
+    {
+      "id": "escalation-window-rollback-settlement",
+      "label": "Rollback settlement escalation window",
+      "state": "escalated",
+      "acknowledgementState": "overdue",
+      "owner": "runtime-owner",
+      "stageId": "stage-rollback-settlement",
+      "reviewerQueueId": "reviewer-queue-rollback-settlement",
+      "deadlineLabel": "Escalated now",
+      "trigger": "Lifecycle evidence is still missing after the local rollback review window elapsed."
+    },
+    {
+      "id": "escalation-window-final-release-decision",
+      "label": "Final decision escalation window",
+      "state": "blocked",
+      "acknowledgementState": "blocked",
+      "owner": "release-manager",
+      "stageId": "stage-final-release-decision",
+      "reviewerQueueId": "reviewer-queue-final-release-decision",
+      "deadlineLabel": "Blocked by gates",
+      "trigger": "Cannot open until signing and publish gates stop being metadata-only."
+    }
+  ],
+  "closeoutWindows": [
+    {
+      "id": "closeout-window-attestation-intake",
+      "label": "Intake closeout window",
+      "state": "scheduled",
+      "acknowledgementState": "acknowledged",
+      "owner": "release-engineering",
+      "stageId": "stage-attestation-intake",
+      "reviewerQueueId": "reviewer-queue-attestation-intake",
+      "sealedEvidence": [
+        "release/RELEASE-MANIFEST.json"
+      ],
+      "pendingEvidence": [
+        "release/ATTESTATION-VERIFICATION-PACKS.json",
+        "release/ATTESTATION-APPLY-AUDIT-PACKS.json"
+      ]
+    },
+    {
+      "id": "closeout-window-approval-orchestration",
+      "label": "Approval closeout window",
+      "state": "open",
+      "acknowledgementState": "pending",
+      "owner": "release-manager",
+      "stageId": "stage-approval-orchestration",
+      "reviewerQueueId": "reviewer-queue-approval-orchestration",
+      "sealedEvidence": [
+        "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json"
+      ],
+      "pendingEvidence": [
+        "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+        "release/RELEASE-APPROVAL-WORKFLOW.json",
+        "release/RELEASE-DECISION-HANDOFF.json"
+      ]
+    },
+    {
+      "id": "closeout-window-lifecycle-enforcement",
+      "label": "Lifecycle closeout window",
+      "state": "scheduled",
+      "acknowledgementState": "blocked",
+      "owner": "product-owner",
+      "stageId": "stage-lifecycle-enforcement",
+      "reviewerQueueId": "reviewer-queue-lifecycle-enforcement",
+      "sealedEvidence": [],
+      "pendingEvidence": [
+        "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+        "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+      ]
+    },
+    {
+      "id": "closeout-window-rollback-settlement",
+      "label": "Rollback settlement closeout window",
+      "state": "ready-to-seal",
+      "acknowledgementState": "overdue",
+      "owner": "runtime-owner",
+      "stageId": "stage-rollback-settlement",
+      "reviewerQueueId": "reviewer-queue-rollback-settlement",
+      "sealedEvidence": [
+        "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json"
+      ],
+      "pendingEvidence": [
+        "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
+        "release/REVIEW-EVIDENCE-CLOSEOUT.json"
+      ]
+    },
+    {
+      "id": "closeout-window-final-release-decision",
+      "label": "Final decision closeout window",
+      "state": "blocked",
+      "acknowledgementState": "blocked",
+      "owner": "release-manager",
+      "stageId": "stage-final-release-decision",
+      "reviewerQueueId": "reviewer-queue-final-release-decision",
+      "sealedEvidence": [],
+      "pendingEvidence": [
         "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
         "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
         "release/PUBLISH-GATES.json",
@@ -112,8 +403,9 @@
   ],
   "blockedBy": [
     "operator review board remains review-only",
+    "reviewer queues remain local-only metadata",
+    "acknowledgement, escalation, and closeout windows remain descriptive only",
     "decision baton remains metadata-only",
-    "evidence sealing remains descriptive only",
     "host-side execution remains disabled"
   ]
 }

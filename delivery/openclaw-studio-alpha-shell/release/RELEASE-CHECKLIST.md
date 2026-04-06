@@ -1,4 +1,4 @@
-# OpenClaw Studio Phase57 Release Checklist
+# OpenClaw Studio Phase58 Release Checklist
 
 ## Required Commands
 
@@ -92,7 +92,7 @@
 - structured alpha-shell snapshot under delivery/openclaw-studio-alpha-shell
 - built renderer bundle copied into artifacts/renderer
 - built Electron bundle copied into artifacts/electron
-- review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase57 operator review board / decision handoff / evidence closeout artifacts without executing anything
+- review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase58 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything
 - deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references
 - deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, and inspector-command linkage
 - persisted shell layout foundation backed by localStorage

@@ -1,15 +1,15 @@
-# OpenClaw Studio Phase57 Package Snapshot
+# OpenClaw Studio Phase58 Package Snapshot
 
-这是一个 **phase57 alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47/48/49/50/51/52/53/54/55/56 packaging 与 shell foundations 的基础上，把 local-only multi-window orchestration、cross-window shared-state review surface、以及 review-only release approval pipeline 继续推进成更明确的 operator review board / decision handoff / evidence closeout 审阅壳，但它依然 **不是 installer**。
+这是一个 **phase58 alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47/48/49/50/51/52/53/54/55/56/57 packaging 与 shell foundations 的基础上，把 local-only multi-window orchestration、cross-window shared-state review surface、以及 review-only release approval pipeline 继续推进成更明确的 operator review loop / reviewer queue / acknowledgement / escalation window / closeout window 审阅壳，但它依然 **不是 installer**。
 
-当前已验证里程碑：phase57 operator review board / decision handoff / evidence closeout / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout。
+当前已验证里程碑：phase58 operator review loop / reviewer queues / acknowledgement state / escalation windows / closeout windows / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout。
 
 ## 当前能交付什么
 
 - structured alpha-shell snapshot under delivery/openclaw-studio-alpha-shell
 - built renderer bundle copied into artifacts/renderer
 - built Electron bundle copied into artifacts/electron
-- review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase57 operator review board / decision handoff / evidence closeout artifacts without executing anything
+- review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase58 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything
 - deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references
 - deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, and inspector-command linkage
 - persisted shell layout foundation backed by localStorage
@@ -154,8 +154,8 @@ openclaw-studio-alpha-shell/
 
 ## 已复制的 artifact 组
 
-- Renderer bundle: 3 files, 452.7 KiB, output=artifacts/renderer
-- Electron bundle: 15 files, 372.8 KiB, output=artifacts/electron
+- Renderer bundle: 3 files, 493.3 KiB, output=artifacts/renderer
+- Electron bundle: 15 files, 376.3 KiB, output=artifacts/electron
 
 ## 已包含的文档
 
@@ -310,4 +310,4 @@ openclaw-studio-alpha-shell/
 - `scripts/install-placeholder.cjs` 只解释当前 installer 仍缺什么，不执行安装
 - 如需重新生成整个 snapshot，请回到 repo root 运行 `npm run package:alpha`
 
-Generated: 2026-04-06T09:26:36.378Z
+Generated: 2026-04-06T10:41:01.137Z
