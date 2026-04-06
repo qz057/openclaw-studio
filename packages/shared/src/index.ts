@@ -3870,9 +3870,9 @@ export const mockShellState: StudioShellState = {
           {
             id: "settings-advanced",
             label: "Product foundations",
-            value: "Phase51 active",
+            value: "Phase52 active",
             detail:
-              "Attestation operator settlement packs, promotion staged-apply signoff sheets, rollback cutover publication bundles, release approval workflow, and promotion gating are active, but they remain local-only and non-executing.",
+              "Attestation operator approval execution envelopes, promotion staged-apply release decision records, rollback cutover publication recovery receipts, release approval workflow, and promotion gating are active, but they remain local-only and non-executing.",
             tone: "positive"
           }
         ]

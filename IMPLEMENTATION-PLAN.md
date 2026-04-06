@@ -223,6 +223,15 @@
 - smoke 已提升到验证 phase51 attestation operator settlement packs / promotion staged-apply signoff sheets / rollback cutover publication bundles contract 与 renderer markers
 - README / HANDOFF / package snapshot 已同步反映 phase51 reality
 
+### Phase 52（当前已完成）
+- phase51 的 formal-release skeleton 已继续下沉成更明确的 attestation operator approval execution envelopes / promotion staged-apply release decision records / rollback cutover publication recovery receipts layer
+- release skeleton 现在补齐 ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES / PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS / ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS
+- shell 现在补齐 Attestation Operator Approval Execution Envelopes / Promotion Staged-apply Release Decision Records / Rollback Cutover Publication Recovery Receipts 可见性
+- package snapshot 现在具备 attestation operator approval execution envelopes / promotion staged-apply release decision records / rollback cutover publication recovery receipts，但仍不做真实 installer / approval / publish / approval envelope issue / staged release decision enforcement / publication recovery receipt emission
+- 全部仍然保持 `local-only`，不做真实 host-side execution 或系统级窗口操作
+- smoke 已提升到验证 phase52 attestation operator approval execution envelopes / promotion staged-apply release decision records / rollback cutover publication recovery receipts contract 与 renderer markers
+- README / HANDOFF / package snapshot 已同步反映 phase52 reality
+
 ## 当前明确边界
 
 当前只允许：
@@ -231,7 +240,7 @@
 - dry-run / preview / simulate
 - Studio-local execute（只改应用内 in-memory state/history）
 - phase27 command surface / layout persistence / window intent staging
-- phase51 attestation operator settlement packs / promotion staged-apply signoff sheets / rollback cutover publication bundles
+- phase52 attestation operator approval execution envelopes / promotion staged-apply release decision records / rollback cutover publication recovery receipts
 - phase26/27/28 release skeleton / artifact review / handoff docs / package metadata
 
 当前明确禁止：
@@ -253,7 +262,7 @@ npm run start:smoke
 npm run package:alpha
 ```
 
-phase51 可额外跑：
+phase52 可额外跑：
 
 ```bash
 npm run release:plan
@@ -261,13 +270,13 @@ npm run release:plan
 
 ## 下一阶段（建议）
 
-### Phase 50
-目标：在不开放危险执行的前提下，继续把 phase51 foundations 推进为更完整的产品能力与交付链路。
+### Phase 53
+目标：在不开放危险执行的前提下，继续把 phase52 foundations 推进为更完整的产品能力与交付链路。
 
 范围建议：
 - 更深的 Inspector / command depth / trace drill-down
 - 更真实的 multi-window orchestration 与跨窗口共享状态
-- 把当前 skeleton 继续推进为 executable review-only attestation operator receipt reconciliation / promotion staged-apply confirmation closeout / rollback cutover execution record closeout / release approval pipeline
+- 把当前 skeleton 继续推进为 executable review-only attestation operator approval envelope routing / promotion staged release decision enforcement / rollback cutover publication recovery closeout / release approval pipeline
 - 在 approval / lifecycle / rollback 真实闭环前继续提升 observability，而不是开启真实 host-side execution
 
 ### 后续阶段

@@ -4,10 +4,10 @@ const path = require("node:path");
 const { getPaths, getPreflightSummary } = require("./studio-preflight.cjs");
 
 const APP_NAME = "OpenClaw Studio";
-const PHASE_ID = "phase51";
-const PHASE_TITLE = "Phase51";
+const PHASE_ID = "phase52";
+const PHASE_TITLE = "Phase52";
 const PHASE_MILESTONE =
-  "phase51 attestation operator settlement packs / promotion staged-apply signoff sheets / rollback cutover publication bundles + docs / smoke / package / release-plan / UI / shared data closeout";
+  "phase52 attestation operator approval execution envelopes / promotion staged-apply release decision records / rollback cutover publication recovery receipts + docs / smoke / package / release-plan / UI / shared data closeout";
 const RELEASE_CHANNEL = "alpha";
 const PACKAGE_ID = "openclaw-studio-alpha-shell";
 const PACKAGE_KIND = "alpha-shell-release-skeleton";
@@ -26,8 +26,8 @@ const CURRENT_DELIVERY_SURFACES = [
   "deeper inspector drilldowns, active flow state, route-aware next-step boards, and inspector-command linkage",
   "persisted shell layout foundation backed by localStorage",
   "cross-view local orchestration boards linking route, workflow lane, workspace, detached candidate, intent focus, focused slot, and handoff posture",
-  "release manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged app materialization skeleton / packaged app directory materialization / packaged app staged output skeleton / packaged app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / attestation apply audit packs / attestation apply execution packets / attestation operator worklists / attestation operator dispatch manifests / attestation operator dispatch packets / attestation operator dispatch receipts / attestation operator reconciliation ledgers / attestation operator settlement packs / installer targets / installer-target builder skeleton / installer builder execution skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / promotion apply readiness / promotion apply manifests / promotion execution checkpoints / promotion operator handoff rails / promotion staged-apply ledgers / promotion staged-apply runsheets / promotion staged-apply command sheets / promotion staged-apply confirmation ledgers / promotion staged-apply closeout journals / promotion staged-apply signoff sheets / signing-ready metadata / signing-publish pipeline / signing-publish gating handshake / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / rollback recovery ledger / rollback execution rehearsal ledger / rollback operator drillbooks / rollback live-readiness contracts / rollback cutover readiness maps / rollback cutover handoff plans / rollback cutover execution checklists / rollback cutover execution records / rollback cutover outcome reports / rollback cutover publication bundles / release approval workflow / release notes / publish gates / promotion gates under release/",
-  "docs closeout: README / HANDOFF / IMPLEMENTATION-PLAN / PACKAGE-README / RELEASE-SUMMARY / REVIEW-MANIFEST / BUNDLE-MATRIX / BUNDLE-ASSEMBLY / PACKAGED-APP-DIRECTORY-SKELETON / PACKAGED-APP-MATERIALIZATION-SKELETON / PACKAGED-APP-DIRECTORY-MATERIALIZATION / PACKAGED-APP-STAGED-OUTPUT-SKELETON.json / PACKAGED-APP-BUNDLE-SEALING-SKELETON.json / SEALED-BUNDLE-INTEGRITY-CONTRACT.json / INTEGRITY-ATTESTATION-EVIDENCE.json / ATTESTATION-VERIFICATION-PACKS.json / ATTESTATION-APPLY-AUDIT-PACKS.json / ATTESTATION-APPLY-EXECUTION-PACKETS.json / ATTESTATION-OPERATOR-WORKLISTS.json / ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json / ATTESTATION-OPERATOR-DISPATCH-PACKETS.json / ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json / ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json / ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json / INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON / INSTALLER-BUILDER-EXECUTION-SKELETON / INSTALLER-BUILDER-ORCHESTRATION.json / INSTALLER-CHANNEL-ROUTING.json / CHANNEL-PROMOTION-EVIDENCE.json / PROMOTION-APPLY-READINESS.json / PROMOTION-APPLY-MANIFESTS.json / PROMOTION-EXECUTION-CHECKPOINTS.json / PROMOTION-OPERATOR-HANDOFF-RAILS.json / PROMOTION-STAGED-APPLY-LEDGERS.json / PROMOTION-STAGED-APPLY-RUNSHEETS.json / PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json / PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json / PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json / PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json / SIGNING-METADATA / NOTARIZATION-PLAN / SIGNING-PUBLISH-PIPELINE / SIGNING-PUBLISH-GATING-HANDSHAKE / SIGNING-PUBLISH-APPROVAL-BRIDGE.json / SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json / PUBLISH-ROLLBACK-HANDSHAKE.json / ROLLBACK-RECOVERY-LEDGER.json / ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json / ROLLBACK-OPERATOR-DRILLBOOKS.json / ROLLBACK-LIVE-READINESS-CONTRACTS.json / ROLLBACK-CUTOVER-READINESS-MAPS.json / ROLLBACK-CUTOVER-HANDOFF-PLANS.json / ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json / ROLLBACK-CUTOVER-EXECUTION-RECORDS.json / ROLLBACK-CUTOVER-OUTCOME-REPORTS.json / ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json / RELEASE-APPROVAL-WORKFLOW / RELEASE-NOTES / PUBLISH-GATES / PROMOTION-GATES",
+  "release manifest / build metadata / review manifest / bundle matrix / bundle assembly / packaged app directory skeleton / packaged app materialization skeleton / packaged app directory materialization / packaged app staged output skeleton / packaged app bundle sealing skeleton / sealed-bundle integrity contract / integrity attestation evidence / attestation verification packs / attestation apply audit packs / attestation apply execution packets / attestation operator worklists / attestation operator dispatch manifests / attestation operator dispatch packets / attestation operator dispatch receipts / attestation operator reconciliation ledgers / attestation operator settlement packs / attestation operator approval execution envelopes / installer targets / installer-target builder skeleton / installer builder execution skeleton / installer builder orchestration / installer channel routing / channel promotion evidence / promotion apply readiness / promotion apply manifests / promotion execution checkpoints / promotion operator handoff rails / promotion staged-apply ledgers / promotion staged-apply runsheets / promotion staged-apply command sheets / promotion staged-apply confirmation ledgers / promotion staged-apply closeout journals / promotion staged-apply signoff sheets / promotion staged-apply release decision records / signing-ready metadata / signing-publish pipeline / signing-publish gating handshake / signing-publish approval bridge / signing-publish promotion handshake / publish rollback handshake / rollback recovery ledger / rollback execution rehearsal ledger / rollback operator drillbooks / rollback live-readiness contracts / rollback cutover readiness maps / rollback cutover handoff plans / rollback cutover execution checklists / rollback cutover execution records / rollback cutover outcome reports / rollback cutover publication bundles / rollback cutover publication recovery receipts / release approval workflow / release notes / publish gates / promotion gates under release/",
+  "docs closeout: README / HANDOFF / IMPLEMENTATION-PLAN / PACKAGE-README / RELEASE-SUMMARY / REVIEW-MANIFEST / BUNDLE-MATRIX / BUNDLE-ASSEMBLY / PACKAGED-APP-DIRECTORY-SKELETON / PACKAGED-APP-MATERIALIZATION-SKELETON / PACKAGED-APP-DIRECTORY-MATERIALIZATION / PACKAGED-APP-STAGED-OUTPUT-SKELETON.json / PACKAGED-APP-BUNDLE-SEALING-SKELETON.json / SEALED-BUNDLE-INTEGRITY-CONTRACT.json / INTEGRITY-ATTESTATION-EVIDENCE.json / ATTESTATION-VERIFICATION-PACKS.json / ATTESTATION-APPLY-AUDIT-PACKS.json / ATTESTATION-APPLY-EXECUTION-PACKETS.json / ATTESTATION-OPERATOR-WORKLISTS.json / ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json / ATTESTATION-OPERATOR-DISPATCH-PACKETS.json / ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json / ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json / ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json / ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json / INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON / INSTALLER-BUILDER-EXECUTION-SKELETON / INSTALLER-BUILDER-ORCHESTRATION.json / INSTALLER-CHANNEL-ROUTING.json / CHANNEL-PROMOTION-EVIDENCE.json / PROMOTION-APPLY-READINESS.json / PROMOTION-APPLY-MANIFESTS.json / PROMOTION-EXECUTION-CHECKPOINTS.json / PROMOTION-OPERATOR-HANDOFF-RAILS.json / PROMOTION-STAGED-APPLY-LEDGERS.json / PROMOTION-STAGED-APPLY-RUNSHEETS.json / PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json / PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json / PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json / PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json / PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json / SIGNING-METADATA / NOTARIZATION-PLAN / SIGNING-PUBLISH-PIPELINE / SIGNING-PUBLISH-GATING-HANDSHAKE / SIGNING-PUBLISH-APPROVAL-BRIDGE.json / SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json / PUBLISH-ROLLBACK-HANDSHAKE.json / ROLLBACK-RECOVERY-LEDGER.json / ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json / ROLLBACK-OPERATOR-DRILLBOOKS.json / ROLLBACK-LIVE-READINESS-CONTRACTS.json / ROLLBACK-CUTOVER-READINESS-MAPS.json / ROLLBACK-CUTOVER-HANDOFF-PLANS.json / ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json / ROLLBACK-CUTOVER-EXECUTION-RECORDS.json / ROLLBACK-CUTOVER-OUTCOME-REPORTS.json / ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json / ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json / RELEASE-APPROVAL-WORKFLOW / RELEASE-NOTES / PUBLISH-GATES / PROMOTION-GATES",
   "placeholder installer explainer script that never installs anything"
 ];
 const FORMAL_INSTALLER_GAPS = [
@@ -41,6 +41,7 @@ const FORMAL_INSTALLER_GAPS = [
   "no executable attestation operator dispatch receipt capture, acknowledgement reconciliation closeout, or escalation settlement yet; dispatch receipts remain review-only metadata",
   "no executable attestation operator reconciliation settlement, escalation clear, or approval-ready closeout yet; reconciliation ledgers remain review-only metadata",
   "no executable attestation operator settlement pack assembly, operator clearance routing, or approval attachment emission yet; settlement packs remain review-only metadata",
+  "no executable attestation operator approval envelope issue, approval-window routing, or operator execution handoff yet; approval execution envelopes remain review-only metadata",
   "no Windows / macOS / Linux installer builder orchestration and channel routing wiring yet; routing remains review-only skeleton",
   "no executable channel promotion evidence pack or promotion routing apply yet; evidence remains review-only metadata",
   "no executable promotion apply manifests or channel apply execution yet; apply manifests remain review-only metadata",
@@ -50,6 +51,7 @@ const FORMAL_INSTALLER_GAPS = [
   "no executable promotion staged-apply confirmation capture, stage acceptance journaling, or cutover closeout reconciliation yet; confirmation ledgers remain review-only metadata",
   "no executable promotion staged-apply closeout sealing, recovery baton handoff, or publish-ready closeout yet; closeout journals remain review-only metadata",
   "no executable promotion staged-apply signoff capture, approver expiry enforcement, or release-ready signoff emission yet; signoff sheets remain review-only metadata",
+  "no executable promotion staged release decision capture, staged go/no-go enforcement, or release decision routing yet; staged release decision records remain review-only metadata",
   "no signing / notarization / hash publication workflow yet; approval bridge remains metadata-only",
   "no executable signing-publish gating handshake yet; handshake remains metadata-only",
   "no executable release approval handshake yet; workflow remains metadata-only",
@@ -60,6 +62,7 @@ const FORMAL_INSTALLER_GAPS = [
   "no executable rollback cutover execution record emission, evidence closeout, or recovery-state publication yet; execution records remain review-only metadata",
   "no executable rollback cutover outcome publication, recovery digest seal, or rollback release report emission yet; outcome reports remain review-only metadata",
   "no executable rollback cutover publication bundle assembly, release-note attachment, or publication handoff yet; publication bundles remain review-only metadata",
+  "no executable rollback cutover publication recovery receipt emission, recovery acknowledgement closeout, or publication receipt routing yet; publication recovery receipts remain review-only metadata",
   "no release publishing / artifact upload / promotion handshake / rollback apply automation yet; publish rollback handshake remains metadata-only",
   "real host-side execution remains disabled until approval / lifecycle / rollback close the loop"
 ];
@@ -83,6 +86,7 @@ const FUTURE_INSTALLER_PIPELINE = [
   "turn attestation operator dispatch receipts into operator acknowledgement capture, reconciliation ledgers, and escalation closeout records only after dispatch packets, staged-apply confirmation ledgers, and rollback execution records are reviewable end-to-end",
   "turn attestation operator reconciliation ledgers into operator settlement packs, escalation disposition envelopes, and signoff-ready handoff evidence only after dispatch receipts, staged-apply closeout journals, and rollback outcome reports are reviewable end-to-end",
   "turn attestation operator settlement packs into explicit operator clearance packets, gating handoff bundles, and release approval attachments only after staged-apply signoff sheets and rollback publication bundles are reviewable end-to-end",
+  "turn attestation operator approval execution envelopes into operator-ready approval packets, execution windows, and approval handoff routes only after settlement packs, staged release decision records, and publication recovery receipts are reviewable end-to-end",
   "turn installer builder orchestration metadata into real per-platform builder wiring without leaving local-only review mode first",
   "turn installer channel routing metadata into explicit alpha/beta/stable routing manifests only after builder execution, approval, and rollback are reviewable end-to-end",
   "turn channel promotion evidence metadata into explicit promotion packets only after upload, approval, and rollback evidence exist together",
@@ -96,6 +100,7 @@ const FUTURE_INSTALLER_PIPELINE = [
   "turn promotion staged-apply confirmation ledgers into stage acceptance journals, cutover confirmation ledgers, and receipt reconciliation anchors only after dispatch receipts, command sheets, and rollback execution records are reviewable end-to-end",
   "turn promotion staged-apply closeout journals into staged-apply signoff sheets, approver expiry tracks, and release-ready handoff journals only after reconciliation ledgers, settlement packs, and rollback outcome reports are reviewable end-to-end",
   "turn promotion staged-apply signoff sheets into explicit release signoff packets, promotion go/no-go sheets, and publish gate attachments only after settlement packs, publication bundles, and approval workflows are reviewable end-to-end",
+  "turn promotion staged-apply release decision records into staged release go/no-go captures, decision expiry tracks, and publish-route decisions only after approval execution envelopes, signoff sheets, and publication recovery receipts are reviewable end-to-end",
   "add signing-ready metadata / signing-publish pipeline / signing-publish approval bridge / notarization / checksum publishing",
   "turn the signing-publish gating handshake from metadata into an executable review gate only after approval / lifecycle / rollback are real",
   "turn the signing-publish promotion handshake from metadata into a gated promotion contract only after upload, approval, and rollback are real",
@@ -110,6 +115,7 @@ const FUTURE_INSTALLER_PIPELINE = [
   "turn rollback cutover execution records into evidence-backed cutover closeout records, recovery-state publications, and rollback receipt links only after execution checklists, staged-apply confirmation ledgers, and publish rollback paths are reviewable end-to-end",
   "turn rollback cutover outcome reports into rollback cutover publication bundles, recovery digests, and release-facing closeout bundles only after execution records, staged-apply closeout journals, and settlement packs are reviewable end-to-end",
   "turn rollback cutover publication bundles into explicit release-note attachments, publish handoff packets, and rollback publication evidence only after staged-apply signoff sheets, publish gates, and release notes are reviewable end-to-end",
+  "turn rollback cutover publication recovery receipts into recovery acknowledgement records, publication-closeout receipts, and rollback recovery evidence only after publication bundles, approval execution envelopes, and staged release decision records are reviewable end-to-end",
   "turn the release approval workflow from metadata into a gated review handshake only after approval / lifecycle / rollback are real",
   "attach release notes, uploaded artifacts, publish gating, and promotion gating metadata",
   "gate any future live host execution behind approval / lifecycle / rollback validation"
@@ -134,6 +140,7 @@ const FORMAL_RELEASE_ARTIFACTS = [
   "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
   "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
   "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+  "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
   "release/INSTALLER-TARGETS.json",
   "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
   "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
@@ -150,6 +157,7 @@ const FORMAL_RELEASE_ARTIFACTS = [
   "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
   "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
   "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+  "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
   "release/SIGNING-METADATA.json",
   "release/NOTARIZATION-PLAN.json",
   "release/SIGNING-PUBLISH-PIPELINE.json",
@@ -167,6 +175,7 @@ const FORMAL_RELEASE_ARTIFACTS = [
   "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
   "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
   "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+  "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json",
   "release/RELEASE-APPROVAL-WORKFLOW.json",
   "release/RELEASE-NOTES.md",
   "release/PUBLISH-GATES.json",
@@ -192,6 +201,7 @@ const RELEASE_PIPELINE_STAGES = [
   "attestation-operator-dispatch-receipts",
   "attestation-operator-reconciliation-ledgers",
   "attestation-operator-settlement-packs",
+  "attestation-operator-approval-execution-envelopes",
   "installer-target-metadata",
   "installer-target-builder-skeleton",
   "installer-builder-execution-skeleton",
@@ -208,6 +218,7 @@ const RELEASE_PIPELINE_STAGES = [
   "promotion-staged-apply-confirmation-ledgers",
   "promotion-staged-apply-closeout-journals",
   "promotion-staged-apply-signoff-sheets",
+  "promotion-staged-apply-release-decision-records",
   "signing-ready-metadata",
   "signing-publish-pipeline-skeleton",
   "signing-publish-gating-handshake",
@@ -224,12 +235,13 @@ const RELEASE_PIPELINE_STAGES = [
   "rollback-cutover-execution-records",
   "rollback-cutover-outcome-reports",
   "rollback-cutover-publication-bundles",
+  "rollback-cutover-publication-recovery-receipts",
   "approval-workflow-skeleton",
   "notarization-blocked",
   "promotion-gated"
 ];
 const REVIEW_STAGE_ID =
-  "attestation-operator-settlement-packs-promotion-staged-apply-signoff-sheets-rollback-cutover-publication-bundles-skeleton";
+  "attestation-operator-approval-execution-envelopes-promotion-staged-apply-release-decision-records-rollback-cutover-publication-recovery-receipts-skeleton";
 const PACKAGE_LAYOUT = [
   {
     id: "docs-root",
@@ -254,7 +266,7 @@ const PACKAGE_LAYOUT = [
     label: "Release metadata",
     path: "release",
     description:
-      "Manifest, build metadata, attestation verification packs, attestation apply audit packs, attestation apply execution packets, attestation operator worklists, attestation operator dispatch manifests, attestation operator dispatch packets, attestation operator dispatch receipts, attestation operator reconciliation ledgers, attestation operator settlement packs, promotion apply manifests, promotion execution checkpoints, promotion operator handoff rails, promotion staged-apply ledgers, promotion staged-apply runsheets, promotion staged-apply command sheets, promotion staged-apply confirmation ledgers, promotion staged-apply closeout journals, promotion staged-apply signoff sheets, rollback rehearsal ledgers, rollback operator drillbooks, rollback live-readiness contracts, rollback cutover readiness maps, rollback cutover handoff plans, rollback cutover execution checklists, rollback cutover execution records, rollback cutover outcome reports, rollback cutover publication bundles, packaged app directory skeletons, signing/publish handshake metadata, installer targets, approval workflow, installer placeholder contract, and release checklist."
+      "Manifest, build metadata, attestation verification packs, attestation apply audit packs, attestation apply execution packets, attestation operator worklists, attestation operator dispatch manifests, attestation operator dispatch packets, attestation operator dispatch receipts, attestation operator reconciliation ledgers, attestation operator settlement packs, attestation operator approval execution envelopes, promotion apply manifests, promotion execution checkpoints, promotion operator handoff rails, promotion staged-apply ledgers, promotion staged-apply runsheets, promotion staged-apply command sheets, promotion staged-apply confirmation ledgers, promotion staged-apply closeout journals, promotion staged-apply signoff sheets, promotion staged-apply release decision records, rollback rehearsal ledgers, rollback operator drillbooks, rollback live-readiness contracts, rollback cutover readiness maps, rollback cutover handoff plans, rollback cutover execution checklists, rollback cutover execution records, rollback cutover outcome reports, rollback cutover publication bundles, rollback cutover publication recovery receipts, packaged app directory skeletons, signing/publish handshake metadata, installer targets, approval workflow, installer placeholder contract, and release checklist."
   },
   {
     id: "release-scripts",
@@ -488,6 +500,12 @@ function buildGeneratedDocs() {
       generated: true
     },
     {
+      id: "attestation-operator-approval-execution-envelopes",
+      label: "Attestation operator approval execution envelopes",
+      outputPath: "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
+      generated: true
+    },
+    {
       id: "installer-targets",
       label: "Installer targets",
       outputPath: "release/INSTALLER-TARGETS.json",
@@ -581,6 +599,12 @@ function buildGeneratedDocs() {
       id: "promotion-staged-apply-signoff-sheets",
       label: "Promotion staged-apply signoff sheets",
       outputPath: "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+      generated: true
+    },
+    {
+      id: "promotion-staged-apply-release-decision-records",
+      label: "Promotion staged-apply release decision records",
+      outputPath: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
       generated: true
     },
     {
@@ -686,6 +710,12 @@ function buildGeneratedDocs() {
       generated: true
     },
     {
+      id: "rollback-cutover-publication-recovery-receipts",
+      label: "Rollback cutover publication recovery receipts",
+      outputPath: "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json",
+      generated: true
+    },
+    {
       id: "release-approval-workflow",
       label: "Release approval workflow",
       outputPath: "release/RELEASE-APPROVAL-WORKFLOW.json",
@@ -762,6 +792,7 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
     "    ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
     "    ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
     "    ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+    "    ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
     "    INSTALLER-TARGETS.json",
     "    INSTALLER-TARGET-BUILDER-SKELETON.json",
     "    INSTALLER-BUILDER-EXECUTION-SKELETON.json",
@@ -778,6 +809,7 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
     "    PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
     "    PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
     "    PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+    "    PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
     "    SIGNING-METADATA.json",
     "    NOTARIZATION-PLAN.json",
     "    SIGNING-PUBLISH-PIPELINE.json",
@@ -795,6 +827,7 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
     "    ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
     "    ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
     "    ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+    "    ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json",
     "    RELEASE-APPROVAL-WORKFLOW.json",
     "    RELEASE-NOTES.md",
     "    PUBLISH-GATES.json",
@@ -809,7 +842,7 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
   return [
     `# OpenClaw Studio ${PHASE_TITLE} Package Snapshot`,
     "",
-    "这是一个 **phase51 alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47/48/49/50 packaging 与 shell foundations 的基础上继续把 attestation operator reconciliation ledgers、promotion staged-apply closeout journals 与 rollback cutover outcome reports推进为 attestation operator settlement packs、promotion staged-apply signoff sheets 与 rollback cutover publication bundles，但它依然 **不是 installer**。",
+    "这是一个 **phase52 alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47/48/49/50/51 packaging 与 shell foundations 的基础上继续把 attestation operator settlement packs、promotion staged-apply signoff sheets 与 rollback cutover publication bundles 推进为 attestation operator approval execution envelopes、promotion staged-apply release decision records 与 rollback cutover publication recovery receipts，但它依然 **不是 installer**。",
     "",
     `当前已验证里程碑：${PHASE_MILESTONE}。`,
     "",
@@ -869,6 +902,7 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
     "- 再看 `release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json`",
     "- 再看 `release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json`",
     "- 再看 `release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json`",
+    "- 再看 `release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json`",
     "- 再看 `release/INSTALLER-TARGETS.json`",
     "- 再看 `release/INSTALLER-TARGET-BUILDER-SKELETON.json`",
     "- 再看 `release/INSTALLER-BUILDER-EXECUTION-SKELETON.json`",
@@ -885,6 +919,7 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
     "- 再看 `release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json`",
     "- 再看 `release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json`",
     "- 再看 `release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json`",
+    "- 再看 `release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json`",
     "- 再看 `release/SIGNING-METADATA.json`",
     "- 再看 `release/NOTARIZATION-PLAN.json`",
     "- 再看 `release/SIGNING-PUBLISH-PIPELINE.json`",
@@ -902,6 +937,7 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
     "- 再看 `release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json`",
     "- 再看 `release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json`",
     "- 再看 `release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json`",
+    "- 再看 `release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json`",
     "- 再看 `release/RELEASE-APPROVAL-WORKFLOW.json`",
     "- 再看 `release/RELEASE-NOTES.md`",
     "- 再看 `release/PUBLISH-GATES.json`",
@@ -957,6 +993,7 @@ function renderReleaseChecklist() {
     "- `release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json` 必须列出 attestation operator dispatch receipts metadata",
     "- `release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json` 必须列出 attestation operator reconciliation ledgers metadata",
     "- `release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json` 必须列出 attestation operator settlement packs metadata",
+    "- `release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json` 必须列出 attestation operator approval execution envelopes metadata",
     "- `release/INSTALLER-TARGETS.json` 必须列出 installer target metadata",
     "- `release/INSTALLER-TARGET-BUILDER-SKELETON.json` 必须列出 installer-target builder skeleton",
     "- `release/INSTALLER-BUILDER-EXECUTION-SKELETON.json` 必须列出 installer builder execution skeleton",
@@ -973,6 +1010,7 @@ function renderReleaseChecklist() {
     "- `release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json` 必须列出 promotion staged-apply confirmation ledgers metadata",
     "- `release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json` 必须列出 promotion staged-apply closeout journals metadata",
     "- `release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json` 必须列出 promotion staged-apply signoff sheets metadata",
+    "- `release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json` 必须列出 promotion staged-apply release decision records metadata",
     "- `release/SIGNING-METADATA.json` 必须列出 signing-ready metadata",
     "- `release/NOTARIZATION-PLAN.json` 必须列出 signing / notarization skeleton",
     "- `release/SIGNING-PUBLISH-PIPELINE.json` 必须列出 signing & publish pipeline skeleton",
@@ -990,6 +1028,7 @@ function renderReleaseChecklist() {
     "- `release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json` 必须列出 rollback cutover execution records metadata",
     "- `release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json` 必须列出 rollback cutover outcome reports metadata",
     "- `release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json` 必须列出 rollback cutover publication bundles metadata",
+    "- `release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json` 必须列出 rollback cutover publication recovery receipts metadata",
     "- `release/RELEASE-APPROVAL-WORKFLOW.json` 必须列出 release approval workflow metadata",
     "- `release/RELEASE-NOTES.md` 必须列出当前 release notes 草案",
     "- `release/PUBLISH-GATES.json` 必须列出 publish gating 条目",
@@ -1040,9 +1079,9 @@ function renderReleaseNotes({ generatedAt }) {
     `Milestone: ${PHASE_MILESTONE}`,
     "",
     "## Highlights",
-    "- attestation operator settlement packs now turn reconciliation ledgers into operator clearance packets, escalation disposition bundles, and release approval attachments without dispatching or reconciling any live operator action for real",
-    "- promotion staged-apply signoff sheets now turn closeout journals into staged approver sheets, release-ready packets, and go/no-go evidence without applying any live promotion for real",
-    "- rollback cutover publication bundles now turn outcome reports into release-note attachments, publication digests, and rollback handoff bundles without mutating any live publish state",
+    "- attestation operator approval execution envelopes now turn settlement packs into operator-ready approval packets, execution windows, and release-approval handoff routes without dispatching any live approval or execution for real",
+    "- promotion staged-apply release decision records now turn signoff sheets into staged go/no-go captures, expiry tracks, and publish-route decisions without applying any live promotion for real",
+    "- rollback cutover publication recovery receipts now turn publication bundles into recovery acknowledgements, publication-closeout receipts, and rollback recovery evidence without mutating any live publish state",
     "",
     "## Current posture",
     "- still local-only",
@@ -1088,6 +1127,7 @@ function buildReviewManifest({ generatedAt, artifactGroups, allDocs }) {
         { id: "pipeline-attestation-operator-dispatch-receipts", label: "Attestation operator dispatch receipts", status: "ready", detail: "Dispatch packets now feed acknowledgement capture slots, reconciliation inputs, and escalation closeout anchors without dispatching any live operator action for real." },
         { id: "pipeline-attestation-operator-reconciliation-ledgers", label: "Attestation operator reconciliation ledgers", status: "ready", detail: "Dispatch receipts now feed operator settlement ledgers, unresolved acknowledgement closeout, and approval-ready summaries without reconciling any live operator action for real." },
         { id: "pipeline-attestation-operator-settlement-packs", label: "Attestation operator settlement packs", status: "ready", detail: "Reconciliation ledgers now feed operator clearance packets, escalation disposition bundles, and approval attachments without routing any live operator settlement for real." },
+        { id: "pipeline-attestation-operator-approval-execution-envelopes", label: "Attestation operator approval execution envelopes", status: "ready", detail: "Settlement packs now feed operator-ready approval packets, execution windows, and approval handoff routes without dispatching any live approval or execution for real." },
         { id: "pipeline-installer-builders", label: "Installer-target builder skeleton", status: "ready", detail: "Installer targets still map cleanly to per-platform builder identities without invoking a real builder." },
         { id: "pipeline-installer-builder-execution", label: "Installer builder execution skeleton", status: "ready", detail: "Future builder commands, environment, outputs, and review checks are now declared without executing any builder." },
         { id: "pipeline-installer-builder-orchestration", label: "Installer builder orchestration", status: "ready", detail: "Builder execution skeletons now sit inside per-platform orchestration flows without invoking any real builder." },
@@ -1103,6 +1143,7 @@ function buildReviewManifest({ generatedAt, artifactGroups, allDocs }) {
         { id: "pipeline-promotion-staged-apply-confirmation-ledgers", label: "Promotion staged-apply confirmation ledgers", status: "ready", detail: "Command sheets now feed stage acceptance journals, cutover confirmation blocks, and closeout inputs without applying any promotion for real." },
         { id: "pipeline-promotion-staged-apply-closeout-journals", label: "Promotion staged-apply closeout journals", status: "ready", detail: "Confirmation ledgers now feed stage closeout seals, recovery batons, and publish-ready cutover journals without applying any promotion for real." },
         { id: "pipeline-promotion-staged-apply-signoff-sheets", label: "Promotion staged-apply signoff sheets", status: "ready", detail: "Closeout journals now feed staged approver sheets, release-ready packets, and go/no-go evidence without applying any promotion for real." },
+        { id: "pipeline-promotion-staged-apply-release-decision-records", label: "Promotion staged-apply release decision records", status: "ready", detail: "Signoff sheets now feed staged release go/no-go captures, decision expiry tracks, and publish-route decisions without applying any promotion for real." },
         { id: "pipeline-signing-publish", label: "Signing & publish pipeline", status: "ready", detail: "Signing, notarization, checksums, upload, and promotion stages remain reviewable as a structured pipeline contract." },
         { id: "pipeline-signing-gating", label: "Signing-publish gating handshake", status: "ready", detail: "Signing, publish, approval, and promotion evidence now flow through a structured handshake contract without approving or publishing anything." },
         { id: "pipeline-signing-approval-bridge", label: "Signing-publish approval bridge", status: "ready", detail: "Gating handshake, approval workflow, and promotion evidence are now bridged as one reviewable approval flow." },
@@ -1118,6 +1159,7 @@ function buildReviewManifest({ generatedAt, artifactGroups, allDocs }) {
         { id: "pipeline-rollback-cutover-execution-records", label: "Rollback cutover execution records", status: "ready", detail: "Rollback cutover execution checklists now feed evidence-backed cutover closeout records, recovery-state publications, and rollback outcome inputs without mutating any live publish state." },
         { id: "pipeline-rollback-cutover-outcome-reports", label: "Rollback cutover outcome reports", status: "ready", detail: "Rollback cutover execution records now feed recovery digests, outcome publications, and rollback-facing closeout reports without mutating any live publish state." },
         { id: "pipeline-rollback-cutover-publication-bundles", label: "Rollback cutover publication bundles", status: "ready", detail: "Outcome reports now feed release-note attachments, publication digests, and rollback publication bundles without mutating any live publish state." },
+        { id: "pipeline-rollback-cutover-publication-recovery-receipts", label: "Rollback cutover publication recovery receipts", status: "ready", detail: "Publication bundles now feed recovery acknowledgements, publication-closeout receipts, and rollback recovery evidence without mutating any live publish state." },
         { id: "pipeline-approval", label: "Release approval workflow", status: "ready", detail: "Release approval remains metadata-only and blocks any live signing, publish, or host-side execution." },
         { id: "pipeline-publish", label: "Promotion gating", status: "blocked", detail: "Installer build, signing, upload, and channel promotion remain intentionally out of scope." }
       ]
@@ -2480,6 +2522,123 @@ function buildAttestationOperatorSettlementPacks({ generatedAt }) {
           "host-side execution remains disabled"
         ],
         canAssembleSettlementPack: false
+      }
+    ]
+  };
+}
+
+function buildAttestationOperatorApprovalExecutionEnvelopes({ generatedAt }) {
+  return {
+    schemaVersion: "openclaw-studio-attestation-operator-approval-execution-envelopes/v1",
+    generatedAt,
+    phase: PHASE_ID,
+    mode: "local-only-review",
+    envelopes: [
+      {
+        id: "attestation-approval-envelope-alpha-to-beta",
+        from: "alpha",
+        to: "beta",
+        attestationOperatorSettlementPackId: "attestation-settlement-pack-alpha-to-beta",
+        promotionStagedApplySignoffSheetId: "promotion-signoff-sheet-alpha-to-beta",
+        rollbackCutoverPublicationBundleId: "rollback-publication-bundle-alpha-to-beta",
+        releaseApprovalStageId: "approval-decision-receipts",
+        gatingStageId: "handshake-attestation-operator-approval-execution-envelopes",
+        publishGateId: "gate-attestation-operator-approval-execution-envelopes",
+        status: "blocked",
+        approvalExecutionEnvelopePath: "future/channels/alpha-to-beta/attestation-operator-approval-execution-envelope.json",
+        executionWindowPath: "future/channels/alpha-to-beta/attestation-operator-approval-execution-window.json",
+        approvalRoutePath: "future/channels/alpha-to-beta/attestation-operator-approval-route.json",
+        handoffTargets: ["release-engineering", "release-manager", "security"],
+        approvals: [
+          {
+            id: "attestation-approval-envelope-alpha-to-beta-security",
+            label: "Security approval envelope",
+            owner: "security-reviewer",
+            status: "planned",
+            evidence: ["attestation-settlement-pack-alpha-to-beta", "promotion-signoff-sheet-alpha-to-beta"]
+          },
+          {
+            id: "attestation-approval-envelope-alpha-to-beta-release-manager",
+            label: "Release routing approval envelope",
+            owner: "release-manager",
+            status: "blocked",
+            evidence: ["attestation-settlement-pack-alpha-to-beta", "rollback-publication-bundle-alpha-to-beta"]
+          },
+          {
+            id: "attestation-approval-envelope-alpha-to-beta-release-engineering",
+            label: "Execution-window approval envelope",
+            owner: "release-engineering",
+            status: "blocked",
+            evidence: ["promotion-signoff-sheet-alpha-to-beta", "rollback-publication-bundle-alpha-to-beta"]
+          }
+        ],
+        reviewChecks: [
+          "settlement pack linked",
+          "promotion signoff sheet linked",
+          "rollback publication bundle linked",
+          "execution window path declared",
+          "approval route path declared"
+        ],
+        blockedBy: [
+          "attestation operator approval execution envelopes remain metadata-only",
+          "release approval remains non-executable",
+          "publish rollback remains non-executable",
+          "host-side execution remains disabled"
+        ],
+        canIssueEnvelope: false
+      },
+      {
+        id: "attestation-approval-envelope-beta-to-stable",
+        from: "beta",
+        to: "stable",
+        attestationOperatorSettlementPackId: "attestation-settlement-pack-beta-to-stable",
+        promotionStagedApplySignoffSheetId: "promotion-signoff-sheet-beta-to-stable",
+        rollbackCutoverPublicationBundleId: "rollback-publication-bundle-beta-to-stable",
+        releaseApprovalStageId: "approval-decision-receipts",
+        gatingStageId: "handshake-attestation-operator-approval-execution-envelopes",
+        publishGateId: "gate-attestation-operator-approval-execution-envelopes",
+        status: "blocked",
+        approvalExecutionEnvelopePath: "future/channels/beta-to-stable/attestation-operator-approval-execution-envelope.json",
+        executionWindowPath: "future/channels/beta-to-stable/attestation-operator-approval-execution-window.json",
+        approvalRoutePath: "future/channels/beta-to-stable/attestation-operator-approval-route.json",
+        handoffTargets: ["release-engineering", "release-manager", "security"],
+        approvals: [
+          {
+            id: "attestation-approval-envelope-beta-to-stable-security",
+            label: "Security approval envelope",
+            owner: "security-reviewer",
+            status: "blocked",
+            evidence: ["attestation-settlement-pack-beta-to-stable", "promotion-signoff-sheet-beta-to-stable"]
+          },
+          {
+            id: "attestation-approval-envelope-beta-to-stable-release-manager",
+            label: "Release routing approval envelope",
+            owner: "release-manager",
+            status: "blocked",
+            evidence: ["attestation-settlement-pack-beta-to-stable", "rollback-publication-bundle-beta-to-stable"]
+          },
+          {
+            id: "attestation-approval-envelope-beta-to-stable-release-engineering",
+            label: "Execution-window approval envelope",
+            owner: "release-engineering",
+            status: "blocked",
+            evidence: ["promotion-signoff-sheet-beta-to-stable", "rollback-publication-bundle-beta-to-stable"]
+          }
+        ],
+        reviewChecks: [
+          "settlement pack linked",
+          "promotion signoff sheet linked",
+          "rollback publication bundle linked",
+          "execution window path declared",
+          "approval route path declared"
+        ],
+        blockedBy: [
+          "attestation operator approval execution envelopes remain metadata-only",
+          "release approval remains non-executable",
+          "publish rollback remains non-executable",
+          "host-side execution remains disabled"
+        ],
+        canIssueEnvelope: false
       }
     ]
   };
@@ -3956,6 +4115,135 @@ function buildPromotionStagedApplySignoffSheets({ generatedAt }) {
   };
 }
 
+function buildPromotionStagedApplyReleaseDecisionRecords({ generatedAt }) {
+  return {
+    schemaVersion: "openclaw-studio-promotion-staged-apply-release-decision-records/v1",
+    generatedAt,
+    phase: PHASE_ID,
+    mode: "local-only-review",
+    decisionRecords: [
+      {
+        id: "promotion-release-decision-record-alpha-to-beta",
+        from: "alpha",
+        to: "beta",
+        promotionStagedApplySignoffSheetId: "promotion-signoff-sheet-alpha-to-beta",
+        attestationOperatorApprovalExecutionEnvelopeId: "attestation-approval-envelope-alpha-to-beta",
+        rollbackCutoverPublicationBundleId: "rollback-publication-bundle-alpha-to-beta",
+        releaseApprovalStageId: "approval-decision-receipts",
+        promotionHandshakeStageId: "promotion-handshake-staged-release-decision-records",
+        publishGateId: "gate-promotion-staged-apply-release-decision-records",
+        status: "blocked",
+        decisionRecordPath: "future/channels/alpha-to-beta/promotion-staged-release-decision-record.json",
+        decisionExpiryPath: "future/channels/alpha-to-beta/promotion-staged-release-decision-expiry.json",
+        publishRoutePath: "future/channels/alpha-to-beta/promotion-staged-release-route.json",
+        decisions: [
+          {
+            id: "promotion-release-decision-alpha-to-beta-security",
+            label: "Security disposition record",
+            owner: "security-reviewer",
+            status: "planned",
+            evidence: ["promotion-signoff-sheet-alpha-to-beta", "attestation-approval-envelope-alpha-to-beta"]
+          },
+          {
+            id: "promotion-release-decision-alpha-to-beta-release-manager",
+            label: "Staged release go/no-go record",
+            owner: "release-manager",
+            status: "blocked",
+            evidence: ["promotion-signoff-sheet-alpha-to-beta", "rollback-publication-bundle-alpha-to-beta"]
+          },
+          {
+            id: "promotion-release-decision-alpha-to-beta-release-engineering",
+            label: "Execution route decision record",
+            owner: "release-engineering",
+            status: "blocked",
+            evidence: ["attestation-approval-envelope-alpha-to-beta", "rollback-publication-bundle-alpha-to-beta"]
+          },
+          {
+            id: "promotion-release-decision-alpha-to-beta-product-owner",
+            label: "Promotion target decision record",
+            owner: "product-owner",
+            status: "blocked",
+            evidence: ["promotion-signoff-sheet-alpha-to-beta", "attestation-approval-envelope-alpha-to-beta"]
+          }
+        ],
+        reviewChecks: [
+          "promotion signoff sheet linked",
+          "approval execution envelope linked",
+          "rollback publication bundle linked",
+          "decision expiry path declared",
+          "publish route path declared"
+        ],
+        blockedBy: [
+          "promotion staged-apply release decision records remain metadata-only",
+          "release approval remains non-executable",
+          "promotion gating remains non-executable",
+          "host-side execution remains disabled"
+        ],
+        canRecordDecision: false
+      },
+      {
+        id: "promotion-release-decision-record-beta-to-stable",
+        from: "beta",
+        to: "stable",
+        promotionStagedApplySignoffSheetId: "promotion-signoff-sheet-beta-to-stable",
+        attestationOperatorApprovalExecutionEnvelopeId: "attestation-approval-envelope-beta-to-stable",
+        rollbackCutoverPublicationBundleId: "rollback-publication-bundle-beta-to-stable",
+        releaseApprovalStageId: "approval-decision-receipts",
+        promotionHandshakeStageId: "promotion-handshake-staged-release-decision-records",
+        publishGateId: "gate-promotion-staged-apply-release-decision-records",
+        status: "blocked",
+        decisionRecordPath: "future/channels/beta-to-stable/promotion-staged-release-decision-record.json",
+        decisionExpiryPath: "future/channels/beta-to-stable/promotion-staged-release-decision-expiry.json",
+        publishRoutePath: "future/channels/beta-to-stable/promotion-staged-release-route.json",
+        decisions: [
+          {
+            id: "promotion-release-decision-beta-to-stable-security",
+            label: "Security disposition record",
+            owner: "security-reviewer",
+            status: "blocked",
+            evidence: ["promotion-signoff-sheet-beta-to-stable", "attestation-approval-envelope-beta-to-stable"]
+          },
+          {
+            id: "promotion-release-decision-beta-to-stable-release-manager",
+            label: "Staged release go/no-go record",
+            owner: "release-manager",
+            status: "blocked",
+            evidence: ["promotion-signoff-sheet-beta-to-stable", "rollback-publication-bundle-beta-to-stable"]
+          },
+          {
+            id: "promotion-release-decision-beta-to-stable-release-engineering",
+            label: "Execution route decision record",
+            owner: "release-engineering",
+            status: "blocked",
+            evidence: ["attestation-approval-envelope-beta-to-stable", "rollback-publication-bundle-beta-to-stable"]
+          },
+          {
+            id: "promotion-release-decision-beta-to-stable-product-owner",
+            label: "Promotion target decision record",
+            owner: "product-owner",
+            status: "blocked",
+            evidence: ["promotion-signoff-sheet-beta-to-stable", "attestation-approval-envelope-beta-to-stable"]
+          }
+        ],
+        reviewChecks: [
+          "promotion signoff sheet linked",
+          "approval execution envelope linked",
+          "rollback publication bundle linked",
+          "decision expiry path declared",
+          "publish route path declared"
+        ],
+        blockedBy: [
+          "promotion staged-apply release decision records remain metadata-only",
+          "release approval remains non-executable",
+          "promotion gating remains non-executable",
+          "host-side execution remains disabled"
+        ],
+        canRecordDecision: false
+      }
+    ]
+  };
+}
+
 function buildSigningMetadata({ generatedAt }) {
   return {
     schemaVersion: "openclaw-studio-signing-metadata/v1",
@@ -3999,18 +4287,25 @@ function buildSigningPublishGatingHandshake({ generatedAt }) {
     attestationOperatorDispatchReceiptsPath: "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
     attestationOperatorReconciliationLedgersPath: "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
     attestationOperatorSettlementPacksPath: "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+    attestationOperatorApprovalExecutionEnvelopesPath: "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
+    attestationOperatorApprovalExecutionEnvelopesPath: "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
+    attestationOperatorApprovalExecutionEnvelopesPath: "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
     channelPromotionEvidencePath: "release/CHANNEL-PROMOTION-EVIDENCE.json",
     promotionStagedApplyRunsheetsPath: "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json",
     promotionStagedApplyCommandSheetsPath: "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
     promotionStagedApplyConfirmationLedgersPath: "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
     promotionStagedApplyCloseoutJournalsPath: "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
     promotionStagedApplySignoffSheetsPath: "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+    promotionStagedApplyReleaseDecisionRecordsPath: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
+    promotionStagedApplyReleaseDecisionRecordsPath: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
+    promotionStagedApplyReleaseDecisionRecordsPath: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
     publishRollbackHandshakePath: "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
     rollbackCutoverHandoffPlansPath: "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
     rollbackCutoverExecutionChecklistsPath: "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
     rollbackCutoverExecutionRecordsPath: "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
     rollbackCutoverOutcomeReportsPath: "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
     rollbackCutoverPublicationBundlesPath: "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+    rollbackCutoverPublicationRecoveryReceiptsPath: "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json",
     participants: ["release-engineering", "security", "release-manager", "product-owner"],
     request: {
       id: "signing-publish-handshake-request",
@@ -4029,6 +4324,9 @@ function buildSigningPublishGatingHandshake({ generatedAt }) {
         { id: "request-attestation-operator-dispatch-receipts", label: "Attestation operator dispatch receipts", required: true },
         { id: "request-attestation-operator-reconciliation-ledgers", label: "Attestation operator reconciliation ledgers", required: true },
         { id: "request-attestation-operator-settlement-packs", label: "Attestation operator settlement packs", required: true },
+        { id: "request-attestation-operator-approval-execution-envelopes", label: "Attestation operator approval execution envelopes", required: true },
+        { id: "request-attestation-operator-approval-execution-envelopes", label: "Attestation operator approval execution envelopes", required: true },
+        { id: "request-attestation-operator-approval-execution-envelopes", label: "Attestation operator approval execution envelopes", required: true },
         { id: "request-channel-route", label: "Channel route", required: true },
         { id: "request-channel-promotion-evidence", label: "Channel promotion evidence", required: true },
         { id: "request-promotion-staged-apply-runsheets", label: "Promotion staged-apply runsheets", required: true },
@@ -4036,6 +4334,9 @@ function buildSigningPublishGatingHandshake({ generatedAt }) {
         { id: "request-promotion-staged-apply-confirmation-ledgers", label: "Promotion staged-apply confirmation ledgers", required: true },
         { id: "request-promotion-staged-apply-closeout-journals", label: "Promotion staged-apply closeout journals", required: true },
         { id: "request-promotion-staged-apply-signoff-sheets", label: "Promotion staged-apply signoff sheets", required: true },
+        { id: "request-promotion-staged-apply-release-decision-records", label: "Promotion staged-apply release decision records", required: true },
+        { id: "request-promotion-staged-apply-release-decision-records", label: "Promotion staged-apply release decision records", required: true },
+        { id: "request-promotion-staged-apply-release-decision-records", label: "Promotion staged-apply release decision records", required: true },
         { id: "request-signing-evidence", label: "Signing evidence", required: true },
         { id: "request-publish-gates", label: "Publish gates", required: true },
         { id: "request-publish-rollback", label: "Publish rollback handshake", required: true },
@@ -4044,6 +4345,7 @@ function buildSigningPublishGatingHandshake({ generatedAt }) {
         { id: "request-rollback-cutover-execution-records", label: "Rollback cutover execution records", required: true },
         { id: "request-rollback-cutover-outcome-reports", label: "Rollback cutover outcome reports", required: true },
         { id: "request-rollback-cutover-publication-bundles", label: "Rollback cutover publication bundles", required: true },
+        { id: "request-rollback-cutover-publication-recovery-receipts", label: "Rollback cutover publication recovery receipts", required: true },
         { id: "request-promotion-target", label: "Promotion target", required: true }
       ]
     },
@@ -4070,6 +4372,7 @@ function buildSigningPublishGatingHandshake({ generatedAt }) {
       { id: "ack-attestation-operator-dispatch-receipts", label: "Attestation operator dispatch receipts reviewed", status: "blocked", artifact: "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" },
       { id: "ack-attestation-operator-reconciliation-ledgers", label: "Attestation operator reconciliation ledgers reviewed", status: "blocked", artifact: "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" },
       { id: "ack-attestation-operator-settlement-packs", label: "Attestation operator settlement packs reviewed", status: "blocked", artifact: "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" },
+      { id: "ack-attestation-operator-approval-execution-envelopes", label: "Attestation operator approval execution envelopes reviewed", status: "blocked", artifact: "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json" },
       { id: "ack-builders", label: "Installer builder execution reviewed", status: "planned", artifact: "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json" },
       { id: "ack-channel-routing", label: "Installer channel routing reviewed", status: "planned", artifact: "release/INSTALLER-CHANNEL-ROUTING.json" },
       { id: "ack-channel-promotion-evidence", label: "Channel promotion evidence reviewed", status: "planned", artifact: "release/CHANNEL-PROMOTION-EVIDENCE.json" },
@@ -4078,6 +4381,7 @@ function buildSigningPublishGatingHandshake({ generatedAt }) {
       { id: "ack-promotion-staged-apply-confirmation-ledgers", label: "Promotion staged-apply confirmation ledgers reviewed", status: "blocked", artifact: "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json" },
       { id: "ack-promotion-staged-apply-closeout-journals", label: "Promotion staged-apply closeout journals reviewed", status: "blocked", artifact: "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json" },
       { id: "ack-promotion-staged-apply-signoff-sheets", label: "Promotion staged-apply signoff sheets reviewed", status: "blocked", artifact: "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json" },
+      { id: "ack-promotion-staged-apply-release-decision-records", label: "Promotion staged-apply release decision records reviewed", status: "blocked", artifact: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json" },
       { id: "ack-signing", label: "Signing evidence reviewed", status: "blocked", artifact: "release/SIGNING-METADATA.json" },
       { id: "ack-publish", label: "Publish and promotion gates reviewed", status: "blocked", artifact: "release/PUBLISH-GATES.json" },
       { id: "ack-publish-rollback", label: "Publish rollback handshake reviewed", status: "blocked", artifact: "release/PUBLISH-ROLLBACK-HANDSHAKE.json" },
@@ -4086,7 +4390,8 @@ function buildSigningPublishGatingHandshake({ generatedAt }) {
       { id: "ack-rollback-cutover-execution-records", label: "Rollback cutover execution records reviewed", status: "blocked", artifact: "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json" }
       ,
       { id: "ack-rollback-cutover-outcome-reports", label: "Rollback cutover outcome reports reviewed", status: "blocked", artifact: "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json" },
-      { id: "ack-rollback-cutover-publication-bundles", label: "Rollback cutover publication bundles reviewed", status: "blocked", artifact: "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" }
+      { id: "ack-rollback-cutover-publication-bundles", label: "Rollback cutover publication bundles reviewed", status: "blocked", artifact: "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" },
+      { id: "ack-rollback-cutover-publication-recovery-receipts", label: "Rollback cutover publication recovery receipts reviewed", status: "blocked", artifact: "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json" }
     ],
     stages: [
       {
@@ -4162,6 +4467,12 @@ function buildSigningPublishGatingHandshake({ generatedAt }) {
         evidence: ["release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json", "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json"]
       },
       {
+        id: "handshake-attestation-operator-approval-execution-envelopes",
+        label: "Attestation operator approval execution envelope review",
+        status: "blocked",
+        evidence: ["release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json", "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json"]
+      },
+      {
         id: "handshake-builders",
         label: "Installer builder execution review",
         status: "planned",
@@ -4208,6 +4519,12 @@ function buildSigningPublishGatingHandshake({ generatedAt }) {
         label: "Promotion staged-apply signoff sheet review",
         status: "blocked",
         evidence: ["release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json", "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json"]
+      },
+      {
+        id: "handshake-promotion-staged-apply-release-decision-records",
+        label: "Promotion staged-apply release decision record review",
+        status: "blocked",
+        evidence: ["release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json", "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json"]
       },
       {
         id: "handshake-signing",
@@ -4262,6 +4579,12 @@ function buildSigningPublishGatingHandshake({ generatedAt }) {
         label: "Rollback cutover publication bundle review",
         status: "blocked",
         evidence: ["release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json", "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json"]
+      },
+      {
+        id: "handshake-rollback-cutover-publication-recovery-receipts",
+        label: "Rollback cutover publication recovery receipt review",
+        status: "blocked",
+        evidence: ["release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json", "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json"]
       }
     ],
     linkedArtifacts: [
@@ -4277,6 +4600,7 @@ function buildSigningPublishGatingHandshake({ generatedAt }) {
       "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
       "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
       "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+      "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
       "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
       "release/INSTALLER-CHANNEL-ROUTING.json",
       "release/CHANNEL-PROMOTION-EVIDENCE.json",
@@ -4285,6 +4609,7 @@ function buildSigningPublishGatingHandshake({ generatedAt }) {
       "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
       "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
       "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+      "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
       "release/SIGNING-METADATA.json",
       "release/SIGNING-PUBLISH-PIPELINE.json",
       "release/PUBLISH-GATES.json",
@@ -4295,14 +4620,15 @@ function buildSigningPublishGatingHandshake({ generatedAt }) {
       "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
       "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
       "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+      "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json",
       "release/RELEASE-APPROVAL-WORKFLOW.json"
     ],
     blockedBy: [
       "signing and notarization remain metadata-only",
       "artifact upload remains blocked",
-      "attestation operator settlement packs remain metadata-only",
-      "promotion staged-apply signoff sheets remain metadata-only",
-      "rollback cutover publication bundles remain metadata-only",
+      "attestation operator approval execution envelopes remain metadata-only",
+      "promotion staged-apply release decision records remain metadata-only",
+      "rollback cutover publication recovery receipts remain metadata-only",
       "publish rollback remains metadata-only",
       "release approval remains non-executable",
       "host-side execution remains disabled"
@@ -4325,6 +4651,7 @@ function buildSigningPublishPipeline({ generatedAt }) {
     attestationOperatorDispatchReceiptsPath: "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
     attestationOperatorReconciliationLedgersPath: "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
     attestationOperatorSettlementPacksPath: "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+    attestationOperatorApprovalExecutionEnvelopesPath: "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
     gatingHandshakePath: "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
     approvalBridgePath: "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
     channelRoutingPath: "release/INSTALLER-CHANNEL-ROUTING.json",
@@ -4338,6 +4665,7 @@ function buildSigningPublishPipeline({ generatedAt }) {
     promotionStagedApplyConfirmationLedgersPath: "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
     promotionStagedApplyCloseoutJournalsPath: "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
     promotionStagedApplySignoffSheetsPath: "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+    promotionStagedApplyReleaseDecisionRecordsPath: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
     promotionHandshakePath: "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
     publishRollbackHandshakePath: "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
     rollbackExecutionRehearsalLedgerPath: "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
@@ -4349,6 +4677,7 @@ function buildSigningPublishPipeline({ generatedAt }) {
     rollbackCutoverExecutionRecordsPath: "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
     rollbackCutoverOutcomeReportsPath: "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
     rollbackCutoverPublicationBundlesPath: "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+    rollbackCutoverPublicationRecoveryReceiptsPath: "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json",
     stages: [
       { id: "pipeline-packaged-app-directory-materialization", label: "Packaged-app directory materialization", status: "planned" },
       { id: "pipeline-packaged-app-staged-output", label: "Packaged-app staged output skeleton", status: "planned" },
@@ -4363,6 +4692,7 @@ function buildSigningPublishPipeline({ generatedAt }) {
       { id: "pipeline-attestation-operator-dispatch-receipts", label: "Attestation operator dispatch receipts", status: "blocked" },
       { id: "pipeline-attestation-operator-reconciliation-ledgers", label: "Attestation operator reconciliation ledgers", status: "blocked" },
       { id: "pipeline-attestation-operator-settlement-packs", label: "Attestation operator settlement packs", status: "blocked" },
+      { id: "pipeline-attestation-operator-approval-execution-envelopes", label: "Attestation operator approval execution envelopes", status: "blocked" },
       { id: "pipeline-installer-builder-execution", label: "Installer builder execution skeleton", status: "planned" },
       { id: "pipeline-installer-builder-orchestration", label: "Installer builder orchestration", status: "planned" },
       { id: "pipeline-installer-channel-routing", label: "Installer channel routing", status: "planned" },
@@ -4376,6 +4706,7 @@ function buildSigningPublishPipeline({ generatedAt }) {
       { id: "pipeline-promotion-staged-apply-confirmation-ledgers", label: "Promotion staged-apply confirmation ledgers", status: "blocked" },
       { id: "pipeline-promotion-staged-apply-closeout-journals", label: "Promotion staged-apply closeout journals", status: "blocked" },
       { id: "pipeline-promotion-staged-apply-signoff-sheets", label: "Promotion staged-apply signoff sheets", status: "blocked" },
+      { id: "pipeline-promotion-staged-apply-release-decision-records", label: "Promotion staged-apply release decision records", status: "blocked" },
       { id: "pipeline-signing-metadata", label: "Signing-ready metadata", status: "ready" },
       { id: "pipeline-notarization", label: "Notarization planning", status: "blocked" },
       { id: "pipeline-checksums", label: "Checksum publication", status: "blocked" },
@@ -4393,6 +4724,7 @@ function buildSigningPublishPipeline({ generatedAt }) {
       { id: "pipeline-rollback-cutover-execution-records", label: "Rollback cutover execution records", status: "blocked" },
       { id: "pipeline-rollback-cutover-outcome-reports", label: "Rollback cutover outcome reports", status: "blocked" },
       { id: "pipeline-rollback-cutover-publication-bundles", label: "Rollback cutover publication bundles", status: "blocked" },
+      { id: "pipeline-rollback-cutover-publication-recovery-receipts", label: "Rollback cutover publication recovery receipts", status: "blocked" },
       { id: "pipeline-upload", label: "Artifact upload", status: "blocked" },
       { id: "pipeline-promotion", label: "Promotion gating", status: "blocked" }
     ]
@@ -4415,7 +4747,8 @@ function buildSigningPublishApprovalBridge({ generatedAt }) {
       { id: "bridge-dispatch-packets-to-dispatch-receipts", from: "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json", to: "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json", status: "blocked" },
       { id: "bridge-dispatch-receipts-to-reconciliation-ledgers", from: "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json", to: "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json", status: "blocked" },
       { id: "bridge-reconciliation-ledgers-to-settlement-packs", from: "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json", to: "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json", status: "blocked" },
-      { id: "bridge-settlement-packs-to-gating", from: "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json", to: "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json", status: "blocked" },
+      { id: "bridge-settlement-packs-to-approval-execution-envelopes", from: "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json", to: "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json", status: "blocked" },
+      { id: "bridge-approval-execution-envelopes-to-gating", from: "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json", to: "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json", status: "blocked" },
       { id: "bridge-signing-to-approval", from: "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json", to: "release/RELEASE-APPROVAL-WORKFLOW.json", status: "blocked" },
       { id: "bridge-approval-to-channel-routing", from: "release/RELEASE-APPROVAL-WORKFLOW.json", to: "release/INSTALLER-CHANNEL-ROUTING.json", status: "blocked" },
       { id: "bridge-channel-routing-to-promotion-evidence", from: "release/INSTALLER-CHANNEL-ROUTING.json", to: "release/CHANNEL-PROMOTION-EVIDENCE.json", status: "blocked" },
@@ -4428,7 +4761,8 @@ function buildSigningPublishApprovalBridge({ generatedAt }) {
       { id: "bridge-command-sheets-to-confirmation-ledgers", from: "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json", to: "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json", status: "blocked" },
       { id: "bridge-confirmation-ledgers-to-closeout-journals", from: "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json", to: "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json", status: "blocked" },
       { id: "bridge-closeout-journals-to-signoff-sheets", from: "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json", to: "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json", status: "blocked" },
-      { id: "bridge-signoff-sheets-to-promotion-handshake", from: "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json", to: "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json", status: "blocked" },
+      { id: "bridge-signoff-sheets-to-release-decision-records", from: "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json", to: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json", status: "blocked" },
+      { id: "bridge-release-decision-records-to-promotion-handshake", from: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json", to: "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json", status: "blocked" },
       { id: "bridge-promotion-handshake-to-publish-rollback", from: "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json", to: "release/PUBLISH-ROLLBACK-HANDSHAKE.json", status: "blocked" },
       { id: "bridge-publish-rollback-to-rollback-rehearsal", from: "release/PUBLISH-ROLLBACK-HANDSHAKE.json", to: "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json", status: "blocked" },
       { id: "bridge-rollback-rehearsal-to-operator-drillbooks", from: "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json", to: "release/ROLLBACK-OPERATOR-DRILLBOOKS.json", status: "blocked" },
@@ -4439,7 +4773,8 @@ function buildSigningPublishApprovalBridge({ generatedAt }) {
       { id: "bridge-execution-checklists-to-execution-records", from: "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json", to: "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json", status: "blocked" },
       { id: "bridge-execution-records-to-outcome-reports", from: "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json", to: "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json", status: "blocked" },
       { id: "bridge-outcome-reports-to-publication-bundles", from: "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json", to: "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json", status: "blocked" },
-      { id: "bridge-publication-bundles-to-publish", from: "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json", to: "release/PUBLISH-GATES.json", status: "blocked" },
+      { id: "bridge-publication-bundles-to-publication-recovery-receipts", from: "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json", to: "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json", status: "blocked" },
+      { id: "bridge-publication-recovery-receipts-to-publish", from: "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json", to: "release/PUBLISH-GATES.json", status: "blocked" },
       { id: "bridge-publish-to-promotion", from: "release/PUBLISH-GATES.json", to: "release/PROMOTION-GATES.json", status: "blocked" }
     ]
   };
@@ -4462,6 +4797,7 @@ function buildSigningPublishPromotionHandshake({ generatedAt }) {
     attestationOperatorDispatchReceiptsPath: "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
     attestationOperatorReconciliationLedgersPath: "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
     attestationOperatorSettlementPacksPath: "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+    attestationOperatorApprovalExecutionEnvelopesPath: "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
     promotionApplyManifestsPath: "release/PROMOTION-APPLY-MANIFESTS.json",
     attestationApplyAuditPacksPath: "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
     promotionExecutionCheckpointsPath: "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
@@ -4472,6 +4808,7 @@ function buildSigningPublishPromotionHandshake({ generatedAt }) {
     promotionStagedApplyConfirmationLedgersPath: "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
     promotionStagedApplyCloseoutJournalsPath: "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
     promotionStagedApplySignoffSheetsPath: "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+    promotionStagedApplyReleaseDecisionRecordsPath: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
     approvalBridgePath: "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
     publishGatesPath: "release/PUBLISH-GATES.json",
     promotionGatesPath: "release/PROMOTION-GATES.json",
@@ -4481,6 +4818,7 @@ function buildSigningPublishPromotionHandshake({ generatedAt }) {
     rollbackCutoverExecutionRecordsPath: "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
     rollbackCutoverOutcomeReportsPath: "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
     rollbackCutoverPublicationBundlesPath: "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+    rollbackCutoverPublicationRecoveryReceiptsPath: "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json",
     participants: ["release-engineering", "security", "release-manager", "product-owner"],
     request: {
       id: "signing-publish-promotion-handshake-request",
@@ -4516,6 +4854,7 @@ function buildSigningPublishPromotionHandshake({ generatedAt }) {
         { id: "request-rollback-cutover-execution-records", label: "Rollback cutover execution records", required: true },
         { id: "request-rollback-cutover-outcome-reports", label: "Rollback cutover outcome reports", required: true },
         { id: "request-rollback-cutover-publication-bundles", label: "Rollback cutover publication bundles", required: true },
+        { id: "request-rollback-cutover-publication-recovery-receipts", label: "Rollback cutover publication recovery receipts", required: true },
         { id: "request-promotion-target", label: "Promotion target", required: true }
       ]
     },
@@ -4543,6 +4882,7 @@ function buildSigningPublishPromotionHandshake({ generatedAt }) {
       { id: "promotion-ack-attestation-operator-dispatch-receipts", label: "Attestation operator dispatch receipts reviewed", status: "blocked", artifact: "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" },
       { id: "promotion-ack-attestation-operator-reconciliation-ledgers", label: "Attestation operator reconciliation ledgers reviewed", status: "blocked", artifact: "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" },
       { id: "promotion-ack-attestation-operator-settlement-packs", label: "Attestation operator settlement packs reviewed", status: "blocked", artifact: "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" },
+      { id: "promotion-ack-attestation-operator-approval-execution-envelopes", label: "Attestation operator approval execution envelopes reviewed", status: "blocked", artifact: "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json" },
       { id: "promotion-ack-apply-manifests", label: "Promotion apply manifests reviewed", status: "planned", artifact: "release/PROMOTION-APPLY-MANIFESTS.json" },
       { id: "promotion-ack-execution-checkpoints", label: "Promotion execution checkpoints reviewed", status: "blocked", artifact: "release/PROMOTION-EXECUTION-CHECKPOINTS.json" },
       { id: "promotion-ack-operator-handoff-rails", label: "Promotion operator handoff rails reviewed", status: "blocked", artifact: "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json" },
@@ -4552,6 +4892,7 @@ function buildSigningPublishPromotionHandshake({ generatedAt }) {
       { id: "promotion-ack-staged-apply-confirmation-ledgers", label: "Promotion staged-apply confirmation ledgers reviewed", status: "blocked", artifact: "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json" },
       { id: "promotion-ack-staged-apply-closeout-journals", label: "Promotion staged-apply closeout journals reviewed", status: "blocked", artifact: "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json" },
       { id: "promotion-ack-staged-apply-signoff-sheets", label: "Promotion staged-apply signoff sheets reviewed", status: "blocked", artifact: "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json" },
+      { id: "promotion-ack-staged-release-decision-records", label: "Promotion staged-apply release decision records reviewed", status: "blocked", artifact: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json" },
       { id: "promotion-ack-approval-bridge", label: "Approval bridge reviewed", status: "blocked", artifact: "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json" },
       { id: "promotion-ack-publish-gates", label: "Publish gates reviewed", status: "blocked", artifact: "release/PUBLISH-GATES.json" },
       { id: "promotion-ack-publish-rollback", label: "Publish rollback handshake reviewed", status: "blocked", artifact: "release/PUBLISH-ROLLBACK-HANDSHAKE.json" },
@@ -4560,6 +4901,7 @@ function buildSigningPublishPromotionHandshake({ generatedAt }) {
       { id: "promotion-ack-rollback-cutover-execution-records", label: "Rollback cutover execution records reviewed", status: "blocked", artifact: "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json" },
       { id: "promotion-ack-rollback-cutover-outcome-reports", label: "Rollback cutover outcome reports reviewed", status: "blocked", artifact: "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json" },
       { id: "promotion-ack-rollback-cutover-publication-bundles", label: "Rollback cutover publication bundles reviewed", status: "blocked", artifact: "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" },
+      { id: "promotion-ack-rollback-cutover-publication-recovery-receipts", label: "Rollback cutover publication recovery receipts reviewed", status: "blocked", artifact: "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json" },
       { id: "promotion-ack-promotion-gates", label: "Promotion gates reviewed", status: "blocked", artifact: "release/PROMOTION-GATES.json" }
     ],
     stages: [
@@ -4636,6 +4978,12 @@ function buildSigningPublishPromotionHandshake({ generatedAt }) {
         evidence: ["release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json", "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json"]
       },
       {
+        id: "promotion-handshake-attestation-approval-execution-envelopes",
+        label: "Attestation operator approval execution envelope review",
+        status: "blocked",
+        evidence: ["release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json", "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json"]
+      },
+      {
         id: "promotion-handshake-apply-manifests",
         label: "Promotion apply manifest review",
         status: "planned",
@@ -4690,6 +5038,12 @@ function buildSigningPublishPromotionHandshake({ generatedAt }) {
         evidence: ["release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json", "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json"]
       },
       {
+        id: "promotion-handshake-staged-release-decision-records",
+        label: "Promotion staged-apply release decision record review",
+        status: "blocked",
+        evidence: ["release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json", "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json"]
+      },
+      {
         id: "promotion-handshake-approval",
         label: "Approval bridge review",
         status: "blocked",
@@ -4738,6 +5092,12 @@ function buildSigningPublishPromotionHandshake({ generatedAt }) {
         evidence: ["release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json", "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json"]
       },
       {
+        id: "promotion-handshake-rollback-cutover-publication-recovery-receipts",
+        label: "Rollback cutover publication recovery receipt review",
+        status: "blocked",
+        evidence: ["release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json", "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json"]
+      },
+      {
         id: "promotion-handshake-promotion",
         label: "Promotion gate review",
         status: "blocked",
@@ -4757,6 +5117,7 @@ function buildSigningPublishPromotionHandshake({ generatedAt }) {
       "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
       "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
       "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+      "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
       "release/PROMOTION-APPLY-MANIFESTS.json",
       "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
       "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json",
@@ -4766,6 +5127,7 @@ function buildSigningPublishPromotionHandshake({ generatedAt }) {
       "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
       "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
       "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+      "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
       "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
       "release/PUBLISH-GATES.json",
       "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
@@ -4774,15 +5136,16 @@ function buildSigningPublishPromotionHandshake({ generatedAt }) {
       "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
       "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
       "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+      "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json",
       "release/PROMOTION-GATES.json",
       "release/RELEASE-APPROVAL-WORKFLOW.json"
     ],
     blockedBy: [
       "sealed bundles remain metadata-only",
       "artifact upload remains blocked",
-      "attestation operator settlement packs remain metadata-only",
-      "promotion staged-apply signoff sheets remain metadata-only",
-      "rollback cutover publication bundles remain metadata-only",
+      "attestation operator approval execution envelopes remain metadata-only",
+      "promotion staged-apply release decision records remain metadata-only",
+      "rollback cutover publication recovery receipts remain metadata-only",
       "publish rollback remains metadata-only",
       "promotion gates remain non-executable",
       "host-side execution remains disabled"
@@ -4804,6 +5167,7 @@ function buildPublishRollbackHandshake({ generatedAt }) {
     attestationOperatorDispatchReceiptsPath: "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
     attestationOperatorReconciliationLedgersPath: "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
     attestationOperatorSettlementPacksPath: "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+    attestationOperatorApprovalExecutionEnvelopesPath: "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
     promotionHandshakePath: "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
     publishGatesPath: "release/PUBLISH-GATES.json",
     promotionGatesPath: "release/PROMOTION-GATES.json",
@@ -4815,6 +5179,7 @@ function buildPublishRollbackHandshake({ generatedAt }) {
     promotionStagedApplyConfirmationLedgersPath: "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
     promotionStagedApplyCloseoutJournalsPath: "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
     promotionStagedApplySignoffSheetsPath: "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+    promotionStagedApplyReleaseDecisionRecordsPath: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
     rollbackExecutionRehearsalLedgerPath: "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
     rollbackOperatorDrillbooksPath: "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
     rollbackLiveReadinessContractsPath: "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
@@ -4824,6 +5189,7 @@ function buildPublishRollbackHandshake({ generatedAt }) {
     rollbackCutoverExecutionRecordsPath: "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
     rollbackCutoverOutcomeReportsPath: "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
     rollbackCutoverPublicationBundlesPath: "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+    rollbackCutoverPublicationRecoveryReceiptsPath: "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json",
     participants: ["release-engineering", "security", "release-manager", "runtime-owner"],
     request: {
       id: "publish-rollback-handshake-request",
@@ -4857,6 +5223,7 @@ function buildPublishRollbackHandshake({ generatedAt }) {
         { id: "request-rollback-cutover-execution-records", label: "Rollback cutover execution records", required: true },
         { id: "request-rollback-cutover-outcome-reports", label: "Rollback cutover outcome reports", required: true },
         { id: "request-rollback-cutover-publication-bundles", label: "Rollback cutover publication bundles", required: true },
+        { id: "request-rollback-cutover-publication-recovery-receipts", label: "Rollback cutover publication recovery receipts", required: true },
         { id: "request-recovery-channel", label: "Recovery channel", required: true }
       ]
     },
@@ -4879,6 +5246,7 @@ function buildPublishRollbackHandshake({ generatedAt }) {
       { id: "rollback-ack-attestation-dispatch-receipts", label: "Attestation operator dispatch receipts reviewed", status: "blocked", artifact: "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" },
       { id: "rollback-ack-attestation-reconciliation-ledgers", label: "Attestation operator reconciliation ledgers reviewed", status: "blocked", artifact: "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" },
       { id: "rollback-ack-attestation-settlement-packs", label: "Attestation operator settlement packs reviewed", status: "blocked", artifact: "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" },
+      { id: "rollback-ack-attestation-approval-execution-envelopes", label: "Attestation operator approval execution envelopes reviewed", status: "blocked", artifact: "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json" },
       { id: "rollback-ack-publish-gates", label: "Publish gates reviewed", status: "blocked", artifact: "release/PUBLISH-GATES.json" },
       { id: "rollback-ack-promotion-gates", label: "Promotion gates reviewed", status: "blocked", artifact: "release/PROMOTION-GATES.json" },
       { id: "rollback-ack-promotion-handshake", label: "Promotion handshake reviewed", status: "blocked", artifact: "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json" },
@@ -4890,6 +5258,7 @@ function buildPublishRollbackHandshake({ generatedAt }) {
       { id: "rollback-ack-staged-apply-confirmation-ledgers", label: "Promotion staged-apply confirmation ledgers reviewed", status: "blocked", artifact: "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json" },
       { id: "rollback-ack-staged-apply-closeout-journals", label: "Promotion staged-apply closeout journals reviewed", status: "blocked", artifact: "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json" },
       { id: "rollback-ack-staged-apply-signoff-sheets", label: "Promotion staged-apply signoff sheets reviewed", status: "blocked", artifact: "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json" },
+      { id: "rollback-ack-staged-release-decision-records", label: "Promotion staged-apply release decision records reviewed", status: "blocked", artifact: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json" },
       { id: "rollback-ack-rehearsal-ledger", label: "Rollback execution rehearsal ledger reviewed", status: "blocked", artifact: "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json" },
       { id: "rollback-ack-operator-drillbooks", label: "Rollback operator drillbooks reviewed", status: "blocked", artifact: "release/ROLLBACK-OPERATOR-DRILLBOOKS.json" },
       { id: "rollback-ack-live-readiness-contracts", label: "Rollback live-readiness contracts reviewed", status: "blocked", artifact: "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json" },
@@ -4899,6 +5268,7 @@ function buildPublishRollbackHandshake({ generatedAt }) {
       { id: "rollback-ack-cutover-execution-records", label: "Rollback cutover execution records reviewed", status: "blocked", artifact: "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json" },
       { id: "rollback-ack-cutover-outcome-reports", label: "Rollback cutover outcome reports reviewed", status: "blocked", artifact: "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json" },
       { id: "rollback-ack-cutover-publication-bundles", label: "Rollback cutover publication bundles reviewed", status: "blocked", artifact: "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" },
+      { id: "rollback-ack-cutover-publication-recovery-receipts", label: "Rollback cutover publication recovery receipts reviewed", status: "blocked", artifact: "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json" },
       { id: "rollback-ack-release-notes", label: "Release notes reviewed", status: "planned", artifact: "release/RELEASE-NOTES.md" }
     ],
     paths: [
@@ -4913,6 +5283,7 @@ function buildPublishRollbackHandshake({ generatedAt }) {
         attestationOperatorDispatchReceiptId: "attestation-dispatch-receipt-alpha-to-beta",
         attestationOperatorReconciliationLedgerId: "attestation-reconciliation-ledger-alpha-to-beta",
         attestationOperatorSettlementPackId: "attestation-settlement-pack-alpha-to-beta",
+        attestationOperatorApprovalExecutionEnvelopeId: "attestation-approval-envelope-alpha-to-beta",
         promotionExecutionCheckpointId: "promotion-checkpoint-alpha-to-beta",
         promotionOperatorHandoffRailId: "promotion-handoff-alpha-to-beta",
         promotionStagedApplyLedgerId: "promotion-staged-ledger-alpha-to-beta",
@@ -4921,6 +5292,7 @@ function buildPublishRollbackHandshake({ generatedAt }) {
         promotionStagedApplyConfirmationLedgerId: "promotion-confirmation-ledger-alpha-to-beta",
         promotionStagedApplyCloseoutJournalId: "promotion-closeout-journal-alpha-to-beta",
         promotionStagedApplySignoffSheetId: "promotion-signoff-sheet-alpha-to-beta",
+        promotionStagedApplyReleaseDecisionRecordId: "promotion-release-decision-record-alpha-to-beta",
         rollbackExecutionRehearsalLedgerId: "rollback-rehearsal-alpha-to-beta",
         rollbackOperatorDrillbookId: "rollback-drillbook-alpha-to-beta",
         rollbackLiveReadinessContractId: "rollback-readiness-alpha-to-beta",
@@ -4930,6 +5302,7 @@ function buildPublishRollbackHandshake({ generatedAt }) {
         rollbackCutoverExecutionRecordId: "rollback-execution-record-alpha-to-beta",
         rollbackCutoverOutcomeReportId: "rollback-outcome-report-alpha-to-beta",
         rollbackCutoverPublicationBundleId: "rollback-publication-bundle-alpha-to-beta",
+        rollbackCutoverPublicationRecoveryReceiptId: "rollback-publication-recovery-receipt-alpha-to-beta",
         rollbackManifestPath: "future/publish/alpha-to-beta/rollback-handshake.json",
         recoveryChannel: "alpha",
         checkpoints: ["sealed-bundle-checkpoint-windows", "sealed-bundle-checkpoint-macos", "sealed-bundle-checkpoint-linux"],
@@ -4946,6 +5319,7 @@ function buildPublishRollbackHandshake({ generatedAt }) {
         attestationOperatorDispatchReceiptId: "attestation-dispatch-receipt-beta-to-stable",
         attestationOperatorReconciliationLedgerId: "attestation-reconciliation-ledger-beta-to-stable",
         attestationOperatorSettlementPackId: "attestation-settlement-pack-beta-to-stable",
+        attestationOperatorApprovalExecutionEnvelopeId: "attestation-approval-envelope-beta-to-stable",
         promotionExecutionCheckpointId: "promotion-checkpoint-beta-to-stable",
         promotionOperatorHandoffRailId: "promotion-handoff-beta-to-stable",
         promotionStagedApplyLedgerId: "promotion-staged-ledger-beta-to-stable",
@@ -4954,6 +5328,7 @@ function buildPublishRollbackHandshake({ generatedAt }) {
         promotionStagedApplyConfirmationLedgerId: "promotion-confirmation-ledger-beta-to-stable",
         promotionStagedApplyCloseoutJournalId: "promotion-closeout-journal-beta-to-stable",
         promotionStagedApplySignoffSheetId: "promotion-signoff-sheet-beta-to-stable",
+        promotionStagedApplyReleaseDecisionRecordId: "promotion-release-decision-record-beta-to-stable",
         rollbackExecutionRehearsalLedgerId: "rollback-rehearsal-beta-to-stable",
         rollbackOperatorDrillbookId: "rollback-drillbook-beta-to-stable",
         rollbackLiveReadinessContractId: "rollback-readiness-beta-to-stable",
@@ -4963,6 +5338,7 @@ function buildPublishRollbackHandshake({ generatedAt }) {
         rollbackCutoverExecutionRecordId: "rollback-execution-record-beta-to-stable",
         rollbackCutoverOutcomeReportId: "rollback-outcome-report-beta-to-stable",
         rollbackCutoverPublicationBundleId: "rollback-publication-bundle-beta-to-stable",
+        rollbackCutoverPublicationRecoveryReceiptId: "rollback-publication-recovery-receipt-beta-to-stable",
         rollbackManifestPath: "future/publish/beta-to-stable/rollback-handshake.json",
         recoveryChannel: "beta",
         checkpoints: ["sealed-bundle-checkpoint-windows", "sealed-bundle-checkpoint-macos", "sealed-bundle-checkpoint-linux"],
@@ -5011,6 +5387,12 @@ function buildPublishRollbackHandshake({ generatedAt }) {
         label: "Attestation operator settlement pack review",
         status: "blocked",
         evidence: ["release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json", "release/PUBLISH-ROLLBACK-HANDSHAKE.json"]
+      },
+      {
+        id: "rollback-handshake-approval-execution-envelopes",
+        label: "Attestation operator approval execution envelope review",
+        status: "blocked",
+        evidence: ["release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json", "release/PUBLISH-ROLLBACK-HANDSHAKE.json"]
       },
       {
         id: "rollback-handshake-publish-gates",
@@ -5079,6 +5461,12 @@ function buildPublishRollbackHandshake({ generatedAt }) {
         evidence: ["release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json", "release/PUBLISH-ROLLBACK-HANDSHAKE.json"]
       },
       {
+        id: "rollback-handshake-staged-release-decision-records",
+        label: "Promotion staged-apply release decision record review",
+        status: "blocked",
+        evidence: ["release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json", "release/PUBLISH-ROLLBACK-HANDSHAKE.json"]
+      },
+      {
         id: "rollback-handshake-rehearsal",
         label: "Rollback execution rehearsal review",
         status: "blocked",
@@ -5133,6 +5521,12 @@ function buildPublishRollbackHandshake({ generatedAt }) {
         evidence: ["release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json", "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json"]
       },
       {
+        id: "rollback-handshake-cutover-publication-recovery-receipts",
+        label: "Rollback cutover publication recovery receipt review",
+        status: "blocked",
+        evidence: ["release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json", "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json"]
+      },
+      {
         id: "rollback-handshake-recovery",
         label: "Recovery channel review",
         status: "blocked",
@@ -5147,6 +5541,7 @@ function buildPublishRollbackHandshake({ generatedAt }) {
       "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
       "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
       "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+      "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
       "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
       "release/PUBLISH-GATES.json",
       "release/PROMOTION-GATES.json",
@@ -5158,6 +5553,7 @@ function buildPublishRollbackHandshake({ generatedAt }) {
       "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
       "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
       "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+      "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
       "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
       "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
       "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
@@ -5167,14 +5563,15 @@ function buildPublishRollbackHandshake({ generatedAt }) {
       "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
       "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
       "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+      "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json",
       "release/RELEASE-NOTES.md",
       "release/INSTALLER-PLACEHOLDER.json"
     ],
     blockedBy: [
       "artifact upload remains blocked",
-      "attestation operator settlement packs remain metadata-only",
-      "promotion staged-apply signoff sheets remain metadata-only",
-      "rollback cutover publication bundles remain metadata-only",
+      "attestation operator approval execution envelopes remain metadata-only",
+      "promotion staged-apply release decision records remain metadata-only",
+      "rollback cutover publication recovery receipts remain metadata-only",
       "promotion remains non-executable",
       "rollback operator drillbooks remain metadata-only",
       "rollback live-readiness contracts remain metadata-only",
@@ -6220,6 +6617,121 @@ function buildRollbackCutoverPublicationBundles({ generatedAt }) {
   };
 }
 
+function buildRollbackCutoverPublicationRecoveryReceipts({ generatedAt }) {
+  return {
+    schemaVersion: "openclaw-studio-rollback-cutover-publication-recovery-receipts/v1",
+    generatedAt,
+    phase: PHASE_ID,
+    mode: "local-only-review",
+    receipts: [
+      {
+        id: "rollback-publication-recovery-receipt-alpha-to-beta",
+        from: "alpha",
+        to: "beta",
+        rollbackCutoverPublicationBundleId: "rollback-publication-bundle-alpha-to-beta",
+        attestationOperatorApprovalExecutionEnvelopeId: "attestation-approval-envelope-alpha-to-beta",
+        promotionStagedApplyReleaseDecisionRecordId: "promotion-release-decision-record-alpha-to-beta",
+        publishRollbackPathId: "publish-rollback-alpha-to-beta",
+        releaseApprovalStageId: "approval-decision-receipts",
+        publishGateId: "gate-rollback-cutover-publication-recovery-receipts",
+        status: "blocked",
+        publicationRecoveryReceiptPath: "future/publish/alpha-to-beta/rollback-cutover-publication-recovery-receipt.json",
+        recoveryAcknowledgementPath: "future/publish/alpha-to-beta/rollback-cutover-publication-recovery-ack.json",
+        recoveryEvidencePath: "future/publish/alpha-to-beta/rollback-cutover-publication-recovery-evidence.json",
+        recoveryReceipts: [
+          {
+            id: "rollback-publication-recovery-alpha-to-beta-release-manager",
+            label: "Publication recovery acknowledgement",
+            owner: "release-manager",
+            status: "planned",
+            evidence: ["rollback-publication-bundle-alpha-to-beta", "promotion-release-decision-record-alpha-to-beta"]
+          },
+          {
+            id: "rollback-publication-recovery-alpha-to-beta-runtime-owner",
+            label: "Recovery evidence receipt",
+            owner: "runtime-owner",
+            status: "blocked",
+            evidence: ["rollback-publication-bundle-alpha-to-beta", "publish-rollback-alpha-to-beta"]
+          },
+          {
+            id: "rollback-publication-recovery-alpha-to-beta-support-operator",
+            label: "Publication closeout receipt",
+            owner: "support-operator",
+            status: "blocked",
+            evidence: ["attestation-approval-envelope-alpha-to-beta", "promotion-release-decision-record-alpha-to-beta"]
+          }
+        ],
+        reviewChecks: [
+          "rollback publication bundle linked",
+          "approval execution envelope linked",
+          "staged release decision record linked",
+          "recovery acknowledgement path declared",
+          "recovery evidence path declared"
+        ],
+        blockedBy: [
+          "rollback cutover publication recovery receipts remain metadata-only",
+          "publish rollback remains non-executable",
+          "release approval remains non-executable",
+          "host-side execution remains disabled"
+        ],
+        canReceiveRecoveryReceipt: false
+      },
+      {
+        id: "rollback-publication-recovery-receipt-beta-to-stable",
+        from: "beta",
+        to: "stable",
+        rollbackCutoverPublicationBundleId: "rollback-publication-bundle-beta-to-stable",
+        attestationOperatorApprovalExecutionEnvelopeId: "attestation-approval-envelope-beta-to-stable",
+        promotionStagedApplyReleaseDecisionRecordId: "promotion-release-decision-record-beta-to-stable",
+        publishRollbackPathId: "publish-rollback-beta-to-stable",
+        releaseApprovalStageId: "approval-decision-receipts",
+        publishGateId: "gate-rollback-cutover-publication-recovery-receipts",
+        status: "blocked",
+        publicationRecoveryReceiptPath: "future/publish/beta-to-stable/rollback-cutover-publication-recovery-receipt.json",
+        recoveryAcknowledgementPath: "future/publish/beta-to-stable/rollback-cutover-publication-recovery-ack.json",
+        recoveryEvidencePath: "future/publish/beta-to-stable/rollback-cutover-publication-recovery-evidence.json",
+        recoveryReceipts: [
+          {
+            id: "rollback-publication-recovery-beta-to-stable-release-manager",
+            label: "Publication recovery acknowledgement",
+            owner: "release-manager",
+            status: "blocked",
+            evidence: ["rollback-publication-bundle-beta-to-stable", "promotion-release-decision-record-beta-to-stable"]
+          },
+          {
+            id: "rollback-publication-recovery-beta-to-stable-runtime-owner",
+            label: "Recovery evidence receipt",
+            owner: "runtime-owner",
+            status: "blocked",
+            evidence: ["rollback-publication-bundle-beta-to-stable", "publish-rollback-beta-to-stable"]
+          },
+          {
+            id: "rollback-publication-recovery-beta-to-stable-support-operator",
+            label: "Publication closeout receipt",
+            owner: "support-operator",
+            status: "blocked",
+            evidence: ["attestation-approval-envelope-beta-to-stable", "promotion-release-decision-record-beta-to-stable"]
+          }
+        ],
+        reviewChecks: [
+          "rollback publication bundle linked",
+          "approval execution envelope linked",
+          "staged release decision record linked",
+          "recovery acknowledgement path declared",
+          "recovery evidence path declared"
+        ],
+        blockedBy: [
+          "rollback cutover publication recovery receipts remain metadata-only",
+          "publish rollback remains non-executable",
+          "release approval remains non-executable",
+          "host-side execution remains disabled"
+        ],
+        canReceiveRecoveryReceipt: false
+      }
+    ]
+  };
+}
+
 function buildReleaseApprovalWorkflow({ generatedAt }) {
   return {
     schemaVersion: "openclaw-studio-release-approval-workflow/v1",
@@ -6262,7 +6774,7 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
       },
       {
         id: "approval-attestation-verification",
-        label: "Attestation verification, dispatch, reconciliation, and receipt review",
+        label: "Attestation verification, dispatch, reconciliation, envelope, and receipt review",
         status: "planned",
         approverRoles: ["release-engineering", "security"],
         evidence: [
@@ -6275,7 +6787,8 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
           "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json",
           "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
           "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
-          "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json"
+          "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+          "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json"
         ]
       },
       {
@@ -6292,7 +6805,7 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
       },
       {
         id: "approval-promotion-apply",
-        label: "Promotion apply, command-sheet, closeout-journal, and execution checkpoint review",
+        label: "Promotion apply, command-sheet, closeout-journal, decision-record, and execution checkpoint review",
         status: "planned",
         approverRoles: ["release-manager", "product-owner"],
         evidence: [
@@ -6305,7 +6818,21 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
           "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
           "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
           "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
-          "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json"
+          "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json"
+        ]
+      },
+      {
+        id: "approval-decision-receipts",
+        label: "Approval execution envelopes, staged release decisions, and publication recovery receipt review",
+        status: "blocked",
+        approverRoles: ["release-engineering", "release-manager", "product-owner"],
+        evidence: [
+          "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json",
+          "release/RELEASE-APPROVAL-WORKFLOW.json",
+          "release/PUBLISH-GATES.json"
         ]
       },
       {
@@ -6322,7 +6849,7 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
       },
       {
         id: "approval-publish-promotion",
-        label: "Publish, rollback, outcome-report, and promotion review",
+        label: "Publish, rollback, outcome-report, recovery-receipt, and promotion review",
         status: "blocked",
         approverRoles: ["release-manager", "product-owner"],
         evidence: [
@@ -6343,7 +6870,8 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
           "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
           "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
           "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
-          "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json"
+          "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json"
         ]
       },
       {
@@ -6379,6 +6907,7 @@ function buildPublishGates({ generatedAt }) {
       { id: "gate-attestation-operator-dispatch-receipts", label: "Attestation operator dispatch receipts reviewed", status: "blocked" },
       { id: "gate-attestation-operator-reconciliation-ledgers", label: "Attestation operator reconciliation ledgers reviewed", status: "blocked" },
       { id: "gate-attestation-operator-settlement-packs", label: "Attestation operator settlement packs reviewed", status: "blocked" },
+      { id: "gate-attestation-operator-approval-execution-envelopes", label: "Attestation operator approval execution envelopes reviewed", status: "blocked" },
       { id: "gate-installer-targets", label: "Installer targets reviewed", status: "planned" },
       { id: "gate-installer-builder-execution", label: "Installer builder execution reviewed", status: "planned" },
       { id: "gate-installer-builder-orchestration", label: "Installer builder orchestration reviewed", status: "planned" },
@@ -6393,6 +6922,7 @@ function buildPublishGates({ generatedAt }) {
       { id: "gate-promotion-staged-apply-confirmation-ledgers", label: "Promotion staged-apply confirmation ledgers reviewed", status: "blocked" },
       { id: "gate-promotion-staged-apply-closeout-journals", label: "Promotion staged-apply closeout journals reviewed", status: "blocked" },
       { id: "gate-promotion-staged-apply-signoff-sheets", label: "Promotion staged-apply signoff sheets reviewed", status: "blocked" },
+      { id: "gate-promotion-staged-apply-release-decision-records", label: "Promotion staged-apply release decision records reviewed", status: "blocked" },
       { id: "gate-signing", label: "Signing / notarization complete", status: "blocked" },
       { id: "gate-signing-handshake", label: "Signing-publish gating handshake resolved", status: "blocked" },
       { id: "gate-approval-bridge", label: "Signing-publish approval bridge resolved", status: "blocked" },
@@ -6407,6 +6937,7 @@ function buildPublishGates({ generatedAt }) {
       { id: "gate-rollback-cutover-execution-records", label: "Rollback cutover execution records reviewed", status: "blocked" },
       { id: "gate-rollback-cutover-outcome-reports", label: "Rollback cutover outcome reports reviewed", status: "blocked" },
       { id: "gate-rollback-cutover-publication-bundles", label: "Rollback cutover publication bundles reviewed", status: "blocked" },
+      { id: "gate-rollback-cutover-publication-recovery-receipts", label: "Rollback cutover publication recovery receipts reviewed", status: "blocked" },
       { id: "gate-approval-workflow", label: "Release approval workflow resolved", status: "blocked" },
       { id: "gate-notes", label: "Release notes approved", status: "planned" },
       { id: "gate-upload", label: "Artifacts uploaded", status: "blocked" },
@@ -6440,6 +6971,7 @@ function buildPromotionGates({ generatedAt }) {
           "attestation operator dispatch receipts",
           "attestation operator reconciliation ledgers",
           "attestation operator settlement packs",
+          "attestation operator approval execution envelopes",
           "installer targets",
           "installer builder execution",
           "installer channel routing",
@@ -6453,6 +6985,7 @@ function buildPromotionGates({ generatedAt }) {
           "promotion staged-apply confirmation ledgers",
           "promotion staged-apply closeout journals",
           "promotion staged-apply signoff sheets",
+          "promotion staged-apply release decision records",
           "signing",
           "signing-publish gating handshake",
           "signing-publish promotion handshake",
@@ -6466,6 +6999,7 @@ function buildPromotionGates({ generatedAt }) {
           "rollback cutover execution records",
           "rollback cutover outcome reports",
           "rollback cutover publication bundles",
+          "rollback cutover publication recovery receipts",
           "release approval workflow",
           "release notes",
           "upload"
@@ -6489,6 +7023,7 @@ function buildPromotionGates({ generatedAt }) {
           "attestation operator dispatch receipts",
           "attestation operator reconciliation ledgers",
           "attestation operator settlement packs",
+          "attestation operator approval execution envelopes",
           "installer channel routing",
           "channel promotion evidence",
           "promotion apply manifests",
@@ -6500,6 +7035,7 @@ function buildPromotionGates({ generatedAt }) {
           "promotion staged-apply confirmation ledgers",
           "promotion staged-apply closeout journals",
           "promotion staged-apply signoff sheets",
+          "promotion staged-apply release decision records",
           "signing-publish gating handshake",
           "signing-publish promotion handshake",
           "publish rollback handshake",
@@ -6512,6 +7048,7 @@ function buildPromotionGates({ generatedAt }) {
           "rollback cutover execution records",
           "rollback cutover outcome reports",
           "rollback cutover publication bundles",
+          "rollback cutover publication recovery receipts",
           "release approval workflow",
           "rollback plan"
         ]
@@ -6550,6 +7087,7 @@ function renderInstallerPlaceholderScript() {
     "console.log(`attestation operator dispatch receipts metadata: ${manifest.attestationOperatorDispatchReceiptsPath}`);",
     "console.log(`attestation operator reconciliation ledgers metadata: ${manifest.attestationOperatorReconciliationLedgersPath}`);",
     "console.log(`attestation operator settlement packs metadata: ${manifest.attestationOperatorSettlementPacksPath}`);",
+    "console.log(`attestation operator approval execution envelopes metadata: ${manifest.attestationOperatorApprovalExecutionEnvelopesPath}`);",
     "console.log(`installer targets metadata: ${manifest.installerTargetsPath}`);",
     "console.log(`installer builder execution metadata: ${manifest.installerBuilderExecutionSkeletonPath}`);",
     "console.log(`installer-target builder metadata: ${manifest.installerTargetBuilderSkeletonPath}`);",
@@ -6565,6 +7103,7 @@ function renderInstallerPlaceholderScript() {
     "console.log(`promotion staged-apply confirmation ledgers metadata: ${manifest.promotionStagedApplyConfirmationLedgersPath}`);",
     "console.log(`promotion staged-apply closeout journals metadata: ${manifest.promotionStagedApplyCloseoutJournalsPath}`);",
     "console.log(`promotion staged-apply signoff sheets metadata: ${manifest.promotionStagedApplySignoffSheetsPath}`);",
+    "console.log(`promotion staged-apply release decision records metadata: ${manifest.promotionStagedApplyReleaseDecisionRecordsPath}`);",
     "console.log(`signing-publish gating handshake metadata: ${manifest.signingPublishGatingHandshakePath}`);",
     "console.log(`signing & publish pipeline metadata: ${manifest.signingPublishPipelinePath}`);",
     "console.log(`signing-publish approval bridge metadata: ${manifest.signingPublishApprovalBridgePath}`);",
@@ -6579,6 +7118,7 @@ function renderInstallerPlaceholderScript() {
     "console.log(`rollback cutover execution records metadata: ${manifest.rollbackCutoverExecutionRecordsPath}`);",
     "console.log(`rollback cutover outcome reports metadata: ${manifest.rollbackCutoverOutcomeReportsPath}`);",
     "console.log(`rollback cutover publication bundles metadata: ${manifest.rollbackCutoverPublicationBundlesPath}`);",
+    "console.log(`rollback cutover publication recovery receipts metadata: ${manifest.rollbackCutoverPublicationRecoveryReceiptsPath}`);",
     "console.log(`approval workflow metadata: ${manifest.approvalWorkflowPath}`);",
     "console.log(\"missing capabilities:\");",
     "for (const item of manifest.missingCapabilities) {",
@@ -6741,6 +7281,7 @@ function buildInstallerPlaceholder({ generatedAt, studioPackage }) {
     attestationOperatorDispatchReceiptsPath: "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
     attestationOperatorReconciliationLedgersPath: "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
     attestationOperatorSettlementPacksPath: "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+    attestationOperatorApprovalExecutionEnvelopesPath: "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
     installerTargetsPath: "release/INSTALLER-TARGETS.json",
     installerBuilderExecutionSkeletonPath: "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
     installerTargetBuilderSkeletonPath: "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
@@ -6757,6 +7298,7 @@ function buildInstallerPlaceholder({ generatedAt, studioPackage }) {
     promotionStagedApplyConfirmationLedgersPath: "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
     promotionStagedApplyCloseoutJournalsPath: "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
     promotionStagedApplySignoffSheetsPath: "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+    promotionStagedApplyReleaseDecisionRecordsPath: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
     signingPublishGatingHandshakePath: "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
     signingPublishPipelinePath: "release/SIGNING-PUBLISH-PIPELINE.json",
     signingPublishApprovalBridgePath: "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
@@ -6772,6 +7314,7 @@ function buildInstallerPlaceholder({ generatedAt, studioPackage }) {
     rollbackCutoverExecutionRecordsPath: "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
     rollbackCutoverOutcomeReportsPath: "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
     rollbackCutoverPublicationBundlesPath: "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+    rollbackCutoverPublicationRecoveryReceiptsPath: "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json",
     approvalWorkflowPath: "release/RELEASE-APPROVAL-WORKFLOW.json"
   };
 }
@@ -6875,6 +7418,9 @@ function createReleaseSkeleton(summary = getPreflightSummary()) {
   const attestationOperatorSettlementPacks = buildAttestationOperatorSettlementPacks({
     generatedAt
   });
+  const attestationOperatorApprovalExecutionEnvelopes = buildAttestationOperatorApprovalExecutionEnvelopes({
+    generatedAt
+  });
   const installerTargets = buildInstallerTargets({
     generatedAt
   });
@@ -6921,6 +7467,9 @@ function createReleaseSkeleton(summary = getPreflightSummary()) {
     generatedAt
   });
   const promotionStagedApplySignoffSheets = buildPromotionStagedApplySignoffSheets({
+    generatedAt
+  });
+  const promotionStagedApplyReleaseDecisionRecords = buildPromotionStagedApplyReleaseDecisionRecords({
     generatedAt
   });
   const signingMetadata = buildSigningMetadata({
@@ -6972,6 +7521,9 @@ function createReleaseSkeleton(summary = getPreflightSummary()) {
     generatedAt
   });
   const rollbackCutoverPublicationBundles = buildRollbackCutoverPublicationBundles({
+    generatedAt
+  });
+  const rollbackCutoverPublicationRecoveryReceipts = buildRollbackCutoverPublicationRecoveryReceipts({
     generatedAt
   });
   const releaseApprovalWorkflow = buildReleaseApprovalWorkflow({
@@ -7033,6 +7585,7 @@ function createReleaseSkeleton(summary = getPreflightSummary()) {
     attestationOperatorDispatchReceipts,
     attestationOperatorReconciliationLedgers,
     attestationOperatorSettlementPacks,
+    attestationOperatorApprovalExecutionEnvelopes,
     installerTargets,
     installerBuilderExecutionSkeleton,
     installerTargetBuilderSkeleton,
@@ -7049,6 +7602,7 @@ function createReleaseSkeleton(summary = getPreflightSummary()) {
     promotionStagedApplyConfirmationLedgers,
     promotionStagedApplyCloseoutJournals,
     promotionStagedApplySignoffSheets,
+    promotionStagedApplyReleaseDecisionRecords,
     signingMetadata,
     notarizationPlan,
     signingPublishGatingHandshake,
@@ -7066,6 +7620,7 @@ function createReleaseSkeleton(summary = getPreflightSummary()) {
     rollbackCutoverExecutionRecords,
     rollbackCutoverOutcomeReports,
     rollbackCutoverPublicationBundles,
+    rollbackCutoverPublicationRecoveryReceipts,
     releaseApprovalWorkflow,
     publishGates,
     promotionGates,
@@ -7175,6 +7730,10 @@ function writeReleaseSkeleton(destinationRoot, skeleton) {
     path.join(destinationRoot, "release", "ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json"),
     skeleton.attestationOperatorSettlementPacks
   );
+  writeJsonFile(
+    path.join(destinationRoot, "release", "ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json"),
+    skeleton.attestationOperatorApprovalExecutionEnvelopes
+  );
   writeJsonFile(path.join(destinationRoot, "release", "INSTALLER-TARGETS.json"), skeleton.installerTargets);
   writeJsonFile(
     path.join(destinationRoot, "release", "INSTALLER-BUILDER-EXECUTION-SKELETON.json"),
@@ -7223,6 +7782,10 @@ function writeReleaseSkeleton(destinationRoot, skeleton) {
   writeJsonFile(
     path.join(destinationRoot, "release", "PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json"),
     skeleton.promotionStagedApplySignoffSheets
+  );
+  writeJsonFile(
+    path.join(destinationRoot, "release", "PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json"),
+    skeleton.promotionStagedApplyReleaseDecisionRecords
   );
   writeJsonFile(path.join(destinationRoot, "release", "SIGNING-METADATA.json"), skeleton.signingMetadata);
   writeJsonFile(path.join(destinationRoot, "release", "NOTARIZATION-PLAN.json"), skeleton.notarizationPlan);
@@ -7287,6 +7850,10 @@ function writeReleaseSkeleton(destinationRoot, skeleton) {
     skeleton.rollbackCutoverPublicationBundles
   );
   writeJsonFile(
+    path.join(destinationRoot, "release", "ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json"),
+    skeleton.rollbackCutoverPublicationRecoveryReceipts
+  );
+  writeJsonFile(
     path.join(destinationRoot, "release", "RELEASE-APPROVAL-WORKFLOW.json"),
     skeleton.releaseApprovalWorkflow
   );
@@ -7327,6 +7894,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
     "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
     "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+    "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json",
     "release/INSTALLER-TARGETS.json",
     "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
     "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
@@ -7343,6 +7911,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
     "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
     "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+    "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json",
     "release/SIGNING-METADATA.json",
     "release/NOTARIZATION-PLAN.json",
     "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
@@ -7360,6 +7929,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
     "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
     "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+    "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json",
     "release/RELEASE-APPROVAL-WORKFLOW.json",
     "release/RELEASE-NOTES.md",
     "release/PUBLISH-GATES.json",
@@ -7443,6 +8013,9 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
   const writtenAttestationOperatorSettlementPacks = readJson(
     path.join(destinationRoot, "release", "ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json")
   );
+  const writtenAttestationOperatorApprovalExecutionEnvelopes = readJson(
+    path.join(destinationRoot, "release", "ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json")
+  );
   const writtenInstallerTargets = readJson(path.join(destinationRoot, "release", "INSTALLER-TARGETS.json"));
   const writtenInstallerBuilderExecutionSkeleton = readJson(
     path.join(destinationRoot, "release", "INSTALLER-BUILDER-EXECUTION-SKELETON.json")
@@ -7488,6 +8061,9 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
   );
   const writtenPromotionStagedApplySignoffSheets = readJson(
     path.join(destinationRoot, "release", "PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json")
+  );
+  const writtenPromotionStagedApplyReleaseDecisionRecords = readJson(
+    path.join(destinationRoot, "release", "PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json")
   );
   const writtenSigningMetadata = readJson(path.join(destinationRoot, "release", "SIGNING-METADATA.json"));
   const writtenNotarizationPlan = readJson(path.join(destinationRoot, "release", "NOTARIZATION-PLAN.json"));
@@ -7536,6 +8112,9 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
   const writtenRollbackCutoverPublicationBundles = readJson(
     path.join(destinationRoot, "release", "ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json")
   );
+  const writtenRollbackCutoverPublicationRecoveryReceipts = readJson(
+    path.join(destinationRoot, "release", "ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json")
+  );
   const writtenReleaseApprovalWorkflow = readJson(
     path.join(destinationRoot, "release", "RELEASE-APPROVAL-WORKFLOW.json")
   );
@@ -7578,6 +8157,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     writtenInstaller.attestationOperatorDispatchReceiptsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" ||
     writtenInstaller.attestationOperatorReconciliationLedgersPath !== "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" ||
     writtenInstaller.attestationOperatorSettlementPacksPath !== "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" ||
+    writtenInstaller.attestationOperatorApprovalExecutionEnvelopesPath !== "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json" ||
     writtenInstaller.installerTargetsPath !== "release/INSTALLER-TARGETS.json" ||
     writtenInstaller.installerBuilderExecutionSkeletonPath !== "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json" ||
     writtenInstaller.installerTargetBuilderSkeletonPath !== "release/INSTALLER-TARGET-BUILDER-SKELETON.json" ||
@@ -7593,6 +8173,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     writtenInstaller.promotionStagedApplyConfirmationLedgersPath !== "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json" ||
     writtenInstaller.promotionStagedApplyCloseoutJournalsPath !== "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json" ||
     writtenInstaller.promotionStagedApplySignoffSheetsPath !== "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json" ||
+    writtenInstaller.promotionStagedApplyReleaseDecisionRecordsPath !== "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json" ||
     writtenInstaller.signingPublishGatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
     writtenInstaller.signingPublishPipelinePath !== "release/SIGNING-PUBLISH-PIPELINE.json" ||
     writtenInstaller.signingPublishApprovalBridgePath !== "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json" ||
@@ -7607,6 +8188,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     writtenInstaller.rollbackCutoverExecutionRecordsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json" ||
     writtenInstaller.rollbackCutoverOutcomeReportsPath !== "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json" ||
     writtenInstaller.rollbackCutoverPublicationBundlesPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" ||
+    writtenInstaller.rollbackCutoverPublicationRecoveryReceiptsPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json" ||
     writtenInstaller.approvalWorkflowPath !== "release/RELEASE-APPROVAL-WORKFLOW.json"
   ) {
     throw new Error(`Installer placeholder is missing the expected ${PHASE_ID} dispatch / runsheet / handoff / handshake / approval paths.`);
@@ -7775,6 +8357,17 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
   }
 
   if (
+    writtenAttestationOperatorApprovalExecutionEnvelopes.phase !== PHASE_ID ||
+    writtenAttestationOperatorApprovalExecutionEnvelopes.mode !== "local-only-review" ||
+    !Array.isArray(writtenAttestationOperatorApprovalExecutionEnvelopes.envelopes) ||
+    writtenAttestationOperatorApprovalExecutionEnvelopes.envelopes.length < 2
+  ) {
+    throw new Error(
+      `Attestation operator approval execution envelopes do not reflect the expected ${PHASE_ID} approval-envelope metadata.`
+    );
+  }
+
+  if (
     writtenInstallerBuilderExecutionSkeleton.phase !== PHASE_ID ||
     !Array.isArray(writtenInstallerBuilderExecutionSkeleton.executions) ||
     writtenInstallerBuilderExecutionSkeleton.executions.length < 7
@@ -7906,6 +8499,17 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     throw new Error(`Promotion staged-apply signoff sheets do not reflect the expected ${PHASE_ID} signoff-sheet metadata.`);
   }
 
+  if (
+    writtenPromotionStagedApplyReleaseDecisionRecords.phase !== PHASE_ID ||
+    writtenPromotionStagedApplyReleaseDecisionRecords.mode !== "local-only-review" ||
+    !Array.isArray(writtenPromotionStagedApplyReleaseDecisionRecords.decisionRecords) ||
+    writtenPromotionStagedApplyReleaseDecisionRecords.decisionRecords.length < 2
+  ) {
+    throw new Error(
+      `Promotion staged-apply release decision records do not reflect the expected ${PHASE_ID} decision-record metadata.`
+    );
+  }
+
   if (writtenSigningMetadata.phase !== PHASE_ID || !Array.isArray(writtenSigningMetadata.readiness) || writtenSigningMetadata.readiness.length < 3) {
     throw new Error(`Signing metadata does not reflect the expected ${PHASE_ID} signing-ready skeleton.`);
   }
@@ -7927,18 +8531,21 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     writtenSigningPublishGatingHandshake.attestationOperatorDispatchReceiptsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" ||
     writtenSigningPublishGatingHandshake.attestationOperatorReconciliationLedgersPath !== "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" ||
     writtenSigningPublishGatingHandshake.attestationOperatorSettlementPacksPath !== "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" ||
+    writtenSigningPublishGatingHandshake.attestationOperatorApprovalExecutionEnvelopesPath !== "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json" ||
     writtenSigningPublishGatingHandshake.channelPromotionEvidencePath !== "release/CHANNEL-PROMOTION-EVIDENCE.json" ||
     writtenSigningPublishGatingHandshake.promotionStagedApplyRunsheetsPath !== "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json" ||
     writtenSigningPublishGatingHandshake.promotionStagedApplyCommandSheetsPath !== "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json" ||
     writtenSigningPublishGatingHandshake.promotionStagedApplyConfirmationLedgersPath !== "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json" ||
     writtenSigningPublishGatingHandshake.promotionStagedApplyCloseoutJournalsPath !== "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json" ||
     writtenSigningPublishGatingHandshake.promotionStagedApplySignoffSheetsPath !== "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json" ||
+    writtenSigningPublishGatingHandshake.promotionStagedApplyReleaseDecisionRecordsPath !== "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json" ||
     writtenSigningPublishGatingHandshake.publishRollbackHandshakePath !== "release/PUBLISH-ROLLBACK-HANDSHAKE.json" ||
     writtenSigningPublishGatingHandshake.rollbackCutoverHandoffPlansPath !== "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json" ||
     writtenSigningPublishGatingHandshake.rollbackCutoverExecutionChecklistsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json" ||
     writtenSigningPublishGatingHandshake.rollbackCutoverExecutionRecordsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json" ||
     writtenSigningPublishGatingHandshake.rollbackCutoverOutcomeReportsPath !== "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json" ||
     writtenSigningPublishGatingHandshake.rollbackCutoverPublicationBundlesPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" ||
+    writtenSigningPublishGatingHandshake.rollbackCutoverPublicationRecoveryReceiptsPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json" ||
     !Array.isArray(writtenSigningPublishGatingHandshake.stages) ||
     writtenSigningPublishGatingHandshake.stages.length < 15 ||
     !Array.isArray(writtenSigningPublishGatingHandshake.acknowledgements) ||
@@ -7959,6 +8566,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     writtenSigningPublishPipeline.attestationOperatorDispatchReceiptsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" ||
     writtenSigningPublishPipeline.attestationOperatorReconciliationLedgersPath !== "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" ||
     writtenSigningPublishPipeline.attestationOperatorSettlementPacksPath !== "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" ||
+    writtenSigningPublishPipeline.attestationOperatorApprovalExecutionEnvelopesPath !== "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json" ||
     writtenSigningPublishPipeline.gatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
     writtenSigningPublishPipeline.approvalBridgePath !== "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json" ||
     writtenSigningPublishPipeline.channelRoutingPath !== "release/INSTALLER-CHANNEL-ROUTING.json" ||
@@ -7972,6 +8580,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     writtenSigningPublishPipeline.promotionStagedApplyConfirmationLedgersPath !== "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json" ||
     writtenSigningPublishPipeline.promotionStagedApplyCloseoutJournalsPath !== "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json" ||
     writtenSigningPublishPipeline.promotionStagedApplySignoffSheetsPath !== "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json" ||
+    writtenSigningPublishPipeline.promotionStagedApplyReleaseDecisionRecordsPath !== "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json" ||
     writtenSigningPublishPipeline.promotionHandshakePath !== "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json" ||
     writtenSigningPublishPipeline.publishRollbackHandshakePath !== "release/PUBLISH-ROLLBACK-HANDSHAKE.json" ||
     writtenSigningPublishPipeline.rollbackExecutionRehearsalLedgerPath !== "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json" ||
@@ -7983,6 +8592,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     writtenSigningPublishPipeline.rollbackCutoverExecutionRecordsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json" ||
     writtenSigningPublishPipeline.rollbackCutoverOutcomeReportsPath !== "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json" ||
     writtenSigningPublishPipeline.rollbackCutoverPublicationBundlesPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" ||
+    writtenSigningPublishPipeline.rollbackCutoverPublicationRecoveryReceiptsPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json" ||
     !Array.isArray(writtenSigningPublishPipeline.stages) ||
     writtenSigningPublishPipeline.stages.length < 27
   ) {
@@ -8011,6 +8621,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     writtenSigningPublishPromotionHandshake.attestationOperatorDispatchReceiptsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" ||
     writtenSigningPublishPromotionHandshake.attestationOperatorReconciliationLedgersPath !== "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" ||
     writtenSigningPublishPromotionHandshake.attestationOperatorSettlementPacksPath !== "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" ||
+    writtenSigningPublishPromotionHandshake.attestationOperatorApprovalExecutionEnvelopesPath !== "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json" ||
     writtenSigningPublishPromotionHandshake.promotionApplyManifestsPath !== "release/PROMOTION-APPLY-MANIFESTS.json" ||
     writtenSigningPublishPromotionHandshake.promotionExecutionCheckpointsPath !== "release/PROMOTION-EXECUTION-CHECKPOINTS.json" ||
     writtenSigningPublishPromotionHandshake.promotionOperatorHandoffRailsPath !== "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json" ||
@@ -8020,12 +8631,14 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     writtenSigningPublishPromotionHandshake.promotionStagedApplyConfirmationLedgersPath !== "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json" ||
     writtenSigningPublishPromotionHandshake.promotionStagedApplyCloseoutJournalsPath !== "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json" ||
     writtenSigningPublishPromotionHandshake.promotionStagedApplySignoffSheetsPath !== "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json" ||
+    writtenSigningPublishPromotionHandshake.promotionStagedApplyReleaseDecisionRecordsPath !== "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json" ||
     writtenSigningPublishPromotionHandshake.publishRollbackHandshakePath !== "release/PUBLISH-ROLLBACK-HANDSHAKE.json" ||
     writtenSigningPublishPromotionHandshake.rollbackCutoverHandoffPlansPath !== "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json" ||
     writtenSigningPublishPromotionHandshake.rollbackCutoverExecutionChecklistsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json" ||
     writtenSigningPublishPromotionHandshake.rollbackCutoverExecutionRecordsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json" ||
     writtenSigningPublishPromotionHandshake.rollbackCutoverOutcomeReportsPath !== "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json" ||
     writtenSigningPublishPromotionHandshake.rollbackCutoverPublicationBundlesPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" ||
+    writtenSigningPublishPromotionHandshake.rollbackCutoverPublicationRecoveryReceiptsPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json" ||
     !Array.isArray(writtenSigningPublishPromotionHandshake.stages) ||
     writtenSigningPublishPromotionHandshake.stages.length < 14 ||
     !Array.isArray(writtenSigningPublishPromotionHandshake.acknowledgements) ||
@@ -8044,6 +8657,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     writtenPublishRollbackHandshake.attestationOperatorDispatchReceiptsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" ||
     writtenPublishRollbackHandshake.attestationOperatorReconciliationLedgersPath !== "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" ||
     writtenPublishRollbackHandshake.attestationOperatorSettlementPacksPath !== "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" ||
+    writtenPublishRollbackHandshake.attestationOperatorApprovalExecutionEnvelopesPath !== "release/ATTESTATION-OPERATOR-APPROVAL-EXECUTION-ENVELOPES.json" ||
     writtenPublishRollbackHandshake.promotionHandshakePath !== "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json" ||
     writtenPublishRollbackHandshake.promotionExecutionCheckpointsPath !== "release/PROMOTION-EXECUTION-CHECKPOINTS.json" ||
     writtenPublishRollbackHandshake.promotionOperatorHandoffRailsPath !== "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json" ||
@@ -8053,6 +8667,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     writtenPublishRollbackHandshake.promotionStagedApplyConfirmationLedgersPath !== "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json" ||
     writtenPublishRollbackHandshake.promotionStagedApplyCloseoutJournalsPath !== "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json" ||
     writtenPublishRollbackHandshake.promotionStagedApplySignoffSheetsPath !== "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json" ||
+    writtenPublishRollbackHandshake.promotionStagedApplyReleaseDecisionRecordsPath !== "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-RECORDS.json" ||
     writtenPublishRollbackHandshake.rollbackExecutionRehearsalLedgerPath !== "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json" ||
     writtenPublishRollbackHandshake.rollbackOperatorDrillbooksPath !== "release/ROLLBACK-OPERATOR-DRILLBOOKS.json" ||
     writtenPublishRollbackHandshake.rollbackLiveReadinessContractsPath !== "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json" ||
@@ -8062,6 +8677,7 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     writtenPublishRollbackHandshake.rollbackCutoverExecutionRecordsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json" ||
     writtenPublishRollbackHandshake.rollbackCutoverOutcomeReportsPath !== "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json" ||
     writtenPublishRollbackHandshake.rollbackCutoverPublicationBundlesPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" ||
+    writtenPublishRollbackHandshake.rollbackCutoverPublicationRecoveryReceiptsPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-RECOVERY-RECEIPTS.json" ||
     !Array.isArray(writtenPublishRollbackHandshake.paths) ||
     writtenPublishRollbackHandshake.paths.length < 2 ||
     !Array.isArray(writtenPublishRollbackHandshake.stages) ||
@@ -8163,6 +8779,17 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
   }
 
   if (
+    writtenRollbackCutoverPublicationRecoveryReceipts.phase !== PHASE_ID ||
+    writtenRollbackCutoverPublicationRecoveryReceipts.mode !== "local-only-review" ||
+    !Array.isArray(writtenRollbackCutoverPublicationRecoveryReceipts.receipts) ||
+    writtenRollbackCutoverPublicationRecoveryReceipts.receipts.length < 2
+  ) {
+    throw new Error(
+      `Rollback cutover publication recovery receipts do not reflect the expected ${PHASE_ID} recovery-receipt metadata.`
+    );
+  }
+
+  if (
     writtenReleaseApprovalWorkflow.phase !== PHASE_ID ||
     writtenReleaseApprovalWorkflow.mode !== "local-only-review" ||
     writtenReleaseApprovalWorkflow.gatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
@@ -8231,6 +8858,7 @@ function formatReleasePlanSummary(skeleton) {
     `Attestation operator dispatch receipts: ${skeleton.attestationOperatorDispatchReceipts.receipts.length}`,
     `Attestation operator reconciliation ledgers: ${skeleton.attestationOperatorReconciliationLedgers.ledgers.length}`,
     `Attestation operator settlement packs: ${skeleton.attestationOperatorSettlementPacks.packs.length}`,
+    `Attestation operator approval execution envelopes: ${skeleton.attestationOperatorApprovalExecutionEnvelopes.envelopes.length}`,
     `Installer targets: ${skeleton.installerTargets.targets.length}`,
     `Installer execution skeletons: ${skeleton.installerBuilderExecutionSkeleton.executions.length}`,
     `Installer builders: ${skeleton.installerTargetBuilderSkeleton.builders.length}`,
@@ -8247,6 +8875,7 @@ function formatReleasePlanSummary(skeleton) {
     `Promotion staged-apply confirmation ledgers: ${skeleton.promotionStagedApplyConfirmationLedgers.ledgers.length}`,
     `Promotion staged-apply closeout journals: ${skeleton.promotionStagedApplyCloseoutJournals.journals.length}`,
     `Promotion staged-apply signoff sheets: ${skeleton.promotionStagedApplySignoffSheets.signoffSheets.length}`,
+    `Promotion staged-apply release decision records: ${skeleton.promotionStagedApplyReleaseDecisionRecords.decisionRecords.length}`,
     `Signing/publish handshake stages: ${skeleton.signingPublishGatingHandshake.stages.length}`,
     `Signing/publish pipeline stages: ${skeleton.signingPublishPipeline.stages.length}`,
     `Signing/publish approval bridge entries: ${skeleton.signingPublishApprovalBridge.bridge.length}`,
@@ -8262,6 +8891,7 @@ function formatReleasePlanSummary(skeleton) {
     `Rollback cutover execution records: ${skeleton.rollbackCutoverExecutionRecords.records.length}`,
     `Rollback cutover outcome reports: ${skeleton.rollbackCutoverOutcomeReports.reports.length}`,
     `Rollback cutover publication bundles: ${skeleton.rollbackCutoverPublicationBundles.bundles.length}`,
+    `Rollback cutover publication recovery receipts: ${skeleton.rollbackCutoverPublicationRecoveryReceipts.receipts.length}`,
     `Approval workflow stages: ${skeleton.releaseApprovalWorkflow.stages.length} (${skeleton.releaseApprovalWorkflow.mode})`,
     `Promotion gates: ${skeleton.promotionGates.promotions.length}`,
     `Docs: ${skeleton.allDocs.map((doc) => doc.outputPath).join(", ")}`
