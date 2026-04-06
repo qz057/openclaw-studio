@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-build-metadata/v1",
-  "generatedAt": "2026-04-06T14:54:49.806Z",
+  "generatedAt": "2026-04-06T15:26:32.077Z",
   "app": {
     "name": "OpenClaw Studio",
     "workspacePackage": "@openclaw/studio",
@@ -505,7 +505,7 @@
       "sourceRoot": "/home/qz057/.openclaw/workspace/openclaw-studio/apps/studio/dist-renderer",
       "outputRoot": "artifacts/renderer",
       "fileCount": 11,
-      "totalBytes": 561607,
+      "totalBytes": 561538,
       "entrypoints": [
         "artifacts/renderer/index.html"
       ]
@@ -516,7 +516,7 @@
       "sourceRoot": "/home/qz057/.openclaw/workspace/openclaw-studio/apps/studio/dist-electron",
       "outputRoot": "artifacts/electron",
       "fileCount": 15,
-      "totalBytes": 391429,
+      "totalBytes": 391626,
       "entrypoints": [
         "artifacts/electron/electron/main.js",
         "artifacts/electron/electron/preload.js",

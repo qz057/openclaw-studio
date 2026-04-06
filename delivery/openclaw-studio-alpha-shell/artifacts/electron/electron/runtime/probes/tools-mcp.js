@@ -15,6 +15,7 @@ const promises_1 = __importDefault(require("node:fs/promises"));
 const node_os_1 = __importDefault(require("node:os"));
 const node_path_1 = __importDefault(require("node:path"));
 const shared_1 = require("@openclaw/shared");
+const host_runtime_1 = require("@openclaw/shared/host-runtime");
 const runtime_command_policy_1 = require("./runtime-command-policy");
 const tools_mcp_actions_1 = require("./tools-mcp-actions");
 const homeDirectory = node_os_1.default.homedir();
@@ -623,7 +624,7 @@ function createHostBridgeState(mutationSlots) {
         previewHandoff: "placeholder",
         validators,
         slotHandlers,
-        trace: (0, shared_1.createStudioHostTraceState)(mutationSlots, slotHandlers, validators)
+        trace: (0, host_runtime_1.createStudioHostTraceState)(mutationSlots, slotHandlers, validators)
     };
 }
 function buildToolsMcpHostExecutorState(probe, controlSession) {
@@ -795,7 +796,7 @@ function buildToolsMcpHostExecutorState(probe, controlSession) {
         failureTaxonomy,
         mutationSlots
     };
-    hostExecutor.releaseApprovalPipeline = (0, shared_1.createStudioReleaseApprovalPipeline)(hostExecutor);
+    hostExecutor.releaseApprovalPipeline = (0, host_runtime_1.createStudioReleaseApprovalPipeline)(hostExecutor);
     return hostExecutor;
 }
 function createHostMutationPreview(hostExecutor, intent, title, summary, requestedTarget, currentLifecycleStage) {

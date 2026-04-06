@@ -6,7 +6,7 @@ Review docs: README.md, HANDOFF.md, IMPLEMENTATION-PLAN.md, PACKAGE-README.md, r
 
 ## Artifact groups
 - Renderer bundle: 11 files, 548.4 KiB, output=artifacts/renderer
-- Electron bundle: 15 files, 382.3 KiB, output=artifacts/electron
+- Electron bundle: 15 files, 382.4 KiB, output=artifacts/electron
 
 ## Pipeline depth
 - pipeline-docs: Docs closeout (ready) · README, HANDOFF, IMPLEMENTATION-PLAN, PACKAGE-README, and release docs are generated together.
@@ -106,4 +106,4 @@ Review docs: README.md, HANDOFF.md, IMPLEMENTATION-PLAN.md, PACKAGE-README.md, r
 - no release publishing / artifact upload / promotion handshake / rollback apply automation yet; publish rollback handshake remains metadata-only
 - real host-side execution remains disabled until the review-only approval / lifecycle / rollback loop becomes executable end-to-end
 
-Generated: 2026-04-06T14:54:49.806Z
+Generated: 2026-04-06T15:26:32.077Z

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createStudioRuntime = createStudioRuntime;
 const shared_1 = require("@openclaw/shared");
+const mock_shell_state_1 = require("@openclaw/shared/mock-shell-state");
 const codex_1 = require("./probes/codex");
 const project_context_1 = require("./probes/project-context");
 const runtime_observations_1 = require("./probes/runtime-observations");
@@ -11,7 +12,7 @@ const startup_routing_1 = require("./probes/startup-routing");
 const system_status_1 = require("./probes/system-status");
 const tools_mcp_1 = require("./probes/tools-mcp");
 function cloneState() {
-    return JSON.parse(JSON.stringify(shared_1.mockShellState));
+    return JSON.parse(JSON.stringify(mock_shell_state_1.mockShellState));
 }
 function updateSettingItem(items, id, patch) {
     return items.map((item) => (item.id === id ? { ...item, ...patch } : item));

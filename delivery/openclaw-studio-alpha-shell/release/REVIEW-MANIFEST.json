@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-review-manifest/v1",
-  "generatedAt": "2026-04-06T14:54:49.806Z",
+  "generatedAt": "2026-04-06T15:26:32.077Z",
   "phase": "phase58",
   "milestone": "phase58 review-only delivery chain / operator review loop / reviewer queues / acknowledgement state / escalation windows / closeout windows / deeper cross-window observability / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout",
   "reviewDocs": [

@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createMockRuntime = createMockRuntime;
-const shared_1 = require("@openclaw/shared");
+const mock_shell_state_1 = require("@openclaw/shared/mock-shell-state");
 function cloneState() {
-    return JSON.parse(JSON.stringify(shared_1.mockShellState));
+    return JSON.parse(JSON.stringify(mock_shell_state_1.mockShellState));
 }
 function createMockRuntime() {
     return {
