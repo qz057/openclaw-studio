@@ -779,9 +779,9 @@ export function App() {
     {
       id: "cross-view-slot-release",
       label: "Focused slot -> Release posture",
-      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase53 attestation operator approval routing contracts`,
+      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase54 attestation operator approval orchestration`,
       detail:
-        "Focused-slot review and release review now sit in the same local-only approval-routing, release-decision-enforcement, and publication-closeout story without enabling host execution, installer work, staged apply entry, cutover execution, or publish rollback."
+        "Focused-slot review and release review now sit in the same local-only approval-orchestration, decision-enforcement-lifecycle, and receipt-settlement-closeout story without enabling host execution, installer work, staged apply entry, cutover execution, or publish rollback."
     }
   ];
   const inspectorCommandLinkage = [
@@ -810,7 +810,7 @@ export function App() {
       label: "Formal Release Readiness",
       value: "RELEASE-MANIFEST / BUILD-METADATA / REVIEW-MANIFEST",
       detail:
-        "Phase53 keeps the manifest spine and extends phase52 approval execution envelopes, staged release decision records, and publication recovery receipts into operator approval routing contracts, staged release decision enforcement contracts, and publication receipt closeout contracts without executing anything."
+        "Phase54 keeps the manifest spine and extends phase53 approval routing contracts, staged release decision enforcement contracts, and publication receipt closeout contracts into operator approval orchestration, staged release decision enforcement lifecycle, and publication receipt settlement closeout without executing anything."
     },
     {
       id: "release-depth-bundles",
@@ -912,6 +912,13 @@ export function App() {
         "Settlement packs now feed reviewer-ready routing tables, approval windows, and release-approval handoff routes without dispatching any live approval or execution for real."
     },
     {
+      id: "release-depth-attestation-operator-approval-orchestration",
+      label: "Attestation Operator Approval Orchestration",
+      value: "ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION / ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS",
+      detail:
+        "Approval routing contracts now feed reviewer baton sequencing, approval quorum timing, and orchestration closeout paths without dispatching any live approval or execution for real."
+    },
+    {
       id: "release-depth-installer-builders",
       label: "Installer-target Builder Skeleton",
       value: "INSTALLER-TARGETS / INSTALLER-TARGET-BUILDER-SKELETON",
@@ -1009,6 +1016,13 @@ export function App() {
       value: "PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS / PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS",
       detail:
         "Signoff sheets now feed staged release guardrails, enforcement windows, and publish-route contracts without applying any promotion for real."
+    },
+    {
+      id: "release-depth-promotion-staged-apply-release-decision-enforcement-lifecycle",
+      label: "Promotion Staged-apply Release Decision Enforcement Lifecycle",
+      value: "PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE / PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS",
+      detail:
+        "Release decision enforcement contracts now feed lifecycle checkpoints, reviewer baton transitions, and expiry closeout without applying any promotion for real."
     },
     {
       id: "release-depth-signing-publish",
@@ -1111,6 +1125,13 @@ export function App() {
         "Publication bundles now feed closeout acknowledgements, publication-closeout contracts, and rollback recovery evidence without mutating any live publish state."
     },
     {
+      id: "release-depth-rollback-cutover-publication-receipt-settlement-closeout",
+      label: "Rollback Cutover Publication Receipt Settlement Closeout",
+      value: "ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT / ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS",
+      detail:
+        "Publication receipt closeout contracts now feed settlement ledgers, receipt closeout acknowledgements, and recovery-ready closeout evidence without mutating any live publish state."
+    },
+    {
       id: "release-depth-approval",
       label: "Release Approval Workflow",
       value: "RELEASE-APPROVAL-WORKFLOW / PUBLISH-GATES / PUBLISH-ROLLBACK-HANDSHAKE",
@@ -1127,7 +1148,7 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase53 increases release structure only; it still does not install, publish, sign, issue approval routing contracts, finalize staged release decisions, receive publication receipt closeout contracts, roll back publish state, or enable host-side execution."
+        "Phase54 increases release structure only; it still does not install, publish, sign, orchestrate approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -1948,31 +1969,31 @@ export function App() {
               <div className="card-header card-header--stack">
                 <div>
                   <p className="eyebrow">Release Pipeline Depth</p>
-                  <h2>Attestation Operator Approval Routing Contracts</h2>
+                  <h2>Attestation Operator Approval Orchestration</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but the release skeleton now pushes phase52 approval execution
-                  envelopes, staged release decision records, and publication recovery receipts forward into attestation operator approval
-                  routing contracts, promotion staged-apply release decision enforcement contracts, and rollback cutover publication
-                  receipt closeout contracts while staying entirely local-only and non-executing.
+                  The alpha shell still does not build a real installer, but the release skeleton now pushes phase53 approval routing
+                  contracts, staged release decision enforcement contracts, and publication receipt closeout contracts forward into
+                  attestation operator approval orchestration, promotion staged-apply release decision enforcement lifecycle, and
+                  rollback cutover publication receipt settlement closeout while staying entirely local-only and non-executing.
                 </p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
                   <span>Phase</span>
-                  <strong>Phase53</strong>
+                  <strong>Phase54</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Attestation</span>
-                  <strong>Routing contracts</strong>
+                  <strong>Approval orchestration</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Promotion</span>
-                  <strong>Enforcement contracts</strong>
+                  <strong>Enforcement lifecycle</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Rollback</span>
-                  <strong>Receipt closeout</strong>
+                  <strong>Receipt settlement closeout</strong>
                 </div>
               </div>
               <div className="workflow-readiness-list">
