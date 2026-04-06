@@ -28,6 +28,7 @@ console.log(`attestation operator reconciliation ledgers metadata: ${manifest.at
 console.log(`attestation operator settlement packs metadata: ${manifest.attestationOperatorSettlementPacksPath}`);
 console.log(`attestation operator approval routing contracts metadata: ${manifest.attestationOperatorApprovalRoutingContractsPath}`);
 console.log(`attestation operator approval orchestration metadata: ${manifest.attestationOperatorApprovalOrchestrationPath}`);
+console.log(`review-only delivery chain metadata: ${manifest.reviewOnlyDeliveryChainPath}`);
 console.log(`operator review board metadata: ${manifest.operatorReviewBoardPath}`);
 console.log(`release decision handoff metadata: ${manifest.releaseDecisionHandoffPath}`);
 console.log(`review evidence closeout metadata: ${manifest.reviewEvidenceCloseoutPath}`);

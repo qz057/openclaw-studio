@@ -1,0 +1,281 @@
+{
+  "schemaVersion": "openclaw-studio-review-only-delivery-chain/v1",
+  "generatedAt": "2026-04-06T14:32:54.667Z",
+  "phase": "phase58",
+  "mode": "local-only-review",
+  "title": "Review-only Delivery Chain",
+  "summary": "Operator review board, promotion readiness, publish decision gates, and rollback readiness are grouped into one staged local-only delivery workflow.",
+  "activeStageId": "delivery-chain-operator-review",
+  "operatorReviewBoardPath": "release/OPERATOR-REVIEW-BOARD.json",
+  "releaseDecisionHandoffPath": "release/RELEASE-DECISION-HANDOFF.json",
+  "reviewEvidenceCloseoutPath": "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+  "paths": {
+    "promotionStageIds": [
+      "delivery-chain-promotion-readiness"
+    ],
+    "publishStageIds": [
+      "delivery-chain-publish-decision"
+    ],
+    "rollbackStageIds": [
+      "delivery-chain-rollback-readiness"
+    ]
+  },
+  "stages": [
+    {
+      "id": "delivery-chain-attestation-intake",
+      "label": "Attestation intake",
+      "phase": "attestation",
+      "status": "ready",
+      "owner": "release-engineering",
+      "posture": "manifest spine sealed for operator pickup",
+      "summary": "Manifest, audit, and attestation evidence start the delivery chain from a typed intake packet instead of scattered files.",
+      "pipelineStageId": "stage-attestation-intake",
+      "reviewerQueueId": "reviewer-queue-attestation-intake",
+      "decisionHandoffId": "decision-handoff-attestation-intake",
+      "evidenceCloseoutId": "evidence-closeout-attestation-intake",
+      "escalationWindowId": "escalation-window-attestation-intake",
+      "closeoutWindowId": "closeout-window-attestation-intake",
+      "upstreamStageIds": [],
+      "downstreamStageIds": [
+        "delivery-chain-operator-review"
+      ],
+      "artifactGroups": [
+        {
+          "id": "delivery-chain-attestation-manifest",
+          "label": "Manifest spine",
+          "summary": "Manifest and review docs establish the intake boundary before reviewer routing starts.",
+          "artifacts": [
+            "release/RELEASE-MANIFEST.json",
+            "release/BUILD-METADATA.json",
+            "release/REVIEW-MANIFEST.json"
+          ]
+        },
+        {
+          "id": "delivery-chain-attestation-evidence",
+          "label": "Attestation intake evidence",
+          "summary": "Verification packs and apply-audit packs stay bundled as one review-only intake envelope.",
+          "artifacts": [
+            "release/ATTESTATION-VERIFICATION-PACKS.json",
+            "release/ATTESTATION-APPLY-AUDIT-PACKS.json"
+          ]
+        }
+      ],
+      "blockedBy": [
+        "intake acknowledgement remains metadata-only",
+        "host-side execution remains disabled"
+      ]
+    },
+    {
+      "id": "delivery-chain-operator-review",
+      "label": "Operator review",
+      "phase": "review",
+      "status": "in-review",
+      "owner": "release-manager",
+      "posture": "active reviewer queue / acknowledgement pending",
+      "summary": "The active board now sits inside a wider delivery chain so reviewer ownership maps to a named delivery stage instead of stopping at the operator loop.",
+      "pipelineStageId": "stage-approval-orchestration",
+      "reviewerQueueId": "reviewer-queue-approval-orchestration",
+      "decisionHandoffId": "decision-handoff-approval-orchestration",
+      "evidenceCloseoutId": "evidence-closeout-approval-orchestration",
+      "escalationWindowId": "escalation-window-approval-orchestration",
+      "closeoutWindowId": "closeout-window-approval-orchestration",
+      "upstreamStageIds": [
+        "delivery-chain-attestation-intake"
+      ],
+      "downstreamStageIds": [
+        "delivery-chain-promotion-readiness"
+      ],
+      "artifactGroups": [
+        {
+          "id": "delivery-chain-review-board",
+          "label": "Board / handoff / closeout",
+          "summary": "Board posture, baton posture, and evidence closeout stay grouped as one delivery checkpoint.",
+          "artifacts": [
+            "release/OPERATOR-REVIEW-BOARD.json",
+            "release/RELEASE-DECISION-HANDOFF.json",
+            "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+            "release/RELEASE-APPROVAL-WORKFLOW.json"
+          ]
+        },
+        {
+          "id": "delivery-chain-review-routing",
+          "label": "Approval routing",
+          "summary": "Approval routing contracts and orchestration packs anchor reviewer ownership and queue timing.",
+          "artifacts": [
+            "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
+            "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json"
+          ]
+        }
+      ],
+      "blockedBy": [
+        "product-owner acknowledgement remains metadata-only",
+        "signing-publish gating handshake remains blocked",
+        "host-side execution remains disabled"
+      ]
+    },
+    {
+      "id": "delivery-chain-promotion-readiness",
+      "label": "Promotion readiness",
+      "phase": "promotion",
+      "status": "planned",
+      "owner": "product-owner",
+      "posture": "promotion path declared / staged apply still review-only",
+      "summary": "Promotion evidence, apply manifests, staged apply closeout, and enforcement lifecycle are grouped as one promotion-review stage.",
+      "pipelineStageId": "stage-lifecycle-enforcement",
+      "reviewerQueueId": "reviewer-queue-lifecycle-enforcement",
+      "decisionHandoffId": "decision-handoff-lifecycle-enforcement",
+      "evidenceCloseoutId": "evidence-closeout-lifecycle-enforcement",
+      "escalationWindowId": "escalation-window-lifecycle-enforcement",
+      "closeoutWindowId": "closeout-window-lifecycle-enforcement",
+      "upstreamStageIds": [
+        "delivery-chain-operator-review"
+      ],
+      "downstreamStageIds": [
+        "delivery-chain-publish-decision",
+        "delivery-chain-rollback-readiness"
+      ],
+      "artifactGroups": [
+        {
+          "id": "delivery-chain-promotion-preflight",
+          "label": "Promotion preflight",
+          "summary": "Promotion evidence, apply readiness, manifests, checkpoints, and handoff rails define the pre-cutover review path.",
+          "artifacts": [
+            "release/CHANNEL-PROMOTION-EVIDENCE.json",
+            "release/PROMOTION-APPLY-READINESS.json",
+            "release/PROMOTION-APPLY-MANIFESTS.json",
+            "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
+            "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json"
+          ]
+        },
+        {
+          "id": "delivery-chain-promotion-closeout",
+          "label": "Staged apply closeout",
+          "summary": "Staged ledgers, runsheets, confirmations, signoffs, and enforcement lifecycle now read as one promotion-closeout path.",
+          "artifacts": [
+            "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
+            "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json",
+            "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
+            "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
+            "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
+            "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+            "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+            "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+          ]
+        }
+      ],
+      "blockedBy": [
+        "promotion staged apply remains metadata-only",
+        "approval closeout still blocks downstream acknowledgement"
+      ]
+    },
+    {
+      "id": "delivery-chain-rollback-readiness",
+      "label": "Rollback readiness",
+      "phase": "rollback",
+      "status": "planned",
+      "owner": "runtime-owner",
+      "posture": "rollback rehearsal visible / settlement still overdue",
+      "summary": "Rollback handshake, rehearsal, cutover records, and receipt settlement closeout are grouped as one recovery-facing review stage.",
+      "pipelineStageId": "stage-rollback-settlement",
+      "reviewerQueueId": "reviewer-queue-rollback-settlement",
+      "decisionHandoffId": "decision-handoff-rollback-settlement",
+      "evidenceCloseoutId": "evidence-closeout-rollback-settlement",
+      "escalationWindowId": "escalation-window-rollback-settlement",
+      "closeoutWindowId": "closeout-window-rollback-settlement",
+      "upstreamStageIds": [
+        "delivery-chain-promotion-readiness"
+      ],
+      "downstreamStageIds": [
+        "delivery-chain-publish-decision"
+      ],
+      "artifactGroups": [
+        {
+          "id": "delivery-chain-rollback-recovery",
+          "label": "Recovery posture",
+          "summary": "Rollback handshake, recovery ledgers, rehearsal, drillbooks, and live-readiness checks define the recovery backbone.",
+          "artifacts": [
+            "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+            "release/ROLLBACK-RECOVERY-LEDGER.json",
+            "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
+            "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
+            "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json"
+          ]
+        },
+        {
+          "id": "delivery-chain-rollback-cutover",
+          "label": "Cutover closeout",
+          "summary": "Cutover readiness, execution, outcome reporting, publication bundles, and receipt settlement stay bundled as one rollback review path.",
+          "artifacts": [
+            "release/ROLLBACK-CUTOVER-READINESS-MAPS.json",
+            "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
+            "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
+            "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
+            "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
+            "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+            "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
+            "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+          ]
+        }
+      ],
+      "blockedBy": [
+        "rollback publication remains review-only",
+        "final decision board remains blocked"
+      ]
+    },
+    {
+      "id": "delivery-chain-publish-decision",
+      "label": "Publish decision gate",
+      "phase": "publish",
+      "status": "blocked",
+      "owner": "release-manager",
+      "posture": "signing / publish gates still metadata-only",
+      "summary": "Signing metadata, publish gates, promotion gates, and release notes now read like one blocked publish-facing decision stage.",
+      "pipelineStageId": "stage-final-release-decision",
+      "reviewerQueueId": "reviewer-queue-final-release-decision",
+      "decisionHandoffId": "decision-handoff-final-release-decision",
+      "evidenceCloseoutId": "evidence-closeout-final-release-decision",
+      "escalationWindowId": "escalation-window-final-release-decision",
+      "closeoutWindowId": "closeout-window-final-release-decision",
+      "upstreamStageIds": [
+        "delivery-chain-promotion-readiness",
+        "delivery-chain-rollback-readiness"
+      ],
+      "downstreamStageIds": [],
+      "artifactGroups": [
+        {
+          "id": "delivery-chain-publish-signing",
+          "label": "Signing / publish handshake",
+          "summary": "Signing metadata, notarization, pipeline, approval bridge, and promotion handshake remain explicit publish inputs.",
+          "artifacts": [
+            "release/SIGNING-METADATA.json",
+            "release/NOTARIZATION-PLAN.json",
+            "release/SIGNING-PUBLISH-PIPELINE.json",
+            "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+            "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
+            "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json"
+          ]
+        },
+        {
+          "id": "delivery-chain-publish-gates",
+          "label": "Release gates",
+          "summary": "Release notes plus publish and promotion gates make the blocked final decision concrete.",
+          "artifacts": [
+            "release/RELEASE-NOTES.md",
+            "release/PUBLISH-GATES.json",
+            "release/PROMOTION-GATES.json"
+          ]
+        }
+      ],
+      "blockedBy": [
+        "signing-publish gating handshake remains metadata-only",
+        "publish rollback handshake remains metadata-only",
+        "real publish automation remains blocked"
+      ]
+    }
+  ],
+  "blockedBy": [
+    "delivery chain remains review-only metadata",
+    "promotion, publish, and rollback execution remain blocked",
+    "host-side execution remains disabled"
+  ]
+}
