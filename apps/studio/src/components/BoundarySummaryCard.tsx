@@ -1,4 +1,11 @@
-import { selectStudioReleaseApprovalPipelineStage, type StudioBoundaryLayer, type StudioBoundarySummary } from "@openclaw/shared";
+import {
+  selectStudioReleaseApprovalPipelineStage,
+  selectStudioReleaseCloseoutWindow,
+  selectStudioReleaseEscalationWindow,
+  selectStudioReleaseReviewerQueue,
+  type StudioBoundaryLayer,
+  type StudioBoundarySummary
+} from "@openclaw/shared";
 
 interface BoundarySummaryCardProps {
   boundary: StudioBoundarySummary;
@@ -57,8 +64,11 @@ export function BoundarySummaryCard({
     new Set(boundary.hostExecutor.bridge.slotHandlers.flatMap((handler) => handler.simulatedOutcomes.map((outcome) => outcome.status)))
   );
   const currentReleaseStage = selectStudioReleaseApprovalPipelineStage(boundary.hostExecutor.releaseApprovalPipeline);
+  const currentReviewerQueue = selectStudioReleaseReviewerQueue(boundary.hostExecutor.releaseApprovalPipeline, currentReleaseStage);
   const currentDecisionHandoff = boundary.hostExecutor.releaseApprovalPipeline.decisionHandoff;
+  const currentEscalationWindow = selectStudioReleaseEscalationWindow(boundary.hostExecutor.releaseApprovalPipeline, currentReleaseStage);
   const currentEvidenceCloseout = boundary.hostExecutor.releaseApprovalPipeline.evidenceCloseout;
+  const currentCloseoutWindow = selectStudioReleaseCloseoutWindow(boundary.hostExecutor.releaseApprovalPipeline, currentReleaseStage);
 
   return (
     <article className={cardClassName}>
@@ -196,6 +206,14 @@ export function BoundarySummaryCard({
               operator board · {boundary.hostExecutor.releaseApprovalPipeline.mode} · {boundary.hostExecutor.releaseApprovalPipeline.stages.length} stages
             </li>
             <li>
+              reviewer queues · {boundary.hostExecutor.releaseApprovalPipeline.reviewerQueues.length} · escalation windows ·{" "}
+              {boundary.hostExecutor.releaseApprovalPipeline.escalationWindows.length}
+            </li>
+            <li>
+              closeout windows · {boundary.hostExecutor.releaseApprovalPipeline.closeoutWindows.length} · active ack ·{" "}
+              {boundary.hostExecutor.releaseApprovalPipeline.reviewBoard.activeAcknowledgementState}
+            </li>
+            <li>
               simulated outcomes · {simulatedOutcomeStatuses.join(" / ")}
             </li>
             <li>
@@ -220,10 +238,19 @@ export function BoundarySummaryCard({
               pipeline · {currentReleaseStage?.label ?? "Unavailable"} · {currentReleaseStage?.status ?? "unknown"}
             </li>
             <li>
+              reviewer queue · {currentReviewerQueue?.label ?? "Unavailable"} · {currentReviewerQueue?.acknowledgementState ?? "unknown"}
+            </li>
+            <li>
               handoff · {currentDecisionHandoff.batonState} · {currentDecisionHandoff.sourceOwner} -&gt; {currentDecisionHandoff.targetOwner}
             </li>
             <li>
+              escalation window · {currentEscalationWindow?.state ?? "unknown"} · {currentEscalationWindow?.deadlineLabel ?? "Unavailable"}
+            </li>
+            <li>
               closeout · {currentEvidenceCloseout.sealingState} · {currentEvidenceCloseout.sealedEvidence.length} sealed / {currentEvidenceCloseout.pendingEvidence.length} pending
+            </li>
+            <li>
+              closeout window · {currentCloseoutWindow?.state ?? "unknown"} · {currentCloseoutWindow?.deadlineLabel ?? "Unavailable"}
             </li>
             <li>
               blockers · {boundary.hostExecutor.releaseApprovalPipeline.blockedBy.length} · review-only release decision remains blocked

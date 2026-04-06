@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import {
+  selectStudioReleaseCloseoutWindow,
+  selectStudioReleaseEscalationWindow,
   selectStudioReleaseApprovalPipelineStage,
+  selectStudioReleaseReviewerQueue,
   studioPageIds,
   type StudioCommandAction,
   type StudioCommandActionGroup,
@@ -494,8 +497,11 @@ export function App() {
   const hostTraceFocus = resolveHostTraceFocus(data.boundary.hostExecutor, resolvedFocusSlotId);
   const releaseApprovalPipeline = data.boundary.hostExecutor.releaseApprovalPipeline;
   const currentReleaseStage = selectStudioReleaseApprovalPipelineStage(releaseApprovalPipeline);
+  const currentReviewerQueue = selectStudioReleaseReviewerQueue(releaseApprovalPipeline, currentReleaseStage);
   const currentDecisionHandoff = releaseApprovalPipeline.decisionHandoff;
+  const currentEscalationWindow = selectStudioReleaseEscalationWindow(releaseApprovalPipeline, currentReleaseStage);
   const currentEvidenceCloseout = releaseApprovalPipeline.evidenceCloseout;
+  const currentCloseoutWindow = selectStudioReleaseCloseoutWindow(releaseApprovalPipeline, currentReleaseStage);
   const dockItems = createDockItems(hostTraceFocus);
   const activePageMeta = data.pages.find((page) => page.id === activePage) ?? {
     id: activePage,
@@ -854,7 +860,7 @@ export function App() {
       label: "Focused slot -> Release posture",
       value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> ${currentReleaseStage?.label ?? "Operator review board"} / ${currentDecisionHandoff.posture}`,
       detail:
-        "Focused-slot review, operator board ownership, decision handoff posture, and evidence closeout now sit in the same phase57 local-only review chain without enabling host execution, installer work, staged apply entry, cutover execution, or publish rollback."
+        "Focused-slot review, operator board ownership, reviewer queue state, escalation timing, decision handoff posture, and evidence closeout now sit in the same phase58 local-only review chain without enabling host execution, installer work, staged apply entry, cutover execution, or publish rollback."
     }
   ];
   const inspectorCommandLinkage = [
@@ -880,7 +886,7 @@ export function App() {
       id: "inspector-linkage-shared-state",
       label: "Inspector -> Shared-state lane",
       value: `${activeWindowRosterEntry?.label ?? "No window"} / ${activeSharedStateLane?.label ?? "No shared-state lane"}`,
-      detail: "The right rail now mirrors the same window roster, sync health, last handoff, and operator review posture shown in the phase57 cross-window board."
+      detail: "The right rail now mirrors the same window roster, sync health, last handoff, reviewer queue, and operator review posture shown in the phase58 cross-window board."
     }
   ];
   const releasePipelineDepth = [
@@ -889,13 +895,31 @@ export function App() {
       label: "Formal Release Readiness",
       value: "RELEASE-MANIFEST / BUILD-METADATA / REVIEW-MANIFEST",
       detail:
-        "Phase57 keeps the manifest spine and turns the approval pipeline into a clearer operator review system with explicit board ownership, packet handoff, and evidence closeout while the shell still adds cross-window shared-state review without executing anything."
+        "Phase58 keeps the manifest spine and turns the approval pipeline into a clearer operator review loop with explicit board ownership, reviewer queues, acknowledgement state, escalation windows, closeout windows, and cross-window shared-state review without executing anything."
     },
     {
       id: "release-depth-operator-review-board",
       label: "Operator Review Board",
       value: "OPERATOR-REVIEW-BOARD / RELEASE-APPROVAL-WORKFLOW",
       detail: "The current slice turns approval routing into a first-class operator board with stage ownership, review packet posture, and cross-links back into trace and shared-state surfaces."
+    },
+    {
+      id: "release-depth-reviewer-queue",
+      label: "Reviewer Queue",
+      value: "queue ownership / acknowledgement state",
+      detail: "Reviewer queues now expose who owns the current board, who is waiting to acknowledge, and which window/shared-state lane is carrying the queue."
+    },
+    {
+      id: "release-depth-escalation-window",
+      label: "Escalation Window",
+      value: "escalation deadline / trigger",
+      detail: "Escalation timing is now first-class instead of being implied by generic pending text on the baton."
+    },
+    {
+      id: "release-depth-closeout-window",
+      label: "Closeout Window",
+      value: "closeout timing / sealed vs pending",
+      detail: "Closeout timing is now explicit and stays tied to the same queue and evidence objects rather than hiding inside closeout summaries."
     },
     {
       id: "release-depth-decision-handoff",
@@ -1245,7 +1269,7 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase57 increases release review and cross-window coordination structure only; it still does not install, publish, sign, orchestrate live approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
+        "Phase58 increases release review and cross-window coordination structure only; it still does not install, publish, sign, orchestrate live approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -2069,27 +2093,44 @@ export function App() {
                   <h2>Review-only Operator Review Board</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but phase57 now exposes operator board ownership, review packets,
-                  decision handoff posture, evidence closeout, staged release decision lifecycle, rollback settlement closeout, the final
-                  release-decision gate, and the cross-window shared-state review layer as one local-only non-executing surface.
+                  The alpha shell still does not build a real installer, but phase58 now exposes operator board ownership, reviewer queues,
+                  acknowledgement state, escalation windows, closeout windows, decision handoff posture, evidence closeout, staged release
+                  decision lifecycle, rollback settlement closeout, the final release-decision gate, and the cross-window shared-state review
+                  layer as one local-only non-executing surface.
                 </p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
                   <span>Phase</span>
-                  <strong>Phase57</strong>
+                  <strong>Phase58</strong>
                 </div>
                 <div className="foundation-pill">
                   <span>Current board</span>
                   <strong>{currentReleaseStage?.label ?? "Unavailable"}</strong>
                 </div>
                 <div className="foundation-pill">
+                  <span>Reviewer queue</span>
+                  <strong>{currentReviewerQueue?.label ?? "Unavailable"}</strong>
+                </div>
+                <div className="foundation-pill">
+                  <span>Acknowledgement</span>
+                  <strong>{currentReviewerQueue?.acknowledgementState ?? "Unavailable"}</strong>
+                </div>
+                <div className="foundation-pill">
                   <span>Decision handoff</span>
                   <strong>{currentDecisionHandoff.batonState}</strong>
                 </div>
                 <div className="foundation-pill">
+                  <span>Escalation</span>
+                  <strong>{currentEscalationWindow?.state ?? "Unavailable"}</strong>
+                </div>
+                <div className="foundation-pill">
                   <span>Evidence closeout</span>
                   <strong>{currentEvidenceCloseout.sealingState}</strong>
+                </div>
+                <div className="foundation-pill">
+                  <span>Closeout window</span>
+                  <strong>{currentCloseoutWindow?.state ?? "Unavailable"}</strong>
                 </div>
               </div>
               <div className="workflow-readiness-list">
@@ -2098,8 +2139,18 @@ export function App() {
                   <strong>{currentReleaseStage?.packet.label ?? "Unavailable"}</strong>
                 </div>
                 <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                  <span>Queue ownership</span>
+                  <strong>{currentReviewerQueue ? `${currentReviewerQueue.owner} / ${currentReviewerQueue.status}` : "Unavailable"}</strong>
+                </div>
+                <div className="workflow-readiness-line workflow-readiness-line--neutral">
                   <span>Baton posture</span>
                   <strong>{currentDecisionHandoff.sourceOwner} -&gt; {currentDecisionHandoff.targetOwner}</strong>
+                </div>
+                <div className="workflow-readiness-line workflow-readiness-line--warning">
+                  <span>Escalation / closeout</span>
+                  <strong>
+                    {currentEscalationWindow?.deadlineLabel ?? "Unavailable"} / {currentCloseoutWindow?.deadlineLabel ?? "Unavailable"}
+                  </strong>
                 </div>
                 <div className="workflow-readiness-line workflow-readiness-line--warning">
                   <span>Blocked by</span>
@@ -2119,9 +2170,9 @@ export function App() {
 
           <OperatorReviewBoard
             pipeline={releaseApprovalPipeline}
-            eyebrow="Phase57"
+            eyebrow="Phase58"
             title="Operator Review Board"
-            summary="The same review-only release pipeline now reads like an operator board with explicit stage ownership, review packets, baton posture, evidence sealing, reviewer notes, and cross-links back into windows and trace."
+            summary="The same review-only release pipeline now reads like an operator board with explicit stage ownership, review packets, reviewer queues, acknowledgement state, escalation windows, closeout windows, evidence sealing, reviewer notes, and cross-links back into windows and trace."
           />
 
           <section className="surface card window-workbench">
@@ -2189,9 +2240,9 @@ export function App() {
               activeWindowId={windowingSurface.activeWindowId}
               activeLaneId={windowingSurface.activeLaneId}
               activeBoardId={windowingSurface.activeBoardId}
-              eyebrow="Phase57"
+              eyebrow="Phase58"
               title="Cross-window Coordination Board"
-              summary="Window roster, shared-state lane ownership, operator review posture, sync health, last handoff, route/workspace intent links, and local-only blockers now stay visible inside the same shell runtime."
+              summary="Window roster, shared-state lane ownership, reviewer queue posture, acknowledgement state, escalation windows, closeout windows, sync health, last handoff, route/workspace intent links, and local-only blockers now stay visible inside the same shell runtime."
             />
             <div className="workflow-lane-strip">
               {data.windowing.workflow.lanes.map((lane) => (
@@ -2418,9 +2469,9 @@ export function App() {
                   activeBoardId={windowingSurface.activeBoardId}
                   compact
                   nested
-                  eyebrow="Phase57"
+                  eyebrow="Phase58"
                   title="Cross-window Shared State"
-                  summary="The windows rail now exposes explicit ownership, operator review posture, sync health, route/workspace intent links, and local-only blockers for the active coordination lane."
+                  summary="The windows rail now exposes explicit ownership, reviewer queue posture, acknowledgement state, escalation/closeout windows, sync health, route/workspace intent links, and local-only blockers for the active coordination lane."
                 />
 
                 <div className="workflow-step-grid workflow-step-grid--compact">

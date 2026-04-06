@@ -12,7 +12,10 @@ import {
   type StudioHostTraceSlotState,
   type StudioHostPreviewHandoff,
   type StudioMetric,
+  selectStudioReleaseCloseoutWindow,
+  selectStudioReleaseEscalationWindow,
   selectStudioReleaseApprovalPipelineStage,
+  selectStudioReleaseReviewerQueue,
   type StudioShellState
 } from "@openclaw/shared";
 import { probeLiveCodex } from "./probes/codex";
@@ -1311,13 +1314,16 @@ function buildShellState(
 
   shellState.inspector.summary =
     hasLiveToolsMcp || hasLiveRuntime
-      ? "Shared boundary state now summarizes the live local-only layer, preview-host contract, per-slot trace focus, operator review board posture, decision handoff, evidence closeout, cross-window shared-state posture, dock linkage, blockers, and future executor posture."
+      ? "Shared boundary state now summarizes the live local-only layer, preview-host contract, per-slot trace focus, operator review loop posture, reviewer queues, acknowledgement state, escalation windows, closeout windows, decision handoff, evidence closeout, cross-window shared-state posture, dock linkage, blockers, and future executor posture."
       : baseState.inspector.summary;
   shellState.inspector.boundary = shellState.boundary;
   const traceFocus = createInspectorTraceFocus(shellState.boundary);
   const currentReleaseStage = selectStudioReleaseApprovalPipelineStage(shellState.boundary.hostExecutor.releaseApprovalPipeline);
+  const currentReviewerQueue = selectStudioReleaseReviewerQueue(shellState.boundary.hostExecutor.releaseApprovalPipeline, currentReleaseStage);
   const currentDecisionHandoff = shellState.boundary.hostExecutor.releaseApprovalPipeline.decisionHandoff;
+  const currentEscalationWindow = selectStudioReleaseEscalationWindow(shellState.boundary.hostExecutor.releaseApprovalPipeline, currentReleaseStage);
   const currentEvidenceCloseout = shellState.boundary.hostExecutor.releaseApprovalPipeline.evidenceCloseout;
+  const currentCloseoutWindow = selectStudioReleaseCloseoutWindow(shellState.boundary.hostExecutor.releaseApprovalPipeline, currentReleaseStage);
   const activeSharedStateLane =
     shellState.windowing.sharedState.lanes.find((lane) => lane.id === shellState.windowing.sharedState.activeLaneId) ??
     shellState.windowing.sharedState.lanes[0];
@@ -1366,14 +1372,34 @@ function buildShellState(
       value: currentReleaseStage ? `${currentReleaseStage.label} / ${currentReleaseStage.status}` : "Unavailable"
     },
     {
+      id: "reviewer-queue",
+      label: "Reviewer queue",
+      value: currentReviewerQueue ? `${currentReviewerQueue.label} / ${currentReviewerQueue.status}` : "Unavailable"
+    },
+    {
+      id: "ack-state",
+      label: "Acknowledgement",
+      value: currentReviewerQueue ? `${currentReviewerQueue.acknowledgementState} / ${currentReviewerQueue.owner}` : "Unavailable"
+    },
+    {
       id: "decision-handoff",
       label: "Decision handoff",
       value: `${currentDecisionHandoff.batonState} / ${currentDecisionHandoff.targetOwner}`
     },
     {
+      id: "escalation-window",
+      label: "Escalation window",
+      value: currentEscalationWindow ? `${currentEscalationWindow.label} / ${currentEscalationWindow.state}` : "Unavailable"
+    },
+    {
       id: "evidence-closeout",
       label: "Evidence closeout",
       value: `${currentEvidenceCloseout.sealingState} / ${currentEvidenceCloseout.owner}`
+    },
+    {
+      id: "closeout-window",
+      label: "Closeout window",
+      value: currentCloseoutWindow ? `${currentCloseoutWindow.label} / ${currentCloseoutWindow.state}` : "Unavailable"
     },
     {
       id: "window-focus",
@@ -1446,6 +1472,14 @@ function buildShellState(
             };
           }
 
+          if (line.id === "drilldown-pipeline-queue") {
+            return {
+              ...line,
+              value: currentReviewerQueue ? `${currentReviewerQueue.label} / ${currentReviewerQueue.acknowledgementState}` : line.value,
+              detail: currentReviewerQueue?.summary ?? line.detail
+            };
+          }
+
           if (line.id === "drilldown-pipeline-lifecycle") {
             return {
               ...line,
@@ -1454,11 +1488,31 @@ function buildShellState(
             };
           }
 
+          if (line.id === "drilldown-pipeline-escalation") {
+            return {
+              ...line,
+              value: currentEscalationWindow?.label ?? line.value,
+              detail: currentEscalationWindow
+                ? `${currentEscalationWindow.state} · ${currentEscalationWindow.deadlineLabel} · ${currentEscalationWindow.trigger}`
+                : line.detail
+            };
+          }
+
           if (line.id === "drilldown-pipeline-rollback") {
             return {
               ...line,
               value: currentEvidenceCloseout.label,
               detail: `${currentEvidenceCloseout.sealingState} · ${currentEvidenceCloseout.owner} · ${currentEvidenceCloseout.pendingEvidence.length} pending evidence`
+            };
+          }
+
+          if (line.id === "drilldown-pipeline-closeout-window") {
+            return {
+              ...line,
+              value: currentCloseoutWindow?.label ?? line.value,
+              detail: currentCloseoutWindow
+                ? `${currentCloseoutWindow.state} · ${currentCloseoutWindow.deadlineLabel} · ${currentCloseoutWindow.pendingEvidence.length} pending evidence`
+                : line.detail
             };
           }
 

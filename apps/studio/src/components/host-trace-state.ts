@@ -10,7 +10,12 @@ import type {
   StudioShellState,
   StudioTone
 } from "@openclaw/shared";
-import { selectStudioReleaseApprovalPipelineStage } from "@openclaw/shared";
+import {
+  selectStudioReleaseApprovalPipelineStage,
+  selectStudioReleaseCloseoutWindow,
+  selectStudioReleaseEscalationWindow,
+  selectStudioReleaseReviewerQueue
+} from "@openclaw/shared";
 
 export interface ResolvedHostTraceFocus {
   slot: StudioHostTraceSlotState;
@@ -138,8 +143,11 @@ export function createInspectorSections(
     : "Unavailable";
   const auditValue = focus ? (focus.usesHandoff ? focus.rollbackAuditDetail : "Placeholder linked") : "Unavailable";
   const currentReleaseStage = selectStudioReleaseApprovalPipelineStage(boundary.hostExecutor.releaseApprovalPipeline);
+  const currentReviewerQueue = selectStudioReleaseReviewerQueue(boundary.hostExecutor.releaseApprovalPipeline, currentReleaseStage);
   const currentDecisionHandoff = boundary.hostExecutor.releaseApprovalPipeline.decisionHandoff;
+  const currentEscalationWindow = selectStudioReleaseEscalationWindow(boundary.hostExecutor.releaseApprovalPipeline, currentReleaseStage);
   const currentEvidenceCloseout = boundary.hostExecutor.releaseApprovalPipeline.evidenceCloseout;
+  const currentCloseoutWindow = selectStudioReleaseCloseoutWindow(boundary.hostExecutor.releaseApprovalPipeline, currentReleaseStage);
   const activeLane =
     (activeLaneId ? windowing?.sharedState.lanes.find((lane) => lane.id === activeLaneId) : undefined) ??
     (windowing ? windowing.sharedState.lanes.find((lane) => lane.id === windowing.sharedState.activeLaneId) : undefined) ??
@@ -187,14 +195,34 @@ export function createInspectorSections(
       value: currentReleaseStage ? `${currentReleaseStage.label} / ${currentReleaseStage.status}` : "Unavailable"
     },
     {
+      id: "reviewer-queue",
+      label: "Reviewer queue",
+      value: currentReviewerQueue ? `${currentReviewerQueue.label} / ${currentReviewerQueue.status}` : "Unavailable"
+    },
+    {
+      id: "ack-state",
+      label: "Acknowledgement",
+      value: currentReviewerQueue ? `${currentReviewerQueue.acknowledgementState} / ${currentReviewerQueue.owner}` : "Unavailable"
+    },
+    {
       id: "decision-handoff",
       label: "Decision handoff",
       value: `${currentDecisionHandoff.batonState} / ${currentDecisionHandoff.targetOwner}`
     },
     {
+      id: "escalation-window",
+      label: "Escalation window",
+      value: currentEscalationWindow ? `${currentEscalationWindow.label} / ${currentEscalationWindow.state}` : "Unavailable"
+    },
+    {
       id: "evidence-closeout",
       label: "Evidence closeout",
       value: `${currentEvidenceCloseout.sealingState} / ${currentEvidenceCloseout.owner}`
+    },
+    {
+      id: "closeout-window",
+      label: "Closeout window",
+      value: currentCloseoutWindow ? `${currentCloseoutWindow.label} / ${currentCloseoutWindow.state}` : "Unavailable"
     },
     {
       id: "window-focus",

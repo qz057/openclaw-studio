@@ -126,7 +126,7 @@ export function DashboardPage({
         activeBoardId={windowingSurface.activeBoardId}
         compact
         title="Dashboard Cross-window Board"
-        summary="Program-level review now includes the same window roster, shared-state lane, operator review lane, sync health, and blocker posture shown in the shell workbench."
+        summary="Program-level review now includes the same window roster, shared-state lane, operator review lane, reviewer queue, acknowledgement state, escalation/closeout windows, sync health, and blocker posture shown in the shell workbench."
       />
 
       <div className="metric-grid">

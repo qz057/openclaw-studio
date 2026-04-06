@@ -4,10 +4,10 @@ const path = require("node:path");
 const { getPaths, getPreflightSummary } = require("./studio-preflight.cjs");
 
 const APP_NAME = "OpenClaw Studio";
-const PHASE_ID = "phase57";
-const PHASE_TITLE = "Phase57";
+const PHASE_ID = "phase58";
+const PHASE_TITLE = "Phase58";
 const PHASE_MILESTONE =
-  "phase57 operator review board / decision handoff / evidence closeout / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout";
+  "phase58 operator review loop / reviewer queues / acknowledgement state / escalation windows / closeout windows / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout";
 const RELEASE_CHANNEL = "alpha";
 const PACKAGE_ID = "openclaw-studio-alpha-shell";
 const PACKAGE_KIND = "alpha-shell-release-skeleton";
@@ -23,7 +23,7 @@ const CURRENT_DELIVERY_SURFACES = [
   "structured alpha-shell snapshot under delivery/openclaw-studio-alpha-shell",
   "built renderer bundle copied into artifacts/renderer",
   "built Electron bundle copied into artifacts/electron",
-  "review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase57 operator review board / decision handoff / evidence closeout artifacts without executing anything",
+  "review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase58 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything",
   "deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references",
   "deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, and inspector-command linkage",
   "persisted shell layout foundation backed by localStorage",
@@ -903,7 +903,7 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
   return [
     `# OpenClaw Studio ${PHASE_TITLE} Package Snapshot`,
     "",
-    `这是一个 **${PHASE_ID} alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47/48/49/50/51/52/53/54/55/56 packaging 与 shell foundations 的基础上，把 local-only multi-window orchestration、cross-window shared-state review surface、以及 review-only release approval pipeline 继续推进成更明确的 operator review board / decision handoff / evidence closeout 审阅壳，但它依然 **不是 installer**。`,
+    `这是一个 **${PHASE_ID} alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47/48/49/50/51/52/53/54/55/56/57 packaging 与 shell foundations 的基础上，把 local-only multi-window orchestration、cross-window shared-state review surface、以及 review-only release approval pipeline 继续推进成更明确的 operator review loop / reviewer queue / acknowledgement / escalation window / closeout window 审阅壳，但它依然 **不是 installer**。`,
     "",
     `当前已验证里程碑：${PHASE_MILESTONE}。`,
     "",
@@ -1152,9 +1152,9 @@ function renderReleaseNotes({ generatedAt }) {
     `Milestone: ${PHASE_MILESTONE}`,
     "",
     "## Highlights",
-    "- operator review board now turns the earlier review-only approval pipeline into a clearer operator-facing board with explicit stage ownership, active review packet posture, and cross-links back into trace and window review surfaces",
-    "- release decision handoff now keeps the reviewer baton explicit between approval, lifecycle, rollback, and final decision stages without enabling any live signing, publish, or host-side execution",
-    "- review evidence closeout now exposes sealing state, sealed evidence, pending evidence, and reviewer notes as first-class local-only review artifacts instead of burying closeout posture inside larger release metadata",
+    "- operator review board now turns the earlier review-only approval pipeline into a clearer operator-facing loop with explicit stage ownership, reviewer queues, acknowledgement state, and cross-links back into trace and window review surfaces",
+    "- release decision handoff now keeps the reviewer baton explicit between approval, lifecycle, rollback, and final decision stages while surfacing acknowledgement state and escalation windows without enabling any live signing, publish, or host-side execution",
+    "- review evidence closeout now exposes sealing state, sealed evidence, pending evidence, closeout windows, and reviewer notes as first-class local-only review artifacts instead of burying closeout posture inside larger release metadata",
     "- attestation operator approval orchestration now turns phase53 approval routing contracts into reviewer baton sequencing, approval quorum timing, and orchestration closeout paths without dispatching any live approval or execution for real",
     "- promotion staged-apply release decision enforcement lifecycle now turns phase53 enforcement contracts into lifecycle checkpoints, reviewer baton transitions, and expiry closeout without applying any live promotion for real",
     "- rollback cutover publication receipt settlement closeout now turns phase53 receipt closeout contracts into settlement ledgers, receipt closeout acknowledgements, and recovery-ready closeout evidence without mutating any live publish state",
@@ -7332,7 +7332,7 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
       },
       {
         id: "approval-operator-board",
-        label: "Operator review board, decision handoff, and evidence closeout review",
+        label: "Operator review board, reviewer queue, acknowledgement, escalation window, decision handoff, and evidence closeout review",
         status: "in-review",
         approverRoles: ["release-manager", "product-owner", "runtime-owner"],
         evidence: [
@@ -7454,10 +7454,14 @@ function buildOperatorReviewBoard({ generatedAt }) {
     board: {
       id: "operator-review-board-release-approval",
       title: "Operator Review Board",
-      posture: "release-manager baton active / review-only handoff",
+      posture: "release-manager queue active / acknowledgement pending / review-only handoff",
       activeOwner: "release-manager",
       activeStageId: "stage-approval-orchestration",
       activePacketId: "review-packet-approval-orchestration",
+      activeReviewerQueueId: "reviewer-queue-approval-orchestration",
+      activeAcknowledgementState: "pending",
+      activeEscalationWindowId: "escalation-window-approval-orchestration",
+      activeCloseoutWindowId: "closeout-window-approval-orchestration",
       sharedStateLaneId: "shared-state-lane-trace-review",
       windowId: "window-trace-review",
       decisionHandoffPath: "release/RELEASE-DECISION-HANDOFF.json",
@@ -7468,19 +7472,25 @@ function buildOperatorReviewBoard({ generatedAt }) {
         id: "board-note-windowing",
         label: "Cross-window review lane",
         value: "Trace Review Lane / window-trace-review",
-        detail: "Operator ownership is intentionally tied to the same shared-state lane and review window surfaced in the phase57 shell."
+        detail: "Operator ownership is intentionally tied to the same shared-state lane and review window surfaced in the phase58 shell."
+      },
+      {
+        id: "board-note-queue",
+        label: "Reviewer queue",
+        value: "Approval reviewer queue / pending acknowledgement",
+        detail: "Queue ownership and acknowledgement state are explicit so the active review loop is auditable before any live reviewer dispatch exists."
       },
       {
         id: "board-note-baton",
         label: "Decision baton",
         value: "release-manager -> product-owner",
-        detail: "The active baton remains metadata-only and local-only, but reviewer ownership and next-stage posture are explicit."
+        detail: "The active baton remains metadata-only and local-only, but reviewer ownership, acknowledgement posture, and next-stage timing are explicit."
       },
       {
-        id: "board-note-closeout",
-        label: "Evidence sealing",
-        value: "open / visible before execution",
-        detail: "Evidence closeout is promoted to a first-class review object so pending artifacts stay visible before any future executor exists."
+        id: "board-note-windows",
+        label: "Escalation / closeout windows",
+        value: "open / open",
+        detail: "Escalation and closeout timing are first-class review-loop objects instead of hidden note fields."
       }
     ],
     stages: [
@@ -7490,8 +7500,11 @@ function buildOperatorReviewBoard({ generatedAt }) {
         status: "ready",
         owner: "release-engineering",
         packetId: "review-packet-attestation-intake",
+        reviewerQueueId: "reviewer-queue-attestation-intake",
         handoffId: "decision-handoff-attestation-intake",
+        escalationWindowId: "escalation-window-attestation-intake",
         closeoutId: "evidence-closeout-attestation-intake",
+        closeoutWindowId: "closeout-window-attestation-intake",
         evidence: [
           "release/RELEASE-MANIFEST.json",
           "release/ATTESTATION-VERIFICATION-PACKS.json",
@@ -7504,8 +7517,11 @@ function buildOperatorReviewBoard({ generatedAt }) {
         status: "in-review",
         owner: "release-manager",
         packetId: "review-packet-approval-orchestration",
+        reviewerQueueId: "reviewer-queue-approval-orchestration",
         handoffId: "decision-handoff-approval-orchestration",
+        escalationWindowId: "escalation-window-approval-orchestration",
         closeoutId: "evidence-closeout-approval-orchestration",
+        closeoutWindowId: "closeout-window-approval-orchestration",
         evidence: [
           "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
           "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
@@ -7520,8 +7536,11 @@ function buildOperatorReviewBoard({ generatedAt }) {
         status: "planned",
         owner: "product-owner",
         packetId: "review-packet-lifecycle-enforcement",
+        reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
         handoffId: "decision-handoff-lifecycle-enforcement",
+        escalationWindowId: "escalation-window-lifecycle-enforcement",
         closeoutId: "evidence-closeout-lifecycle-enforcement",
+        closeoutWindowId: "closeout-window-lifecycle-enforcement",
         evidence: [
           "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
           "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json",
@@ -7534,8 +7553,11 @@ function buildOperatorReviewBoard({ generatedAt }) {
         status: "planned",
         owner: "runtime-owner",
         packetId: "review-packet-rollback-settlement",
+        reviewerQueueId: "reviewer-queue-rollback-settlement",
         handoffId: "decision-handoff-rollback-settlement",
+        escalationWindowId: "escalation-window-rollback-settlement",
         closeoutId: "evidence-closeout-rollback-settlement",
+        closeoutWindowId: "closeout-window-rollback-settlement",
         evidence: [
           "release/REVIEW-EVIDENCE-CLOSEOUT.json",
           "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
@@ -7548,9 +7570,214 @@ function buildOperatorReviewBoard({ generatedAt }) {
         status: "blocked",
         owner: "release-manager",
         packetId: "review-packet-final-release-decision",
+        reviewerQueueId: "reviewer-queue-final-release-decision",
         handoffId: "decision-handoff-final-release-decision",
+        escalationWindowId: "escalation-window-final-release-decision",
         closeoutId: "evidence-closeout-final-release-decision",
+        closeoutWindowId: "closeout-window-final-release-decision",
         evidence: [
+          "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+          "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+          "release/PUBLISH-GATES.json",
+          "release/PROMOTION-GATES.json"
+        ]
+      }
+    ],
+    reviewerQueues: [
+      {
+        id: "reviewer-queue-attestation-intake",
+        label: "Intake reviewer queue",
+        status: "handoff-ready",
+        owner: "release-engineering",
+        acknowledgementState: "acknowledged",
+        stageId: "stage-attestation-intake",
+        windowId: "window-shell-main",
+        sharedStateLaneId: "shared-state-lane-boundary-review",
+        entries: [
+          { id: "queue-entry-attestation-intake-owner", owner: "release-engineering", status: "active", acknowledgementState: "acknowledged" },
+          { id: "queue-entry-attestation-intake-board", owner: "release-manager", status: "queued", acknowledgementState: "pending" }
+        ]
+      },
+      {
+        id: "reviewer-queue-approval-orchestration",
+        label: "Approval reviewer queue",
+        status: "active",
+        owner: "release-manager",
+        acknowledgementState: "pending",
+        stageId: "stage-approval-orchestration",
+        windowId: "window-trace-review",
+        sharedStateLaneId: "shared-state-lane-trace-review",
+        entries: [
+          { id: "queue-entry-approval-owner", owner: "release-manager", status: "active", acknowledgementState: "pending" },
+          { id: "queue-entry-approval-product-owner", owner: "product-owner", status: "awaiting-ack", acknowledgementState: "pending" },
+          { id: "queue-entry-approval-runtime-owner", owner: "runtime-owner", status: "queued", acknowledgementState: "pending" }
+        ]
+      },
+      {
+        id: "reviewer-queue-lifecycle-enforcement",
+        label: "Lifecycle reviewer queue",
+        status: "handoff-ready",
+        owner: "product-owner",
+        acknowledgementState: "blocked",
+        stageId: "stage-lifecycle-enforcement",
+        windowId: "window-review-board",
+        sharedStateLaneId: "shared-state-lane-preview-review",
+        entries: [
+          { id: "queue-entry-lifecycle-owner", owner: "product-owner", status: "queued", acknowledgementState: "blocked" },
+          { id: "queue-entry-lifecycle-runtime-owner", owner: "runtime-owner", status: "queued", acknowledgementState: "blocked" }
+        ]
+      },
+      {
+        id: "reviewer-queue-rollback-settlement",
+        label: "Rollback settlement queue",
+        status: "escalated",
+        owner: "runtime-owner",
+        acknowledgementState: "overdue",
+        stageId: "stage-rollback-settlement",
+        windowId: "window-trace-review",
+        sharedStateLaneId: "shared-state-lane-trace-review",
+        entries: [
+          { id: "queue-entry-rollback-owner", owner: "runtime-owner", status: "escalated", acknowledgementState: "overdue" },
+          { id: "queue-entry-rollback-release-manager", owner: "release-manager", status: "queued", acknowledgementState: "overdue" }
+        ]
+      },
+      {
+        id: "reviewer-queue-final-release-decision",
+        label: "Final decision queue",
+        status: "closed",
+        owner: "release-manager",
+        acknowledgementState: "blocked",
+        stageId: "stage-final-release-decision",
+        windowId: "window-shell-main",
+        sharedStateLaneId: "shared-state-lane-boundary-review",
+        entries: [
+          { id: "queue-entry-final-owner", owner: "release-manager", status: "closed", acknowledgementState: "blocked" },
+          { id: "queue-entry-final-signing", owner: "signing-gate", status: "queued", acknowledgementState: "blocked" }
+        ]
+      }
+    ],
+    escalationWindows: [
+      {
+        id: "escalation-window-attestation-intake",
+        label: "Intake escalation watch",
+        state: "watch",
+        acknowledgementState: "acknowledged",
+        owner: "release-engineering",
+        stageId: "stage-attestation-intake",
+        reviewerQueueId: "reviewer-queue-attestation-intake",
+        deadlineLabel: "Before board pickup",
+        trigger: "Open only if release-manager pickup drifts past the local review window."
+      },
+      {
+        id: "escalation-window-approval-orchestration",
+        label: "Decision-lifecycle escalation window",
+        state: "open",
+        acknowledgementState: "pending",
+        owner: "release-manager",
+        stageId: "stage-approval-orchestration",
+        reviewerQueueId: "reviewer-queue-approval-orchestration",
+        deadlineLabel: "Next 30 min",
+        trigger: "Escalate if product-owner acknowledgement remains pending after the current local review pass."
+      },
+      {
+        id: "escalation-window-lifecycle-enforcement",
+        label: "Lifecycle handoff escalation window",
+        state: "blocked",
+        acknowledgementState: "blocked",
+        owner: "product-owner",
+        stageId: "stage-lifecycle-enforcement",
+        reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
+        deadlineLabel: "After approval closeout",
+        trigger: "Blocked until approval closeout stops holding the lifecycle queue."
+      },
+      {
+        id: "escalation-window-rollback-settlement",
+        label: "Rollback settlement escalation window",
+        state: "escalated",
+        acknowledgementState: "overdue",
+        owner: "runtime-owner",
+        stageId: "stage-rollback-settlement",
+        reviewerQueueId: "reviewer-queue-rollback-settlement",
+        deadlineLabel: "Escalated now",
+        trigger: "Lifecycle evidence is still missing after the local rollback review window elapsed."
+      },
+      {
+        id: "escalation-window-final-release-decision",
+        label: "Final decision escalation window",
+        state: "blocked",
+        acknowledgementState: "blocked",
+        owner: "release-manager",
+        stageId: "stage-final-release-decision",
+        reviewerQueueId: "reviewer-queue-final-release-decision",
+        deadlineLabel: "Blocked by gates",
+        trigger: "Cannot open until signing and publish gates stop being metadata-only."
+      }
+    ],
+    closeoutWindows: [
+      {
+        id: "closeout-window-attestation-intake",
+        label: "Intake closeout window",
+        state: "scheduled",
+        acknowledgementState: "acknowledged",
+        owner: "release-engineering",
+        stageId: "stage-attestation-intake",
+        reviewerQueueId: "reviewer-queue-attestation-intake",
+        sealedEvidence: ["release/RELEASE-MANIFEST.json"],
+        pendingEvidence: ["release/ATTESTATION-VERIFICATION-PACKS.json", "release/ATTESTATION-APPLY-AUDIT-PACKS.json"]
+      },
+      {
+        id: "closeout-window-approval-orchestration",
+        label: "Approval closeout window",
+        state: "open",
+        acknowledgementState: "pending",
+        owner: "release-manager",
+        stageId: "stage-approval-orchestration",
+        reviewerQueueId: "reviewer-queue-approval-orchestration",
+        sealedEvidence: ["release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json"],
+        pendingEvidence: [
+          "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+          "release/RELEASE-APPROVAL-WORKFLOW.json",
+          "release/RELEASE-DECISION-HANDOFF.json"
+        ]
+      },
+      {
+        id: "closeout-window-lifecycle-enforcement",
+        label: "Lifecycle closeout window",
+        state: "scheduled",
+        acknowledgementState: "blocked",
+        owner: "product-owner",
+        stageId: "stage-lifecycle-enforcement",
+        reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
+        sealedEvidence: [],
+        pendingEvidence: [
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+        ]
+      },
+      {
+        id: "closeout-window-rollback-settlement",
+        label: "Rollback settlement closeout window",
+        state: "ready-to-seal",
+        acknowledgementState: "overdue",
+        owner: "runtime-owner",
+        stageId: "stage-rollback-settlement",
+        reviewerQueueId: "reviewer-queue-rollback-settlement",
+        sealedEvidence: ["release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json"],
+        pendingEvidence: [
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
+          "release/REVIEW-EVIDENCE-CLOSEOUT.json"
+        ]
+      },
+      {
+        id: "closeout-window-final-release-decision",
+        label: "Final decision closeout window",
+        state: "blocked",
+        acknowledgementState: "blocked",
+        owner: "release-manager",
+        stageId: "stage-final-release-decision",
+        reviewerQueueId: "reviewer-queue-final-release-decision",
+        sealedEvidence: [],
+        pendingEvidence: [
           "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
           "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
           "release/PUBLISH-GATES.json",
@@ -7560,8 +7787,9 @@ function buildOperatorReviewBoard({ generatedAt }) {
     ],
     blockedBy: [
       "operator review board remains review-only",
+      "reviewer queues remain local-only metadata",
+      "acknowledgement, escalation, and closeout windows remain descriptive only",
       "decision baton remains metadata-only",
-      "evidence sealing remains descriptive only",
       "host-side execution remains disabled"
     ]
   };
@@ -7574,15 +7802,20 @@ function buildReleaseDecisionHandoff({ generatedAt }) {
     phase: PHASE_ID,
     mode: "local-only-review",
     activeHandoffId: "decision-handoff-approval-orchestration",
+    activeReviewerQueueId: "reviewer-queue-approval-orchestration",
     handoffs: [
       {
         id: "decision-handoff-attestation-intake",
         label: "Intake to approval handoff",
         batonState: "handoff-ready",
+        acknowledgementState: "acknowledged",
         sourceOwner: "release-engineering",
         targetOwner: "release-manager",
         posture: "intake packet ready for approval routing",
         packetId: "review-packet-attestation-intake",
+        reviewerQueueId: "reviewer-queue-attestation-intake",
+        escalationWindowId: "escalation-window-attestation-intake",
+        closeoutWindowId: "closeout-window-attestation-intake",
         pending: ["approval acknowledgement stays metadata-only", "host-side execution remains disabled"],
         linkedArtifacts: ["release/RELEASE-MANIFEST.json", "release/OPERATOR-REVIEW-BOARD.json"]
       },
@@ -7590,10 +7823,14 @@ function buildReleaseDecisionHandoff({ generatedAt }) {
         id: "decision-handoff-approval-orchestration",
         label: "Approval to lifecycle handoff",
         batonState: "awaiting-ack",
+        acknowledgementState: "pending",
         sourceOwner: "release-manager",
         targetOwner: "product-owner",
         posture: "reviewer baton waiting on decision-lifecycle acknowledgement",
         packetId: "review-packet-approval-orchestration",
+        reviewerQueueId: "reviewer-queue-approval-orchestration",
+        escalationWindowId: "escalation-window-approval-orchestration",
+        closeoutWindowId: "closeout-window-approval-orchestration",
         pending: [
           "product-owner acknowledgement remains metadata-only",
           "signing-publish gating handshake remains blocked",
@@ -7605,10 +7842,14 @@ function buildReleaseDecisionHandoff({ generatedAt }) {
         id: "decision-handoff-lifecycle-enforcement",
         label: "Lifecycle to rollback handoff",
         batonState: "held",
+        acknowledgementState: "blocked",
         sourceOwner: "product-owner",
         targetOwner: "runtime-owner",
         posture: "lifecycle packet held until approval board closes",
         packetId: "review-packet-lifecycle-enforcement",
+        reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
+        escalationWindowId: "escalation-window-lifecycle-enforcement",
+        closeoutWindowId: "closeout-window-lifecycle-enforcement",
         pending: ["approval board closeout remains open", "rollback closeout remains metadata-only"],
         linkedArtifacts: [
           "release/RELEASE-DECISION-HANDOFF.json",
@@ -7619,10 +7860,14 @@ function buildReleaseDecisionHandoff({ generatedAt }) {
         id: "decision-handoff-rollback-settlement",
         label: "Rollback closeout to final decision handoff",
         batonState: "held",
+        acknowledgementState: "overdue",
         sourceOwner: "runtime-owner",
         targetOwner: "release-manager",
         posture: "rollback closeout queued behind lifecycle evidence",
         packetId: "review-packet-rollback-settlement",
+        reviewerQueueId: "reviewer-queue-rollback-settlement",
+        escalationWindowId: "escalation-window-rollback-settlement",
+        closeoutWindowId: "closeout-window-rollback-settlement",
         pending: ["rollback publication remains review-only", "final decision board remains blocked"],
         linkedArtifacts: [
           "release/RELEASE-DECISION-HANDOFF.json",
@@ -7633,10 +7878,14 @@ function buildReleaseDecisionHandoff({ generatedAt }) {
         id: "decision-handoff-final-release-decision",
         label: "Final decision handoff",
         batonState: "blocked",
+        acknowledgementState: "blocked",
         sourceOwner: "release-manager",
         targetOwner: "signing-gate",
         posture: "blocked by publish and signing gates",
         packetId: "review-packet-final-release-decision",
+        reviewerQueueId: "reviewer-queue-final-release-decision",
+        escalationWindowId: "escalation-window-final-release-decision",
+        closeoutWindowId: "closeout-window-final-release-decision",
         pending: [
           "signing-publish gating handshake remains metadata-only",
           "publish rollback handshake remains metadata-only",
@@ -7647,6 +7896,7 @@ function buildReleaseDecisionHandoff({ generatedAt }) {
     ],
     blockedBy: [
       "all decision handoffs remain local-only metadata",
+      "reviewer acknowledgement remains metadata-only",
       "signing / publish / rollback execution remain blocked",
       "host-side execution remains disabled"
     ]
@@ -7660,12 +7910,16 @@ function buildReviewEvidenceCloseout({ generatedAt }) {
     phase: PHASE_ID,
     mode: "local-only-review",
     activeCloseoutId: "evidence-closeout-approval-orchestration",
+    activeCloseoutWindowId: "closeout-window-approval-orchestration",
     closeouts: [
       {
         id: "evidence-closeout-attestation-intake",
         label: "Intake evidence closeout",
         sealingState: "pending-seal",
+        acknowledgementState: "acknowledged",
         owner: "release-engineering",
+        reviewerQueueId: "reviewer-queue-attestation-intake",
+        closeoutWindowId: "closeout-window-attestation-intake",
         sealedEvidence: ["release/RELEASE-MANIFEST.json"],
         pendingEvidence: ["release/ATTESTATION-VERIFICATION-PACKS.json", "release/ATTESTATION-APPLY-AUDIT-PACKS.json"],
         linkedHandoffId: "decision-handoff-attestation-intake"
@@ -7674,7 +7928,10 @@ function buildReviewEvidenceCloseout({ generatedAt }) {
         id: "evidence-closeout-approval-orchestration",
         label: "Approval evidence closeout",
         sealingState: "open",
+        acknowledgementState: "pending",
         owner: "release-manager",
+        reviewerQueueId: "reviewer-queue-approval-orchestration",
+        closeoutWindowId: "closeout-window-approval-orchestration",
         sealedEvidence: ["release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json"],
         pendingEvidence: [
           "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
@@ -7687,7 +7944,10 @@ function buildReviewEvidenceCloseout({ generatedAt }) {
         id: "evidence-closeout-lifecycle-enforcement",
         label: "Lifecycle evidence closeout",
         sealingState: "open",
+        acknowledgementState: "blocked",
         owner: "product-owner",
+        reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
+        closeoutWindowId: "closeout-window-lifecycle-enforcement",
         sealedEvidence: [],
         pendingEvidence: [
           "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
@@ -7699,7 +7959,10 @@ function buildReviewEvidenceCloseout({ generatedAt }) {
         id: "evidence-closeout-rollback-settlement",
         label: "Rollback evidence closeout",
         sealingState: "pending-seal",
+        acknowledgementState: "overdue",
         owner: "runtime-owner",
+        reviewerQueueId: "reviewer-queue-rollback-settlement",
+        closeoutWindowId: "closeout-window-rollback-settlement",
         sealedEvidence: ["release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json"],
         pendingEvidence: [
           "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
@@ -7711,7 +7974,10 @@ function buildReviewEvidenceCloseout({ generatedAt }) {
         id: "evidence-closeout-final-release-decision",
         label: "Final decision closeout",
         sealingState: "blocked",
+        acknowledgementState: "blocked",
         owner: "release-manager",
+        reviewerQueueId: "reviewer-queue-final-release-decision",
+        closeoutWindowId: "closeout-window-final-release-decision",
         sealedEvidence: [],
         pendingEvidence: [
           "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
@@ -7722,8 +7988,76 @@ function buildReviewEvidenceCloseout({ generatedAt }) {
         linkedHandoffId: "decision-handoff-final-release-decision"
       }
     ],
+    closeoutWindows: [
+      {
+        id: "closeout-window-attestation-intake",
+        label: "Intake closeout window",
+        state: "scheduled",
+        acknowledgementState: "acknowledged",
+        owner: "release-engineering",
+        reviewerQueueId: "reviewer-queue-attestation-intake",
+        sealedEvidence: ["release/RELEASE-MANIFEST.json"],
+        pendingEvidence: ["release/ATTESTATION-VERIFICATION-PACKS.json", "release/ATTESTATION-APPLY-AUDIT-PACKS.json"]
+      },
+      {
+        id: "closeout-window-approval-orchestration",
+        label: "Approval closeout window",
+        state: "open",
+        acknowledgementState: "pending",
+        owner: "release-manager",
+        reviewerQueueId: "reviewer-queue-approval-orchestration",
+        sealedEvidence: ["release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json"],
+        pendingEvidence: [
+          "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+          "release/RELEASE-APPROVAL-WORKFLOW.json",
+          "release/RELEASE-DECISION-HANDOFF.json"
+        ]
+      },
+      {
+        id: "closeout-window-lifecycle-enforcement",
+        label: "Lifecycle closeout window",
+        state: "scheduled",
+        acknowledgementState: "blocked",
+        owner: "product-owner",
+        reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
+        sealedEvidence: [],
+        pendingEvidence: [
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+        ]
+      },
+      {
+        id: "closeout-window-rollback-settlement",
+        label: "Rollback settlement closeout window",
+        state: "ready-to-seal",
+        acknowledgementState: "overdue",
+        owner: "runtime-owner",
+        reviewerQueueId: "reviewer-queue-rollback-settlement",
+        sealedEvidence: ["release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json"],
+        pendingEvidence: [
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
+          "release/REVIEW-EVIDENCE-CLOSEOUT.json"
+        ]
+      },
+      {
+        id: "closeout-window-final-release-decision",
+        label: "Final decision closeout window",
+        state: "blocked",
+        acknowledgementState: "blocked",
+        owner: "release-manager",
+        reviewerQueueId: "reviewer-queue-final-release-decision",
+        sealedEvidence: [],
+        pendingEvidence: [
+          "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+          "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+          "release/PUBLISH-GATES.json",
+          "release/PROMOTION-GATES.json"
+        ]
+      }
+    ],
     blockedBy: [
       "evidence sealing remains review-only",
+      "closeout windows remain metadata-only",
       "publish / promotion closeout remains blocked",
       "host-side execution remains disabled"
     ]

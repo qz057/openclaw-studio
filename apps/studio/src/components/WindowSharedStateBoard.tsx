@@ -1,4 +1,16 @@
-import { selectStudioReleaseApprovalPipelineStage, type StudioPageId, type StudioReleaseApprovalPipeline, type StudioShellState } from "@openclaw/shared";
+import {
+  selectStudioReleaseApprovalPipelineStage,
+  selectStudioReleaseCloseoutWindow,
+  selectStudioReleaseEscalationWindow,
+  selectStudioReleaseReviewerQueue,
+  type StudioPageId,
+  type StudioReleaseAcknowledgementState,
+  type StudioReleaseApprovalPipeline,
+  type StudioReleaseCloseoutWindowState,
+  type StudioReleaseEscalationWindowState,
+  type StudioReleaseReviewerQueueStatus,
+  type StudioShellState
+} from "@openclaw/shared";
 
 interface WindowSharedStateBoardProps {
   windowing: StudioShellState["windowing"];
@@ -30,6 +42,52 @@ function resolveLaneTone(status: StudioShellState["windowing"]["sharedState"]["l
     case "active":
       return "positive";
     case "handoff-ready":
+      return "neutral";
+    default:
+      return "warning";
+  }
+}
+
+function resolveAcknowledgementTone(state: StudioReleaseAcknowledgementState): "positive" | "neutral" | "warning" {
+  switch (state) {
+    case "acknowledged":
+      return "positive";
+    case "pending":
+      return "neutral";
+    default:
+      return "warning";
+  }
+}
+
+function resolveReviewerQueueTone(status: StudioReleaseReviewerQueueStatus): "positive" | "neutral" | "warning" {
+  switch (status) {
+    case "closed":
+      return "positive";
+    case "active":
+    case "handoff-ready":
+      return "neutral";
+    default:
+      return "warning";
+  }
+}
+
+function resolveEscalationTone(state: StudioReleaseEscalationWindowState): "positive" | "neutral" | "warning" {
+  switch (state) {
+    case "watch":
+      return "positive";
+    case "open":
+      return "neutral";
+    default:
+      return "warning";
+  }
+}
+
+function resolveCloseoutWindowTone(state: StudioReleaseCloseoutWindowState): "positive" | "neutral" | "warning" {
+  switch (state) {
+    case "ready-to-seal":
+      return "positive";
+    case "scheduled":
+    case "open":
       return "neutral";
     default:
       return "warning";
@@ -170,6 +228,13 @@ export function WindowSharedStateBoard({
   const activeWindow = resolveActiveWindowRosterEntry(windowing, activeWindowId, activeLane, activeRouteId);
   const activeBoard = resolveActiveOrchestrationBoard(windowing, activeBoardId, activeLane, activeRouteId);
   const currentReleaseStage = releaseApprovalPipeline ? selectStudioReleaseApprovalPipelineStage(releaseApprovalPipeline) : null;
+  const currentReviewerQueue = releaseApprovalPipeline ? selectStudioReleaseReviewerQueue(releaseApprovalPipeline, currentReleaseStage ?? undefined) : null;
+  const currentEscalationWindow =
+    releaseApprovalPipeline ? selectStudioReleaseEscalationWindow(releaseApprovalPipeline, currentReleaseStage ?? undefined) : null;
+  const currentCloseoutWindow =
+    releaseApprovalPipeline ? selectStudioReleaseCloseoutWindow(releaseApprovalPipeline, currentReleaseStage ?? undefined) : null;
+  const activeQueueEntry =
+    currentReviewerQueue?.entries.find((entry) => entry.id === currentReviewerQueue.activeEntryId) ?? currentReviewerQueue?.entries[0] ?? null;
   const panelClassName = [
     nested ? "window-shared-board window-shared-board--nested" : "surface card window-shared-board",
     compact ? "window-shared-board--compact" : ""
@@ -259,18 +324,86 @@ export function WindowSharedStateBoard({
             <span>Operator review lane</span>
             <strong>{currentReleaseStage?.label ?? releaseApprovalPipeline.reviewBoard.title}</strong>
             <p>{releaseApprovalPipeline.reviewBoard.summary}</p>
-            <div className="windowing-preview-list">
-              <div className="windowing-preview-line">
+            <div className="workflow-readiness-list">
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
                 <span>Stage ownership</span>
                 <strong>{currentReleaseStage ? `${currentReleaseStage.owner} / ${currentReleaseStage.status}` : "Unavailable"}</strong>
               </div>
-              <div className="windowing-preview-line">
+              <div className={`workflow-readiness-line workflow-readiness-line--${resolveAcknowledgementTone(releaseApprovalPipeline.reviewBoard.activeAcknowledgementState)}`}>
+                <span>Acknowledgement</span>
+                <strong>{releaseApprovalPipeline.reviewBoard.activeAcknowledgementState}</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
                 <span>Decision handoff</span>
                 <strong>{releaseApprovalPipeline.decisionHandoff.posture}</strong>
               </div>
-              <div className="windowing-preview-line">
-                <span>Evidence closeout</span>
-                <strong>{releaseApprovalPipeline.evidenceCloseout.sealingState}</strong>
+            </div>
+          </article>
+        ) : null}
+
+        {releaseApprovalPipeline ? (
+          <article className="windowing-summary-card">
+            <span>Reviewer queue</span>
+            <strong>{currentReviewerQueue?.label ?? "No reviewer queue"}</strong>
+            <p>{currentReviewerQueue?.summary ?? "No reviewer queue is currently active."}</p>
+            <div className="workflow-readiness-list">
+              <div className={`workflow-readiness-line workflow-readiness-line--${resolveReviewerQueueTone(currentReviewerQueue?.status ?? "escalated")}`}>
+                <span>Queue posture</span>
+                <strong>{currentReviewerQueue ? `${currentReviewerQueue.status} / ${currentReviewerQueue.owner}` : "Unavailable"}</strong>
+              </div>
+              <div className={`workflow-readiness-line workflow-readiness-line--${resolveAcknowledgementTone(currentReviewerQueue?.acknowledgementState ?? "blocked")}`}>
+                <span>Acknowledgement</span>
+                <strong>{currentReviewerQueue?.acknowledgementState ?? "Unavailable"}</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Active entry</span>
+                <strong>{activeQueueEntry ? `${activeQueueEntry.owner} / ${activeQueueEntry.status}` : "Unavailable"}</strong>
+              </div>
+            </div>
+          </article>
+        ) : null}
+
+        {releaseApprovalPipeline ? (
+          <article className="windowing-summary-card">
+            <span>Escalation window</span>
+            <strong>{currentEscalationWindow?.label ?? "No escalation window"}</strong>
+            <p>{currentEscalationWindow?.summary ?? "No escalation window is currently active."}</p>
+            <div className="workflow-readiness-list">
+              <div className={`workflow-readiness-line workflow-readiness-line--${resolveEscalationTone(currentEscalationWindow?.state ?? "blocked")}`}>
+                <span>Window state</span>
+                <strong>{currentEscalationWindow?.state ?? "Unavailable"}</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Deadline</span>
+                <strong>{currentEscalationWindow?.deadlineLabel ?? "Unavailable"}</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Trigger</span>
+                <strong>{currentEscalationWindow?.trigger ?? "Unavailable"}</strong>
+              </div>
+            </div>
+          </article>
+        ) : null}
+
+        {releaseApprovalPipeline ? (
+          <article className="windowing-summary-card">
+            <span>Closeout window</span>
+            <strong>{currentCloseoutWindow?.label ?? "No closeout window"}</strong>
+            <p>{currentCloseoutWindow?.summary ?? "No closeout window is currently active."}</p>
+            <div className="workflow-readiness-list">
+              <div className={`workflow-readiness-line workflow-readiness-line--${resolveCloseoutWindowTone(currentCloseoutWindow?.state ?? "blocked")}`}>
+                <span>Window state</span>
+                <strong>{currentCloseoutWindow?.state ?? "Unavailable"}</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Deadline</span>
+                <strong>{currentCloseoutWindow?.deadlineLabel ?? "Unavailable"}</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Sealed / pending</span>
+                <strong>
+                  {currentCloseoutWindow ? `${currentCloseoutWindow.sealedEvidence.length} / ${currentCloseoutWindow.pendingEvidence.length}` : "Unavailable"}
+                </strong>
               </div>
             </div>
           </article>

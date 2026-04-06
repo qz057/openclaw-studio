@@ -105,8 +105,12 @@ async function verifyRendererFocusedSlotUi() {
     "Review-only Operator Review Board",
     "Operator Review Board",
     "Active Review Packet",
+    "Reviewer Queue",
+    "Acknowledgement",
     "Decision Handoff",
+    "Escalation Window",
     "Evidence Closeout",
+    "Closeout Window",
     "Stage Ownership",
     "Attestation intake board",
     "Approval orchestration board",
@@ -663,11 +667,11 @@ function assertWindowingContract(windowing, layout, hostBridge) {
   }
 
   if (!windowing.roster || !Array.isArray(windowing.roster.windows) || windowing.roster.windows.length === 0) {
-    throw new Error("Shell multi-window contract is missing the phase57 window roster.");
+    throw new Error("Shell multi-window contract is missing the phase58 window roster.");
   }
 
   if (!windowing.sharedState || !Array.isArray(windowing.sharedState.lanes) || windowing.sharedState.lanes.length === 0) {
-    throw new Error("Shell multi-window contract is missing the phase57 shared-state lanes.");
+    throw new Error("Shell multi-window contract is missing the phase58 shared-state lanes.");
   }
 
   const rightRailTabIds = new Set((layout?.rightRailTabs ?? []).map((tab) => tab.id));
@@ -990,6 +994,9 @@ function assertHostExecutorContract(hostExecutor, label) {
     ["intents", hostExecutor.intents],
     ["lifecycle", hostExecutor.lifecycle],
     ["releaseApprovalPipeline.stages", hostExecutor.releaseApprovalPipeline?.stages],
+    ["releaseApprovalPipeline.reviewerQueues", hostExecutor.releaseApprovalPipeline?.reviewerQueues],
+    ["releaseApprovalPipeline.escalationWindows", hostExecutor.releaseApprovalPipeline?.escalationWindows],
+    ["releaseApprovalPipeline.closeoutWindows", hostExecutor.releaseApprovalPipeline?.closeoutWindows],
     ["failureTaxonomy", hostExecutor.failureTaxonomy],
     ["mutationSlots", hostExecutor.mutationSlots],
     ["rollback.stages", hostExecutor.rollback?.stages],
@@ -1006,11 +1013,11 @@ function assertHostExecutorContract(hostExecutor, label) {
   }
 
   if (hostExecutor.releaseApprovalPipeline?.mode !== "review-only" || !hostExecutor.releaseApprovalPipeline?.currentStageId) {
-    throw new Error(`${label} host executor contract is missing the phase57 review-only operator review board posture.`);
+    throw new Error(`${label} host executor contract is missing the phase58 review-only operator review loop posture.`);
   }
 
   if (!hostExecutor.releaseApprovalPipeline.stages.some((stage) => stage.id === hostExecutor.releaseApprovalPipeline.currentStageId)) {
-    throw new Error(`${label} host executor contract points at a missing phase57 operator review stage.`);
+    throw new Error(`${label} host executor contract points at a missing phase58 operator review stage.`);
   }
 
   if (!Array.isArray(hostExecutor.releaseApprovalPipeline.blockedBy) || hostExecutor.releaseApprovalPipeline.blockedBy.length === 0) {
@@ -1019,27 +1026,37 @@ function assertHostExecutorContract(hostExecutor, label) {
 
   if (
     !hostExecutor.releaseApprovalPipeline.reviewBoard?.title ||
+    !hostExecutor.releaseApprovalPipeline.reviewBoard?.activeReviewerQueueId ||
+    !hostExecutor.releaseApprovalPipeline.reviewBoard?.activeEscalationWindowId ||
+    !hostExecutor.releaseApprovalPipeline.reviewBoard?.activeCloseoutWindowId ||
     !Array.isArray(hostExecutor.releaseApprovalPipeline.reviewBoard?.reviewerNotes) ||
     hostExecutor.releaseApprovalPipeline.reviewBoard.reviewerNotes.length === 0
   ) {
-    throw new Error(`${label} host executor contract is missing the phase57 operator review board metadata.`);
+    throw new Error(`${label} host executor contract is missing the phase58 operator review board metadata.`);
   }
 
   if (
     !hostExecutor.releaseApprovalPipeline.decisionHandoff?.label ||
+    !hostExecutor.releaseApprovalPipeline.decisionHandoff?.acknowledgementState ||
+    !hostExecutor.releaseApprovalPipeline.decisionHandoff?.reviewerQueueId ||
+    !hostExecutor.releaseApprovalPipeline.decisionHandoff?.escalationWindowId ||
+    !hostExecutor.releaseApprovalPipeline.decisionHandoff?.closeoutWindowId ||
     !Array.isArray(hostExecutor.releaseApprovalPipeline.decisionHandoff?.pending) ||
     !Array.isArray(hostExecutor.releaseApprovalPipeline.decisionHandoff?.reviewerNotes)
   ) {
-    throw new Error(`${label} host executor contract is missing the phase57 decision handoff metadata.`);
+    throw new Error(`${label} host executor contract is missing the phase58 decision handoff metadata.`);
   }
 
   if (
     !hostExecutor.releaseApprovalPipeline.evidenceCloseout?.label ||
+    !hostExecutor.releaseApprovalPipeline.evidenceCloseout?.acknowledgementState ||
+    !hostExecutor.releaseApprovalPipeline.evidenceCloseout?.reviewerQueueId ||
+    !hostExecutor.releaseApprovalPipeline.evidenceCloseout?.closeoutWindowId ||
     !Array.isArray(hostExecutor.releaseApprovalPipeline.evidenceCloseout?.sealedEvidence) ||
     !Array.isArray(hostExecutor.releaseApprovalPipeline.evidenceCloseout?.pendingEvidence) ||
     !Array.isArray(hostExecutor.releaseApprovalPipeline.evidenceCloseout?.reviewerNotes)
   ) {
-    throw new Error(`${label} host executor contract is missing the phase57 evidence closeout metadata.`);
+    throw new Error(`${label} host executor contract is missing the phase58 evidence closeout metadata.`);
   }
 
   if (
@@ -1047,6 +1064,9 @@ function assertHostExecutorContract(hostExecutor, label) {
       (stage) =>
         Array.isArray(stage.evidence) &&
         stage.evidence.length > 0 &&
+        stage.reviewerQueueId &&
+        stage.escalationWindowId &&
+        stage.closeoutWindowId &&
         Array.isArray(stage.notes) &&
         stage.notes.length > 0 &&
         stage.packet?.label &&
@@ -1058,7 +1078,7 @@ function assertHostExecutorContract(hostExecutor, label) {
         Array.isArray(stage.closeout?.pendingEvidence)
     )
   ) {
-    throw new Error(`${label} host executor contract is missing structured phase57 review packet, handoff, closeout, evidence, or note metadata.`);
+    throw new Error(`${label} host executor contract is missing structured phase58 review packet, queue, escalation, closeout, evidence, or note metadata.`);
   }
 
   const currentStage = hostExecutor.releaseApprovalPipeline.stages.find(
@@ -1071,6 +1091,45 @@ function assertHostExecutorContract(hostExecutor, label) {
     hostExecutor.releaseApprovalPipeline.evidenceCloseout.id !== currentStage.closeout.id
   ) {
     throw new Error(`${label} host executor contract lost alignment between the active stage, decision handoff, and evidence closeout.`);
+  }
+
+  if (
+    !hostExecutor.releaseApprovalPipeline.reviewerQueues.some(
+      (queue) =>
+        queue.id === currentStage?.reviewerQueueId &&
+        queue.acknowledgementState &&
+        Array.isArray(queue.entries) &&
+        queue.entries.length > 0 &&
+        queue.entries.every((entry) => entry.windowId && entry.sharedStateLaneId && Array.isArray(entry.pending))
+    )
+  ) {
+    throw new Error(`${label} host executor contract is missing the phase58 reviewer queue contract.`);
+  }
+
+  if (
+    !hostExecutor.releaseApprovalPipeline.escalationWindows.some(
+      (window) =>
+        window.id === currentStage?.escalationWindowId &&
+        window.acknowledgementState &&
+        window.deadlineLabel &&
+        window.trigger &&
+        Array.isArray(window.pending)
+    )
+  ) {
+    throw new Error(`${label} host executor contract is missing the phase58 escalation window contract.`);
+  }
+
+  if (
+    !hostExecutor.releaseApprovalPipeline.closeoutWindows.some(
+      (window) =>
+        window.id === currentStage?.closeoutWindowId &&
+        window.acknowledgementState &&
+        window.deadlineLabel &&
+        Array.isArray(window.pendingEvidence) &&
+        Array.isArray(window.reviewerNotes)
+    )
+  ) {
+    throw new Error(`${label} host executor contract is missing the phase58 closeout window contract.`);
   }
 
   assertHostBridgeContract(hostExecutor.bridge, `${label} bridge`);
@@ -1165,8 +1224,12 @@ function assertInspectorContract(inspector) {
     "handler",
     "validator",
     "approval-pipeline",
+    "reviewer-queue",
+    "ack-state",
     "decision-handoff",
+    "escalation-window",
     "evidence-closeout",
+    "closeout-window",
     "window-focus",
     "shared-state",
     "rollback",
@@ -1188,11 +1251,11 @@ function assertInspectorContract(inspector) {
   }
 
   if (!inspector.drilldowns.some((drilldown) => drilldown.id === "drilldown-release-approval-pipeline")) {
-    throw new Error("Shell inspector is missing the phase57 operator review drilldown.");
+    throw new Error("Shell inspector is missing the phase58 operator review drilldown.");
   }
 
   if (!inspector.linkage?.windowId || !inspector.linkage?.sharedStateLaneId || !inspector.linkage?.orchestrationBoardId) {
-    throw new Error("Shell inspector is missing the phase57 cross-window linkage metadata.");
+    throw new Error("Shell inspector is missing the phase58 cross-window linkage metadata.");
   }
 
   if (!inspector.drilldowns.some((drilldown) => drilldown.lines.some((line) => Array.isArray(line.links) && line.links.length > 0))) {
@@ -2054,8 +2117,17 @@ function verifyReleaseSkeletonContract() {
   if (
     skeleton.operatorReviewBoard?.board?.decisionHandoffPath !== "release/RELEASE-DECISION-HANDOFF.json" ||
     skeleton.operatorReviewBoard?.board?.evidenceCloseoutPath !== "release/REVIEW-EVIDENCE-CLOSEOUT.json" ||
+    skeleton.operatorReviewBoard?.board?.activeReviewerQueueId !== "reviewer-queue-approval-orchestration" ||
+    skeleton.operatorReviewBoard?.board?.activeEscalationWindowId !== "escalation-window-approval-orchestration" ||
+    skeleton.operatorReviewBoard?.board?.activeCloseoutWindowId !== "closeout-window-approval-orchestration" ||
     !Array.isArray(skeleton.operatorReviewBoard?.stages) ||
     skeleton.operatorReviewBoard.stages.length < 5 ||
+    !Array.isArray(skeleton.operatorReviewBoard?.reviewerQueues) ||
+    skeleton.operatorReviewBoard.reviewerQueues.length < 5 ||
+    !Array.isArray(skeleton.operatorReviewBoard?.escalationWindows) ||
+    skeleton.operatorReviewBoard.escalationWindows.length < 5 ||
+    !Array.isArray(skeleton.operatorReviewBoard?.closeoutWindows) ||
+    skeleton.operatorReviewBoard.closeoutWindows.length < 5 ||
     !Array.isArray(skeleton.operatorReviewBoard?.reviewerNotes) ||
     skeleton.operatorReviewBoard.reviewerNotes.length < 3
   ) {
@@ -2064,6 +2136,7 @@ function verifyReleaseSkeletonContract() {
 
   if (
     skeleton.releaseDecisionHandoff?.activeHandoffId !== "decision-handoff-approval-orchestration" ||
+    skeleton.releaseDecisionHandoff?.activeReviewerQueueId !== "reviewer-queue-approval-orchestration" ||
     !Array.isArray(skeleton.releaseDecisionHandoff?.handoffs) ||
     skeleton.releaseDecisionHandoff.handoffs.length < 5 ||
     !Array.isArray(skeleton.releaseDecisionHandoff?.blockedBy) ||
@@ -2074,8 +2147,11 @@ function verifyReleaseSkeletonContract() {
 
   if (
     skeleton.reviewEvidenceCloseout?.activeCloseoutId !== "evidence-closeout-approval-orchestration" ||
+    skeleton.reviewEvidenceCloseout?.activeCloseoutWindowId !== "closeout-window-approval-orchestration" ||
     !Array.isArray(skeleton.reviewEvidenceCloseout?.closeouts) ||
     skeleton.reviewEvidenceCloseout.closeouts.length < 5 ||
+    !Array.isArray(skeleton.reviewEvidenceCloseout?.closeoutWindows) ||
+    skeleton.reviewEvidenceCloseout.closeoutWindows.length < 5 ||
     !Array.isArray(skeleton.reviewEvidenceCloseout?.blockedBy) ||
     skeleton.reviewEvidenceCloseout.blockedBy.length < 3
   ) {
