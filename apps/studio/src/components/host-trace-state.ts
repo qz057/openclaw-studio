@@ -5,10 +5,11 @@ import type {
   StudioHostMutationIntent,
   StudioHostMutationPreview,
   StudioHostPreviewHandoff,
-  StudioHostPreviewTraceStatus,
+  StudioHostPreviewTraceStep,
   StudioHostTraceSlotState,
   StudioTone
 } from "@openclaw/shared";
+import { selectStudioReleaseApprovalPipelineStage } from "@openclaw/shared";
 
 export interface ResolvedHostTraceFocus {
   slot: StudioHostTraceSlotState;
@@ -22,51 +23,11 @@ export interface ResolvedHostTraceFocus {
   rollbackAuditValue: string;
   rollbackAuditDetail: string;
   summary: string;
-  trace: Array<{
-    id: string;
-    phase: "preview" | "slot" | "result" | "rollback";
-    label: string;
-    status: StudioHostPreviewTraceStatus;
-    summary: string;
-  }>;
+  trace: StudioHostPreviewTraceStep[];
 }
 
 function createSyntheticTrace(slot: StudioHostTraceSlotState): ResolvedHostTraceFocus["trace"] {
-  const rollbackStatus = slot.terminalStatus === "rollback-incomplete" ? "rollback-incomplete" : slot.rollbackDisposition;
-
-  return [
-    {
-      id: `${slot.slotId}-preview`,
-      phase: "preview",
-      label: "Preview staged",
-      status: "mapped",
-      summary: `${slot.label} stays preview-only and maps into the disabled bridge path without opening host execution.`
-    },
-    {
-      id: `${slot.slotId}-slot`,
-      phase: "slot",
-      label: "Slot handler ready",
-      status: "accepted",
-      summary: `${slot.handlerLabel} remains registered on ${slot.channel}, but default-enabled stays false.`
-    },
-    {
-      id: `${slot.slotId}-result`,
-      phase: "result",
-      label: "Simulated result",
-      status: slot.primaryStatus,
-      summary: slot.summary
-    },
-    {
-      id: `${slot.slotId}-rollback`,
-      phase: "rollback",
-      label: "Rollback disposition",
-      status: rollbackStatus,
-      summary:
-        slot.rollbackDisposition === "not-needed"
-          ? "Rollback remains unnecessary for the placeholder flow."
-          : `Rollback disposition stays ${slot.rollbackDisposition} while the flow remains simulated only.`
-    }
-  ];
+  return slot.phases.length > 0 ? slot.phases : [];
 }
 
 export function resolveHostTraceTone(status: string): StudioTone {
@@ -169,6 +130,7 @@ export function createInspectorSections(boundary: StudioBoundarySummary, focus: 
       : `${focus.slot.rollbackDisposition} / ${focus.slot.terminalStatus}`
     : "Unavailable";
   const auditValue = focus ? (focus.usesHandoff ? focus.rollbackAuditDetail : "Placeholder linked") : "Unavailable";
+  const currentReleaseStage = selectStudioReleaseApprovalPipelineStage(boundary.hostExecutor.releaseApprovalPipeline);
 
   return [
     {
@@ -200,6 +162,11 @@ export function createInspectorSections(boundary: StudioBoundarySummary, focus: 
       id: "validator",
       label: "Validator state",
       value: focus ? focus.validationValue : "Unavailable"
+    },
+    {
+      id: "approval-pipeline",
+      label: "Approval pipeline",
+      value: currentReleaseStage ? `${currentReleaseStage.label} / ${currentReleaseStage.status}` : "Unavailable"
     },
     {
       id: "rollback",

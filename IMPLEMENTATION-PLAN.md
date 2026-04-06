@@ -250,6 +250,14 @@
 - smoke 已提升到验证 phase54 attestation operator approval orchestration / promotion staged-apply release decision enforcement lifecycle / rollback cutover publication receipt settlement closeout contract 与 renderer markers
 - README / HANDOFF / package snapshot 已同步反映 phase54 reality
 
+### Phase 55（当前已完成）
+- phase54 的 release-review skeleton 已继续下沉成更明确的 review-only release approval pipeline layer
+- shared / runtime / renderer 现在把 attestation intake、approval orchestration、release decision lifecycle、rollback settlement closeout、以及 final release decision board 串成一个 review-only pipeline
+- trace panel 与 slot roster 现在补齐 phase stage metadata、linked notes、以及 approval / lifecycle / rollback / release-artifact cross-links
+- inspector 现在补齐 release-pipeline section 与 dedicated release approval pipeline drilldown，不再只停留在 focused-slot rollback / audit posture
+- smoke 已提升到验证 phase55 review-only release approval pipeline posture、structured trace phase drill-down、以及 inspector release pipeline drilldowns
+- README / HANDOFF / package snapshot 已同步反映 phase55 reality
+
 ## 当前明确边界
 
 当前只允许：
@@ -258,7 +266,7 @@
 - dry-run / preview / simulate
 - Studio-local execute（只改应用内 in-memory state/history）
 - phase27 command surface / layout persistence / window intent staging
-- phase54 attestation operator approval orchestration / promotion staged-apply release decision enforcement lifecycle / rollback cutover publication receipt settlement closeout
+- phase55 review-only release approval pipeline / deeper trace inspector drill-down
 - phase26/27/28 release skeleton / artifact review / handoff docs / package metadata
 
 当前明确禁止：
@@ -280,7 +288,7 @@ npm run start:smoke
 npm run package:alpha
 ```
 
-phase54 可额外跑：
+phase55 可额外跑：
 
 ```bash
 npm run release:plan
@@ -288,13 +296,13 @@ npm run release:plan
 
 ## 下一阶段（建议）
 
-### Phase 55
-目标：在不开放危险执行的前提下，继续把 phase54 foundations 推进为更完整的产品能力与交付链路。
+### Phase 56
+目标：在不开放危险执行的前提下，继续把 phase55 foundations 推进为更完整的产品能力与交付链路。
 
 范围建议：
-- 更深的 Inspector / command depth / trace drill-down
 - 更真实的 multi-window orchestration 与跨窗口共享状态
-- 把当前 skeleton 继续推进为 executable review-only attestation operator approval orchestration / promotion staged release decision enforcement lifecycle / rollback cutover publication receipt settlement closeout / release approval pipeline
+- 把当前 review-only release approval pipeline 继续推进成更完整的 operator review board / decision handoff / evidence closeout
+- 在 trace / inspector / command surface 上继续补齐跨窗口与跨板块的 observability
 - 在 approval / lifecycle / rollback 真实闭环前继续提升 observability，而不是开启真实 host-side execution
 
 ### 后续阶段

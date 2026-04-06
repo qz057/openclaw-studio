@@ -12,6 +12,7 @@ import {
   type StudioHostTraceSlotState,
   type StudioHostPreviewHandoff,
   type StudioMetric,
+  selectStudioReleaseApprovalPipelineStage,
   type StudioShellState
 } from "@openclaw/shared";
 import { probeLiveCodex } from "./probes/codex";
@@ -1310,10 +1311,11 @@ function buildShellState(
 
   shellState.inspector.summary =
     hasLiveToolsMcp || hasLiveRuntime
-      ? "Shared boundary state now summarizes the live local-only layer, preview-host contract, per-slot trace focus, dock linkage, blockers, and future executor posture."
+      ? "Shared boundary state now summarizes the live local-only layer, preview-host contract, per-slot trace focus, release approval pipeline posture, dock linkage, blockers, and future executor posture."
       : baseState.inspector.summary;
   shellState.inspector.boundary = shellState.boundary;
   const traceFocus = createInspectorTraceFocus(shellState.boundary);
+  const currentReleaseStage = selectStudioReleaseApprovalPipelineStage(shellState.boundary.hostExecutor.releaseApprovalPipeline);
   shellState.inspector.sections = [
     {
       id: "layer",
@@ -1344,6 +1346,11 @@ function buildShellState(
       id: "validator",
       label: "Validator state",
       value: traceFocus ? `${traceFocus.validatorState} / slot-linked` : "Unavailable"
+    },
+    {
+      id: "approval-pipeline",
+      label: "Approval pipeline",
+      value: currentReleaseStage ? `${currentReleaseStage.label} / ${currentReleaseStage.status}` : "Unavailable"
     },
     {
       id: "rollback",

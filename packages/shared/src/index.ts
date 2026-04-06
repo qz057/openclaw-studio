@@ -39,6 +39,16 @@ export type StudioHostPreviewTraceStatus =
   | StudioHostPreviewRollbackDisposition;
 export type StudioHostTraceFocusReason = "preferred-slot" | "recommended-slot";
 export type StudioHostTraceSlotValidatorState = StudioHostBridgeValidatorState | "missing";
+export type StudioContractLinkKind =
+  | "approval"
+  | "lifecycle"
+  | "rollback"
+  | "release-artifact"
+  | "audit"
+  | "trace-slot"
+  | "window-intent";
+export type StudioReleaseApprovalPipelineMode = "review-only";
+export type StudioReleaseApprovalPipelineStageStatus = "ready" | "in-review" | "planned" | "blocked";
 export type StudioHostFailureCode =
   | "policy-disabled"
   | "approval-missing"
@@ -368,6 +378,22 @@ export interface StudioHostBridgeSimulatedOutcome {
   summary: string;
 }
 
+export interface StudioContractLink {
+  id: string;
+  label: string;
+  kind: StudioContractLinkKind;
+  target: string;
+}
+
+export interface StudioLinkedNote {
+  id: string;
+  label: string;
+  value: string;
+  detail: string;
+  tone: StudioTone;
+  links?: StudioContractLink[];
+}
+
 export interface StudioHostBridgeSlotHandler {
   id: string;
   slotId: string;
@@ -399,6 +425,7 @@ export interface StudioHostTraceSlotState {
   rollbackDisposition: StudioHostPreviewRollbackDisposition;
   outcomeChain: StudioHostPreviewStubResultStatus[];
   summary: string;
+  phases: StudioHostPreviewTraceStep[];
 }
 
 export interface StudioHostTraceState {
@@ -433,6 +460,7 @@ export interface StudioHostExecutorState {
   approval: StudioHostApprovalContract;
   audit: StudioHostAuditContract;
   rollback: StudioHostRollbackContract;
+  releaseApprovalPipeline: StudioReleaseApprovalPipeline;
   failureTaxonomy: StudioHostFailureCase[];
   mutationSlots: StudioHostMutationSlot[];
 }
@@ -510,9 +538,11 @@ export interface StudioHostPreviewSlotResult {
 export interface StudioHostPreviewTraceStep {
   id: string;
   phase: StudioHostPreviewTracePhase;
+  stage: StudioHostLifecycleStageId;
   label: string;
   status: StudioHostPreviewTraceStatus;
   summary: string;
+  notes: StudioLinkedNote[];
 }
 
 export interface StudioHostPreviewHandoff {
@@ -571,12 +601,30 @@ export interface StudioInspectorLinkage {
   focusedSlotId?: string;
 }
 
-export interface StudioInspectorDrilldownLine {
+export interface StudioReleaseApprovalPipelineStage {
   id: string;
   label: string;
-  value: string;
-  detail: string;
-  tone: StudioTone;
+  status: StudioReleaseApprovalPipelineStageStatus;
+  owner: string;
+  summary: string;
+  evidence: string[];
+  linkedLifecycleStages: StudioHostLifecycleStageId[];
+  linkedSlotIds: string[];
+  notes: StudioLinkedNote[];
+}
+
+export interface StudioReleaseApprovalPipeline {
+  id: string;
+  title: string;
+  summary: string;
+  mode: StudioReleaseApprovalPipelineMode;
+  currentStageId: string;
+  stages: StudioReleaseApprovalPipelineStage[];
+  blockedBy: string[];
+}
+
+export interface StudioInspectorDrilldownLine extends StudioLinkedNote {
+  id: string;
 }
 
 export interface StudioInspectorDrilldown {
@@ -1140,6 +1188,195 @@ function scoreStudioHostTraceSlot(entry: StudioHostTraceSlotState): number {
   return score;
 }
 
+function createStudioHostTracePhases(
+  slot: StudioHostMutationSlot,
+  handler: StudioHostBridgeSlotHandler,
+  validator: StudioHostBridgeValidator | undefined,
+  primaryOutcome: StudioHostBridgeSimulatedOutcome,
+  terminalOutcome: StudioHostBridgeSimulatedOutcome
+): StudioHostPreviewTraceStep[] {
+  const validatorState = validator?.state ?? "missing";
+  const rollbackStatus =
+    terminalOutcome.status === "rollback-incomplete" ? "rollback-incomplete" : terminalOutcome.rollbackDisposition;
+
+  return [
+    {
+      id: `${slot.id}-trace-preview`,
+      phase: "preview",
+      stage: "request-approval",
+      label: "Approval intake mapped",
+      status: "mapped",
+      summary: `${slot.label} stays on a review-only approval intake path before any host-side handoff could advance.`,
+      notes: [
+        {
+          id: `${slot.id}-trace-preview-approval`,
+          label: "Approval gate",
+          value: "request-approval / review-only",
+          detail: "Preview mapping stays attached to the typed approval contract and the release approval workflow instead of granting execution.",
+          tone: primaryOutcome.stage === "request-approval" ? "warning" : "neutral",
+          links: [
+            { id: `${slot.id}-link-approval-request`, label: "Approval request", kind: "approval", target: "approval.request" },
+            { id: `${slot.id}-link-approval-result`, label: "Approval result", kind: "approval", target: "approval.result" },
+            { id: `${slot.id}-link-lifecycle-request`, label: "Lifecycle request-approval", kind: "lifecycle", target: "lifecycle.request-approval" },
+            {
+              id: `${slot.id}-link-release-workflow`,
+              label: "Release approval workflow",
+              kind: "release-artifact",
+              target: "release/RELEASE-APPROVAL-WORKFLOW.json"
+            }
+          ]
+        },
+        {
+          id: `${slot.id}-trace-preview-pipeline`,
+          label: "Pipeline lane",
+          value: "approval orchestration / lifecycle / rollback",
+          detail: "Phase55 ties preview posture to the review-only release approval pipeline so approval, lifecycle, and rollback evidence stay cross-linked.",
+          tone: "neutral",
+          links: [
+            {
+              id: `${slot.id}-link-approval-orchestration`,
+              label: "Approval orchestration",
+              kind: "release-artifact",
+              target: "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json"
+            },
+            {
+              id: `${slot.id}-link-lifecycle-artifact`,
+              label: "Decision enforcement lifecycle",
+              kind: "release-artifact",
+              target: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+            },
+            {
+              id: `${slot.id}-link-rollback-artifact`,
+              label: "Receipt settlement closeout",
+              kind: "release-artifact",
+              target: "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      id: `${slot.id}-trace-slot`,
+      phase: "slot",
+      stage: "handoff-slot",
+      label: "Slot handoff reviewed",
+      status: "accepted",
+      summary: `${handler.label} remains registered on ${slot.channel}, while ${slot.label} stays default-disabled and review-only.`,
+      notes: [
+        {
+          id: `${slot.id}-trace-slot-validator`,
+          label: "Handler / validator",
+          value: `${handler.state} / ${validatorState}`,
+          detail: `${handler.label} and ${validator?.label ?? "Missing validator"} keep ${slot.handoff.payloadType} -> ${slot.handoff.resultType} reviewable without opening execution.`,
+          tone: validatorState === "registered" ? "positive" : "warning",
+          links: [
+            { id: `${slot.id}-link-slot`, label: slot.label, kind: "trace-slot", target: slot.id },
+            { id: `${slot.id}-link-lifecycle-handoff`, label: "Lifecycle handoff-slot", kind: "lifecycle", target: "lifecycle.handoff-slot" }
+          ]
+        },
+        {
+          id: `${slot.id}-trace-slot-contract`,
+          label: "Contract coverage",
+          value: `${validator?.requiredPayloadFieldIds.length ?? 0} payload / ${validator?.requiredResultFieldIds.length ?? 0} result`,
+          detail: "The handoff contract remains executable-looking in review-only mode by keeping validator coverage and slot payload/result shapes visible together.",
+          tone: "neutral",
+          links: [
+            { id: `${slot.id}-link-approval-stage`, label: "Approval stage", kind: "lifecycle", target: "lifecycle.request-approval" },
+            { id: `${slot.id}-link-audit-stage`, label: "Audit stage", kind: "lifecycle", target: "lifecycle.write-audit" }
+          ]
+        }
+      ]
+    },
+    {
+      id: `${slot.id}-trace-result`,
+      phase: "result",
+      stage: primaryOutcome.stage,
+      label: "Structured result recorded",
+      status: primaryOutcome.status,
+      summary: primaryOutcome.summary,
+      notes: [
+        {
+          id: `${slot.id}-trace-result-failure`,
+          label: "Result posture",
+          value: `${primaryOutcome.failureCode} / ${primaryOutcome.failureDisposition}`,
+          detail: "The placeholder slot result keeps the failure taxonomy, lifecycle stage, and release review posture synchronized.",
+          tone: primaryOutcome.failureDisposition === "blocked" ? "neutral" : "warning",
+          links: [
+            { id: `${slot.id}-link-result-stage`, label: `Lifecycle ${primaryOutcome.stage}`, kind: "lifecycle", target: `lifecycle.${primaryOutcome.stage}` },
+            { id: `${slot.id}-link-audit`, label: "Audit envelope", kind: "audit", target: "audit.event" }
+          ]
+        },
+        {
+          id: `${slot.id}-trace-result-approval`,
+          label: "Approval pipeline handoff",
+          value: "attestation review -> release decision lifecycle",
+          detail: "Result review links the slot outcome back into approval orchestration and staged release decision enforcement lifecycle evidence.",
+          tone: "neutral",
+          links: [
+            {
+              id: `${slot.id}-link-approval-routing`,
+              label: "Approval routing contracts",
+              kind: "release-artifact",
+              target: "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json"
+            },
+            {
+              id: `${slot.id}-link-release-lifecycle`,
+              label: "Release decision lifecycle",
+              kind: "release-artifact",
+              target: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      id: `${slot.id}-trace-rollback`,
+      phase: "rollback",
+      stage: terminalOutcome.stage,
+      label: "Rollback closeout posture",
+      status: rollbackStatus,
+      summary:
+        terminalOutcome.rollbackDisposition === "not-needed"
+          ? "Rollback remains unnecessary for the placeholder flow."
+          : `Rollback disposition stays ${terminalOutcome.rollbackDisposition} while the review-only closeout path remains descriptive.`,
+      notes: [
+        {
+          id: `${slot.id}-trace-rollback-plan`,
+          label: "Rollback disposition",
+          value: `${terminalOutcome.rollbackDisposition} / ${terminalOutcome.stage}`,
+          detail: "Rollback context and verification remain explicit even when the simulated outcome never leaves review-only mode.",
+          tone: terminalOutcome.rollbackDisposition === "not-needed" ? "positive" : "warning",
+          links: [
+            { id: `${slot.id}-link-rollback-context`, label: "Rollback context", kind: "rollback", target: "rollback.context" },
+            { id: `${slot.id}-link-rollback-stage`, label: `Lifecycle ${terminalOutcome.stage}`, kind: "lifecycle", target: `lifecycle.${terminalOutcome.stage}` }
+          ]
+        },
+        {
+          id: `${slot.id}-trace-rollback-settlement`,
+          label: "Publication receipt closeout",
+          value: "rollback settlement closeout linked",
+          detail: "Rollback review is cross-linked to the publication receipt settlement closeout contract so release-facing recovery evidence stays visible.",
+          tone: terminalOutcome.rollbackDisposition === "not-needed" ? "neutral" : "warning",
+          links: [
+            {
+              id: `${slot.id}-link-rollback-closeout-contract`,
+              label: "Receipt closeout contract",
+              kind: "release-artifact",
+              target: "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json"
+            },
+            {
+              id: `${slot.id}-link-rollback-settlement-closeout`,
+              label: "Receipt settlement closeout",
+              kind: "release-artifact",
+              target: "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+            }
+          ]
+        }
+      ]
+    }
+  ];
+}
+
 export function createStudioHostTraceSlotRoster(
   mutationSlots: StudioHostMutationSlot[],
   slotHandlers: StudioHostBridgeSlotHandler[],
@@ -1181,7 +1418,8 @@ export function createStudioHostTraceSlotRoster(
         failureDisposition: primaryOutcome.failureDisposition,
         rollbackDisposition: terminalOutcome.rollbackDisposition,
         outcomeChain: handler.simulatedOutcomes.map((outcome) => outcome.status),
-        summary: `${slot.label} keeps ${primaryOutcome.status} -> ${terminalOutcome.rollbackDisposition} inside the disabled placeholder bridge flow.`
+        summary: `${slot.label} keeps ${primaryOutcome.status} -> ${terminalOutcome.rollbackDisposition} inside the disabled placeholder bridge flow.`,
+        phases: createStudioHostTracePhases(slot, handler, validator, primaryOutcome, terminalOutcome)
       };
     })
     .filter((entry): entry is StudioHostTraceSlotState => entry !== null);
@@ -1210,6 +1448,197 @@ export function createStudioHostTraceState(
     focusReason: preferredSlotId && focusSlotId === preferredSlotId ? "preferred-slot" : "recommended-slot",
     slotRoster
   };
+}
+
+export function createStudioReleaseApprovalPipeline(hostExecutor: {
+  bridge: StudioHostBridgeState;
+  lifecycle: StudioHostLifecycleStage[];
+  approval: StudioHostApprovalContract;
+  rollback: StudioHostRollbackContract;
+}): StudioReleaseApprovalPipeline {
+  const focusSlot =
+    hostExecutor.bridge.trace.slotRoster.find((entry) => entry.slotId === hostExecutor.bridge.trace.focusSlotId) ??
+    hostExecutor.bridge.trace.slotRoster[0];
+  const focusSlotLabel = focusSlot?.label ?? "Focused slot";
+  const focusSlotId = focusSlot?.slotId ?? "slot-lane-apply";
+
+  return {
+    id: "release-approval-pipeline-phase55",
+    title: "Review-only release approval pipeline",
+    summary:
+      "Phase55 layers a structured release approval pipeline on top of the existing approval orchestration, staged release decision lifecycle, and rollback receipt settlement closeout contracts without enabling signing, publish, rollback, or host execution.",
+    mode: "review-only",
+    currentStageId: "release-pipeline-approval-orchestration",
+    blockedBy: [
+      "signing-publish gating handshake remains review-only",
+      "promotion staged release decision lifecycle remains review-only",
+      "rollback publication receipt settlement closeout remains review-only",
+      "host-side execution remains disabled"
+    ],
+    stages: [
+      {
+        id: "release-pipeline-attestation-intake",
+        label: "Attestation intake board",
+        status: "ready",
+        owner: "release-engineering",
+        summary: "Manifest, audit, and attestation evidence are staged as a reviewable intake board before approval routing begins.",
+        evidence: [
+          "release/RELEASE-MANIFEST.json",
+          "release/ATTESTATION-VERIFICATION-PACKS.json",
+          "release/ATTESTATION-APPLY-AUDIT-PACKS.json"
+        ],
+        linkedLifecycleStages: ["collect-context", "write-audit"],
+        linkedSlotIds: ["slot-root-connect", focusSlotId],
+        notes: [
+          {
+            id: "release-pipeline-attestation-evidence",
+            label: "Evidence spine",
+            value: "manifest / audit / attestation",
+            detail: "The intake board keeps manifest, audit, and attestation review together before any approval posture is considered.",
+            tone: "positive",
+            links: [
+              { id: "release-pipeline-link-manifest", label: "Release manifest", kind: "release-artifact", target: "release/RELEASE-MANIFEST.json" },
+              { id: "release-pipeline-link-audit-stage", label: "Lifecycle write-audit", kind: "lifecycle", target: "lifecycle.write-audit" }
+            ]
+          },
+          {
+            id: "release-pipeline-attestation-slot",
+            label: "Focused slot context",
+            value: focusSlotLabel,
+            detail: "The current focused slot remains attached as the most visible execution-facing placeholder while the intake board stays review-only.",
+            tone: "neutral",
+            links: [{ id: "release-pipeline-link-focus-slot", label: focusSlotLabel, kind: "trace-slot", target: focusSlotId }]
+          }
+        ]
+      },
+      {
+        id: "release-pipeline-approval-orchestration",
+        label: "Approval orchestration board",
+        status: "in-review",
+        owner: "release-manager",
+        summary: "Reviewer baton sequencing, approval routing, and release-decision evidence are now visible as one review-only board.",
+        evidence: [
+          "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
+          "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+          "release/RELEASE-APPROVAL-WORKFLOW.json"
+        ],
+        linkedLifecycleStages: ["request-approval", "handoff-slot"],
+        linkedSlotIds: [focusSlotId, "slot-bridge-attach"],
+        notes: [
+          {
+            id: "release-pipeline-approval-contract",
+            label: "Approval contract",
+            value: hostExecutor.approval.mode,
+            detail: "The release pipeline stays anchored to the typed approval request/result contract rather than any live approval grant.",
+            tone: "warning",
+            links: [
+              { id: "release-pipeline-link-approval-request", label: "Approval request", kind: "approval", target: "approval.request" },
+              { id: "release-pipeline-link-approval-result", label: "Approval result", kind: "approval", target: "approval.result" },
+              { id: "release-pipeline-link-release-workflow", label: "Release approval workflow", kind: "release-artifact", target: "release/RELEASE-APPROVAL-WORKFLOW.json" }
+            ]
+          },
+          {
+            id: "release-pipeline-approval-baton",
+            label: "Reviewer baton",
+            value: "routing -> orchestration -> decision board",
+            detail: "Phase55 makes approval routing, orchestration, and final release-decision review feel like one pipeline even though every stage is still non-executing.",
+            tone: "neutral",
+            links: [
+              { id: "release-pipeline-link-lifecycle-approval", label: "Lifecycle request-approval", kind: "lifecycle", target: "lifecycle.request-approval" },
+              { id: "release-pipeline-link-approval-orchestration", label: "Approval orchestration", kind: "release-artifact", target: "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json" }
+            ]
+          }
+        ]
+      },
+      {
+        id: "release-pipeline-lifecycle-enforcement",
+        label: "Release decision lifecycle",
+        status: "planned",
+        owner: "product-owner",
+        summary: "Staged release decision enforcement remains review-only, but the lifecycle checkpoints and closeout path are now tied directly into the approval board.",
+        evidence: [
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+        ],
+        linkedLifecycleStages: ["write-audit", "verify-host"],
+        linkedSlotIds: [focusSlotId, "slot-connector-activate"],
+        notes: [
+          {
+            id: "release-pipeline-lifecycle-checkpoints",
+            label: "Lifecycle checkpoints",
+            value: "intake / window / closeout",
+            detail: "The lifecycle contract now behaves like a release-decision board with explicit review checkpoints and expiry-closeout posture.",
+            tone: "neutral",
+            links: [
+              { id: "release-pipeline-link-lifecycle-artifact", label: "Decision lifecycle", kind: "release-artifact", target: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json" },
+              { id: "release-pipeline-link-verify-stage", label: "Lifecycle verify-host", kind: "lifecycle", target: "lifecycle.verify-host" }
+            ]
+          }
+        ]
+      },
+      {
+        id: "release-pipeline-rollback-settlement",
+        label: "Rollback settlement closeout",
+        status: "planned",
+        owner: "runtime-owner",
+        summary: "Rollback publication receipt closeout and settlement evidence remain blocked from execution but are now first-class review pipeline stages.",
+        evidence: [
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+        ],
+        linkedLifecycleStages: ["rollback-host", "verify-host"],
+        linkedSlotIds: [focusSlotId, "slot-lane-apply"],
+        notes: [
+          {
+            id: "release-pipeline-rollback-context",
+            label: "Rollback context",
+            value: `${hostExecutor.rollback.stages.length} rollback stages`,
+            detail: "Receipt settlement closeout is cross-linked to the typed rollback context so review can stay concrete even without live recovery.",
+            tone: "warning",
+            links: [
+              { id: "release-pipeline-link-rollback-context", label: "Rollback context", kind: "rollback", target: "rollback.context" },
+              { id: "release-pipeline-link-rollback-artifact", label: "Receipt settlement closeout", kind: "release-artifact", target: "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json" }
+            ]
+          }
+        ]
+      },
+      {
+        id: "release-pipeline-release-decision",
+        label: "Final release decision board",
+        status: "blocked",
+        owner: "release-manager",
+        summary: "The final release decision remains explicitly blocked until signing, publish, promotion, and rollback stop being metadata-only.",
+        evidence: [
+          "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+          "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+          "release/PUBLISH-GATES.json",
+          "release/PROMOTION-GATES.json"
+        ],
+        linkedLifecycleStages: ["request-approval", "rollback-host"],
+        linkedSlotIds: [focusSlotId],
+        notes: [
+          {
+            id: "release-pipeline-decision-gate",
+            label: "Decision gate",
+            value: "blocked by review-only execution posture",
+            detail: "The pipeline now exposes the release-decision choke point directly instead of hiding it behind disconnected approval, promotion, and rollback documents.",
+            tone: "warning",
+            links: [
+              { id: "release-pipeline-link-signing-handshake", label: "Signing-publish gating handshake", kind: "release-artifact", target: "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" },
+              { id: "release-pipeline-link-publish-gates", label: "Publish gates", kind: "release-artifact", target: "release/PUBLISH-GATES.json" },
+              { id: "release-pipeline-link-promotion-gates", label: "Promotion gates", kind: "release-artifact", target: "release/PROMOTION-GATES.json" }
+            ]
+          }
+        ]
+      }
+    ]
+  };
+}
+
+export function selectStudioReleaseApprovalPipelineStage(
+  pipeline: Pick<StudioReleaseApprovalPipeline, "stages" | "currentStageId">
+): StudioReleaseApprovalPipelineStage | undefined {
+  return pipeline.stages.find((stage) => stage.id === pipeline.currentStageId) ?? pipeline.stages[0];
 }
 
 function createMockSimulatedOutcomes(slotId: string): StudioHostBridgeSimulatedOutcome[] {
@@ -1285,7 +1714,7 @@ const mockHostBridgeState: StudioHostBridgeState = {
   id: "host-bridge-phase27",
   title: "Disabled host bridge skeleton",
   summary:
-    "Phase 29 keeps the bridge default-disabled while layering detached workspace workflows, readiness-aware window intents, and shell-level posture feedback on top of the existing per-slot focus and trace flow.",
+    "Phase55 keeps the bridge default-disabled while layering review-only release approval pipeline visibility, richer trace drill-down, and shell-level posture feedback on top of the existing per-slot focus flow.",
   mode: "disabled",
   defaultEnabled: false,
   previewHandoff: "placeholder",
@@ -1380,7 +1809,7 @@ const mockHostExecutorState: StudioHostExecutorState = {
   id: "host-executor-phase27",
   title: "Disabled host bridge skeleton",
   summary:
-    "Phase 29 keeps the typed executor contract default-disabled while adding detached workspace workflows, richer window-intent feedback, and shell-level multi-window UX without enabling host mutation.",
+    "Phase55 keeps the typed executor contract default-disabled while adding a review-only release approval pipeline, richer trace drill-down, and deeper inspector visibility without enabling host mutation.",
   mode: "disabled",
   transport: "electron-ipc-skeleton",
   defaultEnabled: false,
@@ -1559,6 +1988,15 @@ const mockHostExecutorState: StudioHostExecutorState = {
         detail: "Confirm the host returned to a coherent post-rollback state."
       }
     ]
+  },
+  releaseApprovalPipeline: {
+    id: "",
+    title: "",
+    summary: "",
+    mode: "review-only",
+    currentStageId: "",
+    stages: [],
+    blockedBy: []
   },
   failureTaxonomy: [
     {
@@ -1811,12 +2249,13 @@ mockHostBridgeState.trace = createStudioHostTraceState(
   mockHostBridgeState.slotHandlers,
   mockHostBridgeState.validators
 );
+mockHostExecutorState.releaseApprovalPipeline = createStudioReleaseApprovalPipeline(mockHostExecutorState);
 
 const mockBoundarySummary: StudioBoundarySummary = {
   id: "shell-host-runtime-boundary",
   title: "Host/runtime boundary",
   summary:
-    "Phase 29 keeps host execution withheld while extending the default-disabled bridge skeleton with detached workspace workflows, readiness-aware window intents, shell-level posture feedback, and finer-grained trace contracts.",
+    "Phase55 keeps host execution withheld while extending the default-disabled bridge skeleton with a review-only release approval pipeline, deeper trace contracts, readiness-aware window intents, and shell-level posture feedback.",
   currentLayer: "local-only",
   nextLayer: "preview-host",
   hostState: "withheld",
@@ -1888,6 +2327,12 @@ const mockBoundarySummary: StudioBoundarySummary = {
       label: "Host executor bridge",
       state: "partial",
       detail: "A default-disabled host bridge skeleton now exists, but no live host mutation or lifecycle executor is enabled."
+    },
+    {
+      id: "cap-release-approval-pipeline",
+      label: "Release approval pipeline",
+      state: "ready",
+      detail: "Approval orchestration, lifecycle enforcement, rollback settlement, and release-decision review now appear as one structured review-only pipeline."
     }
   ],
   blockedReasons: [
@@ -4106,9 +4551,9 @@ export const mockShellState: StudioShellState = {
           {
             id: "settings-advanced",
             label: "Product foundations",
-            value: "Phase54 active",
+            value: "Phase55 active",
             detail:
-              "Attestation operator approval orchestration, promotion staged-apply release decision enforcement lifecycle, rollback cutover publication receipt settlement closeout, release approval workflow, and promotion gating are active on top of the phase53 contracts, but they remain local-only and non-executing.",
+              "A review-only release approval pipeline now sits on top of attestation operator approval orchestration, staged release decision enforcement lifecycle, rollback receipt settlement closeout, release approval workflow, and promotion gating, but every stage remains local-only and non-executing.",
             tone: "positive"
           }
         ]
@@ -4118,7 +4563,7 @@ export const mockShellState: StudioShellState = {
   inspector: {
     title: "Inspector",
     summary:
-      "Boundary policy, active flow state, route-aware command detail, focused-slot posture, and window orchestration linkage stay visible here across the shell.",
+      "Boundary policy, active flow state, focused-slot posture, release approval pipeline state, and window orchestration linkage stay visible here across the shell.",
     boundary: mockBoundarySummary,
     route: {
       routeId: "dashboard",
@@ -4147,6 +4592,7 @@ export const mockShellState: StudioShellState = {
       { id: "slot-focus", label: "Trace focus", value: "Lane apply IPC slot" },
       { id: "handler", label: "Handler state", value: "Registered / disabled" },
       { id: "validator", label: "Validator state", value: "Registered / slot-linked" },
+      { id: "approval-pipeline", label: "Approval pipeline", value: "Approval orchestration board" },
       { id: "rollback", label: "Rollback posture", value: "Incomplete / rollback-incomplete" },
       { id: "audit", label: "Audit posture", value: "Placeholder linked" },
       { id: "blocked", label: "Blocked reasons", value: "4 active" },
@@ -4191,14 +4637,16 @@ export const mockShellState: StudioShellState = {
             label: "Focused slot",
             value: "Lane apply IPC slot",
             detail: "Lane apply remains the highest-risk rollback-aware slot in the default shell snapshot.",
-            tone: "warning"
+            tone: "warning",
+            links: [{ id: "inspector-link-flow-slot", label: "slot-lane-apply", kind: "trace-slot", target: "slot-lane-apply" }]
           },
           {
             id: "drilldown-flow-recommended",
             label: "Recommended action",
             value: "Activate Trace Deck View",
             detail: "The next local-only move keeps trace posture and review orchestration in one shell board.",
-            tone: "positive"
+            tone: "positive",
+            links: [{ id: "inspector-link-trace-workspace", label: "Trace workspace intent", kind: "window-intent", target: "window-intent-trace-workspace" }]
           },
           {
             id: "drilldown-flow-follow-up",
@@ -4206,6 +4654,66 @@ export const mockShellState: StudioShellState = {
             value: "Show Focused Slot Trace -> Stage Trace Workspace Intent",
             detail: "Trace and window intent follow-ups stay linked without opening host execution.",
             tone: "neutral"
+          }
+        ]
+      },
+      {
+        id: "drilldown-release-approval-pipeline",
+        label: "Release Approval Pipeline",
+        summary: "Approval orchestration, lifecycle enforcement, rollback settlement, and release-decision review now read like one review-only pipeline.",
+        lines: [
+          {
+            id: "drilldown-pipeline-current",
+            label: "Current board",
+            value: "Approval orchestration board",
+            detail: "Phase55 surfaces the reviewer baton board directly instead of scattering approval, lifecycle, and rollback documents across separate cards.",
+            tone: "positive",
+            links: [
+              {
+                id: "inspector-link-approval-orchestration",
+                label: "ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+                kind: "release-artifact",
+                target: "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json"
+              },
+              {
+                id: "inspector-link-release-workflow",
+                label: "RELEASE-APPROVAL-WORKFLOW.json",
+                kind: "release-artifact",
+                target: "release/RELEASE-APPROVAL-WORKFLOW.json"
+              }
+            ]
+          },
+          {
+            id: "drilldown-pipeline-lifecycle",
+            label: "Lifecycle board",
+            value: "Decision enforcement lifecycle",
+            detail: "Staged release decision lifecycle checkpoints stay linked to approval routing and slot review while execution remains disabled.",
+            tone: "neutral",
+            links: [
+              {
+                id: "inspector-link-release-lifecycle",
+                label: "PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json",
+                kind: "release-artifact",
+                target: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+              },
+              { id: "inspector-link-lifecycle-verify", label: "lifecycle.verify-host", kind: "lifecycle", target: "lifecycle.verify-host" }
+            ]
+          },
+          {
+            id: "drilldown-pipeline-rollback",
+            label: "Rollback closeout",
+            value: "Receipt settlement closeout",
+            detail: "Rollback publication receipt settlement closeout now appears as a first-class review pipeline stage beside approval and lifecycle.",
+            tone: "warning",
+            links: [
+              {
+                id: "inspector-link-rollback-settlement",
+                label: "ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
+                kind: "release-artifact",
+                target: "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+              },
+              { id: "inspector-link-rollback-host", label: "lifecycle.rollback-host", kind: "lifecycle", target: "lifecycle.rollback-host" }
+            ]
           }
         ]
       },

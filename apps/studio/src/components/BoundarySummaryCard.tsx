@@ -1,4 +1,4 @@
-import type { StudioBoundaryLayer, StudioBoundarySummary } from "@openclaw/shared";
+import { selectStudioReleaseApprovalPipelineStage, type StudioBoundaryLayer, type StudioBoundarySummary } from "@openclaw/shared";
 
 interface BoundarySummaryCardProps {
   boundary: StudioBoundarySummary;
@@ -56,6 +56,7 @@ export function BoundarySummaryCard({
   const simulatedOutcomeStatuses = Array.from(
     new Set(boundary.hostExecutor.bridge.slotHandlers.flatMap((handler) => handler.simulatedOutcomes.map((outcome) => outcome.status)))
   );
+  const currentReleaseStage = selectStudioReleaseApprovalPipelineStage(boundary.hostExecutor.releaseApprovalPipeline);
 
   return (
     <article className={cardClassName}>
@@ -190,6 +191,9 @@ export function BoundarySummaryCard({
               lifecycle stages · {boundary.hostExecutor.lifecycle.length} · failure cases · {boundary.hostExecutor.failureTaxonomy.length}
             </li>
             <li>
+              release pipeline · {boundary.hostExecutor.releaseApprovalPipeline.mode} · {boundary.hostExecutor.releaseApprovalPipeline.stages.length} stages
+            </li>
+            <li>
               simulated outcomes · {simulatedOutcomeStatuses.join(" / ")}
             </li>
             <li>
@@ -209,6 +213,12 @@ export function BoundarySummaryCard({
             </li>
             <li>
               rollback · {boundary.hostExecutor.rollback.status} · {boundary.hostExecutor.rollback.stages.length} stages
+            </li>
+            <li>
+              pipeline · {currentReleaseStage?.label ?? "Unavailable"} · {currentReleaseStage?.status ?? "unknown"}
+            </li>
+            <li>
+              blockers · {boundary.hostExecutor.releaseApprovalPipeline.blockedBy.length} · review-only release decision remains blocked
             </li>
           </ul>
         </div>

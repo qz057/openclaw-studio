@@ -1,9 +1,4 @@
-import type {
-  StudioHostExecutorState,
-  StudioHostMutationPreview,
-  StudioHostPreviewHandoff,
-  StudioHostPreviewTraceStatus
-} from "@openclaw/shared";
+import type { StudioHostExecutorState, StudioHostMutationPreview, StudioHostPreviewHandoff } from "@openclaw/shared";
 import { resolveHostTraceFocus } from "./host-trace-state";
 
 interface HostTracePanelProps {
@@ -149,10 +144,35 @@ export function HostTracePanel({
               <span>
                 {index + 1}. {step.phase}
               </span>
-              <span className={`tone-chip tone-chip--${resolveTraceTone(step.status)}`}>{step.status}</span>
+              <div className="boundary-chip-group">
+                <span>{step.stage}</span>
+                <span className={`tone-chip tone-chip--${resolveTraceTone(step.status)}`}>{step.status}</span>
+              </div>
             </div>
             <strong>{step.label}</strong>
             <p>{step.summary}</p>
+            {step.notes.length > 0 ? (
+              <div className="trace-note-list">
+                {step.notes.map((note) => (
+                  <div key={note.id} className="trace-note-card">
+                    <div className="trace-note-card__meta">
+                      <span>{note.label}</span>
+                      <strong>{note.value}</strong>
+                    </div>
+                    <p>{note.detail}</p>
+                    {note.links?.length ? (
+                      <div className="trace-note-links">
+                        {note.links.map((link) => (
+                          <span key={link.id} className="windowing-badge">
+                            {link.label}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </article>
         ))}
       </div>

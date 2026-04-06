@@ -20,13 +20,14 @@ import type {
   StudioHostMutationSlot,
   StudioHostPreviewHandoff,
   StudioHostPreviewRollbackDisposition,
+  StudioLinkedNote,
   StudioHostRollbackContract,
   StudioRuntimeAction,
   StudioRuntimeActionExecution,
   StudioRuntimeActionResult,
   StudioRuntimeDetail
 } from "@openclaw/shared";
-import { createStudioHostTraceState, studioHostBridgeSlotChannels } from "@openclaw/shared";
+import { createStudioHostTraceState, createStudioReleaseApprovalPipeline, studioHostBridgeSlotChannels } from "@openclaw/shared";
 import {
   buildRuntimePermissionMatrix,
   buildRuntimeRuleMatchLines,
@@ -944,12 +945,11 @@ export function buildToolsMcpHostExecutorState(
     rootOverlay
   );
   const bridge = createHostBridgeState(mutationSlots);
-
-  return {
+  const hostExecutor: StudioHostExecutorState = {
     id: "host-executor-phase27",
     title: "Disabled host bridge skeleton",
     summary:
-      "Phase29 lowers the executor contract into a default-disabled bridge skeleton with preview-to-slot placeholder handoff, detached workspace workflows, readiness-aware window intents, dock/inspector linkage, simulated outcomes, and richer approval/audit/rollback traceability while keeping all host mutation disabled.",
+      "Phase55 lowers the executor contract into a default-disabled bridge skeleton with preview-to-slot placeholder handoff, review-only release approval pipeline visibility, dock/inspector linkage, simulated outcomes, and richer approval/audit/rollback traceability while keeping all host mutation disabled.",
     mode: "disabled",
     transport: "electron-ipc-skeleton",
     defaultEnabled: false,
@@ -1029,9 +1029,21 @@ export function buildToolsMcpHostExecutorState(
       retainedStages: ["approval", "handoff", "execute", "verify", "rollback"]
     },
     rollback,
+    releaseApprovalPipeline: {
+      id: "",
+      title: "",
+      summary: "",
+      mode: "review-only",
+      currentStageId: "",
+      stages: [],
+      blockedBy: []
+    },
     failureTaxonomy,
     mutationSlots
   };
+
+  hostExecutor.releaseApprovalPipeline = createStudioReleaseApprovalPipeline(hostExecutor);
+  return hostExecutor;
 }
 
 function createHostMutationPreview(
@@ -1182,40 +1194,124 @@ function resolveRollbackTraceSummary(
   return `Rollback disposition stays ${terminalOutcome.rollbackDisposition}; checkpoint ${handoff.rollback.checkpoint} remains attached to the placeholder trace.`;
 }
 
+function createHostBridgeTraceNotes(
+  handoff: StudioHostPreviewHandoff,
+  slotHandler: StudioHostBridgeSlotHandler,
+  primaryOutcome: StudioHostBridgeSimulatedOutcome,
+  terminalOutcome: StudioHostBridgeSimulatedOutcome
+): {
+  preview: StudioLinkedNote[];
+  slot: StudioLinkedNote[];
+  result: StudioLinkedNote[];
+  rollback: StudioLinkedNote[];
+} {
+  const slotId = handoff.mapping.slotId;
+
+  return {
+    preview: [
+      {
+        id: `${handoff.id}-note-preview-approval`,
+        label: "Approval gate",
+        value: `${handoff.approval.decision} / ${handoff.approval.scope}`,
+        detail: "Preview mapping stays attached to typed approval evidence and the review-only release approval workflow.",
+        tone: handoff.approval.decision === "approved" ? "neutral" : "warning",
+        links: [
+          { id: `${handoff.id}-preview-link-approval`, label: "Approval result", kind: "approval", target: "approval.result" },
+          { id: `${handoff.id}-preview-link-workflow`, label: "Release approval workflow", kind: "release-artifact", target: "release/RELEASE-APPROVAL-WORKFLOW.json" }
+        ]
+      }
+    ],
+    slot: [
+      {
+        id: `${handoff.id}-note-slot-handler`,
+        label: "Handler / validator",
+        value: `${slotHandler.state} / disabled`,
+        detail: `${slotHandler.label} accepted the placeholder handoff without opening any host-side execution surface.`,
+        tone: "positive",
+        links: [
+          { id: `${handoff.id}-slot-link`, label: slotId, kind: "trace-slot", target: slotId },
+          { id: `${handoff.id}-slot-handoff-link`, label: "Lifecycle handoff-slot", kind: "lifecycle", target: "lifecycle.handoff-slot" }
+        ]
+      }
+    ],
+    result: [
+      {
+        id: `${handoff.id}-note-result-audit`,
+        label: "Audit correlation",
+        value: handoff.audit.correlationId,
+        detail: "The result phase keeps audit correlation, failure taxonomy, and release review posture aligned.",
+        tone: primaryOutcome.failureDisposition === "blocked" ? "neutral" : "warning",
+        links: [
+          { id: `${handoff.id}-audit-link`, label: "Audit event", kind: "audit", target: "audit.event" },
+          { id: `${handoff.id}-approval-orchestration-link`, label: "Approval orchestration", kind: "release-artifact", target: "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json" }
+        ]
+      }
+    ],
+    rollback: [
+      {
+        id: `${handoff.id}-note-rollback-disposition`,
+        label: "Rollback checkpoint",
+        value: `${terminalOutcome.rollbackDisposition} / ${handoff.rollback.checkpoint}`,
+        detail: "Rollback review remains explicit and cross-linked to publication receipt settlement closeout evidence.",
+        tone: terminalOutcome.rollbackDisposition === "not-needed" ? "neutral" : "warning",
+        links: [
+          { id: `${handoff.id}-rollback-link`, label: "Rollback context", kind: "rollback", target: "rollback.context" },
+          {
+            id: `${handoff.id}-rollback-settlement-link`,
+            label: "Receipt settlement closeout",
+            kind: "release-artifact",
+            target: "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+          }
+        ]
+      }
+    ]
+  };
+}
+
 function createHostBridgeTrace(
   handoff: StudioHostPreviewHandoff,
   slotHandler: StudioHostBridgeSlotHandler,
   primaryOutcome: StudioHostBridgeSimulatedOutcome,
   terminalOutcome: StudioHostBridgeSimulatedOutcome
 ): StudioHostPreviewHandoff["trace"] {
+  const notes = createHostBridgeTraceNotes(handoff, slotHandler, primaryOutcome, terminalOutcome);
+
   return [
     {
       id: `${handoff.id}-trace-preview`,
       phase: "preview",
+      stage: "request-approval",
       label: "Preview mapped",
       status: "mapped",
-      summary: handoff.mapping.summary
+      summary: handoff.mapping.summary,
+      notes: notes.preview
     },
     {
       id: `${handoff.id}-trace-slot`,
       phase: "slot",
+      stage: "handoff-slot",
       label: "Slot handler",
       status: "accepted",
-      summary: `${slotHandler.label} accepted the disabled placeholder handoff on ${handoff.mapping.channel}.`
+      summary: `${slotHandler.label} accepted the disabled placeholder handoff on ${handoff.mapping.channel}.`,
+      notes: notes.slot
     },
     {
       id: `${handoff.id}-trace-result`,
       phase: "result",
+      stage: primaryOutcome.stage,
       label: "Simulated result",
       status: primaryOutcome.status,
-      summary: primaryOutcome.summary
+      summary: primaryOutcome.summary,
+      notes: notes.result
     },
     {
       id: `${handoff.id}-trace-rollback`,
       phase: "rollback",
+      stage: terminalOutcome.stage,
       label: "Rollback disposition",
       status: terminalOutcome.status === "rollback-incomplete" ? "rollback-incomplete" : terminalOutcome.rollbackDisposition,
-      summary: resolveRollbackTraceSummary(handoff, primaryOutcome, terminalOutcome)
+      summary: resolveRollbackTraceSummary(handoff, primaryOutcome, terminalOutcome),
+      notes: notes.rollback
     }
   ];
 }

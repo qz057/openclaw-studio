@@ -94,6 +94,11 @@ async function verifyRendererFocusedSlotUi() {
     "Cross-view Coordination Matrix",
     "Inspector-Command Linkage",
     "Release Pipeline Depth",
+    "Review-only Release Approval Pipeline",
+    "Attestation intake board",
+    "Approval orchestration board",
+    "Final release decision board",
+    "Rollback settlement closeout",
     "Formal Release Readiness",
     "Bundle Assembly Skeleton",
     "Packaged-app Directory Materialization",
@@ -848,6 +853,14 @@ function assertHostBridgeContract(hostBridge, label) {
     if (!slot.outcomeChain.length) {
       throw new Error(`${label} trace slot ${slot.slotId} is missing an outcome chain.`);
     }
+
+    if (!Array.isArray(slot.phases) || slot.phases.length < 4) {
+      throw new Error(`${label} trace slot ${slot.slotId} is missing structured phase drill-down.`);
+    }
+
+    if (!slot.phases.every((phase) => phase.stage && Array.isArray(phase.notes))) {
+      throw new Error(`${label} trace slot ${slot.slotId} is missing structured phase stage/note metadata.`);
+    }
   }
 
   for (const requiredStatus of ["blocked", "abort", "partial-apply", "rollback-required", "rollback-incomplete"]) {
@@ -865,6 +878,7 @@ function assertHostExecutorContract(hostExecutor, label) {
   const requiredCollections = [
     ["intents", hostExecutor.intents],
     ["lifecycle", hostExecutor.lifecycle],
+    ["releaseApprovalPipeline.stages", hostExecutor.releaseApprovalPipeline?.stages],
     ["failureTaxonomy", hostExecutor.failureTaxonomy],
     ["mutationSlots", hostExecutor.mutationSlots],
     ["rollback.stages", hostExecutor.rollback?.stages],
@@ -878,6 +892,26 @@ function assertHostExecutorContract(hostExecutor, label) {
     if (!Array.isArray(value) || value.length === 0) {
       throw new Error(`${label} host executor contract is missing required collection ${field}.`);
     }
+  }
+
+  if (hostExecutor.releaseApprovalPipeline?.mode !== "review-only" || !hostExecutor.releaseApprovalPipeline?.currentStageId) {
+    throw new Error(`${label} host executor contract is missing the phase55 review-only release approval pipeline posture.`);
+  }
+
+  if (!hostExecutor.releaseApprovalPipeline.stages.some((stage) => stage.id === hostExecutor.releaseApprovalPipeline.currentStageId)) {
+    throw new Error(`${label} host executor contract points at a missing phase55 release approval pipeline stage.`);
+  }
+
+  if (!Array.isArray(hostExecutor.releaseApprovalPipeline.blockedBy) || hostExecutor.releaseApprovalPipeline.blockedBy.length === 0) {
+    throw new Error(`${label} host executor contract is missing release-approval pipeline blockers.`);
+  }
+
+  if (
+    !hostExecutor.releaseApprovalPipeline.stages.every(
+      (stage) => Array.isArray(stage.evidence) && stage.evidence.length > 0 && Array.isArray(stage.notes) && stage.notes.length > 0
+    )
+  ) {
+    throw new Error(`${label} host executor contract is missing structured release-approval pipeline evidence or notes.`);
   }
 
   assertHostBridgeContract(hostExecutor.bridge, `${label} bridge`);
@@ -944,6 +978,10 @@ function assertHostPreviewHandoff(handoff, label) {
       throw new Error(`${label} is missing handoff trace phase ${phase}.`);
     }
   }
+
+  if (!handoff.trace.every((step) => step.stage && Array.isArray(step.notes))) {
+    throw new Error(`${label} is missing phase55 trace stage/note drill-down metadata.`);
+  }
 }
 
 function assertInspectorContract(inspector) {
@@ -960,7 +998,7 @@ function assertInspectorContract(inspector) {
   }
 
   const sectionIds = new Set((inspector.sections ?? []).map((section) => section.id));
-  const requiredSectionIds = ["layer", "host", "next", "slot-focus", "handler", "validator", "rollback", "audit", "blocked", "slots"];
+  const requiredSectionIds = ["layer", "host", "next", "slot-focus", "handler", "validator", "approval-pipeline", "rollback", "audit", "blocked", "slots"];
 
   for (const sectionId of requiredSectionIds) {
     if (!sectionIds.has(sectionId)) {
@@ -972,6 +1010,14 @@ function assertInspectorContract(inspector) {
     if (!Array.isArray(drilldown.lines) || drilldown.lines.length === 0) {
       throw new Error(`Shell inspector drilldown ${drilldown.id} is missing lines.`);
     }
+  }
+
+  if (!inspector.drilldowns.some((drilldown) => drilldown.id === "drilldown-release-approval-pipeline")) {
+    throw new Error("Shell inspector is missing the phase55 release approval pipeline drilldown.");
+  }
+
+  if (!inspector.drilldowns.some((drilldown) => drilldown.lines.some((line) => Array.isArray(line.links) && line.links.length > 0))) {
+    throw new Error("Shell inspector drilldowns are missing cross-linkable notes.");
   }
 }
 

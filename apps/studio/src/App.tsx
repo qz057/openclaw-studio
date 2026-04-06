@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  selectStudioReleaseApprovalPipelineStage,
   studioPageIds,
   type StudioCommandAction,
   type StudioCommandActionGroup,
@@ -467,6 +468,8 @@ export function App() {
   const defaultFocusedSlotId = getDefaultTraceFocusSlotId(data.boundary.hostExecutor);
   const resolvedFocusSlotId = focusedSlotId ?? defaultFocusedSlotId;
   const hostTraceFocus = resolveHostTraceFocus(data.boundary.hostExecutor, resolvedFocusSlotId);
+  const releaseApprovalPipeline = data.boundary.hostExecutor.releaseApprovalPipeline;
+  const currentReleaseStage = selectStudioReleaseApprovalPipelineStage(releaseApprovalPipeline);
   const inspectorSections = createInspectorSections(data.boundary, hostTraceFocus);
   const dockItems = createDockItems(hostTraceFocus);
   const activePageMeta = data.pages.find((page) => page.id === activePage) ?? {
@@ -791,9 +794,9 @@ export function App() {
     {
       id: "cross-view-slot-release",
       label: "Focused slot -> Release posture",
-      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> phase54 attestation operator approval orchestration`,
+      value: `${hostTraceFocus?.slot.label ?? "No focused slot"} -> ${currentReleaseStage?.label ?? "Review-only release approval pipeline"}`,
       detail:
-        "Focused-slot review and release review now sit in the same local-only approval-orchestration, decision-enforcement-lifecycle, and receipt-settlement-closeout story without enabling host execution, installer work, staged apply entry, cutover execution, or publish rollback."
+        "Focused-slot review and release review now sit in the same phase55 local-only approval-pipeline, decision-enforcement-lifecycle, and receipt-settlement-closeout story without enabling host execution, installer work, staged apply entry, cutover execution, or publish rollback."
     }
   ];
   const inspectorCommandLinkage = [
@@ -822,7 +825,7 @@ export function App() {
       label: "Formal Release Readiness",
       value: "RELEASE-MANIFEST / BUILD-METADATA / REVIEW-MANIFEST",
       detail:
-        "Phase54 keeps the manifest spine and extends phase53 approval routing contracts, staged release decision enforcement contracts, and publication receipt closeout contracts into operator approval orchestration, staged release decision enforcement lifecycle, and publication receipt settlement closeout without executing anything."
+        "Phase55 keeps the manifest spine and turns the phase54 approval orchestration, staged release decision lifecycle, and publication receipt settlement closeout layers into a clearer review-only release approval pipeline without executing anything."
     },
     {
       id: "release-depth-bundles",
@@ -1160,7 +1163,7 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase54 increases release structure only; it still does not install, publish, sign, orchestrate approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
+        "Phase55 increases release review structure only; it still does not install, publish, sign, orchestrate live approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -1981,32 +1984,46 @@ export function App() {
               <div className="card-header card-header--stack">
                 <div>
                   <p className="eyebrow">Release Pipeline Depth</p>
-                  <h2>Attestation Operator Approval Orchestration</h2>
+                  <h2>Review-only Release Approval Pipeline</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but the release skeleton now pushes phase53 approval routing
-                  contracts, staged release decision enforcement contracts, and publication receipt closeout contracts forward into
-                  attestation operator approval orchestration, promotion staged-apply release decision enforcement lifecycle, and
-                  rollback cutover publication receipt settlement closeout while staying entirely local-only and non-executing.
+                  The alpha shell still does not build a real installer, but phase55 now exposes approval orchestration, staged release
+                  decision lifecycle, rollback settlement closeout, and the final release-decision gate as one review-only pipeline while
+                  staying entirely local-only and non-executing.
                 </p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
                   <span>Phase</span>
-                  <strong>Phase54</strong>
+                  <strong>Phase55</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Attestation</span>
-                  <strong>Approval orchestration</strong>
+                  <span>Current stage</span>
+                  <strong>{currentReleaseStage?.label ?? "Unavailable"}</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Promotion</span>
-                  <strong>Enforcement lifecycle</strong>
+                  <span>Mode</span>
+                  <strong>{releaseApprovalPipeline.mode}</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Rollback</span>
-                  <strong>Receipt settlement closeout</strong>
+                  <span>Blocked by</span>
+                  <strong>{releaseApprovalPipeline.blockedBy.length} gates</strong>
                 </div>
+              </div>
+              <div className="workflow-readiness-list">
+                {releaseApprovalPipeline.stages.map((stage) => (
+                  <div
+                    key={stage.id}
+                    className={`workflow-readiness-line workflow-readiness-line--${
+                      stage.status === "ready" ? "positive" : stage.status === "blocked" ? "warning" : "neutral"
+                    }`}
+                  >
+                    <span>{stage.label}</span>
+                    <strong>
+                      {stage.status} · {stage.owner}
+                    </strong>
+                  </div>
+                ))}
               </div>
               <div className="workflow-readiness-list">
                 {releasePipelineDepth.map((item) => (
@@ -2218,6 +2235,30 @@ export function App() {
                     ))}
                   </div>
                 </article>
+                {data.inspector.drilldowns.map((drilldown) => (
+                  <article key={drilldown.id} className="windowing-summary-card">
+                    <span>{drilldown.label}</span>
+                    <strong>{drilldown.summary}</strong>
+                    <div className="windowing-preview-list">
+                      {drilldown.lines.map((line) => (
+                        <div key={line.id} className="windowing-preview-line windowing-preview-line--stacked">
+                          <span>{line.label}</span>
+                          <strong>{line.value}</strong>
+                          <p>{line.detail}</p>
+                          {line.links?.length ? (
+                            <div className="trace-note-links">
+                              {line.links.map((link) => (
+                                <span key={link.id} className="windowing-badge">
+                                  {link.label}
+                                </span>
+                              ))}
+                            </div>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+                ))}
               </>
             ) : null}
 
