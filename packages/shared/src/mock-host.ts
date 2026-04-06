@@ -5,7 +5,7 @@ import type {
   StudioHostExecutorState
 } from "./index.js";
 import { studioHostBridgeSlotChannels } from "./index.js";
-import { createStudioHostTraceState, createStudioReleaseApprovalPipeline } from "./host-runtime.js";
+import { createStudioHostTraceState, createStudioReleaseApprovalPipeline } from "./host-runtime-factories.js";
 
 function createMockSimulatedOutcomes(slotId: string): StudioHostBridgeSimulatedOutcome[] {
   switch (slotId) {

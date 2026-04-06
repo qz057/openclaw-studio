@@ -8,7 +8,7 @@ import type {
   StudioWindowReviewPostureLink,
   StudioWindowing
 } from "./index.js";
-import { mapReleasePipelineStageToDeliveryChainStageId, mapReleasePipelineStageToDeliveryPhase } from "./host-runtime.js";
+import { mapReleasePipelineStageToDeliveryChainStageId, mapReleasePipelineStageToDeliveryPhase } from "./host-runtime-selectors.js";
 import { mockBoundarySummary } from "./mock-host.js";
 
 const mockCommandSurface: StudioCommandSurface = {

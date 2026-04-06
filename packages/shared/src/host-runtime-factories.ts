@@ -1,0 +1,1770 @@
+import type {
+  StudioContractLink,
+  StudioHostApprovalContract,
+  StudioHostBridgeSimulatedOutcome,
+  StudioHostBridgeSlotHandler,
+  StudioHostBridgeState,
+  StudioHostBridgeValidator,
+  StudioHostLifecycleStage,
+  StudioHostMutationIntent,
+  StudioHostMutationSlot,
+  StudioHostPreviewTraceStep,
+  StudioHostRollbackContract,
+  StudioHostTraceSlotState,
+  StudioHostTraceState,
+  StudioReleaseApprovalPipeline,
+  StudioReleaseApprovalPipelineStage,
+  StudioReleaseCloseoutWindow,
+  StudioReleaseDeliveryChain,
+  StudioReleaseEscalationWindow,
+  StudioReleaseReviewerQueue
+} from "./index.js";
+import { selectStudioHostTraceFocusSlotId } from "./host-runtime-selectors.js";
+
+function createStudioWindowCrossLinks(intent: StudioHostMutationIntent): StudioContractLink[] {
+  switch (intent) {
+    case "root-connect":
+      return [
+        { id: "window-link-shell-main", label: "Main Shell Window", kind: "window-roster", target: "window-shell-main" },
+        { id: "window-link-boundary-lane", label: "Boundary Review Lane", kind: "shared-state-lane", target: "shared-state-lane-boundary-review" },
+        {
+          id: "window-link-boundary-board",
+          label: "Boundary Review Orchestration",
+          kind: "orchestration-board",
+          target: "orchestration-board-boundary-review"
+        }
+      ];
+    case "bridge-attach":
+      return [
+        { id: "window-link-inspector-candidate", label: "Detached Inspector Candidate", kind: "window-roster", target: "window-inspector-candidate" },
+        { id: "window-link-boundary-handoff", label: "Boundary Review Lane", kind: "shared-state-lane", target: "shared-state-lane-boundary-review" },
+        {
+          id: "window-link-boundary-board-handoff",
+          label: "Boundary Review Orchestration",
+          kind: "orchestration-board",
+          target: "orchestration-board-boundary-review"
+        }
+      ];
+    case "connector-activate":
+      return [
+        { id: "window-link-review-board", label: "Review Deck Window", kind: "window-roster", target: "window-review-board" },
+        { id: "window-link-preview-lane", label: "Preview Review Lane", kind: "shared-state-lane", target: "shared-state-lane-preview-review" },
+        {
+          id: "window-link-preview-board",
+          label: "Preview Review Orchestration",
+          kind: "orchestration-board",
+          target: "orchestration-board-preview-review"
+        }
+      ];
+    default:
+      return [
+        { id: "window-link-trace-window", label: "Trace Review Window", kind: "window-roster", target: "window-trace-review" },
+        { id: "window-link-trace-lane", label: "Trace Review Lane", kind: "shared-state-lane", target: "shared-state-lane-trace-review" },
+        {
+          id: "window-link-trace-board",
+          label: "Trace Review Orchestration",
+          kind: "orchestration-board",
+          target: "orchestration-board-trace-review"
+        }
+      ];
+  }
+}
+
+function createStudioHostTracePhases(
+  slot: StudioHostMutationSlot,
+  handler: StudioHostBridgeSlotHandler,
+  validator: StudioHostBridgeValidator | undefined,
+  primaryOutcome: StudioHostBridgeSimulatedOutcome,
+  terminalOutcome: StudioHostBridgeSimulatedOutcome
+): StudioHostPreviewTraceStep[] {
+  const validatorState = validator?.state ?? "missing";
+  const rollbackStatus =
+    terminalOutcome.status === "rollback-incomplete" ? "rollback-incomplete" : terminalOutcome.rollbackDisposition;
+
+  return [
+    {
+      id: `${slot.id}-trace-preview`,
+      phase: "preview",
+      stage: "request-approval",
+      label: "Approval intake mapped",
+      status: "mapped",
+      summary: `${slot.label} stays on a review-only approval intake path before any host-side handoff could advance.`,
+      notes: [
+        {
+          id: `${slot.id}-trace-preview-approval`,
+          label: "Approval gate",
+          value: "request-approval / review-only",
+          detail: "Preview mapping stays attached to the typed approval contract and the release approval workflow instead of granting execution.",
+          tone: primaryOutcome.stage === "request-approval" ? "warning" : "neutral",
+          links: [
+            { id: `${slot.id}-link-approval-request`, label: "Approval request", kind: "approval", target: "approval.request" },
+            { id: `${slot.id}-link-approval-result`, label: "Approval result", kind: "approval", target: "approval.result" },
+            { id: `${slot.id}-link-lifecycle-request`, label: "Lifecycle request-approval", kind: "lifecycle", target: "lifecycle.request-approval" },
+            {
+              id: `${slot.id}-link-release-workflow`,
+              label: "Release approval workflow",
+              kind: "release-artifact",
+              target: "release/RELEASE-APPROVAL-WORKFLOW.json"
+            }
+          ]
+        },
+        {
+          id: `${slot.id}-trace-preview-pipeline`,
+          label: "Pipeline lane",
+          value: "approval orchestration / lifecycle / rollback",
+          detail: "Phase58 keeps preview posture tied to the richer operator review loop so approval, lifecycle, rollback, reviewer queues, escalation windows, closeout windows, decision handoff, and cross-window review evidence stay cross-linked.",
+          tone: "neutral",
+          links: [
+            {
+              id: `${slot.id}-link-approval-orchestration`,
+              label: "Approval orchestration",
+              kind: "release-artifact",
+              target: "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json"
+            },
+            {
+              id: `${slot.id}-link-lifecycle-artifact`,
+              label: "Decision enforcement lifecycle",
+              kind: "release-artifact",
+              target: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+            },
+            {
+              id: `${slot.id}-link-rollback-artifact`,
+              label: "Receipt settlement closeout",
+              kind: "release-artifact",
+              target: "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      id: `${slot.id}-trace-slot`,
+      phase: "slot",
+      stage: "handoff-slot",
+      label: "Slot handoff reviewed",
+      status: "accepted",
+      summary: `${handler.label} remains registered on ${slot.channel}, while ${slot.label} stays default-disabled and review-only.`,
+      notes: [
+        {
+          id: `${slot.id}-trace-slot-validator`,
+          label: "Handler / validator",
+          value: `${handler.state} / ${validatorState}`,
+          detail: `${handler.label} and ${validator?.label ?? "Missing validator"} keep ${slot.handoff.payloadType} -> ${slot.handoff.resultType} reviewable without opening execution.`,
+          tone: validatorState === "registered" ? "positive" : "warning",
+          links: [
+            { id: `${slot.id}-link-slot`, label: slot.label, kind: "trace-slot", target: slot.id },
+            { id: `${slot.id}-link-lifecycle-handoff`, label: "Lifecycle handoff-slot", kind: "lifecycle", target: "lifecycle.handoff-slot" },
+            ...createStudioWindowCrossLinks(slot.intent)
+          ]
+        },
+        {
+          id: `${slot.id}-trace-slot-contract`,
+          label: "Contract coverage",
+          value: `${validator?.requiredPayloadFieldIds.length ?? 0} payload / ${validator?.requiredResultFieldIds.length ?? 0} result`,
+          detail: "The handoff contract remains executable-looking in review-only mode by keeping validator coverage and slot payload/result shapes visible together.",
+          tone: "neutral",
+          links: [
+            { id: `${slot.id}-link-approval-stage`, label: "Approval stage", kind: "lifecycle", target: "lifecycle.request-approval" },
+            { id: `${slot.id}-link-audit-stage`, label: "Audit stage", kind: "lifecycle", target: "lifecycle.write-audit" }
+          ]
+        }
+      ]
+    },
+    {
+      id: `${slot.id}-trace-result`,
+      phase: "result",
+      stage: primaryOutcome.stage,
+      label: "Structured result recorded",
+      status: primaryOutcome.status,
+      summary: primaryOutcome.summary,
+      notes: [
+        {
+          id: `${slot.id}-trace-result-failure`,
+          label: "Result posture",
+          value: `${primaryOutcome.failureCode} / ${primaryOutcome.failureDisposition}`,
+          detail: "The placeholder slot result keeps the failure taxonomy, lifecycle stage, and release review posture synchronized.",
+          tone: primaryOutcome.failureDisposition === "blocked" ? "neutral" : "warning",
+          links: [
+            { id: `${slot.id}-link-result-stage`, label: `Lifecycle ${primaryOutcome.stage}`, kind: "lifecycle", target: `lifecycle.${primaryOutcome.stage}` },
+            { id: `${slot.id}-link-audit`, label: "Audit envelope", kind: "audit", target: "audit.event" }
+          ]
+        },
+        {
+          id: `${slot.id}-trace-result-approval`,
+          label: "Approval pipeline handoff",
+          value: "attestation review -> release decision lifecycle",
+          detail: "Result review links the slot outcome back into approval orchestration and staged release decision enforcement lifecycle evidence.",
+          tone: "neutral",
+          links: [
+            {
+              id: `${slot.id}-link-approval-routing`,
+              label: "Approval routing contracts",
+              kind: "release-artifact",
+              target: "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json"
+            },
+            {
+              id: `${slot.id}-link-release-lifecycle`,
+              label: "Release decision lifecycle",
+              kind: "release-artifact",
+              target: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+            },
+            ...createStudioWindowCrossLinks(slot.intent)
+          ]
+        }
+      ]
+    },
+    {
+      id: `${slot.id}-trace-rollback`,
+      phase: "rollback",
+      stage: terminalOutcome.stage,
+      label: "Rollback closeout posture",
+      status: rollbackStatus,
+      summary:
+        terminalOutcome.rollbackDisposition === "not-needed"
+          ? "Rollback remains unnecessary for the placeholder flow."
+          : `Rollback disposition stays ${terminalOutcome.rollbackDisposition} while the review-only closeout path remains descriptive.`,
+      notes: [
+        {
+          id: `${slot.id}-trace-rollback-plan`,
+          label: "Rollback disposition",
+          value: `${terminalOutcome.rollbackDisposition} / ${terminalOutcome.stage}`,
+          detail: "Rollback context and verification remain explicit even when the simulated outcome never leaves review-only mode.",
+          tone: terminalOutcome.rollbackDisposition === "not-needed" ? "positive" : "warning",
+          links: [
+            { id: `${slot.id}-link-rollback-context`, label: "Rollback context", kind: "rollback", target: "rollback.context" },
+            { id: `${slot.id}-link-rollback-stage`, label: `Lifecycle ${terminalOutcome.stage}`, kind: "lifecycle", target: `lifecycle.${terminalOutcome.stage}` }
+          ]
+        },
+        {
+          id: `${slot.id}-trace-rollback-settlement`,
+          label: "Publication receipt closeout",
+          value: "rollback settlement closeout linked",
+          detail: "Rollback review is cross-linked to the publication receipt settlement closeout contract so release-facing recovery evidence stays visible.",
+          tone: terminalOutcome.rollbackDisposition === "not-needed" ? "neutral" : "warning",
+          links: [
+            {
+              id: `${slot.id}-link-rollback-closeout-contract`,
+              label: "Receipt closeout contract",
+              kind: "release-artifact",
+              target: "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json"
+            },
+            {
+              id: `${slot.id}-link-rollback-settlement-closeout`,
+              label: "Receipt settlement closeout",
+              kind: "release-artifact",
+              target: "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+            }
+          ]
+        }
+      ]
+    }
+  ];
+}
+
+export function createStudioHostTraceSlotRoster(
+  mutationSlots: StudioHostMutationSlot[],
+  slotHandlers: StudioHostBridgeSlotHandler[],
+  validators: StudioHostBridgeValidator[]
+): StudioHostTraceSlotState[] {
+  return slotHandlers
+    .map((handler) => {
+      const slot = mutationSlots.find((entry) => entry.id === handler.slotId);
+
+      if (!slot || handler.simulatedOutcomes.length === 0) {
+        return null;
+      }
+
+      const validator = validators.find((entry) => entry.slotId === handler.slotId);
+      const [primaryOutcome, ...remainingOutcomes] = handler.simulatedOutcomes;
+
+      if (!primaryOutcome) {
+        return null;
+      }
+
+      const terminalOutcome = remainingOutcomes[remainingOutcomes.length - 1] ?? primaryOutcome;
+
+      return {
+        slotId: slot.id,
+        label: slot.label,
+        intent: slot.intent,
+        channel: slot.channel,
+        handlerLabel: handler.label,
+        handlerState: handler.state,
+        validatorLabel: validator?.label ?? "Missing validator",
+        validatorState: validator?.state ?? "missing",
+        requiredPayloadFieldCount: validator?.requiredPayloadFieldIds.length ?? 0,
+        requiredResultFieldCount: validator?.requiredResultFieldIds.length ?? 0,
+        primaryStatus: primaryOutcome.status,
+        primaryStage: primaryOutcome.stage,
+        terminalStatus: terminalOutcome.status,
+        terminalStage: terminalOutcome.stage,
+        failureCode: primaryOutcome.failureCode,
+        failureDisposition: primaryOutcome.failureDisposition,
+        rollbackDisposition: terminalOutcome.rollbackDisposition,
+        outcomeChain: handler.simulatedOutcomes.map((outcome) => outcome.status),
+        summary: `${slot.label} keeps ${primaryOutcome.status} -> ${terminalOutcome.rollbackDisposition} inside the disabled placeholder bridge flow.`,
+        phases: createStudioHostTracePhases(slot, handler, validator, primaryOutcome, terminalOutcome)
+      };
+    })
+    .filter((entry): entry is StudioHostTraceSlotState => entry !== null);
+}
+
+export function createStudioHostTraceState(
+  mutationSlots: StudioHostMutationSlot[],
+  slotHandlers: StudioHostBridgeSlotHandler[],
+  validators: StudioHostBridgeValidator[],
+  preferredSlotId?: string | null
+): StudioHostTraceState {
+  const slotRoster = createStudioHostTraceSlotRoster(mutationSlots, slotHandlers, validators);
+  const focusSlotId = selectStudioHostTraceFocusSlotId(slotRoster, preferredSlotId) ?? "";
+
+  return {
+    focusSlotId,
+    focusReason: preferredSlotId && focusSlotId === preferredSlotId ? "preferred-slot" : "recommended-slot",
+    slotRoster
+  };
+}
+
+function createStudioReleaseDeliveryChain(
+  currentStage: StudioReleaseApprovalPipelineStage,
+  stages: StudioReleaseApprovalPipelineStage[]
+): StudioReleaseDeliveryChain {
+  const currentDeliveryStageId = currentStage.deliveryChainStageId;
+
+  return {
+    id: "release-delivery-chain-phase58",
+    title: "Review-only Delivery Chain",
+    summary:
+      "Phase58 slice 3 turns the operator review loop into a fuller review-only delivery chain, so attestation intake, operator review, promotion readiness, publish gating, and rollback readiness all stay linked through the same local-only metadata spine.",
+    mode: "review-only",
+    currentStageId: currentDeliveryStageId,
+    promotionStageIds: ["delivery-chain-promotion-readiness"],
+    publishStageIds: ["delivery-chain-publish-decision"],
+    rollbackStageIds: ["delivery-chain-rollback-readiness"],
+    stages: [
+      {
+        id: "delivery-chain-attestation-intake",
+        label: "Attestation intake",
+        phase: "attestation",
+        status: "ready",
+        owner: "release-engineering",
+        posture: "manifest spine sealed for operator pickup",
+        summary:
+          "Manifest, audit, and attestation evidence are collected as one review-only intake stage so the delivery chain starts from a typed evidence spine instead of scattered files.",
+        pipelineStageId: "release-pipeline-attestation-intake",
+        reviewerQueueId: "reviewer-queue-attestation-intake",
+        decisionHandoffId: "decision-handoff-attestation-intake",
+        evidenceCloseoutId: "evidence-closeout-attestation-intake",
+        escalationWindowId: "escalation-window-attestation-intake",
+        closeoutWindowId: "closeout-window-attestation-intake",
+        upstreamStageIds: [],
+        downstreamStageIds: ["delivery-chain-operator-review"],
+        artifactGroups: [
+          {
+            id: "delivery-chain-attestation-intake-manifest",
+            label: "Manifest spine",
+            summary: "Manifest and review docs define the intake packet boundary before reviewer routing starts.",
+            artifacts: ["release/RELEASE-MANIFEST.json", "release/BUILD-METADATA.json", "release/REVIEW-MANIFEST.json"]
+          },
+          {
+            id: "delivery-chain-attestation-intake-evidence",
+            label: "Attestation intake evidence",
+            summary: "Attestation verification and apply-audit packs stay bundled into one reviewable intake envelope.",
+            artifacts: ["release/ATTESTATION-VERIFICATION-PACKS.json", "release/ATTESTATION-APPLY-AUDIT-PACKS.json"]
+          }
+        ],
+        blockedBy: ["intake acknowledgement remains metadata-only", "host-side execution remains disabled"]
+      },
+      {
+        id: "delivery-chain-operator-review",
+        label: "Operator review",
+        phase: "review",
+        status: "in-review",
+        owner: "release-manager",
+        posture: "active reviewer queue / acknowledgement pending",
+        summary:
+          "The active delivery-chain stage now centers the operator board, reviewer queue, decision handoff, and evidence closeout so approval routing reads like a real delivery checkpoint while staying local-only.",
+        pipelineStageId: "release-pipeline-approval-orchestration",
+        reviewerQueueId: "reviewer-queue-approval-orchestration",
+        decisionHandoffId: "decision-handoff-approval-orchestration",
+        evidenceCloseoutId: "evidence-closeout-approval-orchestration",
+        escalationWindowId: "escalation-window-approval-orchestration",
+        closeoutWindowId: "closeout-window-approval-orchestration",
+        upstreamStageIds: ["delivery-chain-attestation-intake"],
+        downstreamStageIds: ["delivery-chain-promotion-readiness"],
+        artifactGroups: [
+          {
+            id: "delivery-chain-operator-review-board",
+            label: "Board / handoff / closeout",
+            summary: "Board posture, baton posture, and sealing posture stay visible together as one delivery checkpoint.",
+            artifacts: [
+              "release/OPERATOR-REVIEW-BOARD.json",
+              "release/RELEASE-DECISION-HANDOFF.json",
+              "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+              "release/RELEASE-APPROVAL-WORKFLOW.json"
+            ]
+          },
+          {
+            id: "delivery-chain-operator-review-routing",
+            label: "Approval routing",
+            summary: "Approval routing contracts and orchestration packs anchor reviewer ownership and queue timing.",
+            artifacts: [
+              "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
+              "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json"
+            ]
+          }
+        ],
+        blockedBy: [
+          "product-owner acknowledgement remains metadata-only",
+          "signing-publish gating handshake remains blocked",
+          "host-side execution remains disabled"
+        ]
+      },
+      {
+        id: "delivery-chain-promotion-readiness",
+        label: "Promotion readiness",
+        phase: "promotion",
+        status: "planned",
+        owner: "product-owner",
+        posture: "promotion path declared / staged apply still review-only",
+        summary:
+          "Promotion review now behaves like a delivery stage instead of a loose file list: readiness, apply manifests, checkpoint rails, staged apply ledgers, and enforcement lifecycle all stay grouped together.",
+        pipelineStageId: "release-pipeline-lifecycle-enforcement",
+        reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
+        decisionHandoffId: "decision-handoff-lifecycle-enforcement",
+        evidenceCloseoutId: "evidence-closeout-lifecycle-enforcement",
+        escalationWindowId: "escalation-window-lifecycle-enforcement",
+        closeoutWindowId: "closeout-window-lifecycle-enforcement",
+        upstreamStageIds: ["delivery-chain-operator-review"],
+        downstreamStageIds: ["delivery-chain-publish-decision", "delivery-chain-rollback-readiness"],
+        artifactGroups: [
+          {
+            id: "delivery-chain-promotion-readiness-prepare",
+            label: "Promotion preflight",
+            summary: "Promotion evidence, apply readiness, manifests, checkpoints, and handoff rails define the pre-cutover review path.",
+            artifacts: [
+              "release/CHANNEL-PROMOTION-EVIDENCE.json",
+              "release/PROMOTION-APPLY-READINESS.json",
+              "release/PROMOTION-APPLY-MANIFESTS.json",
+              "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
+              "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json"
+            ]
+          },
+          {
+            id: "delivery-chain-promotion-readiness-closeout",
+            label: "Staged apply closeout",
+            summary: "Staged ledgers, runsheets, confirmations, signoffs, and enforcement lifecycle now read as one promotion-closeout path.",
+            artifacts: [
+              "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
+              "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json",
+              "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
+              "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
+              "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
+              "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+              "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+              "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+            ]
+          }
+        ],
+        blockedBy: ["promotion staged apply remains metadata-only", "approval closeout still blocks downstream acknowledgement"]
+      },
+      {
+        id: "delivery-chain-rollback-readiness",
+        label: "Rollback readiness",
+        phase: "rollback",
+        status: "planned",
+        owner: "runtime-owner",
+        posture: "rollback rehearsal visible / settlement still overdue",
+        summary:
+          "Rollback review is now a named delivery stage with recovery ledgers, drillbooks, cutover maps, execution records, and publication closeout grouped into one recovery-ready metadata chain.",
+        pipelineStageId: "release-pipeline-rollback-settlement",
+        reviewerQueueId: "reviewer-queue-rollback-settlement",
+        decisionHandoffId: "decision-handoff-rollback-settlement",
+        evidenceCloseoutId: "evidence-closeout-rollback-settlement",
+        escalationWindowId: "escalation-window-rollback-settlement",
+        closeoutWindowId: "closeout-window-rollback-settlement",
+        upstreamStageIds: ["delivery-chain-promotion-readiness"],
+        downstreamStageIds: ["delivery-chain-publish-decision"],
+        artifactGroups: [
+          {
+            id: "delivery-chain-rollback-readiness-recovery",
+            label: "Recovery posture",
+            summary: "Rollback handshake, recovery ledgers, rehearsal, drillbooks, and live-readiness checks define the recovery backbone.",
+            artifacts: [
+              "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+              "release/ROLLBACK-RECOVERY-LEDGER.json",
+              "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
+              "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
+              "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json"
+            ]
+          },
+          {
+            id: "delivery-chain-rollback-readiness-cutover",
+            label: "Cutover closeout",
+            summary: "Cutover readiness, execution, outcome reporting, publication bundles, and receipt settlement stay bundled as one rollback review path.",
+            artifacts: [
+              "release/ROLLBACK-CUTOVER-READINESS-MAPS.json",
+              "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
+              "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
+              "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
+              "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
+              "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+              "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
+              "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+            ]
+          }
+        ],
+        blockedBy: ["rollback publication remains review-only", "final decision board remains blocked"]
+      },
+      {
+        id: "delivery-chain-publish-decision",
+        label: "Publish decision gate",
+        phase: "publish",
+        status: "blocked",
+        owner: "release-manager",
+        posture: "signing / publish gates still metadata-only",
+        summary:
+          "Signing, publish, promotion gates, and final release notes are now grouped as one publish-facing decision gate instead of a scattered tail of downstream files.",
+        pipelineStageId: "release-pipeline-release-decision",
+        reviewerQueueId: "reviewer-queue-final-release-decision",
+        decisionHandoffId: "decision-handoff-final-release-decision",
+        evidenceCloseoutId: "evidence-closeout-final-release-decision",
+        escalationWindowId: "escalation-window-final-release-decision",
+        closeoutWindowId: "closeout-window-final-release-decision",
+        upstreamStageIds: ["delivery-chain-promotion-readiness", "delivery-chain-rollback-readiness"],
+        downstreamStageIds: [],
+        artifactGroups: [
+          {
+            id: "delivery-chain-publish-decision-signing",
+            label: "Signing / publish handshake",
+            summary: "Signing metadata, notarization, pipeline, approval bridge, and promotion handshake remain explicit publish inputs.",
+            artifacts: [
+              "release/SIGNING-METADATA.json",
+              "release/NOTARIZATION-PLAN.json",
+              "release/SIGNING-PUBLISH-PIPELINE.json",
+              "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+              "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
+              "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json"
+            ]
+          },
+          {
+            id: "delivery-chain-publish-decision-gates",
+            label: "Release gates",
+            summary: "Release notes plus publish and promotion gates make the blocked final decision concrete.",
+            artifacts: ["release/RELEASE-NOTES.md", "release/PUBLISH-GATES.json", "release/PROMOTION-GATES.json"]
+          }
+        ],
+        blockedBy: [
+          "signing-publish gating handshake remains metadata-only",
+          "publish rollback handshake remains metadata-only",
+          "real publish automation remains blocked"
+        ]
+      }
+    ],
+    blockedBy: [
+      "delivery chain remains review-only metadata",
+      "reviewer acknowledgement remains local-only metadata",
+      "promotion, publish, and rollback execution remain blocked",
+      "real host-side execution remains disabled",
+      "signing, publish, promotion, and rollback remain review-only metadata"
+    ]
+  };
+}
+
+export function createStudioReleaseApprovalPipeline(hostExecutor: {
+  bridge: StudioHostBridgeState;
+  lifecycle: StudioHostLifecycleStage[];
+  approval: StudioHostApprovalContract;
+  rollback: StudioHostRollbackContract;
+}): StudioReleaseApprovalPipeline {
+  const focusSlot =
+    hostExecutor.bridge.trace.slotRoster.find((entry) => entry.slotId === hostExecutor.bridge.trace.focusSlotId) ??
+    hostExecutor.bridge.trace.slotRoster[0];
+  const focusSlotLabel = focusSlot?.label ?? "Focused slot";
+  const focusSlotId = focusSlot?.slotId ?? "slot-lane-apply";
+  const stages: StudioReleaseApprovalPipelineStage[] = [
+    {
+      id: "release-pipeline-attestation-intake",
+      label: "Attestation intake board",
+      status: "ready",
+      owner: "release-engineering",
+      summary: "Manifest, audit, and attestation evidence are staged as a typed review packet before any approval routing or baton transfer begins.",
+      deliveryChainStageId: "delivery-chain-attestation-intake",
+      deliveryPhase: "attestation",
+      evidence: [
+        "release/RELEASE-MANIFEST.json",
+        "release/ATTESTATION-VERIFICATION-PACKS.json",
+        "release/ATTESTATION-APPLY-AUDIT-PACKS.json"
+      ],
+      linkedLifecycleStages: ["collect-context", "write-audit"],
+      linkedSlotIds: ["slot-root-connect", focusSlotId],
+      reviewerQueueId: "reviewer-queue-attestation-intake",
+      escalationWindowId: "escalation-window-attestation-intake",
+      closeoutWindowId: "closeout-window-attestation-intake",
+      packet: {
+        id: "review-packet-attestation-intake",
+        label: "Intake review packet",
+        status: "ready",
+        owner: "release-engineering",
+        summary: "Manifest, attestation verification, and audit evidence are sealed into one intake packet so the operator board starts with a concrete review packet instead of disconnected lists.",
+        deliveryChainStageId: "delivery-chain-attestation-intake",
+        evidence: [
+          "release/RELEASE-MANIFEST.json",
+          "release/ATTESTATION-VERIFICATION-PACKS.json",
+          "release/ATTESTATION-APPLY-AUDIT-PACKS.json"
+        ],
+        reviewerNotes: [
+          {
+            id: "review-packet-attestation-slot",
+            label: "Focused slot context",
+            value: focusSlotLabel,
+            detail: "The same focused slot shown in trace and dock remains attached to the intake packet as the execution-facing placeholder context.",
+            tone: "neutral",
+            links: [
+              { id: "review-packet-attestation-link-slot", label: focusSlotLabel, kind: "trace-slot", target: focusSlotId },
+              { id: "review-packet-attestation-link-lane", label: "Trace Review Lane", kind: "shared-state-lane", target: "shared-state-lane-trace-review" }
+            ]
+          }
+        ]
+      },
+      handoff: {
+        id: "decision-handoff-attestation-intake",
+        label: "Intake to approval handoff",
+        batonState: "handoff-ready",
+        acknowledgementState: "acknowledged",
+        sourceOwner: "release-engineering",
+        targetOwner: "release-manager",
+        posture: "intake packet ready for approval routing",
+        summary: "The intake packet is ready to hand off into the approval board, but the baton remains review-only and never dispatches a live approval.",
+        deliveryChainStageId: "delivery-chain-attestation-intake",
+        packetId: "review-packet-attestation-intake",
+        reviewerQueueId: "reviewer-queue-attestation-intake",
+        escalationWindowId: "escalation-window-attestation-intake",
+        closeoutWindowId: "closeout-window-attestation-intake",
+        pending: ["approval acknowledgement stays metadata-only", "host-side execution remains disabled"],
+        reviewerNotes: [
+          {
+            id: "decision-handoff-attestation-note",
+            label: "Window handoff posture",
+            value: "Trace Review Lane -> Review Deck",
+            detail: "The handoff is cross-linked to the same shared-state lane and review workspace surfaced in the current shell.",
+            tone: "positive",
+            links: [
+              { id: "decision-handoff-attestation-link-lane", label: "Trace Review Lane", kind: "shared-state-lane", target: "shared-state-lane-trace-review" },
+              { id: "decision-handoff-attestation-link-window", label: "Trace Review Window", kind: "window-roster", target: "window-trace-review" }
+            ]
+          }
+        ]
+      },
+      closeout: {
+        id: "evidence-closeout-attestation-intake",
+        label: "Intake evidence closeout",
+        sealingState: "pending-seal",
+        acknowledgementState: "acknowledged",
+        owner: "release-engineering",
+        summary: "Intake evidence is reviewable and ready for a local-only closeout summary, but the packet has not been fully sealed because downstream approval review is still open.",
+        deliveryChainStageId: "delivery-chain-attestation-intake",
+        reviewerQueueId: "reviewer-queue-attestation-intake",
+        closeoutWindowId: "closeout-window-attestation-intake",
+        sealedEvidence: ["release/RELEASE-MANIFEST.json"],
+        pendingEvidence: ["release/ATTESTATION-VERIFICATION-PACKS.json", "release/ATTESTATION-APPLY-AUDIT-PACKS.json"],
+        reviewerNotes: [
+          {
+            id: "evidence-closeout-attestation-note",
+            label: "Evidence sealing",
+            value: "manifest sealed / verification pending",
+            detail: "Evidence sealing is explicit here so intake closeout is not hidden behind the later approval lifecycle.",
+            tone: "neutral",
+            links: [{ id: "evidence-closeout-attestation-link-manifest", label: "Release manifest", kind: "release-artifact", target: "release/RELEASE-MANIFEST.json" }]
+          }
+        ]
+      },
+      notes: [
+        {
+          id: "release-pipeline-attestation-evidence",
+          label: "Evidence spine",
+          value: "manifest / audit / attestation",
+          detail: "The intake board keeps manifest, audit, and attestation review together before any approval posture is considered.",
+          tone: "positive",
+          links: [
+            { id: "release-pipeline-link-manifest", label: "Release manifest", kind: "release-artifact", target: "release/RELEASE-MANIFEST.json" },
+            { id: "release-pipeline-link-audit-stage", label: "Lifecycle write-audit", kind: "lifecycle", target: "lifecycle.write-audit" }
+          ]
+        },
+        {
+          id: "release-pipeline-attestation-slot",
+          label: "Focused slot context",
+          value: focusSlotLabel,
+          detail: "The current focused slot remains attached as the most visible execution-facing placeholder while the intake board stays review-only.",
+          tone: "neutral",
+          links: [{ id: "release-pipeline-link-focus-slot", label: focusSlotLabel, kind: "trace-slot", target: focusSlotId }]
+        }
+      ]
+    },
+    {
+      id: "release-pipeline-approval-orchestration",
+      label: "Approval orchestration board",
+      status: "in-review",
+      owner: "release-manager",
+      summary: "Phase58 turns approval routing into a clearer operator review loop with typed review packets, explicit reviewer queues, acknowledgement state, baton posture, escalation windows, and evidence closeout visibility.",
+      deliveryChainStageId: "delivery-chain-operator-review",
+      deliveryPhase: "review",
+      evidence: [
+        "release/OPERATOR-REVIEW-BOARD.json",
+        "release/RELEASE-DECISION-HANDOFF.json",
+        "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+        "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
+        "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+        "release/RELEASE-APPROVAL-WORKFLOW.json"
+      ],
+      linkedLifecycleStages: ["request-approval", "handoff-slot"],
+      linkedSlotIds: [focusSlotId, "slot-bridge-attach"],
+      reviewerQueueId: "reviewer-queue-approval-orchestration",
+      escalationWindowId: "escalation-window-approval-orchestration",
+      closeoutWindowId: "closeout-window-approval-orchestration",
+      packet: {
+        id: "review-packet-approval-orchestration",
+        label: "Operator routing packet",
+        status: "in-review",
+        owner: "release-manager",
+        summary: "Approval routing, orchestration, and workflow evidence are bundled into one operator packet so stage ownership and reviewer notes stay explicit.",
+        deliveryChainStageId: "delivery-chain-operator-review",
+        evidence: [
+          "release/OPERATOR-REVIEW-BOARD.json",
+          "release/RELEASE-DECISION-HANDOFF.json",
+          "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+          "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
+          "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+          "release/RELEASE-APPROVAL-WORKFLOW.json"
+        ],
+        reviewerNotes: [
+          {
+            id: "review-packet-approval-contract",
+            label: "Approval contract",
+            value: hostExecutor.approval.mode,
+            detail: "The operator packet stays anchored to the typed approval request/result contract rather than any live grant.",
+            tone: "warning",
+            links: [
+              { id: "review-packet-approval-link-request", label: "Approval request", kind: "approval", target: "approval.request" },
+              { id: "review-packet-approval-link-result", label: "Approval result", kind: "approval", target: "approval.result" },
+              { id: "review-packet-approval-link-board", label: "Operator review board", kind: "release-artifact", target: "release/OPERATOR-REVIEW-BOARD.json" }
+            ]
+          }
+        ]
+      },
+      handoff: {
+        id: "decision-handoff-approval-orchestration",
+        label: "Approval to lifecycle handoff",
+        batonState: "awaiting-ack",
+        acknowledgementState: "pending",
+        sourceOwner: "release-manager",
+        targetOwner: "product-owner",
+        posture: "reviewer baton waiting on decision-lifecycle acknowledgement",
+        summary: "The current baton sits with the release manager and is ready to hand off into the staged release decision lifecycle once the review-only acknowledgement path is accepted.",
+        deliveryChainStageId: "delivery-chain-operator-review",
+        packetId: "review-packet-approval-orchestration",
+        reviewerQueueId: "reviewer-queue-approval-orchestration",
+        escalationWindowId: "escalation-window-approval-orchestration",
+        closeoutWindowId: "closeout-window-approval-orchestration",
+        pending: [
+          "product-owner acknowledgement remains metadata-only",
+          "signing-publish gating handshake remains blocked",
+          "host-side execution remains disabled"
+        ],
+        reviewerNotes: [
+          {
+            id: "decision-handoff-approval-note",
+            label: "Shared-state lane",
+            value: "Trace Review Lane / synced",
+            detail: "The baton posture is intentionally mirrored in the same shared-state lane and review window shown elsewhere in the shell.",
+            tone: "positive",
+            links: [
+              { id: "decision-handoff-approval-link-lane", label: "Trace Review Lane", kind: "shared-state-lane", target: "shared-state-lane-trace-review" },
+              { id: "decision-handoff-approval-link-window", label: "Trace Review Window", kind: "window-roster", target: "window-trace-review" },
+              { id: "decision-handoff-approval-link-workflow", label: "Release approval workflow", kind: "release-artifact", target: "release/RELEASE-APPROVAL-WORKFLOW.json" }
+            ]
+          }
+        ]
+      },
+      closeout: {
+        id: "evidence-closeout-approval-orchestration",
+        label: "Approval evidence closeout",
+        sealingState: "open",
+        acknowledgementState: "pending",
+        owner: "release-manager",
+        summary: "Approval evidence closeout is first-class in the operator board, but sealing remains open while lifecycle handoff and publish gating are still descriptive only.",
+        deliveryChainStageId: "delivery-chain-operator-review",
+        reviewerQueueId: "reviewer-queue-approval-orchestration",
+        closeoutWindowId: "closeout-window-approval-orchestration",
+        sealedEvidence: ["release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json"],
+        pendingEvidence: [
+          "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+          "release/RELEASE-APPROVAL-WORKFLOW.json",
+          "release/RELEASE-DECISION-HANDOFF.json"
+        ],
+        reviewerNotes: [
+          {
+            id: "evidence-closeout-approval-note",
+            label: "Reviewer notes",
+            value: "baton open / closeout unsealed",
+            detail: "Reviewer notes stay attached to the approval board so the closeout path remains visible before any future execution or publish gate exists.",
+            tone: "warning",
+            links: [
+              { id: "evidence-closeout-approval-link-closeout", label: "Review evidence closeout", kind: "release-artifact", target: "release/REVIEW-EVIDENCE-CLOSEOUT.json" },
+              { id: "evidence-closeout-approval-link-handoff", label: "Release decision handoff", kind: "release-artifact", target: "release/RELEASE-DECISION-HANDOFF.json" }
+            ]
+          }
+        ]
+      },
+      notes: [
+        {
+          id: "release-pipeline-approval-contract",
+          label: "Approval contract",
+          value: hostExecutor.approval.mode,
+          detail: "The release pipeline stays anchored to the typed approval request/result contract rather than any live approval grant.",
+          tone: "warning",
+          links: [
+            { id: "release-pipeline-link-approval-request", label: "Approval request", kind: "approval", target: "approval.request" },
+            { id: "release-pipeline-link-approval-result", label: "Approval result", kind: "approval", target: "approval.result" },
+            { id: "release-pipeline-link-release-workflow", label: "Release approval workflow", kind: "release-artifact", target: "release/RELEASE-APPROVAL-WORKFLOW.json" }
+          ]
+        },
+        {
+          id: "release-pipeline-approval-baton",
+          label: "Reviewer baton",
+          value: "routing -> board -> lifecycle handoff",
+          detail: "Phase58 keeps approval routing, board ownership, reviewer queues, acknowledgement posture, and explicit baton posture visible as one operator review chain while cross-window review ownership becomes more concrete.",
+          tone: "neutral",
+          links: [
+            { id: "release-pipeline-link-lifecycle-approval", label: "Lifecycle request-approval", kind: "lifecycle", target: "lifecycle.request-approval" },
+            { id: "release-pipeline-link-approval-orchestration", label: "Approval orchestration", kind: "release-artifact", target: "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json" },
+            { id: "release-pipeline-link-operator-review-board", label: "Operator review board", kind: "release-artifact", target: "release/OPERATOR-REVIEW-BOARD.json" }
+          ]
+        }
+      ]
+    },
+    {
+      id: "release-pipeline-lifecycle-enforcement",
+      label: "Release decision lifecycle",
+      status: "planned",
+      owner: "product-owner",
+      summary: "Staged release decision enforcement remains review-only, but phase58 now carries a dedicated packet, queue posture, acknowledgement blocker, and closeout expectation into the lifecycle board.",
+      deliveryChainStageId: "delivery-chain-promotion-readiness",
+      deliveryPhase: "promotion",
+      evidence: [
+        "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+        "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json",
+        "release/RELEASE-DECISION-HANDOFF.json"
+      ],
+      linkedLifecycleStages: ["write-audit", "verify-host"],
+      linkedSlotIds: [focusSlotId, "slot-connector-activate"],
+      reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
+      escalationWindowId: "escalation-window-lifecycle-enforcement",
+      closeoutWindowId: "closeout-window-lifecycle-enforcement",
+      packet: {
+        id: "review-packet-lifecycle-enforcement",
+        label: "Decision lifecycle packet",
+        status: "drafted",
+        owner: "product-owner",
+        summary: "Lifecycle checkpoints, enforcement windows, and expiry closeout are packaged together as a staged review packet even though nothing can execute yet.",
+        deliveryChainStageId: "delivery-chain-promotion-readiness",
+        evidence: [
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json",
+          "release/RELEASE-DECISION-HANDOFF.json"
+        ],
+        reviewerNotes: [
+          {
+            id: "review-packet-lifecycle-note",
+            label: "Lifecycle checkpoints",
+            value: "intake / window / closeout",
+            detail: "The lifecycle contract now behaves like a board-ready packet with explicit checkpoint ownership and expiry-closeout posture.",
+            tone: "neutral",
+            links: [
+              { id: "review-packet-lifecycle-link-artifact", label: "Decision lifecycle", kind: "release-artifact", target: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json" },
+              { id: "review-packet-lifecycle-link-stage", label: "Lifecycle verify-host", kind: "lifecycle", target: "lifecycle.verify-host" }
+            ]
+          }
+        ]
+      },
+      handoff: {
+        id: "decision-handoff-lifecycle-enforcement",
+        label: "Lifecycle to rollback handoff",
+        batonState: "held",
+        acknowledgementState: "blocked",
+        sourceOwner: "product-owner",
+        targetOwner: "runtime-owner",
+        posture: "lifecycle packet held until approval board closes",
+        summary: "The lifecycle baton is drafted and visible, but it remains held until the active approval board finishes its review-only handoff posture.",
+        deliveryChainStageId: "delivery-chain-promotion-readiness",
+        packetId: "review-packet-lifecycle-enforcement",
+        reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
+        escalationWindowId: "escalation-window-lifecycle-enforcement",
+        closeoutWindowId: "closeout-window-lifecycle-enforcement",
+        pending: ["approval board closeout remains open", "rollback closeout remains metadata-only"],
+        reviewerNotes: [
+          {
+            id: "decision-handoff-lifecycle-note",
+            label: "Trace linkage",
+            value: focusSlotLabel,
+            detail: "The lifecycle baton stays attached to the same focused slot and trace lane as the active board.",
+            tone: "neutral",
+            links: [{ id: "decision-handoff-lifecycle-link-slot", label: focusSlotLabel, kind: "trace-slot", target: focusSlotId }]
+          }
+        ]
+      },
+      closeout: {
+        id: "evidence-closeout-lifecycle-enforcement",
+        label: "Lifecycle evidence closeout",
+        sealingState: "open",
+        acknowledgementState: "blocked",
+        owner: "product-owner",
+        summary: "Lifecycle closeout remains descriptive, but the packet already declares what would need to be sealed before a later decision handoff could close.",
+        deliveryChainStageId: "delivery-chain-promotion-readiness",
+        reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
+        closeoutWindowId: "closeout-window-lifecycle-enforcement",
+        sealedEvidence: [],
+        pendingEvidence: [
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+        ],
+        reviewerNotes: [
+          {
+            id: "evidence-closeout-lifecycle-note",
+            label: "Closeout posture",
+            value: "open / pending downstream board",
+            detail: "Evidence closeout is visible before publish or rollback artifacts are allowed to become executable.",
+            tone: "warning"
+          }
+        ]
+      },
+      notes: [
+        {
+          id: "release-pipeline-lifecycle-checkpoints",
+          label: "Lifecycle checkpoints",
+          value: "intake / window / closeout",
+          detail: "The lifecycle contract now behaves like a release-decision board with explicit review checkpoints and expiry-closeout posture.",
+          tone: "neutral",
+          links: [
+            { id: "release-pipeline-link-lifecycle-artifact", label: "Decision lifecycle", kind: "release-artifact", target: "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json" },
+            { id: "release-pipeline-link-verify-stage", label: "Lifecycle verify-host", kind: "lifecycle", target: "lifecycle.verify-host" }
+          ]
+        }
+      ]
+    },
+    {
+      id: "release-pipeline-rollback-settlement",
+      label: "Rollback settlement closeout",
+      status: "planned",
+      owner: "runtime-owner",
+      summary: "Rollback publication receipt closeout and settlement evidence remain blocked from execution, but phase58 promotes evidence closeout into a first-class operator review-loop state with overdue acknowledgement and escalation timing.",
+      deliveryChainStageId: "delivery-chain-rollback-readiness",
+      deliveryPhase: "rollback",
+      evidence: [
+        "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+        "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
+        "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+      ],
+      linkedLifecycleStages: ["rollback-host", "verify-host"],
+      linkedSlotIds: [focusSlotId, "slot-lane-apply"],
+      reviewerQueueId: "reviewer-queue-rollback-settlement",
+      escalationWindowId: "escalation-window-rollback-settlement",
+      closeoutWindowId: "closeout-window-rollback-settlement",
+      packet: {
+        id: "review-packet-rollback-settlement",
+        label: "Rollback settlement packet",
+        status: "drafted",
+        owner: "runtime-owner",
+        summary: "Receipt closeout contracts, settlement closeout, and reviewer notes are grouped as one rollback evidence packet.",
+        deliveryChainStageId: "delivery-chain-rollback-readiness",
+        evidence: [
+          "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+        ],
+        reviewerNotes: [
+          {
+            id: "review-packet-rollback-note",
+            label: "Rollback context",
+            value: `${hostExecutor.rollback.stages.length} rollback stages`,
+            detail: "Receipt settlement closeout is cross-linked to the typed rollback context so review can stay concrete even without live recovery.",
+            tone: "warning",
+            links: [
+              { id: "review-packet-rollback-link-context", label: "Rollback context", kind: "rollback", target: "rollback.context" },
+              { id: "review-packet-rollback-link-closeout", label: "Receipt settlement closeout", kind: "release-artifact", target: "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json" }
+            ]
+          }
+        ]
+      },
+      handoff: {
+        id: "decision-handoff-rollback-settlement",
+        label: "Rollback closeout to final decision handoff",
+        batonState: "held",
+        acknowledgementState: "overdue",
+        sourceOwner: "runtime-owner",
+        targetOwner: "release-manager",
+        posture: "rollback closeout queued behind lifecycle evidence",
+        summary: "The rollback baton stays visible as a future handoff target, but it cannot advance until the lifecycle packet and final release board both stop being metadata-only.",
+        deliveryChainStageId: "delivery-chain-rollback-readiness",
+        packetId: "review-packet-rollback-settlement",
+        reviewerQueueId: "reviewer-queue-rollback-settlement",
+        escalationWindowId: "escalation-window-rollback-settlement",
+        closeoutWindowId: "closeout-window-rollback-settlement",
+        pending: ["rollback publication remains review-only", "final decision board remains blocked"],
+        reviewerNotes: [
+          {
+            id: "decision-handoff-rollback-note",
+            label: "Closeout dependency",
+            value: "receipt closeout -> settlement closeout",
+            detail: "The baton only points at review artifacts; it never performs a live rollback or recovery operation.",
+            tone: "warning"
+          }
+        ]
+      },
+      closeout: {
+        id: "evidence-closeout-rollback-settlement",
+        label: "Rollback evidence closeout",
+        sealingState: "pending-seal",
+        acknowledgementState: "overdue",
+        owner: "runtime-owner",
+        summary: "Rollback evidence sealing is explicit and visible even though the settlement closeout remains blocked from execution.",
+        deliveryChainStageId: "delivery-chain-rollback-readiness",
+        reviewerQueueId: "reviewer-queue-rollback-settlement",
+        closeoutWindowId: "closeout-window-rollback-settlement",
+        sealedEvidence: ["release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json"],
+        pendingEvidence: ["release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json", "release/REVIEW-EVIDENCE-CLOSEOUT.json"],
+        reviewerNotes: [
+          {
+            id: "evidence-closeout-rollback-note",
+            label: "Settlement evidence",
+            value: "closeout contracts linked / final seal pending",
+            detail: "Evidence closeout is no longer buried inside rollback JSON lists; it is surfaced as a visible review state with reviewer notes and sealing posture.",
+            tone: "warning"
+          }
+        ]
+      },
+      notes: [
+        {
+          id: "release-pipeline-rollback-context",
+          label: "Rollback context",
+          value: `${hostExecutor.rollback.stages.length} rollback stages`,
+          detail: "Receipt settlement closeout is cross-linked to the typed rollback context so review can stay concrete even without live recovery.",
+          tone: "warning",
+          links: [
+            { id: "release-pipeline-link-rollback-context", label: "Rollback context", kind: "rollback", target: "rollback.context" },
+            { id: "release-pipeline-link-rollback-artifact", label: "Receipt settlement closeout", kind: "release-artifact", target: "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json" }
+          ]
+        }
+      ]
+    },
+    {
+      id: "release-pipeline-release-decision",
+      label: "Final release decision board",
+      status: "blocked",
+      owner: "release-manager",
+      summary: "The final release decision remains explicitly blocked until signing, publish, promotion, and rollback stop being metadata-only, but the blocked baton and closeout posture are now still visible.",
+      deliveryChainStageId: "delivery-chain-publish-decision",
+      deliveryPhase: "publish",
+      evidence: [
+        "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+        "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+        "release/PUBLISH-GATES.json",
+        "release/PROMOTION-GATES.json"
+      ],
+      linkedLifecycleStages: ["request-approval", "rollback-host"],
+      linkedSlotIds: [focusSlotId],
+      reviewerQueueId: "reviewer-queue-final-release-decision",
+      escalationWindowId: "escalation-window-final-release-decision",
+      closeoutWindowId: "closeout-window-final-release-decision",
+      packet: {
+        id: "review-packet-final-release-decision",
+        label: "Final release decision packet",
+        status: "blocked",
+        owner: "release-manager",
+        summary: "The final release decision packet exists as an explicit blocked packet so the operator board can show what is waiting on signing, publish, and promotion.",
+        deliveryChainStageId: "delivery-chain-publish-decision",
+        evidence: [
+          "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+          "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+          "release/PUBLISH-GATES.json",
+          "release/PROMOTION-GATES.json"
+        ],
+        reviewerNotes: [
+          {
+            id: "review-packet-final-release-decision-note",
+            label: "Decision gate",
+            value: "blocked by review-only execution posture",
+            detail: "The operator board exposes the final choke point directly instead of hiding it behind disconnected approval, promotion, and rollback documents.",
+            tone: "warning",
+            links: [
+              { id: "review-packet-final-release-decision-link-signing", label: "Signing-publish gating handshake", kind: "release-artifact", target: "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" },
+              { id: "review-packet-final-release-decision-link-publish", label: "Publish gates", kind: "release-artifact", target: "release/PUBLISH-GATES.json" }
+            ]
+          }
+        ]
+      },
+      handoff: {
+        id: "decision-handoff-final-release-decision",
+        label: "Final decision handoff",
+        batonState: "blocked",
+        acknowledgementState: "blocked",
+        sourceOwner: "release-manager",
+        targetOwner: "signing-gate",
+        posture: "blocked by publish and signing gates",
+        summary: "The final baton is intentionally present even though it cannot move, which keeps the missing decision handoff explicit instead of implicit.",
+        deliveryChainStageId: "delivery-chain-publish-decision",
+        packetId: "review-packet-final-release-decision",
+        reviewerQueueId: "reviewer-queue-final-release-decision",
+        escalationWindowId: "escalation-window-final-release-decision",
+        closeoutWindowId: "closeout-window-final-release-decision",
+        pending: [
+          "signing-publish gating handshake remains metadata-only",
+          "publish rollback handshake remains metadata-only",
+          "real publish automation remains blocked"
+        ],
+        reviewerNotes: [
+          {
+            id: "decision-handoff-final-release-decision-note",
+            label: "Blocked handoff",
+            value: "release-manager -> signing-gate",
+            detail: "The baton stops at the review-only boundary and never crosses into live signing, publish, or host execution.",
+            tone: "warning"
+          }
+        ]
+      },
+      closeout: {
+        id: "evidence-closeout-final-release-decision",
+        label: "Final decision closeout",
+        sealingState: "blocked",
+        acknowledgementState: "blocked",
+        owner: "release-manager",
+        summary: "Final decision evidence closeout cannot seal until signing, publish, promotion, and rollback stop being metadata-only.",
+        deliveryChainStageId: "delivery-chain-publish-decision",
+        reviewerQueueId: "reviewer-queue-final-release-decision",
+        closeoutWindowId: "closeout-window-final-release-decision",
+        sealedEvidence: [],
+        pendingEvidence: [
+          "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+          "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+          "release/PUBLISH-GATES.json",
+          "release/PROMOTION-GATES.json"
+        ],
+        reviewerNotes: [
+          {
+            id: "evidence-closeout-final-release-decision-note",
+            label: "Closeout block",
+            value: "signing / publish / rollback unresolved",
+            detail: "Evidence closeout stays visible as blocked so the operator board preserves an honest end-state instead of implying success.",
+            tone: "warning"
+          }
+        ]
+      },
+      notes: [
+        {
+          id: "release-pipeline-decision-gate",
+          label: "Decision gate",
+          value: "blocked by review-only execution posture",
+          detail: "The pipeline now exposes the release-decision choke point directly instead of hiding it behind disconnected approval, promotion, and rollback documents.",
+          tone: "warning",
+          links: [
+            { id: "release-pipeline-link-signing-handshake", label: "Signing-publish gating handshake", kind: "release-artifact", target: "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" },
+            { id: "release-pipeline-link-publish-gates", label: "Publish gates", kind: "release-artifact", target: "release/PUBLISH-GATES.json" },
+            { id: "release-pipeline-link-promotion-gates", label: "Promotion gates", kind: "release-artifact", target: "release/PROMOTION-GATES.json" }
+          ]
+        }
+      ]
+    }
+  ];
+  const currentStage = stages.find((stage) => stage.id === "release-pipeline-approval-orchestration") ?? stages[0];
+
+  if (!currentStage) {
+    throw new Error("Release approval pipeline requires at least one stage.");
+  }
+
+  const reviewerQueues: StudioReleaseReviewerQueue[] = [
+    {
+      id: "reviewer-queue-attestation-intake",
+      label: "Intake reviewer queue",
+      status: "handoff-ready",
+      owner: "release-engineering",
+      summary: "Manifest and attestation intake are queued for release-manager pickup, and the acknowledgement state is already visible before the baton moves.",
+      deliveryChainStageId: "delivery-chain-attestation-intake",
+      stageId: "release-pipeline-attestation-intake",
+      packetId: "review-packet-attestation-intake",
+      handoffId: "decision-handoff-attestation-intake",
+      closeoutId: "evidence-closeout-attestation-intake",
+      acknowledgementState: "acknowledged",
+      activeEntryId: "reviewer-queue-attestation-intake-release-engineering",
+      windowId: "window-shell-main",
+      sharedStateLaneId: "shared-state-lane-boundary-review",
+      entries: [
+        {
+          id: "reviewer-queue-attestation-intake-release-engineering",
+          label: "Intake packet owner",
+          owner: "release-engineering",
+          status: "active",
+          acknowledgementState: "acknowledged",
+          summary: "The intake packet is assembled, acknowledged locally, and ready to move into the operator board without dispatching a real reviewer.",
+          deliveryChainStageId: "delivery-chain-attestation-intake",
+          packetId: "review-packet-attestation-intake",
+          handoffId: "decision-handoff-attestation-intake",
+          closeoutId: "evidence-closeout-attestation-intake",
+          windowId: "window-shell-main",
+          sharedStateLaneId: "shared-state-lane-boundary-review",
+          pending: ["release-manager pickup remains metadata-only"],
+          reviewerNotes: [
+            {
+              id: "reviewer-queue-attestation-intake-note",
+              label: "Acknowledgement",
+              value: "acknowledged / staged for pickup",
+              detail: "The local queue keeps acknowledgement state explicit even though no live reviewer dispatch can occur.",
+              tone: "positive"
+            }
+          ]
+        },
+        {
+          id: "reviewer-queue-attestation-intake-release-manager",
+          label: "Board pickup",
+          owner: "release-manager",
+          status: "queued",
+          acknowledgementState: "pending",
+          summary: "The next owner is visible as a queued pickup target instead of an implicit baton hop.",
+          deliveryChainStageId: "delivery-chain-attestation-intake",
+          packetId: "review-packet-attestation-intake",
+          handoffId: "decision-handoff-attestation-intake",
+          closeoutId: "evidence-closeout-attestation-intake",
+          windowId: "window-inspector-candidate",
+          sharedStateLaneId: "shared-state-lane-boundary-review",
+          pending: ["operator board intake remains local-only"],
+          reviewerNotes: []
+        }
+      ]
+    },
+    {
+      id: "reviewer-queue-approval-orchestration",
+      label: "Approval reviewer queue",
+      status: "active",
+      owner: "release-manager",
+      summary: "Queue ownership, product-owner acknowledgement, escalation watch, and closeout timing are all explicit on the active review board.",
+      deliveryChainStageId: "delivery-chain-operator-review",
+      stageId: "release-pipeline-approval-orchestration",
+      packetId: "review-packet-approval-orchestration",
+      handoffId: "decision-handoff-approval-orchestration",
+      closeoutId: "evidence-closeout-approval-orchestration",
+      acknowledgementState: "pending",
+      activeEntryId: "reviewer-queue-approval-orchestration-release-manager",
+      windowId: "window-trace-review",
+      sharedStateLaneId: "shared-state-lane-trace-review",
+      entries: [
+        {
+          id: "reviewer-queue-approval-orchestration-release-manager",
+          label: "Board owner",
+          owner: "release-manager",
+          status: "active",
+          acknowledgementState: "pending",
+          summary: "The active board owner is holding the queue while the next reviewer acknowledgement remains open.",
+          deliveryChainStageId: "delivery-chain-operator-review",
+          packetId: "review-packet-approval-orchestration",
+          handoffId: "decision-handoff-approval-orchestration",
+          closeoutId: "evidence-closeout-approval-orchestration",
+          windowId: "window-trace-review",
+          sharedStateLaneId: "shared-state-lane-trace-review",
+          pending: ["product-owner acknowledgement remains metadata-only", "closeout evidence cannot seal yet"],
+          reviewerNotes: [
+            {
+              id: "reviewer-queue-approval-orchestration-owner-note",
+              label: "Current baton",
+              value: "release-manager / awaiting product-owner ack",
+              detail: "The active queue entry carries the same baton posture exposed by the decision handoff card.",
+              tone: "neutral"
+            }
+          ]
+        },
+        {
+          id: "reviewer-queue-approval-orchestration-product-owner",
+          label: "Decision-lifecycle acknowledgement",
+          owner: "product-owner",
+          status: "awaiting-ack",
+          acknowledgementState: "pending",
+          summary: "Product-owner acknowledgement is visible as an explicit queue entry instead of generic pending text.",
+          deliveryChainStageId: "delivery-chain-operator-review",
+          packetId: "review-packet-approval-orchestration",
+          handoffId: "decision-handoff-approval-orchestration",
+          closeoutId: "evidence-closeout-approval-orchestration",
+          windowId: "window-review-board",
+          sharedStateLaneId: "shared-state-lane-preview-review",
+          pending: ["decision-lifecycle acknowledgement remains local-only", "escalation window is open but descriptive"],
+          reviewerNotes: []
+        },
+        {
+          id: "reviewer-queue-approval-orchestration-runtime-owner",
+          label: "Rollback readiness observer",
+          owner: "runtime-owner",
+          status: "queued",
+          acknowledgementState: "pending",
+          summary: "Rollback readiness stays queued behind the active acknowledgement instead of being hidden in later stages.",
+          deliveryChainStageId: "delivery-chain-operator-review",
+          packetId: "review-packet-approval-orchestration",
+          handoffId: "decision-handoff-approval-orchestration",
+          closeoutId: "evidence-closeout-approval-orchestration",
+          windowId: "window-review-board",
+          sharedStateLaneId: "shared-state-lane-preview-review",
+          pending: ["rollback readiness remains review-only"],
+          reviewerNotes: []
+        }
+      ]
+    },
+    {
+      id: "reviewer-queue-lifecycle-enforcement",
+      label: "Lifecycle reviewer queue",
+      status: "handoff-ready",
+      owner: "product-owner",
+      summary: "Lifecycle enforcement is pre-queued with explicit acknowledgement blockers so the next owner is visible before the board advances.",
+      deliveryChainStageId: "delivery-chain-promotion-readiness",
+      stageId: "release-pipeline-lifecycle-enforcement",
+      packetId: "review-packet-lifecycle-enforcement",
+      handoffId: "decision-handoff-lifecycle-enforcement",
+      closeoutId: "evidence-closeout-lifecycle-enforcement",
+      acknowledgementState: "blocked",
+      activeEntryId: "reviewer-queue-lifecycle-enforcement-product-owner",
+      windowId: "window-review-board",
+      sharedStateLaneId: "shared-state-lane-preview-review",
+      entries: [
+        {
+          id: "reviewer-queue-lifecycle-enforcement-product-owner",
+          label: "Lifecycle queue owner",
+          owner: "product-owner",
+          status: "queued",
+          acknowledgementState: "blocked",
+          summary: "The lifecycle queue is visible, but acknowledgement cannot move until approval-board closeout is resolved.",
+          deliveryChainStageId: "delivery-chain-promotion-readiness",
+          packetId: "review-packet-lifecycle-enforcement",
+          handoffId: "decision-handoff-lifecycle-enforcement",
+          closeoutId: "evidence-closeout-lifecycle-enforcement",
+          windowId: "window-review-board",
+          sharedStateLaneId: "shared-state-lane-preview-review",
+          pending: ["approval board closeout remains open"],
+          reviewerNotes: []
+        },
+        {
+          id: "reviewer-queue-lifecycle-enforcement-runtime-owner",
+          label: "Rollback receiver",
+          owner: "runtime-owner",
+          status: "queued",
+          acknowledgementState: "blocked",
+          summary: "Rollback ownership is pre-linked, but the acknowledgement path is intentionally blocked.",
+          deliveryChainStageId: "delivery-chain-promotion-readiness",
+          packetId: "review-packet-lifecycle-enforcement",
+          handoffId: "decision-handoff-lifecycle-enforcement",
+          closeoutId: "evidence-closeout-lifecycle-enforcement",
+          windowId: "window-review-board",
+          sharedStateLaneId: "shared-state-lane-preview-review",
+          pending: ["rollback queue remains descriptive only"],
+          reviewerNotes: []
+        }
+      ]
+    },
+    {
+      id: "reviewer-queue-rollback-settlement",
+      label: "Rollback settlement queue",
+      status: "escalated",
+      owner: "runtime-owner",
+      summary: "Rollback settlement carries an overdue acknowledgement and an explicit escalation window so the stalled baton is visible across the loop.",
+      deliveryChainStageId: "delivery-chain-rollback-readiness",
+      stageId: "release-pipeline-rollback-settlement",
+      packetId: "review-packet-rollback-settlement",
+      handoffId: "decision-handoff-rollback-settlement",
+      closeoutId: "evidence-closeout-rollback-settlement",
+      acknowledgementState: "overdue",
+      activeEntryId: "reviewer-queue-rollback-settlement-runtime-owner",
+      windowId: "window-trace-review",
+      sharedStateLaneId: "shared-state-lane-trace-review",
+      entries: [
+        {
+          id: "reviewer-queue-rollback-settlement-runtime-owner",
+          label: "Settlement owner",
+          owner: "runtime-owner",
+          status: "escalated",
+          acknowledgementState: "overdue",
+          summary: "The rollback settlement owner has an overdue acknowledgement and is driving the active escalation window.",
+          deliveryChainStageId: "delivery-chain-rollback-readiness",
+          packetId: "review-packet-rollback-settlement",
+          handoffId: "decision-handoff-rollback-settlement",
+          closeoutId: "evidence-closeout-rollback-settlement",
+          windowId: "window-trace-review",
+          sharedStateLaneId: "shared-state-lane-trace-review",
+          pending: ["lifecycle evidence is still blocking settlement closeout", "final decision board remains blocked"],
+          reviewerNotes: []
+        },
+        {
+          id: "reviewer-queue-rollback-settlement-release-manager",
+          label: "Final decision receiver",
+          owner: "release-manager",
+          status: "queued",
+          acknowledgementState: "overdue",
+          summary: "The final decision receiver remains queued behind the overdue rollback settlement acknowledgement.",
+          deliveryChainStageId: "delivery-chain-rollback-readiness",
+          packetId: "review-packet-rollback-settlement",
+          handoffId: "decision-handoff-rollback-settlement",
+          closeoutId: "evidence-closeout-rollback-settlement",
+          windowId: "window-shell-main",
+          sharedStateLaneId: "shared-state-lane-boundary-review",
+          pending: ["final decision board is still blocked"],
+          reviewerNotes: []
+        }
+      ]
+    },
+    {
+      id: "reviewer-queue-final-release-decision",
+      label: "Final decision queue",
+      status: "closed",
+      owner: "release-manager",
+      summary: "The final decision queue is explicitly closed by review-only publish and signing gates instead of silently disappearing.",
+      deliveryChainStageId: "delivery-chain-publish-decision",
+      stageId: "release-pipeline-release-decision",
+      packetId: "review-packet-final-release-decision",
+      handoffId: "decision-handoff-final-release-decision",
+      closeoutId: "evidence-closeout-final-release-decision",
+      acknowledgementState: "blocked",
+      activeEntryId: "reviewer-queue-final-release-decision-release-manager",
+      windowId: "window-shell-main",
+      sharedStateLaneId: "shared-state-lane-boundary-review",
+      entries: [
+        {
+          id: "reviewer-queue-final-release-decision-release-manager",
+          label: "Final board owner",
+          owner: "release-manager",
+          status: "closed",
+          acknowledgementState: "blocked",
+          summary: "The final board remains visible, but the queue is closed by publish and signing gates.",
+          deliveryChainStageId: "delivery-chain-publish-decision",
+          packetId: "review-packet-final-release-decision",
+          handoffId: "decision-handoff-final-release-decision",
+          closeoutId: "evidence-closeout-final-release-decision",
+          windowId: "window-shell-main",
+          sharedStateLaneId: "shared-state-lane-boundary-review",
+          pending: ["signing and publish gates remain metadata-only"],
+          reviewerNotes: []
+        },
+        {
+          id: "reviewer-queue-final-release-decision-signing-gate",
+          label: "Signing gate receiver",
+          owner: "signing-gate",
+          status: "queued",
+          acknowledgementState: "blocked",
+          summary: "The blocked downstream receiver is explicit, but it never becomes executable in this phase.",
+          deliveryChainStageId: "delivery-chain-publish-decision",
+          packetId: "review-packet-final-release-decision",
+          handoffId: "decision-handoff-final-release-decision",
+          closeoutId: "evidence-closeout-final-release-decision",
+          windowId: "window-review-board",
+          sharedStateLaneId: "shared-state-lane-preview-review",
+          pending: ["publish automation remains blocked"],
+          reviewerNotes: []
+        }
+      ]
+    }
+  ];
+  const escalationWindows: StudioReleaseEscalationWindow[] = [
+    {
+      id: "escalation-window-attestation-intake",
+      label: "Intake escalation watch",
+      state: "watch",
+      owner: "release-engineering",
+      summary: "The intake queue is acknowledged, so escalation stays on watch and never opens.",
+      deliveryChainStageId: "delivery-chain-attestation-intake",
+      stageId: "release-pipeline-attestation-intake",
+      reviewerQueueId: "reviewer-queue-attestation-intake",
+      handoffId: "decision-handoff-attestation-intake",
+      acknowledgementState: "acknowledged",
+      windowId: "window-shell-main",
+      sharedStateLaneId: "shared-state-lane-boundary-review",
+      deadlineLabel: "Before board pickup",
+      trigger: "Open only if release-manager pickup drifts past the local review window.",
+      pending: ["escalation remains descriptive only"],
+      reviewerNotes: []
+    },
+    {
+      id: "escalation-window-approval-orchestration",
+      label: "Decision-lifecycle escalation window",
+      state: "open",
+      owner: "release-manager",
+      summary: "The active board keeps an explicit escalation window open while product-owner acknowledgement remains pending.",
+      deliveryChainStageId: "delivery-chain-operator-review",
+      stageId: "release-pipeline-approval-orchestration",
+      reviewerQueueId: "reviewer-queue-approval-orchestration",
+      handoffId: "decision-handoff-approval-orchestration",
+      acknowledgementState: "pending",
+      windowId: "window-trace-review",
+      sharedStateLaneId: "shared-state-lane-trace-review",
+      deadlineLabel: "Next 30 min",
+      trigger: "Escalate if decision-lifecycle acknowledgement remains pending after the current local review pass.",
+      pending: ["product-owner acknowledgement remains metadata-only", "signing-publish gate is still blocked"],
+      reviewerNotes: [
+        {
+          id: "escalation-window-approval-orchestration-note",
+          label: "Escalation trigger",
+          value: "pending acknowledgement / trace review lane",
+          detail: "The open escalation window is tied to the same trace review lane and window surfaced in the shell.",
+          tone: "warning"
+        }
+      ]
+    },
+    {
+      id: "escalation-window-lifecycle-enforcement",
+      label: "Lifecycle handoff escalation window",
+      state: "blocked",
+      owner: "product-owner",
+      summary: "Lifecycle escalation is declared early, but it cannot open until approval closeout stops blocking acknowledgement.",
+      deliveryChainStageId: "delivery-chain-promotion-readiness",
+      stageId: "release-pipeline-lifecycle-enforcement",
+      reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
+      handoffId: "decision-handoff-lifecycle-enforcement",
+      acknowledgementState: "blocked",
+      windowId: "window-review-board",
+      sharedStateLaneId: "shared-state-lane-preview-review",
+      deadlineLabel: "After approval closeout",
+      trigger: "Blocked until the active board resolves its open evidence closeout.",
+      pending: ["approval board closeout remains open"],
+      reviewerNotes: []
+    },
+    {
+      id: "escalation-window-rollback-settlement",
+      label: "Rollback settlement escalation window",
+      state: "escalated",
+      owner: "runtime-owner",
+      summary: "Rollback settlement has crossed into an explicit escalated state because lifecycle evidence has not cleared the overdue acknowledgement.",
+      deliveryChainStageId: "delivery-chain-rollback-readiness",
+      stageId: "release-pipeline-rollback-settlement",
+      reviewerQueueId: "reviewer-queue-rollback-settlement",
+      handoffId: "decision-handoff-rollback-settlement",
+      acknowledgementState: "overdue",
+      windowId: "window-trace-review",
+      sharedStateLaneId: "shared-state-lane-trace-review",
+      deadlineLabel: "Escalated now",
+      trigger: "Lifecycle evidence is still missing after the local rollback review window elapsed.",
+      pending: ["receipt settlement remains review-only", "final decision board remains blocked"],
+      reviewerNotes: []
+    },
+    {
+      id: "escalation-window-final-release-decision",
+      label: "Final decision escalation window",
+      state: "blocked",
+      owner: "release-manager",
+      summary: "The final escalation window stays visible as blocked so publish/signing gates are explicit rather than implicit.",
+      deliveryChainStageId: "delivery-chain-publish-decision",
+      stageId: "release-pipeline-release-decision",
+      reviewerQueueId: "reviewer-queue-final-release-decision",
+      handoffId: "decision-handoff-final-release-decision",
+      acknowledgementState: "blocked",
+      windowId: "window-shell-main",
+      sharedStateLaneId: "shared-state-lane-boundary-review",
+      deadlineLabel: "Blocked by gates",
+      trigger: "Cannot open until signing and publish gates stop being metadata-only.",
+      pending: ["signing gate is blocked", "publish gate is blocked"],
+      reviewerNotes: []
+    }
+  ];
+  const closeoutWindows: StudioReleaseCloseoutWindow[] = [
+    {
+      id: "closeout-window-attestation-intake",
+      label: "Intake closeout window",
+      state: "scheduled",
+      owner: "release-engineering",
+      summary: "The intake closeout window is scheduled immediately after board pickup so sealing posture stays visible before approval review starts.",
+      deliveryChainStageId: "delivery-chain-attestation-intake",
+      stageId: "release-pipeline-attestation-intake",
+      reviewerQueueId: "reviewer-queue-attestation-intake",
+      closeoutId: "evidence-closeout-attestation-intake",
+      acknowledgementState: "acknowledged",
+      windowId: "window-shell-main",
+      sharedStateLaneId: "shared-state-lane-boundary-review",
+      deadlineLabel: "After board pickup",
+      sealedEvidence: ["release/RELEASE-MANIFEST.json"],
+      pendingEvidence: ["release/ATTESTATION-VERIFICATION-PACKS.json", "release/ATTESTATION-APPLY-AUDIT-PACKS.json"],
+      reviewerNotes: []
+    },
+    {
+      id: "closeout-window-approval-orchestration",
+      label: "Approval closeout window",
+      state: "open",
+      owner: "release-manager",
+      summary: "Approval closeout is open alongside the active queue so pending evidence and queue state can be reviewed together.",
+      deliveryChainStageId: "delivery-chain-operator-review",
+      stageId: "release-pipeline-approval-orchestration",
+      reviewerQueueId: "reviewer-queue-approval-orchestration",
+      closeoutId: "evidence-closeout-approval-orchestration",
+      acknowledgementState: "pending",
+      windowId: "window-trace-review",
+      sharedStateLaneId: "shared-state-lane-trace-review",
+      deadlineLabel: "Current review pass",
+      sealedEvidence: ["release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json"],
+      pendingEvidence: [
+        "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+        "release/RELEASE-APPROVAL-WORKFLOW.json",
+        "release/RELEASE-DECISION-HANDOFF.json"
+      ],
+      reviewerNotes: [
+        {
+          id: "closeout-window-approval-orchestration-note",
+          label: "Closeout timing",
+          value: "open while acknowledgement is pending",
+          detail: "The closeout window stays open until the same acknowledgement state carried by the active queue is resolved.",
+          tone: "warning"
+        }
+      ]
+    },
+    {
+      id: "closeout-window-lifecycle-enforcement",
+      label: "Lifecycle closeout window",
+      state: "scheduled",
+      owner: "product-owner",
+      summary: "Lifecycle closeout is scheduled but cannot open until the upstream acknowledgement blocker clears.",
+      deliveryChainStageId: "delivery-chain-promotion-readiness",
+      stageId: "release-pipeline-lifecycle-enforcement",
+      reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
+      closeoutId: "evidence-closeout-lifecycle-enforcement",
+      acknowledgementState: "blocked",
+      windowId: "window-review-board",
+      sharedStateLaneId: "shared-state-lane-preview-review",
+      deadlineLabel: "After approval closeout",
+      sealedEvidence: [],
+      pendingEvidence: [
+        "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+        "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+      ],
+      reviewerNotes: []
+    },
+    {
+      id: "closeout-window-rollback-settlement",
+      label: "Rollback settlement closeout window",
+      state: "ready-to-seal",
+      owner: "runtime-owner",
+      summary: "Rollback settlement is close to sealing, but the overdue acknowledgement still keeps the window from closing cleanly.",
+      deliveryChainStageId: "delivery-chain-rollback-readiness",
+      stageId: "release-pipeline-rollback-settlement",
+      reviewerQueueId: "reviewer-queue-rollback-settlement",
+      closeoutId: "evidence-closeout-rollback-settlement",
+      acknowledgementState: "overdue",
+      windowId: "window-trace-review",
+      sharedStateLaneId: "shared-state-lane-trace-review",
+      deadlineLabel: "Ready once lifecycle evidence lands",
+      sealedEvidence: ["release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json"],
+      pendingEvidence: ["release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json", "release/REVIEW-EVIDENCE-CLOSEOUT.json"],
+      reviewerNotes: []
+    },
+    {
+      id: "closeout-window-final-release-decision",
+      label: "Final decision closeout window",
+      state: "blocked",
+      owner: "release-manager",
+      summary: "The final closeout window is visible but blocked by signing, publish, and promotion gates.",
+      deliveryChainStageId: "delivery-chain-publish-decision",
+      stageId: "release-pipeline-release-decision",
+      reviewerQueueId: "reviewer-queue-final-release-decision",
+      closeoutId: "evidence-closeout-final-release-decision",
+      acknowledgementState: "blocked",
+      windowId: "window-shell-main",
+      sharedStateLaneId: "shared-state-lane-boundary-review",
+      deadlineLabel: "Blocked by publish gates",
+      sealedEvidence: [],
+      pendingEvidence: [
+        "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+        "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+        "release/PUBLISH-GATES.json",
+        "release/PROMOTION-GATES.json"
+      ],
+      reviewerNotes: []
+    }
+  ];
+  const currentReviewerQueue = reviewerQueues.find((queue) => queue.id === currentStage.reviewerQueueId) ?? reviewerQueues[0];
+  const currentEscalationWindow =
+    escalationWindows.find((window) => window.id === currentStage.escalationWindowId) ?? escalationWindows[0];
+  const currentCloseoutWindow = closeoutWindows.find((window) => window.id === currentStage.closeoutWindowId) ?? closeoutWindows[0];
+  const deliveryChain = createStudioReleaseDeliveryChain(currentStage, stages);
+
+  return {
+    id: "release-approval-pipeline-phase58",
+    title: "Review-only operator review board",
+    summary:
+      "Phase58 keeps the structured release approval pipeline in place while extending it into a fuller operator review loop with explicit reviewer queues, acknowledgement state, escalation windows, and closeout windows across the same local-only shell.",
+    mode: "review-only",
+    currentStageId: currentStage.id,
+    reviewBoard: {
+      id: "operator-review-board-release-approval",
+      title: "Operator Review Board",
+      summary:
+        "Stage ownership, review packets, reviewer queues, acknowledgement state, escalation timing, closeout windows, baton posture, and reviewer notes now sit on top of the existing review-only release approval pipeline without opening any real execution path.",
+      posture: "release-manager queue active / acknowledgement pending / review-only handoff",
+      activeOwner: currentStage.owner,
+      activeDeliveryChainStageId: deliveryChain.currentStageId,
+      activeReviewerQueueId: currentReviewerQueue?.id ?? "",
+      activeAcknowledgementState: currentReviewerQueue?.acknowledgementState ?? currentStage.handoff.acknowledgementState,
+      activeEscalationWindowId: currentEscalationWindow?.id ?? "",
+      activeCloseoutWindowId: currentCloseoutWindow?.id ?? "",
+      reviewerNotes: [
+        {
+          id: "operator-review-board-note-lane",
+          label: "Shared-state lane",
+          value: "Trace Review Lane / synced",
+          detail: "The operator board is cross-linked to the same shared-state lane, review window, and focused slot already used by trace and window orchestration surfaces.",
+          tone: "positive",
+          links: [
+            { id: "operator-review-board-link-lane", label: "Trace Review Lane", kind: "shared-state-lane", target: "shared-state-lane-trace-review" },
+            { id: "operator-review-board-link-window", label: "Trace Review Window", kind: "window-roster", target: "window-trace-review" },
+            { id: "operator-review-board-link-slot", label: focusSlotLabel, kind: "trace-slot", target: focusSlotId }
+          ]
+        },
+        {
+          id: "operator-review-board-note-handoff",
+          label: "Decision handoff",
+          value: currentStage.handoff.posture,
+          detail: "The current board keeps the baton visible as a local-only handoff instead of generic lifecycle wording, which makes reviewer ownership and next-stage posture explicit.",
+          tone: "neutral",
+          links: [
+            { id: "operator-review-board-link-board", label: "Operator review board", kind: "release-artifact", target: "release/OPERATOR-REVIEW-BOARD.json" },
+            { id: "operator-review-board-link-handoff", label: "Release decision handoff", kind: "release-artifact", target: "release/RELEASE-DECISION-HANDOFF.json" }
+          ]
+        },
+        {
+          id: "operator-review-board-note-delivery-chain",
+          label: "Delivery chain",
+          value: `${currentStage.label} / ${currentStage.deliveryPhase}`,
+          detail: "The same active board now resolves into a typed delivery-chain stage, so promotion, publish, and rollback posture stay attached to the review loop instead of living as a disconnected artifact tail.",
+          tone: "warning"
+        },
+        {
+          id: "operator-review-board-note-queue",
+          label: "Reviewer queue",
+          value: `${currentReviewerQueue?.label ?? "Unavailable"} / ${currentReviewerQueue?.acknowledgementState ?? "pending"}`,
+          detail: "Reviewer ownership, acknowledgement state, and the current queue entry are explicit so the operator loop can be audited without any live approval dispatch.",
+          tone: currentReviewerQueue?.acknowledgementState === "acknowledged" ? "positive" : "warning"
+        },
+        {
+          id: "operator-review-board-note-closeout",
+          label: "Escalation / closeout windows",
+          value: `${currentEscalationWindow?.state ?? "watch"} / ${currentCloseoutWindow?.state ?? "scheduled"}`,
+          detail: "Escalation and closeout windows are first-class review-loop objects, so acknowledgement timing and sealing posture stay cross-linked instead of living in disconnected metadata.",
+          tone: "warning",
+          links: [{ id: "operator-review-board-link-closeout", label: "Review evidence closeout", kind: "release-artifact", target: "release/REVIEW-EVIDENCE-CLOSEOUT.json" }]
+        }
+      ]
+    },
+    decisionHandoff: currentStage.handoff,
+    evidenceCloseout: currentStage.closeout,
+    reviewerQueues,
+    escalationWindows,
+    closeoutWindows,
+    deliveryChain,
+    blockedBy: [
+      "review-only delivery chain remains metadata-only",
+      "reviewer acknowledgement remains local-only metadata",
+      "escalation and closeout windows remain review-only",
+      "signing-publish gating handshake remains review-only",
+      "promotion staged release decision lifecycle remains review-only",
+      "rollback publication receipt settlement closeout remains review-only",
+      "host-side execution remains disabled"
+    ],
+    stages
+  };
+}
