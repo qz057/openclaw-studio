@@ -16,4 +16,4 @@ Milestone: phase58 review-only delivery chain / operator review loop / reviewer 
 - still not an installer
 - still no real publish/upload/sign/notarize actions
 
-Generated: 2026-04-06T15:26:32.077Z
+Generated: 2026-04-06T15:48:49.232Z
