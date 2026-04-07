@@ -46,6 +46,7 @@ export interface ContextualCommandActionDeckLaneItem {
   windowCount: number;
   boardCount: number;
   reviewSurfaceCount: number;
+  companionPathCount: number;
 }
 
 export interface ContextualCommandReviewSurfaceItem {
@@ -57,6 +58,21 @@ export interface ContextualCommandReviewSurfaceItem {
   kindLabel: string;
   coverageLabel: string;
   action: StudioCommandAction;
+}
+
+export interface ContextualCommandCompanionReviewPathItem {
+  id: string;
+  label: string;
+  detail: string;
+  tone: StudioTone;
+  active: boolean;
+  kindLabel: string;
+  sourceLabel: string;
+  primaryActionLabel: string;
+  followUpActionLabels: string[];
+  coverageLabel: string;
+  pathLabel: string;
+  action: StudioCommandAction | null;
 }
 
 export interface ContextualCommandMultiWindowCoverageItem {
@@ -87,6 +103,9 @@ export interface ContextualCommandPanelProps {
   actionDeckSummary?: string;
   actionDeckLanes: ContextualCommandActionDeckLaneItem[];
   reviewSurfaceItems: ContextualCommandReviewSurfaceItem[];
+  companionReviewPathsLabel?: string;
+  companionReviewPathsSummary?: string;
+  companionReviewPathItems: ContextualCommandCompanionReviewPathItem[];
   multiWindowCoverageLabel?: string;
   multiWindowCoverageSummary?: string;
   multiWindowCoverageItems: ContextualCommandMultiWindowCoverageItem[];
@@ -131,6 +150,9 @@ export function ContextualCommandPanel({
   actionDeckSummary,
   actionDeckLanes,
   reviewSurfaceItems,
+  companionReviewPathsLabel,
+  companionReviewPathsSummary,
+  companionReviewPathItems,
   multiWindowCoverageLabel,
   multiWindowCoverageSummary,
   multiWindowCoverageItems,
@@ -269,6 +291,7 @@ export function ContextualCommandPanel({
                     <span className="command-context-pill">{lane.windowCount} windows</span>
                     <span className="command-context-pill">{lane.boardCount} boards</span>
                     <span className="command-context-pill">{lane.reviewSurfaceCount} review surfaces</span>
+                    <span className="command-context-pill">{lane.companionPathCount} companion paths</span>
                     {lane.followUpActionLabels.map((label) => (
                       <span key={`${lane.id}-${label}`} className="command-context-pill">
                         {label}
@@ -368,6 +391,52 @@ export function ContextualCommandPanel({
                     title={item.action.description}
                   >
                     {item.active ? "Refresh coverage" : "Focus coverage"}
+                  </button>
+                ) : null}
+              </article>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {companionReviewPathItems.length ? (
+        <div className="contextual-command-panel__section">
+          <div className="contextual-command-panel__section-header">
+            <span>Companion Review-path Orchestration</span>
+            <strong>{companionReviewPathsLabel ?? `${companionReviewPathItems.length} explicit paths`}</strong>
+          </div>
+          <p className="panel-summary panel-summary--tight">
+            {companionReviewPathsSummary ??
+              "The current review surface now exposes explicit source -> companion review paths with primary and follow-up pivots instead of leaving companion linkage implicit."}
+          </p>
+          <div className="contextual-command-panel__next-step-list">
+            {companionReviewPathItems.map((item) => (
+              <article key={item.id} className={`contextual-command-next-step contextual-command-next-step--${item.tone}`}>
+                <div>
+                  <span>{item.kindLabel}</span>
+                  <strong>{item.active ? `${item.label} · Current path` : item.label}</strong>
+                  <p>{item.detail}</p>
+                  <div className="contextual-command-panel__chips">
+                    <span className={`command-context-pill${item.active ? " workflow-chip--active" : ""}`}>{item.sourceLabel}</span>
+                    <span className="command-context-pill">{item.coverageLabel}</span>
+                    <span className="command-context-pill">{item.pathLabel}</span>
+                    {item.followUpActionLabels.map((label) => (
+                      <span key={`${item.id}-${label}`} className="command-context-pill">
+                        {label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                {item.action ? (
+                  <button
+                    type="button"
+                    className="action-button"
+                    onClick={() => {
+                      onRunAction(item.action as StudioCommandAction);
+                    }}
+                    title={item.action.description}
+                  >
+                    {item.primaryActionLabel}
                   </button>
                 ) : null}
               </article>

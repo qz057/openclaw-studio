@@ -303,8 +303,9 @@
 - phase60 slice4 继续把 review-deck posture 推进成 command-surface action deck，让同一组 local-only orchestration lanes 显式覆盖 promotion readiness / publish / rollback delivery stages，以及对应的 window / shared-state lane / orchestration board / observability row
 - phase60 slice5 继续把 review-deck posture 推进成 coverage-driven review-surface navigation，让 command surface 可以直接 focus review packet / reviewer queue / decision handoff / evidence closeout / publish decision gate / rollback closeout window，并把 delivery stage / window / shared-state lane / orchestration board / observability row 一起切到同一条 local-only review surface
 - phase60 slice6 继续把 coverage-driven review-surface navigation 推进成 command-surface multi-window review coverage，让当前 review surface 所在的 action-deck lane 可以直接枚举 companion window / shared-state lane / orchestration board / observability path，并保持同一条 local-only review coverage flow
-- smoke 已提升到验证 phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review coverage flow / action deck coverage / review-surface navigator / multi-window review coverage / command-surface observability linkage / artifact coverage / blockers / handoff posture renderer markers
-- README / HANDOFF / package snapshot 已同步反映 phase60 slice6 reality
+- phase60 slice7 继续把 action-deck companion coverage 推进成 typed companion review-path orchestration，让当前 review surface 能显式暴露 source / primary companion / follow-up review actions，并保持 route / workspace / window / lane / board / observability coherence
+- smoke 已提升到验证 phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review coverage flow / action deck coverage / review-surface navigator / multi-window review coverage / companion review-path orchestration / command-surface observability linkage / artifact coverage / blockers / handoff posture renderer markers
+- README / HANDOFF / package snapshot 已同步反映 phase60 slice7 reality
 
 ## 当前明确边界
 
@@ -314,7 +315,7 @@
 - dry-run / preview / simulate
 - Studio-local execute（只改应用内 in-memory state/history）
 - phase27 command surface / layout persistence / window intent staging
-- phase60 delivery-chain workspace / stage explorer / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface
+- phase60 delivery-chain workspace / stage explorer / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / companion review-path orchestration / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface
 - phase26/27/28 release skeleton / artifact review / handoff docs / package metadata
 
 当前明确禁止：

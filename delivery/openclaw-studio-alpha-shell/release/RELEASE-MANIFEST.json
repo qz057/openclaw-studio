@@ -1,12 +1,12 @@
 {
   "schemaVersion": "openclaw-studio-release-manifest/v1",
-  "generatedAt": "2026-04-07T01:34:46.855Z",
+  "generatedAt": "2026-04-07T02:09:38.365Z",
   "packageId": "openclaw-studio-alpha-shell",
   "packageName": "OpenClaw Studio Alpha Shell",
   "packageKind": "alpha-shell-release-skeleton",
   "channel": "alpha",
   "phase": "phase60",
-  "milestone": "phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout",
+  "milestone": "phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout",
   "version": "0.1.0",
   "docs": [
     {
@@ -480,7 +480,7 @@
       "label": "Renderer bundle",
       "outputRoot": "artifacts/renderer",
       "fileCount": 11,
-      "totalBytes": 629086,
+      "totalBytes": 644505,
       "entrypoints": [
         "artifacts/renderer/index.html"
       ]
@@ -518,31 +518,22 @@
       "sha256": "cb7ae03992daad83f5279a53c1754c93a60195f17c7d3ee587eb908c0138bd55"
     },
     {
-      "id": "renderer:assets/fallback-CTyhXXZU.js",
+      "id": "renderer:assets/fallback-CPfe-huL.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/fallback-CTyhXXZU.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/fallback-CTyhXXZU.js",
-      "sizeBytes": 225646,
-      "sha256": "52010845e73d43a5fe71f3e0884f3e34ae70a88c6df5b416f2bd14c1615ce7a2"
+      "path": "artifacts/renderer/assets/fallback-CPfe-huL.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/fallback-CPfe-huL.js",
+      "sizeBytes": 228981,
+      "sha256": "3f68bac28d4888c84f5f4d4be84716100ba433d5e2d6267a8336eb54c9a84e97"
     },
     {
-      "id": "renderer:assets/HomePage-s5Bwdk04.js",
+      "id": "renderer:assets/HomePage-D5jfnsRh.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/HomePage-s5Bwdk04.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/HomePage-s5Bwdk04.js",
+      "path": "artifacts/renderer/assets/HomePage-D5jfnsRh.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/HomePage-D5jfnsRh.js",
       "sizeBytes": 3031,
-      "sha256": "3e881ad83e8e4972dcd17512e459b7f1a0b3acc008e53b33d4eedcc31f123d31"
-    },
-    {
-      "id": "renderer:assets/index-B8AmJndH.js",
-      "groupId": "renderer",
-      "role": "asset",
-      "path": "artifacts/renderer/assets/index-B8AmJndH.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-B8AmJndH.js",
-      "sizeBytes": 215931,
-      "sha256": "542c97c335d3a72db3899accdde0466a260d1ab000a20a6d77409a1b2bdf0adf"
+      "sha256": "e7ecee4dc3b2bbd8394c0086fb717a0d096976ea094e85cdaf871dc5a7a30aa8"
     },
     {
       "id": "renderer:assets/index-DoEL3P9P.css",
@@ -554,6 +545,15 @@
       "sha256": "55ee80b0ef16619181212472ff8bb3c125532d4b52c1889509d5bb09499a6828"
     },
     {
+      "id": "renderer:assets/index-DyxcXGA5.js",
+      "groupId": "renderer",
+      "role": "asset",
+      "path": "artifacts/renderer/assets/index-DyxcXGA5.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-DyxcXGA5.js",
+      "sizeBytes": 228015,
+      "sha256": "d7035110f7e9253e031bb44d5d1192054cd9ecfb5b2fca6626d422420bb8572a"
+    },
+    {
       "id": "renderer:assets/SessionsPage-CeRZOu_6.js",
       "groupId": "renderer",
       "role": "asset",
@@ -563,22 +563,22 @@
       "sha256": "54e5f8966e3a61a332401dc09750246fa9ca2aea2468085b38fcbb5f11184452"
     },
     {
-      "id": "renderer:assets/SettingsPage-wZXCaFmC.js",
+      "id": "renderer:assets/SettingsPage-C3YmhVvC.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/SettingsPage-wZXCaFmC.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/SettingsPage-wZXCaFmC.js",
+      "path": "artifacts/renderer/assets/SettingsPage-C3YmhVvC.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/SettingsPage-C3YmhVvC.js",
       "sizeBytes": 1687,
-      "sha256": "6d1945b283d5e02671b2a7f84d12a3583f6580e0d660cc164e6c92832d97c72c"
+      "sha256": "39a0fac7cab71fd0dfefc4800fd514d726c2d26d8f3002e62507bfeaa200cbed"
     },
     {
-      "id": "renderer:assets/SkillsPage-CXubXhpM.js",
+      "id": "renderer:assets/SkillsPage-B7yFrko8.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/SkillsPage-CXubXhpM.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/SkillsPage-CXubXhpM.js",
+      "path": "artifacts/renderer/assets/SkillsPage-B7yFrko8.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/SkillsPage-B7yFrko8.js",
       "sizeBytes": 9335,
-      "sha256": "131439a5adfafd602cecf7e1873724db4d70773234e162e51ef3d567c5f3f3e8"
+      "sha256": "e0e2e67c78c5ebbe29690fa0d95f0cfc34f1da5c49228bbe3628c7a84bc53635"
     },
     {
       "id": "renderer:assets/vendor-D7f9BLy3.js",
@@ -596,7 +596,7 @@
       "path": "artifacts/renderer/index.html",
       "sourceRelativePath": "apps/studio/dist-renderer/index.html",
       "sizeBytes": 496,
-      "sha256": "2b74235aaae1b5d019b8e9bd09c57ce4485d6a2f12de5e50bef4f21f04767edf"
+      "sha256": "448b036db15907b0a6b055f1663590efd63bcca3c441a9fd98818b1cd98a01d5"
     },
     {
       "id": "electron:electron/main.js",
@@ -739,7 +739,7 @@
     "built renderer bundle copied into artifacts/renderer",
     "built Electron bundle copied into artifacts/electron",
     "review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase60 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything",
-    "delivery-chain workspace, stage explorer, review flow ladder, delivery coverage matrix, review-deck coverage routing, review-surface coverage actions, command-surface multi-window review coverage, and the review-deck orchestration action deck linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, observability mapping, command-surface review posture, and multi-window coverage into one staged local-only workflow without executing anything",
+    "delivery-chain workspace, stage explorer, review flow ladder, delivery coverage matrix, review-deck coverage routing, review-surface coverage actions, command-surface multi-window review coverage, typed companion review-path orchestration, and the review-deck orchestration action deck linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, observability mapping, command-surface review posture, and multi-window coverage into one staged local-only workflow without executing anything",
     "deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references",
     "deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, review-posture ownership, and inspector-command linkage",
     "persisted shell layout foundation backed by localStorage",

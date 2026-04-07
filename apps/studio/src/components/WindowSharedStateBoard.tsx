@@ -162,6 +162,21 @@ function formatReviewSurfaceKind(kind: StudioCommandAction["reviewSurfaceKind"])
   }
 }
 
+function formatCompanionReviewPathKind(
+  kind: NonNullable<StudioCommandActionDeck["lanes"][number]["companionReviewPaths"]>[number]["kind"]
+): string {
+  switch (kind) {
+    case "stage-companion":
+      return "Stage companion";
+    case "handoff-companion":
+      return "Handoff companion";
+    case "rollback-companion":
+      return "Rollback companion";
+    default:
+      return "Stabilization companion";
+  }
+}
+
 export function resolveActiveWindowSharedStateLane(
   windowing: StudioShellState["windowing"],
   activeLaneId?: string | null,
@@ -344,6 +359,20 @@ export function WindowSharedStateBoard({
     relevantReviewSurfaceActions.find((action) => action.id === activeReviewSurfaceActionId) ?? relevantReviewSurfaceActions[0] ?? null;
   const relevantActionDeckActionIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => lane.actionIds))];
   const relevantActionDeckStageIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => lane.deliveryChainStageIds ?? []))];
+  const reviewSurfaceActionById = new Map(reviewSurfaceActions.map((action) => [action.id, action]));
+  const relevantCompanionReviewPaths = relevantActionDeckLanes
+    .flatMap((lane) => lane.companionReviewPaths ?? [])
+    .filter((path, index, paths) => paths.findIndex((entry) => entry.id === path.id) === index)
+    .filter((path) => {
+      const linkedActions = [path.sourceActionId, path.primaryActionId, ...(path.followUpActionIds ?? [])]
+        .map((actionId) => reviewSurfaceActionById.get(actionId))
+        .filter((action): action is StudioCommandAction => Boolean(action));
+
+      return linkedActions.some((action) => relevantReviewSurfaceActions.some((entry) => entry.id === action.id)) || path.sourceActionId === activeReviewSurfaceAction?.id;
+    })
+    .sort((left, right) => Number(right.sourceActionId === activeReviewSurfaceAction?.id) - Number(left.sourceActionId === activeReviewSurfaceAction?.id));
+  const activeCompanionReviewPath =
+    relevantCompanionReviewPaths.find((path) => path.sourceActionId === activeReviewSurfaceAction?.id) ?? relevantCompanionReviewPaths[0] ?? null;
   const panelClassName = [
     nested ? "window-shared-board window-shared-board--nested" : "surface card window-shared-board",
     compact ? "window-shared-board--compact" : ""
@@ -501,6 +530,86 @@ export function WindowSharedStateBoard({
                   ) : null}
                 </div>
               ))}
+            </div>
+          </article>
+        ) : null}
+
+        {relevantCompanionReviewPaths.length > 0 ? (
+          <article className="windowing-summary-card">
+            <span>Companion Review Paths</span>
+            <strong>{activeCompanionReviewPath?.label ?? "No companion review path"}</strong>
+            <p>
+              The active window, shared-state lane, orchestration board, and observability row now expose explicit current-surface {"->"} companion-surface
+              review paths with primary and follow-up actions, so companion review orchestration is visible alongside mapped coverage.
+            </p>
+            <div className="workflow-readiness-list">
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Explicit paths</span>
+                <strong>{relevantCompanionReviewPaths.length} linked paths</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Current source</span>
+                <strong>{activeReviewSurfaceAction?.label ?? "No active source surface"}</strong>
+              </div>
+            </div>
+            <div className="windowing-preview-list">
+              {(compact ? relevantCompanionReviewPaths.slice(0, 2) : relevantCompanionReviewPaths).map((path) => {
+                const sourceAction = reviewSurfaceActionById.get(path.sourceActionId) ?? null;
+                const primaryAction = reviewSurfaceActionById.get(path.primaryActionId) ?? null;
+                const followUpActions = (path.followUpActionIds ?? [])
+                  .map((actionId) => reviewSurfaceActionById.get(actionId))
+                  .filter((action): action is StudioCommandAction => Boolean(action));
+                const primaryStage = primaryAction?.deliveryChainStageId
+                  ? releaseApprovalPipeline
+                    ? selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, primaryAction.deliveryChainStageId)
+                    : null
+                  : null;
+                const primaryWindow = primaryAction?.windowId
+                  ? windowing.roster.windows.find((entry) => entry.id === primaryAction.windowId) ?? null
+                  : null;
+                const primaryLane = primaryAction?.sharedStateLaneId
+                  ? windowing.sharedState.lanes.find((entry) => entry.id === primaryAction.sharedStateLaneId) ?? null
+                  : null;
+                const primaryBoard = primaryAction?.orchestrationBoardId
+                  ? windowing.orchestration.boards.find((entry) => entry.id === primaryAction.orchestrationBoardId) ?? null
+                  : null;
+                const active = path.sourceActionId === activeReviewSurfaceAction?.id;
+
+                return (
+                  <div key={path.id} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>{formatCompanionReviewPathKind(path.kind)}</span>
+                    <strong>{active ? `${path.label} / current source` : path.label}</strong>
+                    <p>{path.summary}</p>
+                    <div className="trace-note-links">
+                      <span className={`windowing-badge${active ? " windowing-badge--active" : ""}`}>{sourceAction?.label ?? path.sourceActionId}</span>
+                      <span className="windowing-badge">{primaryAction?.label ?? path.primaryActionId}</span>
+                      <span className="windowing-badge">
+                        {primaryStage?.label ?? primaryAction?.deliveryChainStageId ?? "No stage"} / {primaryWindow?.label ?? primaryAction?.windowId ?? "No window"}
+                      </span>
+                      <span className="windowing-badge">
+                        {primaryLane?.label ?? primaryAction?.sharedStateLaneId ?? "No lane"} / {primaryBoard?.label ?? primaryAction?.orchestrationBoardId ?? "No board"}
+                      </span>
+                      {followUpActions.map((action) => (
+                        <span key={`${path.id}-${action.id}`} className="windowing-badge">
+                          {action.label}
+                        </span>
+                      ))}
+                    </div>
+                    {onRunReviewSurfaceAction && primaryAction ? (
+                      <div className="windowing-card__actions">
+                        <button type="button" className="secondary-button" onClick={() => onRunReviewSurfaceAction(primaryAction)}>
+                          {primaryAction.label}
+                        </button>
+                        {followUpActions.map((action) => (
+                          <button key={action.id} type="button" className="secondary-button" onClick={() => onRunReviewSurfaceAction(action)}>
+                            {action.label}
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
           </article>
         ) : null}

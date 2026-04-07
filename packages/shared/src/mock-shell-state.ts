@@ -14,7 +14,7 @@ import { mockBoundarySummary } from "./mock-host.js";
 const mockCommandSurface: StudioCommandSurface = {
   title: "Command Palette",
   summary:
-    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, review-surface coverage pivots, multi-window review coverage, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
+    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, typed companion review-path orchestration, review-surface coverage pivots, multi-window review coverage, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
   placeholder: "Search orchestration, delivery coverage, observability, navigation, next steps, flow state, detached workspace, or keyboard routes",
   quickActionIds: [
     "command-open-home",
@@ -903,7 +903,7 @@ const mockCommandSurface: StudioCommandSurface = {
       id: "deck-review-deck-orchestration",
       label: "Review Deck Orchestration Deck",
       summary:
-        "Review-deck posture now carries a dedicated local-only action deck so workspace entry, review-workspace intent, delivery-stage coverage, review-surface pivots, multi-window review coverage, and cross-window handoff coverage stay grouped instead of being inferred from separate cards.",
+        "Review-deck posture now carries a dedicated local-only action deck so workspace entry, review-workspace intent, delivery-stage coverage, typed companion review-path orchestration, review-surface pivots, multi-window review coverage, and cross-window handoff coverage stay grouped instead of being inferred from separate cards.",
       tone: "positive",
       flowId: "flow-review-deck-coverage",
       sequenceId: "sequence-review-coverage-flow",
@@ -932,7 +932,20 @@ const mockCommandSurface: StudioCommandSurface = {
           orchestrationBoardIds: ["orchestration-board-preview-review"],
           focusOrchestrationBoardId: "orchestration-board-preview-review",
           observabilityMappingIds: ["observability-mapping-lifecycle-preview"],
-          focusObservabilityMappingId: "observability-mapping-lifecycle-preview"
+          focusObservabilityMappingId: "observability-mapping-lifecycle-preview",
+          companionReviewPaths: [
+            {
+              id: "companion-path-lifecycle-packet-publish-gate",
+              label: "Lifecycle Packet -> Publish Gate",
+              summary:
+                "Keep the lifecycle packet as the current surface, then surface the publish decision gate as the primary companion so promotion readiness, final release gating, and downstream operator review stay linked through one explicit review path.",
+              tone: "warning",
+              kind: "stage-companion",
+              sourceActionId: "command-focus-lifecycle-review-packet",
+              primaryActionId: "command-focus-publish-decision-gate",
+              followUpActionIds: ["command-focus-approval-reviewer-queue"]
+            }
+          ]
         },
         {
           id: "deck-lane-review-deck-delivery-coverage",
@@ -976,7 +989,42 @@ const mockCommandSurface: StudioCommandSurface = {
             "observability-mapping-final-gate",
             "observability-mapping-rollback-shadow"
           ],
-          focusObservabilityMappingId: "observability-mapping-final-gate"
+          focusObservabilityMappingId: "observability-mapping-final-gate",
+          companionReviewPaths: [
+            {
+              id: "companion-path-publish-gate-reviewer-queue",
+              label: "Publish Gate -> Approval Queue",
+              summary:
+                "When the publish decision gate is current, jump straight into the active approval queue and keep rollback closeout as the follow-up companion so final go/no-go review stays tied to the same local-only lane.",
+              tone: "warning",
+              kind: "stage-companion",
+              sourceActionId: "command-focus-publish-decision-gate",
+              primaryActionId: "command-focus-approval-reviewer-queue",
+              followUpActionIds: ["command-focus-rollback-closeout-window"]
+            },
+            {
+              id: "companion-path-reviewer-queue-publish-gate",
+              label: "Approval Queue -> Publish Gate",
+              summary:
+                "When the approval queue is current, promote the publish decision gate to the primary companion so reviewer ownership, final gating, and rollback shadow coverage remain visible as one review path.",
+              tone: "warning",
+              kind: "stage-companion",
+              sourceActionId: "command-focus-approval-reviewer-queue",
+              primaryActionId: "command-focus-publish-decision-gate",
+              followUpActionIds: ["command-focus-rollback-closeout-window"]
+            },
+            {
+              id: "companion-path-rollback-closeout-publish-gate",
+              label: "Rollback Closeout -> Publish Gate",
+              summary:
+                "When rollback closeout is current, lift the publish decision gate back into the primary companion slot and keep the approval queue nearby so recovery posture never detaches from the live decision gate review.",
+              tone: "warning",
+              kind: "rollback-companion",
+              sourceActionId: "command-focus-rollback-closeout-window",
+              primaryActionId: "command-focus-publish-decision-gate",
+              followUpActionIds: ["command-focus-approval-reviewer-queue"]
+            }
+          ]
         },
         {
           id: "deck-lane-review-deck-handoff",
@@ -1005,7 +1053,31 @@ const mockCommandSurface: StudioCommandSurface = {
           orchestrationBoardIds: ["orchestration-board-trace-review"],
           focusOrchestrationBoardId: "orchestration-board-trace-review",
           observabilityMappingIds: ["observability-mapping-approval-active"],
-          focusObservabilityMappingId: "observability-mapping-approval-active"
+          focusObservabilityMappingId: "observability-mapping-approval-active",
+          companionReviewPaths: [
+            {
+              id: "companion-path-decision-handoff-evidence-closeout",
+              label: "Decision Handoff -> Evidence Closeout",
+              summary:
+                "Treat decision handoff as the current review surface, then lift evidence closeout as the primary companion so baton state, acknowledgement timing, and sealing posture remain attached to the same trace-owned review lane.",
+              tone: "warning",
+              kind: "handoff-companion",
+              sourceActionId: "command-focus-approval-decision-handoff",
+              primaryActionId: "command-focus-approval-evidence-closeout",
+              followUpActionIds: ["command-focus-approval-reviewer-queue"]
+            },
+            {
+              id: "companion-path-evidence-closeout-decision-handoff",
+              label: "Evidence Closeout -> Decision Handoff",
+              summary:
+                "When evidence closeout is current, re-surface decision handoff as the primary companion so the sealing contract, baton target, and publish-facing decision gate stay synchronized through the same handoff lane.",
+              tone: "warning",
+              kind: "stabilization-companion",
+              sourceActionId: "command-focus-approval-evidence-closeout",
+              primaryActionId: "command-focus-approval-decision-handoff",
+              followUpActionIds: ["command-focus-publish-decision-gate"]
+            }
+          ]
         }
       ],
       match: {

@@ -2,7 +2,7 @@
 
 ## Snapshot
 
-- 当前已验证里程碑：**phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface + docs / smoke / package / release-plan / UI / shared data closeout**
+- 当前已验证里程碑：**phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface + docs / smoke / package / release-plan / UI / shared data closeout**
 - 当前主视图：
   - `Dashboard`
   - `Home`
@@ -44,6 +44,7 @@
   - phase60 slice4 已把 review-deck posture 继续推进成 command-surface action deck，让同一组 local-only orchestration lanes 显式覆盖 promotion readiness / publish / rollback delivery stages，以及对应的 window / shared-state lane / orchestration board / observability row
   - phase60 slice5 已把 review-deck posture 继续推进成 coverage-driven review-surface actions，让 command surface 能直接 focus review packet / reviewer queue / decision handoff / evidence closeout / publish decision gate / rollback closeout window，并把 delivery stage / window / shared-state lane / orchestration board / observability row 一起切到同一条 local-only review surface
   - phase60 slice6 已继续把 review-deck posture 推进成 command-surface multi-window review coverage，让当前 review surface 所在的 action-deck lane 能直接列出 companion window / shared-state lane / orchestration board / observability path，并在同一条 local-only coverage flow 里继续 focus 对应 review surface
+  - phase60 slice7 已继续把 review-deck posture 推进成 typed companion review-path orchestration，让当前 review surface 能显式暴露 source / primary companion / follow-up review actions，并把 route / workspace / window / shared-state lane / orchestration board / observability coherence 维持在同一条 local-only review flow
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline
@@ -80,7 +81,7 @@ npm run release:plan
 - `workspace views` / `window intents` / `detached panel placeholders`
 - detached workspace workflow：用户现在能看到 workspace entry / detached candidate / workflow posture / switch path
 - window intents 现在具备 staged / focused / preview / shell link 之外，还补齐 workflow step / readiness / handoff posture
-- command surface 现在具备 action groups / sequences / contextual flows / keyboard routing / action decks / review-surface coverage actions / multi-window review coverage
+- command surface 现在具备 action groups / sequences / contextual flows / keyboard routing / action decks / review-surface coverage actions / multi-window review coverage / companion review-path orchestration
 - Dashboard / Home / Skills 会对当前 route / workflow lane / focused slot 给出一致的 recommended next actions
 - inspector 与 windowing 现在补齐 route-aware drilldowns、recent command history、以及 Local Orchestration Board
 - phase32 进一步补齐 Cross-view Coordination Matrix、Inspector-Command Linkage、Packaging Pipeline Depth
@@ -112,6 +113,7 @@ npm run release:plan
 - phase60 slice4 进一步补齐 Review Deck Orchestration Deck、Command-surface Action Deck、以及 delivery stage / window / shared-state lane / orchestration board / observability row 的统一 coverage linkage
 - phase60 slice5 进一步补齐 Focus Review Coverage、Review Surface Navigator、Coverage-driven Review Surfaces、以及 review packet / reviewer queue / decision handoff / evidence closeout / publish decision gate / rollback closeout window 的统一 coverage linkage
 - phase60 slice6 进一步补齐 Multi-window Review Coverage、Mapped Review Paths、以及 action-deck lane 下 companion review surfaces 的统一 coverage linkage
+- phase60 slice7 进一步补齐 Companion Review-path Orchestration、Primary / Follow-up Companion Actions、以及 current review surface 到 companion review surfaces 的显式 source-linked linkage
 - 仍然不做真实外部窗口编排
 
 ## Phase25 Boundary Model

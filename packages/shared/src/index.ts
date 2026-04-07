@@ -987,6 +987,11 @@ export interface StudioCommandContextualFlow {
 }
 
 export type StudioCommandNextStepKind = "route" | "workflow" | "focus" | "window" | "trace";
+export type StudioCommandCompanionReviewPathKind =
+  | "stage-companion"
+  | "handoff-companion"
+  | "rollback-companion"
+  | "stabilization-companion";
 
 export interface StudioCommandNextStep {
   id: string;
@@ -1005,6 +1010,17 @@ export interface StudioCommandNextStepBoard {
   sequenceId: string;
   stepIds: string[];
   match?: StudioCommandMatcher;
+}
+
+export interface StudioCommandCompanionReviewPath {
+  id: string;
+  label: string;
+  summary: string;
+  tone: StudioTone;
+  kind: StudioCommandCompanionReviewPathKind;
+  sourceActionId: string;
+  primaryActionId: string;
+  followUpActionIds?: string[];
 }
 
 export interface StudioCommandActionDeckLane {
@@ -1027,6 +1043,7 @@ export interface StudioCommandActionDeckLane {
   focusOrchestrationBoardId?: string;
   observabilityMappingIds?: string[];
   focusObservabilityMappingId?: string;
+  companionReviewPaths?: StudioCommandCompanionReviewPath[];
 }
 
 export interface StudioCommandActionDeck {

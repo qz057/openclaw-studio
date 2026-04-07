@@ -39,7 +39,7 @@
 - `release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json` 必须列出 attestation operator settlement packs metadata
 - `release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json` 必须列出 attestation operator approval routing contracts metadata
 - `release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json` 必须列出 attestation operator approval orchestration metadata
-- `release/REVIEW-ONLY-DELIVERY-CHAIN.json` 必须列出 delivery-chain workspace / stage explorer / review-surface navigator / multi-window review coverage metadata
+- `release/REVIEW-ONLY-DELIVERY-CHAIN.json` 必须列出 delivery-chain workspace / stage explorer / review-surface navigator / multi-window review coverage / companion review-path orchestration metadata
 - `release/OPERATOR-REVIEW-BOARD.json` 必须列出 operator review board metadata
 - `release/RELEASE-DECISION-HANDOFF.json` 必须列出 release decision handoff metadata
 - `release/REVIEW-EVIDENCE-CLOSEOUT.json` 必须列出 review evidence closeout metadata
@@ -94,7 +94,7 @@
 - built renderer bundle copied into artifacts/renderer
 - built Electron bundle copied into artifacts/electron
 - review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase60 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything
-- delivery-chain workspace, stage explorer, review flow ladder, delivery coverage matrix, review-deck coverage routing, review-surface coverage actions, command-surface multi-window review coverage, and the review-deck orchestration action deck linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, observability mapping, command-surface review posture, and multi-window coverage into one staged local-only workflow without executing anything
+- delivery-chain workspace, stage explorer, review flow ladder, delivery coverage matrix, review-deck coverage routing, review-surface coverage actions, command-surface multi-window review coverage, typed companion review-path orchestration, and the review-deck orchestration action deck linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, observability mapping, command-surface review posture, and multi-window coverage into one staged local-only workflow without executing anything
 - deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references
 - deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, review-posture ownership, and inspector-command linkage
 - persisted shell layout foundation backed by localStorage

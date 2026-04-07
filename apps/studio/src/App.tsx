@@ -37,6 +37,7 @@ import {
 import {
   ContextualCommandPanel,
   type ContextualCommandActionDeckLaneItem,
+  type ContextualCommandCompanionReviewPathItem,
   type ContextualCommandMultiWindowCoverageItem,
   type ContextualCommandPanelProps,
   type ContextualCommandReviewSurfaceItem,
@@ -135,6 +136,21 @@ function formatReviewSurfaceKind(kind: StudioCommandAction["reviewSurfaceKind"])
       return "Closeout window";
     default:
       return "Review surface";
+  }
+}
+
+function formatCompanionReviewPathKind(
+  kind: NonNullable<StudioShellState["commandSurface"]["actionDecks"][number]["lanes"][number]["companionReviewPaths"]>[number]["kind"]
+): string {
+  switch (kind) {
+    case "stage-companion":
+      return "Stage companion";
+    case "handoff-companion":
+      return "Handoff companion";
+    case "rollback-companion":
+      return "Rollback companion";
+    default:
+      return "Stabilization companion";
   }
 }
 
@@ -1111,7 +1127,9 @@ export function App() {
     {
       id: "flow-state-multi-window-coverage",
       label: "Coverage paths",
-      value: activeActionDeckLane ? `${(activeActionDeckLane.observabilityMappingIds ?? []).length} mapped via ${activeActionDeckLane.label}` : "No mapped review lane",
+      value: activeActionDeckLane
+        ? `${(activeActionDeckLane.observabilityMappingIds ?? []).length} mapped / ${(activeActionDeckLane.companionReviewPaths ?? []).length} companion via ${activeActionDeckLane.label}`
+        : "No mapped review lane",
       tone:
         ((activeActionDeckLane?.observabilityMappingIds?.length ?? 0) > 1)
           ? "positive"
@@ -1151,7 +1169,8 @@ export function App() {
         stageCount: (lane.deliveryChainStageIds ?? []).length,
         windowCount: (lane.windowIds ?? []).length,
         boardCount: (lane.orchestrationBoardIds ?? []).length,
-        reviewSurfaceCount
+        reviewSurfaceCount,
+        companionPathCount: (lane.companionReviewPaths ?? []).length
       };
     }) ?? [];
   const activeActionDeckLaneReviewSurfaceActions = dedupeCommandActions(
@@ -1227,6 +1246,61 @@ export function App() {
       })
       .filter((item): item is ContextualCommandMultiWindowCoverageItem => Boolean(item))
       .sort((left, right) => Number(right.active) - Number(left.active) || left.label.localeCompare(right.label));
+  const defaultCompanionReviewSourceActionId = resolvedReviewSurfaceAction?.id ?? activeActionDeckLane?.primaryActionId ?? null;
+  const activeCompanionReviewPaths =
+    (activeActionDeckLane?.companionReviewPaths ?? []).filter((path) => path.sourceActionId === defaultCompanionReviewSourceActionId) ??
+    [];
+  const resolvedCompanionReviewPaths = activeCompanionReviewPaths.length
+    ? activeCompanionReviewPaths
+    : (activeActionDeckLane?.companionReviewPaths ?? []).filter(
+        (path) => path.sourceActionId === activeActionDeckLane?.primaryActionId
+      );
+  const companionReviewPathItems: ContextualCommandCompanionReviewPathItem[] = resolvedCompanionReviewPaths
+    .map((path) => {
+      const sourceActionCandidate = actionById.get(path.sourceActionId);
+      const primaryActionCandidate = actionById.get(path.primaryActionId);
+      const sourceAction = isReviewCoverageAction(sourceActionCandidate) ? sourceActionCandidate : null;
+      const primaryAction = isReviewCoverageAction(primaryActionCandidate) ? primaryActionCandidate : null;
+      const primaryStage = primaryAction?.deliveryChainStageId
+        ? selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, primaryAction.deliveryChainStageId)
+        : null;
+      const primaryWindow = primaryAction?.windowId
+        ? data.windowing.roster.windows.find((entry) => entry.id === primaryAction.windowId) ?? null
+        : null;
+      const primaryLane = primaryAction?.sharedStateLaneId
+        ? data.windowing.sharedState.lanes.find((entry) => entry.id === primaryAction.sharedStateLaneId) ?? null
+        : null;
+      const primaryBoard = primaryAction?.orchestrationBoardId
+        ? data.windowing.orchestration.boards.find((entry) => entry.id === primaryAction.orchestrationBoardId) ?? null
+        : null;
+      const primaryMapping = primaryAction?.observabilityMappingId
+        ? data.windowing.observability.mappings.find((entry) => entry.id === primaryAction.observabilityMappingId) ?? null
+        : null;
+      const followUpActionLabels = (path.followUpActionIds ?? [])
+        .map((actionId) => actionById.get(actionId))
+        .filter(isReviewCoverageAction)
+        .map((action) => action.label);
+
+      return {
+        id: path.id,
+        label: path.label,
+        detail: path.summary,
+        tone: path.tone,
+        active: path.sourceActionId === resolvedReviewSurfaceAction?.id,
+        kindLabel: formatCompanionReviewPathKind(path.kind),
+        sourceLabel: sourceAction?.label ?? path.sourceActionId,
+        primaryActionLabel: primaryAction?.label ?? path.primaryActionId,
+        followUpActionLabels,
+        coverageLabel: `${primaryStage?.label ?? primaryAction?.deliveryChainStageId ?? "No stage"} / ${
+          primaryWindow?.label ?? primaryAction?.windowId ?? "No window"
+        }`,
+        pathLabel: `${primaryLane?.label ?? primaryAction?.sharedStateLaneId ?? "No lane"} / ${
+          primaryBoard?.label ?? primaryAction?.orchestrationBoardId ?? "No board"
+        } / ${primaryMapping?.label ?? primaryAction?.observabilityMappingId ?? "No observability path"}`,
+        action: primaryAction
+      };
+    })
+    .sort((left, right) => Number(right.active) - Number(left.active) || left.label.localeCompare(right.label));
   const paletteShortcutHints: CommandPaletteShortcutHint[] = data.commandSurface.keyboardRouting.shortcuts.slice(0, 8).map((shortcut) => ({
     id: shortcut.id,
     combo: shortcut.combo,
@@ -1260,10 +1334,16 @@ export function App() {
     actionDeckSummary: activeActionDeck?.summary,
     actionDeckLanes,
     reviewSurfaceItems,
+    companionReviewPathsLabel: activeActionDeckLane?.label ? `${activeActionDeckLane.label} companion paths` : undefined,
+    companionReviewPathsSummary:
+      activeActionDeckLane && companionReviewPathItems.length
+        ? `${resolvedReviewSurfaceAction?.label ?? "The active review surface"} now resolves into ${companionReviewPathItems.length} explicit companion review paths, each with a primary surface and typed follow-up pivots that keep the same local-only route, workspace, window, lane, board, and observability chain coherent.`
+        : undefined,
+    companionReviewPathItems,
     multiWindowCoverageLabel: activeActionDeckLane?.label ?? resolvedReviewSurfaceAction?.label,
     multiWindowCoverageSummary:
       activeActionDeckLane && multiWindowCoverageItems.length
-        ? `${resolvedReviewSurfaceAction?.label ?? "The active review surface"} keeps ${multiWindowCoverageItems.length} mapped window, lane, board, and observability paths visible through ${activeActionDeckLane.label}, so companion review surfaces remain reachable without leaving the current local-only command flow.`
+        ? `${resolvedReviewSurfaceAction?.label ?? "The active review surface"} keeps ${multiWindowCoverageItems.length} mapped window, lane, board, and observability paths visible through ${activeActionDeckLane.label}, while ${companionReviewPathItems.length} typed companion review paths keep the primary and follow-up pivots explicit inside the same local-only command flow.`
         : undefined,
     multiWindowCoverageItems,
     nextStepBoardLabel: activeNextStepBoard?.label,
@@ -1866,7 +1946,7 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase60 slice 6 adds command-surface multi-window review coverage on top of slice 5 review-surface navigation; it still does not install, publish, sign, orchestrate live approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
+        "Phase60 slice 7 adds typed companion review-path orchestration on top of slice 6 multi-window review coverage; it still does not install, publish, sign, orchestrate live approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -1903,6 +1983,17 @@ export function App() {
           action.id === resolvedReviewSurfaceAction?.id ? "Active review surface" : formatReviewSurfaceKind(action.reviewSurfaceKind)
         )
       )
+    },
+    {
+      id: "section-companion-review-paths",
+      label: activeActionDeckLane?.label ?? "Companion Review Paths",
+      summary:
+        "The active review surface now exposes explicit companion review paths with primary and follow-up coverage pivots instead of relying on mapped coverage alone.",
+      entries: dedupeCommandActions(companionReviewPathItems.map((item) => item.action ?? undefined)).map((action) => {
+        const sourceItem = companionReviewPathItems.find((item) => item.action?.id === action.id);
+
+        return actionToPaletteEntry(action, sourceItem ? `${sourceItem.kindLabel} from ${sourceItem.sourceLabel}` : "Companion path");
+      })
     },
     {
       id: "section-context",
@@ -2803,10 +2894,11 @@ export function App() {
                   <h2>Delivery-chain Workspace</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but phase60 slice 6 now keeps the review-only delivery chain anchored in a
-                  usable stage explorer plus review-surface navigator while adding command-surface multi-window review coverage, so operator board
-                  ownership, reviewer queues, acknowledgement state, stage-level artifacts, promotion review flow, publish gating, rollback
-                  readiness, blockers, handoff posture, and companion mapped review paths stay visible as one local-only non-executing surface.
+                  The alpha shell still does not build a real installer, but phase60 slice 7 now keeps the review-only delivery chain anchored in a
+                  usable stage explorer plus review-surface navigator while adding typed companion review-path orchestration on top of multi-window
+                  review coverage, so operator board ownership, reviewer queues, acknowledgement state, stage-level artifacts, promotion review
+                  flow, publish gating, rollback readiness, blockers, handoff posture, and explicit companion review paths stay visible as one
+                  local-only non-executing surface.
                 </p>
               </div>
               <div className="foundation-card__metrics">
@@ -2899,7 +2991,7 @@ export function App() {
             onRunReviewSurfaceAction={handleRunReviewSurfaceAction}
             eyebrow="Phase60"
             title="Delivery-chain Workspace"
-            summary="Phase60 slice 6 keeps coverage-driven review-surface navigation in place and adds command-surface multi-window review coverage, so the shell can pivot across attestation, operator review, promotion, publish, and rollback stages while keeping ownership, review surfaces, linked artifacts, blockers, handoff posture, and observability mapping together."
+            summary="Phase60 slice 7 keeps coverage-driven review-surface navigation and multi-window review coverage in place, then adds typed companion review-path orchestration so the shell can pivot across attestation, operator review, promotion, publish, and rollback stages while keeping ownership, review surfaces, primary/follow-up companion actions, linked artifacts, blockers, handoff posture, and observability mapping together."
           />
 
           <section className="surface card window-workbench">

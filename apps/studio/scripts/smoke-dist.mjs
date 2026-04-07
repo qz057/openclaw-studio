@@ -809,6 +809,33 @@ function assertCommandSurfaceContract(commandSurface, shellState) {
           );
         }
       }
+
+      for (const companionPath of lane.companionReviewPaths ?? []) {
+        const sourceAction = actionById.get(companionPath.sourceActionId);
+        const primaryAction = actionById.get(companionPath.primaryActionId);
+
+        if (!sourceAction || sourceAction.kind !== "focus-review-coverage") {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at invalid companion-path source action ${companionPath.sourceActionId}.`
+          );
+        }
+
+        if (!primaryAction || primaryAction.kind !== "focus-review-coverage") {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at invalid companion-path primary action ${companionPath.primaryActionId}.`
+          );
+        }
+
+        for (const followUpActionId of companionPath.followUpActionIds ?? []) {
+          const followUpAction = actionById.get(followUpActionId);
+
+          if (!followUpAction || followUpAction.kind !== "focus-review-coverage") {
+            throw new Error(
+              `Command action deck lane ${lane.id} points at invalid companion-path follow-up action ${followUpActionId}.`
+            );
+          }
+        }
+      }
     }
   }
 
@@ -818,6 +845,10 @@ function assertCommandSurfaceContract(commandSurface, shellState) {
 
   if (!commandSurface.actionDecks.some((deck) => deck.lanes.some((lane) => lane.actionIds.some((actionId) => actionById.get(actionId)?.kind === "focus-review-coverage")))) {
     throw new Error("Shell command surface action decks are missing review-surface coverage pivots.");
+  }
+
+  if (!commandSurface.actionDecks.some((deck) => deck.lanes.some((lane) => (lane.companionReviewPaths?.length ?? 0) > 0))) {
+    throw new Error("Shell command surface action decks are missing typed companion review-path orchestration.");
   }
 
   for (const shortcut of commandSurface.keyboardRouting.shortcuts) {
