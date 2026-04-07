@@ -9682,6 +9682,47 @@ function buildReviewOnlyDeliveryChain({ generatedAt }) {
           bundleSealSummary:
             "macOS bundle-sealing continuity stays blocked on the preview lifecycle row while staged-output review, signing posture, and notarization all remain metadata-only."
         }),
+        failurePath: createPackagedAppMaterializationFailurePath({
+          idPrefix: "macos",
+          platformLabel: "macOS",
+          taskState: "review-ready",
+          summary:
+            "macOS threads .app layout drift, staged-output hold points, and notarization-blocked seal posture into one local-only failure path so validator and rollback posture can be reviewed together before any signing path exists.",
+          activeReadout: "directory",
+          nextReadout: "staged-output",
+          directoryLabel: ".app layout drift abort path",
+          directoryFailureCode: "handoff-invalid",
+          directoryFailureDisposition: "abort",
+          directorySummary:
+            "If the .app layout or launcher root drifts away from the declared verification manifest, the macOS packet aborts before staged-output review can take over.",
+          directoryReviewChecks: [
+            "launcher path stays matched to the .app verification manifest",
+            "directory packet handoff remains current",
+            "validator bridge still exposes the boundary intake row"
+          ],
+          stagedOutputLabel: "Staged-output checksum hold path",
+          stagedOutputFailureCode: "partial-apply",
+          stagedOutputFailureDisposition: "partial-apply",
+          stagedOutputSummary:
+            "Staged-output review would hold on checksum drift so output proof, downstream notarization posture, and rollback ownership remain visible in one readout.",
+          stagedOutputReviewChecks: [
+            "output and checksum manifests stay linked before bundle sealing",
+            "validator bridge keeps the trace review row in scope",
+            "rollback posture remains visible before notarization exists"
+          ],
+          bundleSealingLabel: "Notarization gate remains blocked",
+          bundleSealingFailureCode: "approval-missing",
+          bundleSealingFailureDisposition: "blocked",
+          bundleSealingSummary:
+            "Bundle sealing stays blocked while signing and notarization remain metadata-only, so the failure path ends at a visible approval gate instead of a silent seal handoff.",
+          bundleSealingReviewChecks: [
+            "seal manifest remains declared for review pickup",
+            "notarization plan remains attached to the same blocked gate",
+            "command preview keeps publish-gate review in scope"
+          ],
+          rollbackContractId: "rollback-readiness-alpha-to-beta",
+          rollbackCheckpointId: "sealed-bundle-checkpoint-macos"
+        }),
         blockedBy: [
           "materialization remains review-only",
           "staged outputs remain task-state metadata",
@@ -9757,6 +9798,47 @@ function buildReviewOnlyDeliveryChain({ generatedAt }) {
           bundleSealStatus: "blocked",
           bundleSealSummary:
             "Linux bundle-sealing continuity stays blocked on the preview lifecycle row until staged outputs settle and the downstream package publication gate remains metadata-only."
+        }),
+        failurePath: createPackagedAppMaterializationFailurePath({
+          idPrefix: "linux",
+          platformLabel: "Linux",
+          taskState: "review-ready",
+          summary:
+            "Linux threads package-root preconditions, staged-output checksum holds, and package-publication blockage into one local-only failure path so validator, rollback, and command posture stay readable from the same Stage Explorer slice.",
+          activeReadout: "directory",
+          nextReadout: "staged-output",
+          directoryLabel: "Package-root precondition gate",
+          directoryFailureCode: "precondition-missing",
+          directoryFailureDisposition: "blocked",
+          directorySummary:
+            "If the Linux package root or resources tree no longer satisfy the declared verification manifest, the local review packet stays blocked at the directory checkpoint.",
+          directoryReviewChecks: [
+            "package-root verification manifest stays linked",
+            "directory checkpoint remains the active local review surface",
+            "validator bridge still exposes the boundary intake row"
+          ],
+          stagedOutputLabel: "Checksum staging hold path",
+          stagedOutputFailureCode: "partial-apply",
+          stagedOutputFailureDisposition: "partial-apply",
+          stagedOutputSummary:
+            "If output and checksum manifests drift apart, the Linux staged-output lane holds in review so package publication stays blocked beside the same validator slice.",
+          stagedOutputReviewChecks: [
+            "staged-output manifests stay compared before any package publication",
+            "trace-row observability remains linked to the active validator readout",
+            "rollback posture remains visible from the same command lane"
+          ],
+          bundleSealingLabel: "Package publication gate remains blocked",
+          bundleSealingFailureCode: "approval-missing",
+          bundleSealingFailureDisposition: "blocked",
+          bundleSealingSummary:
+            "Bundle sealing stays blocked while downstream package publication remains metadata-only, so the final failure path still lands on an explicit publish gate.",
+          bundleSealingReviewChecks: [
+            "seal manifest remains declared for review pickup",
+            "package publication gate remains explicitly blocked",
+            "command preview keeps publish-gate review attached"
+          ],
+          rollbackContractId: "rollback-readiness-alpha-to-beta",
+          rollbackCheckpointId: "sealed-bundle-checkpoint-linux"
         }),
         blockedBy: [
           "materialization remains review-only",
@@ -12200,6 +12282,26 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
             readout.observabilitySignalIds.length > 0 &&
             Array.isArray(readout.validatorChecks) &&
             readout.validatorChecks.length > 0
+        ) &&
+        typeof platform.failurePath?.activeReadoutId === "string" &&
+        Array.isArray(platform.failurePath?.readouts) &&
+        platform.failurePath.readouts.length === 3 &&
+        platform.failurePath.readouts.some((readout) => readout.id === platform.failurePath.activeReadoutId) &&
+        (!platform.failurePath.nextReadoutId ||
+          platform.failurePath.readouts.some((readout) => readout.id === platform.failurePath.nextReadoutId)) &&
+        platform.failurePath.readouts.every(
+          (readout) =>
+            typeof readout.reviewPacketStepId === "string" &&
+            typeof readout.validatorReadoutId === "string" &&
+            typeof readout.rollbackContractId === "string" &&
+            typeof readout.rollbackCheckpointId === "string" &&
+            typeof readout.commandDeckLaneId === "string" &&
+            Array.isArray(readout.commandActionIds) &&
+            readout.commandActionIds.length > 0 &&
+            Array.isArray(readout.observabilitySignalIds) &&
+            readout.observabilitySignalIds.length > 0 &&
+            Array.isArray(readout.reviewChecks) &&
+            readout.reviewChecks.length > 0
         )
     ) ||
     !Array.isArray(writtenReviewOnlyDeliveryChain.stages) ||
@@ -12336,6 +12438,26 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
             readout.observabilitySignalIds.length > 0 &&
             Array.isArray(readout.validatorChecks) &&
             readout.validatorChecks.length > 0
+        ) &&
+        typeof contract.failurePath?.activeReadoutId === "string" &&
+        Array.isArray(contract.failurePath?.readouts) &&
+        contract.failurePath.readouts.length === 3 &&
+        contract.failurePath.readouts.some((readout) => readout.id === contract.failurePath.activeReadoutId) &&
+        (!contract.failurePath.nextReadoutId ||
+          contract.failurePath.readouts.some((readout) => readout.id === contract.failurePath.nextReadoutId)) &&
+        contract.failurePath.readouts.every(
+          (readout) =>
+            typeof readout.reviewPacketStepId === "string" &&
+            typeof readout.validatorReadoutId === "string" &&
+            typeof readout.rollbackContractId === "string" &&
+            typeof readout.rollbackCheckpointId === "string" &&
+            typeof readout.commandDeckLaneId === "string" &&
+            Array.isArray(readout.commandActionIds) &&
+            readout.commandActionIds.length > 0 &&
+            Array.isArray(readout.observabilitySignalIds) &&
+            readout.observabilitySignalIds.length > 0 &&
+            Array.isArray(readout.reviewChecks) &&
+            readout.reviewChecks.length > 0
         ) &&
         contract.tasks.every(
           (task) =>
