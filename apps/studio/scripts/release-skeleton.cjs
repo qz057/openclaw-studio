@@ -8131,6 +8131,7 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
     phase: PHASE_ID,
     mode: "local-only-review",
     canApprove: false,
+    activeStageId: "approval-stage-c-entry",
     gatingHandshakePath: "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
     approvalBridgePath: "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
     promotionHandshakePath: "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
@@ -8157,7 +8158,9 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
         label: "Docs and manifest review",
         status: "ready",
         approverRoles: ["release-engineering"],
-        evidence: ["release/RELEASE-MANIFEST.json", "release/BUILD-METADATA.json", "release/REVIEW-MANIFEST.json"]
+        evidence: ["release/RELEASE-MANIFEST.json", "release/BUILD-METADATA.json", "release/REVIEW-MANIFEST.json"],
+        deliveryChainStageIds: ["delivery-chain-attestation-intake"],
+        checkpointIds: ["entry-audit-retention"]
       },
       {
         id: "approval-packaged-app",
@@ -8171,7 +8174,9 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
           "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
           "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
           "release/INSTALLER-TARGETS.json"
-        ]
+        ],
+        deliveryChainStageIds: ["delivery-chain-promotion-readiness"],
+        checkpointIds: ["entry-audit-retention"]
       },
       {
         id: "approval-attestation-verification",
@@ -8192,7 +8197,9 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
           "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
           "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
           "release/OPERATOR-REVIEW-BOARD.json"
-        ]
+        ],
+        deliveryChainStageIds: ["delivery-chain-attestation-intake", "delivery-chain-operator-review"],
+        checkpointIds: ["entry-approval-routing", "entry-audit-retention"]
       },
       {
         id: "approval-operator-board",
@@ -8204,7 +8211,9 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
           "release/RELEASE-DECISION-HANDOFF.json",
           "release/REVIEW-EVIDENCE-CLOSEOUT.json",
           "release/RELEASE-APPROVAL-WORKFLOW.json"
-        ]
+        ],
+        deliveryChainStageIds: ["delivery-chain-operator-review"],
+        checkpointIds: ["entry-approval-routing"]
       },
       {
         id: "approval-qa-closeout",
@@ -8216,7 +8225,9 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
           "release/RELEASE-CHECKLIST.md",
           "release/RELEASE-SUMMARY.md",
           "release/REVIEW-EVIDENCE-CLOSEOUT.json"
-        ]
+        ],
+        deliveryChainStageIds: ["delivery-chain-operator-review", "delivery-chain-rollback-readiness"],
+        checkpointIds: ["entry-audit-retention", "entry-receipt-settlement"]
       },
       {
         id: "approval-installer-builders",
@@ -8228,7 +8239,9 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
           "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
           "release/INSTALLER-CHANNEL-ROUTING.json",
           "release/CHANNEL-PROMOTION-EVIDENCE.json"
-        ]
+        ],
+        deliveryChainStageIds: ["delivery-chain-publish-decision"],
+        checkpointIds: ["entry-approval-routing"]
       },
       {
         id: "approval-promotion-apply",
@@ -8248,7 +8261,9 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
           "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
           "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
           "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
-        ]
+        ],
+        deliveryChainStageIds: ["delivery-chain-promotion-readiness"],
+        checkpointIds: ["entry-approval-routing", "entry-rollback-live-readiness"]
       },
       {
         id: "approval-stage-c-entry",
@@ -8261,6 +8276,13 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
           "release/RELEASE-APPROVAL-WORKFLOW.json",
           "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
           "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+        ],
+        deliveryChainStageIds: ["delivery-chain-rollback-readiness"],
+        checkpointIds: [
+          "entry-approval-routing",
+          "entry-audit-retention",
+          "entry-rollback-live-readiness",
+          "entry-receipt-settlement"
         ]
       },
       {
@@ -8280,7 +8302,9 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
           "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
           "release/RELEASE-APPROVAL-WORKFLOW.json",
           "release/PUBLISH-GATES.json"
-        ]
+        ],
+        deliveryChainStageIds: ["delivery-chain-rollback-readiness", "delivery-chain-publish-decision"],
+        checkpointIds: ["entry-receipt-settlement"]
       },
       {
         id: "approval-signing",
@@ -8292,7 +8316,9 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
           "release/NOTARIZATION-PLAN.json",
           "release/SIGNING-PUBLISH-PIPELINE.json",
           "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json"
-        ]
+        ],
+        deliveryChainStageIds: ["delivery-chain-publish-decision"],
+        checkpointIds: ["entry-approval-routing"]
       },
       {
         id: "approval-publish-promotion",
@@ -8320,7 +8346,13 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
           "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
           "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
           "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
-        ]
+        ],
+        deliveryChainStageIds: [
+          "delivery-chain-promotion-readiness",
+          "delivery-chain-publish-decision",
+          "delivery-chain-rollback-readiness"
+        ],
+        checkpointIds: ["entry-rollback-live-readiness", "entry-receipt-settlement"]
       },
       {
         id: "approval-host-safety",
@@ -8328,7 +8360,9 @@ function buildReleaseApprovalWorkflow({ generatedAt }) {
         status: "blocked",
         approverRoles: ["runtime-owner"],
         evidence: ["release/INSTALLER-PLACEHOLDER.json"],
-        blockers: ["approval / lifecycle / rollback remain placeholder-only", "host-side execution remains disabled"]
+        blockers: ["approval / lifecycle / rollback remain placeholder-only", "host-side execution remains disabled"],
+        deliveryChainStageIds: ["delivery-chain-rollback-readiness"],
+        checkpointIds: ["entry-rollback-live-readiness"]
       }
     ]
   };

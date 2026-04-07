@@ -1,9 +1,10 @@
 {
   "schemaVersion": "openclaw-studio-release-approval-workflow/v1",
-  "generatedAt": "2026-04-07T18:46:00.404Z",
+  "generatedAt": "2026-04-07T18:49:14.104Z",
   "phase": "phase60",
   "mode": "local-only-review",
   "canApprove": false,
+  "activeStageId": "approval-stage-c-entry",
   "gatingHandshakePath": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
   "approvalBridgePath": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
   "promotionHandshakePath": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
@@ -36,6 +37,12 @@
         "release/RELEASE-MANIFEST.json",
         "release/BUILD-METADATA.json",
         "release/REVIEW-MANIFEST.json"
+      ],
+      "deliveryChainStageIds": [
+        "delivery-chain-attestation-intake"
+      ],
+      "checkpointIds": [
+        "entry-audit-retention"
       ]
     },
     {
@@ -53,6 +60,12 @@
         "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
         "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
         "release/INSTALLER-TARGETS.json"
+      ],
+      "deliveryChainStageIds": [
+        "delivery-chain-promotion-readiness"
+      ],
+      "checkpointIds": [
+        "entry-audit-retention"
       ]
     },
     {
@@ -77,6 +90,14 @@
         "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
         "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
         "release/OPERATOR-REVIEW-BOARD.json"
+      ],
+      "deliveryChainStageIds": [
+        "delivery-chain-attestation-intake",
+        "delivery-chain-operator-review"
+      ],
+      "checkpointIds": [
+        "entry-approval-routing",
+        "entry-audit-retention"
       ]
     },
     {
@@ -93,6 +114,12 @@
         "release/RELEASE-DECISION-HANDOFF.json",
         "release/REVIEW-EVIDENCE-CLOSEOUT.json",
         "release/RELEASE-APPROVAL-WORKFLOW.json"
+      ],
+      "deliveryChainStageIds": [
+        "delivery-chain-operator-review"
+      ],
+      "checkpointIds": [
+        "entry-approval-routing"
       ]
     },
     {
@@ -109,6 +136,14 @@
         "release/RELEASE-CHECKLIST.md",
         "release/RELEASE-SUMMARY.md",
         "release/REVIEW-EVIDENCE-CLOSEOUT.json"
+      ],
+      "deliveryChainStageIds": [
+        "delivery-chain-operator-review",
+        "delivery-chain-rollback-readiness"
+      ],
+      "checkpointIds": [
+        "entry-audit-retention",
+        "entry-receipt-settlement"
       ]
     },
     {
@@ -124,6 +159,12 @@
         "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
         "release/INSTALLER-CHANNEL-ROUTING.json",
         "release/CHANNEL-PROMOTION-EVIDENCE.json"
+      ],
+      "deliveryChainStageIds": [
+        "delivery-chain-publish-decision"
+      ],
+      "checkpointIds": [
+        "entry-approval-routing"
       ]
     },
     {
@@ -147,6 +188,13 @@
         "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
         "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
         "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+      ],
+      "deliveryChainStageIds": [
+        "delivery-chain-promotion-readiness"
+      ],
+      "checkpointIds": [
+        "entry-approval-routing",
+        "entry-rollback-live-readiness"
       ]
     },
     {
@@ -164,6 +212,15 @@
         "release/RELEASE-APPROVAL-WORKFLOW.json",
         "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
         "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+      ],
+      "deliveryChainStageIds": [
+        "delivery-chain-rollback-readiness"
+      ],
+      "checkpointIds": [
+        "entry-approval-routing",
+        "entry-audit-retention",
+        "entry-rollback-live-readiness",
+        "entry-receipt-settlement"
       ]
     },
     {
@@ -187,6 +244,13 @@
         "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
         "release/RELEASE-APPROVAL-WORKFLOW.json",
         "release/PUBLISH-GATES.json"
+      ],
+      "deliveryChainStageIds": [
+        "delivery-chain-rollback-readiness",
+        "delivery-chain-publish-decision"
+      ],
+      "checkpointIds": [
+        "entry-receipt-settlement"
       ]
     },
     {
@@ -202,6 +266,12 @@
         "release/NOTARIZATION-PLAN.json",
         "release/SIGNING-PUBLISH-PIPELINE.json",
         "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json"
+      ],
+      "deliveryChainStageIds": [
+        "delivery-chain-publish-decision"
+      ],
+      "checkpointIds": [
+        "entry-approval-routing"
       ]
     },
     {
@@ -233,6 +303,15 @@
         "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
         "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
         "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+      ],
+      "deliveryChainStageIds": [
+        "delivery-chain-promotion-readiness",
+        "delivery-chain-publish-decision",
+        "delivery-chain-rollback-readiness"
+      ],
+      "checkpointIds": [
+        "entry-rollback-live-readiness",
+        "entry-receipt-settlement"
       ]
     },
     {
@@ -248,6 +327,12 @@
       "blockers": [
         "approval / lifecycle / rollback remain placeholder-only",
         "host-side execution remains disabled"
+      ],
+      "deliveryChainStageIds": [
+        "delivery-chain-rollback-readiness"
+      ],
+      "checkpointIds": [
+        "entry-rollback-live-readiness"
       ]
     }
   ]

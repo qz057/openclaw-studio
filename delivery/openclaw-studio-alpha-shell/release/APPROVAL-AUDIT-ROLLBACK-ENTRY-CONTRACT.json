@@ -1,9 +1,10 @@
 {
   "schemaVersion": "openclaw-studio-approval-audit-rollback-entry-contract/v1",
-  "generatedAt": "2026-04-07T18:46:00.404Z",
+  "generatedAt": "2026-04-07T18:49:14.104Z",
   "phase": "phase60",
   "mode": "local-only-review",
   "canEnterExecutableApproval": false,
+  "activeCheckpointId": "entry-rollback-live-readiness",
   "summary": "The first safe Stage C entry now ties approval workflow, audit retention posture, rollback live-readiness, receipt settlement closeout, and release QA closeout proof into one non-executing approval/audit/rollback contract.",
   "releaseQaCloseoutReadinessPath": "release/RELEASE-QA-CLOSEOUT-READINESS.json",
   "approvalWorkflowPath": "release/RELEASE-APPROVAL-WORKFLOW.json",
@@ -18,6 +19,7 @@
       "label": "Approval routing posture",
       "owner": "release-manager",
       "state": "in-review",
+      "deliveryChainStageId": "delivery-chain-rollback-readiness",
       "evidence": [
         "release/RELEASE-APPROVAL-WORKFLOW.json",
         "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
@@ -31,6 +33,18 @@
       "blockedBy": [
         "approval remains metadata-only",
         "reviewer baton remains non-executing"
+      ],
+      "workflowStageIds": [
+        "approval-operator-board",
+        "approval-stage-c-entry",
+        "approval-signing"
+      ],
+      "boundaryStepIds": [
+        "withheld-plan-approval"
+      ],
+      "futureExecutorSlotIds": [
+        "slot-root-connect",
+        "slot-bridge-attach"
       ]
     },
     {
@@ -38,6 +52,7 @@
       "label": "Audit retention posture",
       "owner": "runtime-owner",
       "state": "planned",
+      "deliveryChainStageId": "delivery-chain-operator-review",
       "evidence": [
         "release/BUILD-METADATA.json",
         "release/REVIEW-MANIFEST.json",
@@ -53,6 +68,21 @@
       "blockedBy": [
         "audit retention remains review-only",
         "no executable audit emission yet"
+      ],
+      "workflowStageIds": [
+        "approval-docs-manifest",
+        "approval-attestation-verification",
+        "approval-qa-closeout",
+        "approval-stage-c-entry"
+      ],
+      "boundaryStepIds": [
+        "withheld-plan-root",
+        "withheld-plan-bridge",
+        "withheld-plan-approval"
+      ],
+      "futureExecutorSlotIds": [
+        "slot-root-connect",
+        "slot-bridge-attach"
       ]
     },
     {
@@ -60,6 +90,7 @@
       "label": "Rollback live-readiness posture",
       "owner": "runtime-owner",
       "state": "planned",
+      "deliveryChainStageId": "delivery-chain-rollback-readiness",
       "evidence": [
         "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
         "release/ROLLBACK-CUTOVER-READINESS-MAPS.json",
@@ -73,6 +104,19 @@
       "blockedBy": [
         "rollback remains non-executing",
         "cutover remains review-only"
+      ],
+      "workflowStageIds": [
+        "approval-promotion-apply",
+        "approval-stage-c-entry",
+        "approval-publish-promotion",
+        "approval-host-safety"
+      ],
+      "boundaryStepIds": [
+        "withheld-plan-execute"
+      ],
+      "futureExecutorSlotIds": [
+        "slot-lifecycle",
+        "slot-lane-apply"
       ]
     },
     {
@@ -80,6 +124,7 @@
       "label": "Receipt settlement closeout posture",
       "owner": "release-engineering",
       "state": "planned",
+      "deliveryChainStageId": "delivery-chain-rollback-readiness",
       "evidence": [
         "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
         "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
@@ -93,9 +138,59 @@
       "blockedBy": [
         "publication receipt closeout remains metadata-only",
         "no executable rollback settlement yet"
+      ],
+      "workflowStageIds": [
+        "approval-qa-closeout",
+        "approval-stage-c-entry",
+        "approval-decision-receipts",
+        "approval-publish-promotion"
+      ],
+      "boundaryStepIds": [
+        "withheld-plan-approval",
+        "withheld-plan-execute"
+      ],
+      "futureExecutorSlotIds": [
+        "slot-lane-apply"
       ]
     }
   ],
+  "boundaryLinkage": {
+    "currentBoundaryLayer": "local-only",
+    "nextBoundaryLayer": "preview-host",
+    "checkpointIds": [
+      "entry-approval-routing",
+      "entry-audit-retention",
+      "entry-rollback-live-readiness",
+      "entry-receipt-settlement"
+    ],
+    "workflowStageIds": [
+      "approval-stage-c-entry",
+      "approval-publish-promotion",
+      "approval-host-safety"
+    ],
+    "releaseQaTrackIds": [
+      "release-qa-proof-bundle",
+      "release-qa-delivery-closeout"
+    ],
+    "withheldPlanStepIds": [
+      "withheld-plan-root",
+      "withheld-plan-bridge",
+      "withheld-plan-approval",
+      "withheld-plan-execute"
+    ],
+    "futureExecutorSlotIds": [
+      "slot-root-connect",
+      "slot-bridge-attach",
+      "slot-lifecycle",
+      "slot-lane-apply"
+    ],
+    "blockedBy": [
+      "approval handshake remains withheld",
+      "host mutation bridge remains disabled",
+      "lifecycle runner is still missing",
+      "rollback-aware live apply remains future-only"
+    ]
+  },
   "blockedBy": [
     "Stage C entry remains a local-only contract surface",
     "approval / audit / rollback remain non-executing",

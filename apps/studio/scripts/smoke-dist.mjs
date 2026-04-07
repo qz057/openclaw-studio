@@ -183,7 +183,9 @@ async function verifyRendererFocusedSlotUi() {
     "Artifact Coverage",
     "Packaged-app Materialization Contract",
     "Release QA Closeout Readiness",
+    "Release Approval Workflow",
     "Approval / Audit / Rollback Entry",
+    "Withheld / Future-executor Bridge",
     "Verification manifest",
     "Staged output root",
     "seal manifests",
@@ -3314,11 +3316,47 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseNotes?.includes("release QA closeout readiness") ||
     !skeleton.releaseNotes?.includes("Stage C entry") ||
     !Array.isArray(skeleton.releaseQaCloseoutReadiness?.tracks) ||
+    !skeleton.releaseQaCloseoutReadiness?.activeTrackId ||
     skeleton.releaseQaCloseoutReadiness.tracks.length < 4 ||
+    !skeleton.releaseQaCloseoutReadiness.tracks.every((track) => Array.isArray(track.checkpointIds) && track.checkpointIds.length > 0) ||
     !Array.isArray(skeleton.approvalAuditRollbackEntryContract?.checkpoints) ||
+    !skeleton.approvalAuditRollbackEntryContract?.activeCheckpointId ||
     skeleton.approvalAuditRollbackEntryContract.checkpoints.length < 4 ||
+    !skeleton.approvalAuditRollbackEntryContract.checkpoints.every(
+      (checkpoint) =>
+        checkpoint.deliveryChainStageId &&
+        Array.isArray(checkpoint.workflowStageIds) &&
+        checkpoint.workflowStageIds.length > 0 &&
+        Array.isArray(checkpoint.boundaryStepIds) &&
+        checkpoint.boundaryStepIds.length > 0 &&
+        Array.isArray(checkpoint.futureExecutorSlotIds) &&
+        checkpoint.futureExecutorSlotIds.length > 0
+    ) ||
+    !skeleton.approvalAuditRollbackEntryContract?.boundaryLinkage ||
+    !Array.isArray(skeleton.approvalAuditRollbackEntryContract.boundaryLinkage.withheldPlanStepIds) ||
+    skeleton.approvalAuditRollbackEntryContract.boundaryLinkage.withheldPlanStepIds.length < 4 ||
+    !Array.isArray(skeleton.approvalAuditRollbackEntryContract.boundaryLinkage.futureExecutorSlotIds) ||
+    skeleton.approvalAuditRollbackEntryContract.boundaryLinkage.futureExecutorSlotIds.length < 4 ||
     !Array.isArray(skeleton.releaseApprovalWorkflow?.stages) ||
+    !skeleton.releaseApprovalWorkflow?.activeStageId ||
     !skeleton.releaseApprovalWorkflow.stages.length ||
+    !skeleton.releaseApprovalWorkflow.stages.every(
+      (stage) =>
+        Array.isArray(stage.deliveryChainStageIds) &&
+        stage.deliveryChainStageIds.length > 0 &&
+        Array.isArray(stage.checkpointIds) &&
+        stage.checkpointIds.length > 0
+    ) ||
+    !skeleton.rollbackLiveReadinessContracts?.activeContractId ||
+    !skeleton.rollbackLiveReadinessContracts?.contracts?.every(
+      (contract) =>
+        contract.deliveryChainStageId &&
+        contract.checkpointId &&
+        Array.isArray(contract.boundaryStepIds) &&
+        contract.boundaryStepIds.length > 0 &&
+        Array.isArray(contract.futureExecutorSlotIds) &&
+        contract.futureExecutorSlotIds.length > 0
+    ) ||
     !skeleton.signingPublishApprovalBridge?.bridge?.length ||
     !skeleton.signingPublishPromotionHandshake?.stages?.length ||
     !skeleton.signingPublishPipeline?.stages?.length ||
