@@ -2620,6 +2620,48 @@ function buildPackagedAppLocalMaterializationContract({ generatedAt }) {
           bundleSealSummary:
             "Windows bundle-sealing readiness is already mirrored onto the preview lifecycle row so the next checkpoint stays visible while staged-output review remains active."
         }),
+        failurePath: createPackagedAppMaterializationFailurePath({
+          idPrefix: "windows",
+          platformLabel: "Windows",
+          taskIdPrefix: "local-materialization-task",
+          taskState: "reviewing",
+          summary:
+            "Windows threads checksum drift, seal-gate blockage, and rollback-owned closeout into one local-only failure path so the active materialization slice can be reviewed beside its validator bridge and recommended commands.",
+          activeReadout: "staged-output",
+          nextReadout: "bundle-sealing",
+          directoryLabel: "Directory manifest drift abort path",
+          directoryFailureCode: "handoff-invalid",
+          directoryFailureDisposition: "abort",
+          directorySummary:
+            "If the Windows materialization manifest drifts away from the declared package root, the packet aborts before staged-output review can continue.",
+          directoryReviewChecks: [
+            "verification manifest stays matched to the package root",
+            "directory handoff remains attached to the first review packet step",
+            "validator bridge still exposes the boundary intake row"
+          ],
+          stagedOutputLabel: "Checksum drift rollback path",
+          stagedOutputFailureCode: "rollback-required",
+          stagedOutputFailureDisposition: "rollback",
+          stagedOutputSummary:
+            "If output and checksum manifests diverge, Windows pivots into rollback-owned closeout before bundle sealing can advance, while the packet and validator readouts remain visible.",
+          stagedOutputReviewChecks: [
+            "output and checksum manifests stay compared in one lane",
+            "rollback checkpoint stays attached to the active packet handoff",
+            "publish decision gate remains blocked and review-only"
+          ],
+          bundleSealingLabel: "Seal handoff approval gate remains blocked",
+          bundleSealingFailureCode: "approval-missing",
+          bundleSealingFailureDisposition: "blocked",
+          bundleSealingSummary:
+            "Seal handoff remains blocked until staged-output review settles and the downstream approval / publish gates stop being metadata-only.",
+          bundleSealingReviewChecks: [
+            "bundle-seal checkpoint remains linked to the failure path",
+            "approval gate remains explicitly non-executing",
+            "rollback contract stays reachable from the same command preview"
+          ],
+          rollbackContractId: "rollback-readiness-alpha-to-beta",
+          rollbackCheckpointId: "sealed-bundle-checkpoint-windows"
+        }),
         tasks: [
           {
             id: "local-materialization-task-windows-directory",
@@ -2851,6 +2893,48 @@ function buildPackagedAppLocalMaterializationContract({ generatedAt }) {
           bundleSealStatus: "blocked",
           bundleSealSummary:
             "macOS bundle-sealing continuity stays blocked on the preview lifecycle row while staged-output review, signing posture, and notarization all remain metadata-only."
+        }),
+        failurePath: createPackagedAppMaterializationFailurePath({
+          idPrefix: "macos",
+          platformLabel: "macOS",
+          taskIdPrefix: "local-materialization-task",
+          taskState: "review-ready",
+          summary:
+            "macOS threads .app layout drift, staged-output hold points, and notarization-blocked seal posture into one local-only failure path so validator and rollback posture can be reviewed together before any signing path exists.",
+          activeReadout: "directory",
+          nextReadout: "staged-output",
+          directoryLabel: ".app layout drift abort path",
+          directoryFailureCode: "handoff-invalid",
+          directoryFailureDisposition: "abort",
+          directorySummary:
+            "If the .app layout or launcher root drifts away from the declared verification manifest, the macOS packet aborts before staged-output review can take over.",
+          directoryReviewChecks: [
+            "launcher path stays matched to the .app verification manifest",
+            "directory packet handoff remains current",
+            "validator bridge still exposes the boundary intake row"
+          ],
+          stagedOutputLabel: "Staged-output checksum hold path",
+          stagedOutputFailureCode: "partial-apply",
+          stagedOutputFailureDisposition: "partial-apply",
+          stagedOutputSummary:
+            "Staged-output review would hold on checksum drift so output proof, downstream notarization posture, and rollback ownership remain visible in one readout.",
+          stagedOutputReviewChecks: [
+            "output and checksum manifests stay linked before bundle sealing",
+            "validator bridge keeps the trace review row in scope",
+            "rollback posture remains visible before notarization exists"
+          ],
+          bundleSealingLabel: "Notarization gate remains blocked",
+          bundleSealingFailureCode: "approval-missing",
+          bundleSealingFailureDisposition: "blocked",
+          bundleSealingSummary:
+            "Bundle sealing stays blocked while signing and notarization remain metadata-only, so the failure path ends at a visible approval gate instead of a silent seal handoff.",
+          bundleSealingReviewChecks: [
+            "seal manifest remains declared for review pickup",
+            "notarization plan remains attached to the same blocked gate",
+            "command preview keeps publish-gate review in scope"
+          ],
+          rollbackContractId: "rollback-readiness-alpha-to-beta",
+          rollbackCheckpointId: "sealed-bundle-checkpoint-macos"
         }),
         tasks: [
           {

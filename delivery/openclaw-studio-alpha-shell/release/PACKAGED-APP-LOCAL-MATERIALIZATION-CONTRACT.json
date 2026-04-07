@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-packaged-app-local-materialization-contract/v1",
-  "generatedAt": "2026-04-07T20:44:55.525Z",
+  "generatedAt": "2026-04-07T20:46:22.462Z",
   "phase": "phase60",
   "mode": "review-only",
   "scope": "local-only",
@@ -333,6 +333,107 @@
         "blockedBy": [
           "validator bridge remains review-only",
           "cross-window linkage remains metadata-only",
+          "host-side execution remains disabled"
+        ]
+      },
+      "failurePath": {
+        "id": "packaged-app-materialization-failure-path-windows",
+        "label": "Windows materialization failure path",
+        "taskState": "reviewing",
+        "summary": "Windows threads checksum drift, seal-gate blockage, and rollback-owned closeout into one local-only failure path so the active materialization slice can be reviewed beside its validator bridge and recommended commands.",
+        "activeReadoutId": "packaged-app-materialization-failure-path-windows-staged-output",
+        "nextReadoutId": "packaged-app-materialization-failure-path-windows-bundle-sealing",
+        "readouts": [
+          {
+            "id": "packaged-app-materialization-failure-path-windows-directory",
+            "label": "Directory manifest drift abort path",
+            "failureCode": "handoff-invalid",
+            "failureDisposition": "abort",
+            "summary": "If the Windows materialization manifest drifts away from the declared package root, the packet aborts before staged-output review can continue.",
+            "taskId": "local-materialization-task-windows-directory",
+            "reviewPacketStepId": "packaged-app-review-packet-windows-directory-to-output",
+            "validatorReadoutId": "packaged-app-materialization-validator-observability-windows-directory",
+            "deliveryChainStageId": "delivery-chain-attestation-intake",
+            "rollbackContractId": "rollback-readiness-alpha-to-beta",
+            "rollbackCheckpointId": "sealed-bundle-checkpoint-windows",
+            "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+            "commandActionIds": [
+              "command-focus-materialization-validator-bridge",
+              "command-focus-materialization-failure-path"
+            ],
+            "observabilitySignalIds": [
+              "observability-signal-owner",
+              "observability-signal-route-window",
+              "observability-signal-lane-board"
+            ],
+            "reviewChecks": [
+              "verification manifest stays matched to the package root",
+              "directory handoff remains attached to the first review packet step",
+              "validator bridge still exposes the boundary intake row"
+            ]
+          },
+          {
+            "id": "packaged-app-materialization-failure-path-windows-staged-output",
+            "label": "Checksum drift rollback path",
+            "failureCode": "rollback-required",
+            "failureDisposition": "rollback",
+            "summary": "If output and checksum manifests diverge, Windows pivots into rollback-owned closeout before bundle sealing can advance, while the packet and validator readouts remain visible.",
+            "taskId": "local-materialization-task-windows-staged-output",
+            "reviewPacketStepId": "packaged-app-review-packet-windows-output-to-checksum",
+            "validatorReadoutId": "packaged-app-materialization-validator-observability-windows-staged-output",
+            "deliveryChainStageId": "delivery-chain-operator-review",
+            "rollbackContractId": "rollback-readiness-alpha-to-beta",
+            "rollbackCheckpointId": "sealed-bundle-checkpoint-windows",
+            "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+            "commandActionIds": [
+              "command-focus-materialization-failure-path",
+              "command-focus-publish-decision-gate",
+              "command-focus-rollback-closeout-window"
+            ],
+            "observabilitySignalIds": [
+              "observability-signal-owner",
+              "observability-signal-queue",
+              "observability-signal-escalation-closeout"
+            ],
+            "reviewChecks": [
+              "output and checksum manifests stay compared in one lane",
+              "rollback checkpoint stays attached to the active packet handoff",
+              "publish decision gate remains blocked and review-only"
+            ]
+          },
+          {
+            "id": "packaged-app-materialization-failure-path-windows-bundle-sealing",
+            "label": "Seal handoff approval gate remains blocked",
+            "failureCode": "approval-missing",
+            "failureDisposition": "blocked",
+            "summary": "Seal handoff remains blocked until staged-output review settles and the downstream approval / publish gates stop being metadata-only.",
+            "taskId": "local-materialization-task-windows-bundle-seal",
+            "reviewPacketStepId": "packaged-app-review-packet-windows-checksum-to-seal",
+            "validatorReadoutId": "packaged-app-materialization-validator-observability-windows-bundle-sealing",
+            "deliveryChainStageId": "delivery-chain-promotion-readiness",
+            "rollbackContractId": "rollback-readiness-alpha-to-beta",
+            "rollbackCheckpointId": "sealed-bundle-checkpoint-windows",
+            "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+            "commandActionIds": [
+              "command-focus-materialization-validator-bridge",
+              "command-focus-materialization-failure-path",
+              "command-focus-publish-decision-gate"
+            ],
+            "observabilitySignalIds": [
+              "observability-signal-owner",
+              "observability-signal-lane-board",
+              "observability-signal-mapped-windows"
+            ],
+            "reviewChecks": [
+              "bundle-seal checkpoint remains linked to the failure path",
+              "approval gate remains explicitly non-executing",
+              "rollback contract stays reachable from the same command preview"
+            ]
+          }
+        ],
+        "blockedBy": [
+          "failure path remains review-only",
+          "command preview remains local-only",
           "host-side execution remains disabled"
         ]
       },
@@ -718,6 +819,107 @@
         "blockedBy": [
           "validator bridge remains review-only",
           "cross-window linkage remains metadata-only",
+          "host-side execution remains disabled"
+        ]
+      },
+      "failurePath": {
+        "id": "packaged-app-materialization-failure-path-macos",
+        "label": "macOS materialization failure path",
+        "taskState": "review-ready",
+        "summary": "macOS threads .app layout drift, staged-output hold points, and notarization-blocked seal posture into one local-only failure path so validator and rollback posture can be reviewed together before any signing path exists.",
+        "activeReadoutId": "packaged-app-materialization-failure-path-macos-directory",
+        "nextReadoutId": "packaged-app-materialization-failure-path-macos-staged-output",
+        "readouts": [
+          {
+            "id": "packaged-app-materialization-failure-path-macos-directory",
+            "label": ".app layout drift abort path",
+            "failureCode": "handoff-invalid",
+            "failureDisposition": "abort",
+            "summary": "If the .app layout or launcher root drifts away from the declared verification manifest, the macOS packet aborts before staged-output review can take over.",
+            "taskId": "local-materialization-task-macos-directory",
+            "reviewPacketStepId": "packaged-app-review-packet-macos-directory-to-output",
+            "validatorReadoutId": "packaged-app-materialization-validator-observability-macos-directory",
+            "deliveryChainStageId": "delivery-chain-attestation-intake",
+            "rollbackContractId": "rollback-readiness-alpha-to-beta",
+            "rollbackCheckpointId": "sealed-bundle-checkpoint-macos",
+            "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+            "commandActionIds": [
+              "command-focus-materialization-validator-bridge",
+              "command-focus-materialization-failure-path"
+            ],
+            "observabilitySignalIds": [
+              "observability-signal-owner",
+              "observability-signal-route-window",
+              "observability-signal-lane-board"
+            ],
+            "reviewChecks": [
+              "launcher path stays matched to the .app verification manifest",
+              "directory packet handoff remains current",
+              "validator bridge still exposes the boundary intake row"
+            ]
+          },
+          {
+            "id": "packaged-app-materialization-failure-path-macos-staged-output",
+            "label": "Staged-output checksum hold path",
+            "failureCode": "partial-apply",
+            "failureDisposition": "partial-apply",
+            "summary": "Staged-output review would hold on checksum drift so output proof, downstream notarization posture, and rollback ownership remain visible in one readout.",
+            "taskId": "local-materialization-task-macos-staged-output",
+            "reviewPacketStepId": "packaged-app-review-packet-macos-output-to-checksum",
+            "validatorReadoutId": "packaged-app-materialization-validator-observability-macos-staged-output",
+            "deliveryChainStageId": "delivery-chain-operator-review",
+            "rollbackContractId": "rollback-readiness-alpha-to-beta",
+            "rollbackCheckpointId": "sealed-bundle-checkpoint-macos",
+            "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+            "commandActionIds": [
+              "command-focus-materialization-failure-path",
+              "command-focus-publish-decision-gate",
+              "command-focus-rollback-closeout-window"
+            ],
+            "observabilitySignalIds": [
+              "observability-signal-owner",
+              "observability-signal-queue",
+              "observability-signal-escalation-closeout"
+            ],
+            "reviewChecks": [
+              "output and checksum manifests stay linked before bundle sealing",
+              "validator bridge keeps the trace review row in scope",
+              "rollback posture remains visible before notarization exists"
+            ]
+          },
+          {
+            "id": "packaged-app-materialization-failure-path-macos-bundle-sealing",
+            "label": "Notarization gate remains blocked",
+            "failureCode": "approval-missing",
+            "failureDisposition": "blocked",
+            "summary": "Bundle sealing stays blocked while signing and notarization remain metadata-only, so the failure path ends at a visible approval gate instead of a silent seal handoff.",
+            "taskId": "local-materialization-task-macos-bundle-seal",
+            "reviewPacketStepId": "packaged-app-review-packet-macos-checksum-to-seal",
+            "validatorReadoutId": "packaged-app-materialization-validator-observability-macos-bundle-sealing",
+            "deliveryChainStageId": "delivery-chain-promotion-readiness",
+            "rollbackContractId": "rollback-readiness-alpha-to-beta",
+            "rollbackCheckpointId": "sealed-bundle-checkpoint-macos",
+            "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+            "commandActionIds": [
+              "command-focus-materialization-validator-bridge",
+              "command-focus-materialization-failure-path",
+              "command-focus-publish-decision-gate"
+            ],
+            "observabilitySignalIds": [
+              "observability-signal-owner",
+              "observability-signal-lane-board",
+              "observability-signal-mapped-windows"
+            ],
+            "reviewChecks": [
+              "seal manifest remains declared for review pickup",
+              "notarization plan remains attached to the same blocked gate",
+              "command preview keeps publish-gate review in scope"
+            ]
+          }
+        ],
+        "blockedBy": [
+          "failure path remains review-only",
+          "command preview remains local-only",
           "host-side execution remains disabled"
         ]
       },

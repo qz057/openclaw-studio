@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-attestation-operator-approval-orchestration/v1",
-  "generatedAt": "2026-04-07T20:44:55.525Z",
+  "generatedAt": "2026-04-07T20:46:22.462Z",
   "phase": "phase60",
   "mode": "local-only-review",
   "orchestrations": [
