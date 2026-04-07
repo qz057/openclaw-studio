@@ -294,7 +294,7 @@
 - smoke 已提升到验证 phase58 review-only delivery-chain renderer markers、runtime contract、以及 release artifact contract
 - README / HANDOFF / package snapshot 已同步反映 phase58 slice 3 reality
 
-### Phase 60（当前已完成，slice 1-14）
+### Phase 60（当前已完成，slice 1-21）
 - phase58 slice 3 的 review-only delivery chain 已继续推进成更明确的 delivery-chain workspace / stage explorer
 - shared / runtime / renderer 现在显式带出 selected delivery stage、artifact coverage、related review surfaces、blockers / handoff posture、以及 observability mapping，并把它们收敛到同一个 shell explorer
 - App 主 shell 现在能直接在 operator review board 之后切换 attestation / review / promotion / publish / rollback stages，并看到同一阶段的 ownership、artifact groups、queue / handoff / closeout posture、以及跨窗口映射
@@ -316,8 +316,9 @@
 - phase60 slice18 继续把 Evidence Trace Lens 推进成 acceptance-area Reviewer Flow Ladder / Acceptance Reading Queue，让 delivery workspace 可以把 replay route restore、acceptance checks、capture review、proof dossier、以及 continuity handoff 收敛成 typed reviewer walkthrough，并保持 pass records / trace lens / dossier / continuity surfaces 在同一条本地产品审阅链里
 - phase60 slice19 继续把 acceptance-area Reviewer Flow Ladder 推进成 Reviewer Signoff Board，让 delivery workspace 可以把 walkthrough readiness、open blockers、next reviewer handoff、以及 scenario-level signoff verdict 收敛成显式本地验收结论，并保持 roster / capture flow / continuity posture 在同一条产品审阅链里
 - phase60 slice20 继续把 Reviewer Signoff Board 推进成 Signoff Readiness Queue，让 delivery workspace 可以把 replay pack 的 scenario-level signoff verdict、next pack handoff、ordered closure queue、以及 pack-level blocker posture 收敛成更完整的本地产品审阅收口
-- smoke 已提升到验证 phase60 delivery-chain workspace / stage explorer / review flow ladder / Acceptance Reading Queue / Reviewer Signoff Board / Signoff Readiness Queue / delivery coverage matrix / review coverage flow / action deck coverage / review-surface navigator / multi-window review coverage / companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / acceptance scoreboard / Product Review Console / Screenshot Pass Records / Acceptance Storyboard / Capture Review Flow / Acceptance Evidence Continuity / Evidence Trace Lens / Proof-linked Evidence Bundle / Evidence Dossier / Viewport / Framing / Dossier section / review pack scenarios / command-surface observability linkage / artifact coverage / blockers / handoff posture renderer markers
-- README / HANDOFF / package snapshot 已同步反映 phase60 slice20 reality
+- phase60 slice21 继续把 Signoff Readiness Queue / Acceptance Reading Queue / Evidence Trace Lens 推进成 Final Review Closeout，让 delivery workspace 可以把 queue order、trace focus、storyboard + dossier linkage、以及 reviewer verdict 收敛成更明确的 acceptance closeout console，并保持 local-only / review-only posture
+- smoke 已提升到验证 phase60 delivery-chain workspace / stage explorer / review flow ladder / Acceptance Reading Queue / Reviewer Signoff Board / Signoff Readiness Queue / Final Review Closeout / delivery coverage matrix / review coverage flow / action deck coverage / review-surface navigator / multi-window review coverage / companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / acceptance scoreboard / Product Review Console / Screenshot Pass Records / Acceptance Storyboard / Capture Review Flow / Acceptance Evidence Continuity / Evidence Trace Lens / Proof-linked Evidence Bundle / Evidence Dossier / Viewport / Framing / Dossier section / review pack scenarios / command-surface observability linkage / artifact coverage / blockers / handoff posture renderer markers
+- README / HANDOFF / package snapshot 已同步反映 phase60 slice21 reality
 
 ## 当前明确边界
 
@@ -327,7 +328,7 @@
 - dry-run / preview / simulate
 - Studio-local execute（只改应用内 in-memory state/history）
 - phase27 command surface / layout persistence / window intent staging
-- phase60 delivery-chain workspace / stage explorer / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass progression / screenshot pass records / capture review flow / proof-linked evidence bundle / acceptance scoreboard / replay acceptance checklist / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface
+- phase60 delivery-chain workspace / stage explorer / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass progression / screenshot pass records / capture review flow / proof-linked evidence bundle / reviewer signoff board / signoff readiness queue / final review closeout / acceptance scoreboard / replay acceptance checklist / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface
 - phase26/27/28 release skeleton / artifact review / handoff docs / package metadata
 
 当前明确禁止：
