@@ -475,6 +475,27 @@ button:disabled {
   align-content: start;
 }
 
+.delivery-chain-workspace__acceptance-console-card {
+  grid-column: 1 / -1;
+  border-color: rgba(105, 193, 255, 0.22);
+  background:
+    radial-gradient(circle at top right, rgba(100, 236, 178, 0.12), transparent 34%),
+    linear-gradient(145deg, rgba(18, 35, 52, 0.92), rgba(7, 16, 24, 0.78)),
+    rgba(255, 255, 255, 0.03);
+  box-shadow: 0 22px 48px rgba(4, 10, 18, 0.22);
+}
+
+.delivery-chain-workspace__acceptance-console-card .windowing-preview-list,
+.delivery-chain-workspace__settlement-strip {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.delivery-chain-workspace__acceptance-console-card .delivery-chain-workspace__pass-record {
+  min-height: 100%;
+}
+
 .delivery-chain-workspace__pass-record,
 .delivery-chain-workspace__capture-group,
 .delivery-chain-workspace__storyboard-group,

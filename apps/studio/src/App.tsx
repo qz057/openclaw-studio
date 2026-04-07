@@ -2597,7 +2597,7 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase60 slice 22 keeps replay scenario packs local-only, then layers a Pack Closeout Board on top of Final Review Closeout, Signoff Readiness Queue, the Reviewer Signoff Board, the Reviewer Flow Ladder, the Acceptance Reading Queue, the Evidence Trace Lens, the Acceptance Storyboard, the Evidence Dossier, and Acceptance Evidence Continuity so replay route restore, acceptance checks, screenshot passes, proof bundles, continuity handoffs, scenario-level signoff verdicts, pack-level coverage, and final reviewer handoff posture read as one reviewer closure flow without installing, publishing, signing, orchestrating live approvals, advancing staged decision lifecycles, settling publication receipts, rolling back publish state, or enabling host-side execution."
+        "Phase60 slice 23 keeps replay scenario packs local-only, then layers a Final Review Settlement on top of Final Review Closeout, Signoff Readiness Queue, the Reviewer Signoff Board, the Acceptance Reading Queue, the Evidence Trace Lens, the Acceptance Storyboard, the Evidence Dossier, and the Pack Closeout Board so verdict progression, signoff settlement, proof linkage, and pack closeout framing read as one reviewer-facing closure console without installing, publishing, signing, orchestrating live approvals, advancing staged decision lifecycles, settling publication receipts, rolling back publish state, or enabling host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -3805,14 +3805,14 @@ export function App() {
                   <h2>Delivery-chain Workspace</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but phase60 slice 22 now keeps the review-only delivery chain anchored in a
+                  The alpha shell still does not build a real installer, but phase60 slice 23 now keeps the review-only delivery chain anchored in a
                   usable stage explorer plus route replay board with a screenshot-driven acceptance review pack, explicit acceptance pass progression,
                   screenshot pass records, a Reviewer Flow Ladder, an Acceptance Reading Queue, a Reviewer Signoff Board, a Signoff Readiness Queue, a
-                  Final Review Closeout, a Pack Closeout Board, an Acceptance Storyboard, an Evidence Dossier, Acceptance Evidence Continuity, and an
-                  Evidence Trace Lens, so review-surface navigation, remembered handoff restore, active sequence replay, multi-window coverage,
-                  operator board ownership, reviewer queues, acknowledgement state, stage-level artifacts, promotion review flow, publish gating,
-                  rollback readiness, blockers, handoff posture, ordered companion steps, and explicit companion review paths stay visible as one
-                  local-only non-executing surface.
+                  Final Review Closeout, a Final Review Settlement, a Pack Closeout Board, an Acceptance Storyboard, an Evidence Dossier,
+                  Acceptance Evidence Continuity, and an Evidence Trace Lens, so review-surface navigation, remembered handoff restore, active
+                  sequence replay, multi-window coverage, operator board ownership, reviewer queues, acknowledgement state, stage-level artifacts,
+                  promotion review flow, publish gating, rollback readiness, blockers, handoff posture, ordered companion steps, and explicit
+                  companion review paths stay visible as one local-only non-executing surface.
                 </p>
               </div>
               <div className="foundation-card__metrics">
@@ -3912,7 +3912,7 @@ export function App() {
             onRunCompanionRouteHistory={handleRunCompanionRouteHistory}
             eyebrow="Phase60"
             title="Delivery-chain Workspace"
-            summary="Phase60 slice 22 keeps coverage-driven review-surface navigation, multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, and companion route-history memory in place, then layers a Pack Closeout Board on top of Final Review Closeout, Signoff Readiness Queue, the Reviewer Signoff Board, the Reviewer Flow Ladder, the Acceptance Reading Queue, the Evidence Trace Lens, the Acceptance Storyboard, the Evidence Dossier, Acceptance Evidence Continuity, reviewer framing, and product-review console polish so route replay board, replay scenario packs, capture review, proof bundles, continuity handoffs, scenario-level signoff verdicts, pack-level coverage, and final reviewer handoff posture stay readable as one ordered proof walkthrough along the same publish-gate, approval-queue, rollback-shadow, or handoff relay path while ownership, ordered companion steps, linked artifacts, blockers, handoff posture, route state, and observability mapping remain local-only."
+            summary="Phase60 slice 23 keeps coverage-driven review-surface navigation, multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, and companion route-history memory in place, then layers a Final Review Settlement on top of Final Review Closeout, Signoff Readiness Queue, the Reviewer Signoff Board, the Reviewer Flow Ladder, the Acceptance Reading Queue, the Evidence Trace Lens, the Acceptance Storyboard, the Evidence Dossier, Acceptance Evidence Continuity, and the Pack Closeout Board so route replay board, replay scenario packs, capture review, proof bundles, continuity handoffs, scenario-level signoff verdicts, verdict progression, and pack settlement posture stay readable as one ordered interface-review walkthrough along the same publish-gate, approval-queue, rollback-shadow, or handoff relay path while ownership, ordered companion steps, linked artifacts, blockers, handoff posture, route state, and observability mapping remain local-only."
           />
 
           <section className="surface card window-workbench">
