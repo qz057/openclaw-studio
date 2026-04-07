@@ -440,7 +440,7 @@ function createReplayScenarioPassRecords({
       status: "Route staging",
       detail: "Route replay data is unavailable.",
       tone: "warning"
-    } satisfies ReplayScenarioPassCard);
+    } as ReplayScenarioPassCard);
   const checksPass =
     passCards.find((pass) => pass.id.endsWith("-pass-checks")) ??
     ({
@@ -449,7 +449,7 @@ function createReplayScenarioPassRecords({
       status: "Checks blocked",
       detail: "Acceptance checks are unavailable.",
       tone: "warning"
-    } satisfies ReplayScenarioPassCard);
+    } as ReplayScenarioPassCard);
   const capturePass =
     passCards.find((pass) => pass.id.endsWith("-pass-capture")) ??
     ({
@@ -458,7 +458,7 @@ function createReplayScenarioPassRecords({
       status: "Capture blocked",
       detail: "Screenshot capture targets are unavailable.",
       tone: "warning"
-    } satisfies ReplayScenarioPassCard);
+    } as ReplayScenarioPassCard);
   const proofPass =
     passCards.find((pass) => pass.id.endsWith("-pass-proof")) ??
     ({
@@ -467,7 +467,7 @@ function createReplayScenarioPassRecords({
       status: "Evidence pack pending",
       detail: "Proof-link data is unavailable.",
       tone: "warning"
-    } satisfies ReplayScenarioPassCard);
+    } as ReplayScenarioPassCard);
 
   return [
     {
@@ -1224,7 +1224,7 @@ export function DeliveryChainWorkspace({
           <h2>{title ?? "Delivery-chain Workspace"}</h2>
           <p>
             {summary ??
-              "Stage Explorer ties the operator board, delivery stage, review artifacts, replay scenario packs, screenshot pass records, capture review flow, proof-linked evidence bundles, promotion/publish/rollback flow, blockers, handoff posture, and observability mapping into one local-only review surface."}
+              "Stage Explorer ties the operator board, delivery stage, review artifacts, replay scenario packs, screenshot pass records, capture review flows, proof-linked evidence bundles, promotion/publish/rollback flow, blockers, handoff posture, and observability mapping into one local-only review surface."}
           </p>
         </div>
         <div className="windowing-card__meta">

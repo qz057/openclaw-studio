@@ -51,6 +51,7 @@
   - phase60 slice11 已继续把 companion route-history memory 推进成 route replay board / replay acceptance checklist，让 delivery workspace 可以直接 restore latest handoff、replay active sequence、以及验收当前 review route 的 review surface / route state / window / lane / board / observability contract
   - phase60 slice13 已继续把 route replay board / replay acceptance checklist 推进成 screenshot-driven acceptance review pack / acceptance scoreboard / pass-status board / screenshot target board，让 delivery workspace 可以把 replay route、scenario review pack、验收检查、reviewer / evidence posture、以及 screenshot targets 收敛成更接近产品验收的单条本地审阅层
   - phase60 slice14 已继续把 screenshot-driven acceptance review pack 推进成 acceptance pass layer / evidence bundle surface / reviewer brief / proof bundle / screenshot target framing，让 delivery workspace 可以把 replay route、reviewer brief、scenario evidence、continuity anchors、proof bundle、以及 screenshot targets 收敛成更完整的本地产品验收链
+  - phase60 slice15 已继续把 acceptance pass layer 推进成 Product Review Console / Screenshot Pass Records / Capture Review Flow / Proof-linked Evidence Bundle，让 delivery workspace 可以把 grouped screenshot comparison、linked proof mapping、以及 product-review console polish 收敛成更像真实产品审阅台的本地验收链
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline

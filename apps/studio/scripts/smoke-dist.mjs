@@ -870,9 +870,43 @@ function assertCommandSurfaceContract(commandSurface, shellState) {
             }
           }
 
+          const evidenceItemIds = new Set((entry.scenarioEvidenceItems ?? []).map((item) => item.id));
+          const screenshotCaptureGroups = new Map();
+
           for (const item of entry.screenshotReviewItems ?? []) {
             if (!item.label || !item.surface || !item.detail || !item.posture) {
               throw new Error(`Replay scenario ${entry.id} has an incomplete screenshot target ${item.id}.`);
+            }
+
+            if (!item.captureGroup || !item.comparisonFrame || !(item.linkedEvidenceItemIds?.length ?? 0)) {
+              throw new Error(`Replay scenario ${entry.id} is missing grouped screenshot comparison metadata on ${item.id}.`);
+            }
+
+            const captureGroup = screenshotCaptureGroups.get(item.captureGroup);
+
+            if (captureGroup && captureGroup.comparisonFrame !== item.comparisonFrame) {
+              throw new Error(
+                `Replay scenario ${entry.id} capture group ${item.captureGroup} mixes comparison frames ${captureGroup.comparisonFrame} and ${item.comparisonFrame}.`
+              );
+            }
+
+            screenshotCaptureGroups.set(item.captureGroup, {
+              comparisonFrame: item.comparisonFrame,
+              count: (captureGroup?.count ?? 0) + 1
+            });
+
+            for (const linkedEvidenceItemId of item.linkedEvidenceItemIds) {
+              if (!evidenceItemIds.has(linkedEvidenceItemId)) {
+                throw new Error(
+                  `Replay scenario ${entry.id} screenshot target ${item.id} points at unknown proof item ${linkedEvidenceItemId}.`
+                );
+              }
+            }
+          }
+
+          for (const [captureGroupId, captureGroup] of screenshotCaptureGroups) {
+            if (captureGroup.count < 2) {
+              throw new Error(`Replay scenario ${entry.id} capture group ${captureGroupId} does not form a comparison pair.`);
             }
           }
         }
