@@ -8,6 +8,7 @@ import {
   type StudioReleaseAcknowledgementState,
   type StudioReleaseApprovalPipeline,
   type StudioReleaseCloseoutWindowState,
+  type StudioCommandActionDeck,
   type StudioReleaseEscalationWindowState,
   type StudioReleaseReviewerQueueStatus,
   type StudioShellState
@@ -16,6 +17,7 @@ import {
 interface DeliveryChainWorkspaceProps {
   pipeline: StudioReleaseApprovalPipeline;
   windowing?: StudioShellState["windowing"];
+  actionDeck?: StudioCommandActionDeck | null;
   compact?: boolean;
   nested?: boolean;
   eyebrow?: string;
@@ -195,6 +197,7 @@ function resolveArtifactCoverage(
 export function DeliveryChainWorkspace({
   pipeline,
   windowing,
+  actionDeck,
   compact = false,
   nested = false,
   eyebrow = "Delivery",
@@ -272,6 +275,11 @@ export function DeliveryChainWorkspace({
     selectedReviewerQueue?.entries.find((entry) => entry.id === selectedReviewerQueue.activeEntryId) ?? selectedReviewerQueue?.entries[0] ?? null;
   const publishStage = selectStudioReleaseDeliveryChainStage(pipeline, "delivery-chain-publish-decision") ?? null;
   const rollbackStage = selectStudioReleaseDeliveryChainStage(pipeline, "delivery-chain-rollback-readiness") ?? null;
+  const relevantActionDeckLanes =
+    actionDeck?.lanes.filter((lane) => (selectedDeliveryStage ? (lane.deliveryChainStageIds ?? []).includes(selectedDeliveryStage.id) : false)) ?? [];
+  const relevantActionDeckActionIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => lane.actionIds))];
+  const relevantActionDeckWindowIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => lane.windowIds ?? []))];
+  const relevantActionDeckBoardIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => lane.orchestrationBoardIds ?? []))];
   const panelClassName = [
     nested ? "delivery-chain-workspace delivery-chain-workspace--nested" : "surface card delivery-chain-workspace",
     compact ? "delivery-chain-workspace--compact" : ""
@@ -554,6 +562,58 @@ export function DeliveryChainWorkspace({
       </div>
 
       <div className="delivery-chain-workspace__explorer-grid">
+        {actionDeck ? (
+          <article className="windowing-summary-card">
+            <span>Command-surface Action Deck</span>
+            <strong>{actionDeck.label}</strong>
+            <p>
+              {relevantActionDeckLanes.length > 0
+                ? "The selected delivery stage is covered by the same review-deck action deck that drives workspace entry, windows observability, and local handoff stabilization."
+                : actionDeck.summary}
+            </p>
+            <div className="workflow-readiness-list">
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Stage lanes</span>
+                <strong>{relevantActionDeckLanes.length} matching lanes</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Actions</span>
+                <strong>{relevantActionDeckActionIds.length} linked actions</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Window coverage</span>
+                <strong>{relevantActionDeckWindowIds.length} windows / {relevantActionDeckBoardIds.length} boards</strong>
+              </div>
+            </div>
+            {relevantActionDeckLanes.length > 0 ? (
+              <div className="windowing-preview-list">
+                {relevantActionDeckLanes.map((lane) => {
+                  const coveredWindows = (lane.windowIds ?? [])
+                    .map((windowId) => windowing?.roster.windows.find((entry) => entry.id === windowId)?.label ?? windowId)
+                    .join(" / ");
+                  const coveredBoards = (lane.orchestrationBoardIds ?? [])
+                    .map((boardId) => windowing?.orchestration.boards.find((entry) => entry.id === boardId)?.label ?? boardId)
+                    .join(" / ");
+
+                  return (
+                    <div key={lane.id} className="windowing-preview-line windowing-preview-line--stacked">
+                      <span>{lane.label}</span>
+                      <strong>{lane.actionIds.length} actions / {(lane.deliveryChainStageIds ?? []).length} stages</strong>
+                      <p>{lane.summary}</p>
+                      <div className="trace-note-links">
+                        <span className={`windowing-badge${lane.tone === "positive" ? " windowing-badge--active" : ""}`}>
+                          {coveredWindows || "No mapped windows"}
+                        </span>
+                        <span className="windowing-badge">{coveredBoards || "No mapped boards"}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
+          </article>
+        ) : null}
+
         <article className="windowing-summary-card">
           <span>Delivery Flow</span>
           <strong>{selectedDeliveryStage?.label ?? "No selected stage"}</strong>

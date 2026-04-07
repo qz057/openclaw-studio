@@ -14,7 +14,7 @@ import { mockBoundarySummary } from "./mock-host.js";
 const mockCommandSurface: StudioCommandSurface = {
   title: "Command Palette",
   summary:
-    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
+    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
   placeholder: "Search orchestration, delivery coverage, observability, navigation, next steps, flow state, detached workspace, or keyboard routes",
   quickActionIds: [
     "command-open-home",
@@ -721,6 +721,109 @@ const mockCommandSurface: StudioCommandSurface = {
         routeIds: ["settings", "agents", "codex"],
         workspaceViewIds: ["review-deck"],
         windowIntentIds: ["window-intent-review-workspace"]
+      }
+    }
+  ],
+  actionDecks: [
+    {
+      id: "deck-review-deck-orchestration",
+      label: "Review Deck Orchestration Deck",
+      summary:
+        "Review-deck posture now carries a dedicated local-only action deck so workspace entry, review-workspace intent, delivery-stage coverage, and cross-window handoff coverage stay grouped instead of being inferred from separate cards.",
+      tone: "positive",
+      flowId: "flow-review-deck-coverage",
+      sequenceId: "sequence-review-coverage-flow",
+      lanes: [
+        {
+          id: "deck-lane-review-deck-workspace",
+          label: "Review Workspace Entry",
+          summary:
+            "Move into Review Deck and focus the review workspace intent so the preview lane can own a staged local review posture before any future detached support exists.",
+          tone: "positive",
+          actionIds: ["command-open-review-view", "command-stage-review-window"],
+          primaryActionId: "command-open-review-view",
+          followUpActionIds: ["command-stage-review-window"],
+          workspaceViewIds: ["review-deck"],
+          windowIntentIds: ["window-intent-review-workspace"],
+          deliveryChainStageIds: ["delivery-chain-promotion-readiness"],
+          focusDeliveryChainStageId: "delivery-chain-promotion-readiness",
+          windowIds: ["window-review-board"],
+          focusWindowId: "window-review-board",
+          sharedStateLaneIds: ["shared-state-lane-preview-review"],
+          focusSharedStateLaneId: "shared-state-lane-preview-review",
+          orchestrationBoardIds: ["orchestration-board-preview-review"],
+          focusOrchestrationBoardId: "orchestration-board-preview-review",
+          observabilityMappingIds: ["observability-mapping-lifecycle-preview"],
+          focusObservabilityMappingId: "observability-mapping-lifecycle-preview"
+        },
+        {
+          id: "deck-lane-review-deck-delivery-coverage",
+          label: "Delivery Gate Coverage",
+          summary:
+            "Cross-window observability keeps the preview stage tied to publish and rollback gates, so downstream coverage remains visible while every stage stays metadata-only and non-executing.",
+          tone: "warning",
+          actionIds: ["command-open-windows-observability", "command-stage-review-window"],
+          primaryActionId: "command-open-windows-observability",
+          followUpActionIds: ["command-stage-review-window"],
+          workspaceViewIds: ["review-deck"],
+          windowIntentIds: ["window-intent-review-workspace"],
+          deliveryChainStageIds: [
+            "delivery-chain-promotion-readiness",
+            "delivery-chain-publish-decision",
+            "delivery-chain-rollback-readiness"
+          ],
+          focusDeliveryChainStageId: "delivery-chain-publish-decision",
+          windowIds: ["window-review-board", "window-shell-main", "window-trace-review"],
+          focusWindowId: "window-shell-main",
+          sharedStateLaneIds: [
+            "shared-state-lane-preview-review",
+            "shared-state-lane-boundary-review",
+            "shared-state-lane-trace-review"
+          ],
+          focusSharedStateLaneId: "shared-state-lane-boundary-review",
+          orchestrationBoardIds: [
+            "orchestration-board-preview-review",
+            "orchestration-board-boundary-review",
+            "orchestration-board-trace-review"
+          ],
+          focusOrchestrationBoardId: "orchestration-board-boundary-review",
+          observabilityMappingIds: [
+            "observability-mapping-lifecycle-preview",
+            "observability-mapping-final-gate",
+            "observability-mapping-rollback-shadow"
+          ],
+          focusObservabilityMappingId: "observability-mapping-final-gate"
+        },
+        {
+          id: "deck-lane-review-deck-handoff",
+          label: "Preview Handoff Stabilization",
+          summary:
+            "Advance the preview workflow lane only after Review Deck and windows observability are aligned, so handoff posture and closeout timing stay attached to the same local orchestration board.",
+          tone: "warning",
+          actionIds: [
+            "command-open-review-view",
+            "command-stage-review-window",
+            "command-open-windows-observability",
+            "command-advance-workflow"
+          ],
+          primaryActionId: "command-advance-workflow",
+          followUpActionIds: ["command-open-windows-observability", "command-stage-review-window"],
+          workspaceViewIds: ["review-deck"],
+          windowIntentIds: ["window-intent-review-workspace"],
+          deliveryChainStageIds: ["delivery-chain-promotion-readiness"],
+          focusDeliveryChainStageId: "delivery-chain-promotion-readiness",
+          windowIds: ["window-review-board"],
+          focusWindowId: "window-review-board",
+          sharedStateLaneIds: ["shared-state-lane-preview-review"],
+          focusSharedStateLaneId: "shared-state-lane-preview-review",
+          orchestrationBoardIds: ["orchestration-board-preview-review"],
+          focusOrchestrationBoardId: "orchestration-board-preview-review",
+          observabilityMappingIds: ["observability-mapping-lifecycle-preview"],
+          focusObservabilityMappingId: "observability-mapping-lifecycle-preview"
+        }
+      ],
+      match: {
+        routeIds: ["settings", "agents", "codex"]
       }
     }
   ],

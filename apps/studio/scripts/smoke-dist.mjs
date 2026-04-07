@@ -488,6 +488,10 @@ function assertCommandSurfaceContract(commandSurface, shellState) {
     throw new Error("Shell command surface is missing phase35 next-step boards.");
   }
 
+  if (!Array.isArray(commandSurface.actionDecks) || commandSurface.actionDecks.length === 0) {
+    throw new Error("Shell command surface is missing the phase60 action decks.");
+  }
+
   if (!commandSurface.history?.title || !commandSurface.history?.retention) {
     throw new Error("Shell command surface is missing phase35 command history contract.");
   }
@@ -552,6 +556,16 @@ function assertCommandSurfaceContract(commandSurface, shellState) {
   }
 
   const sequenceIds = new Set(commandSurface.sequences.map((sequence) => sequence.id));
+  const flowIds = new Set(commandSurface.contextualFlows.map((flow) => flow.id));
+  const workspaceViewIds = new Set((shellState.windowing?.views ?? []).map((view) => view.id));
+  const windowIntentIds = new Set((shellState.windowing?.windowIntents ?? []).map((intent) => intent.id));
+  const rosterWindowIds = new Set((shellState.windowing?.roster?.windows ?? []).map((entry) => entry.id));
+  const sharedStateLaneIds = new Set((shellState.windowing?.sharedState?.lanes ?? []).map((lane) => lane.id));
+  const orchestrationBoardIds = new Set((shellState.windowing?.orchestration?.boards ?? []).map((board) => board.id));
+  const observabilityMappingIds = new Set((shellState.windowing?.observability?.mappings ?? []).map((mapping) => mapping.id));
+  const deliveryChainStageIds = new Set(
+    (shellState.boundary?.hostExecutor?.releaseApprovalPipeline?.deliveryChain?.stages ?? []).map((stage) => stage.id)
+  );
   for (const sequence of commandSurface.sequences) {
     if (sequence.safety !== "local-only" || !Array.isArray(sequence.actionIds) || sequence.actionIds.length === 0) {
       throw new Error(`Command sequence ${sequence.id} drifted from the expected local-only posture.`);
@@ -598,6 +612,164 @@ function assertCommandSurfaceContract(commandSurface, shellState) {
         throw new Error(`Command next-step board ${board.id} points at unknown next step ${stepId}.`);
       }
     }
+  }
+
+  for (const deck of commandSurface.actionDecks) {
+    if (!flowIds.has(deck.flowId)) {
+      throw new Error(`Command action deck ${deck.id} points at unknown flow ${deck.flowId}.`);
+    }
+
+    if (!sequenceIds.has(deck.sequenceId)) {
+      throw new Error(`Command action deck ${deck.id} points at unknown sequence ${deck.sequenceId}.`);
+    }
+
+    if (!Array.isArray(deck.lanes) || deck.lanes.length === 0) {
+      throw new Error(`Command action deck ${deck.id} is missing lane coverage.`);
+    }
+
+    for (const lane of deck.lanes) {
+      if (!Array.isArray(lane.actionIds) || lane.actionIds.length === 0) {
+        throw new Error(`Command action deck lane ${lane.id} is missing actions.`);
+      }
+
+      if (!lane.primaryActionId || !lane.actionIds.includes(lane.primaryActionId)) {
+        throw new Error(`Command action deck lane ${lane.id} is missing a primary action inside its action list.`);
+      }
+
+      for (const actionId of lane.actionIds) {
+        if (!actionById.has(actionId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown action ${actionId}.`);
+        }
+      }
+
+      for (const followUpActionId of lane.followUpActionIds ?? []) {
+        if (!lane.actionIds.includes(followUpActionId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at follow-up action ${followUpActionId} outside its action list.`);
+        }
+
+        if (!actionById.has(followUpActionId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown follow-up action ${followUpActionId}.`);
+        }
+      }
+
+      for (const workspaceViewId of lane.workspaceViewIds ?? []) {
+        if (!workspaceViewIds.has(workspaceViewId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown workspace view ${workspaceViewId}.`);
+        }
+      }
+
+      for (const windowIntentId of lane.windowIntentIds ?? []) {
+        if (!windowIntentIds.has(windowIntentId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown window intent ${windowIntentId}.`);
+        }
+      }
+
+      for (const deliveryChainStageId of lane.deliveryChainStageIds ?? []) {
+        if (!deliveryChainStageIds.has(deliveryChainStageId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown delivery stage ${deliveryChainStageId}.`);
+        }
+      }
+
+      if (lane.focusDeliveryChainStageId) {
+        if (!deliveryChainStageIds.has(lane.focusDeliveryChainStageId)) {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at unknown focus delivery stage ${lane.focusDeliveryChainStageId}.`
+          );
+        }
+
+        if (lane.deliveryChainStageIds?.length && !lane.deliveryChainStageIds.includes(lane.focusDeliveryChainStageId)) {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at focus delivery stage ${lane.focusDeliveryChainStageId} outside its mapped stages.`
+          );
+        }
+      }
+
+      for (const windowId of lane.windowIds ?? []) {
+        if (!rosterWindowIds.has(windowId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown window ${windowId}.`);
+        }
+      }
+
+      if (lane.focusWindowId) {
+        if (!rosterWindowIds.has(lane.focusWindowId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown focus window ${lane.focusWindowId}.`);
+        }
+
+        if (lane.windowIds?.length && !lane.windowIds.includes(lane.focusWindowId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at focus window ${lane.focusWindowId} outside its mapped windows.`);
+        }
+      }
+
+      for (const sharedStateLaneId of lane.sharedStateLaneIds ?? []) {
+        if (!sharedStateLaneIds.has(sharedStateLaneId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown shared-state lane ${sharedStateLaneId}.`);
+        }
+      }
+
+      if (lane.focusSharedStateLaneId) {
+        if (!sharedStateLaneIds.has(lane.focusSharedStateLaneId)) {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at unknown focus shared-state lane ${lane.focusSharedStateLaneId}.`
+          );
+        }
+
+        if (lane.sharedStateLaneIds?.length && !lane.sharedStateLaneIds.includes(lane.focusSharedStateLaneId)) {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at focus shared-state lane ${lane.focusSharedStateLaneId} outside its mapped lanes.`
+          );
+        }
+      }
+
+      for (const orchestrationBoardId of lane.orchestrationBoardIds ?? []) {
+        if (!orchestrationBoardIds.has(orchestrationBoardId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown orchestration board ${orchestrationBoardId}.`);
+        }
+      }
+
+      if (lane.focusOrchestrationBoardId) {
+        if (!orchestrationBoardIds.has(lane.focusOrchestrationBoardId)) {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at unknown focus orchestration board ${lane.focusOrchestrationBoardId}.`
+          );
+        }
+
+        if (
+          lane.orchestrationBoardIds?.length &&
+          !lane.orchestrationBoardIds.includes(lane.focusOrchestrationBoardId)
+        ) {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at focus orchestration board ${lane.focusOrchestrationBoardId} outside its mapped boards.`
+          );
+        }
+      }
+
+      for (const observabilityMappingId of lane.observabilityMappingIds ?? []) {
+        if (!observabilityMappingIds.has(observabilityMappingId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown observability mapping ${observabilityMappingId}.`);
+        }
+      }
+
+      if (lane.focusObservabilityMappingId) {
+        if (!observabilityMappingIds.has(lane.focusObservabilityMappingId)) {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at unknown focus observability mapping ${lane.focusObservabilityMappingId}.`
+          );
+        }
+
+        if (
+          lane.observabilityMappingIds?.length &&
+          !lane.observabilityMappingIds.includes(lane.focusObservabilityMappingId)
+        ) {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at focus observability mapping ${lane.focusObservabilityMappingId} outside its mapped rows.`
+          );
+        }
+      }
+    }
+  }
+
+  if (!commandSurface.actionDecks.some((deck) => deck.id === "deck-review-deck-orchestration")) {
+    throw new Error("Shell command surface is missing the phase60 review-deck orchestration deck.");
   }
 
   for (const shortcut of commandSurface.keyboardRouting.shortcuts) {

@@ -993,6 +993,39 @@ export interface StudioCommandNextStepBoard {
   match?: StudioCommandMatcher;
 }
 
+export interface StudioCommandActionDeckLane {
+  id: string;
+  label: string;
+  summary: string;
+  tone: StudioTone;
+  actionIds: string[];
+  primaryActionId: string;
+  followUpActionIds?: string[];
+  workspaceViewIds?: StudioWorkspaceViewId[];
+  windowIntentIds?: string[];
+  deliveryChainStageIds?: string[];
+  focusDeliveryChainStageId?: string;
+  windowIds?: string[];
+  focusWindowId?: string;
+  sharedStateLaneIds?: string[];
+  focusSharedStateLaneId?: string;
+  orchestrationBoardIds?: string[];
+  focusOrchestrationBoardId?: string;
+  observabilityMappingIds?: string[];
+  focusObservabilityMappingId?: string;
+}
+
+export interface StudioCommandActionDeck {
+  id: string;
+  label: string;
+  summary: string;
+  tone: StudioTone;
+  flowId: string;
+  sequenceId: string;
+  lanes: StudioCommandActionDeckLane[];
+  match?: StudioCommandMatcher;
+}
+
 export interface StudioKeyboardShortcut {
   id: string;
   label: string;
@@ -1034,6 +1067,7 @@ export interface StudioCommandSurface {
   contextualFlows: StudioCommandContextualFlow[];
   nextSteps: StudioCommandNextStep[];
   nextStepBoards: StudioCommandNextStepBoard[];
+  actionDecks: StudioCommandActionDeck[];
   history: StudioCommandHistoryContract;
   keyboardRouting: StudioKeyboardRouting;
 }

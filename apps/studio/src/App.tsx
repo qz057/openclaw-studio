@@ -36,6 +36,7 @@ import {
 } from "./components/CommandPalette";
 import {
   ContextualCommandPanel,
+  type ContextualCommandActionDeckLaneItem,
   type ContextualCommandPanelProps,
   type ContextualCommandStateLine,
   type ContextualCommandStep
@@ -158,6 +159,73 @@ function scoreCommandMatcher(matcher: StudioCommandMatcher | undefined, context:
   return score;
 }
 
+interface ActionDeckLaneContext {
+  workspaceViewId?: StudioShellLayoutState["workspaceViewId"];
+  windowIntentId?: string;
+  deliveryStageId?: string | null;
+  windowId?: string | null;
+  sharedStateLaneId?: string | null;
+  orchestrationBoardId?: string | null;
+  observabilityMappingId?: string | null;
+}
+
+function scoreActionDeckLane(
+  lane: StudioShellState["commandSurface"]["actionDecks"][number]["lanes"][number],
+  context: ActionDeckLaneContext
+): number {
+  let score = 0;
+
+  if (context.workspaceViewId && lane.workspaceViewIds?.includes(context.workspaceViewId)) {
+    score += 4;
+  }
+
+  if (context.windowIntentId && lane.windowIntentIds?.includes(context.windowIntentId)) {
+    score += 3;
+  }
+
+  if (context.deliveryStageId) {
+    if (lane.focusDeliveryChainStageId === context.deliveryStageId) {
+      score += 10;
+    } else if (lane.deliveryChainStageIds?.includes(context.deliveryStageId)) {
+      score += 6;
+    }
+  }
+
+  if (context.windowId) {
+    if (lane.focusWindowId === context.windowId) {
+      score += 8;
+    } else if (lane.windowIds?.includes(context.windowId)) {
+      score += 4;
+    }
+  }
+
+  if (context.sharedStateLaneId) {
+    if (lane.focusSharedStateLaneId === context.sharedStateLaneId) {
+      score += 8;
+    } else if (lane.sharedStateLaneIds?.includes(context.sharedStateLaneId)) {
+      score += 4;
+    }
+  }
+
+  if (context.orchestrationBoardId) {
+    if (lane.focusOrchestrationBoardId === context.orchestrationBoardId) {
+      score += 8;
+    } else if (lane.orchestrationBoardIds?.includes(context.orchestrationBoardId)) {
+      score += 4;
+    }
+  }
+
+  if (context.observabilityMappingId) {
+    if (lane.focusObservabilityMappingId === context.observabilityMappingId) {
+      score += 8;
+    } else if (lane.observabilityMappingIds?.includes(context.observabilityMappingId)) {
+      score += 4;
+    }
+  }
+
+  return score;
+}
+
 function matchesKeyboardShortcut(shortcut: StudioKeyboardShortcut, event: KeyboardEvent): boolean {
   if (shortcut.key.toLowerCase() !== event.key.toLowerCase()) {
     return false;
@@ -203,6 +271,7 @@ interface AppWindowingSurfaceProps {
   activeWindowId: string | null;
   activeLaneId: string | null;
   activeBoardId: string | null;
+  activeMappingId: string | null;
 }
 
 interface CommandContextState {
@@ -225,6 +294,7 @@ type WindowIntentStateMap = Record<string, StudioWindowIntentStatus>;
 type LocalWindowIntent = StudioShellState["windowing"]["windowIntents"][number] & {
   localStatus: StudioWindowIntentStatus;
 };
+type CommandActionDeck = StudioShellState["commandSurface"]["actionDecks"][number];
 type WindowWorkflowLane = StudioShellState["windowing"]["workflow"]["lanes"][number];
 type WindowWorkflowStep = StudioShellState["windowing"]["workflow"]["steps"][number];
 type WorkflowStepState = "available" | "entered" | "surfaced" | "staged" | "focused";
@@ -261,6 +331,15 @@ interface ActivityInput {
 interface CommandSequenceProgress {
   recommendedAction: StudioCommandAction | null;
   steps: ContextualCommandStep[];
+}
+
+interface ReviewCoverageSelection {
+  actionDeckLaneId: string | null;
+  deliveryStageId: string | null;
+  windowId: string | null;
+  sharedStateLaneId: string | null;
+  orchestrationBoardId: string | null;
+  observabilityMappingId: string | null;
 }
 
 function createWindowIntentStateMap(
@@ -467,6 +546,14 @@ export function App() {
   const [windowIntentStates, setWindowIntentStates] = useState<WindowIntentStateMap>({});
   const [commandLog, setCommandLog] = useState<CommandLogEntry[]>([]);
   const [selectedPaletteEntryId, setSelectedPaletteEntryId] = useState<string | null>(null);
+  const [reviewCoverageSelection, setReviewCoverageSelection] = useState<ReviewCoverageSelection>({
+    actionDeckLaneId: null,
+    deliveryStageId: null,
+    windowId: null,
+    sharedStateLaneId: null,
+    orchestrationBoardId: null,
+    observabilityMappingId: null
+  });
 
   useEffect(() => {
     const syncRoute = () => {
@@ -687,19 +774,6 @@ export function App() {
     data.windowing.roster.windows[0] ??
     null;
   const activeObservabilityMapping = selectStudioWindowObservabilityActiveMapping(data.windowing) ?? null;
-  const windowingSurface: AppWindowingSurfaceProps = {
-    activeRouteId: activePage,
-    activeWindowId: activeWindowRosterEntry?.id ?? null,
-    activeLaneId: activeSharedStateLane?.id ?? null,
-    activeBoardId: activeOrchestrationBoard?.id ?? null
-  };
-  const inspectorSections = createInspectorSections(
-    data.boundary,
-    hostTraceFocus,
-    data.windowing,
-    windowingSurface.activeLaneId,
-    windowingSurface.activeWindowId
-  );
   const actionById = new Map(data.commandSurface.actions.map((action) => [action.id, action]));
   const activeContexts = data.commandSurface.contexts.filter((context) => context.id === "global" || context.id === activePage);
   const contextualActions = dedupeCommandActions(activeContexts.flatMap((context) => context.actionIds.map((actionId) => actionById.get(actionId))));
@@ -765,6 +839,110 @@ export function App() {
 
         return rightScore - leftScore;
       })[0] ?? null;
+  const activeActionDeck =
+    data.commandSurface.actionDecks
+      .filter((deck) => matchesCommandMatcher(deck.match, commandContext))
+      .sort((left, right) => {
+        const leftScore =
+          scoreCommandMatcher(left.match, commandContext) +
+          (left.flowId === activeContextualFlow?.id ? 10 : 0) +
+          (left.sequenceId === activeSequence?.id ? 6 : 0);
+        const rightScore =
+          scoreCommandMatcher(right.match, commandContext) +
+          (right.flowId === activeContextualFlow?.id ? 10 : 0) +
+          (right.sequenceId === activeSequence?.id ? 6 : 0);
+
+        return rightScore - leftScore;
+      })[0] ?? null;
+  const activeActionDeckActionIds = [...new Set(activeActionDeck?.lanes.flatMap((lane) => lane.actionIds) ?? [])];
+  const activeActionDeckDeliveryStageIds = [
+    ...new Set(activeActionDeck?.lanes.flatMap((lane) => lane.deliveryChainStageIds ?? []) ?? [])
+  ];
+  const activeActionDeckWindowIds = [...new Set(activeActionDeck?.lanes.flatMap((lane) => lane.windowIds ?? []) ?? [])];
+  const activeActionDeckBoardIds = [...new Set(activeActionDeck?.lanes.flatMap((lane) => lane.orchestrationBoardIds ?? []) ?? [])];
+  const selectedCoverageStage =
+    (reviewCoverageSelection.deliveryStageId
+      ? selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, reviewCoverageSelection.deliveryStageId)
+      : null) ?? null;
+  const selectedCoverageWindow =
+    data.windowing.roster.windows.find((entry) => entry.id === reviewCoverageSelection.windowId) ?? null;
+  const selectedCoverageLane =
+    data.windowing.sharedState.lanes.find((entry) => entry.id === reviewCoverageSelection.sharedStateLaneId) ?? null;
+  const selectedCoverageBoard =
+    data.windowing.orchestration.boards.find((entry) => entry.id === reviewCoverageSelection.orchestrationBoardId) ?? null;
+  const selectedCoverageMapping =
+    data.windowing.observability.mappings.find((entry) => entry.id === reviewCoverageSelection.observabilityMappingId) ?? null;
+  const actionDeckLaneContext: ActionDeckLaneContext = {
+    workspaceViewId: workspaceView?.id,
+    windowIntentId: selectedWindowIntent?.id,
+    deliveryStageId: selectedCoverageStage?.id ?? currentDeliveryStage?.id ?? null,
+    windowId: selectedCoverageWindow?.id ?? activeWindowRosterEntry?.id ?? null,
+    sharedStateLaneId: selectedCoverageLane?.id ?? activeSharedStateLane?.id ?? null,
+    orchestrationBoardId: selectedCoverageBoard?.id ?? activeOrchestrationBoard?.id ?? null,
+    observabilityMappingId: selectedCoverageMapping?.id ?? activeObservabilityMapping?.id ?? null
+  };
+  const activeActionDeckLane =
+    (reviewCoverageSelection.actionDeckLaneId
+      ? activeActionDeck?.lanes.find((lane) => lane.id === reviewCoverageSelection.actionDeckLaneId)
+      : undefined) ??
+    [...(activeActionDeck?.lanes ?? [])].sort(
+      (left, right) => scoreActionDeckLane(right, actionDeckLaneContext) - scoreActionDeckLane(left, actionDeckLaneContext)
+    )[0] ??
+    null;
+  const resolvedDeliveryCoverageStage =
+    selectedCoverageStage ??
+    (activeActionDeckLane?.focusDeliveryChainStageId
+      ? selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, activeActionDeckLane.focusDeliveryChainStageId)
+      : null) ??
+    currentDeliveryStage ??
+    releaseApprovalPipeline.deliveryChain.stages[0] ??
+    null;
+  const resolvedCoverageWindow =
+    selectedCoverageWindow ??
+    (activeActionDeckLane?.focusWindowId
+      ? data.windowing.roster.windows.find((entry) => entry.id === activeActionDeckLane.focusWindowId)
+      : null) ??
+    activeWindowRosterEntry ??
+    data.windowing.roster.windows[0] ??
+    null;
+  const resolvedCoverageLane =
+    selectedCoverageLane ??
+    (activeActionDeckLane?.focusSharedStateLaneId
+      ? data.windowing.sharedState.lanes.find((entry) => entry.id === activeActionDeckLane.focusSharedStateLaneId)
+      : null) ??
+    activeSharedStateLane ??
+    data.windowing.sharedState.lanes[0] ??
+    null;
+  const resolvedCoverageBoard =
+    selectedCoverageBoard ??
+    (activeActionDeckLane?.focusOrchestrationBoardId
+      ? data.windowing.orchestration.boards.find((entry) => entry.id === activeActionDeckLane.focusOrchestrationBoardId)
+      : null) ??
+    activeOrchestrationBoard ??
+    data.windowing.orchestration.boards[0] ??
+    null;
+  const resolvedCoverageMapping =
+    selectedCoverageMapping ??
+    (activeActionDeckLane?.focusObservabilityMappingId
+      ? data.windowing.observability.mappings.find((entry) => entry.id === activeActionDeckLane.focusObservabilityMappingId)
+      : null) ??
+    activeObservabilityMapping ??
+    data.windowing.observability.mappings[0] ??
+    null;
+  const windowingSurface: AppWindowingSurfaceProps = {
+    activeRouteId: activePage,
+    activeWindowId: resolvedCoverageWindow?.id ?? null,
+    activeLaneId: resolvedCoverageLane?.id ?? null,
+    activeBoardId: resolvedCoverageBoard?.id ?? null,
+    activeMappingId: resolvedCoverageMapping?.id ?? null
+  };
+  const inspectorSections = createInspectorSections(
+    data.boundary,
+    hostTraceFocus,
+    data.windowing,
+    windowingSurface.activeLaneId,
+    windowingSurface.activeWindowId
+  );
   const nextStepItems =
     activeNextStepBoard?.stepIds.flatMap((stepId) => {
       const step = nextStepById.get(stepId);
@@ -804,6 +982,12 @@ export function App() {
       tone: activeContextualFlow ? "positive" : "neutral"
     },
     {
+      id: "flow-state-action-deck",
+      label: "Action deck",
+      value: activeActionDeck?.label ?? "No action deck",
+      tone: activeActionDeck?.tone ?? "neutral"
+    },
+    {
       id: "flow-state-workspace",
       label: "Workspace",
       value: workspaceView?.label ?? "No workspace",
@@ -829,16 +1013,23 @@ export function App() {
     {
       id: "flow-state-delivery",
       label: "Delivery coverage",
-      value: currentDeliveryStage ? `${currentDeliveryStage.label} / ${currentDeliveryStage.phase}` : "No delivery stage",
-      tone: currentDeliveryStage?.status === "ready" ? "positive" : currentDeliveryStage ? "warning" : "neutral"
+      value: resolvedDeliveryCoverageStage
+        ? `${resolvedDeliveryCoverageStage.label} / ${resolvedDeliveryCoverageStage.phase}`
+        : "No delivery stage",
+      tone:
+        resolvedDeliveryCoverageStage?.status === "ready"
+          ? "positive"
+          : resolvedDeliveryCoverageStage
+            ? "warning"
+            : "neutral"
     },
     {
       id: "flow-state-observability",
       label: "Observability path",
-      value: activeObservabilityMapping
-        ? `${activeObservabilityMapping.label} / ${formatReviewPostureRelationship(activeObservabilityMapping.relationship)}`
+      value: resolvedCoverageMapping
+        ? `${resolvedCoverageMapping.label} / ${formatReviewPostureRelationship(resolvedCoverageMapping.relationship)}`
         : "No active observability path",
-      tone: activeObservabilityMapping ? activeObservabilityMapping.tone : "neutral"
+      tone: resolvedCoverageMapping ? resolvedCoverageMapping.tone : "neutral"
     },
     {
       id: "flow-state-detached",
@@ -847,6 +1038,30 @@ export function App() {
       tone: selectedDetachedPanel ? (selectedDetachedPanel.detachState === "detached-local" ? "positive" : "warning") : "neutral"
     }
   ];
+  const actionDeckLanes: ContextualCommandActionDeckLaneItem[] =
+    activeActionDeck?.lanes.map((lane) => {
+      const primaryAction = actionById.get(lane.primaryActionId);
+      const followUpActionLabels = (lane.followUpActionIds ?? [])
+        .map((actionId) => actionById.get(actionId)?.label)
+        .filter((label): label is string => Boolean(label));
+      const laneScore = scoreActionDeckLane(lane, actionDeckLaneContext);
+
+      return {
+        id: lane.id,
+        label: lane.label,
+        detail: lane.summary,
+        tone: lane.tone,
+        active: (reviewCoverageSelection.actionDeckLaneId ? lane.id === reviewCoverageSelection.actionDeckLaneId : false) ||
+          (!reviewCoverageSelection.actionDeckLaneId && lane.id === activeActionDeckLane?.id) ||
+          laneScore > 0,
+        primaryActionLabel: primaryAction?.label ?? lane.primaryActionId,
+        followUpActionLabels,
+        actionCount: lane.actionIds.length,
+        stageCount: (lane.deliveryChainStageIds ?? []).length,
+        windowCount: (lane.windowIds ?? []).length,
+        boardCount: (lane.orchestrationBoardIds ?? []).length
+      };
+    }) ?? [];
   const paletteShortcutHints: CommandPaletteShortcutHint[] = data.commandSurface.keyboardRouting.shortcuts.slice(0, 8).map((shortcut) => ({
     id: shortcut.id,
     combo: shortcut.combo,
@@ -876,6 +1091,9 @@ export function App() {
     workspaceLabel: workspaceView?.label,
     focusedSlotLabel: hostTraceFocus?.slot.label,
     activeFlowState,
+    actionDeckLabel: activeActionDeck?.label,
+    actionDeckSummary: activeActionDeck?.summary,
+    actionDeckLanes,
     nextStepBoardLabel: activeNextStepBoard?.label,
     nextStepBoardSummary: activeNextStepBoard?.summary,
     nextStepItems,
@@ -904,6 +1122,27 @@ export function App() {
     },
     onRunAction: (action) => {
       executeCommand(action);
+    },
+    onRunActionDeckLane: (laneId) => {
+      const lane = activeActionDeck?.lanes.find((entry) => entry.id === laneId);
+
+      if (!lane) {
+        return;
+      }
+
+      setReviewCoverageSelection({
+        actionDeckLaneId: lane.id,
+        deliveryStageId: lane.focusDeliveryChainStageId ?? lane.deliveryChainStageIds?.[0] ?? null,
+        windowId: lane.focusWindowId ?? lane.windowIds?.[0] ?? null,
+        sharedStateLaneId: lane.focusSharedStateLaneId ?? lane.sharedStateLaneIds?.[0] ?? null,
+        orchestrationBoardId: lane.focusOrchestrationBoardId ?? lane.orchestrationBoardIds?.[0] ?? null,
+        observabilityMappingId: lane.focusObservabilityMappingId ?? lane.observabilityMappingIds?.[0] ?? null
+      });
+
+      const primaryAction = actionById.get(lane.primaryActionId);
+      if (primaryAction) {
+        executeCommand(primaryAction);
+      }
     }
   };
   const crossViewCoordinationMatrix = [
@@ -918,6 +1157,15 @@ export function App() {
       label: "Flow -> Next-step board",
       value: `${activeSequence?.label ?? "No active sequence"} -> ${activeNextStepBoard?.label ?? "No next-step board"}`,
       detail: "Recommended next actions and route-aware boards now stay linked instead of surfacing as isolated buttons."
+    },
+    {
+      id: "cross-view-action-deck",
+      label: "Action deck -> Delivery / windows",
+      value: activeActionDeck
+        ? `${activeActionDeck.label} -> ${activeActionDeckDeliveryStageIds.length} stages / ${activeActionDeckWindowIds.length} windows / ${activeActionDeckBoardIds.length} boards`
+        : "No active action deck",
+      detail:
+        "Review-deck orchestration now carries explicit delivery-stage and multi-window coverage instead of leaving the command surface detached from downstream review posture."
     },
     {
       id: "cross-view-window-shell",
@@ -960,6 +1208,12 @@ export function App() {
       label: "Inspector -> Next-step board",
       value: activeNextStepBoard?.label ?? "No next-step board",
       detail: "Inspector drilldowns now stay tied to the same route-aware next-step board that drives the current page."
+    },
+    {
+      id: "inspector-linkage-action-deck",
+      label: "Inspector -> Action deck",
+      value: activeActionDeck ? `${activeActionDeck.label} / ${activeActionDeck.lanes.length} lanes` : "No action deck",
+      detail: "Inspector drilldowns can now be compared against the same review-deck action deck that maps delivery-stage and window coverage."
     },
     {
       id: "inspector-linkage-window",
@@ -2139,6 +2393,46 @@ export function App() {
               </div>
             </article>
 
+            {activeActionDeck ? (
+              <article className="surface card foundation-card">
+                <div className="card-header card-header--stack">
+                  <div>
+                    <p className="eyebrow">Phase60</p>
+                    <h2>{activeActionDeck.label}</h2>
+                  </div>
+                  <p>{activeActionDeck.summary}</p>
+                </div>
+                <div className="foundation-card__metrics">
+                  <div className="foundation-pill">
+                    <span>Deck lanes</span>
+                    <strong>{activeActionDeck.lanes.length}</strong>
+                  </div>
+                  <div className="foundation-pill">
+                    <span>Actions</span>
+                    <strong>{activeActionDeckActionIds.length}</strong>
+                  </div>
+                  <div className="foundation-pill">
+                    <span>Delivery stages</span>
+                    <strong>{activeActionDeckDeliveryStageIds.length}</strong>
+                  </div>
+                  <div className="foundation-pill">
+                    <span>Window surfaces</span>
+                    <strong>{activeActionDeckWindowIds.length}</strong>
+                  </div>
+                </div>
+                <div className="workflow-readiness-list">
+                  {activeActionDeck.lanes.map((lane) => (
+                    <div key={lane.id} className={`workflow-readiness-line workflow-readiness-line--${lane.tone}`}>
+                      <span>{lane.label}</span>
+                      <strong>
+                        {lane.actionIds.length} actions / {(lane.deliveryChainStageIds ?? []).length} stages / {(lane.windowIds ?? []).length} windows
+                      </strong>
+                    </div>
+                  ))}
+                </div>
+              </article>
+            ) : null}
+
             <article className="surface card foundation-card">
               <div className="card-header card-header--stack">
                 <div>
@@ -2314,6 +2608,7 @@ export function App() {
           <DeliveryChainWorkspace
             pipeline={releaseApprovalPipeline}
             windowing={data.windowing}
+            actionDeck={activeActionDeck}
             eyebrow="Phase60"
             title="Delivery-chain Workspace"
             summary="Phase60 slice 1 adds a Stage Explorer so the shell can pivot across attestation, operator review, promotion, publish, and rollback stages while keeping ownership, review surfaces, linked artifacts, blockers, handoff posture, and observability mapping together."
@@ -2402,6 +2697,7 @@ export function App() {
             <WindowSharedStateBoard
               windowing={data.windowing}
               releaseApprovalPipeline={releaseApprovalPipeline}
+              actionDeck={activeActionDeck}
               activeRouteId={windowingSurface.activeRouteId}
               activeWindowId={windowingSurface.activeWindowId}
               activeLaneId={windowingSurface.activeLaneId}
@@ -2653,6 +2949,7 @@ export function App() {
                 <WindowSharedStateBoard
                   windowing={data.windowing}
                   releaseApprovalPipeline={releaseApprovalPipeline}
+                  actionDeck={activeActionDeck}
                   activeRouteId={windowingSurface.activeRouteId}
                   activeWindowId={windowingSurface.activeWindowId}
                   activeLaneId={windowingSurface.activeLaneId}

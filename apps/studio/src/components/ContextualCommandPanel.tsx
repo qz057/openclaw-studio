@@ -33,6 +33,20 @@ export interface ContextualCommandHistoryEntry {
   timestamp: string;
 }
 
+export interface ContextualCommandActionDeckLaneItem {
+  id: string;
+  label: string;
+  detail: string;
+  tone: StudioTone;
+  active: boolean;
+  primaryActionLabel: string;
+  followUpActionLabels: string[];
+  actionCount: number;
+  stageCount: number;
+  windowCount: number;
+  boardCount: number;
+}
+
 export interface ContextualCommandPanelProps {
   eyebrow: string;
   title: string;
@@ -43,6 +57,9 @@ export interface ContextualCommandPanelProps {
   workspaceLabel?: string;
   focusedSlotLabel?: string;
   activeFlowState: ContextualCommandStateLine[];
+  actionDeckLabel?: string;
+  actionDeckSummary?: string;
+  actionDeckLanes: ContextualCommandActionDeckLaneItem[];
   nextStepBoardLabel?: string;
   nextStepBoardSummary?: string;
   nextStepItems: ContextualCommandNextStepItem[];
@@ -56,6 +73,7 @@ export interface ContextualCommandPanelProps {
   shortcuts: StudioKeyboardShortcut[];
   onRunFlow: () => void;
   onRunAction: (action: StudioCommandAction) => void;
+  onRunActionDeckLane?: (laneId: string) => void;
 }
 
 function getStepStateLabel(state: ContextualCommandStepState): string {
@@ -79,6 +97,9 @@ export function ContextualCommandPanel({
   workspaceLabel,
   focusedSlotLabel,
   activeFlowState,
+  actionDeckLabel,
+  actionDeckSummary,
+  actionDeckLanes,
   nextStepBoardLabel,
   nextStepBoardSummary,
   nextStepItems,
@@ -91,7 +112,8 @@ export function ContextualCommandPanel({
   steps,
   shortcuts,
   onRunFlow,
-  onRunAction
+  onRunAction,
+  onRunActionDeckLane
 }: ContextualCommandPanelProps) {
   return (
     <article className="surface card contextual-command-panel">
@@ -183,6 +205,52 @@ export function ContextualCommandPanel({
                     title={item.action.description}
                   >
                     {item.action.label}
+                  </button>
+                ) : null}
+              </article>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {actionDeckLanes.length ? (
+        <div className="contextual-command-panel__section">
+          <div className="contextual-command-panel__section-header">
+            <span>Action Deck Orchestration</span>
+            <strong>{actionDeckLabel ?? "Review coverage deck"}</strong>
+          </div>
+          <p className="panel-summary panel-summary--tight">
+            {actionDeckSummary ?? "Deck lanes keep delivery-stage and multi-window coverage linked to the same local-only command surface."}
+          </p>
+          <div className="contextual-command-panel__next-step-list">
+            {actionDeckLanes.map((lane) => (
+              <article key={lane.id} className={`contextual-command-next-step contextual-command-next-step--${lane.tone}`}>
+                <div>
+                  <span>{lane.primaryActionLabel}</span>
+                  <strong>{lane.active ? `${lane.label} · Active coverage` : lane.label}</strong>
+                  <p>{lane.detail}</p>
+                  <div className="contextual-command-panel__chips">
+                    <span className={`command-context-pill${lane.active ? " workflow-chip--active" : ""}`}>{lane.actionCount} actions</span>
+                    <span className="command-context-pill">{lane.stageCount} stages</span>
+                    <span className="command-context-pill">{lane.windowCount} windows</span>
+                    <span className="command-context-pill">{lane.boardCount} boards</span>
+                    {lane.followUpActionLabels.map((label) => (
+                      <span key={`${lane.id}-${label}`} className="command-context-pill">
+                        {label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                {onRunActionDeckLane ? (
+                  <button
+                    type="button"
+                    className="action-button"
+                    onClick={() => {
+                      onRunActionDeckLane(lane.id);
+                    }}
+                    title={lane.detail}
+                  >
+                    {lane.primaryActionLabel}
                   </button>
                 ) : null}
               </article>

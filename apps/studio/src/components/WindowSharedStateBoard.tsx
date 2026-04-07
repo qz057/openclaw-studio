@@ -5,6 +5,7 @@ import {
   selectStudioReleaseEscalationWindow,
   selectStudioReleaseReviewerQueue,
   selectStudioWindowObservabilityActiveMapping,
+  type StudioCommandActionDeck,
   type StudioPageId,
   type StudioReleaseAcknowledgementState,
   type StudioReleaseApprovalPipeline,
@@ -17,6 +18,7 @@ import {
 interface WindowSharedStateBoardProps {
   windowing: StudioShellState["windowing"];
   releaseApprovalPipeline?: StudioReleaseApprovalPipeline;
+  actionDeck?: StudioCommandActionDeck | null;
   activeRouteId?: StudioPageId;
   activeWindowId?: string | null;
   activeLaneId?: string | null;
@@ -235,6 +237,7 @@ function resolveActiveOrchestrationBoard(
 export function WindowSharedStateBoard({
   windowing,
   releaseApprovalPipeline,
+  actionDeck,
   activeRouteId,
   activeWindowId,
   activeLaneId,
@@ -292,6 +295,19 @@ export function WindowSharedStateBoard({
           };
         })
     : [];
+  const relevantActionDeckLanes =
+    actionDeck?.lanes.filter((lane) => {
+      const coversWindow = activeWindow ? (lane.windowIds ?? []).includes(activeWindow.id) : false;
+      const coversSharedStateLane = activeLane ? (lane.sharedStateLaneIds ?? []).includes(activeLane.id) : false;
+      const coversBoard = activeBoard ? (lane.orchestrationBoardIds ?? []).includes(activeBoard.id) : false;
+      const coversMapping = activeObservabilityMapping
+        ? (lane.observabilityMappingIds ?? []).includes(activeObservabilityMapping.id)
+        : false;
+
+      return coversWindow || coversSharedStateLane || coversBoard || coversMapping;
+    }) ?? [];
+  const relevantActionDeckActionIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => lane.actionIds))];
+  const relevantActionDeckStageIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => lane.deliveryChainStageIds ?? []))];
   const panelClassName = [
     nested ? "window-shared-board window-shared-board--nested" : "surface card window-shared-board",
     compact ? "window-shared-board--compact" : ""
@@ -360,6 +376,61 @@ export function WindowSharedStateBoard({
             </div>
           </div>
         </article>
+
+        {actionDeck ? (
+          <article className="windowing-summary-card">
+            <span>Command-surface Action Deck</span>
+            <strong>{actionDeck.label}</strong>
+            <p>
+              {relevantActionDeckLanes.length > 0
+                ? "The active window, shared-state lane, orchestration board, and observability row are all covered by the same review-deck action deck."
+                : actionDeck.summary}
+            </p>
+            <div className="workflow-readiness-list">
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Covered lanes</span>
+                <strong>{relevantActionDeckLanes.length} deck lanes</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Actions</span>
+                <strong>{relevantActionDeckActionIds.length} linked actions</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Delivery stages</span>
+                <strong>{relevantActionDeckStageIds.length} mapped stages</strong>
+              </div>
+            </div>
+            {relevantActionDeckLanes.length > 0 ? (
+              <div className="windowing-preview-list">
+                {relevantActionDeckLanes.map((lane) => {
+                  const coveredStages = (lane.deliveryChainStageIds ?? [])
+                    .map(
+                      (stageId) =>
+                        releaseApprovalPipeline?.deliveryChain.stages.find((entry) => entry.id === stageId)?.label ?? stageId
+                    )
+                    .join(" / ");
+                  const coveredMappings = (lane.observabilityMappingIds ?? [])
+                    .map((mappingId) => observabilityMappings.find((entry) => entry.id === mappingId)?.label ?? mappingId)
+                    .join(" / ");
+
+                  return (
+                    <div key={lane.id} className="windowing-preview-line windowing-preview-line--stacked">
+                      <span>{lane.label}</span>
+                      <strong>{lane.actionIds.length} actions / {(lane.windowIds ?? []).length} windows</strong>
+                      <p>{lane.summary}</p>
+                      <div className="trace-note-links">
+                        <span className={`windowing-badge${lane.tone === "positive" ? " windowing-badge--active" : ""}`}>
+                          {coveredStages || "No mapped stages"}
+                        </span>
+                        <span className="windowing-badge">{coveredMappings || "No observability rows"}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
+          </article>
+        ) : null}
 
         <article className="windowing-summary-card">
           <span>Route / workspace intent links</span>
