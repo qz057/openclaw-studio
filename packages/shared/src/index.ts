@@ -992,6 +992,10 @@ export type StudioCommandCompanionReviewPathKind =
   | "handoff-companion"
   | "rollback-companion"
   | "stabilization-companion";
+export type StudioCommandCompanionReviewSequenceStepRole =
+  | "current-review-surface"
+  | "primary-companion"
+  | "follow-up-companion";
 
 export interface StudioCommandNextStep {
   id: string;
@@ -1018,9 +1022,25 @@ export interface StudioCommandCompanionReviewPath {
   summary: string;
   tone: StudioTone;
   kind: StudioCommandCompanionReviewPathKind;
+  sequenceId: string;
   sourceActionId: string;
   primaryActionId: string;
   followUpActionIds?: string[];
+}
+
+export interface StudioCommandCompanionReviewSequenceStep {
+  id: string;
+  actionId: string;
+  role: StudioCommandCompanionReviewSequenceStepRole;
+  summary: string;
+}
+
+export interface StudioCommandCompanionReviewSequence {
+  id: string;
+  label: string;
+  summary: string;
+  tone: StudioTone;
+  steps: StudioCommandCompanionReviewSequenceStep[];
 }
 
 export interface StudioCommandActionDeckLane {
@@ -1043,6 +1063,7 @@ export interface StudioCommandActionDeckLane {
   focusOrchestrationBoardId?: string;
   observabilityMappingIds?: string[];
   focusObservabilityMappingId?: string;
+  companionSequences?: StudioCommandCompanionReviewSequence[];
   companionReviewPaths?: StudioCommandCompanionReviewPath[];
 }
 

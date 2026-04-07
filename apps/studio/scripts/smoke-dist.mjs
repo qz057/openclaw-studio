@@ -810,9 +810,41 @@ function assertCommandSurfaceContract(commandSurface, shellState) {
         }
       }
 
+      const companionSequenceIds = new Set((lane.companionSequences ?? []).map((sequence) => sequence.id));
+      const laneCompanionActionIds = new Set([
+        ...lane.actionIds,
+        ...(lane.companionReviewPaths ?? []).flatMap((path) => [path.sourceActionId, path.primaryActionId, ...(path.followUpActionIds ?? [])])
+      ]);
+
+      for (const companionSequence of lane.companionSequences ?? []) {
+        if (!companionSequence.label || !companionSequence.summary || companionSequence.steps.length < 2) {
+          throw new Error(`Command action deck lane ${lane.id} has an invalid companion sequence ${companionSequence.id}.`);
+        }
+
+        for (const step of companionSequence.steps) {
+          const sequenceAction = actionById.get(step.actionId);
+
+          if (!sequenceAction || sequenceAction.kind !== "focus-review-coverage") {
+            throw new Error(
+              `Command action deck lane ${lane.id} points at invalid companion-sequence action ${step.actionId}.`
+            );
+          }
+
+          if (!laneCompanionActionIds.has(step.actionId)) {
+            throw new Error(
+              `Command action deck lane ${lane.id} companion sequence ${companionSequence.id} points outside its linked companion actions.`
+            );
+          }
+        }
+      }
+
       for (const companionPath of lane.companionReviewPaths ?? []) {
         const sourceAction = actionById.get(companionPath.sourceActionId);
         const primaryAction = actionById.get(companionPath.primaryActionId);
+
+        if (!companionPath.sequenceId || !companionSequenceIds.has(companionPath.sequenceId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown companion-path sequence ${companionPath.sequenceId}.`);
+        }
 
         if (!sourceAction || sourceAction.kind !== "focus-review-coverage") {
           throw new Error(
@@ -849,6 +881,10 @@ function assertCommandSurfaceContract(commandSurface, shellState) {
 
   if (!commandSurface.actionDecks.some((deck) => deck.lanes.some((lane) => (lane.companionReviewPaths?.length ?? 0) > 0))) {
     throw new Error("Shell command surface action decks are missing typed companion review-path orchestration.");
+  }
+
+  if (!commandSurface.actionDecks.some((deck) => deck.lanes.some((lane) => (lane.companionSequences?.length ?? 0) > 0))) {
+    throw new Error("Shell command surface action decks are missing sequence-aware companion review navigation.");
   }
 
   for (const shortcut of commandSurface.keyboardRouting.shortcuts) {

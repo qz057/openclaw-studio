@@ -46,6 +46,7 @@ export interface ContextualCommandActionDeckLaneItem {
   windowCount: number;
   boardCount: number;
   reviewSurfaceCount: number;
+  companionSequenceCount: number;
   companionPathCount: number;
 }
 
@@ -60,6 +61,19 @@ export interface ContextualCommandReviewSurfaceItem {
   action: StudioCommandAction;
 }
 
+export interface ContextualCommandCompanionSequenceStepItem {
+  id: string;
+  label: string;
+  detail: string;
+  tone: StudioTone;
+  active: boolean;
+  roleLabel: string;
+  stepLabel: string;
+  coverageLabel: string;
+  pathLabel: string;
+  action: StudioCommandAction | null;
+}
+
 export interface ContextualCommandCompanionReviewPathItem {
   id: string;
   label: string;
@@ -72,6 +86,7 @@ export interface ContextualCommandCompanionReviewPathItem {
   followUpActionLabels: string[];
   coverageLabel: string;
   pathLabel: string;
+  sequenceLabel?: string;
   action: StudioCommandAction | null;
 }
 
@@ -103,6 +118,9 @@ export interface ContextualCommandPanelProps {
   actionDeckSummary?: string;
   actionDeckLanes: ContextualCommandActionDeckLaneItem[];
   reviewSurfaceItems: ContextualCommandReviewSurfaceItem[];
+  companionSequenceLabel?: string;
+  companionSequenceSummary?: string;
+  companionSequenceStepItems: ContextualCommandCompanionSequenceStepItem[];
   companionReviewPathsLabel?: string;
   companionReviewPathsSummary?: string;
   companionReviewPathItems: ContextualCommandCompanionReviewPathItem[];
@@ -150,6 +168,9 @@ export function ContextualCommandPanel({
   actionDeckSummary,
   actionDeckLanes,
   reviewSurfaceItems,
+  companionSequenceLabel,
+  companionSequenceSummary,
+  companionSequenceStepItems,
   companionReviewPathsLabel,
   companionReviewPathsSummary,
   companionReviewPathItems,
@@ -291,6 +312,7 @@ export function ContextualCommandPanel({
                     <span className="command-context-pill">{lane.windowCount} windows</span>
                     <span className="command-context-pill">{lane.boardCount} boards</span>
                     <span className="command-context-pill">{lane.reviewSurfaceCount} review surfaces</span>
+                    <span className="command-context-pill">{lane.companionSequenceCount} companion sequences</span>
                     <span className="command-context-pill">{lane.companionPathCount} companion paths</span>
                     {lane.followUpActionLabels.map((label) => (
                       <span key={`${lane.id}-${label}`} className="command-context-pill">
@@ -399,6 +421,47 @@ export function ContextualCommandPanel({
         </div>
       ) : null}
 
+      {companionSequenceStepItems.length ? (
+        <div className="contextual-command-panel__section">
+          <div className="contextual-command-panel__section-header">
+            <span>Companion Sequence Navigator</span>
+            <strong>{companionSequenceLabel ?? `${companionSequenceStepItems.length} ordered steps`}</strong>
+          </div>
+          <p className="panel-summary panel-summary--tight">
+            {companionSequenceSummary ??
+              "The current review surface now resolves through an ordered companion sequence so current, primary, and follow-up coverage stay visibly sequenced."}
+          </p>
+          <div className="contextual-command-panel__next-step-list">
+            {companionSequenceStepItems.map((item) => (
+              <article key={item.id} className={`contextual-command-next-step contextual-command-next-step--${item.tone}`}>
+                <div>
+                  <span>{item.stepLabel}</span>
+                  <strong>{item.active ? `${item.label} · Current step` : item.label}</strong>
+                  <p>{item.detail}</p>
+                  <div className="contextual-command-panel__chips">
+                    <span className={`command-context-pill${item.active ? " workflow-chip--active" : ""}`}>{item.roleLabel}</span>
+                    <span className="command-context-pill">{item.coverageLabel}</span>
+                    <span className="command-context-pill">{item.pathLabel}</span>
+                  </div>
+                </div>
+                {item.action ? (
+                  <button
+                    type="button"
+                    className="action-button"
+                    onClick={() => {
+                      onRunAction(item.action as StudioCommandAction);
+                    }}
+                    title={item.action.description}
+                  >
+                    {item.active ? "Refresh step" : "Focus step"}
+                  </button>
+                ) : null}
+              </article>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       {companionReviewPathItems.length ? (
         <div className="contextual-command-panel__section">
           <div className="contextual-command-panel__section-header">
@@ -420,6 +483,7 @@ export function ContextualCommandPanel({
                     <span className={`command-context-pill${item.active ? " workflow-chip--active" : ""}`}>{item.sourceLabel}</span>
                     <span className="command-context-pill">{item.coverageLabel}</span>
                     <span className="command-context-pill">{item.pathLabel}</span>
+                    {item.sequenceLabel ? <span className="command-context-pill">{item.sequenceLabel}</span> : null}
                     {item.followUpActionLabels.map((label) => (
                       <span key={`${item.id}-${label}`} className="command-context-pill">
                         {label}

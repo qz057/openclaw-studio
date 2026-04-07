@@ -14,7 +14,7 @@ import { mockBoundarySummary } from "./mock-host.js";
 const mockCommandSurface: StudioCommandSurface = {
   title: "Command Palette",
   summary:
-    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, typed companion review-path orchestration, review-surface coverage pivots, multi-window review coverage, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
+    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, typed companion review-path orchestration, ordered companion review sequences, review-surface coverage pivots, multi-window review coverage, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
   placeholder: "Search orchestration, delivery coverage, observability, navigation, next steps, flow state, detached workspace, or keyboard routes",
   quickActionIds: [
     "command-open-home",
@@ -933,6 +933,35 @@ const mockCommandSurface: StudioCommandSurface = {
           focusOrchestrationBoardId: "orchestration-board-preview-review",
           observabilityMappingIds: ["observability-mapping-lifecycle-preview"],
           focusObservabilityMappingId: "observability-mapping-lifecycle-preview",
+          companionSequences: [
+            {
+              id: "companion-sequence-lifecycle-gate-coverage",
+              label: "Lifecycle Gate Coverage",
+              summary:
+                "Sequence lifecycle packet, publish gate, and approval queue coverage so promotion readiness can walk forward into final go/no-go review without leaving the review deck.",
+              tone: "warning",
+              steps: [
+                {
+                  id: "companion-sequence-step-lifecycle-packet",
+                  actionId: "command-focus-lifecycle-review-packet",
+                  role: "current-review-surface",
+                  summary: "Start from the lifecycle packet so promotion readiness stays anchored to the current review surface."
+                },
+                {
+                  id: "companion-sequence-step-lifecycle-publish-gate",
+                  actionId: "command-focus-publish-decision-gate",
+                  role: "primary-companion",
+                  summary: "Promote the publish decision gate into the next companion slot for final release posture review."
+                },
+                {
+                  id: "companion-sequence-step-lifecycle-reviewer-queue",
+                  actionId: "command-focus-approval-reviewer-queue",
+                  role: "follow-up-companion",
+                  summary: "Keep the approval reviewer queue in the same sequence so reviewer ownership stays attached to the gate handoff."
+                }
+              ]
+            }
+          ],
           companionReviewPaths: [
             {
               id: "companion-path-lifecycle-packet-publish-gate",
@@ -941,6 +970,7 @@ const mockCommandSurface: StudioCommandSurface = {
                 "Keep the lifecycle packet as the current surface, then surface the publish decision gate as the primary companion so promotion readiness, final release gating, and downstream operator review stay linked through one explicit review path.",
               tone: "warning",
               kind: "stage-companion",
+              sequenceId: "companion-sequence-lifecycle-gate-coverage",
               sourceActionId: "command-focus-lifecycle-review-packet",
               primaryActionId: "command-focus-publish-decision-gate",
               followUpActionIds: ["command-focus-approval-reviewer-queue"]
@@ -990,6 +1020,35 @@ const mockCommandSurface: StudioCommandSurface = {
             "observability-mapping-rollback-shadow"
           ],
           focusObservabilityMappingId: "observability-mapping-final-gate",
+          companionSequences: [
+            {
+              id: "companion-sequence-delivery-gate-loop",
+              label: "Delivery Gate Coverage Loop",
+              summary:
+                "Sequence publish gate, approval queue, and rollback closeout so the current review surface can move across downstream decision coverage without losing the same local-only lane.",
+              tone: "warning",
+              steps: [
+                {
+                  id: "companion-sequence-step-delivery-publish-gate",
+                  actionId: "command-focus-publish-decision-gate",
+                  role: "current-review-surface",
+                  summary: "Hold the publish decision gate as the current surface while final go/no-go posture remains active."
+                },
+                {
+                  id: "companion-sequence-step-delivery-reviewer-queue",
+                  actionId: "command-focus-approval-reviewer-queue",
+                  role: "primary-companion",
+                  summary: "Move into the approval queue next so reviewer ownership stays attached to the same gate coverage."
+                },
+                {
+                  id: "companion-sequence-step-delivery-rollback-closeout",
+                  actionId: "command-focus-rollback-closeout-window",
+                  role: "follow-up-companion",
+                  summary: "Keep rollback closeout visible as the trailing recovery step behind the same decision chain."
+                }
+              ]
+            }
+          ],
           companionReviewPaths: [
             {
               id: "companion-path-publish-gate-reviewer-queue",
@@ -998,6 +1057,7 @@ const mockCommandSurface: StudioCommandSurface = {
                 "When the publish decision gate is current, jump straight into the active approval queue and keep rollback closeout as the follow-up companion so final go/no-go review stays tied to the same local-only lane.",
               tone: "warning",
               kind: "stage-companion",
+              sequenceId: "companion-sequence-delivery-gate-loop",
               sourceActionId: "command-focus-publish-decision-gate",
               primaryActionId: "command-focus-approval-reviewer-queue",
               followUpActionIds: ["command-focus-rollback-closeout-window"]
@@ -1009,6 +1069,7 @@ const mockCommandSurface: StudioCommandSurface = {
                 "When the approval queue is current, promote the publish decision gate to the primary companion so reviewer ownership, final gating, and rollback shadow coverage remain visible as one review path.",
               tone: "warning",
               kind: "stage-companion",
+              sequenceId: "companion-sequence-delivery-gate-loop",
               sourceActionId: "command-focus-approval-reviewer-queue",
               primaryActionId: "command-focus-publish-decision-gate",
               followUpActionIds: ["command-focus-rollback-closeout-window"]
@@ -1020,6 +1081,7 @@ const mockCommandSurface: StudioCommandSurface = {
                 "When rollback closeout is current, lift the publish decision gate back into the primary companion slot and keep the approval queue nearby so recovery posture never detaches from the live decision gate review.",
               tone: "warning",
               kind: "rollback-companion",
+              sequenceId: "companion-sequence-delivery-gate-loop",
               sourceActionId: "command-focus-rollback-closeout-window",
               primaryActionId: "command-focus-publish-decision-gate",
               followUpActionIds: ["command-focus-approval-reviewer-queue"]
@@ -1054,6 +1116,41 @@ const mockCommandSurface: StudioCommandSurface = {
           focusOrchestrationBoardId: "orchestration-board-trace-review",
           observabilityMappingIds: ["observability-mapping-approval-active"],
           focusObservabilityMappingId: "observability-mapping-approval-active",
+          companionSequences: [
+            {
+              id: "companion-sequence-handoff-stabilization",
+              label: "Handoff Stabilization Relay",
+              summary:
+                "Sequence decision handoff, evidence closeout, reviewer queue, and publish gate so acknowledgement timing and downstream decision posture stay visible in one relay.",
+              tone: "warning",
+              steps: [
+                {
+                  id: "companion-sequence-step-handoff-decision",
+                  actionId: "command-focus-approval-decision-handoff",
+                  role: "current-review-surface",
+                  summary: "Treat decision handoff as the current surface while baton state is being stabilized."
+                },
+                {
+                  id: "companion-sequence-step-handoff-closeout",
+                  actionId: "command-focus-approval-evidence-closeout",
+                  role: "primary-companion",
+                  summary: "Lift evidence closeout next so sealing posture stays attached to the baton handoff."
+                },
+                {
+                  id: "companion-sequence-step-handoff-reviewer-queue",
+                  actionId: "command-focus-approval-reviewer-queue",
+                  role: "follow-up-companion",
+                  summary: "Keep the reviewer queue in sequence so acknowledgement timing never detaches from queue ownership."
+                },
+                {
+                  id: "companion-sequence-step-handoff-publish-gate",
+                  actionId: "command-focus-publish-decision-gate",
+                  role: "follow-up-companion",
+                  summary: "Carry the handoff relay all the way to the publish gate so downstream decision posture remains in scope."
+                }
+              ]
+            }
+          ],
           companionReviewPaths: [
             {
               id: "companion-path-decision-handoff-evidence-closeout",
@@ -1062,6 +1159,7 @@ const mockCommandSurface: StudioCommandSurface = {
                 "Treat decision handoff as the current review surface, then lift evidence closeout as the primary companion so baton state, acknowledgement timing, and sealing posture remain attached to the same trace-owned review lane.",
               tone: "warning",
               kind: "handoff-companion",
+              sequenceId: "companion-sequence-handoff-stabilization",
               sourceActionId: "command-focus-approval-decision-handoff",
               primaryActionId: "command-focus-approval-evidence-closeout",
               followUpActionIds: ["command-focus-approval-reviewer-queue"]
@@ -1073,6 +1171,7 @@ const mockCommandSurface: StudioCommandSurface = {
                 "When evidence closeout is current, re-surface decision handoff as the primary companion so the sealing contract, baton target, and publish-facing decision gate stay synchronized through the same handoff lane.",
               tone: "warning",
               kind: "stabilization-companion",
+              sequenceId: "companion-sequence-handoff-stabilization",
               sourceActionId: "command-focus-approval-evidence-closeout",
               primaryActionId: "command-focus-approval-decision-handoff",
               followUpActionIds: ["command-focus-publish-decision-gate"]

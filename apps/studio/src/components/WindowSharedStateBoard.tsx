@@ -177,6 +177,19 @@ function formatCompanionReviewPathKind(
   }
 }
 
+function formatCompanionReviewSequenceStepRole(
+  role: NonNullable<StudioCommandActionDeck["lanes"][number]["companionSequences"]>[number]["steps"][number]["role"]
+): string {
+  switch (role) {
+    case "current-review-surface":
+      return "Current surface";
+    case "primary-companion":
+      return "Primary companion";
+    default:
+      return "Follow-up companion";
+  }
+}
+
 export function resolveActiveWindowSharedStateLane(
   windowing: StudioShellState["windowing"],
   activeLaneId?: string | null,
@@ -359,7 +372,27 @@ export function WindowSharedStateBoard({
     relevantReviewSurfaceActions.find((action) => action.id === activeReviewSurfaceActionId) ?? relevantReviewSurfaceActions[0] ?? null;
   const relevantActionDeckActionIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => lane.actionIds))];
   const relevantActionDeckStageIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => lane.deliveryChainStageIds ?? []))];
+  const relevantActionDeckSequenceIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => (lane.companionSequences ?? []).map((sequence) => sequence.id)))];
   const reviewSurfaceActionById = new Map(reviewSurfaceActions.map((action) => [action.id, action]));
+  const relevantCompanionSequences = relevantActionDeckLanes
+    .flatMap((lane) => lane.companionSequences ?? [])
+    .filter((sequence, index, sequences) => sequences.findIndex((entry) => entry.id === sequence.id) === index)
+    .filter((sequence) => {
+      const linkedActions = sequence.steps
+        .map((step) => reviewSurfaceActionById.get(step.actionId))
+        .filter((action): action is StudioCommandAction => Boolean(action));
+
+      return linkedActions.some((action) => relevantReviewSurfaceActions.some((entry) => entry.id === action.id)) || sequence.steps.some((step) => step.actionId === activeReviewSurfaceAction?.id);
+    })
+    .sort(
+      (left, right) =>
+        Number(right.steps.some((step) => step.actionId === activeReviewSurfaceAction?.id)) -
+        Number(left.steps.some((step) => step.actionId === activeReviewSurfaceAction?.id))
+    );
+  const activeCompanionSequence =
+    relevantCompanionSequences.find((sequence) => sequence.steps.some((step) => step.actionId === activeReviewSurfaceAction?.id)) ??
+    relevantCompanionSequences[0] ??
+    null;
   const relevantCompanionReviewPaths = relevantActionDeckLanes
     .flatMap((lane) => lane.companionReviewPaths ?? [])
     .filter((path, index, paths) => paths.findIndex((entry) => entry.id === path.id) === index)
@@ -369,10 +402,17 @@ export function WindowSharedStateBoard({
         .filter((action): action is StudioCommandAction => Boolean(action));
 
       return linkedActions.some((action) => relevantReviewSurfaceActions.some((entry) => entry.id === action.id)) || path.sourceActionId === activeReviewSurfaceAction?.id;
-    })
-    .sort((left, right) => Number(right.sourceActionId === activeReviewSurfaceAction?.id) - Number(left.sourceActionId === activeReviewSurfaceAction?.id));
+    });
+  const activeCompanionReviewPaths = relevantCompanionReviewPaths.filter((path) => path.sourceActionId === activeReviewSurfaceAction?.id);
+  const resolvedCompanionReviewPaths = activeCompanionReviewPaths.length
+    ? activeCompanionReviewPaths
+    : activeCompanionSequence
+      ? relevantCompanionReviewPaths.filter((path) => path.sequenceId === activeCompanionSequence.id)
+      : relevantCompanionReviewPaths;
   const activeCompanionReviewPath =
-    relevantCompanionReviewPaths.find((path) => path.sourceActionId === activeReviewSurfaceAction?.id) ?? relevantCompanionReviewPaths[0] ?? null;
+    resolvedCompanionReviewPaths.find((path) => path.sourceActionId === activeReviewSurfaceAction?.id) ?? resolvedCompanionReviewPaths[0] ?? null;
+  const activeCompanionSequenceCurrentStepIndex =
+    activeCompanionSequence?.steps.findIndex((step) => step.actionId === activeReviewSurfaceAction?.id) ?? -1;
   const panelClassName = [
     nested ? "window-shared-board window-shared-board--nested" : "surface card window-shared-board",
     compact ? "window-shared-board--compact" : ""
@@ -464,6 +504,10 @@ export function WindowSharedStateBoard({
                 <span>Delivery stages</span>
                 <strong>{relevantActionDeckStageIds.length} mapped stages</strong>
               </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Companion sequences</span>
+                <strong>{relevantActionDeckSequenceIds.length} ordered sequences</strong>
+              </div>
             </div>
             {relevantActionDeckLanes.length > 0 ? (
               <div className="windowing-preview-list">
@@ -488,6 +532,7 @@ export function WindowSharedStateBoard({
                           {coveredStages || "No mapped stages"}
                         </span>
                         <span className="windowing-badge">{coveredMappings || "No observability rows"}</span>
+                        <span className="windowing-badge">{(lane.companionSequences ?? []).length} companion sequences</span>
                       </div>
                     </div>
                   );
@@ -534,18 +579,95 @@ export function WindowSharedStateBoard({
           </article>
         ) : null}
 
-        {relevantCompanionReviewPaths.length > 0 ? (
+        {activeCompanionSequence ? (
+          <article className="windowing-summary-card">
+            <span>Companion Sequence Navigator</span>
+            <strong>{activeCompanionSequence.label}</strong>
+            <p>
+              The active window, shared-state lane, orchestration board, and observability row now resolve through an ordered companion sequence instead of
+              only a flat path list.
+            </p>
+            <div className="workflow-readiness-list">
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Ordered steps</span>
+                <strong>{activeCompanionSequence.steps.length} sequence steps</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Current step</span>
+                <strong>
+                  {activeCompanionSequenceCurrentStepIndex >= 0
+                    ? `Step ${activeCompanionSequenceCurrentStepIndex + 1} of ${activeCompanionSequence.steps.length}`
+                    : "No active sequence step"}
+                </strong>
+              </div>
+            </div>
+            <div className="windowing-preview-list">
+              {(compact ? activeCompanionSequence.steps.slice(0, 3) : activeCompanionSequence.steps).map((step, index) => {
+                const stepAction = reviewSurfaceActionById.get(step.actionId) ?? null;
+                const stepStage = stepAction?.deliveryChainStageId
+                  ? releaseApprovalPipeline
+                    ? selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, stepAction.deliveryChainStageId)
+                    : null
+                  : null;
+                const stepWindow = stepAction?.windowId
+                  ? windowing.roster.windows.find((entry) => entry.id === stepAction.windowId) ?? null
+                  : null;
+                const stepLane = stepAction?.sharedStateLaneId
+                  ? windowing.sharedState.lanes.find((entry) => entry.id === stepAction.sharedStateLaneId) ?? null
+                  : null;
+                const stepBoard = stepAction?.orchestrationBoardId
+                  ? windowing.orchestration.boards.find((entry) => entry.id === stepAction.orchestrationBoardId) ?? null
+                  : null;
+                const stepMapping = stepAction?.observabilityMappingId
+                  ? windowing.observability.mappings.find((entry) => entry.id === stepAction.observabilityMappingId) ?? null
+                  : null;
+                const active = step.actionId === activeReviewSurfaceAction?.id;
+
+                return (
+                  <div key={step.id} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>
+                      Step {index + 1} of {activeCompanionSequence.steps.length}
+                    </span>
+                    <strong>{active ? `${stepAction?.label ?? step.actionId} / current step` : stepAction?.label ?? step.actionId}</strong>
+                    <p>{step.summary}</p>
+                    <div className="trace-note-links">
+                      <span className={`windowing-badge${active ? " windowing-badge--active" : ""}`}>
+                        {formatCompanionReviewSequenceStepRole(step.role)}
+                      </span>
+                      <span className="windowing-badge">
+                        {stepStage?.label ?? stepAction?.deliveryChainStageId ?? "No stage"} / {stepWindow?.label ?? stepAction?.windowId ?? "No window"}
+                      </span>
+                      <span className="windowing-badge">
+                        {stepLane?.label ?? stepAction?.sharedStateLaneId ?? "No lane"} / {stepBoard?.label ?? stepAction?.orchestrationBoardId ?? "No board"}
+                      </span>
+                      <span className="windowing-badge">{stepMapping?.label ?? stepAction?.observabilityMappingId ?? "No observability path"}</span>
+                    </div>
+                    {onRunReviewSurfaceAction && stepAction ? (
+                      <div className="windowing-card__actions">
+                        <button type="button" className="secondary-button" onClick={() => onRunReviewSurfaceAction(stepAction)}>
+                          {active ? "Refresh step" : "Focus step"}
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </article>
+        ) : null}
+
+        {resolvedCompanionReviewPaths.length > 0 ? (
           <article className="windowing-summary-card">
             <span>Companion Review Paths</span>
             <strong>{activeCompanionReviewPath?.label ?? "No companion review path"}</strong>
             <p>
-              The active window, shared-state lane, orchestration board, and observability row now expose explicit current-surface {"->"} companion-surface
-              review paths with primary and follow-up actions, so companion review orchestration is visible alongside mapped coverage.
+              The active window, shared-state lane, orchestration board, and observability row now keep explicit companion review paths under the active
+              sequence, so source-to-primary/follow-up pivots remain inspectable alongside mapped coverage.
             </p>
             <div className="workflow-readiness-list">
               <div className="workflow-readiness-line workflow-readiness-line--neutral">
                 <span>Explicit paths</span>
-                <strong>{relevantCompanionReviewPaths.length} linked paths</strong>
+                <strong>{resolvedCompanionReviewPaths.length} linked paths</strong>
               </div>
               <div className="workflow-readiness-line workflow-readiness-line--neutral">
                 <span>Current source</span>
@@ -553,9 +675,10 @@ export function WindowSharedStateBoard({
               </div>
             </div>
             <div className="windowing-preview-list">
-              {(compact ? relevantCompanionReviewPaths.slice(0, 2) : relevantCompanionReviewPaths).map((path) => {
+              {(compact ? resolvedCompanionReviewPaths.slice(0, 2) : resolvedCompanionReviewPaths).map((path) => {
                 const sourceAction = reviewSurfaceActionById.get(path.sourceActionId) ?? null;
                 const primaryAction = reviewSurfaceActionById.get(path.primaryActionId) ?? null;
+                const companionSequence = relevantCompanionSequences.find((sequence) => sequence.id === path.sequenceId) ?? null;
                 const followUpActions = (path.followUpActionIds ?? [])
                   .map((actionId) => reviewSurfaceActionById.get(actionId))
                   .filter((action): action is StudioCommandAction => Boolean(action));
@@ -573,7 +696,10 @@ export function WindowSharedStateBoard({
                 const primaryBoard = primaryAction?.orchestrationBoardId
                   ? windowing.orchestration.boards.find((entry) => entry.id === primaryAction.orchestrationBoardId) ?? null
                   : null;
-                const active = path.sourceActionId === activeReviewSurfaceAction?.id;
+                const active =
+                  path.sourceActionId === activeReviewSurfaceAction?.id ||
+                  path.primaryActionId === activeReviewSurfaceAction?.id ||
+                  Boolean(activeReviewSurfaceAction?.id && path.followUpActionIds?.includes(activeReviewSurfaceAction.id));
 
                 return (
                   <div key={path.id} className="windowing-preview-line windowing-preview-line--stacked">
@@ -583,6 +709,7 @@ export function WindowSharedStateBoard({
                     <div className="trace-note-links">
                       <span className={`windowing-badge${active ? " windowing-badge--active" : ""}`}>{sourceAction?.label ?? path.sourceActionId}</span>
                       <span className="windowing-badge">{primaryAction?.label ?? path.primaryActionId}</span>
+                      {companionSequence ? <span className="windowing-badge">{companionSequence.label}</span> : null}
                       <span className="windowing-badge">
                         {primaryStage?.label ?? primaryAction?.deliveryChainStageId ?? "No stage"} / {primaryWindow?.label ?? primaryAction?.windowId ?? "No window"}
                       </span>
