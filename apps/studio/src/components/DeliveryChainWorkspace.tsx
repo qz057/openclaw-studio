@@ -132,6 +132,34 @@ type ReplayReviewerReadingQueueItem = {
   inTrace: boolean;
 };
 
+type ReplayReviewCloseoutStep = {
+  id: string;
+  label: string;
+  status: string;
+  detail: string;
+  tone: Tone;
+  traceId: string | null;
+  badges: string[];
+};
+
+type ReplayPackSignoffQueueItem = {
+  id: string;
+  stepLabel: string;
+  entry: StudioCommandCompanionRouteHistoryEntry;
+  tone: Tone;
+  state: ReplayScenarioReviewerSignoff["state"];
+  verdict: string;
+  summary: string;
+  owner: string;
+  nextHandoff: string;
+  blockerCount: number;
+  primaryBlocker: string | null;
+  readyCheckpointCount: number;
+  checkpointCount: number;
+  stageLabel: string;
+  targetAction: StudioCommandAction | null;
+};
+
 const ALL_REPLAY_EVIDENCE_TRACE_ID = "replay-evidence-trace-all";
 
 function resolveStageTone(status: StudioReleaseApprovalPipeline["stages"][number]["status"]): Tone {
@@ -425,6 +453,26 @@ function deriveReplayReviewerSignoffState(tone: Tone): ReplayScenarioReviewerSig
     default:
       return "blocked";
   }
+}
+
+function deriveReplayPackReviewerSignoffState({
+  readyCount,
+  blockedCount,
+  totalCount
+}: {
+  readyCount: number;
+  blockedCount: number;
+  totalCount: number;
+}): ReplayScenarioReviewerSignoff["state"] {
+  if (totalCount > 0 && readyCount === totalCount) {
+    return "ready";
+  }
+
+  if (blockedCount > 0) {
+    return "blocked";
+  }
+
+  return "watch";
 }
 
 function resolveReplayScreenshotTone(
@@ -858,6 +906,42 @@ function resolveReplayProgressTone(readyCount: number, totalCount: number): Tone
   }
 
   return "warning";
+}
+
+function resolveReplayCompositeTone(tones: Tone[]): Tone {
+  if (tones.length > 0 && tones.every((tone) => tone === "positive")) {
+    return "positive";
+  }
+
+  if (tones.includes("warning")) {
+    return "warning";
+  }
+
+  if (tones.includes("neutral") || tones.includes("positive")) {
+    return "neutral";
+  }
+
+  return "warning";
+}
+
+function formatReplayFinalCloseoutStatusLabel(
+  signoffState: NonNullable<StudioCommandCompanionRouteHistoryEntry["reviewerSignoff"]>["state"],
+  readyCount: number,
+  totalCount: number
+): string {
+  if (signoffState === "ready" && totalCount > 0 && readyCount === totalCount) {
+    return "Final closeout ready";
+  }
+
+  if (signoffState === "blocked") {
+    return "Final closeout blocked";
+  }
+
+  if (readyCount > 0) {
+    return "Final closeout in review";
+  }
+
+  return "Closeout review queued";
 }
 
 function resolveReplayScenarioTone(
@@ -1594,6 +1678,117 @@ export function DeliveryChainWorkspace({
   const activeReplayScenarioPackReadyPassCount = activeReplayScenarioPackSummary.readyPassCount;
   const activeReplayScenarioPackReadySignoffCount = activeReplayScenarioPackSummary.readySignoffCount;
   const activeReplayScenarioPackBlockedSignoffCount = activeReplayScenarioPackSummary.blockedSignoffCount;
+  const activeReplayScenarioPackSignoffQueue: ReplayPackSignoffQueueItem[] = activeReplayScenarioPackEntries.map((entry, index) => {
+    const targetAction = reviewSurfaceActionById.get(entry.targetActionId) ?? null;
+    const scenarioRouteState = entry.routeStateId
+      ? relevantCompanionRouteStates.find((routeState) => routeState.id === entry.routeStateId) ?? null
+      : null;
+    const scenarioStage = entry.deliveryChainStageId
+      ? selectStudioReleaseDeliveryChainStage(pipeline, entry.deliveryChainStageId)
+      : targetAction?.deliveryChainStageId
+        ? selectStudioReleaseDeliveryChainStage(pipeline, targetAction.deliveryChainStageId)
+        : null;
+    const readyChecks = entry.acceptanceChecks?.filter((check) => check.state === "ready").length ?? 0;
+    const evidenceItems = entry.scenarioEvidenceItems ?? [];
+    const readyEvidence = evidenceItems.filter((item) => item.posture !== "pending").length;
+    const continuityChecks = entry.evidenceContinuityChecks ?? [];
+    const readyContinuity = continuityChecks.filter((check) => check.state === "ready").length;
+    const screenshotItems = entry.screenshotReviewItems ?? [];
+    const readyScreenshots = screenshotItems.filter((item) => item.posture !== "required").length;
+    const passCards = createReplayScenarioPassCards({
+      entry,
+      routeLabel: scenarioRouteState?.label ?? entry.routeStateId ?? "No route snapshot",
+      routeReady: Boolean(scenarioRouteState && entry.sequenceId && targetAction),
+      readyChecks,
+      totalChecks: entry.acceptanceChecks?.length ?? 0,
+      readyEvidence,
+      totalEvidence: evidenceItems.length,
+      readyContinuity,
+      totalContinuity: continuityChecks.length,
+      readyScreenshots,
+      totalScreenshots: screenshotItems.length
+    });
+    const scenarioTone = resolveReplayScenarioTone(
+      readyChecks,
+      entry.acceptanceChecks?.length ?? 0,
+      readyScreenshots,
+      screenshotItems.length,
+      readyEvidence,
+      evidenceItems.length,
+      readyContinuity,
+      continuityChecks.length
+    );
+    const reviewerSignoffState = entry.reviewerSignoff?.state ?? deriveReplayReviewerSignoffState(scenarioTone);
+    const reviewerSignoffCheckpoints = entry.reviewerSignoff?.checkpoints ?? [];
+    const reviewerSignoffReadyCheckpointCount = reviewerSignoffCheckpoints.filter((checkpoint) => checkpoint.state === "ready").length;
+    const fallbackSummary =
+      reviewerSignoffState === "ready"
+        ? "Scenario walkthrough, evidence order, and signoff closure are aligned for the current local-only pack."
+        : reviewerSignoffState === "watch"
+          ? "Scenario signoff remains in review while the ordered replay route, evidence flow, and handoff closure settle."
+          : "Scenario signoff is blocking pack closure until the remaining reviewer handoff and evidence linkage are aligned.";
+    const fallbackNextHandoff =
+      reviewerSignoffState === "ready"
+        ? "No further reviewer handoff"
+        : scenarioRouteState
+          ? `Restore ${scenarioRouteState.label} and continue the reviewer closure flow.`
+          : `Load ${entry.scenarioLabel ?? entry.label} and continue the reviewer closure flow.`;
+    const blockers =
+      entry.reviewerSignoff?.blockers ??
+      (reviewerSignoffState === "ready"
+        ? []
+        : [entry.reviewerSignoff?.nextHandoff ?? fallbackNextHandoff]);
+
+    return {
+      id: entry.id,
+      stepLabel: `Queue ${String(index + 1).padStart(2, "0")}`,
+      entry,
+      tone: resolveReplayReviewerSignoffTone(reviewerSignoffState),
+      state: reviewerSignoffState,
+      verdict: entry.reviewerSignoff?.verdict ?? formatReplayReviewerSignoffState(reviewerSignoffState),
+      summary: entry.reviewerSignoff?.summary ?? fallbackSummary,
+      owner: entry.reviewerSignoff?.owner ?? entry.reviewerPosture ?? activeReplayScenarioPack?.pack.reviewerPosture ?? "Reviewer queue owner",
+      nextHandoff: entry.reviewerSignoff?.nextHandoff ?? fallbackNextHandoff,
+      blockerCount: blockers.length,
+      primaryBlocker: blockers[0] ?? null,
+      readyCheckpointCount: reviewerSignoffCheckpoints.length ? reviewerSignoffReadyCheckpointCount : passCards.filter((pass) => pass.tone === "positive").length,
+      checkpointCount: reviewerSignoffCheckpoints.length || passCards.length,
+      stageLabel: scenarioStage?.label ?? entry.deliveryChainStageId ?? "No stage",
+      targetAction
+    };
+  });
+  const activeReplayScenarioPackQueueInReviewCount = Math.max(
+    activeReplayScenarioPackEntries.length - activeReplayScenarioPackReadySignoffCount - activeReplayScenarioPackBlockedSignoffCount,
+    0
+  );
+  const activeReplayScenarioPackSignoffQueueState = deriveReplayPackReviewerSignoffState({
+    readyCount: activeReplayScenarioPackReadySignoffCount,
+    blockedCount: activeReplayScenarioPackBlockedSignoffCount,
+    totalCount: activeReplayScenarioPackEntries.length
+  });
+  const activeReplayScenarioPackSignoffQueueTone = resolveReplayReviewerSignoffTone(activeReplayScenarioPackSignoffQueueState);
+  const activeReplayScenarioPackNextSignoffQueueItem =
+    activeReplayScenarioPackSignoffQueue.find((item) => item.state !== "ready") ?? activeReplayScenarioPackSignoffQueue[0] ?? null;
+  const activeReplayScenarioPackFocusedSignoffQueueItem =
+    activeReplayScenarioEntry
+      ? activeReplayScenarioPackSignoffQueue.find((item) => item.id === activeReplayScenarioEntry.id) ?? null
+      : null;
+  const activeReplayScenarioPackPrimarySignoffQueueItem =
+    activeReplayScenarioPackFocusedSignoffQueueItem ?? activeReplayScenarioPackNextSignoffQueueItem ?? activeReplayScenarioPackSignoffQueue[0] ?? null;
+  const activeReplayScenarioPackSignoffQueueStatusLabel =
+    activeReplayScenarioPackSignoffQueueState === "ready"
+      ? "Pack signoff aligned"
+      : activeReplayScenarioPackBlockedSignoffCount > 0
+        ? `${activeReplayScenarioPackBlockedSignoffCount} blocked scenario signoffs`
+        : "Signoff queue in review";
+  const activeReplayScenarioPackSignoffQueueSummary =
+    activeReplayScenarioPackSignoffQueueState === "ready"
+      ? "Scenario-level signoffs now read as one ordered queue, so the acceptance pack can settle without leaving the local-only replay workspace."
+      : activeReplayScenarioPackNextSignoffQueueItem
+        ? `${activeReplayScenarioPackNextSignoffQueueItem.entry.scenarioLabel ?? activeReplayScenarioPackNextSignoffQueueItem.entry.label} is the next scenario handoff in the ordered signoff queue, keeping pack closure readable before the reviewer leaves the current route.`
+        : "Scenario signoff ordering is unavailable for the current acceptance pack.";
+  const activeReplayScenarioPackSignoffQueuePrimaryBlocker =
+    activeReplayScenarioPackSignoffQueue.find((item) => item.primaryBlocker)?.primaryBlocker ?? null;
   const activeReplayScenarioPackCaptureMetrics = activeReplayScenarioPackEntries.reduce(
     (totals, entry) => {
       const captureGroups = createReplayScreenshotCaptureGroups({
@@ -2116,6 +2311,123 @@ export function DeliveryChainWorkspace({
     activeReplayScenarioNextReadingItem ??
     activeReplayScenarioReadingQueue[0] ??
     null;
+  const activeReplayScenarioCloseoutFocusTrace =
+    (activeReplayScenarioNextReadingItem?.traceId
+      ? activeReplayScenarioEvidenceTraces.find((trace) => trace.id === activeReplayScenarioNextReadingItem.traceId) ?? null
+      : null) ??
+    (activeReplayScenarioNextWorkflowStep?.traceId
+      ? activeReplayScenarioEvidenceTraces.find((trace) => trace.id === activeReplayScenarioNextWorkflowStep.traceId) ?? null
+      : null) ??
+    (hasActiveReplayEvidenceTraceFilter ? activeReplayEvidenceTrace : null);
+  const activeReplayScenarioStoryboardDossierTone = resolveReplayCompositeTone([
+    resolveReplayProgressTone(activeReplayScenarioReadyCaptureGroupCount, activeReplayScenarioCaptureGroups.length),
+    activeReplayScenarioEvidenceBundleTone
+  ]);
+  const activeReplayScenarioStoryboardDossierTraceId =
+    (activeReplayScenarioFocusedCaptureGroup && activeReplayScenarioFocusedCaptureGroup.tone !== "positive"
+      ? createReplayEvidenceTraceCaptureGroupId(activeReplayScenarioFocusedCaptureGroup.id)
+      : null) ??
+    (activeReplayScenarioFocusedEvidenceItem &&
+    resolveReplayScenarioEvidenceTone(activeReplayScenarioFocusedEvidenceItem.posture) !== "positive"
+      ? createReplayEvidenceTraceEvidenceItemId(activeReplayScenarioFocusedEvidenceItem.id)
+      : null) ??
+    (activeReplayScenarioFocusedContinuityHandoff &&
+    resolveReplayEvidenceContinuityTone(activeReplayScenarioFocusedContinuityHandoff.state) !== "positive"
+      ? createReplayEvidenceTraceContinuityHandoffId(activeReplayScenarioFocusedContinuityHandoff.id)
+      : null);
+  const activeReplayScenarioCloseoutSteps: ReplayReviewCloseoutStep[] = activeReplayScenarioEntry
+    ? [
+        {
+          id: `${activeReplayScenarioEntry.id}-closeout-reading`,
+          label: "Acceptance Reading Queue",
+          status: activeReplayScenarioReadingQueueStatusLabel,
+          detail:
+            activeReplayScenarioFocusedReadingItem?.detail ??
+            "No reviewer reading queue is defined for the current acceptance card.",
+          tone: activeReplayScenarioReadingQueueTone,
+          traceId: activeReplayScenarioNextReadingItem?.traceId ?? activeReplayScenarioFocusedReadingItem?.traceId ?? null,
+          badges: [
+            `${activeReplayScenarioReadingQueueReadyCount} / ${activeReplayScenarioReadingQueue.length} items ready`,
+            activeReplayScenarioFocusedReadingItem
+              ? `${activeReplayScenarioFocusedReadingItem.stepLabel} / ${formatReplayReviewerReadingQueueItemKind(
+                  activeReplayScenarioFocusedReadingItem.kind
+                )}`
+              : "Queue intake"
+          ]
+        },
+        {
+          id: `${activeReplayScenarioEntry.id}-closeout-trace`,
+          label: "Evidence Trace Lens",
+          status:
+            activeReplayScenarioCloseoutFocusTrace?.id && activeReplayScenarioCloseoutFocusTrace.id !== ALL_REPLAY_EVIDENCE_TRACE_ID
+              ? `${formatReplayEvidenceTraceKind(activeReplayScenarioCloseoutFocusTrace.kind)} focused`
+              : "Full acceptance pack visible",
+          detail:
+            activeReplayScenarioCloseoutFocusTrace?.detail ??
+            activeReplayScenarioNextWorkflowStep?.detail ??
+            "Trace lens can stay wide until the reviewer needs to isolate one proof trail.",
+          tone: activeReplayScenarioCloseoutFocusTrace?.tone ?? activeReplayScenarioEvidenceBundleTone,
+          traceId:
+            activeReplayScenarioCloseoutFocusTrace?.id && activeReplayScenarioCloseoutFocusTrace.id !== ALL_REPLAY_EVIDENCE_TRACE_ID
+              ? activeReplayScenarioCloseoutFocusTrace.id
+              : null,
+          badges: [
+            `${activeReplayScenarioCloseoutFocusTrace?.screenshotIds.length ?? activeReplayScenarioScreenshotItems.length} storyboard shots`,
+            `${activeReplayScenarioCloseoutFocusTrace?.evidenceItemIds.length ?? activeReplayScenarioEvidenceItems.length} proof items`,
+            `${activeReplayScenarioCloseoutFocusTrace?.continuityHandoffIds.length ?? activeReplayScenarioRelevantContinuityHandoffs.length} continuity handoffs`
+          ]
+        },
+        {
+          id: `${activeReplayScenarioEntry.id}-closeout-proof`,
+          label: "Storyboard + Dossier Linkage",
+          status: `${activeReplayScenarioReadyCaptureGroupCount} / ${activeReplayScenarioCaptureGroups.length} groups ready`,
+          detail:
+            activeReplayScenarioFocusedCaptureGroup && activeReplayScenarioFocusedEvidenceItem
+              ? `${activeReplayScenarioFocusedCaptureGroup.label} stays tied to ${activeReplayScenarioFocusedEvidenceItem.dossierSection} via ${activeReplayScenarioFocusedEvidenceLinkedScreenshots.length} linked storyboard shots, so proof review closes in the same order as capture review.`
+              : activeReplayScenarioEvidenceItems.length
+                ? "Storyboard shots, dossier items, and continuity anchors stay grouped for the current acceptance card."
+                : "Storyboard and dossier linkage is still missing for the current acceptance card.",
+          tone: activeReplayScenarioStoryboardDossierTone,
+          traceId: activeReplayScenarioStoryboardDossierTraceId,
+          badges: [
+            activeReplayScenarioEvidenceBundleStatusLabel,
+            `${activeReplayScenarioEvidenceReady} / ${activeReplayScenarioEvidenceItems.length} proof items staged`,
+            `${activeReplayScenarioContinuityReady} / ${activeReplayScenarioContinuityChecks.length} continuity checks ready`
+          ]
+        },
+        {
+          id: `${activeReplayScenarioEntry.id}-closeout-signoff`,
+          label: "Reviewer Signoff Board",
+          status: activeReplayScenarioReviewerSignoffVerdict,
+          detail: activeReplayScenarioReviewerSignoffSummary,
+          tone: activeReplayScenarioReviewerSignoffTone,
+          traceId: activeReplayScenarioNextWorkflowStep?.traceId ?? null,
+          badges: [
+            `${activeReplayScenarioReviewerSignoffReadyCount} / ${activeReplayScenarioReviewerSignoffCheckpoints.length} checkpoints ready`,
+            activeReplayScenarioReviewerSignoffOwner
+          ]
+        }
+      ]
+    : [];
+  const activeReplayScenarioCloseoutReadyCount = activeReplayScenarioCloseoutSteps.filter((step) => step.tone === "positive").length;
+  const activeReplayScenarioCloseoutStatusLabel = formatReplayFinalCloseoutStatusLabel(
+    activeReplayScenarioReviewerSignoffState,
+    activeReplayScenarioCloseoutReadyCount,
+    activeReplayScenarioCloseoutSteps.length
+  );
+  const activeReplayScenarioCloseoutTone = resolveReplayCompositeTone(activeReplayScenarioCloseoutSteps.map((step) => step.tone));
+  const activeReplayScenarioNextCloseoutStep = activeReplayScenarioCloseoutSteps.find((step) => step.tone !== "positive") ?? null;
+  const activeReplayScenarioFocusedCloseoutStep =
+    activeReplayScenarioCloseoutSteps.find((step) => step.traceId !== null && step.traceId === activeReplayEvidenceTrace?.id) ??
+    activeReplayScenarioNextCloseoutStep ??
+    activeReplayScenarioCloseoutSteps[0] ??
+    null;
+  const activeReplayScenarioCloseoutSummary =
+    activeReplayScenarioCloseoutStatusLabel === "Final closeout ready"
+      ? "Reading order, trace focus, storyboard proof linkage, and reviewer signoff have settled into one local-only acceptance closeout path."
+      : activeReplayScenarioNextCloseoutStep
+        ? `${activeReplayScenarioNextCloseoutStep.label} is still keeping final review open, but queue, trace, storyboard, dossier, and signoff remain linked inside the same acceptance console.`
+        : "Final review closeout is waiting on acceptance pack data.";
   const panelClassName = [
     nested ? "delivery-chain-workspace delivery-chain-workspace--nested" : "surface card delivery-chain-workspace",
     compact ? "delivery-chain-workspace--compact" : ""
@@ -2819,6 +3131,129 @@ export function DeliveryChainWorkspace({
                       </div>
                     </div>
                   </article>
+                  {activeReplayScenarioEntry ? (
+                    <article
+                      className={`windowing-summary-card${
+                        activeReplayScenarioCloseoutTone === "positive" ? " windowing-summary-card--active" : ""
+                      }`}
+                    >
+                      <span>Final Review Closeout</span>
+                      <strong>{activeReplayScenarioCloseoutStatusLabel}</strong>
+                      <p>{activeReplayScenarioCloseoutSummary}</p>
+                      <div className="trace-note-links">
+                        <span className={`windowing-badge${activeReplayScenarioCloseoutTone === "positive" ? " windowing-badge--active" : ""}`}>
+                          {activeReplayScenarioReviewerSignoffVerdict}
+                        </span>
+                        <span className="windowing-badge">
+                          {activeReplayScenarioCloseoutReadyCount} / {activeReplayScenarioCloseoutSteps.length} closeout steps ready
+                        </span>
+                        <span className="windowing-badge">{activeReplayScenarioEvidenceBundleStatusLabel}</span>
+                        <span className="windowing-badge">{activeReplayScenarioReviewerPosture}</span>
+                        <span className="windowing-badge">{activeReplayScenarioPack.pack.safety}</span>
+                      </div>
+                      <div className="windowing-preview-list">
+                        <div className="windowing-preview-line windowing-preview-line--stacked">
+                          <span>Scenario verdict</span>
+                          <strong>{activeReplayScenarioReviewerSignoffVerdict}</strong>
+                          <p>{activeReplayScenarioReviewerSignoffSummary}</p>
+                        </div>
+                        <div className="windowing-preview-line windowing-preview-line--stacked">
+                          <span>Linked closeout path</span>
+                          <strong>
+                            Acceptance Reading Queue -&gt; Evidence Trace Lens -&gt; Storyboard + Dossier Linkage -&gt; Reviewer Signoff Board
+                          </strong>
+                          <p>
+                            {activeReplayScenarioFocusedCloseoutStep
+                              ? `${activeReplayScenarioFocusedCloseoutStep.label} currently holds the working focus while the rest of the acceptance console stays linked.`
+                              : "Queue order, trace focus, storyboard linkage, and signoff stay linked inside the active acceptance console."}
+                          </p>
+                        </div>
+                        <div className="windowing-preview-line windowing-preview-line--stacked">
+                          <span>Open closeout handoff</span>
+                          <strong>{activeReplayScenarioNextCloseoutStep?.label ?? "Closeout settled"}</strong>
+                          <p>{activeReplayScenarioNextCloseoutStep?.detail ?? activeReplayScenarioCloseoutSummary}</p>
+                        </div>
+                      </div>
+                      {activeReplayScenarioNextCloseoutStep?.traceId ? (
+                        <div className="windowing-card__actions">
+                          <button
+                            type="button"
+                            className="secondary-button"
+                            onClick={() => toggleReplayEvidenceTrace(activeReplayScenarioNextCloseoutStep.traceId!)}
+                          >
+                            {activeReplayEvidenceTrace?.id === activeReplayScenarioNextCloseoutStep.traceId
+                              ? "Show full pack"
+                              : "Focus closeout blocker"}
+                          </button>
+                        </div>
+                      ) : hasActiveReplayEvidenceTraceFilter ? (
+                        <div className="windowing-card__actions">
+                          <button
+                            type="button"
+                            className="secondary-button"
+                            onClick={() => setActiveReplayEvidenceTraceId(ALL_REPLAY_EVIDENCE_TRACE_ID)}
+                          >
+                            Show full pack
+                          </button>
+                        </div>
+                      ) : null}
+                      <div className="delivery-chain-workspace__pass-record-list">
+                        {activeReplayScenarioCloseoutSteps.map((step, index) => {
+                          const activeTrace = step.traceId !== null && activeReplayEvidenceTrace?.id === step.traceId;
+                          const focusedStep = step.id === activeReplayScenarioFocusedCloseoutStep?.id;
+                          const nextStep = step.id === activeReplayScenarioNextCloseoutStep?.id;
+                          const canResetTrace = nextStep && step.traceId === null && hasActiveReplayEvidenceTraceFilter;
+
+                          return (
+                            <div
+                              key={step.id}
+                              className={`delivery-chain-workspace__pass-record delivery-chain-workspace__pass-record--${step.tone}${
+                                focusedStep ? " delivery-chain-workspace__pass-record--current" : ""
+                              }${nextStep ? " delivery-chain-workspace__pass-record--next" : ""}`}
+                            >
+                              <div className="delivery-chain-workspace__pass-record-header">
+                                <span>{`Closeout ${String(index + 1).padStart(2, "0")}`}</span>
+                                <strong>{step.status}</strong>
+                              </div>
+                              <div className="delivery-chain-workspace__pass-record-body">
+                                <h3>{step.label}</h3>
+                                <p>{step.detail}</p>
+                              </div>
+                              <div className="trace-note-links">
+                                {focusedStep ? <span className="windowing-badge windowing-badge--active">Closeout focus</span> : null}
+                                {nextStep ? <span className="windowing-badge windowing-badge--active">Open handoff</span> : null}
+                                {activeTrace ? <span className="windowing-badge windowing-badge--active">Lens focused</span> : null}
+                                {step.badges.map((badge) => (
+                                  <span key={`${step.id}-${badge}`} className="windowing-badge">
+                                    {badge}
+                                  </span>
+                                ))}
+                                {step.traceId ? (
+                                  <button
+                                    type="button"
+                                    className={`secondary-button delivery-chain-workspace__trace-toggle${
+                                      activeTrace ? " delivery-chain-workspace__trace-toggle--active" : ""
+                                    }`}
+                                    onClick={() => toggleReplayEvidenceTrace(step.traceId!)}
+                                  >
+                                    {activeTrace ? "Show full pack" : "Focus closeout step"}
+                                  </button>
+                                ) : canResetTrace ? (
+                                  <button
+                                    type="button"
+                                    className="secondary-button delivery-chain-workspace__trace-toggle"
+                                    onClick={() => setActiveReplayEvidenceTraceId(ALL_REPLAY_EVIDENCE_TRACE_ID)}
+                                  >
+                                    Show full pack
+                                  </button>
+                                ) : null}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </article>
+                  ) : null}
                   {activeReplayScenarioEntry ? (
                     <article
                       className={`windowing-summary-card${
@@ -3600,6 +4035,7 @@ export function DeliveryChainWorkspace({
                         <span className="windowing-badge">
                           {activeReplayScenarioReviewerSignoffReadyCount} / {activeReplayScenarioReviewerSignoffCheckpoints.length} checkpoints ready
                         </span>
+                        <span className="windowing-badge">{activeReplayScenarioCloseoutStatusLabel}</span>
                         <span className="windowing-badge">
                           {activeReplayScenarioPackReadySignoffCount} / {activeReplayScenarioPackEntries.length || 0} scenarios ready
                         </span>
@@ -3619,6 +4055,11 @@ export function DeliveryChainWorkspace({
                                 ? `${activeReplayScenarioReviewerSignoffBlockers.length} blockers still need reviewer closure before signoff can settle.`
                                 : "No signoff blockers remain for this local-only acceptance card.")}
                           </p>
+                        </div>
+                        <div className="windowing-preview-line windowing-preview-line--stacked">
+                          <span>Acceptance closeout console</span>
+                          <strong>{activeReplayScenarioCloseoutStatusLabel}</strong>
+                          <p>{activeReplayScenarioCloseoutSummary}</p>
                         </div>
                       </div>
                       {activeReplayScenarioNextWorkflowStep?.traceId ? (
@@ -3687,6 +4128,153 @@ export function DeliveryChainWorkspace({
                             <strong>No open blockers remain for this local-only reviewer signoff.</strong>
                           </div>
                         )}
+                      </div>
+                    </article>
+                  ) : null}
+                  {activeReplayScenarioPack ? (
+                    <article
+                      className={`windowing-summary-card${
+                        activeReplayScenarioPackSignoffQueueTone === "positive" ? " windowing-summary-card--active" : ""
+                      }`}
+                    >
+                      <span>Signoff Readiness Queue</span>
+                      <strong>
+                        {activeReplayScenarioPackReadySignoffCount} / {activeReplayScenarioPackEntries.length || 0} scenarios ready
+                      </strong>
+                      <p>{activeReplayScenarioPackSignoffQueueSummary}</p>
+                      <div className="trace-note-links">
+                        <span
+                          className={`windowing-badge${
+                            activeReplayScenarioPackSignoffQueueTone === "positive" ? " windowing-badge--active" : ""
+                          }`}
+                        >
+                          {activeReplayScenarioPackSignoffQueueStatusLabel}
+                        </span>
+                        <span className="windowing-badge">
+                          {activeReplayScenarioPackBlockedSignoffCount} blocked / {activeReplayScenarioPackQueueInReviewCount} in review
+                        </span>
+                        {activeReplayScenarioPackPrimarySignoffQueueItem ? (
+                          <span className="windowing-badge">{activeReplayScenarioPackPrimarySignoffQueueItem.owner}</span>
+                        ) : null}
+                        <span className="windowing-badge">{activeReplayScenarioPack.pack.safety}</span>
+                      </div>
+                      <div className="windowing-preview-list">
+                        <div className="windowing-preview-line windowing-preview-line--stacked">
+                          <span>Current queue focus</span>
+                          <strong>
+                            {activeReplayScenarioPackPrimarySignoffQueueItem
+                              ? `${activeReplayScenarioPackPrimarySignoffQueueItem.stepLabel} / ${
+                                  activeReplayScenarioPackPrimarySignoffQueueItem.entry.scenarioLabel ??
+                                  activeReplayScenarioPackPrimarySignoffQueueItem.entry.label
+                                }`
+                              : "No signoff queue"}
+                          </strong>
+                          <p>
+                            {activeReplayScenarioPackPrimarySignoffQueueItem?.summary ??
+                              "No ordered signoff queue is available for this acceptance pack."}
+                          </p>
+                        </div>
+                        <div className="windowing-preview-line windowing-preview-line--stacked">
+                          <span>Next pack handoff</span>
+                          <strong>
+                            {activeReplayScenarioPackNextSignoffQueueItem
+                              ? `${activeReplayScenarioPackNextSignoffQueueItem.stepLabel} / ${activeReplayScenarioPackNextSignoffQueueItem.nextHandoff}`
+                              : "Pack signoff aligned"}
+                          </strong>
+                          <p>
+                            {activeReplayScenarioPackNextSignoffQueueItem?.primaryBlocker ??
+                              (activeReplayScenarioPackSignoffQueueState === "ready"
+                                ? "Every scenario signoff is aligned, so the pack can settle without another reviewer jump."
+                                : "No scenario-level blocker is currently attached to the ordered signoff queue.")}
+                          </p>
+                        </div>
+                        <div className="windowing-preview-line windowing-preview-line--stacked">
+                          <span>Pack blocker posture</span>
+                          <strong>
+                            {activeReplayScenarioPackSignoffQueuePrimaryBlocker ??
+                              "No open signoff blockers remain across the current acceptance pack."}
+                          </strong>
+                          <p>
+                            {activeReplayScenarioPackBlockedSignoffCount > 0
+                              ? `${activeReplayScenarioPackBlockedSignoffCount} scenario signoffs still need reviewer closure before the pack can settle.`
+                              : `${activeReplayScenarioPackReadySignoffCount} scenario signoffs are ready across the current local-only pack.`}
+                          </p>
+                        </div>
+                      </div>
+                      {activeReplayScenarioPackNextSignoffQueueItem &&
+                      activeReplayScenarioPackNextSignoffQueueItem.id !== activeReplayScenarioEntry?.id ? (
+                        onRunCompanionRouteHistory ? (
+                          <div className="windowing-card__actions">
+                            <button
+                              type="button"
+                              className="secondary-button"
+                              onClick={() => onRunCompanionRouteHistory(activeReplayScenarioPackNextSignoffQueueItem.id)}
+                            >
+                              Load next signoff
+                            </button>
+                          </div>
+                        ) : onRunReviewSurfaceAction && activeReplayScenarioPackNextSignoffQueueItem.targetAction ? (
+                          <div className="windowing-card__actions">
+                            <button
+                              type="button"
+                              className="secondary-button"
+                              onClick={() => onRunReviewSurfaceAction(activeReplayScenarioPackNextSignoffQueueItem.targetAction!)}
+                            >
+                              Focus next signoff
+                            </button>
+                          </div>
+                        ) : null
+                      ) : null}
+                      <div className="delivery-chain-workspace__pass-record-list">
+                        {(compact
+                          ? activeReplayScenarioPackSignoffQueue.slice(0, 3)
+                          : activeReplayScenarioPackSignoffQueue
+                        ).map((item) => {
+                          const active = item.id === activeReplayScenarioEntry?.id;
+                          const next = item.id === activeReplayScenarioPackNextSignoffQueueItem?.id;
+
+                          return (
+                            <div
+                              key={item.id}
+                              className={`delivery-chain-workspace__pass-record delivery-chain-workspace__pass-record--${item.tone}${
+                                active ? " delivery-chain-workspace__pass-record--current" : ""
+                              }${next ? " delivery-chain-workspace__pass-record--next" : ""}`}
+                            >
+                              <div className="delivery-chain-workspace__pass-record-header">
+                                <span>{item.stepLabel}</span>
+                                <strong>{formatReplayReviewerSignoffState(item.state)}</strong>
+                              </div>
+                              <div className="delivery-chain-workspace__pass-record-body">
+                                <h3>{item.entry.scenarioLabel ?? item.entry.label}</h3>
+                                <p>{item.summary}</p>
+                              </div>
+                              <div className="windowing-preview-list">
+                                <div className="windowing-preview-line">
+                                  <span>Next handoff</span>
+                                  <strong>{item.nextHandoff}</strong>
+                                </div>
+                                <div className="windowing-preview-line">
+                                  <span>Checkpoints</span>
+                                  <strong>
+                                    {item.readyCheckpointCount} / {item.checkpointCount} ready
+                                  </strong>
+                                </div>
+                              </div>
+                              <div className="trace-note-links">
+                                <span className={`windowing-badge${item.tone === "positive" ? " windowing-badge--active" : ""}`}>
+                                  {item.verdict}
+                                </span>
+                                <span className="windowing-badge">{item.stageLabel}</span>
+                                <span className="windowing-badge">{item.owner}</span>
+                                {active ? <span className="windowing-badge windowing-badge--active">Queue focus</span> : null}
+                                {next ? <span className="windowing-badge windowing-badge--active">Next pack handoff</span> : null}
+                                <span className="windowing-badge">
+                                  {item.blockerCount > 0 ? `${item.blockerCount} blockers` : "No blockers"}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </article>
                   ) : null}
