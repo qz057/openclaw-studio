@@ -8,6 +8,9 @@ import {
   selectStudioReleaseEscalationWindow,
   selectStudioReleasePackagedAppMaterializationContractBundleSealingCheckpoint,
   selectStudioReleasePackagedAppMaterializationContractBundleSealingReadiness,
+  selectStudioReleasePackagedAppMaterializationContractFailurePath,
+  selectStudioReleasePackagedAppMaterializationContractFailureReadout,
+  selectStudioReleasePackagedAppMaterializationContractNextFailureReadout,
   selectStudioReleasePackagedAppMaterializationContractNearbyStageCReadiness,
   selectStudioReleasePackagedAppMaterializationContractNextProgressSegment,
   selectStudioReleasePackagedAppMaterializationContractPlatform,
@@ -475,6 +478,10 @@ function formatReviewSurfaceKind(kind: StudioCommandAction["reviewSurfaceKind"])
   switch (kind) {
     case "review-packet":
       return "Review packet";
+    case "validator-bridge":
+      return "Validator bridge";
+    case "failure-path":
+      return "Failure path";
     case "reviewer-queue":
       return "Reviewer queue";
     case "decision-handoff":
@@ -487,6 +494,28 @@ function formatReviewSurfaceKind(kind: StudioCommandAction["reviewSurfaceKind"])
       return "Closeout window";
     default:
       return "Review surface";
+  }
+}
+
+function formatFailureDisposition(disposition: "blocked" | "abort" | "partial-apply" | "rollback"): string {
+  switch (disposition) {
+    case "blocked":
+      return "Blocked";
+    case "abort":
+      return "Abort";
+    case "partial-apply":
+      return "Partial apply";
+    case "rollback":
+      return "Rollback";
+  }
+}
+
+function resolveFailureDispositionTone(disposition: "blocked" | "abort" | "partial-apply" | "rollback"): Tone {
+  switch (disposition) {
+    case "blocked":
+      return "neutral";
+    default:
+      return "warning";
   }
 }
 
@@ -1777,6 +1806,21 @@ export function DeliveryChainWorkspace({
       pipeline.deliveryChain,
       selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
     ) ?? null;
+  const selectedFailurePath =
+    selectStudioReleasePackagedAppMaterializationContractFailurePath(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
+    ) ?? null;
+  const selectedFailureReadout =
+    selectStudioReleasePackagedAppMaterializationContractFailureReadout(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
+    ) ?? null;
+  const nextFailureReadout =
+    selectStudioReleasePackagedAppMaterializationContractNextFailureReadout(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
+    ) ?? null;
   const validatorSurfaceMatch = selectStudioReleasePackagedAppMaterializationContractValidatorObservabilitySurfaceMatch(
     pipeline.deliveryChain,
     windowing,
@@ -1808,6 +1852,9 @@ export function DeliveryChainWorkspace({
   const selectedValidatorStage = selectedValidatorReadout
     ? selectStudioReleaseDeliveryChainStage(pipeline, selectedValidatorReadout.deliveryChainStageId) ?? null
     : null;
+  const selectedFailureStage = selectedFailureReadout
+    ? selectStudioReleaseDeliveryChainStage(pipeline, selectedFailureReadout.deliveryChainStageId) ?? null
+    : null;
   const materializationReviewReadyCount =
     selectedMaterializationPlatform?.tasks.filter((task) => task.taskState === "review-ready").length ?? 0;
   const materializationBlockedCount =
@@ -1830,6 +1877,32 @@ export function DeliveryChainWorkspace({
     selectedReviewPacketStep && selectedMaterializationPlatform
       ? selectedMaterializationPlatform.tasks.find((task) => task.id === selectedReviewPacketStep.toTaskId) ?? null
       : null;
+  const selectedFailureReviewPacketStep =
+    selectedFailureReadout && selectedReviewPacket
+      ? selectedReviewPacket.steps.find((step) => step.id === selectedFailureReadout.reviewPacketStepId) ?? null
+      : null;
+  const selectedFailureValidatorReadout =
+    selectedFailureReadout && selectedValidatorBridge
+      ? selectedValidatorBridge.readouts.find((readout) => readout.id === selectedFailureReadout.validatorReadoutId) ?? null
+      : null;
+  const selectedFailureRollbackContract = selectedFailureReadout
+    ? selectStudioReleaseRollbackLiveReadinessContract(pipeline.deliveryChain, selectedFailureReadout.rollbackContractId) ?? null
+    : null;
+  const failureCommandPreviewActions = selectedFailureReadout
+    ? selectedFailureReadout.commandActionIds
+        .map(
+          (actionId) =>
+            reviewSurfaceActions.find((action): action is ReviewCoverageAction => isReviewCoverageAction(action) && action.id === actionId) ?? null
+        )
+        .filter((action): action is ReviewCoverageAction => Boolean(action))
+    : [];
+  const failureCommandPreviewLane =
+    actionDeck?.lanes.find((lane) => lane.id === selectedFailureReadout?.commandDeckLaneId) ?? null;
+  const failureObservabilitySignals = selectedFailureReadout
+    ? selectedFailureReadout.observabilitySignalIds
+        .map((signalId) => windowing?.observability.signals.find((signal) => signal.id === signalId) ?? null)
+        .filter((signal): signal is NonNullable<typeof signal> => Boolean(signal))
+    : [];
   const rollbackDecisionStage = selectStudioReleaseDeliveryChainStage(pipeline, "delivery-chain-rollback-readiness") ?? null;
   const selectedQaTrackStage = selectedQaTrack ? selectStudioReleaseDeliveryChainStage(pipeline, selectedQaTrack.deliveryChainStageId) ?? null : null;
   const selectedApprovalWorkflowStages =
@@ -2000,9 +2073,8 @@ export function DeliveryChainWorkspace({
     selectedReviewerQueue?.entries.find((entry) => entry.id === selectedReviewerQueue.activeEntryId) ?? selectedReviewerQueue?.entries[0] ?? null;
   const publishStage = selectStudioReleaseDeliveryChainStage(pipeline, "delivery-chain-publish-decision") ?? null;
   const rollbackStage = selectStudioReleaseDeliveryChainStage(pipeline, "delivery-chain-rollback-readiness") ?? null;
-  const stageReviewSurfaceActions = reviewSurfaceActions
-    .filter(isReviewCoverageAction)
-    .filter((action) => action.deliveryChainStageId === selectedDeliveryStage?.id);
+  const allReviewSurfaceActions = reviewSurfaceActions.filter(isReviewCoverageAction);
+  const stageReviewSurfaceActions = allReviewSurfaceActions.filter((action) => action.deliveryChainStageId === selectedDeliveryStage?.id);
   const activeStageReviewSurfaceAction =
     stageReviewSurfaceActions.find((action) => action.id === activeReviewSurfaceActionId) ?? stageReviewSurfaceActions[0] ?? null;
   const relevantActionDeckLanes =
@@ -2027,7 +2099,7 @@ export function DeliveryChainWorkspace({
   } = resolveCompanionRouteContext({
     lanes: relevantActionDeckLanes,
     contextReviewSurfaceActions: stageReviewSurfaceActions,
-    allReviewSurfaceActions: reviewSurfaceActions.filter(isReviewCoverageAction),
+    allReviewSurfaceActions,
     activeReviewSurfaceActionId: activeStageReviewSurfaceAction?.id ?? null,
     companionRouteStateId: activeCompanionRouteStateId,
     companionSequenceId: activeCompanionSequenceId,
