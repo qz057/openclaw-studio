@@ -221,6 +221,17 @@ type ReplayAcceptanceCloseoutTimelineItem = {
   badges: string[];
 };
 
+type MaterializationStageCReadoutCard = {
+  id: string;
+  label: string;
+  title: string;
+  status: string;
+  detail: string;
+  tone: Tone;
+  stageLabel: string;
+  badges: string[];
+};
+
 const ALL_REPLAY_EVIDENCE_TRACE_ID = "replay-evidence-trace-all";
 
 function resolveStageTone(status: StudioReleaseApprovalPipeline["stages"][number]["status"]): Tone {
@@ -1835,6 +1846,115 @@ export function DeliveryChainWorkspace({
   const nearbyMaterializationWorkflowStage = nearbyMaterializationStageCReadiness.workflowStages[0] ?? selectedApprovalWorkflowStage ?? null;
   const nearbyMaterializationCheckpoint = nearbyMaterializationStageCReadiness.checkpoints[0] ?? selectedStageCCheckpoint ?? null;
   const nearbyMaterializationRollbackContract = nearbyMaterializationStageCReadiness.rollbackContracts[0] ?? selectedRollbackContract ?? null;
+  const nearbyMaterializationCheckpointStage = nearbyMaterializationCheckpoint
+    ? selectStudioReleaseDeliveryChainStage(pipeline, nearbyMaterializationCheckpoint.deliveryChainStageId) ?? null
+    : null;
+  const materializationStageCReadoutStatus = nearbyMaterializationCheckpoint
+    ? formatStageReadinessStatus(nearbyMaterializationCheckpoint.state)
+    : nearbyMaterializationWorkflowStage
+      ? formatStageReadinessStatus(nearbyMaterializationWorkflowStage.status)
+      : nearbyMaterializationQaTrack
+        ? formatStageReadinessStatus(nearbyMaterializationQaTrack.status)
+        : nearbyMaterializationRollbackContract
+          ? formatStageReadinessStatus(nearbyMaterializationRollbackContract.status)
+          : "Unavailable";
+  const materializationStageCReadoutTone = nearbyMaterializationCheckpoint
+    ? resolveStageTone(nearbyMaterializationCheckpoint.state)
+    : nearbyMaterializationWorkflowStage
+      ? resolveStageTone(nearbyMaterializationWorkflowStage.status)
+      : nearbyMaterializationQaTrack
+        ? resolveStageTone(nearbyMaterializationQaTrack.status)
+        : nearbyMaterializationRollbackContract
+          ? resolveStageTone(nearbyMaterializationRollbackContract.status)
+          : "warning";
+  const materializationStageCReadoutPath = [
+    selectedReviewPacketStep?.label ?? selectedReviewPacket?.label ?? null,
+    selectedValidatorReadout?.label ?? selectedValidatorBridge?.label ?? null,
+    nearbyMaterializationCheckpoint?.label ?? nearbyMaterializationQaTrack?.label ?? nearbyMaterializationWorkflowStage?.label ?? null
+  ]
+    .filter((label): label is string => Boolean(label))
+    .join(" -> ");
+  const materializationStageCReadoutCards: MaterializationStageCReadoutCard[] = selectedMaterializationPlatform
+    ? [
+        {
+          id: "packet-handoff",
+          label: "Packet handoff",
+          title: selectedReviewPacketStep?.label ?? selectedReviewPacket?.label ?? "No local review packet",
+          status: selectedReviewPacketStep
+            ? formatMaterializationTaskState(selectedReviewPacketStep.taskState)
+            : selectedReviewPacket
+              ? formatMaterializationTaskState(selectedReviewPacket.taskState)
+              : "Unavailable",
+          detail: selectedReviewPacketStep
+            ? `${selectedReviewPacketSourceTask?.label ?? selectedReviewPacketStep.fromTaskId} -> ${
+                selectedReviewPacketTargetTask?.label ?? selectedReviewPacketStep.toTaskId
+              } / ${selectedReviewPacketStep.summary}`
+            : selectedReviewPacket?.summary ?? "The selected platform does not expose a local review-packet handoff yet.",
+          tone: selectedReviewPacketStep
+            ? resolveMaterializationTaskTone(selectedReviewPacketStep.taskState)
+            : resolveMaterializationTaskTone(selectedReviewPacket?.taskState ?? "blocked"),
+          stageLabel: selectedReviewPacketStepStage
+            ? `${selectedReviewPacketStepStage.label} / ${selectedReviewPacketStepStage.status}`
+            : "No linked stage",
+          badges: [
+            selectedReviewPacketStep?.manifestPath ?? null,
+            selectedReviewPacket?.rollbackCheckpointId ? `Rollback ${selectedReviewPacket.rollbackCheckpointId}` : null,
+            nextReviewPacketStep ? `Next ${nextReviewPacketStep.label}` : selectedReviewPacket ? "Final handoff next" : null
+          ].filter((badge): badge is string => Boolean(badge))
+        },
+        {
+          id: "validator-surface",
+          label: "Observability bridge",
+          title: selectedValidatorReadout?.label ?? selectedValidatorBridge?.label ?? "No validator readout",
+          status: selectedValidatorReadout
+            ? formatValidatorReadoutStatus(selectedValidatorReadout.status)
+            : selectedValidatorBridge
+              ? formatMaterializationTaskState(selectedValidatorBridge.taskState)
+              : "Unavailable",
+          detail: selectedValidatorReadout
+            ? `${validatorSurfaceMatch.observabilityMapping?.label ?? selectedValidatorReadout.observabilityMappingId} / ${
+                validatorSurfaceMatch.window?.label ?? selectedValidatorReadout.windowId
+              } / ${validatorSurfaceMatch.lane?.label ?? selectedValidatorReadout.sharedStateLaneId} / ${
+                validatorSurfaceMatch.board?.label ?? selectedValidatorReadout.orchestrationBoardId
+              }`
+            : selectedValidatorBridge?.summary ?? "Validator / observability linkage is unavailable for the selected platform.",
+          tone: selectedValidatorReadout
+            ? resolveValidatorReadoutTone(selectedValidatorReadout.status)
+            : resolveMaterializationTaskTone(selectedValidatorBridge?.taskState ?? "blocked"),
+          stageLabel: selectedValidatorStage ? `${selectedValidatorStage.label} / ${selectedValidatorStage.status}` : "No linked stage",
+          badges: [
+            validatorSurfaceMatch.reviewStateContinuityEntry?.label ?? null,
+            `${validatorSurfaceMatch.observabilitySignals.length} signals`,
+            nextValidatorReadout ? `Next ${nextValidatorReadout.label}` : selectedValidatorBridge ? "Final validator checkpoint" : null
+          ].filter((badge): badge is string => Boolean(badge))
+        },
+        {
+          id: "stage-c-linkage",
+          label: "Stage C posture",
+          title: nearbyMaterializationCheckpoint?.label ?? "Nearby Stage C posture",
+          status: materializationStageCReadoutStatus,
+          detail:
+            nearbyMaterializationCheckpoint?.reviewChecks[0] ??
+            nearbyMaterializationCheckpoint?.evidence[0] ??
+            nearbyMaterializationWorkflowStage?.evidence[0] ??
+            nearbyMaterializationQaTrack?.reviewChecks[0] ??
+            nearbyMaterializationQaTrack?.artifacts[0] ??
+            nearbyMaterializationRollbackContract?.readinessChecks[0] ??
+            "Nearby Stage C QA, approval, entry, and rollback posture is unavailable for the selected platform.",
+          tone: materializationStageCReadoutTone,
+          stageLabel: nearbyMaterializationCheckpointStage
+            ? `${nearbyMaterializationCheckpointStage.label} / ${nearbyMaterializationCheckpointStage.status}`
+            : `${nearbyMaterializationStageCReadiness.stageIds.length} linked stages`,
+          badges: [
+            nearbyMaterializationQaTrack ? `QA ${nearbyMaterializationQaTrack.label}` : null,
+            nearbyMaterializationWorkflowStage ? `Workflow ${nearbyMaterializationWorkflowStage.label}` : null,
+            nearbyMaterializationRollbackContract
+              ? `Rollback ${nearbyMaterializationRollbackContract.from} -> ${nearbyMaterializationRollbackContract.to}`
+              : null
+          ].filter((badge): badge is string => Boolean(badge))
+        }
+      ]
+    : [];
   const selectedStageCBoundarySteps =
     selectedStageCCheckpoint?.boundaryStepIds
       .map((stepId) => boundary?.withheldExecutionPlan.find((step) => step.id === stepId) ?? null)
@@ -6469,6 +6589,32 @@ export function DeliveryChainWorkspace({
                   <span>Integrity manifest</span>
                   <strong>{selectedMaterializationPlatform.manifests.bundleIntegrity}</strong>
                 </div>
+              </div>
+              <div className="workflow-readiness-list">
+                <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                  <span>Materialization readout chain</span>
+                  <strong>{materializationStageCReadoutPath || "Unavailable"}</strong>
+                </div>
+              </div>
+              <div className={compact ? "workflow-step-grid workflow-step-grid--compact" : "workflow-step-grid"}>
+                {materializationStageCReadoutCards.map((card) => (
+                  <div key={card.id} className={`workflow-step-card workflow-step-card--${card.tone}`}>
+                    <div className="workflow-step-card__meta">
+                      <span>{card.label}</span>
+                      <strong>{card.status}</strong>
+                    </div>
+                    <h3>{card.title}</h3>
+                    <p>{card.detail}</p>
+                    <div className="windowing-card__meta">
+                      <span className="windowing-badge">{card.stageLabel}</span>
+                      {card.badges.map((badge) => (
+                        <span key={`${card.id}-${badge}`} className="windowing-badge">
+                          {badge}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
               <div className="delivery-chain-workspace__artifact-groups">
                 {selectedMaterializationPlatform.tasks.map((task) => (
