@@ -2,7 +2,7 @@
 
 ## Snapshot
 
-- 当前已验证里程碑：**phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface + docs / smoke / package / release-plan / UI / shared data closeout**
+- 当前已验证里程碑：**phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay acceptance checklist / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface + docs / smoke / package / release-plan / UI / shared data closeout**
 - 当前主视图：
   - `Dashboard`
   - `Home`
@@ -48,6 +48,7 @@
   - phase60 slice8 已继续把 typed companion review-path orchestration 推进成 sequence-aware companion review navigation，让当前 review surface 显式暴露 ordered companion steps、active sequence step、以及与 route / workspace / window / shared-state lane / orchestration board / observability path 绑定的 sequence context
   - phase60 slice9 已继续把 sequence-aware companion review navigation 推进成 delivery-gate companion sequence switching，让 publish gate / approval queue / rollback shadow 三条 companion 序列可以在同一条 local-only review lane 里显式切换，并把 route / workspace / intent state 一起带入 active / alternate companion coverage
   - phase60 slice10 已继续把 delivery-gate companion sequence switching 推进成 companion route-history memory，让 review-deck lane 能记住最近一次 publish gate / approval queue / rollback shadow / handoff relay 的 companion handoff，并在重新进入同一条 local-only review route 时恢复 route state / sequence / review-surface / multi-window posture
+  - phase60 slice11 已继续把 companion route-history memory 推进成 route replay board / replay acceptance checklist，让 delivery workspace 可以直接 restore latest handoff、replay active sequence、以及验收当前 review route 的 review surface / route state / window / lane / board / observability contract
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline
@@ -84,7 +85,7 @@ npm run release:plan
 - `workspace views` / `window intents` / `detached panel placeholders`
 - detached workspace workflow：用户现在能看到 workspace entry / detached candidate / workflow posture / switch path
 - window intents 现在具备 staged / focused / preview / shell link 之外，还补齐 workflow step / readiness / handoff posture
-- command surface 现在具备 action groups / sequences / contextual flows / keyboard routing / action decks / review-surface coverage actions / multi-window review coverage / companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory
+- command surface 现在具备 action groups / sequences / contextual flows / keyboard routing / action decks / review-surface coverage actions / multi-window review coverage / companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay restore / replay acceptance checks
 - Dashboard / Home / Skills 会对当前 route / workflow lane / focused slot 给出一致的 recommended next actions
 - inspector 与 windowing 现在补齐 route-aware drilldowns、recent command history、以及 Local Orchestration Board
 - phase32 进一步补齐 Cross-view Coordination Matrix、Inspector-Command Linkage、Packaging Pipeline Depth
@@ -120,6 +121,7 @@ npm run release:plan
 - phase60 slice8 进一步补齐 Companion Sequence Navigator、Ordered Companion Steps、Active Sequence Step、以及 current review surface 到 sequence-aware companion navigation 的显式 sequence-linked linkage
 - phase60 slice9 进一步补齐 Companion Sequence Switcher、Delivery Gate alternate sequences、以及 publish gate / approval queue / rollback shadow 在同一条 local-only companion lane 里的显式 sequence switching
 - phase60 slice10 进一步补齐 Companion Route History、Remembered Handoffs、以及重新进入 review-deck lane 时的 route state / sequence / multi-window posture restore
+- phase60 slice11 进一步补齐 Route Replay Board、Replay Acceptance Checklist、Restore latest handoff / Replay active sequence controls、以及当前 review route 的 review surface / route state / window / lane / board / observability contract
 - 仍然不做真实外部窗口编排
 
 ## Phase25 Boundary Model

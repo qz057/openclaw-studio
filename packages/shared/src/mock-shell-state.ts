@@ -14,7 +14,7 @@ import { mockBoundarySummary } from "./mock-host.js";
 const mockCommandSurface: StudioCommandSurface = {
   title: "Command Palette",
   summary:
-    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, typed companion review-path orchestration, ordered companion review sequences, typed companion route states, explicit active/alternate routes, switchable sequence posture, companion route-history memory, stabilized path handoffs, review-surface coverage pivots, multi-window review coverage, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
+    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, typed companion review-path orchestration, ordered companion review sequences, typed companion route states, explicit active/alternate routes, switchable sequence posture, companion route-history memory, route replay restore, replay acceptance checks, stabilized path handoffs, review-surface coverage pivots, multi-window review coverage, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
   placeholder: "Search orchestration, delivery coverage, observability, navigation, next steps, flow state, detached workspace, or keyboard routes",
   quickActionIds: [
     "command-open-home",
@@ -903,7 +903,7 @@ const mockCommandSurface: StudioCommandSurface = {
       id: "deck-review-deck-orchestration",
       label: "Review Deck Orchestration Deck",
       summary:
-        "Review-deck posture now carries a dedicated local-only action deck so workspace entry, review-workspace intent, delivery-stage coverage, typed companion review-path orchestration, delivery-gate companion sequence switching, companion route-history memory, stabilized path handoffs, review-surface pivots, multi-window review coverage, and cross-window handoff coverage stay grouped instead of being inferred from separate cards.",
+        "Review-deck posture now carries a dedicated local-only action deck so workspace entry, review-workspace intent, delivery-stage coverage, typed companion review-path orchestration, delivery-gate companion sequence switching, companion route-history memory, route replay restore, replay acceptance checks, stabilized path handoffs, review-surface pivots, multi-window review coverage, and cross-window handoff coverage stay grouped instead of being inferred from separate cards.",
       tone: "positive",
       flowId: "flow-review-deck-coverage",
       sequenceId: "sequence-review-coverage-flow",

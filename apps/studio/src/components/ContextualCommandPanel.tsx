@@ -480,11 +480,6 @@ export function ContextualCommandPanel({
                     type="button"
                     className="action-button"
                     onClick={() => {
-                      if (onRunCompanionRouteHistory) {
-                        onRunCompanionRouteHistory(item.id);
-                        return;
-                      }
-
                       onRunAction(item.action as StudioCommandAction);
                     }}
                     title={item.action.description}
@@ -565,12 +560,12 @@ export function ContextualCommandPanel({
       {companionRouteHistoryItems.length ? (
         <div className="contextual-command-panel__section">
           <div className="contextual-command-panel__section-header">
-            <span>Companion Route History</span>
+            <span>Route Replay Restore</span>
             <strong>{companionRouteHistoryLabel ?? `${companionRouteHistoryItems.length} remembered handoffs`}</strong>
           </div>
           <p className="panel-summary panel-summary--tight">
             {companionRouteHistorySummary ??
-              "Recent companion handoffs stay remembered so returning to the same review lane restores the last route, sequence, and review-surface posture instead of recomputing it from scratch."}
+              "Remembered companion handoffs now double as route replay restores, so returning to the same review lane can restore the last route, sequence, and review-surface posture instead of recomputing it from scratch."}
           </p>
           <div className="contextual-command-panel__next-step-list">
             {companionRouteHistoryItems.map((item) => (
@@ -587,16 +582,23 @@ export function ContextualCommandPanel({
                     {item.sequenceLabel ? <span className="command-context-pill">{item.sequenceLabel}</span> : null}
                   </div>
                 </div>
-                {item.action ? (
+                {onRunCompanionRouteHistory || item.action ? (
                   <button
                     type="button"
                     className="action-button"
                     onClick={() => {
-                      onRunAction(item.action as StudioCommandAction);
+                      if (onRunCompanionRouteHistory) {
+                        onRunCompanionRouteHistory(item.id);
+                        return;
+                      }
+
+                      if (item.action) {
+                        onRunAction(item.action as StudioCommandAction);
+                      }
                     }}
-                    title={item.action.description}
+                    title={item.action?.description ?? item.detail}
                   >
-                    {item.active ? "Refresh handoff" : "Resume handoff"}
+                    {item.active ? "Refresh replay" : "Restore handoff"}
                   </button>
                 ) : null}
               </article>

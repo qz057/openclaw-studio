@@ -32,6 +32,7 @@ interface DeliveryChainWorkspaceProps {
   onSelectStage?: (stageId: string) => void;
   onRunReviewSurfaceAction?: (action: StudioCommandAction) => void;
   onRunCompanionSequence?: (sequenceId: string) => void;
+  onRunCompanionRouteHistory?: (entryId: string) => void;
   compact?: boolean;
   nested?: boolean;
   eyebrow?: string;
@@ -329,6 +330,7 @@ export function DeliveryChainWorkspace({
   onSelectStage,
   onRunReviewSurfaceAction,
   onRunCompanionSequence,
+  onRunCompanionRouteHistory,
   compact = false,
   nested = false,
   eyebrow = "Delivery",
@@ -442,6 +444,73 @@ export function DeliveryChainWorkspace({
     companionPathHandoffId: activeCompanionPathHandoffId,
     additionalCompanionRouteHistoryEntries: companionRouteHistoryEntries
   });
+  const replayRestoreEntry = activeCompanionRouteHistoryEntry ?? relevantCompanionRouteHistoryEntries[0] ?? null;
+  const replayRestoreRouteState =
+    (replayRestoreEntry?.routeStateId
+      ? relevantCompanionRouteStates.find((routeState) => routeState.id === replayRestoreEntry.routeStateId) ?? null
+      : null) ??
+    activeCompanionRouteState ??
+    null;
+  const replayRestoreSequence =
+    (replayRestoreEntry?.sequenceId
+      ? relevantCompanionSequences.find((sequence) => sequence.id === replayRestoreEntry.sequenceId) ?? null
+      : null) ??
+    activeCompanionSequence ??
+    null;
+  const replayRestoreAction =
+    (replayRestoreEntry ? reviewSurfaceActionById.get(replayRestoreEntry.targetActionId) ?? null : null) ??
+    (replayRestoreRouteState ? reviewSurfaceActionById.get(replayRestoreRouteState.currentActionId) ?? null : null) ??
+    activeStageReviewSurfaceAction ??
+    null;
+  const replayRestoreStage =
+    (replayRestoreEntry?.deliveryChainStageId ? selectStudioReleaseDeliveryChainStage(pipeline, replayRestoreEntry.deliveryChainStageId) : null) ??
+    (replayRestoreAction?.deliveryChainStageId ? selectStudioReleaseDeliveryChainStage(pipeline, replayRestoreAction.deliveryChainStageId) : null) ??
+    (replayRestoreRouteState?.deliveryChainStageId ? selectStudioReleaseDeliveryChainStage(pipeline, replayRestoreRouteState.deliveryChainStageId) : null) ??
+    selectedDeliveryStage;
+  const replayRestoreWindow =
+    (replayRestoreEntry?.windowId ? windowing?.roster.windows.find((entry) => entry.id === replayRestoreEntry.windowId) ?? null : null) ??
+    (replayRestoreAction?.windowId ? windowing?.roster.windows.find((entry) => entry.id === replayRestoreAction.windowId) ?? null : null) ??
+    (replayRestoreRouteState?.windowId ? windowing?.roster.windows.find((entry) => entry.id === replayRestoreRouteState.windowId) ?? null : null) ??
+    null;
+  const replayRestoreLane =
+    (replayRestoreEntry?.sharedStateLaneId
+      ? windowing?.sharedState.lanes.find((entry) => entry.id === replayRestoreEntry.sharedStateLaneId) ?? null
+      : null) ??
+    (replayRestoreAction?.sharedStateLaneId
+      ? windowing?.sharedState.lanes.find((entry) => entry.id === replayRestoreAction.sharedStateLaneId) ?? null
+      : null) ??
+    (replayRestoreRouteState?.sharedStateLaneId
+      ? windowing?.sharedState.lanes.find((entry) => entry.id === replayRestoreRouteState.sharedStateLaneId) ?? null
+      : null) ??
+    null;
+  const replayRestoreBoard =
+    (replayRestoreEntry?.orchestrationBoardId
+      ? windowing?.orchestration.boards.find((entry) => entry.id === replayRestoreEntry.orchestrationBoardId) ?? null
+      : null) ??
+    (replayRestoreAction?.orchestrationBoardId
+      ? windowing?.orchestration.boards.find((entry) => entry.id === replayRestoreAction.orchestrationBoardId) ?? null
+      : null) ??
+    (replayRestoreRouteState?.orchestrationBoardId
+      ? windowing?.orchestration.boards.find((entry) => entry.id === replayRestoreRouteState.orchestrationBoardId) ?? null
+      : null) ??
+    null;
+  const replayRestoreMapping =
+    (replayRestoreEntry?.observabilityMappingId
+      ? windowing?.observability.mappings.find((entry) => entry.id === replayRestoreEntry.observabilityMappingId) ?? null
+      : null) ??
+    (replayRestoreAction?.observabilityMappingId
+      ? windowing?.observability.mappings.find((entry) => entry.id === replayRestoreAction.observabilityMappingId) ?? null
+      : null) ??
+    (replayRestoreRouteState?.observabilityMappingId
+      ? windowing?.observability.mappings.find((entry) => entry.id === replayRestoreRouteState.observabilityMappingId) ?? null
+      : null) ??
+    activeStageMapping;
+  const replayAcceptanceChecksReady =
+    Number(Boolean(replayRestoreEntry)) +
+    Number(Boolean(replayRestoreSequence?.steps.length)) +
+    Number(Boolean(replayRestoreAction)) +
+    Number(Boolean(replayRestoreWindow && replayRestoreLane && replayRestoreBoard && replayRestoreMapping)) +
+    1;
   const panelClassName = [
     nested ? "delivery-chain-workspace delivery-chain-workspace--nested" : "surface card delivery-chain-workspace",
     compact ? "delivery-chain-workspace--compact" : ""
@@ -935,33 +1004,112 @@ export function DeliveryChainWorkspace({
 
         {activeCompanionPathHandoff || relevantCompanionRouteHistoryEntries.length > 0 ? (
           <article className="windowing-summary-card">
-            <span>Path Handoff Stabilization</span>
-            <strong>{activeCompanionPathHandoff?.label ?? activeCompanionRouteHistoryEntry?.label ?? "No stabilized handoff"}</strong>
+            <span>Route Replay Board</span>
+            <strong>{replayRestoreEntry?.label ?? activeCompanionPathHandoff?.label ?? "No replay target"}</strong>
             <p>
-              The selected stage now keeps typed path handoff posture and remembered route transitions together, so returning to the same delivery lane
-              restores the last companion path instead of flattening back to the default review surface.
+              The selected stage now turns remembered route transitions into an acceptance-facing restore surface, so product testing can restore the
+              last handoff, replay the active companion sequence, and verify the same review surface plus window / lane / board / observability
+              contract without leaving local-only review posture.
             </p>
+            <div className="windowing-card__meta">
+              <span className="windowing-badge windowing-badge--active">{replayAcceptanceChecksReady} / 5 checks ready</span>
+              <span className="windowing-badge">{replayRestoreRouteState?.label ?? "No route snapshot"}</span>
+              <span className="windowing-badge">{replayRestoreStage?.label ?? "No delivery stage"}</span>
+            </div>
             <div className="workflow-readiness-list">
-              <div className="workflow-readiness-line workflow-readiness-line--neutral">
-                <span>Handoff stability</span>
+              <div
+                className={`workflow-readiness-line workflow-readiness-line--${
+                  replayRestoreEntry ? "positive" : activeCompanionPathHandoff ? "neutral" : "warning"
+                }`}
+              >
+                <span>Restore latest handoff</span>
                 <strong>
-                  {activeCompanionPathHandoff ? formatCompanionPathHandoffStability(activeCompanionPathHandoff.stability) : "No active handoff"}
+                  {replayRestoreEntry
+                    ? `${formatCompanionRouteTransitionKind(replayRestoreEntry.transitionKind)} / ${replayRestoreEntry.timestampLabel}`
+                    : "No remembered restore target"}
                 </strong>
               </div>
-              <div className="workflow-readiness-line workflow-readiness-line--neutral">
-                <span>Companion Route History</span>
-                <strong>{relevantCompanionRouteHistoryEntries.length} remembered routes</strong>
-              </div>
-              <div className="workflow-readiness-line workflow-readiness-line--neutral">
-                <span>Latest transition</span>
+              <div className={`workflow-readiness-line workflow-readiness-line--${replayRestoreSequence ? "positive" : "warning"}`}>
+                <span>Replay active sequence</span>
                 <strong>
-                  {activeCompanionRouteHistoryEntry
-                    ? formatCompanionRouteTransitionKind(activeCompanionRouteHistoryEntry.transitionKind)
-                    : "No remembered transition"}
+                  {replayRestoreSequence
+                    ? `${replayRestoreSequence.label} / ${replayRestoreSequence.steps.length} steps`
+                    : "No replay sequence"}
                 </strong>
+              </div>
+              <div className={`workflow-readiness-line workflow-readiness-line--${replayRestoreAction ? "positive" : "warning"}`}>
+                <span>Replay surface</span>
+                <strong>
+                  {replayRestoreAction
+                    ? `${replayRestoreAction.label} / ${formatReviewSurfaceKind(replayRestoreAction.reviewSurfaceKind)}`
+                    : "No replay surface"}
+                </strong>
+              </div>
+              <div
+                className={`workflow-readiness-line workflow-readiness-line--${
+                  replayRestoreWindow && replayRestoreLane && replayRestoreBoard && replayRestoreMapping ? "positive" : "warning"
+                }`}
+              >
+                <span>Coverage contract</span>
+                <strong>
+                  {replayRestoreWindow && replayRestoreLane && replayRestoreBoard && replayRestoreMapping
+                    ? `${replayRestoreWindow.label} / ${replayRestoreLane.label} / ${replayRestoreBoard.label}`
+                    : "Window, lane, board, or observability linkage is incomplete"}
+                </strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--positive">
+                <span>Safety posture</span>
+                <strong>local-only / review-only</strong>
               </div>
             </div>
+            <div className="windowing-card__actions">
+              {onRunCompanionRouteHistory && replayRestoreEntry ? (
+                <button type="button" className="secondary-button" onClick={() => onRunCompanionRouteHistory(replayRestoreEntry.id)}>
+                  Restore latest handoff
+                </button>
+              ) : null}
+              {onRunCompanionSequence && replayRestoreSequence ? (
+                <button type="button" className="secondary-button" onClick={() => onRunCompanionSequence(replayRestoreSequence.id)}>
+                  Replay active sequence
+                </button>
+              ) : null}
+              {onRunReviewSurfaceAction && replayRestoreAction ? (
+                <button type="button" className="secondary-button" onClick={() => onRunReviewSurfaceAction(replayRestoreAction)}>
+                  Focus replay surface
+                </button>
+              ) : null}
+            </div>
             <div className="windowing-preview-list">
+              <div className="windowing-preview-line windowing-preview-line--stacked">
+                <span>Replay Acceptance Checklist</span>
+                <strong>{replayAcceptanceChecksReady} / 5 acceptance checks ready</strong>
+                <p>
+                  Restore the latest handoff, replay the current companion sequence, confirm the replay surface, and verify the same stage, window,
+                  lane, board, and observability path stay attached inside local-only review mode.
+                </p>
+                <div className="trace-note-links">
+                  <span className="windowing-badge">{relevantCompanionRouteHistoryEntries.length} remembered routes</span>
+                  <span className="windowing-badge">{relevantCompanionPathHandoffs.length} stabilized handoffs</span>
+                  <span className="windowing-badge">{relevantCompanionSequences.length} replay sequences</span>
+                </div>
+              </div>
+              <div className="windowing-preview-line windowing-preview-line--stacked">
+                <span>Acceptance route snapshot</span>
+                <strong>{replayRestoreRouteState?.label ?? "No route snapshot"}</strong>
+                <p>
+                  {replayRestoreStage?.label ?? "No stage"} / {replayRestoreWindow?.label ?? "No window"} /{" "}
+                  {replayRestoreLane?.label ?? "No lane"} / {replayRestoreBoard?.label ?? "No board"}
+                </p>
+                <div className="trace-note-links">
+                  {replayRestoreSequence ? <span className="windowing-badge">{replayRestoreSequence.label}</span> : null}
+                  <span className="windowing-badge">{replayRestoreMapping?.label ?? "No observability path"}</span>
+                  {activeCompanionPathHandoff ? (
+                    <span className="windowing-badge">
+                      {activeCompanionPathHandoff.label} / {formatCompanionPathHandoffStability(activeCompanionPathHandoff.stability)}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
               {(compact ? relevantCompanionPathHandoffs.slice(0, 2) : relevantCompanionPathHandoffs).map((handoff) => {
                 const targetAction = reviewSurfaceActionById.get(handoff.targetActionId) ?? null;
                 const handoffStage = handoff.deliveryChainStageId
@@ -989,6 +1137,12 @@ export function DeliveryChainWorkspace({
                   : targetAction?.observabilityMappingId
                     ? windowing?.observability.mappings.find((entry) => entry.id === targetAction.observabilityMappingId) ?? null
                     : null;
+                const linkedHistoryEntry =
+                  relevantCompanionRouteHistoryEntries.find(
+                    (entry) =>
+                      entry.reviewPathId === handoff.reviewPathId ||
+                      (entry.routeStateId === handoff.routeStateId && entry.targetActionId === handoff.targetActionId)
+                  ) ?? null;
                 const active = handoff.id === activeCompanionPathHandoff?.id;
 
                 return (
@@ -1005,7 +1159,13 @@ export function DeliveryChainWorkspace({
                       </span>
                       <span className="windowing-badge">{handoffMapping?.label ?? handoff.observabilityMappingId ?? "No observability path"}</span>
                     </div>
-                    {onRunReviewSurfaceAction && targetAction ? (
+                    {onRunCompanionRouteHistory && linkedHistoryEntry ? (
+                      <div className="windowing-card__actions">
+                        <button type="button" className="secondary-button" onClick={() => onRunCompanionRouteHistory(linkedHistoryEntry.id)}>
+                          Restore handoff
+                        </button>
+                      </div>
+                    ) : onRunReviewSurfaceAction && targetAction ? (
                       <div className="windowing-card__actions">
                         <button type="button" className="secondary-button" onClick={() => onRunReviewSurfaceAction(targetAction)}>
                           {active ? "Refresh handoff" : "Focus handoff"}
@@ -1030,7 +1190,13 @@ export function DeliveryChainWorkspace({
                       </span>
                       {entry.sequenceId ? <span className="windowing-badge">{entry.sequenceId}</span> : null}
                     </div>
-                    {onRunReviewSurfaceAction && targetAction ? (
+                    {onRunCompanionRouteHistory ? (
+                      <div className="windowing-card__actions">
+                        <button type="button" className="secondary-button" onClick={() => onRunCompanionRouteHistory(entry.id)}>
+                          {active ? "Refresh restore" : "Restore memory"}
+                        </button>
+                      </div>
+                    ) : onRunReviewSurfaceAction && targetAction ? (
                       <div className="windowing-card__actions">
                         <button type="button" className="secondary-button" onClick={() => onRunReviewSurfaceAction(targetAction)}>
                           {active ? "Refresh memory" : "Focus memory"}
