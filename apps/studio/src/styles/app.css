@@ -419,6 +419,7 @@ button:disabled {
 .delivery-chain-workspace__explorer-grid,
 .delivery-chain-workspace__artifact-groups,
 .delivery-chain-workspace__acceptance-grid,
+.delivery-chain-workspace__pass-grid,
 .delivery-chain-workspace__acceptance-status-list {
   display: grid;
   gap: 16px;
@@ -437,9 +438,13 @@ button:disabled {
 }
 
 .delivery-chain-workspace__detail-grid,
-.delivery-chain-workspace__explorer-grid,
-.delivery-chain-workspace__acceptance-grid {
+.delivery-chain-workspace__explorer-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.delivery-chain-workspace__acceptance-grid,
+.delivery-chain-workspace__pass-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .delivery-chain-workspace__artifact-groups {
@@ -452,6 +457,50 @@ button:disabled {
 
 .delivery-chain-workspace__acceptance-grid .windowing-summary-card {
   align-content: start;
+}
+
+.delivery-chain-workspace__pass-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 176, 208, 0.14);
+  background: rgba(7, 16, 24, 0.62);
+}
+
+.delivery-chain-workspace__pass-card--positive {
+  border-color: rgba(100, 236, 178, 0.24);
+  background: rgba(14, 32, 28, 0.62);
+}
+
+.delivery-chain-workspace__pass-card--neutral {
+  border-color: rgba(105, 193, 255, 0.22);
+}
+
+.delivery-chain-workspace__pass-card--warning {
+  border-color: rgba(255, 209, 92, 0.22);
+}
+
+.delivery-chain-workspace__pass-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.delivery-chain-workspace__pass-card-header span {
+  color: #8fa3ba;
+  font-size: 0.8rem;
+}
+
+.delivery-chain-workspace__pass-card-header strong {
+  color: #d8e5f2;
+}
+
+.delivery-chain-workspace__pass-card p {
+  margin: 0;
+  color: #8fa3ba;
+  line-height: 1.5;
 }
 
 .workflow-lane-strip {
@@ -1159,6 +1208,7 @@ button:disabled {
   .delivery-chain-workspace__detail-grid,
   .delivery-chain-workspace__explorer-grid,
   .delivery-chain-workspace__acceptance-grid,
+  .delivery-chain-workspace__pass-grid,
   .delivery-chain-workspace__artifact-groups,
   .window-shared-detail-grid,
   .window-roster-grid,
@@ -1597,6 +1647,7 @@ button:disabled {
   .delivery-chain-workspace__detail-grid,
   .delivery-chain-workspace__explorer-grid,
   .delivery-chain-workspace__acceptance-grid,
+  .delivery-chain-workspace__pass-grid,
   .delivery-chain-workspace__artifact-groups,
   .window-shared-detail-grid,
   .window-roster-grid,

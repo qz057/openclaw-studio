@@ -294,7 +294,7 @@
 - smoke 已提升到验证 phase58 review-only delivery-chain renderer markers、runtime contract、以及 release artifact contract
 - README / HANDOFF / package snapshot 已同步反映 phase58 slice 3 reality
 
-### Phase 60（当前已完成，slice 1-9）
+### Phase 60（当前已完成，slice 1-14）
 - phase58 slice 3 的 review-only delivery chain 已继续推进成更明确的 delivery-chain workspace / stage explorer
 - shared / runtime / renderer 现在显式带出 selected delivery stage、artifact coverage、related review surfaces、blockers / handoff posture、以及 observability mapping，并把它们收敛到同一个 shell explorer
 - App 主 shell 现在能直接在 operator review board 之后切换 attestation / review / promotion / publish / rollback stages，并看到同一阶段的 ownership、artifact groups、queue / handoff / closeout posture、以及跨窗口映射
@@ -309,8 +309,9 @@
 - phase60 slice10 继续把 delivery-gate companion sequence switching 推进成 companion route-history memory，让 review-deck lane 能记住最近一次 publish gate / approval queue / rollback shadow / handoff relay 的 companion handoff，并在重新进入同一条 local-only review route 时恢复 route state / sequence / review-surface / multi-window posture
 - phase60 slice11 继续把 companion route-history memory 推进成 route replay board / replay acceptance checklist，让 delivery workspace 可以直接 restore latest handoff、replay active sequence、以及验收当前 review route 的 review surface / route state / window / lane / board / observability contract
 - phase60 slice13 继续把 route replay board / replay acceptance checklist 推进成 screenshot-driven acceptance review pack / acceptance scoreboard / pass-status board / screenshot target board，让 delivery workspace 可以把 replay route、scenario review pack、验收检查、reviewer / evidence posture、以及 screenshot targets 收敛成更接近产品验收的单条本地审阅层
-- smoke 已提升到验证 phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review coverage flow / action deck coverage / review-surface navigator / multi-window review coverage / companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / acceptance scoreboard / acceptance review pack / pass-status board / screenshot target board / review pack scenarios / command-surface observability linkage / artifact coverage / blockers / handoff posture renderer markers
-- README / HANDOFF / package snapshot 已同步反映 phase60 slice13 reality
+- phase60 slice14 继续把 screenshot-driven acceptance review pack 推进成 acceptance pass layer / evidence bundle surface / reviewer brief / proof bundle / screenshot target framing，让 delivery workspace 可以把 replay route、reviewer brief、scenario evidence、continuity anchors、proof bundle、以及 screenshot targets 收敛成更完整的本地产品验收链
+- smoke 已提升到验证 phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review coverage flow / action deck coverage / review-surface navigator / multi-window review coverage / companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / acceptance scoreboard / acceptance review pack / acceptance pass layer / evidence bundle / reviewer brief / proof bundle / screenshot target board / review pack scenarios / command-surface observability linkage / artifact coverage / blockers / handoff posture renderer markers
+- README / HANDOFF / package snapshot 已同步反映 phase60 slice14 reality
 
 ## 当前明确边界
 

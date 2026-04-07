@@ -126,6 +126,10 @@ async function verifyRendererFocusedSlotUi() {
     "Acceptance Scoreboard",
     "Acceptance Review Pack",
     "Pass Status Board",
+    "Acceptance Pass Layer",
+    "Evidence Bundle",
+    "Reviewer brief",
+    "Proof bundle",
     "Screenshot Target Board",
     "Review Pack Scenarios",
     "remembered handoffs",
@@ -818,6 +822,59 @@ function assertCommandSurfaceContract(commandSurface, shellState) {
           throw new Error(
             `Command action deck lane ${lane.id} points at focus observability mapping ${lane.focusObservabilityMappingId} outside its mapped rows.`
           );
+        }
+      }
+
+      if (lane.replayScenarioPack) {
+        if (!lane.replayScenarioPack.label || !lane.replayScenarioPack.summary || lane.replayScenarioPack.safety !== "local-only") {
+          throw new Error(`Command action deck lane ${lane.id} is missing the phase60 acceptance review-pack contract.`);
+        }
+
+        if (!(lane.companionRouteHistory?.length ?? 0)) {
+          throw new Error(`Command action deck lane ${lane.id} is missing replay scenarios for its acceptance review-pack.`);
+        }
+
+        for (const entry of lane.companionRouteHistory ?? []) {
+          if (
+            !entry.scenarioLabel ||
+            !entry.scenarioSummary ||
+            !(entry.reviewerPosture || lane.replayScenarioPack.reviewerPosture) ||
+            !(entry.evidencePosture || lane.replayScenarioPack.evidencePosture)
+          ) {
+            throw new Error(`Replay scenario ${entry.id} is missing reviewer-facing acceptance copy.`);
+          }
+
+          if (!(entry.acceptanceChecks?.length ?? 0) || !(entry.screenshotReviewItems?.length ?? 0)) {
+            throw new Error(`Replay scenario ${entry.id} is missing the phase60 acceptance pass flow metadata.`);
+          }
+
+          if (!(entry.scenarioEvidenceItems?.length ?? 0) || !(entry.evidenceContinuityChecks?.length ?? 0)) {
+            throw new Error(`Replay scenario ${entry.id} is missing the phase60 evidence bundle metadata.`);
+          }
+
+          for (const check of entry.acceptanceChecks ?? []) {
+            if (!check.label || !check.detail || !check.state) {
+              throw new Error(`Replay scenario ${entry.id} has an incomplete acceptance check ${check.id}.`);
+            }
+          }
+
+          for (const item of entry.scenarioEvidenceItems ?? []) {
+            if (!item.label || !item.artifact || !item.detail || !item.posture) {
+              throw new Error(`Replay scenario ${entry.id} has an incomplete proof-bundle item ${item.id}.`);
+            }
+          }
+
+          for (const check of entry.evidenceContinuityChecks ?? []) {
+            if (!check.label || !check.handoff || !check.detail || !check.state) {
+              throw new Error(`Replay scenario ${entry.id} has an incomplete evidence continuity check ${check.id}.`);
+            }
+          }
+
+          for (const item of entry.screenshotReviewItems ?? []) {
+            if (!item.label || !item.surface || !item.detail || !item.posture) {
+              throw new Error(`Replay scenario ${entry.id} has an incomplete screenshot target ${item.id}.`);
+            }
+          }
         }
       }
 

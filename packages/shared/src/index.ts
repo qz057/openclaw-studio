@@ -1115,6 +1115,26 @@ export interface StudioCommandReplayAcceptanceCheck {
   state: StudioCommandReplayAcceptanceCheckState;
 }
 
+export type StudioCommandReplayScenarioEvidenceItemPosture = "linked" | "staged" | "pending";
+
+export interface StudioCommandReplayScenarioEvidenceItem {
+  id: string;
+  label: string;
+  artifact: string;
+  posture: StudioCommandReplayScenarioEvidenceItemPosture;
+  detail: string;
+}
+
+export type StudioCommandReplayEvidenceContinuityCheckState = "ready" | "watch" | "blocked";
+
+export interface StudioCommandReplayEvidenceContinuityCheck {
+  id: string;
+  label: string;
+  handoff: string;
+  detail: string;
+  state: StudioCommandReplayEvidenceContinuityCheckState;
+}
+
 export interface StudioCommandReplayScreenshotReviewItem {
   id: string;
   label: string;
@@ -1158,6 +1178,8 @@ export interface StudioCommandCompanionRouteHistoryEntry {
   reviewerPosture?: string;
   evidencePosture?: string;
   acceptanceChecks?: StudioCommandReplayAcceptanceCheck[];
+  scenarioEvidenceItems?: StudioCommandReplayScenarioEvidenceItem[];
+  evidenceContinuityChecks?: StudioCommandReplayEvidenceContinuityCheck[];
   screenshotReviewItems?: StudioCommandReplayScreenshotReviewItem[];
 }
 
