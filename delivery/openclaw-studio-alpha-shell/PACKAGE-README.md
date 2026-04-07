@@ -2,7 +2,7 @@
 
 这是一个 **phase60 alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47/48/49/50/51/52/53/54/55/56/57/58 packaging 与 shell foundations 的基础上，把 local-only multi-window orchestration、cross-window shared-state review surface、以及 review-only release approval pipeline 继续推进成更明确的 Delivery-chain Workspace / Stage Explorer / artifact coverage / blockers / handoff posture / observability mapping 审阅壳，但它依然 **不是 installer**。
 
-当前已验证里程碑：phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass progression / screenshot pass records / capture review flow / proof-linked evidence bundle / reviewer brief / proof bundle / product-review console polish / acceptance scoreboard / replay acceptance checklist / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout。
+当前已验证里程碑：phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass progression / screenshot pass records / capture review flow / proof-linked evidence bundle / acceptance evidence continuity / reviewer brief / proof bundle / product-review console polish / acceptance storyboard / evidence dossier / acceptance scoreboard / replay acceptance checklist / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout。
 
 ## 当前能交付什么
 
@@ -10,7 +10,7 @@
 - built renderer bundle copied into artifacts/renderer
 - built Electron bundle copied into artifacts/electron
 - review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase60 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything
-- delivery-chain workspace, stage explorer, review flow ladder, delivery coverage matrix, review-deck coverage routing, review-surface coverage actions, command-surface multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, companion route-history memory, a route replay board, replay scenario packs, a screenshot-driven acceptance review pack, acceptance pass progression, screenshot pass records, capture review flows, a proof-linked evidence bundle, reviewer briefs, proof bundles, product-review console polish, an acceptance scoreboard, a replay acceptance checklist, and the review-deck orchestration action deck linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, observability mapping, command-surface review posture, and multi-window coverage into one staged local-only workflow without executing anything
+- delivery-chain workspace, stage explorer, review flow ladder, delivery coverage matrix, review-deck coverage routing, review-surface coverage actions, command-surface multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, companion route-history memory, a route replay board, replay scenario packs, a screenshot-driven acceptance review pack, acceptance pass progression, screenshot pass records, capture review flows, a proof-linked evidence bundle, acceptance evidence continuity, reviewer briefs, proof bundles, product-review console polish, an acceptance storyboard, an evidence dossier, an acceptance scoreboard, and a replay acceptance checklist, and the review-deck orchestration action deck linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, observability mapping, command-surface review posture, and multi-window coverage into one staged local-only workflow without executing anything
 - deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references
 - deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, review-posture ownership, and inspector-command linkage
 - persisted shell layout foundation backed by localStorage
@@ -156,7 +156,7 @@ openclaw-studio-alpha-shell/
 
 ## 已复制的 artifact 组
 
-- Renderer bundle: 11 files, 768.2 KiB, output=artifacts/renderer
+- Renderer bundle: 11 files, 787.2 KiB, output=artifacts/renderer
 - Electron bundle: 15 files, 382.4 KiB, output=artifacts/electron
 
 ## 已包含的文档
@@ -314,4 +314,4 @@ openclaw-studio-alpha-shell/
 - `scripts/install-placeholder.cjs` 只解释当前 installer 仍缺什么，不执行安装
 - 如需重新生成整个 snapshot，请回到 repo root 运行 `npm run package:alpha`
 
-Generated: 2026-04-07T07:15:51.798Z
+Generated: 2026-04-07T07:56:25.310Z

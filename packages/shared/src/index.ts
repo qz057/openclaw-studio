@@ -1116,12 +1116,16 @@ export interface StudioCommandReplayAcceptanceCheck {
 }
 
 export type StudioCommandReplayScenarioEvidenceItemPosture = "linked" | "staged" | "pending";
+export type StudioCommandReplayScenarioEvidenceItemKind = "route-snapshot" | "reviewer-notes" | "comparison-ledger";
 
 export interface StudioCommandReplayScenarioEvidenceItem {
   id: string;
   label: string;
   artifact: string;
+  kind: StudioCommandReplayScenarioEvidenceItemKind;
   posture: StudioCommandReplayScenarioEvidenceItemPosture;
+  owner: string;
+  dossierSection: string;
   detail: string;
 }
 
@@ -1135,24 +1139,46 @@ export interface StudioCommandReplayEvidenceContinuityCheck {
   state: StudioCommandReplayEvidenceContinuityCheckState;
 }
 
+export type StudioCommandReplayScreenshotStoryboardRole = "baseline" | "handoff" | "return" | "re-entry";
+
 export interface StudioCommandReplayScreenshotReviewItem {
   id: string;
   label: string;
   surface: string;
   posture: StudioCommandReplayScreenshotReviewPosture;
+  storyboardRole: StudioCommandReplayScreenshotStoryboardRole;
+  shotIndex: number;
+  viewport: string;
+  focus: string;
+  framing: string;
   detail: string;
   captureGroup?: string;
   comparisonFrame?: string;
   linkedEvidenceItemIds?: string[];
 }
 
+export interface StudioCommandReplayPackContinuityHandoff {
+  id: string;
+  label: string;
+  sourceLabel: string;
+  targetLabel: string;
+  detail: string;
+  state: StudioCommandReplayEvidenceContinuityCheckState;
+  sourceScenarioId?: string;
+  targetScenarioId?: string;
+  linkedEvidenceItemIds: string[];
+  linkedScreenshotIds: string[];
+}
+
 export interface StudioCommandReplayScenarioPack {
   id: string;
   label: string;
   summary: string;
+  continuitySummary: string;
   reviewerPosture: string;
   evidencePosture: string;
   acceptancePosture: string;
+  continuityHandoffs: StudioCommandReplayPackContinuityHandoff[];
   safety: "local-only";
 }
 

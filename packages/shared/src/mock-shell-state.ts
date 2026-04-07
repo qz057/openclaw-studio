@@ -14,7 +14,7 @@ import { mockBoundarySummary } from "./mock-host.js";
 const mockCommandSurface: StudioCommandSurface = {
   title: "Command Palette",
   summary:
-    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, typed companion review-path orchestration, ordered companion review sequences, typed companion route states, explicit active/alternate routes, switchable sequence posture, companion route-history memory, route replay restore, replay scenario packs, screenshot-driven acceptance review packs, acceptance pass layers, screenshot pass records, capture review flows, proof-linked comparison bundles, product-review console polish, replay acceptance checks, stabilized path handoffs, review-surface coverage pivots, multi-window review coverage, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
+    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, typed companion review-path orchestration, ordered companion review sequences, typed companion route states, explicit active/alternate routes, switchable sequence posture, companion route-history memory, route replay restore, replay scenario packs, screenshot-driven acceptance review packs, acceptance pass layers, screenshot pass records, capture review flows, proof-linked comparison bundles, acceptance storyboards, evidence dossiers, product-review console polish, replay acceptance checks, stabilized path handoffs, review-surface coverage pivots, multi-window review coverage, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
   placeholder: "Search orchestration, delivery coverage, observability, navigation, next steps, flow state, detached workspace, or keyboard routes",
   quickActionIds: [
     "command-open-home",
@@ -903,7 +903,7 @@ const mockCommandSurface: StudioCommandSurface = {
       id: "deck-review-deck-orchestration",
       label: "Review Deck Orchestration Deck",
       summary:
-        "Review-deck posture now carries a dedicated local-only action deck so workspace entry, review-workspace intent, delivery-stage coverage, typed companion review-path orchestration, delivery-gate companion sequence switching, companion route-history memory, route replay restore, replay scenario packs, screenshot-driven acceptance review packs, acceptance pass layers, screenshot pass records, capture review flows, proof-linked comparison bundles, replay acceptance checks, stabilized path handoffs, review-surface pivots, multi-window review coverage, and cross-window handoff coverage stay grouped instead of being inferred from separate cards.",
+        "Review-deck posture now carries a dedicated local-only action deck so workspace entry, review-workspace intent, delivery-stage coverage, typed companion review-path orchestration, delivery-gate companion sequence switching, companion route-history memory, route replay restore, replay scenario packs, screenshot-driven acceptance review packs, acceptance pass layers, screenshot pass records, capture review flows, proof-linked comparison bundles, acceptance storyboards, evidence dossiers, replay acceptance checks, stabilized path handoffs, review-surface pivots, multi-window review coverage, and cross-window handoff coverage stay grouped instead of being inferred from separate cards.",
       tone: "positive",
       flowId: "flow-review-deck-coverage",
       sequenceId: "sequence-review-coverage-flow",
@@ -938,9 +938,40 @@ const mockCommandSurface: StudioCommandSurface = {
             label: "Lifecycle Entry Acceptance Pack",
             summary:
               "Bundle the staged lifecycle packet, downstream publish gate handoff, reviewer brief, screenshot pass records, and proof-linked capture flow into one promotion-readiness scenario roster.",
+            continuitySummary:
+              "Acceptance evidence continuity keeps the lifecycle packet baseline, reviewer handoff notes, and publish-gate comparison proof chained into one promotion-readiness review story.",
             reviewerPosture: "promotion readiness / reviewer handoff",
             evidencePosture: "packet notes / route replay evidence / screenshot staging",
             acceptancePosture: "lifecycle acceptance pass",
+            continuityHandoffs: [
+              {
+                id: "replay-pack-continuity-lifecycle-baseline",
+                label: "Lifecycle packet baseline stays attached",
+                sourceLabel: "Lifecycle packet restore",
+                targetLabel: "Promotion route snapshot",
+                detail:
+                  "The restored lifecycle packet should keep the same promotion-readiness snapshot visible before the publish-gate handoff is reviewed.",
+                state: "ready",
+                sourceScenarioId: "companion-route-history-lifecycle-publish-gate",
+                linkedEvidenceItemIds: ["replay-evidence-lifecycle-route-snapshot"],
+                linkedScreenshotIds: ["replay-shot-lifecycle-packet"]
+              },
+              {
+                id: "replay-pack-continuity-lifecycle-handoff",
+                label: "Reviewer handoff carries into the publish gate comparison",
+                sourceLabel: "Reviewer handoff notes",
+                targetLabel: "Publish gate comparison frame",
+                detail:
+                  "Reviewer framing should carry from the lifecycle packet into the publish-gate comparison without dropping the same acceptance posture.",
+                state: "watch",
+                sourceScenarioId: "companion-route-history-lifecycle-publish-gate",
+                linkedEvidenceItemIds: [
+                  "replay-evidence-lifecycle-handoff-notes",
+                  "replay-evidence-lifecycle-compare-ledger"
+                ],
+                linkedScreenshotIds: ["replay-shot-lifecycle-packet", "replay-shot-lifecycle-gate"]
+              }
+            ],
             safety: "local-only"
           },
           companionSequences: [
@@ -1099,21 +1130,30 @@ const mockCommandSurface: StudioCommandSurface = {
                   id: "replay-evidence-lifecycle-route-snapshot",
                   label: "Lifecycle route snapshot",
                   artifact: "Route snapshot / promotion-readiness packet",
+                  kind: "route-snapshot",
                   posture: "linked",
+                  owner: "Promotion readiness owner",
+                  dossierSection: "Route baseline",
                   detail: "Link the remembered route snapshot to the lifecycle packet header so the acceptance card starts from the same packet state."
                 },
                 {
                   id: "replay-evidence-lifecycle-handoff-notes",
                   label: "Publish gate handoff notes",
                   artifact: "Reviewer notes / downstream publish gate handoff",
+                  kind: "reviewer-notes",
                   posture: "staged",
+                  owner: "Downstream publish reviewer",
+                  dossierSection: "Reviewer baton",
                   detail: "Stage reviewer-facing notes that explain why the lifecycle packet hands into the publish gate as the next acceptance surface."
                 },
                 {
                   id: "replay-evidence-lifecycle-compare-ledger",
                   label: "Promotion handoff comparison ledger",
                   artifact: "Acceptance ledger / packet-to-gate comparison",
+                  kind: "comparison-ledger",
                   posture: "pending",
+                  owner: "Acceptance capture reviewer",
+                  dossierSection: "Comparison ledger",
                   detail: "Keep the comparison ledger local-only until product review confirms the packet baseline and publish-gate frame stay in sync."
                 }
               ],
@@ -1146,6 +1186,11 @@ const mockCommandSurface: StudioCommandSurface = {
                   label: "Lifecycle packet baseline",
                   surface: "Review packet / promotion readiness",
                   posture: "staged",
+                  storyboardRole: "baseline",
+                  shotIndex: 1,
+                  viewport: "Desktop workspace / stage explorer frame",
+                  focus: "Packet header, evidence chips, route snapshot",
+                  framing: "Keep the route snapshot badges and lifecycle packet title above the fold.",
                   detail: "Capture the packet header, evidence chips, and route snapshot together for product review.",
                   captureGroup: "Lifecycle gate comparison",
                   comparisonFrame: "Lifecycle packet baseline -> publish gate handoff",
@@ -1159,6 +1204,11 @@ const mockCommandSurface: StudioCommandSurface = {
                   label: "Publish gate handoff frame",
                   surface: "Publish decision gate",
                   posture: "required",
+                  storyboardRole: "handoff",
+                  shotIndex: 2,
+                  viewport: "Desktop workspace / publish gate pivot",
+                  focus: "Gate summary, handoff notes, carry-over route posture",
+                  framing: "Frame the publish decision gate beside the restored packet badges so the baton is obvious.",
                   detail: "Stage a comparison frame showing the lifecycle packet replay handing into the publish gate surface.",
                   captureGroup: "Lifecycle gate comparison",
                   comparisonFrame: "Lifecycle packet baseline -> publish gate handoff",
@@ -1219,9 +1269,61 @@ const mockCommandSurface: StudioCommandSurface = {
             label: "Delivery Gate Acceptance Pack",
             summary:
               "Bundle publish gate, approval queue, rollback shadow re-entry, reviewer framing, screenshot pass records, and proof-linked comparison captures into a route replay roster so interface acceptance can follow a realistic delivery review script.",
+            continuitySummary:
+              "Acceptance evidence continuity keeps publish-gate, approval-queue, and rollback-shadow proof handoffs visible as one review chain instead of isolated scenario cards.",
             reviewerPosture: "release manager / reviewer queue / rollback owner",
             evidencePosture: "gate notes / queue posture / screenshot target board",
             acceptancePosture: "delivery gate acceptance pass",
+            continuityHandoffs: [
+              {
+                id: "replay-pack-continuity-delivery-gate-queue",
+                label: "Gate handback keeps reviewer ownership visible",
+                sourceLabel: "Publish gate handback",
+                targetLabel: "Approval queue baseline",
+                detail:
+                  "The publish decision gate should hand reviewer ownership into the approval queue without dropping the same evidence chain or route posture.",
+                state: "ready",
+                sourceScenarioId: "companion-route-history-publish-gate-queue",
+                targetScenarioId: "companion-route-history-approval-queue-publish-gate",
+                linkedEvidenceItemIds: [
+                  "replay-evidence-publish-queue-baton",
+                  "replay-evidence-queue-snapshot"
+                ],
+                linkedScreenshotIds: ["replay-shot-publish-queue", "replay-shot-queue-current"]
+              },
+              {
+                id: "replay-pack-continuity-delivery-queue-return",
+                label: "Queue return keeps final gate context attached",
+                sourceLabel: "Approval queue return",
+                targetLabel: "Publish gate re-entry",
+                detail:
+                  "Queue-owned acknowledgement posture should stay visible when the route hands back into the final publish gate for the next acceptance check.",
+                state: "watch",
+                sourceScenarioId: "companion-route-history-approval-queue-publish-gate",
+                targetScenarioId: "companion-route-history-publish-gate-queue",
+                linkedEvidenceItemIds: [
+                  "replay-evidence-queue-return-notes",
+                  "replay-evidence-publish-gate-snapshot"
+                ],
+                linkedScreenshotIds: ["replay-shot-queue-return", "replay-shot-publish-gate"]
+              },
+              {
+                id: "replay-pack-continuity-delivery-rollback-reentry",
+                label: "Rollback shadow re-entry keeps recovery proof attached",
+                sourceLabel: "Rollback shadow recovery",
+                targetLabel: "Publish gate recovery re-entry",
+                detail:
+                  "Recovery posture should re-enter the publish gate with the same fallback proof and reviewer shadow still visible for product review.",
+                state: "watch",
+                sourceScenarioId: "companion-route-history-rollback-shadow-publish-gate",
+                targetScenarioId: "companion-route-history-publish-gate-queue",
+                linkedEvidenceItemIds: [
+                  "replay-evidence-rollback-reentry-notes",
+                  "replay-evidence-publish-gate-snapshot"
+                ],
+                linkedScreenshotIds: ["replay-shot-rollback-reentry", "replay-shot-publish-gate"]
+              }
+            ],
             safety: "local-only"
           },
           companionSequences: [
@@ -1640,21 +1742,30 @@ const mockCommandSurface: StudioCommandSurface = {
                   id: "replay-evidence-publish-gate-snapshot",
                   label: "Publish gate route snapshot",
                   artifact: "Decision route snapshot / final gate baseline",
+                  kind: "route-snapshot",
                   posture: "linked",
+                  owner: "Release manager",
+                  dossierSection: "Route baseline",
                   detail: "Link the replayed decision gate summary to the current route snapshot so the acceptance card opens on the same go/no-go posture."
                 },
                 {
                   id: "replay-evidence-publish-queue-baton",
                   label: "Approval queue baton notes",
                   artifact: "Reviewer baton notes / queue handback",
+                  kind: "reviewer-notes",
                   posture: "staged",
+                  owner: "Approval reviewer",
+                  dossierSection: "Reviewer baton",
                   detail: "Stage the baton notes that explain how reviewer ownership moves from the publish gate into the approval queue."
                 },
                 {
                   id: "replay-evidence-publish-compare-ledger",
                   label: "Gate handback comparison ledger",
                   artifact: "Acceptance ledger / gate-to-queue comparison",
+                  kind: "comparison-ledger",
                   posture: "pending",
+                  owner: "Acceptance capture reviewer",
+                  dossierSection: "Comparison ledger",
                   detail: "Keep the comparison ledger local-only until the queue handback frame is staged beside the gate baseline."
                 }
               ],
@@ -1687,6 +1798,11 @@ const mockCommandSurface: StudioCommandSurface = {
                   label: "Publish gate hero frame",
                   surface: "Final release decision board",
                   posture: "linked",
+                  storyboardRole: "baseline",
+                  shotIndex: 1,
+                  viewport: "Desktop workspace / decision board hero",
+                  focus: "Go/no-go posture, route snapshot, reviewer baton",
+                  framing: "Hold the final decision board header and route chips in the same shot so the baseline reads instantly.",
                   detail: "Link the gate summary, route snapshot, and current reviewer posture as a single comparison shot.",
                   captureGroup: "Gate handback comparison",
                   comparisonFrame: "Publish gate baseline -> approval queue handback",
@@ -1700,6 +1816,11 @@ const mockCommandSurface: StudioCommandSurface = {
                   label: "Approval queue handback frame",
                   surface: "Reviewer queue / trace-owned lane",
                   posture: "staged",
+                  storyboardRole: "handoff",
+                  shotIndex: 2,
+                  viewport: "Desktop workspace / queue handback",
+                  focus: "Queue acknowledgement, baton notes, gate carry-over",
+                  framing: "Keep the queue owner and the replayed gate badges visible together in the same handback frame.",
                   detail: "Stage the handback frame so acknowledgement posture can be reviewed beside the replayed gate.",
                   captureGroup: "Gate handback comparison",
                   comparisonFrame: "Publish gate baseline -> approval queue handback",
@@ -1760,21 +1881,30 @@ const mockCommandSurface: StudioCommandSurface = {
                   id: "replay-evidence-queue-snapshot",
                   label: "Approval queue route snapshot",
                   artifact: "Queue snapshot / acknowledgement baseline",
+                  kind: "route-snapshot",
                   posture: "linked",
+                  owner: "Reviewer queue owner",
+                  dossierSection: "Route baseline",
                   detail: "Link the current queue owner and acknowledgement state to the replay snapshot so the return path starts from the same review baseline."
                 },
                 {
                   id: "replay-evidence-queue-return-notes",
                   label: "Publish return notes",
                   artifact: "Handoff notes / queue-to-gate return",
+                  kind: "reviewer-notes",
                   posture: "staged",
+                  owner: "Publish decision owner",
+                  dossierSection: "Reviewer baton",
                   detail: "Stage notes that explain why the queue handback returns the route to the publish gate instead of opening a detached view."
                 },
                 {
                   id: "replay-evidence-queue-coverage-ledger",
                   label: "Shared coverage comparison ledger",
                   artifact: "Acceptance ledger / queue coverage comparison",
+                  kind: "comparison-ledger",
                   posture: "pending",
+                  owner: "Acceptance capture reviewer",
+                  dossierSection: "Comparison ledger",
                   detail: "Hold the comparison ledger until the return frame confirms queue ownership and gate context stay visible together."
                 }
               ],
@@ -1807,6 +1937,11 @@ const mockCommandSurface: StudioCommandSurface = {
                   label: "Approval queue current-state frame",
                   surface: "Reviewer queue",
                   posture: "staged",
+                  storyboardRole: "baseline",
+                  shotIndex: 1,
+                  viewport: "Desktop workspace / queue current state",
+                  focus: "Queue owner, acknowledgement state, replay badges",
+                  framing: "Keep the active reviewer row and route badges together so the queue baseline feels anchored.",
                   detail: "Stage the queue owner, acknowledgement state, and replay route badges in one review frame.",
                   captureGroup: "Queue return comparison",
                   comparisonFrame: "Approval queue baseline -> publish gate return",
@@ -1820,6 +1955,11 @@ const mockCommandSurface: StudioCommandSurface = {
                   label: "Publish handback confirmation frame",
                   surface: "Publish decision gate / shared-state coverage",
                   posture: "required",
+                  storyboardRole: "return",
+                  shotIndex: 2,
+                  viewport: "Desktop workspace / gate return confirmation",
+                  focus: "Returned gate summary, queue carry-over, observability badges",
+                  framing: "Frame the returned publish gate with queue ownership still visible so the handback does not read like a reset.",
                   detail: "Capture the point where the replayed queue route hands back into the gate while keeping the same coverage contract.",
                   captureGroup: "Queue return comparison",
                   comparisonFrame: "Approval queue baseline -> publish gate return",
@@ -1880,21 +2020,30 @@ const mockCommandSurface: StudioCommandSurface = {
                   id: "replay-evidence-rollback-shadow-snapshot",
                   label: "Rollback shadow route snapshot",
                   artifact: "Recovery snapshot / rollback closeout baseline",
+                  kind: "route-snapshot",
                   posture: "linked",
+                  owner: "Rollback owner",
+                  dossierSection: "Route baseline",
                   detail: "Link the rollback shadow replay snapshot to the closeout summary so recovery review begins from the same fallback baseline."
                 },
                 {
                   id: "replay-evidence-rollback-reentry-notes",
                   label: "Recovery re-entry notes",
                   artifact: "Fallback notes / publish gate re-entry",
+                  kind: "reviewer-notes",
                   posture: "staged",
+                  owner: "Recovery reviewer",
+                  dossierSection: "Reviewer baton",
                   detail: "Stage the notes that explain how the rollback shadow route re-enters the publish gate without dropping recovery posture."
                 },
                 {
                   id: "replay-evidence-rollback-compare-ledger",
                   label: "Recovery comparison ledger",
                   artifact: "Acceptance ledger / rollback-to-gate comparison",
+                  kind: "comparison-ledger",
                   posture: "pending",
+                  owner: "Acceptance capture reviewer",
+                  dossierSection: "Comparison ledger",
                   detail: "Keep the comparison ledger local-only until the recovery re-entry frame is staged beside the rollback baseline."
                 }
               ],
@@ -1927,6 +2076,11 @@ const mockCommandSurface: StudioCommandSurface = {
                   label: "Rollback shadow baseline",
                   surface: "Rollback closeout window",
                   posture: "linked",
+                  storyboardRole: "baseline",
+                  shotIndex: 1,
+                  viewport: "Desktop workspace / rollback closeout",
+                  focus: "Recovery baseline, shadow context, replay route metadata",
+                  framing: "Hold the rollback closeout summary and replay chips in one frame so the fallback baseline stays legible.",
                   detail: "Link the rollback closeout summary and replay route metadata as a recovery baseline frame.",
                   captureGroup: "Recovery re-entry comparison",
                   comparisonFrame: "Rollback shadow baseline -> publish gate re-entry",
@@ -1940,6 +2094,11 @@ const mockCommandSurface: StudioCommandSurface = {
                   label: "Recovery re-entry frame",
                   surface: "Publish decision gate / rollback shadow companion",
                   posture: "required",
+                  storyboardRole: "re-entry",
+                  shotIndex: 2,
+                  viewport: "Desktop workspace / recovery gate re-entry",
+                  focus: "Gate re-entry, rollback notes, preserved shadow posture",
+                  framing: "Frame the publish gate with rollback shadow context still visible so the re-entry cannot be mistaken for a clean route.",
                   detail: "Capture the recovery route re-entering the publish gate while the same shadow context stays visible.",
                   captureGroup: "Recovery re-entry comparison",
                   comparisonFrame: "Rollback shadow baseline -> publish gate re-entry",
@@ -1985,9 +2144,45 @@ const mockCommandSurface: StudioCommandSurface = {
             label: "Decision Handoff Acceptance Pack",
             summary:
               "Bundle decision baton, evidence closeout, return handoff, reviewer brief, screenshot pass records, and a continuity-backed proof-linked capture flow into one review roster so route replay doubles as a realistic approval acceptance script.",
+            continuitySummary:
+              "Acceptance evidence continuity keeps the baton baseline, closeout sealing posture, and decision return proof aligned so the approval relay reads like one sealed review chain.",
             reviewerPosture: "baton owner / evidence closeout reviewer",
             evidencePosture: "handoff notes / sealing posture / screenshot staging",
             acceptancePosture: "handoff stabilization acceptance pass",
+            continuityHandoffs: [
+              {
+                id: "replay-pack-continuity-handoff-closeout",
+                label: "Decision baton hands cleanly into closeout review",
+                sourceLabel: "Decision baton baseline",
+                targetLabel: "Evidence closeout baseline",
+                detail:
+                  "The baton baseline should carry its acknowledgement framing into the closeout baseline before the return handoff is reviewed.",
+                state: "ready",
+                sourceScenarioId: "companion-route-history-decision-handoff-closeout",
+                targetScenarioId: "companion-route-history-closeout-decision-handoff",
+                linkedEvidenceItemIds: [
+                  "replay-evidence-handoff-closeout-notes",
+                  "replay-evidence-closeout-snapshot"
+                ],
+                linkedScreenshotIds: ["replay-shot-handoff-baton", "replay-shot-closeout-current"]
+              },
+              {
+                id: "replay-pack-continuity-handoff-return",
+                label: "Closeout return keeps the baton proof chain intact",
+                sourceLabel: "Closeout return notes",
+                targetLabel: "Decision handback confirmation",
+                detail:
+                  "Sealed evidence should hand back into the baton owner with the same return notes and downstream publish posture still attached.",
+                state: "watch",
+                sourceScenarioId: "companion-route-history-closeout-decision-handoff",
+                targetScenarioId: "companion-route-history-decision-handoff-closeout",
+                linkedEvidenceItemIds: [
+                  "replay-evidence-closeout-return-notes",
+                  "replay-evidence-handoff-baton-snapshot"
+                ],
+                linkedScreenshotIds: ["replay-shot-closeout-return", "replay-shot-handoff-baton"]
+              }
+            ],
             safety: "local-only"
           },
           companionSequences: [
@@ -2224,21 +2419,30 @@ const mockCommandSurface: StudioCommandSurface = {
                   id: "replay-evidence-handoff-baton-snapshot",
                   label: "Decision baton route snapshot",
                   artifact: "Baton snapshot / acknowledgement baseline",
+                  kind: "route-snapshot",
                   posture: "linked",
+                  owner: "Decision baton owner",
+                  dossierSection: "Route baseline",
                   detail: "Link the replayed baton summary to the acknowledgement posture so the acceptance card begins from the same handoff baseline."
                 },
                 {
                   id: "replay-evidence-handoff-closeout-notes",
                   label: "Closeout handoff notes",
                   artifact: "Sealing notes / closeout companion handoff",
+                  kind: "reviewer-notes",
                   posture: "staged",
+                  owner: "Evidence closeout reviewer",
+                  dossierSection: "Reviewer baton",
                   detail: "Stage the notes that explain how evidence closeout becomes the primary companion without detaching the baton context."
                 },
                 {
                   id: "replay-evidence-handoff-compare-ledger",
                   label: "Baton closeout comparison ledger",
                   artifact: "Acceptance ledger / baton-to-closeout comparison",
+                  kind: "comparison-ledger",
                   posture: "pending",
+                  owner: "Acceptance capture reviewer",
+                  dossierSection: "Comparison ledger",
                   detail: "Keep the comparison ledger local-only until the closeout companion frame is staged beside the baton baseline."
                 }
               ],
@@ -2271,6 +2475,11 @@ const mockCommandSurface: StudioCommandSurface = {
                   label: "Decision baton baseline",
                   surface: "Decision handoff surface",
                   posture: "staged",
+                  storyboardRole: "baseline",
+                  shotIndex: 1,
+                  viewport: "Desktop workspace / decision baton",
+                  focus: "Baton summary, acknowledgement posture, route snapshot",
+                  framing: "Keep the baton summary and acknowledgement posture locked together so the baseline reads like a handoff moment.",
                   detail: "Stage the baton summary, route snapshot, and acknowledgement posture together.",
                   captureGroup: "Baton closeout comparison",
                   comparisonFrame: "Decision baton baseline -> evidence closeout companion",
@@ -2284,6 +2493,11 @@ const mockCommandSurface: StudioCommandSurface = {
                   label: "Closeout companion frame",
                   surface: "Evidence closeout",
                   posture: "required",
+                  storyboardRole: "handoff",
+                  shotIndex: 2,
+                  viewport: "Desktop workspace / closeout companion",
+                  focus: "Sealing posture, baton carry-over, closeout evidence surface",
+                  framing: "Frame evidence closeout as the primary companion while the baton context stays visible in the same shot.",
                   detail: "Capture the point where the replayed baton route lifts evidence closeout as its primary companion.",
                   captureGroup: "Baton closeout comparison",
                   comparisonFrame: "Decision baton baseline -> evidence closeout companion",
@@ -2344,21 +2558,30 @@ const mockCommandSurface: StudioCommandSurface = {
                   id: "replay-evidence-closeout-snapshot",
                   label: "Closeout route snapshot",
                   artifact: "Sealed evidence snapshot / closeout baseline",
+                  kind: "route-snapshot",
                   posture: "linked",
+                  owner: "Evidence closeout reviewer",
+                  dossierSection: "Route baseline",
                   detail: "Link the closeout summary and sealed evidence posture to the replay snapshot so the return path starts from the same baseline."
                 },
                 {
                   id: "replay-evidence-closeout-return-notes",
                   label: "Decision return notes",
                   artifact: "Handback notes / closeout-to-decision return",
+                  kind: "reviewer-notes",
                   posture: "staged",
+                  owner: "Decision baton owner",
+                  dossierSection: "Reviewer baton",
                   detail: "Stage notes that explain how the closeout-owned route returns control to the decision baton without losing downstream publish context."
                 },
                 {
                   id: "replay-evidence-closeout-coverage-ledger",
                   label: "Decision return comparison ledger",
                   artifact: "Acceptance ledger / closeout return comparison",
+                  kind: "comparison-ledger",
                   posture: "pending",
+                  owner: "Acceptance capture reviewer",
+                  dossierSection: "Comparison ledger",
                   detail: "Hold the comparison ledger until the decision return frame confirms sealed evidence and downstream context stay visible together."
                 }
               ],
@@ -2391,6 +2614,11 @@ const mockCommandSurface: StudioCommandSurface = {
                   label: "Closeout current-state frame",
                   surface: "Evidence closeout / sealed evidence",
                   posture: "linked",
+                  storyboardRole: "baseline",
+                  shotIndex: 1,
+                  viewport: "Desktop workspace / sealed closeout",
+                  focus: "Closeout summary, sealed evidence posture, replay badges",
+                  framing: "Keep the sealed evidence summary and route posture in one frame so the baseline feels reviewer-ready.",
                   detail: "Link the closeout summary and replay evidence posture as the baseline product-review frame.",
                   captureGroup: "Closeout decision comparison",
                   comparisonFrame: "Evidence closeout baseline -> decision handback",
@@ -2404,6 +2632,11 @@ const mockCommandSurface: StudioCommandSurface = {
                   label: "Decision return frame",
                   surface: "Decision handoff / downstream publish context",
                   posture: "required",
+                  storyboardRole: "return",
+                  shotIndex: 2,
+                  viewport: "Desktop workspace / decision handback",
+                  focus: "Decision return, sealed evidence carry-over, downstream publish context",
+                  framing: "Frame the decision handback with sealed evidence and downstream publish context still visible in the same pass.",
                   detail: "Capture the closeout route handing back into decision handoff while the same downstream context stays visible.",
                   captureGroup: "Closeout decision comparison",
                   comparisonFrame: "Evidence closeout baseline -> decision handback",
@@ -5038,7 +5271,7 @@ export const mockShellState: StudioShellState = {
         id: "drilldown-review-only-delivery-chain",
         label: "Delivery-chain Workspace",
         summary:
-          "Stage Explorer keeps operator review, promotion readiness, publish gating, rollback readiness, stage-level artifacts, blockers, handoff posture, observability mapping, replay scenario packs, acceptance pass layers, screenshot pass records, capture review flows, and proof-linked evidence bundles visible as one richer delivery workflow instead of a disconnected tail of release files.",
+          "Stage Explorer keeps operator review, promotion readiness, publish gating, rollback readiness, stage-level artifacts, blockers, handoff posture, observability mapping, replay scenario packs, acceptance pass layers, screenshot pass records, capture review flows, acceptance storyboards, evidence dossiers, and proof-linked evidence bundles visible as one richer delivery workflow instead of a disconnected tail of release files.",
         lines: [
           {
             id: "drilldown-delivery-chain-current",

@@ -126,11 +126,17 @@ async function verifyRendererFocusedSlotUi() {
     "Acceptance Scoreboard",
     "Product Review Console",
     "Screenshot Pass Records",
+    "Acceptance Storyboard",
     "Acceptance pass progression",
     "Capture Review Flow",
+    "Acceptance Evidence Continuity",
     "Reviewer brief",
     "Proof bundle",
     "Proof-linked Evidence Bundle",
+    "Evidence Dossier",
+    "Viewport",
+    "Framing",
+    "Dossier section",
     "Review Pack Scenarios",
     "remembered handoffs",
     "Restore latest handoff",
@@ -834,6 +840,18 @@ function assertCommandSurfaceContract(commandSurface, shellState) {
           throw new Error(`Command action deck lane ${lane.id} is missing replay scenarios for its acceptance review-pack.`);
         }
 
+        if (!lane.replayScenarioPack.continuitySummary || !(lane.replayScenarioPack.continuityHandoffs?.length ?? 0)) {
+          throw new Error(`Command action deck lane ${lane.id} is missing the phase60 acceptance evidence continuity contract.`);
+        }
+
+        const replayScenarioIds = new Set((lane.companionRouteHistory ?? []).map((entry) => entry.id));
+        const replayScenarioEvidenceItemIds = new Set(
+          (lane.companionRouteHistory ?? []).flatMap((entry) => (entry.scenarioEvidenceItems ?? []).map((item) => item.id))
+        );
+        const replayScenarioScreenshotIds = new Set(
+          (lane.companionRouteHistory ?? []).flatMap((entry) => (entry.screenshotReviewItems ?? []).map((item) => item.id))
+        );
+
         for (const entry of lane.companionRouteHistory ?? []) {
           if (
             !entry.scenarioLabel ||
@@ -859,7 +877,7 @@ function assertCommandSurfaceContract(commandSurface, shellState) {
           }
 
           for (const item of entry.scenarioEvidenceItems ?? []) {
-            if (!item.label || !item.artifact || !item.detail || !item.posture) {
+            if (!item.label || !item.artifact || !item.detail || !item.posture || !item.kind || !item.owner || !item.dossierSection) {
               throw new Error(`Replay scenario ${entry.id} has an incomplete proof-bundle item ${item.id}.`);
             }
           }
@@ -872,15 +890,32 @@ function assertCommandSurfaceContract(commandSurface, shellState) {
 
           const evidenceItemIds = new Set((entry.scenarioEvidenceItems ?? []).map((item) => item.id));
           const screenshotCaptureGroups = new Map();
+          const screenshotShotIndexes = new Set();
 
           for (const item of entry.screenshotReviewItems ?? []) {
-            if (!item.label || !item.surface || !item.detail || !item.posture) {
+            if (
+              !item.label ||
+              !item.surface ||
+              !item.detail ||
+              !item.posture ||
+              !item.storyboardRole ||
+              !item.shotIndex ||
+              !item.viewport ||
+              !item.focus ||
+              !item.framing
+            ) {
               throw new Error(`Replay scenario ${entry.id} has an incomplete screenshot target ${item.id}.`);
             }
 
             if (!item.captureGroup || !item.comparisonFrame || !(item.linkedEvidenceItemIds?.length ?? 0)) {
               throw new Error(`Replay scenario ${entry.id} is missing grouped screenshot comparison metadata on ${item.id}.`);
             }
+
+            if (screenshotShotIndexes.has(item.shotIndex)) {
+              throw new Error(`Replay scenario ${entry.id} reuses storyboard shot index ${item.shotIndex}.`);
+            }
+
+            screenshotShotIndexes.add(item.shotIndex);
 
             const captureGroup = screenshotCaptureGroups.get(item.captureGroup);
 
@@ -907,6 +942,50 @@ function assertCommandSurfaceContract(commandSurface, shellState) {
           for (const [captureGroupId, captureGroup] of screenshotCaptureGroups) {
             if (captureGroup.count < 2) {
               throw new Error(`Replay scenario ${entry.id} capture group ${captureGroupId} does not form a comparison pair.`);
+            }
+          }
+        }
+
+        for (const handoff of lane.replayScenarioPack.continuityHandoffs ?? []) {
+          if (!handoff.label || !handoff.sourceLabel || !handoff.targetLabel || !handoff.detail || !handoff.state) {
+            throw new Error(`Replay scenario pack ${lane.replayScenarioPack.id} has an incomplete continuity handoff ${handoff.id}.`);
+          }
+
+          if (!handoff.sourceScenarioId && !handoff.targetScenarioId) {
+            throw new Error(`Replay scenario pack ${lane.replayScenarioPack.id} continuity handoff ${handoff.id} is missing scenario linkage.`);
+          }
+
+          if (handoff.sourceScenarioId && !replayScenarioIds.has(handoff.sourceScenarioId)) {
+            throw new Error(
+              `Replay scenario pack ${lane.replayScenarioPack.id} continuity handoff ${handoff.id} points at unknown source scenario ${handoff.sourceScenarioId}.`
+            );
+          }
+
+          if (handoff.targetScenarioId && !replayScenarioIds.has(handoff.targetScenarioId)) {
+            throw new Error(
+              `Replay scenario pack ${lane.replayScenarioPack.id} continuity handoff ${handoff.id} points at unknown target scenario ${handoff.targetScenarioId}.`
+            );
+          }
+
+          if (!(handoff.linkedEvidenceItemIds?.length ?? 0) || !(handoff.linkedScreenshotIds?.length ?? 0)) {
+            throw new Error(
+              `Replay scenario pack ${lane.replayScenarioPack.id} continuity handoff ${handoff.id} is missing proof or capture linkage.`
+            );
+          }
+
+          for (const evidenceItemId of handoff.linkedEvidenceItemIds) {
+            if (!replayScenarioEvidenceItemIds.has(evidenceItemId)) {
+              throw new Error(
+                `Replay scenario pack ${lane.replayScenarioPack.id} continuity handoff ${handoff.id} points at unknown proof item ${evidenceItemId}.`
+              );
+            }
+          }
+
+          for (const screenshotId of handoff.linkedScreenshotIds) {
+            if (!replayScenarioScreenshotIds.has(screenshotId)) {
+              throw new Error(
+                `Replay scenario pack ${lane.replayScenarioPack.id} continuity handoff ${handoff.id} points at unknown screenshot target ${screenshotId}.`
+              );
             }
           }
         }

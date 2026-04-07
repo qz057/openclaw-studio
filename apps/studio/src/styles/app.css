@@ -422,6 +422,10 @@ button:disabled {
 .delivery-chain-workspace__pass-grid,
 .delivery-chain-workspace__pass-record-list,
 .delivery-chain-workspace__capture-flow,
+.delivery-chain-workspace__storyboard,
+.delivery-chain-workspace__storyboard-strip,
+.delivery-chain-workspace__evidence-dossier-list,
+.delivery-chain-workspace__continuity-list,
 .delivery-chain-workspace__acceptance-status-list {
   display: grid;
   gap: 16px;
@@ -457,12 +461,26 @@ button:disabled {
   grid-template-columns: minmax(0, 1fr);
 }
 
+.delivery-chain-workspace__storyboard,
+.delivery-chain-workspace__continuity-list {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.delivery-chain-workspace__storyboard-strip,
+.delivery-chain-workspace__evidence-dossier-list {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .delivery-chain-workspace__acceptance-grid .windowing-summary-card {
   align-content: start;
 }
 
 .delivery-chain-workspace__pass-record,
-.delivery-chain-workspace__capture-group {
+.delivery-chain-workspace__capture-group,
+.delivery-chain-workspace__storyboard-group,
+.delivery-chain-workspace__storyboard-shot,
+.delivery-chain-workspace__evidence-dossier-item,
+.delivery-chain-workspace__continuity-handoff {
   display: grid;
   gap: 12px;
   padding: 14px;
@@ -472,23 +490,39 @@ button:disabled {
 }
 
 .delivery-chain-workspace__pass-record--positive,
-.delivery-chain-workspace__capture-group--positive {
+.delivery-chain-workspace__capture-group--positive,
+.delivery-chain-workspace__storyboard-group--positive,
+.delivery-chain-workspace__storyboard-shot--positive,
+.delivery-chain-workspace__evidence-dossier-item--positive,
+.delivery-chain-workspace__continuity-handoff--positive {
   border-color: rgba(100, 236, 178, 0.24);
   background: rgba(14, 32, 28, 0.62);
 }
 
 .delivery-chain-workspace__pass-record--neutral,
-.delivery-chain-workspace__capture-group--neutral {
+.delivery-chain-workspace__capture-group--neutral,
+.delivery-chain-workspace__storyboard-group--neutral,
+.delivery-chain-workspace__storyboard-shot--neutral,
+.delivery-chain-workspace__evidence-dossier-item--neutral,
+.delivery-chain-workspace__continuity-handoff--neutral {
   border-color: rgba(105, 193, 255, 0.22);
 }
 
 .delivery-chain-workspace__pass-record--warning,
-.delivery-chain-workspace__capture-group--warning {
+.delivery-chain-workspace__capture-group--warning,
+.delivery-chain-workspace__storyboard-group--warning,
+.delivery-chain-workspace__storyboard-shot--warning,
+.delivery-chain-workspace__evidence-dossier-item--warning,
+.delivery-chain-workspace__continuity-handoff--warning {
   border-color: rgba(255, 209, 92, 0.22);
 }
 
 .delivery-chain-workspace__pass-record-header,
-.delivery-chain-workspace__capture-group-header {
+.delivery-chain-workspace__capture-group-header,
+.delivery-chain-workspace__storyboard-group-header,
+.delivery-chain-workspace__storyboard-shot-header,
+.delivery-chain-workspace__evidence-dossier-header,
+.delivery-chain-workspace__continuity-handoff-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -496,31 +530,86 @@ button:disabled {
 }
 
 .delivery-chain-workspace__capture-group-header div,
-.delivery-chain-workspace__pass-record-body {
+.delivery-chain-workspace__pass-record-body,
+.delivery-chain-workspace__storyboard-group-header div,
+.delivery-chain-workspace__storyboard-shot-fields,
+.delivery-chain-workspace__evidence-dossier-header div,
+.delivery-chain-workspace__evidence-dossier-fields,
+.delivery-chain-workspace__continuity-handoff-header div {
   display: grid;
   gap: 6px;
 }
 
 .delivery-chain-workspace__pass-record-header span,
-.delivery-chain-workspace__capture-group-header span {
+.delivery-chain-workspace__capture-group-header span,
+.delivery-chain-workspace__storyboard-group-header span,
+.delivery-chain-workspace__storyboard-shot-header span,
+.delivery-chain-workspace__evidence-dossier-header span,
+.delivery-chain-workspace__continuity-handoff-header span {
   color: #8fa3ba;
   font-size: 0.78rem;
 }
 
 .delivery-chain-workspace__pass-record-header strong,
-.delivery-chain-workspace__capture-group-header strong {
+.delivery-chain-workspace__capture-group-header strong,
+.delivery-chain-workspace__storyboard-group-header strong,
+.delivery-chain-workspace__storyboard-shot-header strong,
+.delivery-chain-workspace__evidence-dossier-header strong,
+.delivery-chain-workspace__continuity-handoff-header strong {
   color: #d8e5f2;
 }
 
-.delivery-chain-workspace__pass-record-body h3 {
+.delivery-chain-workspace__pass-record-body h3,
+.delivery-chain-workspace__storyboard-shot h3 {
   margin: 0;
   font-size: 1rem;
 }
 
-.delivery-chain-workspace__pass-record-body p {
+.delivery-chain-workspace__pass-record-body p,
+.delivery-chain-workspace__storyboard-shot p,
+.delivery-chain-workspace__evidence-dossier-item p,
+.delivery-chain-workspace__continuity-handoff p {
   margin: 0;
   color: #8fa3ba;
   line-height: 1.5;
+}
+
+.delivery-chain-workspace__storyboard-shot {
+  gap: 14px;
+  background:
+    linear-gradient(145deg, rgba(18, 35, 52, 0.92), rgba(7, 16, 24, 0.72)),
+    rgba(7, 16, 24, 0.62);
+}
+
+.delivery-chain-workspace__storyboard-shot-fields,
+.delivery-chain-workspace__evidence-dossier-fields {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.delivery-chain-workspace__storyboard-shot-field,
+.delivery-chain-workspace__evidence-dossier-field {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 176, 208, 0.12);
+  background: rgba(7, 16, 24, 0.5);
+}
+
+.delivery-chain-workspace__storyboard-shot-field--wide {
+  grid-column: 1 / -1;
+}
+
+.delivery-chain-workspace__storyboard-shot-field span,
+.delivery-chain-workspace__evidence-dossier-field span {
+  color: #8fa3ba;
+  font-size: 0.78rem;
+}
+
+.delivery-chain-workspace__storyboard-shot-field strong,
+.delivery-chain-workspace__evidence-dossier-field strong {
+  color: #d8e5f2;
+  line-height: 1.45;
 }
 
 .delivery-chain-workspace__pass-card {
