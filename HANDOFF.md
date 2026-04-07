@@ -2,7 +2,7 @@
 
 ## Snapshot
 
-- 当前已验证里程碑：**phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / acceptance pass surface / screenshot review metadata / replay acceptance checklist / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface + docs / smoke / package / release-plan / UI / shared data closeout**
+- 当前已验证里程碑：**phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / screenshot-driven acceptance review pack / acceptance scoreboard / pass-status board / screenshot target board / replay acceptance checklist / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface + docs / smoke / package / release-plan / UI / shared data closeout**
 - 当前主视图：
   - `Dashboard`
   - `Home`
@@ -49,7 +49,7 @@
   - phase60 slice9 已继续把 sequence-aware companion review navigation 推进成 delivery-gate companion sequence switching，让 publish gate / approval queue / rollback shadow 三条 companion 序列可以在同一条 local-only review lane 里显式切换，并把 route / workspace / intent state 一起带入 active / alternate companion coverage
   - phase60 slice10 已继续把 delivery-gate companion sequence switching 推进成 companion route-history memory，让 review-deck lane 能记住最近一次 publish gate / approval queue / rollback shadow / handoff relay 的 companion handoff，并在重新进入同一条 local-only review route 时恢复 route state / sequence / review-surface / multi-window posture
   - phase60 slice11 已继续把 companion route-history memory 推进成 route replay board / replay acceptance checklist，让 delivery workspace 可以直接 restore latest handoff、replay active sequence、以及验收当前 review route 的 review surface / route state / window / lane / board / observability contract
-  - phase60 slice12 已继续把 route replay board / replay acceptance checklist 推进成 replay scenario packs / acceptance pass surface / screenshot review metadata，让 delivery workspace 可以把 replay route、验收检查、以及 review evidence posture 绑定成更接近产品验收的单条本地审阅流
+  - phase60 slice13 已继续把 route replay board / replay acceptance checklist 推进成 screenshot-driven acceptance review pack / acceptance scoreboard / pass-status board / screenshot target board，让 delivery workspace 可以把 replay route、scenario review pack、验收检查、reviewer / evidence posture、以及 screenshot targets 收敛成更接近产品验收的单条本地审阅层
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline
@@ -86,7 +86,7 @@ npm run release:plan
 - `workspace views` / `window intents` / `detached panel placeholders`
 - detached workspace workflow：用户现在能看到 workspace entry / detached candidate / workflow posture / switch path
 - window intents 现在具备 staged / focused / preview / shell link 之外，还补齐 workflow step / readiness / handoff posture
-- command surface 现在具备 action groups / sequences / contextual flows / keyboard routing / action decks / review-surface coverage actions / multi-window review coverage / companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay restore / replay scenario packs / acceptance-pass surface / screenshot review metadata / replay acceptance checks
+- command surface 现在具备 action groups / sequences / contextual flows / keyboard routing / action decks / review-surface coverage actions / multi-window review coverage / companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay restore / replay scenario packs / screenshot-driven acceptance review pack / acceptance scoreboard / pass-status board / screenshot target board / replay acceptance checks
 - Dashboard / Home / Skills 会对当前 route / workflow lane / focused slot 给出一致的 recommended next actions
 - inspector 与 windowing 现在补齐 route-aware drilldowns、recent command history、以及 Local Orchestration Board
 - phase32 进一步补齐 Cross-view Coordination Matrix、Inspector-Command Linkage、Packaging Pipeline Depth
@@ -123,7 +123,7 @@ npm run release:plan
 - phase60 slice9 进一步补齐 Companion Sequence Switcher、Delivery Gate alternate sequences、以及 publish gate / approval queue / rollback shadow 在同一条 local-only companion lane 里的显式 sequence switching
 - phase60 slice10 进一步补齐 Companion Route History、Remembered Handoffs、以及重新进入 review-deck lane 时的 route state / sequence / multi-window posture restore
 - phase60 slice11 进一步补齐 Route Replay Board、Replay Acceptance Checklist、Restore latest handoff / Replay active sequence controls、以及当前 review route 的 review surface / route state / window / lane / board / observability contract
-- phase60 slice12 进一步补齐 Replay Scenario Packs、Acceptance Pass Surface、Screenshot Review Metadata、以及当前 replay route 的 review evidence posture / scenario roster / product-review framing
+- phase60 slice13 进一步补齐 Acceptance Scoreboard、Acceptance Review Pack、Pass Status Board、Screenshot Target Board、以及当前 replay route 的 reviewer posture / evidence posture / review pack roster / product-review framing
 - 仍然不做真实外部窗口编排
 
 ## Phase25 Boundary Model

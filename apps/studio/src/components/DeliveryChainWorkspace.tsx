@@ -255,6 +255,66 @@ function formatReplayScreenshotPosture(
   }
 }
 
+function resolveReplayProgressTone(readyCount: number, totalCount: number): Tone {
+  if (totalCount === 0) {
+    return "warning";
+  }
+
+  if (readyCount === totalCount) {
+    return "positive";
+  }
+
+  if (readyCount > 0) {
+    return "neutral";
+  }
+
+  return "warning";
+}
+
+function resolveReplayScenarioTone(
+  readyChecks: number,
+  totalChecks: number,
+  readyScreenshots: number,
+  totalScreenshots: number
+): Tone {
+  const checksTone = resolveReplayProgressTone(readyChecks, totalChecks);
+  const screenshotsTone = totalScreenshots === 0 ? "positive" : resolveReplayProgressTone(readyScreenshots, totalScreenshots);
+
+  if (checksTone === "positive" && screenshotsTone === "positive") {
+    return "positive";
+  }
+
+  if (checksTone === "warning" && screenshotsTone === "warning") {
+    return "warning";
+  }
+
+  return "neutral";
+}
+
+function formatReplayScenarioStatusLabel(
+  readyChecks: number,
+  totalChecks: number,
+  readyScreenshots: number,
+  totalScreenshots: number
+): string {
+  const checksReady = totalChecks > 0 && readyChecks === totalChecks;
+  const screenshotsReady = totalScreenshots === 0 || readyScreenshots === totalScreenshots;
+
+  if (checksReady && screenshotsReady) {
+    return "Ready for local acceptance";
+  }
+
+  if (checksReady) {
+    return "Capture review pending";
+  }
+
+  if (readyChecks > 0 || readyScreenshots > 0) {
+    return "Acceptance review in progress";
+  }
+
+  return "Acceptance evidence incomplete";
+}
+
 function formatCompanionRouteState(action: StudioCommandAction | null | undefined, windowing?: StudioShellState["windowing"]): string {
   const linkedIntent = action?.windowIntentId
     ? windowing?.windowIntents.find((entry) => entry.id === action.windowIntentId) ?? null
@@ -566,10 +626,43 @@ export function DeliveryChainWorkspace({
     (replayRestoreEntry && activeReplayScenarioPack?.entries.find((entry) => entry.id === replayRestoreEntry.id)) ??
     activeReplayScenarioPack?.entries[0] ??
     null;
+  const activeReplayScenarioPackEntries = activeReplayScenarioPack?.entries ?? [];
   const activeReplayScenarioAcceptanceChecks = activeReplayScenarioEntry?.acceptanceChecks ?? [];
   const activeReplayScenarioAcceptanceReady = activeReplayScenarioAcceptanceChecks.filter((check) => check.state === "ready").length;
   const activeReplayScenarioScreenshotItems = activeReplayScenarioEntry?.screenshotReviewItems ?? [];
   const activeReplayScenarioScreenshotReady = activeReplayScenarioScreenshotItems.filter((item) => item.posture !== "required").length;
+  const activeReplayScenarioPackAcceptanceChecks = activeReplayScenarioPackEntries.flatMap((entry) => entry.acceptanceChecks ?? []);
+  const activeReplayScenarioPackAcceptanceReady = activeReplayScenarioPackAcceptanceChecks.filter((check) => check.state === "ready").length;
+  const activeReplayScenarioPackScreenshotItems = activeReplayScenarioPackEntries.flatMap((entry) => entry.screenshotReviewItems ?? []);
+  const activeReplayScenarioPackScreenshotReady = activeReplayScenarioPackScreenshotItems.filter((item) => item.posture !== "required").length;
+  const activeReplayScenarioTone = resolveReplayScenarioTone(
+    activeReplayScenarioAcceptanceReady,
+    activeReplayScenarioAcceptanceChecks.length,
+    activeReplayScenarioScreenshotReady,
+    activeReplayScenarioScreenshotItems.length
+  );
+  const activeReplayScenarioStatusLabel = formatReplayScenarioStatusLabel(
+    activeReplayScenarioAcceptanceReady,
+    activeReplayScenarioAcceptanceChecks.length,
+    activeReplayScenarioScreenshotReady,
+    activeReplayScenarioScreenshotItems.length
+  );
+  const activeReplayScenarioPackTone = resolveReplayScenarioTone(
+    activeReplayScenarioPackAcceptanceReady,
+    activeReplayScenarioPackAcceptanceChecks.length,
+    activeReplayScenarioPackScreenshotReady,
+    activeReplayScenarioPackScreenshotItems.length
+  );
+  const activeReplayScenarioPackStatusLabel = formatReplayScenarioStatusLabel(
+    activeReplayScenarioPackAcceptanceReady,
+    activeReplayScenarioPackAcceptanceChecks.length,
+    activeReplayScenarioPackScreenshotReady,
+    activeReplayScenarioPackScreenshotItems.length
+  );
+  const activeReplayScenarioReviewerPosture =
+    activeReplayScenarioEntry?.reviewerPosture ?? activeReplayScenarioPack?.pack.reviewerPosture ?? "No reviewer posture";
+  const activeReplayScenarioEvidencePosture =
+    activeReplayScenarioEntry?.evidencePosture ?? activeReplayScenarioPack?.pack.evidencePosture ?? "No evidence posture";
   const replayAcceptanceChecksReady =
     Number(Boolean(replayRestoreEntry)) +
     Number(Boolean(replayRestoreSequence?.steps.length)) +
@@ -591,7 +684,7 @@ export function DeliveryChainWorkspace({
           <h2>{title ?? "Delivery-chain Workspace"}</h2>
           <p>
             {summary ??
-              "Stage Explorer ties the operator board, delivery stage, review artifacts, replay scenario packs, acceptance-pass evidence, promotion/publish/rollback flow, blockers, handoff posture, and observability mapping into one local-only review surface."}
+              "Stage Explorer ties the operator board, delivery stage, review artifacts, replay scenario packs, screenshot-driven acceptance review evidence, promotion/publish/rollback flow, blockers, handoff posture, and observability mapping into one local-only review surface."}
           </p>
         </div>
         <div className="windowing-card__meta">
@@ -1147,11 +1240,11 @@ export function DeliveryChainWorkspace({
             </div>
             <div className="windowing-preview-list">
               <div className="windowing-preview-line windowing-preview-line--stacked">
-                <span>Replay Acceptance Checklist</span>
-                <strong>{replayAcceptanceChecksReady} / 5 acceptance checks ready</strong>
+                <span>Acceptance Scoreboard</span>
+                <strong>{replayAcceptanceChecksReady} / 5 replay checks ready</strong>
                 <p>
                   Restore the latest handoff, replay the current companion sequence, confirm the replay surface, and verify the same stage, window,
-                  lane, board, and observability path stay attached inside local-only review mode.
+                  lane, board, and observability path stay attached before the screenshot-driven acceptance review pack is read.
                 </p>
                 <div className="trace-note-links">
                   <span className="windowing-badge">{relevantCompanionRouteHistoryEntries.length} remembered routes</span>
@@ -1176,75 +1269,140 @@ export function DeliveryChainWorkspace({
                   ) : null}
                 </div>
               </div>
-              {activeReplayScenarioPack ? (
-                <div className="windowing-preview-line windowing-preview-line--stacked">
-                  <span>Replay Scenario Pack</span>
-                  <strong>{activeReplayScenarioPack.pack.label}</strong>
-                  <p>{activeReplayScenarioPack.pack.summary}</p>
-                  <div className="trace-note-links">
-                    <span className="windowing-badge windowing-badge--active">{activeReplayScenarioPack.entries.length} scenario cards</span>
-                    <span className="windowing-badge">{activeReplayScenarioPack.pack.reviewerPosture}</span>
-                    <span className="windowing-badge">{activeReplayScenarioPack.pack.acceptancePosture}</span>
-                    <span className="windowing-badge">{activeReplayScenarioPack.pack.safety}</span>
+            </div>
+            {activeReplayScenarioPack ? (
+              <>
+                <div className="delivery-chain-workspace__acceptance-metrics">
+                  <div className="foundation-pill">
+                    <span>Review pack status</span>
+                    <strong>{activeReplayScenarioPackStatusLabel}</strong>
+                  </div>
+                  <div className="foundation-pill">
+                    <span>Pass checks</span>
+                    <strong>
+                      {activeReplayScenarioPackAcceptanceReady} / {activeReplayScenarioPackAcceptanceChecks.length || 0} ready
+                    </strong>
+                  </div>
+                  <div className="foundation-pill">
+                    <span>Screenshot targets</span>
+                    <strong>
+                      {activeReplayScenarioPackScreenshotReady} / {activeReplayScenarioPackScreenshotItems.length || 0} staged
+                    </strong>
+                  </div>
+                  <div className="foundation-pill">
+                    <span>Scenario cards</span>
+                    <strong>{activeReplayScenarioPackEntries.length} cards</strong>
                   </div>
                 </div>
-              ) : null}
-              {activeReplayScenarioEntry ? (
-                <div className="windowing-preview-line windowing-preview-line--stacked">
-                  <span>Acceptance Pass Surface</span>
-                  <strong>{activeReplayScenarioEntry.scenarioLabel ?? activeReplayScenarioEntry.label}</strong>
-                  <p>{activeReplayScenarioEntry.scenarioSummary ?? activeReplayScenarioEntry.summary}</p>
-                  <div className="trace-note-links">
-                    <span className="windowing-badge windowing-badge--active">
-                      {activeReplayScenarioAcceptanceReady} / {activeReplayScenarioAcceptanceChecks.length || 0} route checks ready
-                    </span>
-                    <span className="windowing-badge">
-                      {activeReplayScenarioEntry.reviewerPosture ?? activeReplayScenarioPack?.pack.reviewerPosture ?? "No reviewer posture"}
-                    </span>
-                    <span className="windowing-badge">
-                      {activeReplayScenarioEntry.evidencePosture ?? activeReplayScenarioPack?.pack.evidencePosture ?? "No evidence posture"}
-                    </span>
-                  </div>
-                  {activeReplayScenarioAcceptanceChecks.length ? (
-                    <div className="workflow-readiness-list">
-                      {activeReplayScenarioAcceptanceChecks.map((check) => (
-                        <div
-                          key={check.id}
-                          className={`workflow-readiness-line workflow-readiness-line--${resolveReplayAcceptanceTone(check.state)}`}
-                        >
-                          <span>{check.label}</span>
-                          <strong>{check.detail}</strong>
-                        </div>
-                      ))}
+                <div className="delivery-chain-workspace__acceptance-grid">
+                  <article
+                    className={`windowing-summary-card${activeReplayScenarioPackTone === "positive" ? " windowing-summary-card--active" : ""}`}
+                  >
+                    <span>Acceptance Review Pack</span>
+                    <strong>{activeReplayScenarioPack.pack.label}</strong>
+                    <p>{activeReplayScenarioPack.pack.summary}</p>
+                    <div className="trace-note-links">
+                      <span className={`windowing-badge${activeReplayScenarioPackTone === "positive" ? " windowing-badge--active" : ""}`}>
+                        {activeReplayScenarioPackStatusLabel}
+                      </span>
+                      <span className="windowing-badge">{activeReplayScenarioPack.pack.acceptancePosture}</span>
+                      <span className="windowing-badge">{activeReplayScenarioPack.pack.safety}</span>
                     </div>
-                  ) : null}
-                </div>
-              ) : null}
-              {activeReplayScenarioEntry ? (
-                <div className="windowing-preview-line windowing-preview-line--stacked">
-                  <span>Screenshot Review</span>
-                  <strong>{activeReplayScenarioScreenshotReady} / {activeReplayScenarioScreenshotItems.length || 0} capture targets staged</strong>
-                  <p>
-                    Screenshot metadata stays review-only: capture targets, comparison surfaces, and evidence posture are listed for acceptance review
-                    without invoking any host execution.
-                  </p>
-                  <div className="windowing-preview-list">
-                    {(compact ? activeReplayScenarioScreenshotItems.slice(0, 2) : activeReplayScenarioScreenshotItems).map((item) => (
-                      <div key={item.id} className="windowing-preview-line windowing-preview-line--stacked">
-                        <span>{formatReplayScreenshotPosture(item.posture)}</span>
-                        <strong>{item.label}</strong>
-                        <p>{item.detail}</p>
+                    <div className="windowing-preview-list">
+                      <div className="windowing-preview-line">
+                        <span>Active pass card</span>
+                        <strong>{activeReplayScenarioEntry?.scenarioLabel ?? activeReplayScenarioEntry?.label ?? "No scenario selected"}</strong>
+                      </div>
+                      <div className="windowing-preview-line">
+                        <span>Reviewer posture</span>
+                        <strong>{activeReplayScenarioReviewerPosture}</strong>
+                      </div>
+                      <div className="windowing-preview-line">
+                        <span>Evidence posture</span>
+                        <strong>{activeReplayScenarioEvidencePosture}</strong>
+                      </div>
+                      <div className="windowing-preview-line windowing-preview-line--stacked">
+                        <span>Product-review route frame</span>
+                        <strong>{replayRestoreRouteState?.label ?? "No route snapshot"}</strong>
+                        <p>
+                          {replayRestoreStage?.label ?? "No stage"} / {replayRestoreWindow?.label ?? "No window"} /{" "}
+                          {replayRestoreLane?.label ?? "No lane"} / {replayRestoreBoard?.label ?? "No board"}
+                        </p>
                         <div className="trace-note-links">
-                          <span className={`windowing-badge${item.posture !== "required" ? " windowing-badge--active" : ""}`}>{item.surface}</span>
-                          <span className={`windowing-badge${resolveReplayScreenshotTone(item.posture) !== "warning" ? " windowing-badge--active" : ""}`}>
-                            {formatReplayScreenshotPosture(item.posture)}
-                          </span>
+                          {replayRestoreSequence ? <span className="windowing-badge">{replayRestoreSequence.label}</span> : null}
+                          <span className="windowing-badge">{replayRestoreMapping?.label ?? "No observability path"}</span>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  </article>
+                  {activeReplayScenarioEntry ? (
+                    <article className={`windowing-summary-card${activeReplayScenarioTone === "positive" ? " windowing-summary-card--active" : ""}`}>
+                      <span>Pass Status Board</span>
+                      <strong>{activeReplayScenarioStatusLabel}</strong>
+                      <p>{activeReplayScenarioEntry.scenarioSummary ?? activeReplayScenarioEntry.summary}</p>
+                      <div className="trace-note-links">
+                        <span className={`windowing-badge${activeReplayScenarioTone === "positive" ? " windowing-badge--active" : ""}`}>
+                          {activeReplayScenarioAcceptanceReady} / {activeReplayScenarioAcceptanceChecks.length || 0} route checks ready
+                        </span>
+                        <span className="windowing-badge">{activeReplayScenarioReviewerPosture}</span>
+                        <span className="windowing-badge">{activeReplayScenarioEvidencePosture}</span>
+                      </div>
+                      <div className="delivery-chain-workspace__acceptance-status-list">
+                        {activeReplayScenarioAcceptanceChecks.length ? (
+                          activeReplayScenarioAcceptanceChecks.map((check) => (
+                            <div
+                              key={check.id}
+                              className={`workflow-readiness-line workflow-readiness-line--${resolveReplayAcceptanceTone(check.state)}`}
+                            >
+                              <span>{check.label}</span>
+                              <strong>{check.detail}</strong>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="workflow-readiness-line workflow-readiness-line--warning">
+                            <span>Pass checks</span>
+                            <strong>No pass checks defined for this acceptance card.</strong>
+                          </div>
+                        )}
+                      </div>
+                    </article>
+                  ) : null}
+                  {activeReplayScenarioEntry ? (
+                    <article className="windowing-summary-card">
+                      <span>Screenshot Target Board</span>
+                      <strong>{activeReplayScenarioScreenshotReady} / {activeReplayScenarioScreenshotItems.length || 0} capture targets staged</strong>
+                      <p>
+                        Screenshot targets stay review-only: capture surfaces, comparison frames, and evidence posture are listed for acceptance
+                        review without invoking any host execution.
+                      </p>
+                      <div className="trace-note-links">
+                        <span className={`windowing-badge${activeReplayScenarioTone !== "warning" ? " windowing-badge--active" : ""}`}>
+                          {activeReplayScenarioStatusLabel}
+                        </span>
+                        <span className="windowing-badge">{activeReplayScenarioEvidencePosture}</span>
+                        <span className="windowing-badge">{activeReplayScenarioPack.pack.safety}</span>
+                      </div>
+                      <div className="windowing-preview-list">
+                        {(compact ? activeReplayScenarioScreenshotItems.slice(0, 2) : activeReplayScenarioScreenshotItems).map((item) => (
+                          <div key={item.id} className="windowing-preview-line windowing-preview-line--stacked">
+                            <span>{formatReplayScreenshotPosture(item.posture)}</span>
+                            <strong>{item.label}</strong>
+                            <p>{item.detail}</p>
+                            <div className="trace-note-links">
+                              <span className={`windowing-badge${item.posture !== "required" ? " windowing-badge--active" : ""}`}>{item.surface}</span>
+                              <span className={`windowing-badge${resolveReplayScreenshotTone(item.posture) !== "warning" ? " windowing-badge--active" : ""}`}>
+                                {formatReplayScreenshotPosture(item.posture)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </article>
+                  ) : null}
                 </div>
-              ) : null}
+              </>
+            ) : null}
+            <div className="windowing-preview-list">
               {(compact ? relevantCompanionPathHandoffs.slice(0, 2) : relevantCompanionPathHandoffs).map((handoff) => {
                 const targetAction = reviewSurfaceActionById.get(handoff.targetActionId) ?? null;
                 const handoffStage = handoff.deliveryChainStageId
@@ -1347,7 +1505,7 @@ export function DeliveryChainWorkspace({
             {activeReplayScenarioPack ? (
               <>
                 <div className="panel-title-row">
-                  <h3>Scenario Roster</h3>
+                  <h3>Review Pack Scenarios</h3>
                   <span>{activeReplayScenarioPack.entries.length} cards</span>
                 </div>
                 <div className={compact ? "workflow-step-grid workflow-step-grid--compact" : "workflow-step-grid"}>
@@ -1356,34 +1514,53 @@ export function DeliveryChainWorkspace({
                     const scenarioRouteState = entry.routeStateId
                       ? relevantCompanionRouteStates.find((routeState) => routeState.id === entry.routeStateId) ?? null
                       : null;
-                    const scenarioStage = entry.deliveryChainStageId
-                      ? selectStudioReleaseDeliveryChainStage(pipeline, entry.deliveryChainStageId)
-                      : targetAction?.deliveryChainStageId
-                        ? selectStudioReleaseDeliveryChainStage(pipeline, targetAction.deliveryChainStageId)
-                        : null;
-                    const readyChecks = entry.acceptanceChecks?.filter((check) => check.state === "ready").length ?? 0;
-                    const active = entry.id === replayRestoreEntry?.id;
+                        const scenarioStage = entry.deliveryChainStageId
+                          ? selectStudioReleaseDeliveryChainStage(pipeline, entry.deliveryChainStageId)
+                          : targetAction?.deliveryChainStageId
+                            ? selectStudioReleaseDeliveryChainStage(pipeline, targetAction.deliveryChainStageId)
+                            : null;
+                        const readyChecks = entry.acceptanceChecks?.filter((check) => check.state === "ready").length ?? 0;
+                        const screenshotItems = entry.screenshotReviewItems ?? [];
+                        const readyScreenshots = screenshotItems.filter((item) => item.posture !== "required").length;
+                        const scenarioTone = resolveReplayScenarioTone(
+                          readyChecks,
+                          entry.acceptanceChecks?.length ?? 0,
+                          readyScreenshots,
+                          screenshotItems.length
+                        );
+                        const scenarioStatusLabel = formatReplayScenarioStatusLabel(
+                          readyChecks,
+                          entry.acceptanceChecks?.length ?? 0,
+                          readyScreenshots,
+                          screenshotItems.length
+                        );
+                        const active = entry.id === replayRestoreEntry?.id;
 
-                    return (
-                      <article
-                        key={entry.id}
-                        className={active ? "windowing-summary-card windowing-summary-card--active" : "windowing-summary-card"}
-                      >
-                        <span>{entry.timestampLabel}</span>
-                        <strong>{entry.scenarioLabel ?? entry.label}</strong>
-                        <p>{entry.scenarioSummary ?? entry.summary}</p>
-                        <div className="trace-note-links">
-                          <span className={`windowing-badge${active ? " windowing-badge--active" : ""}`}>
+                        return (
+                          <article
+                            key={entry.id}
+                            className={`workflow-step-card workflow-step-card--${scenarioTone}${active ? " workflow-step-card--active" : ""}`}
+                          >
+                            <div className="workflow-step-card__meta">
+                              <span>{entry.timestampLabel}</span>
+                              <strong>{scenarioStatusLabel}</strong>
+                            </div>
+                            <h3>{entry.scenarioLabel ?? entry.label}</h3>
+                            <p>{entry.scenarioSummary ?? entry.summary}</p>
+                            <div className="trace-note-links">
+                              <span className={`windowing-badge${active ? " windowing-badge--active" : ""}`}>
                             {scenarioStage?.label ?? entry.deliveryChainStageId ?? "No stage"}
-                          </span>
-                          <span className="windowing-badge">{scenarioRouteState?.label ?? entry.routeStateId ?? "No route state"}</span>
-                          <span className="windowing-badge">
-                            {readyChecks} / {entry.acceptanceChecks?.length ?? 0} checks ready
-                          </span>
-                          <span className="windowing-badge">{entry.screenshotReviewItems?.length ?? 0} screenshot targets</span>
-                        </div>
-                        <div className="trace-note-links">
-                          <span className="windowing-badge">
+                              </span>
+                              <span className="windowing-badge">{scenarioRouteState?.label ?? entry.routeStateId ?? "No route state"}</span>
+                              <span className="windowing-badge">
+                                {readyChecks} / {entry.acceptanceChecks?.length ?? 0} checks ready
+                              </span>
+                              <span className="windowing-badge">
+                                {readyScreenshots} / {screenshotItems.length} screenshot targets staged
+                              </span>
+                            </div>
+                            <div className="trace-note-links">
+                              <span className="windowing-badge">
                             {entry.reviewerPosture ?? activeReplayScenarioPack.pack.reviewerPosture}
                           </span>
                           <span className="windowing-badge">

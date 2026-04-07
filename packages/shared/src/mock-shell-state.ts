@@ -14,7 +14,7 @@ import { mockBoundarySummary } from "./mock-host.js";
 const mockCommandSurface: StudioCommandSurface = {
   title: "Command Palette",
   summary:
-    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, typed companion review-path orchestration, ordered companion review sequences, typed companion route states, explicit active/alternate routes, switchable sequence posture, companion route-history memory, route replay restore, replay scenario packs, acceptance-pass surfaces, screenshot review metadata, replay acceptance checks, stabilized path handoffs, review-surface coverage pivots, multi-window review coverage, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
+    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, typed companion review-path orchestration, ordered companion review sequences, typed companion route states, explicit active/alternate routes, switchable sequence posture, companion route-history memory, route replay restore, replay scenario packs, screenshot-driven acceptance review packs, pass-status boards, screenshot target boards, replay acceptance checks, stabilized path handoffs, review-surface coverage pivots, multi-window review coverage, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
   placeholder: "Search orchestration, delivery coverage, observability, navigation, next steps, flow state, detached workspace, or keyboard routes",
   quickActionIds: [
     "command-open-home",
@@ -903,7 +903,7 @@ const mockCommandSurface: StudioCommandSurface = {
       id: "deck-review-deck-orchestration",
       label: "Review Deck Orchestration Deck",
       summary:
-        "Review-deck posture now carries a dedicated local-only action deck so workspace entry, review-workspace intent, delivery-stage coverage, typed companion review-path orchestration, delivery-gate companion sequence switching, companion route-history memory, route replay restore, replay scenario packs, acceptance-pass surfaces, screenshot review metadata, replay acceptance checks, stabilized path handoffs, review-surface pivots, multi-window review coverage, and cross-window handoff coverage stay grouped instead of being inferred from separate cards.",
+        "Review-deck posture now carries a dedicated local-only action deck so workspace entry, review-workspace intent, delivery-stage coverage, typed companion review-path orchestration, delivery-gate companion sequence switching, companion route-history memory, route replay restore, replay scenario packs, screenshot-driven acceptance review packs, pass-status boards, screenshot target boards, replay acceptance checks, stabilized path handoffs, review-surface pivots, multi-window review coverage, and cross-window handoff coverage stay grouped instead of being inferred from separate cards.",
       tone: "positive",
       flowId: "flow-review-deck-coverage",
       sequenceId: "sequence-review-coverage-flow",
@@ -1162,7 +1162,7 @@ const mockCommandSurface: StudioCommandSurface = {
             summary:
               "Bundle publish gate, approval queue, and rollback shadow re-entry into one route replay roster so interface acceptance can follow a realistic delivery review script.",
             reviewerPosture: "release manager / reviewer queue / rollback owner",
-            evidencePosture: "gate notes / queue posture / screenshot review metadata",
+            evidencePosture: "gate notes / queue posture / screenshot target board",
             acceptancePosture: "delivery gate acceptance pass",
             safety: "local-only"
           },
@@ -1618,7 +1618,7 @@ const mockCommandSurface: StudioCommandSurface = {
               scenarioSummary:
                 "Resume the reviewer-owned queue route, hand back into the publish gate, and verify queue acknowledgement plus final decision posture remain linked inside the same replay lane.",
               reviewerPosture: "active reviewer queue / publish decision owner",
-              evidencePosture: "queue notes / gate readiness / screenshot review metadata",
+              evidencePosture: "queue notes / gate readiness / screenshot target board",
               acceptanceChecks: [
                 {
                   id: "replay-check-queue-return",
@@ -2028,7 +2028,7 @@ const mockCommandSurface: StudioCommandSurface = {
               scenarioSummary:
                 "Resume the closeout-owned route, hand back into the decision baton, and verify sealing posture plus downstream publish context remain attached inside the same replay surface.",
               reviewerPosture: "evidence closeout reviewer / decision owner",
-              evidencePosture: "sealed evidence / handback notes / screenshot review metadata",
+              evidencePosture: "sealed evidence / handback notes / screenshot target board",
               acceptanceChecks: [
                 {
                   id: "replay-check-closeout-current",
@@ -4690,7 +4690,7 @@ export const mockShellState: StudioShellState = {
         id: "drilldown-review-only-delivery-chain",
         label: "Delivery-chain Workspace",
         summary:
-          "Stage Explorer keeps operator review, promotion readiness, publish gating, rollback readiness, stage-level artifacts, blockers, handoff posture, observability mapping, replay scenario packs, and acceptance-pass evidence visible as one richer delivery workflow instead of a disconnected tail of release files.",
+          "Stage Explorer keeps operator review, promotion readiness, publish gating, rollback readiness, stage-level artifacts, blockers, handoff posture, observability mapping, replay scenario packs, and screenshot-driven acceptance review evidence visible as one richer delivery workflow instead of a disconnected tail of release files.",
         lines: [
           {
             id: "drilldown-delivery-chain-current",
