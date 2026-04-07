@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-attestation-operator-dispatch-packets/v1",
-  "generatedAt": "2026-04-07T17:06:37.622Z",
+  "generatedAt": "2026-04-07T17:11:16.753Z",
   "phase": "phase60",
   "mode": "local-only-review",
   "packets": [

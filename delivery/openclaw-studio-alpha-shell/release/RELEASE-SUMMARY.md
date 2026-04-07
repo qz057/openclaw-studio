@@ -111,4 +111,4 @@ Review docs: README.md, HANDOFF.md, IMPLEMENTATION-PLAN.md, PACKAGE-README.md, r
 - no release publishing / artifact upload / promotion handshake / rollback apply automation yet; publish rollback handshake remains metadata-only
 - real host-side execution remains disabled until the review-only approval / lifecycle / rollback loop becomes executable end-to-end
 
-Generated: 2026-04-07T17:06:37.622Z
+Generated: 2026-04-07T17:11:16.753Z
