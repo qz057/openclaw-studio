@@ -342,7 +342,7 @@ function createStudioReleaseQaCloseoutReadiness(): StudioReleaseQaCloseoutReadin
     label: "Release QA Closeout Readiness",
     mode: "review-only",
     summary:
-      "Packaged-app continuity, installer/signing handshake verification, release proof bundles, and delivery closeout settlement now stay grouped as one typed Stage C readiness surface instead of a flat list of closeout artifacts.",
+      "Packaged-app continuity, local review packets, installer/signing handshake verification, release proof bundles, and delivery closeout settlement now stay grouped as one typed Stage C readiness surface instead of a flat list of closeout artifacts.",
     canCloseOut: false,
     activeTrackId: "release-qa-delivery-closeout",
     reviewOnlyDeliveryChainPath: "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
@@ -363,6 +363,7 @@ function createStudioReleaseQaCloseoutReadiness(): StudioReleaseQaCloseoutReadin
           "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
           "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
           "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+          "release/PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json",
           "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json"
         ],
         reviewChecks: [
@@ -370,6 +371,7 @@ function createStudioReleaseQaCloseoutReadiness(): StudioReleaseQaCloseoutReadin
           "materialization sequence declared",
           "staged outputs linked",
           "bundle sealing linked",
+          "local review packet linked",
           "integrity contract linked"
         ],
         blockedBy: ["packaged output materialization remains metadata-only", "bundle sealing remains metadata-only"],

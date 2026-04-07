@@ -1209,7 +1209,7 @@ function renderReleaseNotes({ generatedAt }) {
     "- release decision handoff now keeps the reviewer baton explicit between approval, lifecycle, rollback, and final decision stages while also holding the selected delivery stage and downstream posture in view without enabling any live signing, publish, or host-side execution",
     "- review evidence closeout now exposes sealing state, sealed evidence, pending evidence, closeout windows, reviewer notes, and linked stage artifacts as first-class local-only review metadata instead of burying closeout posture inside larger release files",
     "- packaged-app local materialization contract now threads directory materialization, staged-output, and bundle-sealing task states into one per-platform review-only handoff spine with explicit current task, task evidence, delivery-stage linkage, and local review packet handoffs, so future local materialization work can deepen without building or sealing anything for real",
-    "- release QA closeout readiness now pulls packaged-app materialization continuity, installer/signing/notarization handshake checks, release checklist proof, and delivery closeout posture into one review-only QA surface without building or publishing anything",
+    "- release QA closeout readiness now pulls packaged-app materialization continuity, local review packets, installer/signing/notarization handshake checks, release checklist proof, and delivery closeout posture into one review-only QA surface without building or publishing anything",
     "- approval / audit / rollback entry contract now marks the first safe Stage C entry by tying approval workflow, audit retention posture, rollback live-readiness, and receipt settlement closeout into one non-executing operator-facing contract",
     "- attestation operator approval orchestration now turns phase53 approval routing contracts into reviewer baton sequencing, approval quorum timing, and orchestration closeout paths without dispatching any live approval or execution for real",
     "- promotion staged-apply release decision enforcement lifecycle now turns phase53 enforcement contracts into lifecycle checkpoints, reviewer baton transitions, and expiry closeout without applying any live promotion for real",
@@ -1263,7 +1263,7 @@ function buildReviewManifest({ generatedAt, artifactGroups, allDocs }) {
         { id: "pipeline-attestation-operator-approval-routing-contracts", label: "Attestation operator approval routing contracts", status: "ready", detail: "Settlement packs now feed reviewer-ready routing tables, approval windows, and approval handoff routes without dispatching any live approval or execution for real." },
         { id: "pipeline-attestation-operator-approval-orchestration", label: "Attestation operator approval orchestration", status: "ready", detail: "Approval routing contracts now feed reviewer baton sequencing, quorum timing, and orchestration closeout paths without dispatching any live approval or execution for real." },
         { id: "pipeline-review-only-delivery-chain", label: "Delivery-chain workspace", status: "ready", detail: "Operator review board, decision handoff, evidence closeout, promotion readiness, publish gating, rollback readiness, packaged-app materialization roots, review-packet handoffs, stage-level artifacts, blockers, and observability mapping now read like one staged delivery workflow without executing anything." },
-        { id: "pipeline-release-qa-closeout-readiness", label: "Release QA closeout readiness", status: "ready", detail: "Packaged-app materialization continuity, installer/signing/notarization handshake verification, release checklist proof, and delivery closeout posture now stay grouped as one review-only QA board." },
+        { id: "pipeline-release-qa-closeout-readiness", label: "Release QA closeout readiness", status: "ready", detail: "Packaged-app materialization continuity, local review packets, installer/signing/notarization handshake verification, release checklist proof, and delivery closeout posture now stay grouped as one review-only QA board." },
         { id: "pipeline-approval-audit-rollback-entry-contract", label: "Approval / audit / rollback entry contract", status: "ready", detail: "The first safe Stage C entry now ties approval workflow, audit retention posture, rollback live-readiness, receipt settlement closeout, and delivery QA proof into one non-executing contract." },
         { id: "pipeline-installer-builders", label: "Installer-target builder skeleton", status: "ready", detail: "Installer targets still map cleanly to per-platform builder identities without invoking a real builder." },
         { id: "pipeline-installer-builder-execution", label: "Installer builder execution skeleton", status: "ready", detail: "Future builder commands, environment, outputs, and review checks are now declared without executing any builder." },
@@ -2557,7 +2557,9 @@ function buildPackagedAppLocalMaterializationContract({ generatedAt }) {
           summary:
             "Directory verification, output-manifest staging, and checksum-manifest staging stay chained as one local-only Linux handoff before bundle sealing can be reviewed.",
           currentStepId: "local-materialization-staged-output-step-linux-directory-verification",
+          nextStepId: "local-materialization-staged-output-step-linux-output-manifest",
           downstreamBundleSealingId: "bundle-sealing-linux",
+          completedStepIds: [],
           steps: [
             {
               id: "local-materialization-staged-output-step-linux-directory-verification",
@@ -2609,11 +2611,21 @@ function buildPackagedAppLocalMaterializationContract({ generatedAt }) {
           summary:
             "Seal and integrity manifests are declared, but the Linux seal handoff remains blocked while staged-output review and later package publication stay metadata-only.",
           currentCheckpoint: "seal manifest declared / publish path still blocked",
+          activeCheckpointId: "packaged-app-bundle-sealing-checkpoint-linux-gate",
           deliveryChainStageId: "delivery-chain-promotion-readiness",
           downstreamGateStageId: "delivery-chain-publish-decision",
           dependsOnTaskId: "local-materialization-task-linux-staged-output",
           sealManifestPath: "future/sealed-bundles/linux/bundle-seal-manifest.json",
           integrityManifestPath: "future/sealed-bundles/linux/bundle-integrity-manifest.json",
+          checkpoints: createPackagedAppBundleSealingCheckpoints({
+            idPrefix: "linux",
+            sealManifestPath: "future/sealed-bundles/linux/bundle-seal-manifest.json",
+            integrityManifestPath: "future/sealed-bundles/linux/bundle-integrity-manifest.json",
+            gateLabel: "Package publication path still blocked",
+            gateDetail: "Linux bundle sealing stays blocked until the staged-output lane settles and the downstream package publication gate stops being metadata-only.",
+            gateArtifactPath: "release/PUBLISH-GATES.json",
+            gateStatus: "blocked"
+          }),
           reviewChecks: [
             "seal manifest declared",
             "integrity manifest declared",
@@ -2633,6 +2645,7 @@ function buildPackagedAppLocalMaterializationContract({ generatedAt }) {
             "Directory review is the current Linux checkpoint, with staged-output review queued next and bundle sealing still held behind the same local-only chain.",
           currentTaskId: "local-materialization-task-linux-directory",
           nextTaskId: "local-materialization-task-linux-staged-output",
+          activeSegmentId: "packaged-app-local-materialization-segment-linux-directory",
           completedTaskCount: 0,
           blockedTaskCount: 1,
           totalTaskCount: 3,
@@ -2641,7 +2654,24 @@ function buildPackagedAppLocalMaterializationContract({ generatedAt }) {
             "delivery-chain-attestation-intake",
             "delivery-chain-operator-review",
             "delivery-chain-promotion-readiness"
-          ]
+          ],
+          segments: createPackagedAppLocalMaterializationSegments({
+            idPrefix: "linux",
+            directoryTaskId: "local-materialization-task-linux-directory",
+            directoryStatus: "active",
+            directorySummary: "Linux is still on the directory checkpoint, so the package root, resources tree, and verification manifest remain the active review surface.",
+            stagedOutputTaskId: "local-materialization-task-linux-staged-output",
+            stagedOutputStatus: "up-next",
+            stagedOutputSummary: "Linux staged-output manifests are queued as the next local-only slice once the package-root checkpoint is closed.",
+            stagedOutputStepIds: [
+              "local-materialization-staged-output-step-linux-directory-verification",
+              "local-materialization-staged-output-step-linux-output-manifest",
+              "local-materialization-staged-output-step-linux-checksum-manifest"
+            ],
+            bundleSealTaskId: "local-materialization-task-linux-bundle-seal",
+            bundleSealStatus: "blocked",
+            bundleSealSummary: "Bundle sealing remains downstream but blocked until staged outputs settle and the package publication gate stays purely review-only."
+          })
         },
         tasks: [
           {
@@ -8683,7 +8713,7 @@ function buildReleaseQaCloseoutReadiness({ generatedAt }) {
     canCloseOut: false,
     activeTrackId: "release-qa-delivery-closeout",
     summary:
-      "Packaged-app materialization continuity, installer/signing handshake verification, release checklist proof, and delivery closeout posture now stay grouped as one local-only QA closeout surface.",
+      "Packaged-app materialization continuity, local review packets, installer/signing handshake verification, release checklist proof, and delivery closeout posture now stay grouped as one local-only QA closeout surface.",
     reviewOnlyDeliveryChainPath: "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
     releaseApprovalWorkflowPath: "release/RELEASE-APPROVAL-WORKFLOW.json",
     reviewEvidenceCloseoutPath: "release/REVIEW-EVIDENCE-CLOSEOUT.json",
@@ -8702,6 +8732,7 @@ function buildReleaseQaCloseoutReadiness({ generatedAt }) {
           "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
           "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
           "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+          "release/PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json",
           "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json"
         ],
         reviewChecks: [
@@ -8709,6 +8740,7 @@ function buildReleaseQaCloseoutReadiness({ generatedAt }) {
           "materialization sequence declared",
           "staged outputs linked",
           "bundle sealing linked",
+          "local review packet linked",
           "integrity contract linked"
         ],
         blockedBy: ["packaged output materialization remains metadata-only", "bundle sealing remains metadata-only"],

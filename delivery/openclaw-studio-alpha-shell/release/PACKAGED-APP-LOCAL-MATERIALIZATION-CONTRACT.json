@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-packaged-app-local-materialization-contract/v1",
-  "generatedAt": "2026-04-07T19:16:43.777Z",
+  "generatedAt": "2026-04-07T19:23:15.970Z",
   "phase": "phase60",
   "mode": "review-only",
   "scope": "local-only",
@@ -41,7 +41,11 @@
         "label": "Windows staged-output chain",
         "summary": "Directory verification, output-manifest staging, and checksum-manifest staging stay chained as one local-only Windows handoff before bundle sealing can be reviewed.",
         "currentStepId": "local-materialization-staged-output-step-windows-output-manifest",
+        "nextStepId": "local-materialization-staged-output-step-windows-checksum-manifest",
         "downstreamBundleSealingId": "bundle-sealing-windows",
+        "completedStepIds": [
+          "local-materialization-staged-output-step-windows-directory-verification"
+        ],
         "steps": [
           {
             "id": "local-materialization-staged-output-step-windows-directory-verification",
@@ -152,11 +156,35 @@
         "taskState": "blocked",
         "summary": "Seal and integrity manifests are declared, but the Windows seal handoff remains blocked until the staged-output chain stops being metadata-only and the publish gate remains review-only.",
         "currentCheckpoint": "seal manifest declared / staged-output review still active",
+        "activeCheckpointId": "packaged-app-bundle-sealing-checkpoint-windows-gate",
         "deliveryChainStageId": "delivery-chain-promotion-readiness",
         "downstreamGateStageId": "delivery-chain-publish-decision",
         "dependsOnTaskId": "local-materialization-task-windows-staged-output",
         "sealManifestPath": "future/sealed-bundles/windows/bundle-seal-manifest.json",
         "integrityManifestPath": "future/sealed-bundles/windows/bundle-integrity-manifest.json",
+        "checkpoints": [
+          {
+            "id": "packaged-app-bundle-sealing-checkpoint-windows-seal-manifest",
+            "label": "Seal manifest declared",
+            "status": "ready",
+            "detail": "Bundle sealing stays local-only, but the seal manifest path is already explicit for review pickup.",
+            "artifactPath": "future/sealed-bundles/windows/bundle-seal-manifest.json"
+          },
+          {
+            "id": "packaged-app-bundle-sealing-checkpoint-windows-integrity-manifest",
+            "label": "Integrity manifest declared",
+            "status": "ready",
+            "detail": "Integrity posture stays visible beside the same seal handoff without digest publication or attestation execution.",
+            "artifactPath": "future/sealed-bundles/windows/bundle-integrity-manifest.json"
+          },
+          {
+            "id": "packaged-app-bundle-sealing-checkpoint-windows-gate",
+            "label": "Staged-output review still active",
+            "status": "watch",
+            "detail": "Windows bundle sealing stays behind the current staged-output review slice until the output and checksum handoff stop being metadata-only.",
+            "artifactPath": "future/staged-output/windows/output-manifest.json"
+          }
+        ],
         "reviewChecks": [
           "seal manifest declared",
           "integrity manifest declared",
@@ -175,6 +203,7 @@
         "summary": "Directory review is complete, staged-output review is current, and bundle sealing stays queued as the next local-only checkpoint.",
         "currentTaskId": "local-materialization-task-windows-staged-output",
         "nextTaskId": "local-materialization-task-windows-bundle-seal",
+        "activeSegmentId": "packaged-app-local-materialization-segment-windows-staged-output",
         "completedTaskCount": 1,
         "blockedTaskCount": 1,
         "totalTaskCount": 3,
@@ -185,6 +214,42 @@
           "delivery-chain-attestation-intake",
           "delivery-chain-operator-review",
           "delivery-chain-promotion-readiness"
+        ],
+        "segments": [
+          {
+            "id": "packaged-app-local-materialization-segment-windows-directory",
+            "label": "Directory materialization",
+            "kind": "directory",
+            "status": "completed",
+            "summary": "Directory verification is already closed out, so Windows review starts from an explicit packaged-app root checkpoint.",
+            "taskId": "local-materialization-task-windows-directory",
+            "deliveryChainStageId": "delivery-chain-attestation-intake",
+            "linkedStepIds": []
+          },
+          {
+            "id": "packaged-app-local-materialization-segment-windows-staged-output",
+            "label": "Staged-output handoff",
+            "kind": "staged-output",
+            "status": "active",
+            "summary": "Windows is currently inside the staged-output handoff, with output and checksum manifests carrying the active local-only review posture.",
+            "taskId": "local-materialization-task-windows-staged-output",
+            "deliveryChainStageId": "delivery-chain-operator-review",
+            "linkedStepIds": [
+              "local-materialization-staged-output-step-windows-directory-verification",
+              "local-materialization-staged-output-step-windows-output-manifest",
+              "local-materialization-staged-output-step-windows-checksum-manifest"
+            ]
+          },
+          {
+            "id": "packaged-app-local-materialization-segment-windows-bundle-sealing",
+            "label": "Bundle-sealing readiness",
+            "kind": "bundle-sealing",
+            "status": "blocked",
+            "summary": "Bundle sealing is the next downstream slice, but it stays blocked behind the current staged-output review and review-only publish gate.",
+            "taskId": "local-materialization-task-windows-bundle-seal",
+            "deliveryChainStageId": "delivery-chain-promotion-readiness",
+            "linkedStepIds": []
+          }
         ]
       },
       "tasks": [
@@ -281,7 +346,9 @@
         "label": "macOS staged-output chain",
         "summary": "Directory verification, output-manifest staging, and checksum-manifest staging stay chained as one local-only .app handoff before bundle sealing can be reviewed.",
         "currentStepId": "local-materialization-staged-output-step-macos-directory-verification",
+        "nextStepId": "local-materialization-staged-output-step-macos-output-manifest",
         "downstreamBundleSealingId": "bundle-sealing-macos",
+        "completedStepIds": [],
         "steps": [
           {
             "id": "local-materialization-staged-output-step-macos-directory-verification",
@@ -392,11 +459,35 @@
         "taskState": "blocked",
         "summary": "Seal and integrity manifests are declared, but the macOS seal handoff remains blocked while staged-output review, signing, and notarization all stay metadata-only.",
         "currentCheckpoint": "seal manifest declared / notarization path still blocked",
+        "activeCheckpointId": "packaged-app-bundle-sealing-checkpoint-macos-gate",
         "deliveryChainStageId": "delivery-chain-promotion-readiness",
         "downstreamGateStageId": "delivery-chain-publish-decision",
         "dependsOnTaskId": "local-materialization-task-macos-staged-output",
         "sealManifestPath": "future/sealed-bundles/macos/bundle-seal-manifest.json",
         "integrityManifestPath": "future/sealed-bundles/macos/bundle-integrity-manifest.json",
+        "checkpoints": [
+          {
+            "id": "packaged-app-bundle-sealing-checkpoint-macos-seal-manifest",
+            "label": "Seal manifest declared",
+            "status": "ready",
+            "detail": "Bundle sealing stays local-only, but the seal manifest path is already explicit for review pickup.",
+            "artifactPath": "future/sealed-bundles/macos/bundle-seal-manifest.json"
+          },
+          {
+            "id": "packaged-app-bundle-sealing-checkpoint-macos-integrity-manifest",
+            "label": "Integrity manifest declared",
+            "status": "ready",
+            "detail": "Integrity posture stays visible beside the same seal handoff without digest publication or attestation execution.",
+            "artifactPath": "future/sealed-bundles/macos/bundle-integrity-manifest.json"
+          },
+          {
+            "id": "packaged-app-bundle-sealing-checkpoint-macos-gate",
+            "label": "Notarization path still blocked",
+            "status": "blocked",
+            "detail": "macOS bundle sealing stays blocked until the staged-output lane is reviewed end-to-end and later signing/notarization posture stops being metadata-only.",
+            "artifactPath": "release/NOTARIZATION-PLAN.json"
+          }
+        ],
         "reviewChecks": [
           "seal manifest declared",
           "integrity manifest declared",
@@ -415,6 +506,7 @@
         "summary": "Directory review is the current macOS checkpoint, with staged-output review queued next and bundle sealing still held behind the same local-only chain.",
         "currentTaskId": "local-materialization-task-macos-directory",
         "nextTaskId": "local-materialization-task-macos-staged-output",
+        "activeSegmentId": "packaged-app-local-materialization-segment-macos-directory",
         "completedTaskCount": 0,
         "blockedTaskCount": 1,
         "totalTaskCount": 3,
@@ -423,6 +515,42 @@
           "delivery-chain-attestation-intake",
           "delivery-chain-operator-review",
           "delivery-chain-promotion-readiness"
+        ],
+        "segments": [
+          {
+            "id": "packaged-app-local-materialization-segment-macos-directory",
+            "label": "Directory materialization",
+            "kind": "directory",
+            "status": "active",
+            "summary": "macOS is still on the directory checkpoint, so the .app layout and verification manifest stay as the active reviewer pickup surface.",
+            "taskId": "local-materialization-task-macos-directory",
+            "deliveryChainStageId": "delivery-chain-attestation-intake",
+            "linkedStepIds": []
+          },
+          {
+            "id": "packaged-app-local-materialization-segment-macos-staged-output",
+            "label": "Staged-output handoff",
+            "kind": "staged-output",
+            "status": "up-next",
+            "summary": "Once the directory checkpoint clears, the .app staged-output lane becomes the next local-only review slice.",
+            "taskId": "local-materialization-task-macos-staged-output",
+            "deliveryChainStageId": "delivery-chain-operator-review",
+            "linkedStepIds": [
+              "local-materialization-staged-output-step-macos-directory-verification",
+              "local-materialization-staged-output-step-macos-output-manifest",
+              "local-materialization-staged-output-step-macos-checksum-manifest"
+            ]
+          },
+          {
+            "id": "packaged-app-local-materialization-segment-macos-bundle-sealing",
+            "label": "Bundle-sealing readiness",
+            "kind": "bundle-sealing",
+            "status": "blocked",
+            "summary": "Bundle sealing remains downstream but blocked until staged outputs, signing posture, and notarization readiness stop being metadata-only.",
+            "taskId": "local-materialization-task-macos-bundle-seal",
+            "deliveryChainStageId": "delivery-chain-promotion-readiness",
+            "linkedStepIds": []
+          }
         ]
       },
       "tasks": [
@@ -519,7 +647,9 @@
         "label": "Linux staged-output chain",
         "summary": "Directory verification, output-manifest staging, and checksum-manifest staging stay chained as one local-only Linux handoff before bundle sealing can be reviewed.",
         "currentStepId": "local-materialization-staged-output-step-linux-directory-verification",
+        "nextStepId": "local-materialization-staged-output-step-linux-output-manifest",
         "downstreamBundleSealingId": "bundle-sealing-linux",
+        "completedStepIds": [],
         "steps": [
           {
             "id": "local-materialization-staged-output-step-linux-directory-verification",
@@ -630,11 +760,35 @@
         "taskState": "blocked",
         "summary": "Seal and integrity manifests are declared, but the Linux seal handoff remains blocked while staged-output review and later package publication stay metadata-only.",
         "currentCheckpoint": "seal manifest declared / publish path still blocked",
+        "activeCheckpointId": "packaged-app-bundle-sealing-checkpoint-linux-gate",
         "deliveryChainStageId": "delivery-chain-promotion-readiness",
         "downstreamGateStageId": "delivery-chain-publish-decision",
         "dependsOnTaskId": "local-materialization-task-linux-staged-output",
         "sealManifestPath": "future/sealed-bundles/linux/bundle-seal-manifest.json",
         "integrityManifestPath": "future/sealed-bundles/linux/bundle-integrity-manifest.json",
+        "checkpoints": [
+          {
+            "id": "packaged-app-bundle-sealing-checkpoint-linux-seal-manifest",
+            "label": "Seal manifest declared",
+            "status": "ready",
+            "detail": "Bundle sealing stays local-only, but the seal manifest path is already explicit for review pickup.",
+            "artifactPath": "future/sealed-bundles/linux/bundle-seal-manifest.json"
+          },
+          {
+            "id": "packaged-app-bundle-sealing-checkpoint-linux-integrity-manifest",
+            "label": "Integrity manifest declared",
+            "status": "ready",
+            "detail": "Integrity posture stays visible beside the same seal handoff without digest publication or attestation execution.",
+            "artifactPath": "future/sealed-bundles/linux/bundle-integrity-manifest.json"
+          },
+          {
+            "id": "packaged-app-bundle-sealing-checkpoint-linux-gate",
+            "label": "Package publication path still blocked",
+            "status": "blocked",
+            "detail": "Linux bundle sealing stays blocked until the staged-output lane settles and the downstream package publication gate stops being metadata-only.",
+            "artifactPath": "release/PUBLISH-GATES.json"
+          }
+        ],
         "reviewChecks": [
           "seal manifest declared",
           "integrity manifest declared",
@@ -653,6 +807,7 @@
         "summary": "Directory review is the current Linux checkpoint, with staged-output review queued next and bundle sealing still held behind the same local-only chain.",
         "currentTaskId": "local-materialization-task-linux-directory",
         "nextTaskId": "local-materialization-task-linux-staged-output",
+        "activeSegmentId": "packaged-app-local-materialization-segment-linux-directory",
         "completedTaskCount": 0,
         "blockedTaskCount": 1,
         "totalTaskCount": 3,
@@ -661,6 +816,42 @@
           "delivery-chain-attestation-intake",
           "delivery-chain-operator-review",
           "delivery-chain-promotion-readiness"
+        ],
+        "segments": [
+          {
+            "id": "packaged-app-local-materialization-segment-linux-directory",
+            "label": "Directory materialization",
+            "kind": "directory",
+            "status": "active",
+            "summary": "Linux is still on the directory checkpoint, so the package root, resources tree, and verification manifest remain the active review surface.",
+            "taskId": "local-materialization-task-linux-directory",
+            "deliveryChainStageId": "delivery-chain-attestation-intake",
+            "linkedStepIds": []
+          },
+          {
+            "id": "packaged-app-local-materialization-segment-linux-staged-output",
+            "label": "Staged-output handoff",
+            "kind": "staged-output",
+            "status": "up-next",
+            "summary": "Linux staged-output manifests are queued as the next local-only slice once the package-root checkpoint is closed.",
+            "taskId": "local-materialization-task-linux-staged-output",
+            "deliveryChainStageId": "delivery-chain-operator-review",
+            "linkedStepIds": [
+              "local-materialization-staged-output-step-linux-directory-verification",
+              "local-materialization-staged-output-step-linux-output-manifest",
+              "local-materialization-staged-output-step-linux-checksum-manifest"
+            ]
+          },
+          {
+            "id": "packaged-app-local-materialization-segment-linux-bundle-sealing",
+            "label": "Bundle-sealing readiness",
+            "kind": "bundle-sealing",
+            "status": "blocked",
+            "summary": "Bundle sealing remains downstream but blocked until staged outputs settle and the package publication gate stays purely review-only.",
+            "taskId": "local-materialization-task-linux-bundle-seal",
+            "deliveryChainStageId": "delivery-chain-promotion-readiness",
+            "linkedStepIds": []
+          }
         ]
       },
       "tasks": [

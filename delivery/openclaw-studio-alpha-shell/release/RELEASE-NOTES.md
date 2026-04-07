@@ -9,7 +9,7 @@ Milestone: phase60 delivery-chain workspace / stage explorer / review flow ladde
 - release decision handoff now keeps the reviewer baton explicit between approval, lifecycle, rollback, and final decision stages while also holding the selected delivery stage and downstream posture in view without enabling any live signing, publish, or host-side execution
 - review evidence closeout now exposes sealing state, sealed evidence, pending evidence, closeout windows, reviewer notes, and linked stage artifacts as first-class local-only review metadata instead of burying closeout posture inside larger release files
 - packaged-app local materialization contract now threads directory materialization, staged-output, and bundle-sealing task states into one per-platform review-only handoff spine with explicit current task, task evidence, delivery-stage linkage, and local review packet handoffs, so future local materialization work can deepen without building or sealing anything for real
-- release QA closeout readiness now pulls packaged-app materialization continuity, installer/signing/notarization handshake checks, release checklist proof, and delivery closeout posture into one review-only QA surface without building or publishing anything
+- release QA closeout readiness now pulls packaged-app materialization continuity, local review packets, installer/signing/notarization handshake checks, release checklist proof, and delivery closeout posture into one review-only QA surface without building or publishing anything
 - approval / audit / rollback entry contract now marks the first safe Stage C entry by tying approval workflow, audit retention posture, rollback live-readiness, and receipt settlement closeout into one non-executing operator-facing contract
 - attestation operator approval orchestration now turns phase53 approval routing contracts into reviewer baton sequencing, approval quorum timing, and orchestration closeout paths without dispatching any live approval or execution for real
 - promotion staged-apply release decision enforcement lifecycle now turns phase53 enforcement contracts into lifecycle checkpoints, reviewer baton transitions, and expiry closeout without applying any live promotion for real
@@ -20,4 +20,4 @@ Milestone: phase60 delivery-chain workspace / stage explorer / review flow ladde
 - still not an installer
 - still no real publish/upload/sign/notarize actions
 
-Generated: 2026-04-07T19:16:43.777Z
+Generated: 2026-04-07T19:23:15.970Z

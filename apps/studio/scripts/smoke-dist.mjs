@@ -3318,6 +3318,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseNotes?.includes("release decision handoff") ||
     !skeleton.releaseNotes?.includes("review evidence closeout") ||
     !skeleton.releaseNotes?.includes("packaged-app local materialization contract") ||
+    !skeleton.releaseNotes?.includes("local review packet") ||
     !skeleton.releaseNotes?.includes("promotion staged-apply release decision enforcement lifecycle") ||
     !skeleton.releaseNotes?.includes("rollback cutover publication receipt settlement closeout") ||
     !skeleton.releaseNotes?.includes("release QA closeout readiness") ||
@@ -3377,6 +3378,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseChecklist.includes("npm run package:alpha") ||
     !skeleton.releaseChecklist.includes("npm run release:plan") ||
     !skeleton.releaseChecklist.includes("PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json") ||
+    !skeleton.releaseChecklist.includes("review packet") ||
     !skeleton.releaseChecklist.includes("SEALED-BUNDLE-INTEGRITY-CONTRACT.json") ||
     !skeleton.releaseChecklist.includes("INTEGRITY-ATTESTATION-EVIDENCE.json") ||
     !skeleton.releaseChecklist.includes("ATTESTATION-VERIFICATION-PACKS.json") ||

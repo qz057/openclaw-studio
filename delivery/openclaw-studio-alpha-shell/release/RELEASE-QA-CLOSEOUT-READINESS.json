@@ -1,11 +1,11 @@
 {
   "schemaVersion": "openclaw-studio-release-qa-closeout-readiness/v1",
-  "generatedAt": "2026-04-07T19:16:43.777Z",
+  "generatedAt": "2026-04-07T19:23:15.970Z",
   "phase": "phase60",
   "mode": "local-only-review",
   "canCloseOut": false,
   "activeTrackId": "release-qa-delivery-closeout",
-  "summary": "Packaged-app materialization continuity, installer/signing handshake verification, release checklist proof, and delivery closeout posture now stay grouped as one local-only QA closeout surface.",
+  "summary": "Packaged-app materialization continuity, local review packets, installer/signing handshake verification, release checklist proof, and delivery closeout posture now stay grouped as one local-only QA closeout surface.",
   "reviewOnlyDeliveryChainPath": "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
   "releaseApprovalWorkflowPath": "release/RELEASE-APPROVAL-WORKFLOW.json",
   "reviewEvidenceCloseoutPath": "release/REVIEW-EVIDENCE-CLOSEOUT.json",
@@ -24,6 +24,7 @@
         "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
         "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
         "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+        "release/PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json",
         "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json"
       ],
       "reviewChecks": [
@@ -31,6 +32,7 @@
         "materialization sequence declared",
         "staged outputs linked",
         "bundle sealing linked",
+        "local review packet linked",
         "integrity contract linked"
       ],
       "blockedBy": [
