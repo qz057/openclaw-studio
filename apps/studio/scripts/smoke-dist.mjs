@@ -192,6 +192,11 @@ async function verifyRendererFocusedSlotUi() {
     "Validator / Observability Bridge",
     "Current validator readout",
     "Next validator readout",
+    "Current failure-path readout",
+    "Next failure-path readout",
+    "Failure command preview",
+    "Failure path",
+    "Failure code / disposition",
     "Validator surface match",
     "Matched continuity entry",
     "Current review step",
@@ -1661,6 +1666,42 @@ function assertHostExecutorContract(hostExecutor, label) {
   }
 
   if (
+    !Array.isArray(hostExecutor.releaseApprovalPipeline.deliveryChain.packagedAppMaterializationContract?.platforms) ||
+    hostExecutor.releaseApprovalPipeline.deliveryChain.packagedAppMaterializationContract.platforms.length < 3 ||
+    !hostExecutor.releaseApprovalPipeline.deliveryChain.packagedAppMaterializationContract.platforms.every(
+      (platform) =>
+        typeof platform.reviewPacket?.currentStepId === "string" &&
+        Array.isArray(platform.reviewPacket?.steps) &&
+        platform.reviewPacket.steps.length >= 3 &&
+        typeof platform.validatorObservabilityBridge?.activeReadoutId === "string" &&
+        Array.isArray(platform.validatorObservabilityBridge?.readouts) &&
+        platform.validatorObservabilityBridge.readouts.length === 3 &&
+        typeof platform.failurePath?.activeReadoutId === "string" &&
+        Array.isArray(platform.failurePath?.readouts) &&
+        platform.failurePath.readouts.length === 3 &&
+        platform.failurePath.readouts.some((readout) => readout.id === platform.failurePath.activeReadoutId) &&
+        (!platform.failurePath.nextReadoutId ||
+          platform.failurePath.readouts.some((readout) => readout.id === platform.failurePath.nextReadoutId)) &&
+        platform.failurePath.readouts.every(
+          (readout) =>
+            typeof readout.reviewPacketStepId === "string" &&
+            typeof readout.validatorReadoutId === "string" &&
+            typeof readout.rollbackContractId === "string" &&
+            typeof readout.rollbackCheckpointId === "string" &&
+            typeof readout.commandDeckLaneId === "string" &&
+            Array.isArray(readout.commandActionIds) &&
+            readout.commandActionIds.length > 0 &&
+            Array.isArray(readout.observabilitySignalIds) &&
+            readout.observabilitySignalIds.length > 0 &&
+            Array.isArray(readout.reviewChecks) &&
+            readout.reviewChecks.length > 0
+        )
+    )
+  ) {
+    throw new Error(`${label} host executor contract is missing phase60 materialization failure-path metadata.`);
+  }
+
+  if (
     !hostExecutor.releaseApprovalPipeline.reviewBoard?.title ||
     !hostExecutor.releaseApprovalPipeline.reviewBoard?.activeDeliveryChainStageId ||
     !hostExecutor.releaseApprovalPipeline.reviewBoard?.activeReviewerQueueId ||
@@ -2809,6 +2850,26 @@ function verifyReleaseSkeletonContract() {
             Array.isArray(readout.validatorChecks) &&
             readout.validatorChecks.length > 0
         ) &&
+        typeof contract.failurePath?.activeReadoutId === "string" &&
+        Array.isArray(contract.failurePath?.readouts) &&
+        contract.failurePath.readouts.length === 3 &&
+        contract.failurePath.readouts.some((readout) => readout.id === contract.failurePath.activeReadoutId) &&
+        (!contract.failurePath.nextReadoutId ||
+          contract.failurePath.readouts.some((readout) => readout.id === contract.failurePath.nextReadoutId)) &&
+        contract.failurePath.readouts.every(
+          (readout) =>
+            typeof readout.reviewPacketStepId === "string" &&
+            typeof readout.validatorReadoutId === "string" &&
+            typeof readout.rollbackContractId === "string" &&
+            typeof readout.rollbackCheckpointId === "string" &&
+            typeof readout.commandDeckLaneId === "string" &&
+            Array.isArray(readout.commandActionIds) &&
+            readout.commandActionIds.length > 0 &&
+            Array.isArray(readout.observabilitySignalIds) &&
+            readout.observabilitySignalIds.length > 0 &&
+            Array.isArray(readout.reviewChecks) &&
+            readout.reviewChecks.length > 0
+        ) &&
         contract.tasks.every(
           (task) =>
             typeof task.summary === "string" &&
@@ -2914,6 +2975,26 @@ function verifyReleaseSkeletonContract() {
             readout.observabilitySignalIds.length > 0 &&
             Array.isArray(readout.validatorChecks) &&
             readout.validatorChecks.length > 0
+        ) &&
+        typeof platform.failurePath?.activeReadoutId === "string" &&
+        Array.isArray(platform.failurePath?.readouts) &&
+        platform.failurePath.readouts.length === 3 &&
+        platform.failurePath.readouts.some((readout) => readout.id === platform.failurePath.activeReadoutId) &&
+        (!platform.failurePath.nextReadoutId ||
+          platform.failurePath.readouts.some((readout) => readout.id === platform.failurePath.nextReadoutId)) &&
+        platform.failurePath.readouts.every(
+          (readout) =>
+            typeof readout.reviewPacketStepId === "string" &&
+            typeof readout.validatorReadoutId === "string" &&
+            typeof readout.rollbackContractId === "string" &&
+            typeof readout.rollbackCheckpointId === "string" &&
+            typeof readout.commandDeckLaneId === "string" &&
+            Array.isArray(readout.commandActionIds) &&
+            readout.commandActionIds.length > 0 &&
+            Array.isArray(readout.observabilitySignalIds) &&
+            readout.observabilitySignalIds.length > 0 &&
+            Array.isArray(readout.reviewChecks) &&
+            readout.reviewChecks.length > 0
         )
     ) ||
     !Array.isArray(skeleton.reviewOnlyDeliveryChain?.stages) ||
