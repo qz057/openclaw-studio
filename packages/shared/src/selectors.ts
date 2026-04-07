@@ -3,11 +3,15 @@ import type {
   StudioReleaseApprovalPipeline,
   StudioReleaseApprovalWorkflowStage,
   StudioReleaseApprovalPipelineStage,
+  StudioReleasePackagedAppBundleSealingCheckpoint,
   StudioReleasePackagedAppBundleSealingReadiness,
   StudioReleaseCloseoutWindow,
   StudioReleaseDeliveryChainStage,
   StudioReleaseEscalationWindow,
   StudioReleasePackagedAppLocalMaterializationProgress,
+  StudioReleasePackagedAppLocalMaterializationSegment,
+  StudioReleasePackagedAppMaterializationReviewPacket,
+  StudioReleasePackagedAppMaterializationReviewPacketStep,
   StudioReleaseQaCloseoutReadinessTrack,
   StudioReleasePackagedAppStagedOutputChain,
   StudioReleasePackagedAppStagedOutputChainStep,
@@ -121,6 +125,37 @@ export function selectStudioReleasePackagedAppMaterializationContractStagedOutpu
   return chain?.steps.find((step) => step.id === stepId) ?? chain?.steps[0];
 }
 
+export function selectStudioReleasePackagedAppMaterializationContractStagedOutputNextStep(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+): StudioReleasePackagedAppStagedOutputChainStep | undefined {
+  const chain = selectStudioReleasePackagedAppMaterializationContractStagedOutputChain(deliveryChain, platformOrId);
+
+  if (!chain?.nextStepId) {
+    return undefined;
+  }
+
+  return chain.steps.find((step) => step.id === chain.nextStepId);
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractReviewPacket(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+): StudioReleasePackagedAppMaterializationReviewPacket | undefined {
+  return selectStudioReleasePackagedAppMaterializationContractPlatform(deliveryChain, platformOrId)?.reviewPacket;
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractReviewPacketStep(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null,
+  stepOrId?: Pick<StudioReleasePackagedAppMaterializationReviewPacketStep, "id"> | string | null
+): StudioReleasePackagedAppMaterializationReviewPacketStep | undefined {
+  const reviewPacket = selectStudioReleasePackagedAppMaterializationContractReviewPacket(deliveryChain, platformOrId);
+  const stepId = typeof stepOrId === "string" ? stepOrId : stepOrId?.id ?? reviewPacket?.currentStepId;
+
+  return reviewPacket?.steps.find((step) => step.id === stepId) ?? reviewPacket?.steps[0];
+}
+
 export function selectStudioReleasePackagedAppMaterializationContractBundleSealingReadiness(
   deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
   platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
@@ -128,11 +163,98 @@ export function selectStudioReleasePackagedAppMaterializationContractBundleSeali
   return selectStudioReleasePackagedAppMaterializationContractPlatform(deliveryChain, platformOrId)?.bundleSealingReadiness;
 }
 
+export function selectStudioReleasePackagedAppMaterializationContractBundleSealingCheckpoint(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null,
+  checkpointOrId?: Pick<StudioReleasePackagedAppBundleSealingCheckpoint, "id"> | string | null
+): StudioReleasePackagedAppBundleSealingCheckpoint | undefined {
+  const readiness = selectStudioReleasePackagedAppMaterializationContractBundleSealingReadiness(deliveryChain, platformOrId);
+  const checkpointId = typeof checkpointOrId === "string" ? checkpointOrId : checkpointOrId?.id ?? readiness?.activeCheckpointId;
+
+  return readiness?.checkpoints.find((checkpoint) => checkpoint.id === checkpointId) ?? readiness?.checkpoints[0];
+}
+
 export function selectStudioReleasePackagedAppMaterializationContractProgress(
   deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
   platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
 ): StudioReleasePackagedAppLocalMaterializationProgress | undefined {
   return selectStudioReleasePackagedAppMaterializationContractPlatform(deliveryChain, platformOrId)?.localMaterializationProgress;
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractProgressSegment(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null,
+  segmentOrId?: Pick<StudioReleasePackagedAppLocalMaterializationSegment, "id"> | string | null
+): StudioReleasePackagedAppLocalMaterializationSegment | undefined {
+  const progress = selectStudioReleasePackagedAppMaterializationContractProgress(deliveryChain, platformOrId);
+  const segmentId = typeof segmentOrId === "string" ? segmentOrId : segmentOrId?.id ?? progress?.activeSegmentId;
+
+  return progress?.segments.find((segment) => segment.id === segmentId) ?? progress?.segments[0];
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractNextProgressSegment(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+): StudioReleasePackagedAppLocalMaterializationSegment | undefined {
+  const progress = selectStudioReleasePackagedAppMaterializationContractProgress(deliveryChain, platformOrId);
+  const activeSegment = selectStudioReleasePackagedAppMaterializationContractProgressSegment(deliveryChain, platformOrId);
+
+  if (!progress?.segments.length) {
+    return undefined;
+  }
+
+  const activeIndex = progress.segments.findIndex((segment) => segment.id === activeSegment?.id);
+  const nextSegment =
+    progress.segments.slice(activeIndex + 1).find((segment) => segment.status === "up-next" || segment.status === "blocked") ??
+    progress.segments.find((segment) => segment.status === "up-next" || segment.status === "blocked");
+
+  return nextSegment;
+}
+
+function collectStudioReleasePackagedAppMaterializationRelatedStageIds(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract" | "stageCReadiness">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+): string[] {
+  const contract = deliveryChain.packagedAppMaterializationContract;
+  const platform = selectStudioReleasePackagedAppMaterializationContractPlatform(deliveryChain, platformOrId);
+  const progress = platform?.localMaterializationProgress;
+  const stageIds = new Set<string>([
+    contract.ownerStageId,
+    contract.downstreamGateStageId,
+    deliveryChain.stageCReadiness.stageBBridgeStageId,
+    deliveryChain.stageCReadiness.entryStageId
+  ]);
+
+  platform?.tasks.forEach((task) => stageIds.add(task.deliveryChainStageId));
+  progress?.stageSequence.forEach((stageId) => stageIds.add(stageId));
+  progress?.segments.forEach((segment) => stageIds.add(segment.deliveryChainStageId));
+
+  return [...stageIds];
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractNearbyStageCReadiness(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract" | "stageCReadiness">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+): {
+  stageIds: string[];
+  qaTracks: StudioReleaseQaCloseoutReadinessTrack[];
+  workflowStages: StudioReleaseApprovalWorkflowStage[];
+  checkpoints: StudioReleaseApprovalAuditRollbackEntryCheckpoint[];
+  rollbackContracts: StudioReleaseRollbackLiveReadinessContract[];
+} {
+  const stageIds = collectStudioReleasePackagedAppMaterializationRelatedStageIds(deliveryChain, platformOrId);
+  const stageIdSet = new Set(stageIds);
+  const { stageCReadiness } = deliveryChain;
+
+  return {
+    stageIds,
+    qaTracks: stageCReadiness.releaseQaCloseoutReadiness.tracks.filter((track) => stageIdSet.has(track.deliveryChainStageId)),
+    workflowStages: stageCReadiness.approvalWorkflow.stages.filter((stage) =>
+      stage.deliveryChainStageIds.some((stageId) => stageIdSet.has(stageId))
+    ),
+    checkpoints: stageCReadiness.entryContract.checkpoints.filter((checkpoint) => stageIdSet.has(checkpoint.deliveryChainStageId)),
+    rollbackContracts: stageCReadiness.rollbackLiveReadiness.contracts.filter((contract) => stageIdSet.has(contract.deliveryChainStageId))
+  };
 }
 
 export function selectStudioReleaseQaCloseoutReadinessTrack(

@@ -19,7 +19,11 @@ import type {
   StudioReleaseCloseoutWindow,
   StudioReleaseDeliveryChain,
   StudioReleaseEscalationWindow,
+  StudioReleasePackagedAppBundleSealingCheckpoint,
   StudioReleasePackagedAppMaterializationContract,
+  StudioReleasePackagedAppLocalMaterializationSegment,
+  StudioReleasePackagedAppMaterializationReviewPacket,
+  StudioReleasePackagedAppMaterializationTaskState,
   StudioReleaseQaCloseoutReadiness,
   StudioReleaseRollbackLiveReadiness,
   StudioReleaseStageCBoundaryLinkage,
@@ -949,7 +953,7 @@ function createStudioReleaseDeliveryChain(
     id: "release-delivery-chain-phase60",
     title: "Delivery-chain Workspace",
     summary:
-      "Phase60 slice 32 keeps the review-only delivery chain readable as a stage explorer while also surfacing packaged-app staged-output task orchestration, bundle-sealing readiness, local progression, and a deeper Stage C readiness spine, so per-platform roots, current task evidence, staged-output manifests, seal checkpoints, QA closeout tracks, approval workflow stages, rollback live-readiness contracts, and boundary handoff posture stay inspectable inside the same local-only metadata spine.",
+      "Phase60 slice 33 keeps the review-only delivery chain readable as a stage explorer while also surfacing packaged-app staged-output task orchestration, bundle-sealing readiness, local review packets, local progression, and a deeper Stage C readiness spine, so per-platform roots, current task evidence, packet handoffs, staged-output manifests, seal checkpoints, QA closeout tracks, approval workflow stages, rollback live-readiness contracts, and boundary handoff posture stay inspectable inside the same local-only metadata spine.",
     mode: "review-only",
     currentStageId: currentDeliveryStageId,
     packagedAppMaterializationContract,
@@ -1068,7 +1072,7 @@ function createStudioReleaseDeliveryChain(
             id: "delivery-chain-promotion-readiness-materialization",
             label: "Packaged-app materialization",
             summary:
-              "Directory materialization, staged-output manifests, and bundle-sealing checkpoints stay grouped as one inspectable local materialization contract before any installer or publish path exists.",
+              "Directory materialization, staged-output manifests, bundle-sealing checkpoints, and local review packets stay grouped as one inspectable local materialization contract before any installer or publish path exists.",
             artifacts: packagedAppMaterializationContract.artifacts
           },
           {
@@ -1239,13 +1243,220 @@ function createStudioReleaseDeliveryChain(
   };
 }
 
+type StudioPackagedAppReviewPacketStepKey =
+  | "directory-to-output"
+  | "output-to-checksum"
+  | "checksum-to-seal";
+
+function createStudioPackagedAppMaterializationReviewPacket({
+  idPrefix,
+  label,
+  packetState,
+  activeStep,
+  directoryTaskId,
+  stagedOutputTaskId,
+  bundleSealTaskId,
+  verificationManifestPath,
+  outputManifestPath,
+  checksumManifestPath,
+  sealManifestPath,
+  rollbackCheckpointId
+}: {
+  idPrefix: string;
+  label: string;
+  packetState: StudioReleasePackagedAppMaterializationTaskState;
+  activeStep: StudioPackagedAppReviewPacketStepKey;
+  directoryTaskId: string;
+  stagedOutputTaskId: string;
+  bundleSealTaskId: string;
+  verificationManifestPath: string;
+  outputManifestPath: string;
+  checksumManifestPath: string;
+  sealManifestPath: string;
+  rollbackCheckpointId: string;
+}): StudioReleasePackagedAppMaterializationReviewPacket {
+  const packetId = `packaged-app-review-packet-${idPrefix}`;
+  const stepIds = {
+    "directory-to-output": `${packetId}-directory-to-output`,
+    "output-to-checksum": `${packetId}-output-to-checksum`,
+    "checksum-to-seal": `${packetId}-checksum-to-seal`
+  } as const;
+  const orderedStepIds = [stepIds["directory-to-output"], stepIds["output-to-checksum"], stepIds["checksum-to-seal"]];
+  const currentStepId = stepIds[activeStep];
+  const currentStepIndex = orderedStepIds.indexOf(currentStepId);
+  const nextStepId = orderedStepIds[currentStepIndex + 1] ?? null;
+
+  return {
+    id: packetId,
+    label: `${label} local review packet`,
+    taskState: packetState,
+    summary:
+      `${label} keeps directory verification, staged-output manifests, and bundle-seal posture in one local-only review packet so the current handoff can be inspected without materializing anything.`,
+    currentStepId,
+    nextStepId,
+    rollbackCheckpointId,
+    reviewEvidence: [
+      "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+      "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+      "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+      outputManifestPath,
+      checksumManifestPath,
+      sealManifestPath
+    ],
+    steps: [
+      {
+        id: stepIds["directory-to-output"],
+        label: "Directory -> staged-output handoff",
+        taskState: "review-ready",
+        summary:
+          `${label} directory verification is already linked to the first staged-output handoff, so output-manifest review can start from the same package-root baseline.`,
+        fromTaskId: directoryTaskId,
+        toTaskId: stagedOutputTaskId,
+        manifestPath: verificationManifestPath,
+        deliveryChainStageId: "delivery-chain-attestation-intake",
+        evidence: ["release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json", verificationManifestPath]
+      },
+      {
+        id: stepIds["output-to-checksum"],
+        label: "Staged-output -> checksum handoff",
+        taskState: packetState,
+        summary:
+          `${label} output-manifest review keeps checksum proof in the same lane so staged-output evidence stays readable before any seal path can advance.`,
+        fromTaskId: stagedOutputTaskId,
+        toTaskId: stagedOutputTaskId,
+        manifestPath: outputManifestPath,
+        deliveryChainStageId: "delivery-chain-operator-review",
+        evidence: ["release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json", outputManifestPath, checksumManifestPath]
+      },
+      {
+        id: stepIds["checksum-to-seal"],
+        label: "Checksum -> bundle-seal handoff",
+        taskState: "blocked",
+        summary:
+          `${label} checksum proof is staged for review, but the bundle-seal handoff stays blocked until the local-only packet stops being metadata-only.`,
+        fromTaskId: stagedOutputTaskId,
+        toTaskId: bundleSealTaskId,
+        manifestPath: sealManifestPath,
+        deliveryChainStageId: "delivery-chain-promotion-readiness",
+        evidence: ["release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json", checksumManifestPath, sealManifestPath]
+      }
+    ],
+    blockedBy: [
+      "staged outputs remain metadata-only",
+      "bundle sealing remains metadata-only",
+      "host-side execution remains disabled"
+    ]
+  };
+}
+
+function createStudioPackagedAppBundleSealingCheckpoints({
+  idPrefix,
+  sealManifestPath,
+  integrityManifestPath,
+  gateLabel,
+  gateDetail,
+  gateArtifactPath,
+  gateStatus
+}: {
+  idPrefix: string;
+  sealManifestPath: string;
+  integrityManifestPath: string;
+  gateLabel: string;
+  gateDetail: string;
+  gateArtifactPath: string;
+  gateStatus: StudioReleasePackagedAppBundleSealingCheckpoint["status"];
+}): StudioReleasePackagedAppBundleSealingCheckpoint[] {
+  return [
+    {
+      id: `packaged-app-bundle-sealing-checkpoint-${idPrefix}-seal-manifest`,
+      label: "Seal manifest declared",
+      status: "ready",
+      detail: "Bundle sealing stays local-only, but the seal manifest path is already explicit for review pickup.",
+      artifactPath: sealManifestPath
+    },
+    {
+      id: `packaged-app-bundle-sealing-checkpoint-${idPrefix}-integrity-manifest`,
+      label: "Integrity manifest declared",
+      status: "ready",
+      detail: "Integrity posture stays visible beside the same seal handoff without digest publication or attestation execution.",
+      artifactPath: integrityManifestPath
+    },
+    {
+      id: `packaged-app-bundle-sealing-checkpoint-${idPrefix}-gate`,
+      label: gateLabel,
+      status: gateStatus,
+      detail: gateDetail,
+      artifactPath: gateArtifactPath
+    }
+  ];
+}
+
+function createStudioPackagedAppLocalMaterializationSegments({
+  idPrefix,
+  directoryTaskId,
+  directoryStatus,
+  directorySummary,
+  stagedOutputTaskId,
+  stagedOutputStatus,
+  stagedOutputSummary,
+  stagedOutputStepIds,
+  bundleSealTaskId,
+  bundleSealStatus,
+  bundleSealSummary
+}: {
+  idPrefix: string;
+  directoryTaskId: string;
+  directoryStatus: StudioReleasePackagedAppLocalMaterializationSegment["status"];
+  directorySummary: string;
+  stagedOutputTaskId: string;
+  stagedOutputStatus: StudioReleasePackagedAppLocalMaterializationSegment["status"];
+  stagedOutputSummary: string;
+  stagedOutputStepIds: string[];
+  bundleSealTaskId: string;
+  bundleSealStatus: StudioReleasePackagedAppLocalMaterializationSegment["status"];
+  bundleSealSummary: string;
+}): StudioReleasePackagedAppLocalMaterializationSegment[] {
+  return [
+    {
+      id: `packaged-app-local-materialization-segment-${idPrefix}-directory`,
+      label: "Directory materialization",
+      kind: "directory",
+      status: directoryStatus,
+      summary: directorySummary,
+      taskId: directoryTaskId,
+      deliveryChainStageId: "delivery-chain-attestation-intake",
+      linkedStepIds: []
+    },
+    {
+      id: `packaged-app-local-materialization-segment-${idPrefix}-staged-output`,
+      label: "Staged-output handoff",
+      kind: "staged-output",
+      status: stagedOutputStatus,
+      summary: stagedOutputSummary,
+      taskId: stagedOutputTaskId,
+      deliveryChainStageId: "delivery-chain-operator-review",
+      linkedStepIds: stagedOutputStepIds
+    },
+    {
+      id: `packaged-app-local-materialization-segment-${idPrefix}-bundle-sealing`,
+      label: "Bundle-sealing readiness",
+      kind: "bundle-sealing",
+      status: bundleSealStatus,
+      summary: bundleSealSummary,
+      taskId: bundleSealTaskId,
+      deliveryChainStageId: "delivery-chain-promotion-readiness",
+      linkedStepIds: []
+    }
+  ];
+}
+
 function createStudioPackagedAppMaterializationContract(): StudioReleasePackagedAppMaterializationContract {
   return {
     id: "packaged-app-materialization-contract",
     label: "Packaged-app Materialization Contract",
     mode: "review-only",
     summary:
-      "Packaged-app directory materialization, staged-output task chains, bundle-sealing readiness, and local progression now stay inspectable as one per-platform task-state contract, so the shell can review active roots, evidence handoffs, and seal posture without materializing, signing, or publishing anything.",
+      "Packaged-app directory materialization, staged-output task chains, bundle-sealing readiness, local review packets, and local progression now stay inspectable as one per-platform task-state contract, so the shell can review active roots, evidence handoffs, and seal posture without materializing, signing, or publishing anything.",
     currentTaskState: "reviewing",
     activePlatformId: "packaged-app-materialization-platform-windows",
     ownerStageId: "delivery-chain-promotion-readiness",
@@ -1314,7 +1525,9 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
           summary:
             "Directory verification, output-manifest staging, and checksum-manifest staging stay chained as one local-only Windows handoff before bundle sealing can be reviewed.",
           currentStepId: "packaged-app-staged-output-step-windows-output-manifest",
+          nextStepId: "packaged-app-staged-output-step-windows-checksum-manifest",
           downstreamBundleSealingId: "bundle-sealing-windows",
+          completedStepIds: ["packaged-app-staged-output-step-windows-directory-verification"],
           steps: [
             {
               id: "packaged-app-staged-output-step-windows-directory-verification",
@@ -1346,6 +1559,20 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
             }
           ]
         },
+        reviewPacket: createStudioPackagedAppMaterializationReviewPacket({
+          idPrefix: "windows",
+          label: "Windows",
+          packetState: "reviewing",
+          activeStep: "output-to-checksum",
+          directoryTaskId: "packaged-app-materialization-task-windows-directory",
+          stagedOutputTaskId: "packaged-app-materialization-task-windows-staged-output",
+          bundleSealTaskId: "packaged-app-materialization-task-windows-bundle-seal",
+          verificationManifestPath: "future/packaged-app/windows/materialization-manifest.json",
+          outputManifestPath: "future/staged-output/windows/output-manifest.json",
+          checksumManifestPath: "future/staged-output/windows/checksum-manifest.json",
+          sealManifestPath: "future/sealed-bundles/windows/bundle-seal-manifest.json",
+          rollbackCheckpointId: "sealed-bundle-checkpoint-windows"
+        }),
         bundleSealingReadiness: {
           id: "packaged-app-bundle-sealing-readiness-windows",
           label: "Windows bundle-sealing readiness",
@@ -1353,11 +1580,21 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
           summary:
             "Seal and integrity manifests are declared, but the Windows seal handoff remains blocked until the staged-output chain stops being metadata-only and the publish gate remains review-only.",
           currentCheckpoint: "seal manifest declared / staged-output review still active",
+          activeCheckpointId: "packaged-app-bundle-sealing-checkpoint-windows-gate",
           deliveryChainStageId: "delivery-chain-promotion-readiness",
           downstreamGateStageId: "delivery-chain-publish-decision",
           dependsOnTaskId: "packaged-app-materialization-task-windows-staged-output",
           sealManifestPath: "future/sealed-bundles/windows/bundle-seal-manifest.json",
           integrityManifestPath: "future/sealed-bundles/windows/bundle-integrity-manifest.json",
+          checkpoints: createStudioPackagedAppBundleSealingCheckpoints({
+            idPrefix: "windows",
+            sealManifestPath: "future/sealed-bundles/windows/bundle-seal-manifest.json",
+            integrityManifestPath: "future/sealed-bundles/windows/bundle-integrity-manifest.json",
+            gateLabel: "Staged-output review still active",
+            gateDetail: "Windows bundle sealing stays behind the current staged-output review slice until the output and checksum handoff stop being metadata-only.",
+            gateArtifactPath: "future/staged-output/windows/output-manifest.json",
+            gateStatus: "watch"
+          }),
           reviewChecks: [
             "seal manifest declared",
             "integrity manifest declared",
@@ -1377,6 +1614,7 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
             "Directory review is complete, staged-output review is current, and bundle sealing stays queued as the next local-only checkpoint.",
           currentTaskId: "packaged-app-materialization-task-windows-staged-output",
           nextTaskId: "packaged-app-materialization-task-windows-bundle-seal",
+          activeSegmentId: "packaged-app-local-materialization-segment-windows-staged-output",
           completedTaskCount: 1,
           blockedTaskCount: 1,
           totalTaskCount: 3,
@@ -1385,7 +1623,24 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
             "delivery-chain-attestation-intake",
             "delivery-chain-operator-review",
             "delivery-chain-promotion-readiness"
-          ]
+          ],
+          segments: createStudioPackagedAppLocalMaterializationSegments({
+            idPrefix: "windows",
+            directoryTaskId: "packaged-app-materialization-task-windows-directory",
+            directoryStatus: "completed",
+            directorySummary: "Directory verification is already closed out, so Windows review starts from an explicit packaged-app root checkpoint.",
+            stagedOutputTaskId: "packaged-app-materialization-task-windows-staged-output",
+            stagedOutputStatus: "active",
+            stagedOutputSummary: "Windows is currently inside the staged-output handoff, with output and checksum manifests carrying the active local-only review posture.",
+            stagedOutputStepIds: [
+              "packaged-app-staged-output-step-windows-directory-verification",
+              "packaged-app-staged-output-step-windows-output-manifest",
+              "packaged-app-staged-output-step-windows-checksum-manifest"
+            ],
+            bundleSealTaskId: "packaged-app-materialization-task-windows-bundle-seal",
+            bundleSealStatus: "blocked",
+            bundleSealSummary: "Bundle sealing is the next downstream slice, but it stays blocked behind the current staged-output review and review-only publish gate."
+          })
         },
         tasks: [
           {
@@ -1495,7 +1750,9 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
           summary:
             "Directory verification, output-manifest staging, and checksum-manifest staging stay chained as one local-only .app handoff before bundle sealing can be reviewed.",
           currentStepId: "packaged-app-staged-output-step-macos-directory-verification",
+          nextStepId: "packaged-app-staged-output-step-macos-output-manifest",
           downstreamBundleSealingId: "bundle-sealing-macos",
+          completedStepIds: [],
           steps: [
             {
               id: "packaged-app-staged-output-step-macos-directory-verification",
@@ -1527,6 +1784,20 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
             }
           ]
         },
+        reviewPacket: createStudioPackagedAppMaterializationReviewPacket({
+          idPrefix: "macos",
+          label: "macOS",
+          packetState: "review-ready",
+          activeStep: "directory-to-output",
+          directoryTaskId: "packaged-app-materialization-task-macos-directory",
+          stagedOutputTaskId: "packaged-app-materialization-task-macos-staged-output",
+          bundleSealTaskId: "packaged-app-materialization-task-macos-bundle-seal",
+          verificationManifestPath: "future/packaged-app/macos/materialization-manifest.json",
+          outputManifestPath: "future/staged-output/macos/output-manifest.json",
+          checksumManifestPath: "future/staged-output/macos/checksum-manifest.json",
+          sealManifestPath: "future/sealed-bundles/macos/bundle-seal-manifest.json",
+          rollbackCheckpointId: "sealed-bundle-checkpoint-macos"
+        }),
         bundleSealingReadiness: {
           id: "packaged-app-bundle-sealing-readiness-macos",
           label: "macOS bundle-sealing readiness",
@@ -1534,11 +1805,21 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
           summary:
             "Seal and integrity manifests are declared, but the macOS seal handoff remains blocked while staged-output review, signing, and notarization all stay metadata-only.",
           currentCheckpoint: "seal manifest declared / notarization path still blocked",
+          activeCheckpointId: "packaged-app-bundle-sealing-checkpoint-macos-gate",
           deliveryChainStageId: "delivery-chain-promotion-readiness",
           downstreamGateStageId: "delivery-chain-publish-decision",
           dependsOnTaskId: "packaged-app-materialization-task-macos-staged-output",
           sealManifestPath: "future/sealed-bundles/macos/bundle-seal-manifest.json",
           integrityManifestPath: "future/sealed-bundles/macos/bundle-integrity-manifest.json",
+          checkpoints: createStudioPackagedAppBundleSealingCheckpoints({
+            idPrefix: "macos",
+            sealManifestPath: "future/sealed-bundles/macos/bundle-seal-manifest.json",
+            integrityManifestPath: "future/sealed-bundles/macos/bundle-integrity-manifest.json",
+            gateLabel: "Notarization path still blocked",
+            gateDetail: "macOS bundle sealing stays blocked until the staged-output lane is reviewed end-to-end and later signing/notarization posture stops being metadata-only.",
+            gateArtifactPath: "release/NOTARIZATION-PLAN.json",
+            gateStatus: "blocked"
+          }),
           reviewChecks: [
             "seal manifest declared",
             "integrity manifest declared",
@@ -1558,6 +1839,7 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
             "Directory review is the current macOS checkpoint, with staged-output review queued next and bundle sealing still held behind the same local-only chain.",
           currentTaskId: "packaged-app-materialization-task-macos-directory",
           nextTaskId: "packaged-app-materialization-task-macos-staged-output",
+          activeSegmentId: "packaged-app-local-materialization-segment-macos-directory",
           completedTaskCount: 0,
           blockedTaskCount: 1,
           totalTaskCount: 3,
@@ -1566,7 +1848,24 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
             "delivery-chain-attestation-intake",
             "delivery-chain-operator-review",
             "delivery-chain-promotion-readiness"
-          ]
+          ],
+          segments: createStudioPackagedAppLocalMaterializationSegments({
+            idPrefix: "macos",
+            directoryTaskId: "packaged-app-materialization-task-macos-directory",
+            directoryStatus: "active",
+            directorySummary: "macOS is still on the directory checkpoint, so the .app layout and verification manifest stay as the active reviewer pickup surface.",
+            stagedOutputTaskId: "packaged-app-materialization-task-macos-staged-output",
+            stagedOutputStatus: "up-next",
+            stagedOutputSummary: "Once the directory checkpoint clears, the .app staged-output lane becomes the next local-only review slice.",
+            stagedOutputStepIds: [
+              "packaged-app-staged-output-step-macos-directory-verification",
+              "packaged-app-staged-output-step-macos-output-manifest",
+              "packaged-app-staged-output-step-macos-checksum-manifest"
+            ],
+            bundleSealTaskId: "packaged-app-materialization-task-macos-bundle-seal",
+            bundleSealStatus: "blocked",
+            bundleSealSummary: "Bundle sealing remains downstream but blocked until staged outputs, signing posture, and notarization readiness stop being metadata-only."
+          })
         },
         tasks: [
           {
@@ -1676,7 +1975,9 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
           summary:
             "Directory verification, output-manifest staging, and checksum-manifest staging stay chained as one local-only Linux handoff before bundle sealing can be reviewed.",
           currentStepId: "packaged-app-staged-output-step-linux-directory-verification",
+          nextStepId: "packaged-app-staged-output-step-linux-output-manifest",
           downstreamBundleSealingId: "bundle-sealing-linux",
+          completedStepIds: [],
           steps: [
             {
               id: "packaged-app-staged-output-step-linux-directory-verification",
@@ -1708,6 +2009,20 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
             }
           ]
         },
+        reviewPacket: createStudioPackagedAppMaterializationReviewPacket({
+          idPrefix: "linux",
+          label: "Linux",
+          packetState: "review-ready",
+          activeStep: "directory-to-output",
+          directoryTaskId: "packaged-app-materialization-task-linux-directory",
+          stagedOutputTaskId: "packaged-app-materialization-task-linux-staged-output",
+          bundleSealTaskId: "packaged-app-materialization-task-linux-bundle-seal",
+          verificationManifestPath: "future/packaged-app/linux/materialization-manifest.json",
+          outputManifestPath: "future/staged-output/linux/output-manifest.json",
+          checksumManifestPath: "future/staged-output/linux/checksum-manifest.json",
+          sealManifestPath: "future/sealed-bundles/linux/bundle-seal-manifest.json",
+          rollbackCheckpointId: "sealed-bundle-checkpoint-linux"
+        }),
         bundleSealingReadiness: {
           id: "packaged-app-bundle-sealing-readiness-linux",
           label: "Linux bundle-sealing readiness",
@@ -1715,11 +2030,21 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
           summary:
             "Seal and integrity manifests are declared, but the Linux seal handoff remains blocked while staged-output review and later package publication stay metadata-only.",
           currentCheckpoint: "seal manifest declared / publish path still blocked",
+          activeCheckpointId: "packaged-app-bundle-sealing-checkpoint-linux-gate",
           deliveryChainStageId: "delivery-chain-promotion-readiness",
           downstreamGateStageId: "delivery-chain-publish-decision",
           dependsOnTaskId: "packaged-app-materialization-task-linux-staged-output",
           sealManifestPath: "future/sealed-bundles/linux/bundle-seal-manifest.json",
           integrityManifestPath: "future/sealed-bundles/linux/bundle-integrity-manifest.json",
+          checkpoints: createStudioPackagedAppBundleSealingCheckpoints({
+            idPrefix: "linux",
+            sealManifestPath: "future/sealed-bundles/linux/bundle-seal-manifest.json",
+            integrityManifestPath: "future/sealed-bundles/linux/bundle-integrity-manifest.json",
+            gateLabel: "Package publication path still blocked",
+            gateDetail: "Linux bundle sealing stays blocked until the staged-output lane settles and the downstream package publication gate stops being metadata-only.",
+            gateArtifactPath: "release/PUBLISH-GATES.json",
+            gateStatus: "blocked"
+          }),
           reviewChecks: [
             "seal manifest declared",
             "integrity manifest declared",
@@ -1739,6 +2064,7 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
             "Directory review is the current Linux checkpoint, with staged-output review queued next and bundle sealing still held behind the same local-only chain.",
           currentTaskId: "packaged-app-materialization-task-linux-directory",
           nextTaskId: "packaged-app-materialization-task-linux-staged-output",
+          activeSegmentId: "packaged-app-local-materialization-segment-linux-directory",
           completedTaskCount: 0,
           blockedTaskCount: 1,
           totalTaskCount: 3,
@@ -1747,7 +2073,24 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
             "delivery-chain-attestation-intake",
             "delivery-chain-operator-review",
             "delivery-chain-promotion-readiness"
-          ]
+          ],
+          segments: createStudioPackagedAppLocalMaterializationSegments({
+            idPrefix: "linux",
+            directoryTaskId: "packaged-app-materialization-task-linux-directory",
+            directoryStatus: "active",
+            directorySummary: "Linux is still on the directory checkpoint, so the package root, resources tree, and verification manifest remain the active review surface.",
+            stagedOutputTaskId: "packaged-app-materialization-task-linux-staged-output",
+            stagedOutputStatus: "up-next",
+            stagedOutputSummary: "Linux staged-output manifests are queued as the next local-only slice once the package-root checkpoint is closed.",
+            stagedOutputStepIds: [
+              "packaged-app-staged-output-step-linux-directory-verification",
+              "packaged-app-staged-output-step-linux-output-manifest",
+              "packaged-app-staged-output-step-linux-checksum-manifest"
+            ],
+            bundleSealTaskId: "packaged-app-materialization-task-linux-bundle-seal",
+            bundleSealStatus: "blocked",
+            bundleSealSummary: "Bundle sealing remains downstream but blocked until staged outputs settle and the package publication gate stays purely review-only."
+          })
         },
         tasks: [
           {

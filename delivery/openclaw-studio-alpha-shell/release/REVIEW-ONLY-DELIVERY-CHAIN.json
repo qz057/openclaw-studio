@@ -1,10 +1,10 @@
 {
   "schemaVersion": "openclaw-studio-review-only-delivery-chain/v1",
-  "generatedAt": "2026-04-07T18:53:42.417Z",
+  "generatedAt": "2026-04-07T19:16:43.777Z",
   "phase": "phase60",
   "mode": "local-only-review",
   "title": "Delivery-chain Workspace",
-  "summary": "Stage Explorer keeps operator review board, promotion readiness, publish decision gates, rollback readiness, stage-level artifacts, packaged-app materialization roots, blockers, handoff posture, and observability mapping grouped into one staged local-only delivery workflow.",
+  "summary": "Stage Explorer keeps operator review board, promotion readiness, publish decision gates, rollback readiness, stage-level artifacts, packaged-app materialization roots, packet-level handoffs, blockers, handoff posture, and observability mapping grouped into one staged local-only delivery workflow.",
   "activeStageId": "delivery-chain-operator-review",
   "operatorReviewBoardPath": "release/OPERATOR-REVIEW-BOARD.json",
   "releaseDecisionHandoffPath": "release/RELEASE-DECISION-HANDOFF.json",
@@ -14,7 +14,7 @@
     "id": "packaged-app-materialization-contract",
     "label": "Packaged-app Materialization Contract",
     "mode": "review-only",
-    "summary": "Directory materialization, staged-output manifests, and bundle-sealing checkpoints now stay inspectable as one per-platform local-only contract, so promotion readiness can review roots and seal paths without materializing, signing, or publishing anything.",
+    "summary": "Directory materialization, staged-output manifests, bundle-sealing checkpoints, and packet-level handoffs now stay inspectable as one per-platform local-only contract, so promotion readiness can review roots, handoff continuity, and seal paths without materializing, signing, or publishing anything.",
     "ownerStageId": "delivery-chain-promotion-readiness",
     "downstreamGateStageId": "delivery-chain-publish-decision",
     "artifacts": [
@@ -57,6 +57,74 @@
           "seal manifest declared",
           "integrity manifest path declared"
         ],
+        "reviewPacket": {
+          "id": "packaged-app-review-packet-windows",
+          "label": "Windows local review packet",
+          "taskState": "reviewing",
+          "summary": "Windows keeps directory verification, staged-output manifests, and bundle-seal posture in one local-only review packet so the current handoff can be inspected without materializing anything.",
+          "currentStepId": "packaged-app-review-packet-windows-output-to-checksum",
+          "nextStepId": "packaged-app-review-packet-windows-checksum-to-seal",
+          "rollbackCheckpointId": "sealed-bundle-checkpoint-windows",
+          "reviewEvidence": [
+            "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+            "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+            "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+            "future/staged-output/windows/output-manifest.json",
+            "future/staged-output/windows/checksum-manifest.json",
+            "future/sealed-bundles/windows/bundle-seal-manifest.json"
+          ],
+          "steps": [
+            {
+              "id": "packaged-app-review-packet-windows-directory-to-output",
+              "label": "Directory -> staged-output handoff",
+              "taskState": "review-ready",
+              "summary": "Windows directory verification is already linked to the first staged-output handoff, so output-manifest review can start from the same package-root baseline.",
+              "fromTaskId": "packaged-app-materialization-task-windows-directory",
+              "toTaskId": "packaged-app-materialization-task-windows-staged-output",
+              "manifestPath": "future/packaged-app/windows/materialization-manifest.json",
+              "deliveryChainStageId": "delivery-chain-attestation-intake",
+              "evidence": [
+                "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+                "future/packaged-app/windows/materialization-manifest.json"
+              ]
+            },
+            {
+              "id": "packaged-app-review-packet-windows-output-to-checksum",
+              "label": "Staged-output -> checksum handoff",
+              "taskState": "reviewing",
+              "summary": "Windows output-manifest review keeps checksum proof in the same lane so staged-output evidence stays readable before any seal path can advance.",
+              "fromTaskId": "packaged-app-materialization-task-windows-staged-output",
+              "toTaskId": "packaged-app-materialization-task-windows-staged-output",
+              "manifestPath": "future/staged-output/windows/output-manifest.json",
+              "deliveryChainStageId": "delivery-chain-operator-review",
+              "evidence": [
+                "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+                "future/staged-output/windows/output-manifest.json",
+                "future/staged-output/windows/checksum-manifest.json"
+              ]
+            },
+            {
+              "id": "packaged-app-review-packet-windows-checksum-to-seal",
+              "label": "Checksum -> bundle-seal handoff",
+              "taskState": "blocked",
+              "summary": "Windows checksum proof is staged for review, but the bundle-seal handoff stays blocked until the local-only packet stops being metadata-only.",
+              "fromTaskId": "packaged-app-materialization-task-windows-staged-output",
+              "toTaskId": "packaged-app-materialization-task-windows-bundle-seal",
+              "manifestPath": "future/sealed-bundles/windows/bundle-seal-manifest.json",
+              "deliveryChainStageId": "delivery-chain-promotion-readiness",
+              "evidence": [
+                "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+                "future/staged-output/windows/checksum-manifest.json",
+                "future/sealed-bundles/windows/bundle-seal-manifest.json"
+              ]
+            }
+          ],
+          "blockedBy": [
+            "staged outputs remain metadata-only",
+            "bundle sealing remains metadata-only",
+            "host-side execution remains disabled"
+          ]
+        },
         "blockedBy": [
           "materialization remains review-only",
           "staged outputs remain task-state metadata",
@@ -95,6 +163,74 @@
           "seal manifest declared",
           "integrity manifest path declared"
         ],
+        "reviewPacket": {
+          "id": "packaged-app-review-packet-macos",
+          "label": "macOS local review packet",
+          "taskState": "review-ready",
+          "summary": "macOS keeps directory verification, staged-output manifests, and bundle-seal posture in one local-only review packet so the current handoff can be inspected without materializing anything.",
+          "currentStepId": "packaged-app-review-packet-macos-directory-to-output",
+          "nextStepId": "packaged-app-review-packet-macos-output-to-checksum",
+          "rollbackCheckpointId": "sealed-bundle-checkpoint-macos",
+          "reviewEvidence": [
+            "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+            "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+            "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+            "future/staged-output/macos/output-manifest.json",
+            "future/staged-output/macos/checksum-manifest.json",
+            "future/sealed-bundles/macos/bundle-seal-manifest.json"
+          ],
+          "steps": [
+            {
+              "id": "packaged-app-review-packet-macos-directory-to-output",
+              "label": "Directory -> staged-output handoff",
+              "taskState": "review-ready",
+              "summary": "macOS directory verification is already linked to the first staged-output handoff, so output-manifest review can start from the same package-root baseline.",
+              "fromTaskId": "packaged-app-materialization-task-macos-directory",
+              "toTaskId": "packaged-app-materialization-task-macos-staged-output",
+              "manifestPath": "future/packaged-app/macos/materialization-manifest.json",
+              "deliveryChainStageId": "delivery-chain-attestation-intake",
+              "evidence": [
+                "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+                "future/packaged-app/macos/materialization-manifest.json"
+              ]
+            },
+            {
+              "id": "packaged-app-review-packet-macos-output-to-checksum",
+              "label": "Staged-output -> checksum handoff",
+              "taskState": "review-ready",
+              "summary": "macOS output-manifest review keeps checksum proof in the same lane so staged-output evidence stays readable before any seal path can advance.",
+              "fromTaskId": "packaged-app-materialization-task-macos-staged-output",
+              "toTaskId": "packaged-app-materialization-task-macos-staged-output",
+              "manifestPath": "future/staged-output/macos/output-manifest.json",
+              "deliveryChainStageId": "delivery-chain-operator-review",
+              "evidence": [
+                "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+                "future/staged-output/macos/output-manifest.json",
+                "future/staged-output/macos/checksum-manifest.json"
+              ]
+            },
+            {
+              "id": "packaged-app-review-packet-macos-checksum-to-seal",
+              "label": "Checksum -> bundle-seal handoff",
+              "taskState": "blocked",
+              "summary": "macOS checksum proof is staged for review, but the bundle-seal handoff stays blocked until the local-only packet stops being metadata-only.",
+              "fromTaskId": "packaged-app-materialization-task-macos-staged-output",
+              "toTaskId": "packaged-app-materialization-task-macos-bundle-seal",
+              "manifestPath": "future/sealed-bundles/macos/bundle-seal-manifest.json",
+              "deliveryChainStageId": "delivery-chain-promotion-readiness",
+              "evidence": [
+                "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+                "future/staged-output/macos/checksum-manifest.json",
+                "future/sealed-bundles/macos/bundle-seal-manifest.json"
+              ]
+            }
+          ],
+          "blockedBy": [
+            "staged outputs remain metadata-only",
+            "bundle sealing remains metadata-only",
+            "host-side execution remains disabled"
+          ]
+        },
         "blockedBy": [
           "materialization remains review-only",
           "staged outputs remain task-state metadata",
@@ -133,6 +269,74 @@
           "seal manifest declared",
           "integrity manifest path declared"
         ],
+        "reviewPacket": {
+          "id": "packaged-app-review-packet-linux",
+          "label": "Linux local review packet",
+          "taskState": "review-ready",
+          "summary": "Linux keeps directory verification, staged-output manifests, and bundle-seal posture in one local-only review packet so the current handoff can be inspected without materializing anything.",
+          "currentStepId": "packaged-app-review-packet-linux-directory-to-output",
+          "nextStepId": "packaged-app-review-packet-linux-output-to-checksum",
+          "rollbackCheckpointId": "sealed-bundle-checkpoint-linux",
+          "reviewEvidence": [
+            "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+            "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+            "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+            "future/staged-output/linux/output-manifest.json",
+            "future/staged-output/linux/checksum-manifest.json",
+            "future/sealed-bundles/linux/bundle-seal-manifest.json"
+          ],
+          "steps": [
+            {
+              "id": "packaged-app-review-packet-linux-directory-to-output",
+              "label": "Directory -> staged-output handoff",
+              "taskState": "review-ready",
+              "summary": "Linux directory verification is already linked to the first staged-output handoff, so output-manifest review can start from the same package-root baseline.",
+              "fromTaskId": "packaged-app-materialization-task-linux-directory",
+              "toTaskId": "packaged-app-materialization-task-linux-staged-output",
+              "manifestPath": "future/packaged-app/linux/materialization-manifest.json",
+              "deliveryChainStageId": "delivery-chain-attestation-intake",
+              "evidence": [
+                "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+                "future/packaged-app/linux/materialization-manifest.json"
+              ]
+            },
+            {
+              "id": "packaged-app-review-packet-linux-output-to-checksum",
+              "label": "Staged-output -> checksum handoff",
+              "taskState": "review-ready",
+              "summary": "Linux output-manifest review keeps checksum proof in the same lane so staged-output evidence stays readable before any seal path can advance.",
+              "fromTaskId": "packaged-app-materialization-task-linux-staged-output",
+              "toTaskId": "packaged-app-materialization-task-linux-staged-output",
+              "manifestPath": "future/staged-output/linux/output-manifest.json",
+              "deliveryChainStageId": "delivery-chain-operator-review",
+              "evidence": [
+                "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+                "future/staged-output/linux/output-manifest.json",
+                "future/staged-output/linux/checksum-manifest.json"
+              ]
+            },
+            {
+              "id": "packaged-app-review-packet-linux-checksum-to-seal",
+              "label": "Checksum -> bundle-seal handoff",
+              "taskState": "blocked",
+              "summary": "Linux checksum proof is staged for review, but the bundle-seal handoff stays blocked until the local-only packet stops being metadata-only.",
+              "fromTaskId": "packaged-app-materialization-task-linux-staged-output",
+              "toTaskId": "packaged-app-materialization-task-linux-bundle-seal",
+              "manifestPath": "future/sealed-bundles/linux/bundle-seal-manifest.json",
+              "deliveryChainStageId": "delivery-chain-promotion-readiness",
+              "evidence": [
+                "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+                "future/staged-output/linux/checksum-manifest.json",
+                "future/sealed-bundles/linux/bundle-seal-manifest.json"
+              ]
+            }
+          ],
+          "blockedBy": [
+            "staged outputs remain metadata-only",
+            "bundle sealing remains metadata-only",
+            "host-side execution remains disabled"
+          ]
+        },
         "blockedBy": [
           "materialization remains review-only",
           "staged outputs remain task-state metadata",

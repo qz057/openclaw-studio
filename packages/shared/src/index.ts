@@ -948,6 +948,9 @@ export type StudioReleasePackagedAppMaterializationTaskStageId =
   | "packaged-app-directory-materialization"
   | "packaged-app-staged-output-skeleton"
   | "packaged-app-bundle-sealing-skeleton";
+export type StudioReleasePackagedAppLocalMaterializationSegmentKind = "directory" | "staged-output" | "bundle-sealing";
+export type StudioReleasePackagedAppLocalMaterializationSegmentStatus = "completed" | "active" | "up-next" | "blocked";
+export type StudioReleasePackagedAppBundleSealingCheckpointStatus = "ready" | "watch" | "blocked";
 
 export interface StudioReleasePackagedAppMaterializationContractLocalRoots {
   materializationRoot: string;
@@ -989,8 +992,43 @@ export interface StudioReleasePackagedAppStagedOutputChain {
   label: string;
   summary: string;
   currentStepId: string;
+  nextStepId: string | null;
   downstreamBundleSealingId: string;
+  completedStepIds: string[];
   steps: StudioReleasePackagedAppStagedOutputChainStep[];
+}
+
+export interface StudioReleasePackagedAppMaterializationReviewPacketStep {
+  id: string;
+  label: string;
+  taskState: StudioReleasePackagedAppMaterializationTaskState;
+  summary: string;
+  fromTaskId: string;
+  toTaskId: string;
+  manifestPath: string;
+  deliveryChainStageId: string;
+  evidence: string[];
+}
+
+export interface StudioReleasePackagedAppMaterializationReviewPacket {
+  id: string;
+  label: string;
+  taskState: StudioReleasePackagedAppMaterializationTaskState;
+  summary: string;
+  currentStepId: string;
+  nextStepId: string | null;
+  rollbackCheckpointId: string;
+  reviewEvidence: string[];
+  steps: StudioReleasePackagedAppMaterializationReviewPacketStep[];
+  blockedBy: string[];
+}
+
+export interface StudioReleasePackagedAppBundleSealingCheckpoint {
+  id: string;
+  label: string;
+  status: StudioReleasePackagedAppBundleSealingCheckpointStatus;
+  detail: string;
+  artifactPath: string;
 }
 
 export interface StudioReleasePackagedAppBundleSealingReadiness {
@@ -999,13 +1037,26 @@ export interface StudioReleasePackagedAppBundleSealingReadiness {
   taskState: StudioReleasePackagedAppMaterializationTaskState;
   summary: string;
   currentCheckpoint: string;
+  activeCheckpointId: string;
   deliveryChainStageId: string;
   downstreamGateStageId: string;
   dependsOnTaskId: string;
   sealManifestPath: string;
   integrityManifestPath: string;
+  checkpoints: StudioReleasePackagedAppBundleSealingCheckpoint[];
   reviewChecks: string[];
   blockedBy: string[];
+}
+
+export interface StudioReleasePackagedAppLocalMaterializationSegment {
+  id: string;
+  label: string;
+  kind: StudioReleasePackagedAppLocalMaterializationSegmentKind;
+  status: StudioReleasePackagedAppLocalMaterializationSegmentStatus;
+  summary: string;
+  taskId: string;
+  deliveryChainStageId: string;
+  linkedStepIds: string[];
 }
 
 export interface StudioReleasePackagedAppLocalMaterializationProgress {
@@ -1015,11 +1066,13 @@ export interface StudioReleasePackagedAppLocalMaterializationProgress {
   summary: string;
   currentTaskId: string;
   nextTaskId: string | null;
+  activeSegmentId: string;
   completedTaskCount: number;
   blockedTaskCount: number;
   totalTaskCount: number;
   completedTaskIds: string[];
   stageSequence: string[];
+  segments: StudioReleasePackagedAppLocalMaterializationSegment[];
 }
 
 export interface StudioReleasePackagedAppMaterializationContractPlatform {
@@ -1044,6 +1097,7 @@ export interface StudioReleasePackagedAppMaterializationContractPlatform {
   localRoots: StudioReleasePackagedAppMaterializationContractLocalRoots;
   manifests: StudioReleasePackagedAppMaterializationContractManifests;
   stagedOutputChain: StudioReleasePackagedAppStagedOutputChain;
+  reviewPacket: StudioReleasePackagedAppMaterializationReviewPacket;
   bundleSealingReadiness: StudioReleasePackagedAppBundleSealingReadiness;
   localMaterializationProgress: StudioReleasePackagedAppLocalMaterializationProgress;
   tasks: StudioReleasePackagedAppMaterializationContractTask[];
@@ -2230,8 +2284,15 @@ export {
   selectStudioReleasePackagedAppMaterializationContractTask,
   selectStudioReleasePackagedAppMaterializationContractStagedOutputChain,
   selectStudioReleasePackagedAppMaterializationContractStagedOutputStep,
+  selectStudioReleasePackagedAppMaterializationContractStagedOutputNextStep,
+  selectStudioReleasePackagedAppMaterializationContractReviewPacket,
+  selectStudioReleasePackagedAppMaterializationContractReviewPacketStep,
   selectStudioReleasePackagedAppMaterializationContractBundleSealingReadiness,
+  selectStudioReleasePackagedAppMaterializationContractBundleSealingCheckpoint,
   selectStudioReleasePackagedAppMaterializationContractProgress,
+  selectStudioReleasePackagedAppMaterializationContractProgressSegment,
+  selectStudioReleasePackagedAppMaterializationContractNextProgressSegment,
+  selectStudioReleasePackagedAppMaterializationContractNearbyStageCReadiness,
   selectStudioReleaseQaCloseoutReadinessTrack,
   selectStudioReleaseApprovalWorkflowStage,
   selectStudioReleaseApprovalAuditRollbackEntryCheckpoint,

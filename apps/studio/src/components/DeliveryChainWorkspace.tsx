@@ -9,6 +9,8 @@ import {
   selectStudioReleasePackagedAppMaterializationContractBundleSealingReadiness,
   selectStudioReleasePackagedAppMaterializationContractPlatform,
   selectStudioReleasePackagedAppMaterializationContractProgress,
+  selectStudioReleasePackagedAppMaterializationContractReviewPacket,
+  selectStudioReleasePackagedAppMaterializationContractReviewPacketStep,
   selectStudioReleasePackagedAppMaterializationContractStagedOutputChain,
   selectStudioReleasePackagedAppMaterializationContractStagedOutputStep,
   selectStudioReleasePackagedAppMaterializationContractTask,
@@ -1411,6 +1413,7 @@ export function DeliveryChainWorkspace({
   const [selectedMaterializationPlatformId, setSelectedMaterializationPlatformId] = useState<string | null>(null);
   const [selectedMaterializationTaskId, setSelectedMaterializationTaskId] = useState<string | null>(null);
   const [selectedStagedOutputStepId, setSelectedStagedOutputStepId] = useState<string | null>(null);
+  const [selectedReviewPacketStepId, setSelectedReviewPacketStepId] = useState<string | null>(null);
   const [selectedQaTrackId, setSelectedQaTrackId] = useState<string | null>(null);
   const [selectedApprovalWorkflowStageId, setSelectedApprovalWorkflowStageId] = useState<string | null>(null);
   const [selectedStageCCheckpointId, setSelectedStageCCheckpointId] = useState<string | null>(null);
@@ -1555,6 +1558,23 @@ export function DeliveryChainWorkspace({
     }
   }, [selectedMaterializationPlatform, selectedStagedOutputStepId]);
 
+  useEffect(() => {
+    if (!selectedMaterializationPlatform?.reviewPacket.steps.length) {
+      if (selectedReviewPacketStepId !== null) {
+        setSelectedReviewPacketStepId(null);
+      }
+
+      return;
+    }
+
+    if (
+      !selectedReviewPacketStepId ||
+      !selectedMaterializationPlatform.reviewPacket.steps.some((step) => step.id === selectedReviewPacketStepId)
+    ) {
+      setSelectedReviewPacketStepId(selectedMaterializationPlatform.reviewPacket.currentStepId);
+    }
+  }, [selectedMaterializationPlatform, selectedReviewPacketStepId]);
+
   const selectedMaterializationTask =
     selectStudioReleasePackagedAppMaterializationContractTask(
       pipeline.deliveryChain,
@@ -1571,6 +1591,17 @@ export function DeliveryChainWorkspace({
       pipeline.deliveryChain,
       selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId,
       selectedStagedOutputStepId
+    ) ?? null;
+  const selectedReviewPacket =
+    selectStudioReleasePackagedAppMaterializationContractReviewPacket(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
+    ) ?? null;
+  const selectedReviewPacketStep =
+    selectStudioReleasePackagedAppMaterializationContractReviewPacketStep(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId,
+      selectedReviewPacketStepId
     ) ?? null;
   const selectedBundleSealingReadiness =
     selectStudioReleasePackagedAppMaterializationContractBundleSealingReadiness(
@@ -1592,6 +1623,9 @@ export function DeliveryChainWorkspace({
   const selectedStagedOutputStepStage = selectedStagedOutputStep
     ? selectStudioReleaseDeliveryChainStage(pipeline, selectedStagedOutputStep.deliveryChainStageId) ?? null
     : null;
+  const selectedReviewPacketStepStage = selectedReviewPacketStep
+    ? selectStudioReleaseDeliveryChainStage(pipeline, selectedReviewPacketStep.deliveryChainStageId) ?? null
+    : null;
   const bundleSealingStage = selectedBundleSealingReadiness
     ? selectStudioReleaseDeliveryChainStage(pipeline, selectedBundleSealingReadiness.deliveryChainStageId) ?? null
     : null;
@@ -1599,6 +1633,18 @@ export function DeliveryChainWorkspace({
     selectedMaterializationPlatform?.tasks.filter((task) => task.taskState === "review-ready").length ?? 0;
   const materializationBlockedCount =
     selectedMaterializationPlatform?.tasks.filter((task) => task.taskState === "blocked").length ?? 0;
+  const nextReviewPacketStep =
+    selectedReviewPacket?.nextStepId
+      ? selectedReviewPacket.steps.find((step) => step.id === selectedReviewPacket.nextStepId) ?? null
+      : null;
+  const selectedReviewPacketSourceTask =
+    selectedReviewPacketStep && selectedMaterializationPlatform
+      ? selectedMaterializationPlatform.tasks.find((task) => task.id === selectedReviewPacketStep.fromTaskId) ?? null
+      : null;
+  const selectedReviewPacketTargetTask =
+    selectedReviewPacketStep && selectedMaterializationPlatform
+      ? selectedMaterializationPlatform.tasks.find((task) => task.id === selectedReviewPacketStep.toTaskId) ?? null
+      : null;
   const rollbackDecisionStage = selectStudioReleaseDeliveryChainStage(pipeline, "delivery-chain-rollback-readiness") ?? null;
   const selectedQaTrackStage = selectedQaTrack ? selectStudioReleaseDeliveryChainStage(pipeline, selectedQaTrack.deliveryChainStageId) ?? null : null;
   const selectedApprovalWorkflowStages =
@@ -6097,6 +6143,38 @@ export function DeliveryChainWorkspace({
                       : "Unavailable"}
                   </strong>
                 </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveMaterializationTaskTone(selectedReviewPacket?.taskState ?? "blocked")}`}>
+                  <span>Local review packet</span>
+                  <strong>
+                    {selectedReviewPacket
+                      ? `${formatMaterializationTaskState(selectedReviewPacket.taskState)} / ${selectedReviewPacket.steps.length} handoffs`
+                      : "Unavailable"}
+                  </strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveMaterializationTaskTone(selectedReviewPacketStep?.taskState ?? "blocked")}`}>
+                  <span>Current review step</span>
+                  <strong>
+                    {selectedReviewPacketStep
+                      ? `${selectedReviewPacketStep.label} / ${formatMaterializationTaskState(selectedReviewPacketStep.taskState)}`
+                      : "Unavailable"}
+                  </strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(selectedReviewPacketStepStage?.status ?? "blocked")}`}>
+                  <span>Review-step stage</span>
+                  <strong>
+                    {selectedReviewPacketStepStage
+                      ? `${selectedReviewPacketStepStage.label} / ${selectedReviewPacketStepStage.status}`
+                      : "Unavailable"}
+                  </strong>
+                </div>
+                <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                  <span>Next review step</span>
+                  <strong>{nextReviewPacketStep ? nextReviewPacketStep.label : "Final handoff"}</strong>
+                </div>
+                <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                  <span>Packet rollback anchor</span>
+                  <strong>{selectedReviewPacket?.rollbackCheckpointId ?? "Unavailable"}</strong>
+                </div>
                 <div className={`workflow-readiness-line workflow-readiness-line--${resolveMaterializationTaskTone(selectedBundleSealingReadiness?.taskState ?? "blocked")}`}>
                   <span>Bundle-seal readiness</span>
                   <strong>
@@ -6155,6 +6233,24 @@ export function DeliveryChainWorkspace({
                       className={step.id === selectedStagedOutputStep?.id ? "windowing-card windowing-card--active" : "windowing-card"}
                       onClick={() => {
                         setSelectedStagedOutputStepId(step.id);
+                      }}
+                    >
+                      <span>{step.label}</span>
+                      <strong>{formatMaterializationTaskState(step.taskState)}</strong>
+                      <p>{step.summary}</p>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              {selectedReviewPacket ? (
+                <div className="delivery-chain-workspace__artifact-groups">
+                  {selectedReviewPacket.steps.map((step) => (
+                    <button
+                      key={step.id}
+                      type="button"
+                      className={step.id === selectedReviewPacketStep?.id ? "windowing-card windowing-card--active" : "windowing-card"}
+                      onClick={() => {
+                        setSelectedReviewPacketStepId(step.id);
                       }}
                     >
                       <span>{step.label}</span>
@@ -6235,6 +6331,45 @@ export function DeliveryChainWorkspace({
                   <div key={dependency} className="windowing-preview-line windowing-preview-line--stacked">
                     <span>Chain depends on</span>
                     <strong>{dependency}</strong>
+                  </div>
+                ))}
+                {selectedReviewPacket ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Packet summary</span>
+                    <strong>{selectedReviewPacket.summary}</strong>
+                  </div>
+                ) : null}
+                {selectedReviewPacketStep ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Review-step manifest</span>
+                    <strong>{selectedReviewPacketStep.label} / {selectedReviewPacketStep.manifestPath}</strong>
+                  </div>
+                ) : null}
+                {selectedReviewPacketSourceTask || selectedReviewPacketTargetTask ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Step transition</span>
+                    <strong>
+                      {(selectedReviewPacketSourceTask?.label ?? selectedReviewPacketStep?.fromTaskId ?? "Unknown source")}{" -> "}
+                      {(selectedReviewPacketTargetTask?.label ?? selectedReviewPacketStep?.toTaskId ?? "Unknown target")}
+                    </strong>
+                  </div>
+                ) : null}
+                {selectedReviewPacketStep ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Review-step summary</span>
+                    <strong>{selectedReviewPacketStep.summary}</strong>
+                  </div>
+                ) : null}
+                {(compact ? selectedReviewPacketStep?.evidence.slice(0, 2) ?? [] : selectedReviewPacketStep?.evidence ?? []).map((artifact) => (
+                  <div key={artifact} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Packet evidence</span>
+                    <strong>{artifact}</strong>
+                  </div>
+                ))}
+                {(compact ? selectedReviewPacket?.blockedBy.slice(0, 2) ?? [] : selectedReviewPacket?.blockedBy ?? []).map((blocker) => (
+                  <div key={blocker} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Packet blocker</span>
+                    <strong>{blocker}</strong>
                   </div>
                 ))}
                 {selectedBundleSealingReadiness ? (

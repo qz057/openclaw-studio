@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-packaged-app-staged-output-skeleton/v1",
-  "generatedAt": "2026-04-07T18:53:42.417Z",
+  "generatedAt": "2026-04-07T19:16:43.777Z",
   "phase": "phase60",
   "outputs": [
     {
@@ -29,6 +29,10 @@
         "bundle sealing handoff declared"
       ],
       "currentStepId": "staged-output-step-windows-output-manifest",
+      "nextStepId": "staged-output-step-windows-checksum-manifest",
+      "completedStepIds": [
+        "staged-output-step-windows-directory-verification"
+      ],
       "steps": [
         {
           "id": "staged-output-step-windows-directory-verification",
@@ -97,6 +101,8 @@
         "bundle sealing handoff declared"
       ],
       "currentStepId": "staged-output-step-macos-directory-verification",
+      "nextStepId": "staged-output-step-macos-output-manifest",
+      "completedStepIds": [],
       "steps": [
         {
           "id": "staged-output-step-macos-directory-verification",
@@ -165,6 +171,8 @@
         "bundle sealing handoff declared"
       ],
       "currentStepId": "staged-output-step-linux-directory-verification",
+      "nextStepId": "staged-output-step-linux-output-manifest",
+      "completedStepIds": [],
       "steps": [
         {
           "id": "staged-output-step-linux-directory-verification",

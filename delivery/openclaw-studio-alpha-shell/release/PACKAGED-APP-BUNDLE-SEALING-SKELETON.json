@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-packaged-app-bundle-sealing-skeleton/v1",
-  "generatedAt": "2026-04-07T18:53:42.417Z",
+  "generatedAt": "2026-04-07T19:16:43.777Z",
   "phase": "phase60",
   "mode": "review-only",
   "bundles": [
@@ -41,11 +41,35 @@
         "taskState": "blocked",
         "summary": "Seal and integrity manifests are declared, but the Windows seal handoff remains blocked until the staged-output chain stops being metadata-only and the publish gate remains review-only.",
         "currentCheckpoint": "seal manifest declared / staged-output review still active",
+        "activeCheckpointId": "packaged-app-bundle-sealing-checkpoint-windows-gate",
         "deliveryChainStageId": "delivery-chain-promotion-readiness",
         "downstreamGateStageId": "delivery-chain-publish-decision",
         "dependsOnTaskId": "staged-output-windows",
         "sealManifestPath": "future/sealed-bundles/windows/bundle-seal-manifest.json",
         "integrityManifestPath": "future/sealed-bundles/windows/bundle-integrity-manifest.json",
+        "checkpoints": [
+          {
+            "id": "packaged-app-bundle-sealing-checkpoint-windows-seal-manifest",
+            "label": "Seal manifest declared",
+            "status": "ready",
+            "detail": "Bundle sealing stays local-only, but the seal manifest path is already explicit for review pickup.",
+            "artifactPath": "future/sealed-bundles/windows/bundle-seal-manifest.json"
+          },
+          {
+            "id": "packaged-app-bundle-sealing-checkpoint-windows-integrity-manifest",
+            "label": "Integrity manifest declared",
+            "status": "ready",
+            "detail": "Integrity posture stays visible beside the same seal handoff without digest publication or attestation execution.",
+            "artifactPath": "future/sealed-bundles/windows/bundle-integrity-manifest.json"
+          },
+          {
+            "id": "packaged-app-bundle-sealing-checkpoint-windows-gate",
+            "label": "Staged-output review still active",
+            "status": "watch",
+            "detail": "Windows bundle sealing stays behind the current staged-output review slice until the output and checksum handoff stop being metadata-only.",
+            "artifactPath": "future/staged-output/windows/output-manifest.json"
+          }
+        ],
         "reviewChecks": [
           "seal manifest declared",
           "integrity manifest declared",
@@ -96,11 +120,35 @@
         "taskState": "blocked",
         "summary": "Seal and integrity manifests are declared, but the macOS seal handoff remains blocked while staged-output review, signing, and notarization all stay metadata-only.",
         "currentCheckpoint": "seal manifest declared / notarization path still blocked",
+        "activeCheckpointId": "packaged-app-bundle-sealing-checkpoint-macos-gate",
         "deliveryChainStageId": "delivery-chain-promotion-readiness",
         "downstreamGateStageId": "delivery-chain-publish-decision",
         "dependsOnTaskId": "staged-output-macos",
         "sealManifestPath": "future/sealed-bundles/macos/bundle-seal-manifest.json",
         "integrityManifestPath": "future/sealed-bundles/macos/bundle-integrity-manifest.json",
+        "checkpoints": [
+          {
+            "id": "packaged-app-bundle-sealing-checkpoint-macos-seal-manifest",
+            "label": "Seal manifest declared",
+            "status": "ready",
+            "detail": "Bundle sealing stays local-only, but the seal manifest path is already explicit for review pickup.",
+            "artifactPath": "future/sealed-bundles/macos/bundle-seal-manifest.json"
+          },
+          {
+            "id": "packaged-app-bundle-sealing-checkpoint-macos-integrity-manifest",
+            "label": "Integrity manifest declared",
+            "status": "ready",
+            "detail": "Integrity posture stays visible beside the same seal handoff without digest publication or attestation execution.",
+            "artifactPath": "future/sealed-bundles/macos/bundle-integrity-manifest.json"
+          },
+          {
+            "id": "packaged-app-bundle-sealing-checkpoint-macos-gate",
+            "label": "Notarization path still blocked",
+            "status": "blocked",
+            "detail": "macOS bundle sealing stays blocked until the staged-output lane is reviewed end-to-end and later signing/notarization posture stops being metadata-only.",
+            "artifactPath": "release/NOTARIZATION-PLAN.json"
+          }
+        ],
         "reviewChecks": [
           "seal manifest declared",
           "integrity manifest declared",
@@ -151,11 +199,35 @@
         "taskState": "blocked",
         "summary": "Seal and integrity manifests are declared, but the Linux seal handoff remains blocked while staged-output review and later package publication stay metadata-only.",
         "currentCheckpoint": "seal manifest declared / publish path still blocked",
+        "activeCheckpointId": "packaged-app-bundle-sealing-checkpoint-linux-gate",
         "deliveryChainStageId": "delivery-chain-promotion-readiness",
         "downstreamGateStageId": "delivery-chain-publish-decision",
         "dependsOnTaskId": "staged-output-linux",
         "sealManifestPath": "future/sealed-bundles/linux/bundle-seal-manifest.json",
         "integrityManifestPath": "future/sealed-bundles/linux/bundle-integrity-manifest.json",
+        "checkpoints": [
+          {
+            "id": "packaged-app-bundle-sealing-checkpoint-linux-seal-manifest",
+            "label": "Seal manifest declared",
+            "status": "ready",
+            "detail": "Bundle sealing stays local-only, but the seal manifest path is already explicit for review pickup.",
+            "artifactPath": "future/sealed-bundles/linux/bundle-seal-manifest.json"
+          },
+          {
+            "id": "packaged-app-bundle-sealing-checkpoint-linux-integrity-manifest",
+            "label": "Integrity manifest declared",
+            "status": "ready",
+            "detail": "Integrity posture stays visible beside the same seal handoff without digest publication or attestation execution.",
+            "artifactPath": "future/sealed-bundles/linux/bundle-integrity-manifest.json"
+          },
+          {
+            "id": "packaged-app-bundle-sealing-checkpoint-linux-gate",
+            "label": "Package publication path still blocked",
+            "status": "blocked",
+            "detail": "Linux bundle sealing stays blocked until the staged-output lane settles and the downstream package publication gate stops being metadata-only.",
+            "artifactPath": "release/PUBLISH-GATES.json"
+          }
+        ],
         "reviewChecks": [
           "seal manifest declared",
           "integrity manifest declared",
