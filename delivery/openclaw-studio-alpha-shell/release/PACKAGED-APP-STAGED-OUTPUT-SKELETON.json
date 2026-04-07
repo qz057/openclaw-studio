@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-packaged-app-staged-output-skeleton/v1",
-  "generatedAt": "2026-04-07T16:22:49.691Z",
+  "generatedAt": "2026-04-07T17:06:37.622Z",
   "phase": "phase60",
   "outputs": [
     {
@@ -10,11 +10,28 @@
       "materializationId": "materialize-windows-packaged-app",
       "bundleSealingId": "bundle-sealing-windows",
       "integrityContractId": "integrity-contract-windows",
+      "localMaterializationContractId": "local-materialization-contract-windows",
       "status": "planned",
+      "taskState": "review-ready",
       "outputRoot": "future/staged-output/windows/OpenClaw Studio",
       "manifests": [
         "future/staged-output/windows/output-manifest.json",
         "future/staged-output/windows/checksum-manifest.json"
+      ],
+      "taskDependencies": [
+        "directory-materialization-windows",
+        "materialize-windows-packaged-app"
+      ],
+      "reviewChecks": [
+        "materialization manifest linked",
+        "staged output manifest declared",
+        "checksum manifest declared",
+        "bundle sealing handoff declared"
+      ],
+      "blockedBy": [
+        "staged outputs remain metadata-only",
+        "bundle sealing remains metadata-only",
+        "host-side execution remains disabled"
       ]
     },
     {
@@ -24,11 +41,28 @@
       "materializationId": "materialize-macos-packaged-app",
       "bundleSealingId": "bundle-sealing-macos",
       "integrityContractId": "integrity-contract-macos",
+      "localMaterializationContractId": "local-materialization-contract-macos",
       "status": "planned",
+      "taskState": "review-ready",
       "outputRoot": "future/staged-output/macos/OpenClaw Studio.app",
       "manifests": [
         "future/staged-output/macos/output-manifest.json",
         "future/staged-output/macos/checksum-manifest.json"
+      ],
+      "taskDependencies": [
+        "directory-materialization-macos",
+        "materialize-macos-packaged-app"
+      ],
+      "reviewChecks": [
+        "materialization manifest linked",
+        "staged output manifest declared",
+        "checksum manifest declared",
+        "bundle sealing handoff declared"
+      ],
+      "blockedBy": [
+        "staged outputs remain metadata-only",
+        "bundle sealing remains metadata-only",
+        "host-side execution remains disabled"
       ]
     },
     {
@@ -38,11 +72,28 @@
       "materializationId": "materialize-linux-packaged-app",
       "bundleSealingId": "bundle-sealing-linux",
       "integrityContractId": "integrity-contract-linux",
+      "localMaterializationContractId": "local-materialization-contract-linux",
       "status": "planned",
+      "taskState": "review-ready",
       "outputRoot": "future/staged-output/linux/openclaw-studio",
       "manifests": [
         "future/staged-output/linux/output-manifest.json",
         "future/staged-output/linux/checksum-manifest.json"
+      ],
+      "taskDependencies": [
+        "directory-materialization-linux",
+        "materialize-linux-packaged-app"
+      ],
+      "reviewChecks": [
+        "materialization manifest linked",
+        "staged output manifest declared",
+        "checksum manifest declared",
+        "bundle sealing handoff declared"
+      ],
+      "blockedBy": [
+        "staged outputs remain metadata-only",
+        "bundle sealing remains metadata-only",
+        "host-side execution remains disabled"
       ]
     }
   ]

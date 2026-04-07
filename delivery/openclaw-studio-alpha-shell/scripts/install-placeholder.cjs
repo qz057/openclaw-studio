@@ -16,6 +16,7 @@ console.log(`packaged app directory materialization metadata: ${manifest.package
 console.log(`packaged app materialization metadata: ${manifest.packagedAppMaterializationSkeletonPath}`);
 console.log(`packaged app staged output metadata: ${manifest.packagedAppStagedOutputSkeletonPath}`);
 console.log(`packaged app bundle sealing metadata: ${manifest.packagedAppBundleSealingSkeletonPath}`);
+console.log(`packaged app local materialization contract: ${manifest.packagedAppLocalMaterializationContractPath}`);
 console.log(`sealed-bundle integrity metadata: ${manifest.sealedBundleIntegrityContractPath}`);
 console.log(`attestation verification packs metadata: ${manifest.attestationVerificationPacksPath}`);
 console.log(`attestation apply audit packs metadata: ${manifest.attestationApplyAuditPacksPath}`);
@@ -32,6 +33,8 @@ console.log(`delivery-chain workspace metadata: ${manifest.reviewOnlyDeliveryCha
 console.log(`operator review board metadata: ${manifest.operatorReviewBoardPath}`);
 console.log(`release decision handoff metadata: ${manifest.releaseDecisionHandoffPath}`);
 console.log(`review evidence closeout metadata: ${manifest.reviewEvidenceCloseoutPath}`);
+console.log(`release QA closeout readiness metadata: ${manifest.releaseQaCloseoutReadinessPath}`);
+console.log(`approval/audit/rollback entry metadata: ${manifest.approvalAuditRollbackEntryContractPath}`);
 console.log(`installer targets metadata: ${manifest.installerTargetsPath}`);
 console.log(`installer builder execution metadata: ${manifest.installerBuilderExecutionSkeletonPath}`);
 console.log(`installer-target builder metadata: ${manifest.installerTargetBuilderSkeletonPath}`);

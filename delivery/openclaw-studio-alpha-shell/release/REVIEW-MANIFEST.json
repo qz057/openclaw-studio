@@ -1,8 +1,8 @@
 {
   "schemaVersion": "openclaw-studio-review-manifest/v1",
-  "generatedAt": "2026-04-07T16:22:49.691Z",
+  "generatedAt": "2026-04-07T17:06:37.622Z",
   "phase": "phase60",
-  "milestone": "phase60 delivery-chain workspace / stage explorer / review flow ladder / acceptance reading queue / reviewer signoff board / signoff readiness queue / final review closeout / final verdict console / acceptance closeout timeline / final review settlement / pack closeout board / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass progression / screenshot pass records / capture review flow / proof-linked evidence bundle / acceptance evidence continuity / reviewer brief / proof bundle / product-review console polish / acceptance storyboard / evidence dossier / evidence trace lens / acceptance scoreboard / replay acceptance checklist / command-surface observability linkage / inspector-command linkage / review state continuity / observability closeout / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout",
+  "milestone": "phase60 delivery-chain workspace / stage explorer / review flow ladder / acceptance reading queue / reviewer signoff board / signoff readiness queue / final review closeout / final verdict console / acceptance closeout timeline / final review settlement / pack closeout board / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass progression / screenshot pass records / capture review flow / proof-linked evidence bundle / acceptance evidence continuity / reviewer brief / proof bundle / product-review console polish / acceptance storyboard / evidence dossier / evidence trace lens / acceptance scoreboard / replay acceptance checklist / command-surface observability linkage / inspector-command linkage / review state continuity / observability closeout / linked review artifacts / blockers / handoff posture / observability mapping / packaged-app materialization contract / packaged-app task-state linkage / staged-output review readout / bundle-sealing review readout / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout",
   "reviewDocs": [
     "README.md",
     "HANDOFF.md",
@@ -17,6 +17,7 @@
     "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
     "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
     "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+    "release/PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json",
     "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
     "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
     "release/ATTESTATION-VERIFICATION-PACKS.json",
@@ -34,6 +35,8 @@
     "release/OPERATOR-REVIEW-BOARD.json",
     "release/RELEASE-DECISION-HANDOFF.json",
     "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+    "release/RELEASE-QA-CLOSEOUT-READINESS.json",
+    "release/APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT.json",
     "release/INSTALLER-TARGETS.json",
     "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
     "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
@@ -124,25 +127,31 @@
         "id": "pipeline-materialization",
         "label": "Packaged-app materialization skeleton",
         "status": "ready",
-        "detail": "Packaged app directory plans still map into explicit materialization steps without creating a real packaged app."
+        "detail": "Packaged app directory plans still map into explicit materialization steps, task states, and handoff ids without creating a real packaged app."
       },
       {
         "id": "pipeline-directory-materialization",
         "label": "Packaged-app directory materialization",
         "status": "ready",
-        "detail": "Per-platform directory staging roots, launcher paths, verification manifests, and review checkpoints are now formalized as metadata."
+        "detail": "Per-platform directory staging roots, launcher paths, verification manifests, task states, and review checkpoints are now formalized as metadata."
       },
       {
         "id": "pipeline-staged-output",
         "label": "Packaged-app staged output skeleton",
         "status": "ready",
-        "detail": "Directory materialization now feeds explicit staged outputs and manifests without creating any real packaged artifact."
+        "detail": "Directory materialization now feeds explicit staged outputs, manifests, task dependencies, and local-only review checks without creating any real packaged artifact."
       },
       {
         "id": "pipeline-bundle-sealing",
         "label": "Packaged-app bundle sealing skeleton",
         "status": "ready",
-        "detail": "Staged outputs now feed review-only sealing manifests and integrity checkpoints without freezing any real packaged bundle."
+        "detail": "Staged outputs now feed review-only sealing manifests, task dependencies, and integrity checkpoints without freezing any real packaged bundle."
+      },
+      {
+        "id": "pipeline-local-materialization-contract",
+        "label": "Packaged-app local materialization contract",
+        "status": "ready",
+        "detail": "Directory materialization, staged outputs, and bundle sealing now share one per-platform local-only task-state contract with current-task focus, review evidence, handoff roots, delivery-stage linkage, and integrity links without materializing any real host-side bundle."
       },
       {
         "id": "pipeline-bundle-integrity",
@@ -226,7 +235,19 @@
         "id": "pipeline-review-only-delivery-chain",
         "label": "Delivery-chain workspace",
         "status": "ready",
-        "detail": "Operator review board, decision handoff, evidence closeout, promotion readiness, publish gating, rollback readiness, stage-level artifacts, blockers, and observability mapping now read like one staged delivery workflow without executing anything."
+        "detail": "Operator review board, decision handoff, evidence closeout, promotion readiness, publish gating, rollback readiness, packaged-app materialization roots, stage-level artifacts, blockers, and observability mapping now read like one staged delivery workflow without executing anything."
+      },
+      {
+        "id": "pipeline-release-qa-closeout-readiness",
+        "label": "Release QA closeout readiness",
+        "status": "ready",
+        "detail": "Packaged-app materialization continuity, installer/signing/notarization handshake verification, release checklist proof, and delivery closeout posture now stay grouped as one review-only QA board."
+      },
+      {
+        "id": "pipeline-approval-audit-rollback-entry-contract",
+        "label": "Approval / audit / rollback entry contract",
+        "status": "ready",
+        "detail": "The first safe Stage C entry now ties approval workflow, audit retention posture, rollback live-readiness, receipt settlement closeout, and delivery QA proof into one non-executing contract."
       },
       {
         "id": "pipeline-installer-builders",
@@ -447,8 +468,9 @@
     ]
   },
   "blockedActions": [
-    "no packaged per-OS staged output materialization yet; staged outputs remain review-only metadata",
-    "no packaged per-OS bundle sealing yet; sealing remains review-only metadata",
+    "no executable per-OS packaged-app materialization yet; directory roots and verification manifests remain review-only contract data",
+    "no executable per-OS staged output materialization yet; staged outputs remain review-only task-state metadata",
+    "no executable per-OS bundle sealing yet; sealing remains review-only task-state metadata",
     "no per-platform sealed-bundle integrity attestation or digest publication yet; integrity contract remains review-only metadata",
     "no attestation verification pack emission or verifier handoff yet; verification packs remain review-only metadata",
     "no executable attestation apply audit or apply-execution packet handoff yet; audit packs and execution packets remain review-only metadata",
@@ -459,6 +481,7 @@
     "no executable attestation operator settlement pack assembly, operator clearance routing, or approval attachment emission yet; settlement packs remain review-only metadata",
     "no executable attestation operator approval routing contract issuance, reviewer queue routing, or approval handoff declaration yet; approval routing contracts remain review-only metadata",
     "no executable attestation operator approval orchestration queueing, reviewer baton sequencing, or approval orchestration closeout yet; approval orchestration remains review-only metadata",
+    "no executable approval / audit / rollback entry handshake yet; Stage C entry remains a local-only contract surface",
     "no Windows / macOS / Linux installer builder orchestration and channel routing wiring yet; routing remains review-only skeleton",
     "no executable channel promotion evidence pack or promotion routing apply yet; evidence remains review-only metadata",
     "no executable promotion apply manifests or channel apply execution yet; apply manifests remain review-only metadata",

@@ -4,6 +4,8 @@ import type {
   StudioReleaseCloseoutWindow,
   StudioReleaseDeliveryChainStage,
   StudioReleaseEscalationWindow,
+  StudioReleasePackagedAppMaterializationContractPlatform,
+  StudioReleasePackagedAppMaterializationContractTask,
   StudioReleaseReviewerQueue,
   StudioReviewStateContinuity,
   StudioReviewStateContinuityEntry,
@@ -66,6 +68,31 @@ export function selectStudioReleaseDeliveryChainStage(
     pipeline.deliveryChain.stages.find((stage) => stage.id === pipeline.deliveryChain.currentStageId) ??
     pipeline.deliveryChain.stages[0]
   );
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractPlatform(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+): StudioReleasePackagedAppMaterializationContractPlatform | undefined {
+  const contract = deliveryChain.packagedAppMaterializationContract;
+  const platformId = typeof platformOrId === "string" ? platformOrId : platformOrId?.id ?? contract.activePlatformId;
+
+  return (
+    contract.platforms.find((platform) => platform.id === platformId) ??
+    contract.platforms.find((platform) => platform.id === contract.activePlatformId) ??
+    contract.platforms[0]
+  );
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractTask(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null,
+  taskOrId?: Pick<StudioReleasePackagedAppMaterializationContractTask, "id"> | string | null
+): StudioReleasePackagedAppMaterializationContractTask | undefined {
+  const platform = selectStudioReleasePackagedAppMaterializationContractPlatform(deliveryChain, platformOrId);
+  const taskId = typeof taskOrId === "string" ? taskOrId : taskOrId?.id ?? platform?.currentTaskId;
+
+  return platform?.tasks.find((task) => task.id === taskId) ?? platform?.tasks[0];
 }
 
 export function selectStudioReviewStateContinuityActiveEntry(

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-sealed-bundle-integrity-contract/v1",
-  "generatedAt": "2026-04-07T16:22:49.691Z",
+  "generatedAt": "2026-04-07T17:06:37.622Z",
   "phase": "phase60",
   "mode": "review-only",
   "contracts": [
@@ -10,6 +10,7 @@
       "channel": "alpha",
       "stagedOutputId": "staged-output-windows",
       "bundleSealingId": "bundle-sealing-windows",
+      "localMaterializationContractId": "local-materialization-contract-windows",
       "installerFlowId": "orchestrate-windows-builders",
       "promotionEvidenceIds": [
         "promotion-evidence-alpha-to-beta",
@@ -43,6 +44,7 @@
       "channel": "alpha",
       "stagedOutputId": "staged-output-macos",
       "bundleSealingId": "bundle-sealing-macos",
+      "localMaterializationContractId": "local-materialization-contract-macos",
       "installerFlowId": "orchestrate-macos-builders",
       "promotionEvidenceIds": [
         "promotion-evidence-alpha-to-beta",
@@ -76,6 +78,7 @@
       "channel": "alpha",
       "stagedOutputId": "staged-output-linux",
       "bundleSealingId": "bundle-sealing-linux",
+      "localMaterializationContractId": "local-materialization-contract-linux",
       "installerFlowId": "orchestrate-linux-builders",
       "promotionEvidenceIds": [
         "promotion-evidence-alpha-to-beta",

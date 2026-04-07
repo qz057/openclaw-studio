@@ -1,0 +1,280 @@
+{
+  "schemaVersion": "openclaw-studio-packaged-app-local-materialization-contract/v1",
+  "generatedAt": "2026-04-07T17:06:37.622Z",
+  "phase": "phase60",
+  "mode": "review-only",
+  "scope": "local-only",
+  "currentTaskState": "reviewing",
+  "activeContractId": "local-materialization-contract-windows",
+  "ownerStageId": "delivery-chain-promotion-readiness",
+  "downstreamGateStageId": "delivery-chain-publish-decision",
+  "contracts": [
+    {
+      "id": "local-materialization-contract-windows",
+      "label": "Windows local materialization contract",
+      "platform": "windows",
+      "status": "in-review",
+      "taskState": "reviewing",
+      "currentTaskId": "local-materialization-task-windows-staged-output",
+      "directoryMaterializationId": "directory-materialization-windows",
+      "materializationId": "materialize-windows-packaged-app",
+      "stagedOutputId": "staged-output-windows",
+      "bundleSealingId": "bundle-sealing-windows",
+      "integrityContractId": "integrity-contract-windows",
+      "localRoots": {
+        "materializationRoot": "future/packaged-app/windows/OpenClaw Studio",
+        "stagedOutputRoot": "future/staged-output/windows/OpenClaw Studio",
+        "sealedBundleRoot": "future/sealed-bundles/windows/OpenClaw Studio"
+      },
+      "manifests": {
+        "directoryVerification": "future/packaged-app/windows/materialization-manifest.json",
+        "stagedOutput": [
+          "future/staged-output/windows/output-manifest.json",
+          "future/staged-output/windows/checksum-manifest.json"
+        ],
+        "bundleSeal": "future/sealed-bundles/windows/bundle-seal-manifest.json",
+        "bundleIntegrity": "future/sealed-bundles/windows/bundle-integrity-manifest.json",
+        "integrityContract": "future/sealed-bundles/windows/integrity-contract.json"
+      },
+      "tasks": [
+        {
+          "id": "local-materialization-task-windows-directory",
+          "label": "Directory materialization",
+          "stageId": "packaged-app-directory-materialization",
+          "taskState": "review-ready",
+          "summary": "Launcher path, resources tree, and verification manifest are explicit for reviewer pickup before any packaged-app root is materialized.",
+          "dependsOn": [
+            "directory-materialization-windows"
+          ],
+          "evidence": [
+            "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+            "future/packaged-app/windows/materialization-manifest.json"
+          ],
+          "deliveryChainStageId": "delivery-chain-attestation-intake"
+        },
+        {
+          "id": "local-materialization-task-windows-staged-output",
+          "label": "Staged output readiness",
+          "stageId": "packaged-app-staged-output-skeleton",
+          "taskState": "reviewing",
+          "summary": "Output and checksum manifests stay attached to the same packaged-app lane so the reviewer can inspect the staged-output handoff without emitting any real bundle.",
+          "dependsOn": [
+            "local-materialization-task-windows-directory"
+          ],
+          "evidence": [
+            "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+            "future/staged-output/windows/output-manifest.json",
+            "future/staged-output/windows/checksum-manifest.json"
+          ],
+          "deliveryChainStageId": "delivery-chain-operator-review"
+        },
+        {
+          "id": "local-materialization-task-windows-bundle-seal",
+          "label": "Bundle-sealing readiness",
+          "stageId": "packaged-app-bundle-sealing-skeleton",
+          "taskState": "blocked",
+          "summary": "Seal and integrity manifests are linked, but bundle sealing stays blocked until staged outputs stop being metadata-only and later publish gates become executable.",
+          "dependsOn": [
+            "local-materialization-task-windows-staged-output"
+          ],
+          "evidence": [
+            "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+            "future/sealed-bundles/windows/bundle-seal-manifest.json",
+            "future/sealed-bundles/windows/bundle-integrity-manifest.json"
+          ],
+          "deliveryChainStageId": "delivery-chain-promotion-readiness"
+        }
+      ],
+      "reviewChecks": [
+        "directory materialization review evidence linked",
+        "staged output manifests chained",
+        "bundle seal manifests chained",
+        "integrity handoff declared"
+      ],
+      "blockedBy": [
+        "materialization remains review-only",
+        "staged outputs remain metadata-only",
+        "bundle sealing remains metadata-only",
+        "host-side execution remains disabled"
+      ]
+    },
+    {
+      "id": "local-materialization-contract-macos",
+      "label": "macOS local materialization contract",
+      "platform": "macos",
+      "status": "planned",
+      "taskState": "review-ready",
+      "currentTaskId": "local-materialization-task-macos-directory",
+      "directoryMaterializationId": "directory-materialization-macos",
+      "materializationId": "materialize-macos-packaged-app",
+      "stagedOutputId": "staged-output-macos",
+      "bundleSealingId": "bundle-sealing-macos",
+      "integrityContractId": "integrity-contract-macos",
+      "localRoots": {
+        "materializationRoot": "future/packaged-app/macos/OpenClaw Studio.app",
+        "stagedOutputRoot": "future/staged-output/macos/OpenClaw Studio.app",
+        "sealedBundleRoot": "future/sealed-bundles/macos/OpenClaw Studio.app"
+      },
+      "manifests": {
+        "directoryVerification": "future/packaged-app/macos/materialization-manifest.json",
+        "stagedOutput": [
+          "future/staged-output/macos/output-manifest.json",
+          "future/staged-output/macos/checksum-manifest.json"
+        ],
+        "bundleSeal": "future/sealed-bundles/macos/bundle-seal-manifest.json",
+        "bundleIntegrity": "future/sealed-bundles/macos/bundle-integrity-manifest.json",
+        "integrityContract": "future/sealed-bundles/macos/integrity-contract.json"
+      },
+      "tasks": [
+        {
+          "id": "local-materialization-task-macos-directory",
+          "label": "Directory materialization",
+          "stageId": "packaged-app-directory-materialization",
+          "taskState": "review-ready",
+          "summary": "The .app launcher path, bundle layout, and verification manifest are explicit for review even though no real app bundle is materialized.",
+          "dependsOn": [
+            "directory-materialization-macos"
+          ],
+          "evidence": [
+            "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+            "future/packaged-app/macos/materialization-manifest.json"
+          ],
+          "deliveryChainStageId": "delivery-chain-attestation-intake"
+        },
+        {
+          "id": "local-materialization-task-macos-staged-output",
+          "label": "Staged output readiness",
+          "stageId": "packaged-app-staged-output-skeleton",
+          "taskState": "review-ready",
+          "summary": "Staged-output manifests are chained to the same .app review lane so downstream output posture stays visible without producing any app bundle for real.",
+          "dependsOn": [
+            "local-materialization-task-macos-directory"
+          ],
+          "evidence": [
+            "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+            "future/staged-output/macos/output-manifest.json",
+            "future/staged-output/macos/checksum-manifest.json"
+          ],
+          "deliveryChainStageId": "delivery-chain-operator-review"
+        },
+        {
+          "id": "local-materialization-task-macos-bundle-seal",
+          "label": "Bundle-sealing readiness",
+          "stageId": "packaged-app-bundle-sealing-skeleton",
+          "taskState": "blocked",
+          "summary": "Seal and integrity manifests are linked, but the macOS bundle-seal handoff remains blocked while sealing and notarization stay metadata-only.",
+          "dependsOn": [
+            "local-materialization-task-macos-staged-output"
+          ],
+          "evidence": [
+            "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+            "future/sealed-bundles/macos/bundle-seal-manifest.json",
+            "future/sealed-bundles/macos/bundle-integrity-manifest.json"
+          ],
+          "deliveryChainStageId": "delivery-chain-promotion-readiness"
+        }
+      ],
+      "reviewChecks": [
+        "directory materialization review evidence linked",
+        "staged output manifests chained",
+        "bundle seal manifests chained",
+        "integrity handoff declared"
+      ],
+      "blockedBy": [
+        "materialization remains review-only",
+        "staged outputs remain metadata-only",
+        "bundle sealing remains metadata-only",
+        "host-side execution remains disabled"
+      ]
+    },
+    {
+      "id": "local-materialization-contract-linux",
+      "label": "Linux local materialization contract",
+      "platform": "linux",
+      "status": "planned",
+      "taskState": "review-ready",
+      "currentTaskId": "local-materialization-task-linux-directory",
+      "directoryMaterializationId": "directory-materialization-linux",
+      "materializationId": "materialize-linux-packaged-app",
+      "stagedOutputId": "staged-output-linux",
+      "bundleSealingId": "bundle-sealing-linux",
+      "integrityContractId": "integrity-contract-linux",
+      "localRoots": {
+        "materializationRoot": "future/packaged-app/linux/openclaw-studio",
+        "stagedOutputRoot": "future/staged-output/linux/openclaw-studio",
+        "sealedBundleRoot": "future/sealed-bundles/linux/openclaw-studio"
+      },
+      "manifests": {
+        "directoryVerification": "future/packaged-app/linux/materialization-manifest.json",
+        "stagedOutput": [
+          "future/staged-output/linux/output-manifest.json",
+          "future/staged-output/linux/checksum-manifest.json"
+        ],
+        "bundleSeal": "future/sealed-bundles/linux/bundle-seal-manifest.json",
+        "bundleIntegrity": "future/sealed-bundles/linux/bundle-integrity-manifest.json",
+        "integrityContract": "future/sealed-bundles/linux/integrity-contract.json"
+      },
+      "tasks": [
+        {
+          "id": "local-materialization-task-linux-directory",
+          "label": "Directory materialization",
+          "stageId": "packaged-app-directory-materialization",
+          "taskState": "review-ready",
+          "summary": "Launcher path, resources tree, and verification manifest are explicit so the Linux package root can be reviewed without creating a real bundle.",
+          "dependsOn": [
+            "directory-materialization-linux"
+          ],
+          "evidence": [
+            "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+            "future/packaged-app/linux/materialization-manifest.json"
+          ],
+          "deliveryChainStageId": "delivery-chain-attestation-intake"
+        },
+        {
+          "id": "local-materialization-task-linux-staged-output",
+          "label": "Staged output readiness",
+          "stageId": "packaged-app-staged-output-skeleton",
+          "taskState": "review-ready",
+          "summary": "Output and checksum manifests are chained to the same Linux review lane so staged-output posture stays inspectable without emitting any package target.",
+          "dependsOn": [
+            "local-materialization-task-linux-directory"
+          ],
+          "evidence": [
+            "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+            "future/staged-output/linux/output-manifest.json",
+            "future/staged-output/linux/checksum-manifest.json"
+          ],
+          "deliveryChainStageId": "delivery-chain-operator-review"
+        },
+        {
+          "id": "local-materialization-task-linux-bundle-seal",
+          "label": "Bundle-sealing readiness",
+          "stageId": "packaged-app-bundle-sealing-skeleton",
+          "taskState": "blocked",
+          "summary": "Seal and integrity manifests are linked, but the Linux bundle-seal handoff remains blocked while sealing and checksum publication stay metadata-only.",
+          "dependsOn": [
+            "local-materialization-task-linux-staged-output"
+          ],
+          "evidence": [
+            "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+            "future/sealed-bundles/linux/bundle-seal-manifest.json",
+            "future/sealed-bundles/linux/bundle-integrity-manifest.json"
+          ],
+          "deliveryChainStageId": "delivery-chain-promotion-readiness"
+        }
+      ],
+      "reviewChecks": [
+        "directory materialization review evidence linked",
+        "staged output manifests chained",
+        "bundle seal manifests chained",
+        "integrity handoff declared"
+      ],
+      "blockedBy": [
+        "materialization remains review-only",
+        "staged outputs remain metadata-only",
+        "bundle sealing remains metadata-only",
+        "host-side execution remains disabled"
+      ]
+    }
+  ]
+}

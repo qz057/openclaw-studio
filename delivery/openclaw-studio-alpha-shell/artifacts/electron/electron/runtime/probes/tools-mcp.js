@@ -785,6 +785,18 @@ function buildToolsMcpHostExecutorState(probe, controlSession) {
                 summary: "",
                 mode: "review-only",
                 currentStageId: "",
+                packagedAppMaterializationContract: {
+                    id: "",
+                    label: "",
+                    mode: "review-only",
+                    summary: "",
+                    currentTaskState: "blocked",
+                    activePlatformId: "",
+                    ownerStageId: "",
+                    downstreamGateStageId: "",
+                    artifacts: [],
+                    platforms: []
+                },
                 promotionStageIds: [],
                 publishStageIds: [],
                 rollbackStageIds: [],

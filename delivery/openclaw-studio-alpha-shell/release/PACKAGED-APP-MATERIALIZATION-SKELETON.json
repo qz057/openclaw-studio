@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-packaged-app-materialization-skeleton/v1",
-  "generatedAt": "2026-04-07T16:22:49.691Z",
+  "generatedAt": "2026-04-07T17:06:37.622Z",
   "phase": "phase60",
   "materializations": [
     {
@@ -9,10 +9,21 @@
       "assemblyId": "windows",
       "packagedAppDirectoryId": "packaged-app-directory-windows",
       "directoryMaterializationId": "directory-materialization-windows",
+      "stagedOutputId": "staged-output-windows",
+      "bundleSealingId": "bundle-sealing-windows",
+      "integrityContractId": "integrity-contract-windows",
+      "localMaterializationContractId": "local-materialization-contract-windows",
       "status": "planned",
+      "taskState": "review-ready",
       "stagedOutputRoot": "future/packaged-app/windows/OpenClaw Studio",
       "verificationManifestPath": "future/packaged-app/windows/materialization-manifest.json",
+      "handoffManifestPath": "future/staged-output/windows/output-manifest.json",
       "reviewMode": "local-only",
+      "reviewEvidence": [
+        "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+        "future/packaged-app/windows/materialization-manifest.json",
+        "future/staged-output/windows/output-manifest.json"
+      ],
       "steps": [
         "collect renderer/electron inputs",
         "assemble app.asar",
@@ -26,10 +37,21 @@
       "assemblyId": "macos",
       "packagedAppDirectoryId": "packaged-app-directory-macos",
       "directoryMaterializationId": "directory-materialization-macos",
+      "stagedOutputId": "staged-output-macos",
+      "bundleSealingId": "bundle-sealing-macos",
+      "integrityContractId": "integrity-contract-macos",
+      "localMaterializationContractId": "local-materialization-contract-macos",
       "status": "planned",
+      "taskState": "review-ready",
       "stagedOutputRoot": "future/packaged-app/macos/OpenClaw Studio.app",
       "verificationManifestPath": "future/packaged-app/macos/materialization-manifest.json",
+      "handoffManifestPath": "future/staged-output/macos/output-manifest.json",
       "reviewMode": "local-only",
+      "reviewEvidence": [
+        "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+        "future/packaged-app/macos/materialization-manifest.json",
+        "future/staged-output/macos/output-manifest.json"
+      ],
       "steps": [
         "collect renderer/electron inputs",
         "assemble app.asar",
@@ -43,10 +65,21 @@
       "assemblyId": "linux",
       "packagedAppDirectoryId": "packaged-app-directory-linux",
       "directoryMaterializationId": "directory-materialization-linux",
+      "stagedOutputId": "staged-output-linux",
+      "bundleSealingId": "bundle-sealing-linux",
+      "integrityContractId": "integrity-contract-linux",
+      "localMaterializationContractId": "local-materialization-contract-linux",
       "status": "planned",
+      "taskState": "review-ready",
       "stagedOutputRoot": "future/packaged-app/linux/openclaw-studio",
       "verificationManifestPath": "future/packaged-app/linux/materialization-manifest.json",
+      "handoffManifestPath": "future/staged-output/linux/output-manifest.json",
       "reviewMode": "local-only",
+      "reviewEvidence": [
+        "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+        "future/packaged-app/linux/materialization-manifest.json",
+        "future/staged-output/linux/output-manifest.json"
+      ],
       "steps": [
         "collect renderer/electron inputs",
         "assemble app.asar",

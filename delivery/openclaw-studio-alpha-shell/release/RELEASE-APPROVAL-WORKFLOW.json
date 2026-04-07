@@ -1,12 +1,14 @@
 {
   "schemaVersion": "openclaw-studio-release-approval-workflow/v1",
-  "generatedAt": "2026-04-07T16:22:49.691Z",
+  "generatedAt": "2026-04-07T17:06:37.622Z",
   "phase": "phase60",
   "mode": "local-only-review",
   "canApprove": false,
   "gatingHandshakePath": "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
   "approvalBridgePath": "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
   "promotionHandshakePath": "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+  "releaseQaCloseoutReadinessPath": "release/RELEASE-QA-CLOSEOUT-READINESS.json",
+  "approvalAuditRollbackEntryContractPath": "release/APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT.json",
   "reviewOnlyDeliveryChainPath": "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
   "operatorReviewBoardPath": "release/OPERATOR-REVIEW-BOARD.json",
   "releaseDecisionHandoffPath": "release/RELEASE-DECISION-HANDOFF.json",
@@ -14,6 +16,8 @@
   "blockedBy": [
     "approval handshake is not executable yet",
     "operator review board remains local-only metadata",
+    "release QA closeout remains review-only metadata",
+    "approval / audit / rollback Stage C entry remains non-executing",
     "signing / notarization remain metadata-only",
     "signing-publish gating handshake remains metadata-only",
     "publish rollback handshake remains metadata-only",
@@ -92,6 +96,22 @@
       ]
     },
     {
+      "id": "approval-qa-closeout",
+      "label": "Release QA closeout readiness review",
+      "status": "in-review",
+      "approverRoles": [
+        "release-manager",
+        "qa-owner",
+        "product-owner"
+      ],
+      "evidence": [
+        "release/RELEASE-QA-CLOSEOUT-READINESS.json",
+        "release/RELEASE-CHECKLIST.md",
+        "release/RELEASE-SUMMARY.md",
+        "release/REVIEW-EVIDENCE-CLOSEOUT.json"
+      ]
+    },
+    {
       "id": "approval-installer-builders",
       "label": "Installer builder execution review",
       "status": "planned",
@@ -127,6 +147,23 @@
         "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
         "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
         "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+      ]
+    },
+    {
+      "id": "approval-stage-c-entry",
+      "label": "Approval / audit / rollback Stage C entry review",
+      "status": "planned",
+      "approverRoles": [
+        "release-manager",
+        "runtime-owner",
+        "security"
+      ],
+      "evidence": [
+        "release/APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT.json",
+        "release/RELEASE-QA-CLOSEOUT-READINESS.json",
+        "release/RELEASE-APPROVAL-WORKFLOW.json",
+        "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
+        "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
       ]
     },
     {

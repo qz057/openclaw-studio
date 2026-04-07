@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "openclaw-studio-approval-audit-rollback-entry-contract/v1",
+  "generatedAt": "2026-04-07T17:06:37.622Z",
+  "phase": "phase60",
+  "mode": "local-only-review",
+  "canEnterExecutableApproval": false,
+  "summary": "The first safe Stage C entry now ties approval workflow, audit retention posture, rollback live-readiness, receipt settlement closeout, and release QA closeout proof into one non-executing approval/audit/rollback contract.",
+  "releaseQaCloseoutReadinessPath": "release/RELEASE-QA-CLOSEOUT-READINESS.json",
+  "approvalWorkflowPath": "release/RELEASE-APPROVAL-WORKFLOW.json",
+  "reviewOnlyDeliveryChainPath": "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
+  "reviewManifestPath": "release/REVIEW-MANIFEST.json",
+  "attestationApplyAuditPacksPath": "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
+  "rollbackLiveReadinessContractsPath": "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
+  "rollbackCutoverPublicationReceiptSettlementCloseoutPath": "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
+  "checkpoints": [
+    {
+      "id": "entry-approval-routing",
+      "label": "Approval routing posture",
+      "owner": "release-manager",
+      "state": "in-review",
+      "evidence": [
+        "release/RELEASE-APPROVAL-WORKFLOW.json",
+        "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
+        "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json"
+      ],
+      "reviewChecks": [
+        "approval workflow linked",
+        "routing contracts linked",
+        "orchestration linked"
+      ],
+      "blockedBy": [
+        "approval remains metadata-only",
+        "reviewer baton remains non-executing"
+      ]
+    },
+    {
+      "id": "entry-audit-retention",
+      "label": "Audit retention posture",
+      "owner": "runtime-owner",
+      "state": "planned",
+      "evidence": [
+        "release/BUILD-METADATA.json",
+        "release/REVIEW-MANIFEST.json",
+        "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
+        "release/RELEASE-QA-CLOSEOUT-READINESS.json"
+      ],
+      "reviewChecks": [
+        "build metadata linked",
+        "review manifest linked",
+        "audit packs linked",
+        "QA closeout proof linked"
+      ],
+      "blockedBy": [
+        "audit retention remains review-only",
+        "no executable audit emission yet"
+      ]
+    },
+    {
+      "id": "entry-rollback-live-readiness",
+      "label": "Rollback live-readiness posture",
+      "owner": "runtime-owner",
+      "state": "planned",
+      "evidence": [
+        "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
+        "release/ROLLBACK-CUTOVER-READINESS-MAPS.json",
+        "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json"
+      ],
+      "reviewChecks": [
+        "live-readiness contracts linked",
+        "cutover readiness maps linked",
+        "handoff plans linked"
+      ],
+      "blockedBy": [
+        "rollback remains non-executing",
+        "cutover remains review-only"
+      ]
+    },
+    {
+      "id": "entry-receipt-settlement",
+      "label": "Receipt settlement closeout posture",
+      "owner": "release-engineering",
+      "state": "planned",
+      "evidence": [
+        "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
+        "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
+        "release/RELEASE-QA-CLOSEOUT-READINESS.json"
+      ],
+      "reviewChecks": [
+        "receipt closeout contracts linked",
+        "receipt settlement closeout linked",
+        "delivery QA closeout linked"
+      ],
+      "blockedBy": [
+        "publication receipt closeout remains metadata-only",
+        "no executable rollback settlement yet"
+      ]
+    }
+  ],
+  "blockedBy": [
+    "Stage C entry remains a local-only contract surface",
+    "approval / audit / rollback remain non-executing",
+    "host-side execution remains disabled"
+  ]
+}

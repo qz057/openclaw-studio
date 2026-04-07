@@ -987,6 +987,35 @@ export function WindowSharedStateBoard({
 
         {releaseApprovalPipeline ? (
           <article className="windowing-summary-card">
+            <span>Stage B / Stage C Bridge</span>
+            <strong>
+              {publishDeliveryStage && rollbackDeliveryStage
+                ? `${publishDeliveryStage.label} -> ${rollbackDeliveryStage.label}`
+                : "No bridge posture"}
+            </strong>
+            <p>
+              Materialization continuity, installer/signing QA closeout, and the first safe approval / audit / rollback Stage C entry now stay visible
+              through the same cross-window ownership map instead of becoming disconnected release-tail metadata.
+            </p>
+            <div className="workflow-readiness-list">
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Materialization</span>
+                <strong>Packaged-app continuity / local-only</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--warning">
+                <span>QA closeout</span>
+                <strong>RELEASE-QA-CLOSEOUT-READINESS / review-only</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--warning">
+                <span>Stage C entry</span>
+                <strong>APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT / non-executing</strong>
+              </div>
+            </div>
+          </article>
+        ) : null}
+
+        {releaseApprovalPipeline ? (
+          <article className="windowing-summary-card">
             <span>Reviewer queue</span>
             <strong>{currentReviewerQueue?.label ?? "No reviewer queue"}</strong>
             <p>{currentReviewerQueue?.summary ?? "No reviewer queue is currently active."}</p>

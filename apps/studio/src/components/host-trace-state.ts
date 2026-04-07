@@ -291,12 +291,22 @@ export function createInspectorSections(
       value: currentCloseoutWindow ? `${currentCloseoutWindow.label} / ${currentCloseoutWindow.state}` : "Unavailable"
     },
     {
+      id: "release-qa-closeout",
+      label: "QA closeout",
+      value: "RELEASE-QA-CLOSEOUT-READINESS / review-only"
+    },
+    {
       id: "publish-rollback",
       label: "Publish / rollback",
       value:
         publishDeliveryStage && rollbackDeliveryStage
           ? `${publishDeliveryStage.status} publish / ${rollbackDeliveryStage.status} rollback`
           : "Unavailable"
+    },
+    {
+      id: "stage-c-entry",
+      label: "Stage C entry",
+      value: "APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT / non-executing"
     },
     {
       id: "window-focus",

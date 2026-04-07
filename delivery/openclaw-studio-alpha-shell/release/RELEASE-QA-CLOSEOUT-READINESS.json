@@ -1,0 +1,122 @@
+{
+  "schemaVersion": "openclaw-studio-release-qa-closeout-readiness/v1",
+  "generatedAt": "2026-04-07T17:06:37.622Z",
+  "phase": "phase60",
+  "mode": "local-only-review",
+  "canCloseOut": false,
+  "summary": "Packaged-app materialization continuity, installer/signing handshake verification, release checklist proof, and delivery closeout posture now stay grouped as one local-only QA closeout surface.",
+  "reviewOnlyDeliveryChainPath": "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
+  "releaseApprovalWorkflowPath": "release/RELEASE-APPROVAL-WORKFLOW.json",
+  "reviewEvidenceCloseoutPath": "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+  "releaseSummaryPath": "release/RELEASE-SUMMARY.md",
+  "releaseChecklistPath": "release/RELEASE-CHECKLIST.md",
+  "tracks": [
+    {
+      "id": "release-qa-materialization-continuity",
+      "label": "Packaged-app materialization continuity",
+      "owner": "release-engineering",
+      "status": "ready",
+      "deliveryChainStageId": "delivery-chain-promotion-readiness",
+      "artifacts": [
+        "release/PACKAGED-APP-DIRECTORY-SKELETON.json",
+        "release/PACKAGED-APP-MATERIALIZATION-SKELETON.json",
+        "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+        "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+        "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+        "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json"
+      ],
+      "reviewChecks": [
+        "directory skeleton declared",
+        "materialization sequence declared",
+        "staged outputs linked",
+        "bundle sealing linked",
+        "integrity contract linked"
+      ],
+      "blockedBy": [
+        "packaged output materialization remains metadata-only",
+        "bundle sealing remains metadata-only"
+      ]
+    },
+    {
+      "id": "release-qa-installer-signing-handshake",
+      "label": "Installer / signing handshake verification",
+      "owner": "platform-owner",
+      "status": "ready",
+      "deliveryChainStageId": "delivery-chain-publish-decision",
+      "artifacts": [
+        "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
+        "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
+        "release/INSTALLER-BUILDER-ORCHESTRATION.json",
+        "release/INSTALLER-CHANNEL-ROUTING.json",
+        "release/SIGNING-METADATA.json",
+        "release/NOTARIZATION-PLAN.json",
+        "release/SIGNING-PUBLISH-PIPELINE.json",
+        "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+        "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
+        "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json"
+      ],
+      "reviewChecks": [
+        "installer targets linked",
+        "builder execution skeleton linked",
+        "channel routing declared",
+        "notarization plan declared",
+        "signing/publish handshake linked"
+      ],
+      "blockedBy": [
+        "installer builder remains non-executing",
+        "signing/notarization remain metadata-only"
+      ]
+    },
+    {
+      "id": "release-qa-proof-bundle",
+      "label": "Release QA proof bundle",
+      "owner": "qa-owner",
+      "status": "in-review",
+      "deliveryChainStageId": "delivery-chain-operator-review",
+      "artifacts": [
+        "release/REVIEW-MANIFEST.json",
+        "release/RELEASE-SUMMARY.md",
+        "release/RELEASE-CHECKLIST.md",
+        "release/REVIEW-EVIDENCE-CLOSEOUT.json"
+      ],
+      "reviewChecks": [
+        "review manifest listed",
+        "release summary generated",
+        "checklist includes validation chain",
+        "evidence closeout linked"
+      ],
+      "blockedBy": [
+        "reviewer acknowledgement remains metadata-only",
+        "final signoff remains local-only"
+      ]
+    },
+    {
+      "id": "release-qa-delivery-closeout",
+      "label": "Delivery closeout settlement",
+      "owner": "release-manager",
+      "status": "planned",
+      "deliveryChainStageId": "delivery-chain-rollback-readiness",
+      "artifacts": [
+        "release/RELEASE-DECISION-HANDOFF.json",
+        "release/RELEASE-APPROVAL-WORKFLOW.json",
+        "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
+        "release/RELEASE-QA-CLOSEOUT-READINESS.json"
+      ],
+      "reviewChecks": [
+        "decision handoff linked",
+        "approval workflow linked",
+        "receipt settlement closeout linked",
+        "QA closeout route declared"
+      ],
+      "blockedBy": [
+        "delivery closeout remains review-only",
+        "publish lifecycle remains non-executing"
+      ]
+    }
+  ],
+  "blockedBy": [
+    "release QA closeout remains review-only metadata",
+    "installer/signing verification remains non-executing",
+    "host-side execution remains disabled"
+  ]
+}

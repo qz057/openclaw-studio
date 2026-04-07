@@ -415,6 +415,18 @@ export const mockHostExecutorState: StudioHostExecutorState = {
       summary: "",
       mode: "review-only",
       currentStageId: "",
+      packagedAppMaterializationContract: {
+        id: "",
+        label: "",
+        mode: "review-only",
+        summary: "",
+        currentTaskState: "review-ready",
+        activePlatformId: "",
+        ownerStageId: "",
+        downstreamGateStageId: "",
+        artifacts: [],
+        platforms: []
+      },
       promotionStageIds: [],
       publishStageIds: [],
       rollbackStageIds: [],

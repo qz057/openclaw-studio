@@ -789,6 +789,76 @@ export interface StudioReleaseDeliveryChainArtifactGroup {
   artifacts: string[];
 }
 
+export type StudioPackagedAppPlatform = "windows" | "macos" | "linux";
+export type StudioReleasePackagedAppMaterializationTaskState = "review-ready" | "reviewing" | "blocked";
+export type StudioReleasePackagedAppMaterializationTaskStageId =
+  | "packaged-app-directory-materialization"
+  | "packaged-app-staged-output-skeleton"
+  | "packaged-app-bundle-sealing-skeleton";
+
+export interface StudioReleasePackagedAppMaterializationContractLocalRoots {
+  materializationRoot: string;
+  stagedOutputRoot: string;
+  sealedBundleRoot: string;
+}
+
+export interface StudioReleasePackagedAppMaterializationContractManifests {
+  directoryVerification: string;
+  stagedOutput: string[];
+  bundleSeal: string;
+  bundleIntegrity: string;
+  integrityContract: string;
+}
+
+export interface StudioReleasePackagedAppMaterializationContractTask {
+  id: string;
+  label: string;
+  stageId: StudioReleasePackagedAppMaterializationTaskStageId;
+  taskState: StudioReleasePackagedAppMaterializationTaskState;
+  summary: string;
+  dependsOn: string[];
+  evidence: string[];
+  deliveryChainStageId: string;
+}
+
+export interface StudioReleasePackagedAppMaterializationContractPlatform {
+  id: string;
+  platform: StudioPackagedAppPlatform;
+  status: StudioReleaseApprovalPipelineStageStatus;
+  taskState: StudioReleasePackagedAppMaterializationTaskState;
+  summary: string;
+  currentTaskId: string;
+  directoryMaterializationId: string;
+  materializationId: string;
+  stagedOutputId: string;
+  bundleSealingId: string;
+  verificationManifestPath: string;
+  stagedOutputRoot: string;
+  stagedOutputManifestPaths: string[];
+  sealManifestPath: string;
+  integrityManifestPath: string;
+  rollbackCheckpointId: string;
+  materializationSteps: string[];
+  reviewChecks: string[];
+  localRoots: StudioReleasePackagedAppMaterializationContractLocalRoots;
+  manifests: StudioReleasePackagedAppMaterializationContractManifests;
+  tasks: StudioReleasePackagedAppMaterializationContractTask[];
+  blockedBy: string[];
+}
+
+export interface StudioReleasePackagedAppMaterializationContract {
+  id: string;
+  label: string;
+  mode: StudioReleaseApprovalPipelineMode;
+  summary: string;
+  currentTaskState: StudioReleasePackagedAppMaterializationTaskState;
+  activePlatformId: string;
+  ownerStageId: string;
+  downstreamGateStageId: string;
+  artifacts: string[];
+  platforms: StudioReleasePackagedAppMaterializationContractPlatform[];
+}
+
 export interface StudioReleaseDeliveryChainStage {
   id: string;
   label: string;
@@ -815,6 +885,7 @@ export interface StudioReleaseDeliveryChain {
   summary: string;
   mode: StudioReleaseApprovalPipelineMode;
   currentStageId: string;
+  packagedAppMaterializationContract: StudioReleasePackagedAppMaterializationContract;
   promotionStageIds: string[];
   publishStageIds: string[];
   rollbackStageIds: string[];
@@ -1950,6 +2021,8 @@ export {
   selectStudioReleaseEscalationWindow,
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
+  selectStudioReleasePackagedAppMaterializationContractPlatform,
+  selectStudioReleasePackagedAppMaterializationContractTask,
   selectStudioReviewStateContinuityActiveEntry,
   selectStudioReviewStateContinuityEntry,
   selectStudioWindowObservabilityActiveMapping,

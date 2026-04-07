@@ -181,6 +181,13 @@ async function verifyRendererFocusedSlotUi() {
     "Observability Mapping",
     "Delivery Flow",
     "Artifact Coverage",
+    "Packaged-app Materialization Contract",
+    "Release QA Closeout Readiness",
+    "Approval / Audit / Rollback Entry",
+    "Verification manifest",
+    "Staged output root",
+    "seal manifests",
+    "integrity manifest",
     "Blockers / Handoff Posture",
     "Delivery Chain Stage",
     "Delivery Coverage Matrix",
@@ -199,11 +206,16 @@ async function verifyRendererFocusedSlotUi() {
     "Release decision lifecycle",
     "Final release decision board",
     "Rollback settlement closeout",
+    "Stage B / Stage C Bridge",
     "Formal Release Readiness",
     "Bundle Assembly Skeleton",
     "Packaged-app Directory Materialization",
+    "Packaged-app Local Materialization Contract",
     "Packaged-app Staged Output Skeleton",
     "Packaged-app Bundle Sealing Skeleton",
+    "Contract task state",
+    "Platform task state",
+    "Task delivery stage",
     "Sealed-bundle Integrity Contract",
     "Integrity Attestation Evidence",
     "Attestation Verification Packs",
@@ -216,6 +228,8 @@ async function verifyRendererFocusedSlotUi() {
     "Attestation Operator Reconciliation Ledgers",
     "Attestation Operator Approval Routing Contracts",
     "Attestation Operator Approval Orchestration",
+    "RELEASE-QA-CLOSEOUT-READINESS",
+    "APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT",
     "Installer-target Builder Skeleton",
     "Installer Builder Execution Skeleton",
     "Installer Builder Orchestration",
@@ -2418,6 +2432,7 @@ function verifyReleaseSkeletonContract() {
     "release/PACKAGED-APP-MATERIALIZATION-SKELETON.json",
     "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
     "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+    "release/PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json",
     "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
     "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
     "release/ATTESTATION-VERIFICATION-PACKS.json",
@@ -2498,6 +2513,8 @@ function verifyReleaseSkeletonContract() {
     skeleton.installerPlaceholder.packagedAppMaterializationSkeletonPath !== "release/PACKAGED-APP-MATERIALIZATION-SKELETON.json" ||
     skeleton.installerPlaceholder.packagedAppStagedOutputSkeletonPath !== "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json" ||
     skeleton.installerPlaceholder.packagedAppBundleSealingSkeletonPath !== "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json" ||
+    skeleton.installerPlaceholder.packagedAppLocalMaterializationContractPath !==
+      "release/PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json" ||
     skeleton.installerPlaceholder.sealedBundleIntegrityContractPath !== "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json" ||
     skeleton.installerPlaceholder.integrityAttestationEvidencePath !== "release/INTEGRITY-ATTESTATION-EVIDENCE.json" ||
     skeleton.installerPlaceholder.attestationVerificationPacksPath !== "release/ATTESTATION-VERIFICATION-PACKS.json" ||
@@ -2586,6 +2603,7 @@ function verifyReleaseSkeletonContract() {
   }
 
   if (
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-VERIFICATION-PACKS.json") ||
     !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-APPLY-AUDIT-PACKS.json") ||
@@ -2630,6 +2648,7 @@ function verifyReleaseSkeletonContract() {
 
   if (
     !Array.isArray(skeleton.releaseManifest.formalReleaseArtifacts) ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-VERIFICATION-PACKS.json") ||
     !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-APPLY-AUDIT-PACKS.json") ||
@@ -2692,20 +2711,83 @@ function verifyReleaseSkeletonContract() {
     throw new Error(`Packaged app directory skeleton is missing ${PHASE_ID} directory declarations.`);
   }
 
-  if (!Array.isArray(skeleton.packagedAppDirectoryMaterialization?.directories) || skeleton.packagedAppDirectoryMaterialization.directories.length < 3) {
+  if (
+    !Array.isArray(skeleton.packagedAppDirectoryMaterialization?.directories) ||
+    skeleton.packagedAppDirectoryMaterialization.directories.length < 3 ||
+    !skeleton.packagedAppDirectoryMaterialization.directories.every(
+      (entry) => entry.taskState === "review-ready" && typeof entry.localMaterializationContractId === "string"
+    )
+  ) {
     throw new Error(`Packaged app directory materialization is missing ${PHASE_ID} directory materialization declarations.`);
   }
 
-  if (!Array.isArray(skeleton.packagedAppMaterializationSkeleton?.materializations) || skeleton.packagedAppMaterializationSkeleton.materializations.length < 3) {
+  if (
+    !Array.isArray(skeleton.packagedAppMaterializationSkeleton?.materializations) ||
+    skeleton.packagedAppMaterializationSkeleton.materializations.length < 3 ||
+    !skeleton.packagedAppMaterializationSkeleton.materializations.every(
+      (entry) => entry.taskState === "review-ready" && typeof entry.localMaterializationContractId === "string"
+    )
+  ) {
     throw new Error(`Packaged app materialization skeleton is missing ${PHASE_ID} materialization declarations.`);
   }
 
-  if (!Array.isArray(skeleton.packagedAppStagedOutputSkeleton?.outputs) || skeleton.packagedAppStagedOutputSkeleton.outputs.length < 3) {
+  if (
+    !Array.isArray(skeleton.packagedAppStagedOutputSkeleton?.outputs) ||
+    skeleton.packagedAppStagedOutputSkeleton.outputs.length < 3 ||
+    !skeleton.packagedAppStagedOutputSkeleton.outputs.every(
+      (entry) =>
+        entry.taskState === "review-ready" &&
+        typeof entry.localMaterializationContractId === "string" &&
+        Array.isArray(entry.taskDependencies)
+    )
+  ) {
     throw new Error(`Packaged-app staged output skeleton is missing ${PHASE_ID} staged-output declarations.`);
   }
 
-  if (!Array.isArray(skeleton.packagedAppBundleSealingSkeleton?.bundles) || skeleton.packagedAppBundleSealingSkeleton.bundles.length < 3) {
+  if (
+    !Array.isArray(skeleton.packagedAppBundleSealingSkeleton?.bundles) ||
+    skeleton.packagedAppBundleSealingSkeleton.bundles.length < 3 ||
+    !skeleton.packagedAppBundleSealingSkeleton.bundles.every(
+      (entry) =>
+        entry.taskState === "review-ready" &&
+        typeof entry.localMaterializationContractId === "string" &&
+        Array.isArray(entry.taskDependencies)
+    )
+  ) {
     throw new Error(`Packaged-app bundle sealing skeleton is missing ${PHASE_ID} sealing declarations.`);
+  }
+
+  if (
+    skeleton.packagedAppLocalMaterializationContract?.phase !== PHASE_ID ||
+    skeleton.packagedAppLocalMaterializationContract?.mode !== "review-only" ||
+    skeleton.packagedAppLocalMaterializationContract?.scope !== "local-only" ||
+    skeleton.packagedAppLocalMaterializationContract?.currentTaskState !== "reviewing" ||
+    skeleton.packagedAppLocalMaterializationContract?.activeContractId !== "local-materialization-contract-windows" ||
+    skeleton.packagedAppLocalMaterializationContract?.ownerStageId !== "delivery-chain-promotion-readiness" ||
+    skeleton.packagedAppLocalMaterializationContract?.downstreamGateStageId !== "delivery-chain-publish-decision" ||
+    !Array.isArray(skeleton.packagedAppLocalMaterializationContract?.contracts) ||
+    skeleton.packagedAppLocalMaterializationContract.contracts.length < 3 ||
+    !skeleton.packagedAppLocalMaterializationContract.contracts.every(
+      (contract) =>
+        typeof contract.currentTaskId === "string" &&
+        typeof contract.taskState === "string" &&
+        Array.isArray(contract.tasks) &&
+        contract.tasks.length === 3 &&
+        contract.tasks.some((task) => task.id === contract.currentTaskId) &&
+        contract.tasks.every(
+          (task) =>
+            typeof task.summary === "string" &&
+            task.summary.length > 0 &&
+            typeof task.deliveryChainStageId === "string" &&
+            task.deliveryChainStageId.length > 0
+        )
+    ) ||
+    !skeleton.packagedAppLocalMaterializationContract.contracts.some((contract) => contract.taskState === "reviewing") ||
+    !skeleton.packagedAppLocalMaterializationContract.contracts.some((contract) =>
+      contract.tasks.some((task) => task.taskState === "blocked")
+    )
+  ) {
+    throw new Error(`Packaged-app local materialization contract is missing ${PHASE_ID} task-state declarations.`);
   }
 
   if (!Array.isArray(skeleton.sealedBundleIntegrityContract?.contracts) || skeleton.sealedBundleIntegrityContract.contracts.length < 3) {
@@ -2769,6 +2851,12 @@ function verifyReleaseSkeletonContract() {
     skeleton.reviewOnlyDeliveryChain?.operatorReviewBoardPath !== "release/OPERATOR-REVIEW-BOARD.json" ||
     skeleton.reviewOnlyDeliveryChain?.releaseDecisionHandoffPath !== "release/RELEASE-DECISION-HANDOFF.json" ||
     skeleton.reviewOnlyDeliveryChain?.reviewEvidenceCloseoutPath !== "release/REVIEW-EVIDENCE-CLOSEOUT.json" ||
+    skeleton.reviewOnlyDeliveryChain?.packagedAppLocalMaterializationContractPath !==
+      "release/PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json" ||
+    !Array.isArray(skeleton.reviewOnlyDeliveryChain?.packagedAppMaterializationContract?.artifacts) ||
+    skeleton.reviewOnlyDeliveryChain.packagedAppMaterializationContract.artifacts.length < 5 ||
+    !Array.isArray(skeleton.reviewOnlyDeliveryChain?.packagedAppMaterializationContract?.platforms) ||
+    skeleton.reviewOnlyDeliveryChain.packagedAppMaterializationContract.platforms.length < 3 ||
     !Array.isArray(skeleton.reviewOnlyDeliveryChain?.stages) ||
     skeleton.reviewOnlyDeliveryChain.stages.length < 5 ||
     !skeleton.reviewOnlyDeliveryChain.stages.every(
@@ -3154,6 +3242,7 @@ function verifyReleaseSkeletonContract() {
     !skeleton.packageReadme.includes("Stage Explorer") ||
     !skeleton.packageReadme.includes("正式 installer 仍缺什么") ||
     !skeleton.packageReadme.includes("artifacts/renderer") ||
+    !skeleton.packageReadme.includes("release/PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json") ||
     !skeleton.packageReadme.includes("release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json") ||
     !skeleton.packageReadme.includes("release/INTEGRITY-ATTESTATION-EVIDENCE.json") ||
     !skeleton.packageReadme.includes("release/ATTESTATION-VERIFICATION-PACKS.json") ||
@@ -3171,6 +3260,8 @@ function verifyReleaseSkeletonContract() {
     !skeleton.packageReadme.includes("release/OPERATOR-REVIEW-BOARD.json") ||
     !skeleton.packageReadme.includes("release/RELEASE-DECISION-HANDOFF.json") ||
     !skeleton.packageReadme.includes("release/REVIEW-EVIDENCE-CLOSEOUT.json") ||
+    !skeleton.packageReadme.includes("release/RELEASE-QA-CLOSEOUT-READINESS.json") ||
+    !skeleton.packageReadme.includes("release/APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT.json") ||
     !skeleton.packageReadme.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.packageReadme.includes("release/PROMOTION-APPLY-READINESS.json") ||
     !skeleton.packageReadme.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
@@ -3217,8 +3308,15 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseNotes?.includes("operator review board") ||
     !skeleton.releaseNotes?.includes("release decision handoff") ||
     !skeleton.releaseNotes?.includes("review evidence closeout") ||
+    !skeleton.releaseNotes?.includes("packaged-app local materialization contract") ||
     !skeleton.releaseNotes?.includes("promotion staged-apply release decision enforcement lifecycle") ||
     !skeleton.releaseNotes?.includes("rollback cutover publication receipt settlement closeout") ||
+    !skeleton.releaseNotes?.includes("release QA closeout readiness") ||
+    !skeleton.releaseNotes?.includes("Stage C entry") ||
+    !Array.isArray(skeleton.releaseQaCloseoutReadiness?.tracks) ||
+    skeleton.releaseQaCloseoutReadiness.tracks.length < 4 ||
+    !Array.isArray(skeleton.approvalAuditRollbackEntryContract?.checkpoints) ||
+    skeleton.approvalAuditRollbackEntryContract.checkpoints.length < 4 ||
     !Array.isArray(skeleton.releaseApprovalWorkflow?.stages) ||
     !skeleton.releaseApprovalWorkflow.stages.length ||
     !skeleton.signingPublishApprovalBridge?.bridge?.length ||
@@ -3233,6 +3331,7 @@ function verifyReleaseSkeletonContract() {
   if (
     !skeleton.releaseChecklist.includes("npm run package:alpha") ||
     !skeleton.releaseChecklist.includes("npm run release:plan") ||
+    !skeleton.releaseChecklist.includes("PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json") ||
     !skeleton.releaseChecklist.includes("SEALED-BUNDLE-INTEGRITY-CONTRACT.json") ||
     !skeleton.releaseChecklist.includes("INTEGRITY-ATTESTATION-EVIDENCE.json") ||
     !skeleton.releaseChecklist.includes("ATTESTATION-VERIFICATION-PACKS.json") ||
@@ -3249,6 +3348,8 @@ function verifyReleaseSkeletonContract() {
     !skeleton.releaseChecklist.includes("OPERATOR-REVIEW-BOARD.json") ||
     !skeleton.releaseChecklist.includes("RELEASE-DECISION-HANDOFF.json") ||
     !skeleton.releaseChecklist.includes("REVIEW-EVIDENCE-CLOSEOUT.json") ||
+    !skeleton.releaseChecklist.includes("RELEASE-QA-CLOSEOUT-READINESS.json") ||
+    !skeleton.releaseChecklist.includes("APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT.json") ||
     !skeleton.releaseChecklist.includes("CHANNEL-PROMOTION-EVIDENCE.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-APPLY-READINESS.json") ||
     !skeleton.releaseChecklist.includes("PROMOTION-APPLY-MANIFESTS.json") ||

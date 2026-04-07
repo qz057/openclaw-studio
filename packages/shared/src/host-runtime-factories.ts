@@ -17,6 +17,7 @@ import type {
   StudioReleaseCloseoutWindow,
   StudioReleaseDeliveryChain,
   StudioReleaseEscalationWindow,
+  StudioReleasePackagedAppMaterializationContract,
   StudioReleaseReviewerQueue
 } from "./index.js";
 import { selectStudioHostTraceFocusSlotId } from "./host-runtime-selectors.js";
@@ -330,14 +331,16 @@ function createStudioReleaseDeliveryChain(
   stages: StudioReleaseApprovalPipelineStage[]
 ): StudioReleaseDeliveryChain {
   const currentDeliveryStageId = currentStage.deliveryChainStageId;
+  const packagedAppMaterializationContract = createStudioPackagedAppMaterializationContract();
 
   return {
     id: "release-delivery-chain-phase60",
     title: "Delivery-chain Workspace",
     summary:
-      "Phase60 slice 1 turns the review-only delivery chain into a usable stage explorer, so attestation intake, operator review, promotion readiness, publish gating, rollback readiness, artifacts, blockers, and observability mapping all stay linked through the same local-only metadata spine.",
+      "Phase60 slice 31 keeps the review-only delivery chain readable as a stage explorer while also surfacing packaged-app task-state continuity, so per-platform roots, current task evidence, staged-output manifests, and bundle-sealing checkpoints stay inspectable inside the same local-only metadata spine.",
     mode: "review-only",
     currentStageId: currentDeliveryStageId,
+    packagedAppMaterializationContract,
     promotionStageIds: ["delivery-chain-promotion-readiness"],
     publishStageIds: ["delivery-chain-publish-decision"],
     rollbackStageIds: ["delivery-chain-rollback-readiness"],
@@ -412,6 +415,16 @@ function createStudioReleaseDeliveryChain(
               "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
               "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json"
             ]
+          },
+          {
+            id: "delivery-chain-operator-review-qa-closeout",
+            label: "Release QA closeout",
+            summary: "QA closeout readiness, checklist proof, and release summary keep the active reviewer stage tied to the same delivery closeout posture.",
+            artifacts: [
+              "release/RELEASE-QA-CLOSEOUT-READINESS.json",
+              "release/RELEASE-CHECKLIST.md",
+              "release/RELEASE-SUMMARY.md"
+            ]
           }
         ],
         blockedBy: [
@@ -439,6 +452,13 @@ function createStudioReleaseDeliveryChain(
         downstreamStageIds: ["delivery-chain-publish-decision", "delivery-chain-rollback-readiness"],
         artifactGroups: [
           {
+            id: "delivery-chain-promotion-readiness-materialization",
+            label: "Packaged-app materialization",
+            summary:
+              "Directory materialization, staged-output manifests, and bundle-sealing checkpoints stay grouped as one inspectable local materialization contract before any installer or publish path exists.",
+            artifacts: packagedAppMaterializationContract.artifacts
+          },
+          {
             id: "delivery-chain-promotion-readiness-prepare",
             label: "Promotion preflight",
             summary: "Promotion evidence, apply readiness, manifests, checkpoints, and handoff rails define the pre-cutover review path.",
@@ -463,6 +483,15 @@ function createStudioReleaseDeliveryChain(
               "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
               "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
               "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+            ]
+          },
+          {
+            id: "delivery-chain-promotion-readiness-qa-closeout",
+            label: "Release QA readiness",
+            summary: "QA closeout readiness keeps materialization continuity, staged delivery proof, and handoff posture grouped with promotion review.",
+            artifacts: [
+              "release/RELEASE-QA-CLOSEOUT-READINESS.json",
+              "release/RELEASE-SUMMARY.md"
             ]
           }
         ],
@@ -512,6 +541,18 @@ function createStudioReleaseDeliveryChain(
               "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
               "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
             ]
+          },
+          {
+            id: "delivery-chain-rollback-readiness-stage-c-entry",
+            label: "Stage C entry contract",
+            summary: "Approval workflow, audit retention posture, rollback live-readiness, and receipt settlement now stay grouped as the first safe Stage C entry surface.",
+            artifacts: [
+              "release/APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT.json",
+              "release/RELEASE-APPROVAL-WORKFLOW.json",
+              "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
+              "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
+              "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+            ]
           }
         ],
         blockedBy: ["rollback publication remains review-only", "final decision board remains blocked"]
@@ -552,6 +593,17 @@ function createStudioReleaseDeliveryChain(
             label: "Release gates",
             summary: "Release notes plus publish and promotion gates make the blocked final decision concrete.",
             artifacts: ["release/RELEASE-NOTES.md", "release/PUBLISH-GATES.json", "release/PROMOTION-GATES.json"]
+          },
+          {
+            id: "delivery-chain-publish-decision-qa-closeout",
+            label: "QA / closeout readiness",
+            summary: "Installer-signing handshake verification and release QA closeout stay visible at the blocked publish gate instead of hiding behind separate package docs.",
+            artifacts: [
+              "release/RELEASE-QA-CLOSEOUT-READINESS.json",
+              "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
+              "release/INSTALLER-BUILDER-ORCHESTRATION.json",
+              "release/INSTALLER-CHANNEL-ROUTING.json"
+            ]
           }
         ],
         blockedBy: [
@@ -563,10 +615,343 @@ function createStudioReleaseDeliveryChain(
     ],
     blockedBy: [
       "delivery chain remains review-only metadata",
+      "packaged-app materialization remains local-only review metadata",
+      "release QA closeout remains local-only review metadata",
+      "approval / audit / rollback Stage C entry remains non-executing",
       "reviewer acknowledgement remains local-only metadata",
       "promotion, publish, and rollback execution remain blocked",
       "real host-side execution remains disabled",
       "signing, publish, promotion, and rollback remain review-only metadata"
+    ]
+  };
+}
+
+function createStudioPackagedAppMaterializationContract(): StudioReleasePackagedAppMaterializationContract {
+  return {
+    id: "packaged-app-materialization-contract",
+    label: "Packaged-app Materialization Contract",
+    mode: "review-only",
+    summary:
+      "Packaged-app directory materialization, staged-output manifests, and bundle-sealing checkpoints now stay inspectable as one per-platform task-state contract, so the shell can review active local roots, evidence handoffs, and seal readiness without materializing, signing, or publishing anything.",
+    currentTaskState: "reviewing",
+    activePlatformId: "packaged-app-materialization-platform-windows",
+    ownerStageId: "delivery-chain-promotion-readiness",
+    downstreamGateStageId: "delivery-chain-publish-decision",
+    artifacts: [
+      "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+      "release/PACKAGED-APP-MATERIALIZATION-SKELETON.json",
+      "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+      "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+      "release/PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json",
+      "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json"
+    ],
+    platforms: [
+      {
+        id: "packaged-app-materialization-platform-windows",
+        platform: "windows",
+        status: "in-review",
+        taskState: "reviewing",
+        summary:
+          "Windows keeps the packaged-app directory, staged-output manifests, and bundle-seal handoff visible as one local-only review lane, with staged-output evidence currently under review.",
+        currentTaskId: "packaged-app-materialization-task-windows-staged-output",
+        directoryMaterializationId: "directory-materialization-windows",
+        materializationId: "materialize-windows-packaged-app",
+        stagedOutputId: "staged-output-windows",
+        bundleSealingId: "bundle-sealing-windows",
+        verificationManifestPath: "future/packaged-app/windows/materialization-manifest.json",
+        stagedOutputRoot: "future/staged-output/windows/OpenClaw Studio",
+        localRoots: {
+          materializationRoot: "future/packaged-app/windows/OpenClaw Studio",
+          stagedOutputRoot: "future/staged-output/windows/OpenClaw Studio",
+          sealedBundleRoot: "future/sealed-bundles/windows/OpenClaw Studio"
+        },
+        stagedOutputManifestPaths: [
+          "future/staged-output/windows/output-manifest.json",
+          "future/staged-output/windows/checksum-manifest.json"
+        ],
+        manifests: {
+          directoryVerification: "future/packaged-app/windows/materialization-manifest.json",
+          stagedOutput: [
+            "future/staged-output/windows/output-manifest.json",
+            "future/staged-output/windows/checksum-manifest.json"
+          ],
+          bundleSeal: "future/sealed-bundles/windows/bundle-seal-manifest.json",
+          bundleIntegrity: "future/sealed-bundles/windows/bundle-integrity-manifest.json",
+          integrityContract: "future/sealed-bundles/windows/integrity-contract.json"
+        },
+        sealManifestPath: "future/sealed-bundles/windows/bundle-seal-manifest.json",
+        integrityManifestPath: "future/sealed-bundles/windows/bundle-integrity-manifest.json",
+        rollbackCheckpointId: "sealed-bundle-checkpoint-windows",
+        materializationSteps: [
+          "resolve renderer/electron snapshot inputs",
+          "stage packaged-app directory layout",
+          "record verification manifest",
+          "declare staged-output manifests",
+          "declare bundle-seal and integrity manifests"
+        ],
+        reviewChecks: [
+          "launcher path remains reviewable",
+          "staged output layout frozen",
+          "seal manifest declared",
+          "integrity manifest path declared"
+        ],
+        tasks: [
+          {
+            id: "packaged-app-materialization-task-windows-directory",
+            label: "Directory materialization",
+            stageId: "packaged-app-directory-materialization",
+            taskState: "review-ready",
+            summary:
+              "Launcher path, resources tree, and verification manifest are explicit for reviewer pickup before any packaged-app root is materialized.",
+            dependsOn: ["directory-materialization-windows"],
+            evidence: [
+              "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+              "future/packaged-app/windows/materialization-manifest.json"
+            ],
+            deliveryChainStageId: "delivery-chain-attestation-intake"
+          },
+          {
+            id: "packaged-app-materialization-task-windows-staged-output",
+            label: "Staged output readiness",
+            stageId: "packaged-app-staged-output-skeleton",
+            taskState: "reviewing",
+            summary:
+              "Output and checksum manifests stay attached to the same packaged-app lane so the reviewer can inspect the staged-output handoff without emitting any real bundle.",
+            dependsOn: ["packaged-app-materialization-task-windows-directory"],
+            evidence: [
+              "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+              "future/staged-output/windows/output-manifest.json",
+              "future/staged-output/windows/checksum-manifest.json"
+            ],
+            deliveryChainStageId: "delivery-chain-operator-review"
+          },
+          {
+            id: "packaged-app-materialization-task-windows-bundle-seal",
+            label: "Bundle-sealing readiness",
+            stageId: "packaged-app-bundle-sealing-skeleton",
+            taskState: "blocked",
+            summary:
+              "Seal and integrity manifests are linked, but bundle sealing stays blocked until staged outputs stop being metadata-only and later publish gates become executable.",
+            dependsOn: ["packaged-app-materialization-task-windows-staged-output"],
+            evidence: [
+              "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+              "future/sealed-bundles/windows/bundle-seal-manifest.json",
+              "future/sealed-bundles/windows/bundle-integrity-manifest.json"
+            ],
+            deliveryChainStageId: "delivery-chain-promotion-readiness"
+          }
+        ],
+        blockedBy: [
+          "materialization remains review-only",
+          "staged outputs remain metadata-only",
+          "bundle sealing remains metadata-only",
+          "host-side execution remains disabled"
+        ]
+      },
+      {
+        id: "packaged-app-materialization-platform-macos",
+        platform: "macos",
+        status: "planned",
+        taskState: "review-ready",
+        summary:
+          "macOS keeps the .app directory, staged-output manifests, and bundle-seal checkpoints visible as one local-only review lane without creating a real app bundle.",
+        currentTaskId: "packaged-app-materialization-task-macos-directory",
+        directoryMaterializationId: "directory-materialization-macos",
+        materializationId: "materialize-macos-packaged-app",
+        stagedOutputId: "staged-output-macos",
+        bundleSealingId: "bundle-sealing-macos",
+        verificationManifestPath: "future/packaged-app/macos/materialization-manifest.json",
+        stagedOutputRoot: "future/staged-output/macos/OpenClaw Studio.app",
+        localRoots: {
+          materializationRoot: "future/packaged-app/macos/OpenClaw Studio.app",
+          stagedOutputRoot: "future/staged-output/macos/OpenClaw Studio.app",
+          sealedBundleRoot: "future/sealed-bundles/macos/OpenClaw Studio.app"
+        },
+        stagedOutputManifestPaths: [
+          "future/staged-output/macos/output-manifest.json",
+          "future/staged-output/macos/checksum-manifest.json"
+        ],
+        manifests: {
+          directoryVerification: "future/packaged-app/macos/materialization-manifest.json",
+          stagedOutput: [
+            "future/staged-output/macos/output-manifest.json",
+            "future/staged-output/macos/checksum-manifest.json"
+          ],
+          bundleSeal: "future/sealed-bundles/macos/bundle-seal-manifest.json",
+          bundleIntegrity: "future/sealed-bundles/macos/bundle-integrity-manifest.json",
+          integrityContract: "future/sealed-bundles/macos/integrity-contract.json"
+        },
+        sealManifestPath: "future/sealed-bundles/macos/bundle-seal-manifest.json",
+        integrityManifestPath: "future/sealed-bundles/macos/bundle-integrity-manifest.json",
+        rollbackCheckpointId: "sealed-bundle-checkpoint-macos",
+        materializationSteps: [
+          "resolve renderer/electron snapshot inputs",
+          "stage .app bundle layout",
+          "record verification manifest",
+          "declare staged-output manifests",
+          "declare bundle-seal and integrity manifests"
+        ],
+        reviewChecks: [
+          "launcher path remains reviewable",
+          "bundle layout frozen",
+          "seal manifest declared",
+          "integrity manifest path declared"
+        ],
+        tasks: [
+          {
+            id: "packaged-app-materialization-task-macos-directory",
+            label: "Directory materialization",
+            stageId: "packaged-app-directory-materialization",
+            taskState: "review-ready",
+            summary:
+              "The .app launcher path, bundle layout, and verification manifest are explicit for review even though no real app bundle is materialized.",
+            dependsOn: ["directory-materialization-macos"],
+            evidence: [
+              "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+              "future/packaged-app/macos/materialization-manifest.json"
+            ],
+            deliveryChainStageId: "delivery-chain-attestation-intake"
+          },
+          {
+            id: "packaged-app-materialization-task-macos-staged-output",
+            label: "Staged output readiness",
+            stageId: "packaged-app-staged-output-skeleton",
+            taskState: "review-ready",
+            summary:
+              "Staged-output manifests are chained to the same .app review lane so downstream output posture stays visible without producing any app bundle for real.",
+            dependsOn: ["packaged-app-materialization-task-macos-directory"],
+            evidence: [
+              "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+              "future/staged-output/macos/output-manifest.json",
+              "future/staged-output/macos/checksum-manifest.json"
+            ],
+            deliveryChainStageId: "delivery-chain-operator-review"
+          },
+          {
+            id: "packaged-app-materialization-task-macos-bundle-seal",
+            label: "Bundle-sealing readiness",
+            stageId: "packaged-app-bundle-sealing-skeleton",
+            taskState: "blocked",
+            summary:
+              "Seal and integrity manifests are linked, but the macOS bundle-seal handoff remains blocked while sealing and notarization stay metadata-only.",
+            dependsOn: ["packaged-app-materialization-task-macos-staged-output"],
+            evidence: [
+              "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+              "future/sealed-bundles/macos/bundle-seal-manifest.json",
+              "future/sealed-bundles/macos/bundle-integrity-manifest.json"
+            ],
+            deliveryChainStageId: "delivery-chain-promotion-readiness"
+          }
+        ],
+        blockedBy: [
+          "materialization remains review-only",
+          "staged outputs remain metadata-only",
+          "bundle sealing remains metadata-only",
+          "host-side execution remains disabled"
+        ]
+      },
+      {
+        id: "packaged-app-materialization-platform-linux",
+        platform: "linux",
+        status: "planned",
+        taskState: "review-ready",
+        summary:
+          "Linux keeps the packaged-app directory, staged-output manifests, and bundle-seal checkpoints visible as one local-only review lane while package targets remain blocked.",
+        currentTaskId: "packaged-app-materialization-task-linux-directory",
+        directoryMaterializationId: "directory-materialization-linux",
+        materializationId: "materialize-linux-packaged-app",
+        stagedOutputId: "staged-output-linux",
+        bundleSealingId: "bundle-sealing-linux",
+        verificationManifestPath: "future/packaged-app/linux/materialization-manifest.json",
+        stagedOutputRoot: "future/staged-output/linux/openclaw-studio",
+        localRoots: {
+          materializationRoot: "future/packaged-app/linux/openclaw-studio",
+          stagedOutputRoot: "future/staged-output/linux/openclaw-studio",
+          sealedBundleRoot: "future/sealed-bundles/linux/openclaw-studio"
+        },
+        stagedOutputManifestPaths: [
+          "future/staged-output/linux/output-manifest.json",
+          "future/staged-output/linux/checksum-manifest.json"
+        ],
+        manifests: {
+          directoryVerification: "future/packaged-app/linux/materialization-manifest.json",
+          stagedOutput: [
+            "future/staged-output/linux/output-manifest.json",
+            "future/staged-output/linux/checksum-manifest.json"
+          ],
+          bundleSeal: "future/sealed-bundles/linux/bundle-seal-manifest.json",
+          bundleIntegrity: "future/sealed-bundles/linux/bundle-integrity-manifest.json",
+          integrityContract: "future/sealed-bundles/linux/integrity-contract.json"
+        },
+        sealManifestPath: "future/sealed-bundles/linux/bundle-seal-manifest.json",
+        integrityManifestPath: "future/sealed-bundles/linux/bundle-integrity-manifest.json",
+        rollbackCheckpointId: "sealed-bundle-checkpoint-linux",
+        materializationSteps: [
+          "resolve renderer/electron snapshot inputs",
+          "stage packaged-app directory layout",
+          "record verification manifest",
+          "declare staged-output manifests",
+          "declare bundle-seal and integrity manifests"
+        ],
+        reviewChecks: [
+          "launcher path remains reviewable",
+          "staged output layout frozen",
+          "seal manifest declared",
+          "integrity manifest path declared"
+        ],
+        tasks: [
+          {
+            id: "packaged-app-materialization-task-linux-directory",
+            label: "Directory materialization",
+            stageId: "packaged-app-directory-materialization",
+            taskState: "review-ready",
+            summary:
+              "Launcher path, resources tree, and verification manifest are explicit so the Linux package root can be reviewed without creating a real bundle.",
+            dependsOn: ["directory-materialization-linux"],
+            evidence: [
+              "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+              "future/packaged-app/linux/materialization-manifest.json"
+            ],
+            deliveryChainStageId: "delivery-chain-attestation-intake"
+          },
+          {
+            id: "packaged-app-materialization-task-linux-staged-output",
+            label: "Staged output readiness",
+            stageId: "packaged-app-staged-output-skeleton",
+            taskState: "review-ready",
+            summary:
+              "Output and checksum manifests are chained to the same Linux review lane so staged-output posture stays inspectable without emitting any package target.",
+            dependsOn: ["packaged-app-materialization-task-linux-directory"],
+            evidence: [
+              "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+              "future/staged-output/linux/output-manifest.json",
+              "future/staged-output/linux/checksum-manifest.json"
+            ],
+            deliveryChainStageId: "delivery-chain-operator-review"
+          },
+          {
+            id: "packaged-app-materialization-task-linux-bundle-seal",
+            label: "Bundle-sealing readiness",
+            stageId: "packaged-app-bundle-sealing-skeleton",
+            taskState: "blocked",
+            summary:
+              "Seal and integrity manifests are linked, but the Linux bundle-seal handoff remains blocked while sealing and checksum publication stay metadata-only.",
+            dependsOn: ["packaged-app-materialization-task-linux-staged-output"],
+            evidence: [
+              "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+              "future/sealed-bundles/linux/bundle-seal-manifest.json",
+              "future/sealed-bundles/linux/bundle-integrity-manifest.json"
+            ],
+            deliveryChainStageId: "delivery-chain-promotion-readiness"
+          }
+        ],
+        blockedBy: [
+          "materialization remains review-only",
+          "staged outputs remain metadata-only",
+          "bundle sealing remains metadata-only",
+          "host-side execution remains disabled"
+        ]
+      }
     ]
   };
 }
@@ -706,7 +1091,7 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
       label: "Approval orchestration board",
       status: "in-review",
       owner: "release-manager",
-      summary: "Phase60 keeps approval routing explicit with typed review packets, reviewer queues, acknowledgement state, baton posture, escalation windows, and evidence closeout visibility.",
+      summary: "Phase60 keeps approval routing explicit with typed review packets, reviewer queues, acknowledgement state, baton posture, escalation windows, evidence closeout visibility, and release QA closeout posture.",
       deliveryChainStageId: "delivery-chain-operator-review",
       deliveryPhase: "review",
       evidence: [
@@ -715,6 +1100,7 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
         "release/REVIEW-EVIDENCE-CLOSEOUT.json",
         "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
         "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+        "release/RELEASE-QA-CLOSEOUT-READINESS.json",
         "release/RELEASE-APPROVAL-WORKFLOW.json"
       ],
       linkedLifecycleStages: ["request-approval", "handoff-slot"],
@@ -735,6 +1121,7 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
           "release/REVIEW-EVIDENCE-CLOSEOUT.json",
           "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
           "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+          "release/RELEASE-QA-CLOSEOUT-READINESS.json",
           "release/RELEASE-APPROVAL-WORKFLOW.json"
         ],
         reviewerNotes: [
@@ -799,6 +1186,7 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
         sealedEvidence: ["release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json"],
         pendingEvidence: [
           "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+          "release/RELEASE-QA-CLOSEOUT-READINESS.json",
           "release/RELEASE-APPROVAL-WORKFLOW.json",
           "release/RELEASE-DECISION-HANDOFF.json"
         ],
@@ -848,13 +1236,14 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
       label: "Release decision lifecycle",
       status: "planned",
       owner: "product-owner",
-      summary: "Staged release decision enforcement remains review-only, but phase60 now carries a dedicated packet, queue posture, acknowledgement blocker, and closeout expectation into the lifecycle board.",
+      summary: "Staged release decision enforcement remains review-only, but phase60 now carries a dedicated packet, queue posture, acknowledgement blocker, closeout expectation, and packaged-app QA continuity into the lifecycle board.",
       deliveryChainStageId: "delivery-chain-promotion-readiness",
       deliveryPhase: "promotion",
       evidence: [
         "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
         "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json",
-        "release/RELEASE-DECISION-HANDOFF.json"
+        "release/RELEASE-DECISION-HANDOFF.json",
+        "release/RELEASE-QA-CLOSEOUT-READINESS.json"
       ],
       linkedLifecycleStages: ["write-audit", "verify-host"],
       linkedSlotIds: [focusSlotId, "slot-connector-activate"],
@@ -871,7 +1260,8 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
         evidence: [
           "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
           "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json",
-          "release/RELEASE-DECISION-HANDOFF.json"
+          "release/RELEASE-DECISION-HANDOFF.json",
+          "release/RELEASE-QA-CLOSEOUT-READINESS.json"
         ],
         reviewerNotes: [
           {
@@ -926,7 +1316,8 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
         sealedEvidence: [],
         pendingEvidence: [
           "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
-          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json",
+          "release/RELEASE-QA-CLOSEOUT-READINESS.json"
         ],
         reviewerNotes: [
           {
@@ -957,13 +1348,14 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
       label: "Rollback settlement closeout",
       status: "planned",
       owner: "runtime-owner",
-      summary: "Rollback publication receipt closeout and settlement evidence remain blocked from execution, but phase60 promotes evidence closeout into a first-class operator review-loop state with overdue acknowledgement and escalation timing.",
+      summary: "Rollback publication receipt closeout and settlement evidence remain blocked from execution, but phase60 now also exposes the first safe approval / audit / rollback Stage C entry beside the overdue acknowledgement and escalation timing.",
       deliveryChainStageId: "delivery-chain-rollback-readiness",
       deliveryPhase: "rollback",
       evidence: [
         "release/REVIEW-EVIDENCE-CLOSEOUT.json",
         "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
-        "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+        "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
+        "release/APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT.json"
       ],
       linkedLifecycleStages: ["rollback-host", "verify-host"],
       linkedSlotIds: [focusSlotId, "slot-lane-apply"],
@@ -980,7 +1372,8 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
         evidence: [
           "release/REVIEW-EVIDENCE-CLOSEOUT.json",
           "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
-          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
+          "release/APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT.json"
         ],
         reviewerNotes: [
           {
@@ -1032,7 +1425,11 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
         reviewerQueueId: "reviewer-queue-rollback-settlement",
         closeoutWindowId: "closeout-window-rollback-settlement",
         sealedEvidence: ["release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json"],
-        pendingEvidence: ["release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json", "release/REVIEW-EVIDENCE-CLOSEOUT.json"],
+        pendingEvidence: [
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
+          "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+          "release/APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT.json"
+        ],
         reviewerNotes: [
           {
             id: "evidence-closeout-rollback-note",
@@ -1062,14 +1459,15 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
       label: "Final release decision board",
       status: "blocked",
       owner: "release-manager",
-      summary: "The final release decision remains explicitly blocked until signing, publish, promotion, and rollback stop being metadata-only, but the blocked baton and closeout posture are now still visible.",
+      summary: "The final release decision remains explicitly blocked until signing, publish, promotion, and rollback stop being metadata-only, but the blocked baton, QA closeout posture, and installer/signing handshake proof are now still visible.",
       deliveryChainStageId: "delivery-chain-publish-decision",
       deliveryPhase: "publish",
       evidence: [
         "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
         "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
         "release/PUBLISH-GATES.json",
-        "release/PROMOTION-GATES.json"
+        "release/PROMOTION-GATES.json",
+        "release/RELEASE-QA-CLOSEOUT-READINESS.json"
       ],
       linkedLifecycleStages: ["request-approval", "rollback-host"],
       linkedSlotIds: [focusSlotId],
@@ -1087,7 +1485,8 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
           "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
           "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
           "release/PUBLISH-GATES.json",
-          "release/PROMOTION-GATES.json"
+          "release/PROMOTION-GATES.json",
+          "release/RELEASE-QA-CLOSEOUT-READINESS.json"
         ],
         reviewerNotes: [
           {
@@ -1147,7 +1546,8 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
           "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
           "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
           "release/PUBLISH-GATES.json",
-          "release/PROMOTION-GATES.json"
+          "release/PROMOTION-GATES.json",
+          "release/RELEASE-QA-CLOSEOUT-READINESS.json"
         ],
         reviewerNotes: [
           {

@@ -3,6 +3,8 @@ import {
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseApprovalPipelineStage,
+  selectStudioReleasePackagedAppMaterializationContractPlatform,
+  selectStudioReleasePackagedAppMaterializationContractTask,
   selectStudioReleaseReviewerQueue,
   selectStudioWindowObservabilityActiveMapping,
   studioPageIds,
@@ -250,6 +252,21 @@ function resolveReviewSurfaceRouteLabel(
   const intentLabel = linkedIntent?.label ?? action?.windowIntentId ?? "No intent";
 
   return `${routeId} / ${workspaceViewId} / ${intentLabel}`;
+}
+
+function resolveReleaseBridgeValue(stageId: string | null | undefined): string | null {
+  switch (stageId) {
+    case "delivery-chain-promotion-readiness":
+      return "Packaged-app continuity / staged output / bundle sealing";
+    case "delivery-chain-publish-decision":
+      return "Installer-signing QA closeout / blocked publish gate";
+    case "delivery-chain-rollback-readiness":
+      return "Approval-audit-rollback Stage C entry / non-executing";
+    case "delivery-chain-operator-review":
+      return "Release QA closeout / reviewer evidence sealing";
+    default:
+      return null;
+  }
 }
 
 function matchesCommandMatcher(matcher: StudioCommandMatcher | undefined, context: CommandContextState): boolean {
@@ -634,6 +651,32 @@ function formatWorkflowPosture(posture: StudioShellState["windowing"]["workflow"
   }
 }
 
+function formatPackagedAppPlatform(
+  platform: StudioShellState["boundary"]["hostExecutor"]["releaseApprovalPipeline"]["deliveryChain"]["packagedAppMaterializationContract"]["platforms"][number]["platform"]
+): string {
+  switch (platform) {
+    case "windows":
+      return "Windows";
+    case "macos":
+      return "macOS";
+    default:
+      return "Linux";
+  }
+}
+
+function formatMaterializationTaskState(
+  state: StudioShellState["boundary"]["hostExecutor"]["releaseApprovalPipeline"]["deliveryChain"]["packagedAppMaterializationContract"]["platforms"][number]["taskState"]
+): string {
+  switch (state) {
+    case "review-ready":
+      return "Review-ready";
+    case "reviewing":
+      return "Reviewing";
+    default:
+      return "Blocked";
+  }
+}
+
 function formatReviewPostureRelationship(
   relationship: StudioShellState["windowing"]["observability"]["mappings"][number]["relationship"]
 ): string {
@@ -881,6 +924,10 @@ export function App() {
   const currentCloseoutWindow = selectStudioReleaseCloseoutWindow(releaseApprovalPipeline, currentReleaseStage);
   const currentDecisionHandoff = releaseApprovalPipeline.decisionHandoff;
   const currentEvidenceCloseout = releaseApprovalPipeline.evidenceCloseout;
+  const activeMaterializationPlatform =
+    selectStudioReleasePackagedAppMaterializationContractPlatform(releaseApprovalPipeline.deliveryChain) ?? null;
+  const activeMaterializationTask =
+    selectStudioReleasePackagedAppMaterializationContractTask(releaseApprovalPipeline.deliveryChain, activeMaterializationPlatform?.id) ?? null;
   const dockItems = createDockItems(hostTraceFocus);
   const activePageMeta = data.pages.find((page) => page.id === activePage) ?? {
     id: activePage,
@@ -2412,19 +2459,31 @@ export function App() {
       id: "release-depth-directory-materialization",
       label: "Packaged-app Directory Materialization",
       value: "PACKAGED-APP-DIRECTORY-SKELETON / PACKAGED-APP-DIRECTORY-MATERIALIZATION",
-      detail: "Packaged app directory plans now map into explicit per-platform staging roots, launcher paths, and verification manifests without creating any real packaged app."
+      detail:
+        "Packaged app directory plans now map into explicit per-platform staging roots, launcher paths, and verification manifests, and the Stage Explorer reads them back as the first task inside the same local-only materialization contract without creating any real packaged app."
+    },
+    {
+      id: "release-depth-local-materialization-contract",
+      label: "Packaged-app Local Materialization Contract",
+      value: activeMaterializationPlatform
+        ? `${formatPackagedAppPlatform(activeMaterializationPlatform.platform)} / ${formatMaterializationTaskState(activeMaterializationPlatform.taskState)}${activeMaterializationTask ? ` / ${activeMaterializationTask.label}` : ""}`
+        : "Unavailable",
+      detail:
+        "The packaged-app materialization contract now exposes per-platform task state, task evidence, and delivery-stage linkage, so staged-output and bundle-seal readiness read like one reviewer-facing local handoff spine instead of only flat path metadata."
     },
     {
       id: "release-depth-staged-output",
       label: "Packaged-app Staged Output Skeleton",
       value: "PACKAGED-APP-STAGED-OUTPUT-SKELETON",
-      detail: "Directory materialization now feeds explicit staged outputs and manifests without creating real packaged artifacts."
+      detail:
+        "Directory materialization now feeds explicit staged outputs and manifests, and the Stage Explorer keeps those output roots, task evidence, and current review state visible next to the same per-platform materialization contract without creating real packaged artifacts."
     },
     {
       id: "release-depth-bundle-sealing",
       label: "Packaged-app Bundle Sealing Skeleton",
       value: "PACKAGED-APP-BUNDLE-SEALING-SKELETON",
-      detail: "Staged outputs now feed explicit sealing manifests and integrity checkpoints without freezing or signing any real packaged bundle."
+      detail:
+        "Staged outputs now feed explicit sealing manifests and integrity checkpoints, and the Stage Explorer keeps seal paths inspectable as read-only bundle-sealing posture without freezing or signing any real packaged bundle."
     },
     {
       id: "release-depth-bundle-integrity",
@@ -2531,6 +2590,13 @@ export function App() {
       label: "Installer Channel Routing",
       value: "INSTALLER-CHANNEL-ROUTING",
       detail: "Review-only installer outputs now map into explicit alpha/beta/stable routing manifests without routing any artifact for real."
+    },
+    {
+      id: "release-depth-release-qa-closeout-readiness",
+      label: "Release QA Closeout Readiness",
+      value: "RELEASE-QA-CLOSEOUT-READINESS / RELEASE-CHECKLIST / RELEASE-SUMMARY",
+      detail:
+        "Packaged-app materialization continuity, installer/signing/notarization handshake verification, checklist proof, and delivery closeout posture now stay grouped as one local-only QA surface without building, signing, or publishing anything."
     },
     {
       id: "release-depth-channel-promotion-evidence",
@@ -2722,6 +2788,14 @@ export function App() {
         "Publication receipt closeout contracts now feed settlement ledgers, receipt closeout acknowledgements, and recovery-ready closeout evidence without mutating any live publish state."
     },
     {
+      id: "release-depth-approval-audit-rollback-entry-contract",
+      label: "Approval / Audit / Rollback Entry Contract",
+      value:
+        "APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT / ATTESTATION-APPLY-AUDIT-PACKS / ROLLBACK-LIVE-READINESS-CONTRACTS",
+      detail:
+        "The first safe Stage C entry now ties approval workflow, audit retention posture, rollback live-readiness, receipt settlement closeout, and delivery QA proof into one non-executing operator-facing contract."
+    },
+    {
       id: "release-depth-approval",
       label: "Release Approval Workflow",
       value: "RELEASE-APPROVAL-WORKFLOW / PUBLISH-GATES / PUBLISH-ROLLBACK-HANDSHAKE",
@@ -2738,7 +2812,7 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase60 slice 28 keeps replay scenario packs local-only, then turns the slice27 observability closeout into a review-state continuity contract that threads the active review surface, window / lane / board spine, reviewer queue, closeout timing, mapped review path, and inspector / windows readouts through the same local-only continuity chain without installing, publishing, signing, orchestrating live approvals, advancing staged decision lifecycles, settling publication receipts, rolling back publish state, or enabling host-side execution."
+        "Phase60 slice 31 keeps replay, review-state continuity, and packaged-app materialization task-state linkage threaded through one local-only chain, so the active review surface, window / lane / board spine, reviewer queue, closeout timing, current task evidence, materialization roots, staged-output handoff, and bundle-sealing posture stay readable without installing, publishing, signing, or enabling host-side execution."
     }
   ];
   const buildPaletteEntryDetailLines = (
@@ -2769,6 +2843,16 @@ export function App() {
         id: `${action.id}-detail-surface`,
         label: "Review surface",
         value: `${formatReviewSurfaceKind(action.reviewSurfaceKind)} / ${stage?.label ?? action.deliveryChainStageId ?? "No stage"}`
+      });
+    }
+
+    const releaseBridgeValue = resolveReleaseBridgeValue(action.deliveryChainStageId);
+
+    if (releaseBridgeValue) {
+      lines.push({
+        id: `${action.id}-detail-release-bridge`,
+        label: "Release bridge",
+        value: releaseBridgeValue
       });
     }
 
@@ -4246,15 +4330,15 @@ export function App() {
                   <h2>Delivery-chain Workspace</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but phase60 slice 28 now keeps the review-only delivery chain anchored in a
+                  The alpha shell still does not build a real installer, but phase60 slice 31 now keeps the review-only delivery chain anchored in a
                   usable stage explorer plus route replay board, screenshot-driven acceptance review pack, explicit acceptance pass progression,
                   screenshot pass records, a Reviewer Flow Ladder, an Acceptance Reading Queue, a Reviewer Signoff Board, a Signoff Readiness Queue, a
                   Final Review Closeout, a Final Review Settlement, a Final Verdict Console, an Acceptance Closeout Timeline, a Pack Closeout Board, an
-                  Acceptance Storyboard, an Evidence Dossier, Acceptance Evidence Continuity, an Evidence Trace Lens, and a Review State Continuity
-                  contract, so review-surface navigation, remembered handoff restore, active sequence replay, multi-window coverage, operator board
-                  ownership, reviewer queues, acknowledgement state, stage-level artifacts, promotion review flow, publish gating, rollback readiness,
-                  blockers, handoff posture, ordered companion steps, explicit companion review paths, and cross-window shared-state continuity readouts
-                  stay visible as one local-only non-executing surface.
+                  Acceptance Storyboard, an Evidence Dossier, Acceptance Evidence Continuity, an Evidence Trace Lens, a Review State Continuity
+                  contract, and a packaged-app materialization contract with current task evidence, so review-surface navigation, remembered handoff
+                  restore, active sequence replay, multi-window coverage, operator board ownership, reviewer queues, acknowledgement state,
+                  stage-level artifacts, publish gating, rollback readiness, blockers, handoff posture, ordered companion steps, explicit companion
+                  review paths, and cross-window shared-state continuity readouts stay visible as one local-only non-executing surface.
                 </p>
               </div>
               <div className="foundation-card__metrics">
@@ -4354,7 +4438,7 @@ export function App() {
             onRunCompanionRouteHistory={handleRunCompanionRouteHistory}
             eyebrow="Phase60"
             title="Delivery-chain Workspace"
-            summary="Phase60 slice 28 keeps coverage-driven review-surface navigation, multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, companion route-history memory, and the slice27 observability closeout in place, then turns them into a selector-backed review-state continuity contract so route replay board, replay scenario packs, capture review, proof bundles, continuity handoffs, scenario-level signoff verdicts, closeout timing, verdict progression, pack settlement posture, inspector continuity readouts, and windows-rail continuity linkage stay readable as one ordered local-only interface-review walkthrough."
+            summary="Phase60 slice 31 keeps the selector-backed review-state continuity contract from slice28 in place, then deepens the same Stage Explorer with packaged-app task-state linkage so per-platform current task, task evidence, verification manifests, staged-output roots, seal manifests, rollback handoff posture, route replay packs, continuity handoffs, closeout timing, and windows-rail linkage stay readable as one ordered local-only interface-review walkthrough."
           />
 
           <section className="surface card window-workbench">

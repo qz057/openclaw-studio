@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-packaged-app-directory-materialization/v1",
-  "generatedAt": "2026-04-07T16:22:49.691Z",
+  "generatedAt": "2026-04-07T17:06:37.622Z",
   "phase": "phase60",
   "mode": "review-only",
   "directories": [
@@ -10,7 +10,12 @@
       "assemblyId": "windows",
       "packagedAppDirectoryId": "packaged-app-directory-windows",
       "packagedAppMaterializationId": "materialize-windows-packaged-app",
+      "stagedOutputId": "staged-output-windows",
+      "bundleSealingId": "bundle-sealing-windows",
+      "integrityContractId": "integrity-contract-windows",
+      "localMaterializationContractId": "local-materialization-contract-windows",
       "status": "planned",
+      "taskState": "review-ready",
       "stagedOutputRoot": "future/packaged-app/windows/OpenClaw Studio",
       "verificationManifestPath": "future/packaged-app/windows/materialization-manifest.json",
       "launcherPath": "OpenClaw Studio.exe",
@@ -18,6 +23,11 @@
         "resources/app.asar",
         "resources/app/package.json",
         "resources/app/assets"
+      ],
+      "reviewEvidence": [
+        "release/BUNDLE-ASSEMBLY.json",
+        "release/PACKAGED-APP-DIRECTORY-SKELETON.json",
+        "future/packaged-app/windows/materialization-manifest.json"
       ],
       "steps": [
         "resolve renderer/electron snapshot inputs",
@@ -37,7 +47,12 @@
       "assemblyId": "macos",
       "packagedAppDirectoryId": "packaged-app-directory-macos",
       "packagedAppMaterializationId": "materialize-macos-packaged-app",
+      "stagedOutputId": "staged-output-macos",
+      "bundleSealingId": "bundle-sealing-macos",
+      "integrityContractId": "integrity-contract-macos",
+      "localMaterializationContractId": "local-materialization-contract-macos",
       "status": "planned",
+      "taskState": "review-ready",
       "stagedOutputRoot": "future/packaged-app/macos/OpenClaw Studio.app",
       "verificationManifestPath": "future/packaged-app/macos/materialization-manifest.json",
       "launcherPath": "Contents/MacOS/OpenClaw Studio",
@@ -45,6 +60,11 @@
         "Contents/Info.plist",
         "Contents/Resources/app.asar",
         "Contents/Resources/app/package.json"
+      ],
+      "reviewEvidence": [
+        "release/BUNDLE-ASSEMBLY.json",
+        "release/PACKAGED-APP-DIRECTORY-SKELETON.json",
+        "future/packaged-app/macos/materialization-manifest.json"
       ],
       "steps": [
         "resolve renderer/electron snapshot inputs",
@@ -64,7 +84,12 @@
       "assemblyId": "linux",
       "packagedAppDirectoryId": "packaged-app-directory-linux",
       "packagedAppMaterializationId": "materialize-linux-packaged-app",
+      "stagedOutputId": "staged-output-linux",
+      "bundleSealingId": "bundle-sealing-linux",
+      "integrityContractId": "integrity-contract-linux",
+      "localMaterializationContractId": "local-materialization-contract-linux",
       "status": "planned",
+      "taskState": "review-ready",
       "stagedOutputRoot": "future/packaged-app/linux/openclaw-studio",
       "verificationManifestPath": "future/packaged-app/linux/materialization-manifest.json",
       "launcherPath": "openclaw-studio",
@@ -72,6 +97,11 @@
         "resources/app.asar",
         "resources/app/package.json",
         "resources/app/assets"
+      ],
+      "reviewEvidence": [
+        "release/BUNDLE-ASSEMBLY.json",
+        "release/PACKAGED-APP-DIRECTORY-SKELETON.json",
+        "future/packaged-app/linux/materialization-manifest.json"
       ],
       "steps": [
         "resolve renderer/electron snapshot inputs",

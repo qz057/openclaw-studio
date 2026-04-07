@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-packaged-app-bundle-sealing-skeleton/v1",
-  "generatedAt": "2026-04-07T16:22:49.691Z",
+  "generatedAt": "2026-04-07T17:06:37.622Z",
   "phase": "phase60",
   "mode": "review-only",
   "bundles": [
@@ -10,15 +10,30 @@
       "stagedOutputId": "staged-output-windows",
       "integrityContractId": "integrity-contract-windows",
       "installerFlowId": "orchestrate-windows-builders",
+      "localMaterializationContractId": "local-materialization-contract-windows",
       "status": "planned",
+      "taskState": "review-ready",
       "sealedBundleRoot": "future/sealed-bundles/windows/OpenClaw Studio",
       "sealManifestPath": "future/sealed-bundles/windows/bundle-seal-manifest.json",
       "integrityManifestPath": "future/sealed-bundles/windows/bundle-integrity-manifest.json",
       "rollbackCheckpointId": "sealed-bundle-checkpoint-windows",
+      "taskDependencies": [
+        "staged-output-windows"
+      ],
+      "reviewEvidence": [
+        "future/staged-output/windows/output-manifest.json",
+        "future/staged-output/windows/checksum-manifest.json",
+        "future/sealed-bundles/windows/bundle-seal-manifest.json"
+      ],
       "reviewChecks": [
         "staged output layout frozen",
         "seal manifest declared",
         "integrity manifest path declared"
+      ],
+      "blockedBy": [
+        "bundle sealing remains metadata-only",
+        "digest publication remains blocked",
+        "host-side execution remains disabled"
       ],
       "canSeal": false
     },
@@ -28,15 +43,30 @@
       "stagedOutputId": "staged-output-macos",
       "integrityContractId": "integrity-contract-macos",
       "installerFlowId": "orchestrate-macos-builders",
+      "localMaterializationContractId": "local-materialization-contract-macos",
       "status": "planned",
+      "taskState": "review-ready",
       "sealedBundleRoot": "future/sealed-bundles/macos/OpenClaw Studio.app",
       "sealManifestPath": "future/sealed-bundles/macos/bundle-seal-manifest.json",
       "integrityManifestPath": "future/sealed-bundles/macos/bundle-integrity-manifest.json",
       "rollbackCheckpointId": "sealed-bundle-checkpoint-macos",
+      "taskDependencies": [
+        "staged-output-macos"
+      ],
+      "reviewEvidence": [
+        "future/staged-output/macos/output-manifest.json",
+        "future/staged-output/macos/checksum-manifest.json",
+        "future/sealed-bundles/macos/bundle-seal-manifest.json"
+      ],
       "reviewChecks": [
         "bundle layout frozen",
         "seal manifest declared",
         "integrity manifest path declared"
+      ],
+      "blockedBy": [
+        "bundle sealing remains metadata-only",
+        "digest publication remains blocked",
+        "host-side execution remains disabled"
       ],
       "canSeal": false
     },
@@ -46,15 +76,30 @@
       "stagedOutputId": "staged-output-linux",
       "integrityContractId": "integrity-contract-linux",
       "installerFlowId": "orchestrate-linux-builders",
+      "localMaterializationContractId": "local-materialization-contract-linux",
       "status": "planned",
+      "taskState": "review-ready",
       "sealedBundleRoot": "future/sealed-bundles/linux/openclaw-studio",
       "sealManifestPath": "future/sealed-bundles/linux/bundle-seal-manifest.json",
       "integrityManifestPath": "future/sealed-bundles/linux/bundle-integrity-manifest.json",
       "rollbackCheckpointId": "sealed-bundle-checkpoint-linux",
+      "taskDependencies": [
+        "staged-output-linux"
+      ],
+      "reviewEvidence": [
+        "future/staged-output/linux/output-manifest.json",
+        "future/staged-output/linux/checksum-manifest.json",
+        "future/sealed-bundles/linux/bundle-seal-manifest.json"
+      ],
       "reviewChecks": [
         "staged output layout frozen",
         "seal manifest declared",
         "integrity manifest path declared"
+      ],
+      "blockedBy": [
+        "bundle sealing remains metadata-only",
+        "digest publication remains blocked",
+        "host-side execution remains disabled"
       ],
       "canSeal": false
     }
