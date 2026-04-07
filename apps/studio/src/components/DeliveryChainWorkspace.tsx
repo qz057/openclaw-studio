@@ -83,6 +83,21 @@ type ReplayScenarioPassRecord = {
   badges: string[];
 };
 
+type ReplayReviewWorkflowStepKind = "route" | "checks" | "capture-group" | "evidence-item" | "continuity-handoff";
+
+type ReplayReviewWorkflowStep = {
+  id: string;
+  kind: ReplayReviewWorkflowStepKind;
+  stepLabel: string;
+  label: string;
+  status: string;
+  owner: string;
+  detail: string;
+  tone: Tone;
+  traceId: string | null;
+  badges: string[];
+};
+
 type ReplayEvidenceTraceKind = "all" | "capture-group" | "evidence-item" | "continuity-handoff";
 
 type ReplayEvidenceTrace = {
@@ -405,6 +420,23 @@ function formatReplayEvidenceTraceKind(kind: ReplayEvidenceTraceKind): string {
       return "Continuity handoff";
     default:
       return "All evidence";
+  }
+}
+
+function formatReplayReviewWorkflowStepKind(kind: ReplayReviewWorkflowStepKind): string {
+  switch (kind) {
+    case "route":
+      return "Replay route";
+    case "checks":
+      return "Acceptance checks";
+    case "capture-group":
+      return "Capture group";
+    case "evidence-item":
+      return "Proof dossier";
+    case "continuity-handoff":
+      return "Continuity handoff";
+    default:
+      return "Reviewer step";
   }
 }
 
@@ -1394,6 +1426,8 @@ export function DeliveryChainWorkspace({
       })
     : [];
   const activeReplayScenarioReadyPassCount = activeReplayScenarioPassCards.filter((pass) => pass.tone === "positive").length;
+  const activeReplayScenarioRoutePassRecord = activeReplayScenarioPassRecords[0] ?? null;
+  const activeReplayScenarioChecksPassRecord = activeReplayScenarioPassRecords[1] ?? null;
   const activeReplayScenarioPackReadyPassCount = activeReplayScenarioPackEntries.reduce((total, entry) => {
     const targetAction = reviewSurfaceActionById.get(entry.targetActionId) ?? null;
     const scenarioRouteState = entry.routeStateId
@@ -1458,6 +1492,165 @@ export function DeliveryChainWorkspace({
   const activeReplayEvidenceTracePackOnlyLinkCount =
     (activeReplayEvidenceTrace?.hiddenEvidenceItemCount ?? 0) + (activeReplayEvidenceTrace?.hiddenScreenshotCount ?? 0);
   const hasActiveReplayEvidenceTraceFilter = Boolean(activeReplayEvidenceTrace && activeReplayEvidenceTrace.kind !== "all");
+  const activeReplayScenarioFocusedCaptureGroup =
+    (activeReplayEvidenceTrace?.kind === "capture-group"
+      ? activeReplayScenarioCaptureGroups.find((group) => createReplayEvidenceTraceCaptureGroupId(group.id) === activeReplayEvidenceTrace.id) ?? null
+      : null) ??
+    activeReplayScenarioCaptureGroups.find((group) => group.tone !== "positive") ??
+    activeReplayScenarioCaptureGroups[0] ??
+    null;
+  const activeReplayScenarioFocusedEvidenceItem =
+    (activeReplayEvidenceTrace?.kind === "evidence-item"
+      ? activeReplayScenarioEvidenceItems.find((item) => createReplayEvidenceTraceEvidenceItemId(item.id) === activeReplayEvidenceTrace.id) ?? null
+      : null) ??
+    activeReplayScenarioEvidenceItems.find((item) => item.posture === "pending") ??
+    activeReplayScenarioEvidenceItems.find((item) => item.posture === "staged") ??
+    activeReplayScenarioEvidenceItems[0] ??
+    null;
+  const activeReplayScenarioFocusedEvidenceLinkedScreenshots = activeReplayScenarioFocusedEvidenceItem
+    ? activeReplayScenarioScreenshotItems.filter((item) => item.linkedEvidenceItemIds?.includes(activeReplayScenarioFocusedEvidenceItem.id))
+    : [];
+  const activeReplayScenarioFocusedContinuityHandoff =
+    (activeReplayEvidenceTrace?.kind === "continuity-handoff"
+      ? activeReplayScenarioRelevantContinuityHandoffs.find(
+          (handoff) => createReplayEvidenceTraceContinuityHandoffId(handoff.id) === activeReplayEvidenceTrace.id
+        ) ?? null
+      : null) ??
+    activeReplayScenarioRelevantContinuityHandoffs.find((handoff) => handoff.state !== "ready") ??
+    activeReplayScenarioRelevantContinuityHandoffs[0] ??
+    null;
+  const activeReplayScenarioReviewWorkflow: ReplayReviewWorkflowStep[] = activeReplayScenarioEntry
+    ? [
+        {
+          id: `${activeReplayScenarioEntry.id}-workflow-route`,
+          kind: "route",
+          stepLabel: "Step 01",
+          label: "Restore replay route",
+          status: activeReplayScenarioRoutePassRecord?.status ?? "Route staging",
+          owner: "Replay route contract",
+          detail:
+            activeReplayScenarioRoutePassRecord?.detail ??
+            `${replayRestoreStage?.label ?? "No stage"} / ${replayRestoreWindow?.label ?? "No window"} / ${replayRestoreLane?.label ?? "No lane"} / ${
+              replayRestoreBoard?.label ?? "No board"
+            }`,
+          tone: activeReplayScenarioRoutePassRecord?.tone ?? "warning",
+          traceId: null,
+          badges: [activeReplayScenarioRouteLabel, replayRestoreSequence?.label ?? "No replay sequence"]
+        },
+        {
+          id: `${activeReplayScenarioEntry.id}-workflow-checks`,
+          kind: "checks",
+          stepLabel: "Step 02",
+          label: "Lock acceptance checks",
+          status: activeReplayScenarioChecksPassRecord?.status ?? "Checks blocked",
+          owner: "Scenario checklist review",
+          detail:
+            activeReplayScenarioChecksPassRecord?.detail ??
+            `${activeReplayScenarioAcceptanceReady} / ${activeReplayScenarioAcceptanceChecks.length} acceptance checks ready`,
+          tone: activeReplayScenarioChecksPassRecord?.tone ?? "warning",
+          traceId: null,
+          badges: [
+            `${activeReplayScenarioAcceptanceReady} / ${activeReplayScenarioAcceptanceChecks.length} checks ready`,
+            activeReplayScenarioReviewerPosture
+          ]
+        },
+        {
+          id: `${activeReplayScenarioEntry.id}-workflow-capture`,
+          kind: "capture-group",
+          stepLabel: "Step 03",
+          label: "Compare capture group",
+          status: activeReplayScenarioFocusedCaptureGroup
+            ? `${activeReplayScenarioFocusedCaptureGroup.readyCount} / ${activeReplayScenarioFocusedCaptureGroup.totalCount} staged`
+            : "Capture flow missing",
+          owner: "Capture Review Flow",
+          detail: activeReplayScenarioFocusedCaptureGroup
+            ? `${activeReplayScenarioFocusedCaptureGroup.comparisonFrame} keeps ${activeReplayScenarioFocusedCaptureGroup.linkedEvidenceItems.length} proof links attached while the storyboard is reviewed.`
+            : "No grouped screenshot comparisons are defined for this acceptance card.",
+          tone: activeReplayScenarioFocusedCaptureGroup?.tone ?? "warning",
+          traceId: activeReplayScenarioFocusedCaptureGroup
+            ? createReplayEvidenceTraceCaptureGroupId(activeReplayScenarioFocusedCaptureGroup.id)
+            : null,
+          badges: activeReplayScenarioFocusedCaptureGroup
+            ? [
+                activeReplayScenarioFocusedCaptureGroup.label,
+                `${activeReplayScenarioFocusedCaptureGroup.items.length} storyboard shots`,
+                `${activeReplayScenarioFocusedCaptureGroup.linkedEvidenceItems.length} proof links`
+              ]
+            : [`${activeReplayScenarioCaptureGroups.length} capture groups`]
+        },
+        {
+          id: `${activeReplayScenarioEntry.id}-workflow-evidence`,
+          kind: "evidence-item",
+          stepLabel: "Step 04",
+          label: "Read proof dossier",
+          status: activeReplayScenarioFocusedEvidenceItem
+            ? `${formatReplayScenarioEvidencePosture(activeReplayScenarioFocusedEvidenceItem.posture)} proof item`
+            : "Proof dossier missing",
+          owner: activeReplayScenarioFocusedEvidenceItem?.owner ?? "Evidence bundle linkage",
+          detail: activeReplayScenarioFocusedEvidenceItem
+            ? `${activeReplayScenarioFocusedEvidenceItem.dossierSection} stays linked to ${activeReplayScenarioFocusedEvidenceLinkedScreenshots.length} storyboard shots so the proof packet reads in the same order as the capture flow.`
+            : "No evidence dossier items are defined for this acceptance card.",
+          tone: activeReplayScenarioFocusedEvidenceItem
+            ? resolveReplayScenarioEvidenceTone(activeReplayScenarioFocusedEvidenceItem.posture)
+            : "warning",
+          traceId: activeReplayScenarioFocusedEvidenceItem
+            ? createReplayEvidenceTraceEvidenceItemId(activeReplayScenarioFocusedEvidenceItem.id)
+            : null,
+          badges: activeReplayScenarioFocusedEvidenceItem
+            ? [
+                activeReplayScenarioFocusedEvidenceItem.dossierSection,
+                `${activeReplayScenarioFocusedEvidenceLinkedScreenshots.length} linked captures`,
+                activeReplayScenarioFocusedEvidenceItem.artifact
+              ]
+            : [`${activeReplayScenarioEvidenceItems.length} proof items`]
+        },
+        {
+          id: `${activeReplayScenarioEntry.id}-workflow-continuity`,
+          kind: "continuity-handoff",
+          stepLabel: "Step 05",
+          label: "Confirm continuity handoff",
+          status: activeReplayScenarioFocusedContinuityHandoff
+            ? formatReplayEvidenceContinuityState(activeReplayScenarioFocusedContinuityHandoff.state)
+            : "Continuity missing",
+          owner: "Acceptance evidence continuity",
+          detail: activeReplayScenarioFocusedContinuityHandoff
+            ? activeReplayScenarioFocusedContinuityHandoff.detail
+            : "No continuity handoffs are linked to this acceptance card.",
+          tone: activeReplayScenarioFocusedContinuityHandoff
+            ? resolveReplayEvidenceContinuityTone(activeReplayScenarioFocusedContinuityHandoff.state)
+            : "warning",
+          traceId: activeReplayScenarioFocusedContinuityHandoff
+            ? createReplayEvidenceTraceContinuityHandoffId(activeReplayScenarioFocusedContinuityHandoff.id)
+            : null,
+          badges: activeReplayScenarioFocusedContinuityHandoff
+            ? [
+                activeReplayScenarioFocusedContinuityHandoff.sourceLabel,
+                activeReplayScenarioFocusedContinuityHandoff.targetLabel,
+                `${activeReplayScenarioFocusedContinuityHandoff.linkedEvidenceItemIds.length} proof anchors`
+              ]
+            : [`${activeReplayScenarioRelevantContinuityHandoffs.length} continuity handoffs`]
+        }
+      ]
+    : [];
+  const activeReplayScenarioReadyWorkflowStepCount = activeReplayScenarioReviewWorkflow.filter((step) => step.tone === "positive").length;
+  const activeReplayScenarioNextWorkflowStep =
+    activeReplayScenarioReviewWorkflow.find((step) => step.tone !== "positive") ?? null;
+  const activeReplayScenarioWorkflowFallbackStep =
+    activeReplayScenarioReviewWorkflow[activeReplayScenarioReviewWorkflow.length - 1] ?? null;
+  const activeReplayScenarioFocusedWorkflowStep =
+    activeReplayScenarioReviewWorkflow.find(
+      (step) => step.traceId !== null && step.traceId === activeReplayEvidenceTrace?.id
+    ) ??
+    activeReplayScenarioNextWorkflowStep ??
+    activeReplayScenarioWorkflowFallbackStep ??
+    null;
+  const activeReplayScenarioWorkflowRemainingStepCount = Math.max(
+    activeReplayScenarioReviewWorkflow.length - activeReplayScenarioReadyWorkflowStepCount,
+    0
+  );
+  const isActiveReplayScenarioWorkflowComplete =
+    activeReplayScenarioReviewWorkflow.length > 0 &&
+    activeReplayScenarioReadyWorkflowStepCount === activeReplayScenarioReviewWorkflow.length;
   const panelClassName = [
     nested ? "delivery-chain-workspace delivery-chain-workspace--nested" : "surface card delivery-chain-workspace",
     compact ? "delivery-chain-workspace--compact" : ""
@@ -2154,6 +2347,134 @@ export function DeliveryChainWorkspace({
                       </div>
                     </div>
                   </article>
+                  {activeReplayScenarioEntry ? (
+                    <article
+                      className={`windowing-summary-card${
+                        isActiveReplayScenarioWorkflowComplete ? " windowing-summary-card--active" : ""
+                      }`}
+                    >
+                      <span>Reviewer Flow Ladder</span>
+                      <strong>
+                        {activeReplayScenarioReadyWorkflowStepCount} / {activeReplayScenarioReviewWorkflow.length} reviewer steps ready
+                      </strong>
+                      <p>
+                        Ordered reviewer walkthrough keeps replay route restore, acceptance checks, capture review, proof dossier, and continuity
+                        handoff in one local-only reading order instead of making the reviewer scan the full pack out of sequence.
+                      </p>
+                      <div className="trace-note-links">
+                        <span
+                          className={`windowing-badge${
+                            isActiveReplayScenarioWorkflowComplete ? " windowing-badge--active" : ""
+                          }`}
+                        >
+                          {isActiveReplayScenarioWorkflowComplete
+                            ? "Walkthrough aligned"
+                            : `${activeReplayScenarioWorkflowRemainingStepCount} steps still need review`}
+                        </span>
+                        <span className="windowing-badge">{activeReplayScenarioReviewerPosture}</span>
+                        <span className="windowing-badge">{activeReplayScenarioEvidenceBundleStatusLabel}</span>
+                        <span className="windowing-badge">{activeReplayScenarioPack.pack.safety}</span>
+                        {hasActiveReplayEvidenceTraceFilter && activeReplayScenarioFocusedWorkflowStep ? (
+                          <span className="windowing-badge">
+                            Lens focus: {activeReplayScenarioFocusedWorkflowStep.stepLabel}
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="windowing-preview-line windowing-preview-line--stacked">
+                        <span>Next reviewer handoff</span>
+                        <strong>
+                          {activeReplayScenarioNextWorkflowStep
+                            ? `${activeReplayScenarioNextWorkflowStep.stepLabel} / ${activeReplayScenarioNextWorkflowStep.label}`
+                            : "Walkthrough aligned"}
+                        </strong>
+                        <p>
+                          {activeReplayScenarioNextWorkflowStep?.detail ??
+                            "Replay route restore, acceptance checks, capture review, proof dossier, and continuity handoff are aligned across the current local-only review pack."}
+                        </p>
+                      </div>
+                      {activeReplayScenarioNextWorkflowStep?.traceId ? (
+                        <div className="windowing-card__actions">
+                          <button
+                            type="button"
+                            className="secondary-button"
+                            onClick={() => toggleReplayEvidenceTrace(activeReplayScenarioNextWorkflowStep.traceId!)}
+                          >
+                            {activeReplayEvidenceTrace?.id === activeReplayScenarioNextWorkflowStep.traceId
+                              ? "Show full pack"
+                              : "Focus next step"}
+                          </button>
+                        </div>
+                      ) : hasActiveReplayEvidenceTraceFilter ? (
+                        <div className="windowing-card__actions">
+                          <button
+                            type="button"
+                            className="secondary-button"
+                            onClick={() => setActiveReplayEvidenceTraceId(ALL_REPLAY_EVIDENCE_TRACE_ID)}
+                          >
+                            Show full pack
+                          </button>
+                        </div>
+                      ) : null}
+                      <div className="delivery-chain-workspace__pass-record-list">
+                        {activeReplayScenarioReviewWorkflow.map((step) => {
+                          const activeTrace = step.traceId !== null && activeReplayEvidenceTrace?.id === step.traceId;
+                          const focusedStep = step.id === activeReplayScenarioFocusedWorkflowStep?.id;
+                          const nextStep = step.id === activeReplayScenarioNextWorkflowStep?.id;
+                          const canResetTrace = nextStep && step.traceId === null && hasActiveReplayEvidenceTraceFilter;
+
+                          return (
+                            <div
+                              key={step.id}
+                              className={`delivery-chain-workspace__pass-record delivery-chain-workspace__pass-record--${step.tone}${
+                                focusedStep ? " delivery-chain-workspace__pass-record--current" : ""
+                              }${nextStep ? " delivery-chain-workspace__pass-record--next" : ""}`}
+                            >
+                              <div className="delivery-chain-workspace__pass-record-header">
+                                <span>{step.stepLabel}</span>
+                                <strong>{step.status}</strong>
+                              </div>
+                              <div className="delivery-chain-workspace__pass-record-body">
+                                <h3>{step.label}</h3>
+                                <p>{step.detail}</p>
+                              </div>
+                              <div className="trace-note-links">
+                                <span className={`windowing-badge${step.tone === "positive" ? " windowing-badge--active" : ""}`}>
+                                  {formatReplayReviewWorkflowStepKind(step.kind)}
+                                </span>
+                                <span className="windowing-badge">{step.owner}</span>
+                                {nextStep ? <span className="windowing-badge windowing-badge--active">Next reviewer step</span> : null}
+                                {activeTrace ? <span className="windowing-badge windowing-badge--active">Trace lens focused</span> : null}
+                                {step.badges.map((badge) => (
+                                  <span key={`${step.id}-${badge}`} className="windowing-badge">
+                                    {badge}
+                                  </span>
+                                ))}
+                                {step.traceId ? (
+                                  <button
+                                    type="button"
+                                    className={`secondary-button delivery-chain-workspace__trace-toggle${
+                                      activeTrace ? " delivery-chain-workspace__trace-toggle--active" : ""
+                                    }`}
+                                    onClick={() => toggleReplayEvidenceTrace(step.traceId!)}
+                                  >
+                                    {activeTrace ? "Show full pack" : "Focus this step"}
+                                  </button>
+                                ) : canResetTrace ? (
+                                  <button
+                                    type="button"
+                                    className="secondary-button delivery-chain-workspace__trace-toggle"
+                                    onClick={() => setActiveReplayEvidenceTraceId(ALL_REPLAY_EVIDENCE_TRACE_ID)}
+                                  >
+                                    Show full pack
+                                  </button>
+                                ) : null}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </article>
+                  ) : null}
                   {activeReplayScenarioEntry ? (
                     <article
                       className={`windowing-summary-card${

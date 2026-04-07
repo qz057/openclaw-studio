@@ -54,6 +54,7 @@
   - phase60 slice15 已继续把 acceptance pass layer 推进成 Product Review Console / Screenshot Pass Records / Capture Review Flow / Proof-linked Evidence Bundle，让 delivery workspace 可以把 grouped screenshot comparison、linked proof mapping、以及 product-review console polish 收敛成更像真实产品审阅台的本地验收链
   - phase60 slice16 已继续把 Product Review Console 推进成 Acceptance Storyboard / Evidence Dossier / Acceptance Evidence Continuity，让 delivery workspace 可以把 ordered screenshot shots、viewport / framing guidance、owner-tagged proof bundles、review-pack scenario handoff、proof anchors、以及 screenshot capture lineage 收敛成更完整的本地验收证据链
   - phase60 slice17 已继续把 Acceptance Storyboard / Evidence Dossier / Acceptance Evidence Continuity 推进成 Evidence Trace Lens，让 delivery workspace 可以把 focused proof trails、storyboard shots、dossier proof items、以及 continuity handoffs 收敛成更易读的本地产品审阅链
+  - phase60 slice18 已继续把 Evidence Trace Lens 推进成 acceptance-area Reviewer Flow Ladder，让 delivery workspace 可以把 replay route restore、acceptance checks、capture review、proof dossier、以及 continuity handoff 收敛成更有序的 reviewer walkthrough，并保持 pass records / trace lens / dossier / continuity surfaces 在同一条本地产品审阅链里
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline
@@ -132,6 +133,7 @@ npm run release:plan
 - phase60 slice15 进一步补齐 Product Review Console、Screenshot Pass Records、Capture Review Flow、Proof-linked Evidence Bundle、以及当前 replay route 的 grouped screenshot comparison / linked proof mapping / product-review console polish
 - phase60 slice16 进一步补齐 Acceptance Storyboard、Evidence Dossier、Acceptance Evidence Continuity、Viewport / Framing Guidance、review-pack scenario handoff、proof anchors、capture lineage、以及当前 replay pack 的 continuity-linked acceptance evidence chain
 - phase60 slice17 进一步补齐 Evidence Trace Lens、focused proof trails、storyboard / dossier / continuity 联动聚焦、以及当前 replay pack 的 screenshot-driven review ergonomics
+- phase60 slice18 进一步补齐 Reviewer Flow Ladder、ordered reviewer walkthrough、next reviewer step 提示、以及当前 replay pack 的 pass records / trace lens / dossier / continuity 联动阅读顺序
 - 仍然不做真实外部窗口编排
 
 ## Phase25 Boundary Model

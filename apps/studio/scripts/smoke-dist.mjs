@@ -125,6 +125,7 @@ async function verifyRendererFocusedSlotUi() {
     "Route Replay Board",
     "Acceptance Scoreboard",
     "Product Review Console",
+    "Reviewer Flow Ladder",
     "Screenshot Pass Records",
     "Acceptance Storyboard",
     "Acceptance pass progression",

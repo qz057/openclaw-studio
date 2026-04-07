@@ -2597,7 +2597,7 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase60 slice 17 keeps replay scenario packs local-only, then adds an Evidence Trace Lens on top of the Acceptance Storyboard / Evidence Dossier / Acceptance Evidence Continuity surface so screenshot passes, proof bundles, and continuity handoffs can be read as one focused review trail without installing, publishing, signing, orchestrating live approvals, advancing staged decision lifecycles, settling publication receipts, rolling back publish state, or enabling host-side execution."
+        "Phase60 slice 18 keeps replay scenario packs local-only, then adds a Reviewer Flow Ladder on top of pass records, the Evidence Trace Lens, the Acceptance Storyboard, the Evidence Dossier, and Acceptance Evidence Continuity so replay route restore, acceptance checks, screenshot passes, proof bundles, and continuity handoffs read as one ordered reviewer walkthrough without installing, publishing, signing, orchestrating live approvals, advancing staged decision lifecycles, settling publication receipts, rolling back publish state, or enabling host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -3805,12 +3805,13 @@ export function App() {
                   <h2>Delivery-chain Workspace</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but phase60 slice 17 now keeps the review-only delivery chain anchored in a
+                  The alpha shell still does not build a real installer, but phase60 slice 18 now keeps the review-only delivery chain anchored in a
                   usable stage explorer plus route replay board with a screenshot-driven acceptance review pack, explicit acceptance pass progression,
-                  screenshot pass records, an Acceptance Storyboard, an Evidence Dossier, Acceptance Evidence Continuity, and an Evidence Trace Lens,
-                  so review-surface navigation, remembered handoff restore, active sequence replay, multi-window coverage, operator board ownership,
-                  reviewer queues, acknowledgement state, stage-level artifacts, promotion review flow, publish gating, rollback readiness, blockers,
-                  handoff posture, ordered companion steps, and explicit companion review paths stay visible as one local-only non-executing surface.
+                  screenshot pass records, a Reviewer Flow Ladder, an Acceptance Storyboard, an Evidence Dossier, Acceptance Evidence Continuity, and
+                  an Evidence Trace Lens, so review-surface navigation, remembered handoff restore, active sequence replay, multi-window coverage,
+                  operator board ownership, reviewer queues, acknowledgement state, stage-level artifacts, promotion review flow, publish gating,
+                  rollback readiness, blockers, handoff posture, ordered companion steps, and explicit companion review paths stay visible as one
+                  local-only non-executing surface.
                 </p>
               </div>
               <div className="foundation-card__metrics">
@@ -3910,7 +3911,7 @@ export function App() {
             onRunCompanionRouteHistory={handleRunCompanionRouteHistory}
             eyebrow="Phase60"
             title="Delivery-chain Workspace"
-            summary="Phase60 slice 17 keeps coverage-driven review-surface navigation, multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, and companion route-history memory in place, then adds an Evidence Trace Lens so route replay board, replay scenario packs, screenshot pass records, the Acceptance Storyboard, the Evidence Dossier, Acceptance Evidence Continuity, reviewer framing, and product-review console polish stay readable as one focused proof trail along the same publish-gate, approval-queue, rollback-shadow, or handoff relay path while ownership, ordered companion steps, linked artifacts, blockers, handoff posture, route state, and observability mapping remain local-only."
+            summary="Phase60 slice 18 keeps coverage-driven review-surface navigation, multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, and companion route-history memory in place, then adds a Reviewer Flow Ladder on top of pass records, the Evidence Trace Lens, the Acceptance Storyboard, the Evidence Dossier, Acceptance Evidence Continuity, reviewer framing, and product-review console polish so route replay board, replay scenario packs, capture review, proof bundles, and continuity handoffs stay readable as one ordered proof walkthrough along the same publish-gate, approval-queue, rollback-shadow, or handoff relay path while ownership, ordered companion steps, linked artifacts, blockers, handoff posture, route state, and observability mapping remain local-only."
           />
 
           <section className="surface card window-workbench">

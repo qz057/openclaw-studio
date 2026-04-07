@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-signing-publish-pipeline/v1",
-  "generatedAt": "2026-04-07T08:36:31.744Z",
+  "generatedAt": "2026-04-07T09:28:37.574Z",
   "phase": "phase60",
   "sealedBundleIntegrityContractPath": "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
   "attestationVerificationPacksPath": "release/ATTESTATION-VERIFICATION-PACKS.json",

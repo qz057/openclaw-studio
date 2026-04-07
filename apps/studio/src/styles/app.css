@@ -523,6 +523,15 @@ button:disabled {
   border-color: rgba(255, 209, 92, 0.22);
 }
 
+.delivery-chain-workspace__pass-record--current {
+  box-shadow: 0 0 0 1px rgba(105, 193, 255, 0.22), 0 18px 36px rgba(4, 10, 18, 0.24);
+  transform: translateY(-1px);
+}
+
+.delivery-chain-workspace__pass-record--next {
+  border-color: rgba(100, 236, 178, 0.28);
+}
+
 .delivery-chain-workspace__pass-record-header,
 .delivery-chain-workspace__capture-group-header,
 .delivery-chain-workspace__storyboard-group-header,
