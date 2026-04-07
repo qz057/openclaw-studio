@@ -59,6 +59,20 @@ export interface ContextualCommandReviewSurfaceItem {
   action: StudioCommandAction;
 }
 
+export interface ContextualCommandMultiWindowCoverageItem {
+  id: string;
+  label: string;
+  detail: string;
+  tone: StudioTone;
+  active: boolean;
+  relationshipLabel: string;
+  coverageLabel: string;
+  pathLabel: string;
+  reviewSurfaceCount: number;
+  reviewSurfaceLabels: string[];
+  action: StudioCommandAction | null;
+}
+
 export interface ContextualCommandPanelProps {
   eyebrow: string;
   title: string;
@@ -73,6 +87,9 @@ export interface ContextualCommandPanelProps {
   actionDeckSummary?: string;
   actionDeckLanes: ContextualCommandActionDeckLaneItem[];
   reviewSurfaceItems: ContextualCommandReviewSurfaceItem[];
+  multiWindowCoverageLabel?: string;
+  multiWindowCoverageSummary?: string;
+  multiWindowCoverageItems: ContextualCommandMultiWindowCoverageItem[];
   nextStepBoardLabel?: string;
   nextStepBoardSummary?: string;
   nextStepItems: ContextualCommandNextStepItem[];
@@ -114,6 +131,9 @@ export function ContextualCommandPanel({
   actionDeckSummary,
   actionDeckLanes,
   reviewSurfaceItems,
+  multiWindowCoverageLabel,
+  multiWindowCoverageSummary,
+  multiWindowCoverageItems,
   nextStepBoardLabel,
   nextStepBoardSummary,
   nextStepItems,
@@ -304,6 +324,52 @@ export function ContextualCommandPanel({
                 >
                   {item.action.label}
                 </button>
+              </article>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {multiWindowCoverageItems.length ? (
+        <div className="contextual-command-panel__section">
+          <div className="contextual-command-panel__section-header">
+            <span>Multi-window Review Coverage</span>
+            <strong>{multiWindowCoverageLabel ?? `${multiWindowCoverageItems.length} mapped paths`}</strong>
+          </div>
+          <p className="panel-summary panel-summary--tight">
+            {multiWindowCoverageSummary ??
+              "The active review-surface lane now keeps companion window, shared-state lane, orchestration board, and observability paths visible together."}
+          </p>
+          <div className="contextual-command-panel__next-step-list">
+            {multiWindowCoverageItems.map((item) => (
+              <article key={item.id} className={`contextual-command-next-step contextual-command-next-step--${item.tone}`}>
+                <div>
+                  <span>{item.relationshipLabel}</span>
+                  <strong>{item.active ? `${item.label} · Active path` : item.label}</strong>
+                  <p>{item.detail}</p>
+                  <div className="contextual-command-panel__chips">
+                    <span className={`command-context-pill${item.active ? " workflow-chip--active" : ""}`}>{item.coverageLabel}</span>
+                    <span className="command-context-pill">{item.pathLabel}</span>
+                    <span className="command-context-pill">{item.reviewSurfaceCount} review surfaces</span>
+                    {item.reviewSurfaceLabels.map((label) => (
+                      <span key={`${item.id}-${label}`} className="command-context-pill">
+                        {label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                {item.action ? (
+                  <button
+                    type="button"
+                    className="action-button"
+                    onClick={() => {
+                      onRunAction(item.action as StudioCommandAction);
+                    }}
+                    title={item.action.description}
+                  >
+                    {item.active ? "Refresh coverage" : "Focus coverage"}
+                  </button>
+                ) : null}
               </article>
             ))}
           </div>

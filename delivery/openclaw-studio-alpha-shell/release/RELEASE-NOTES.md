@@ -1,6 +1,6 @@
 # OpenClaw Studio Phase60 Release Notes
 
-Milestone: phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout
+Milestone: phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout
 
 ## Highlights
 - Delivery-chain Workspace now turns the earlier review-only delivery chain into a Stage Explorer with stage-level artifacts, blockers, handoff posture, and observability mapping kept in one local-only workflow
@@ -16,4 +16,4 @@ Milestone: phase60 delivery-chain workspace / stage explorer / review flow ladde
 - still not an installer
 - still no real publish/upload/sign/notarize actions
 
-Generated: 2026-04-07T00:53:09.685Z
+Generated: 2026-04-07T01:34:46.855Z

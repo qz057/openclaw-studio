@@ -37,6 +37,7 @@ import {
 import {
   ContextualCommandPanel,
   type ContextualCommandActionDeckLaneItem,
+  type ContextualCommandMultiWindowCoverageItem,
   type ContextualCommandPanelProps,
   type ContextualCommandReviewSurfaceItem,
   type ContextualCommandStateLine,
@@ -1108,6 +1109,17 @@ export function App() {
       tone: resolvedCoverageMapping ? resolvedCoverageMapping.tone : "neutral"
     },
     {
+      id: "flow-state-multi-window-coverage",
+      label: "Coverage paths",
+      value: activeActionDeckLane ? `${(activeActionDeckLane.observabilityMappingIds ?? []).length} mapped via ${activeActionDeckLane.label}` : "No mapped review lane",
+      tone:
+        ((activeActionDeckLane?.observabilityMappingIds?.length ?? 0) > 1)
+          ? "positive"
+          : activeActionDeckLane
+            ? "neutral"
+            : "warning"
+    },
+    {
       id: "flow-state-detached",
       label: "Detached candidate",
       value: selectedDetachedPanel?.label ?? "No detached candidate",
@@ -1142,6 +1154,9 @@ export function App() {
         reviewSurfaceCount
       };
     }) ?? [];
+  const activeActionDeckLaneReviewSurfaceActions = dedupeCommandActions(
+    activeActionDeckLane?.actionIds.map((actionId) => actionById.get(actionId)).filter(isReviewCoverageAction) ?? []
+  );
   const reviewSurfaceItems: ContextualCommandReviewSurfaceItem[] = surfacedReviewCoverageActions.map((action) => {
     const reviewSurfaceStage = action.deliveryChainStageId
       ? selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, action.deliveryChainStageId)
@@ -1166,6 +1181,52 @@ export function App() {
       action
     };
   });
+  const multiWindowCoverageItems: ContextualCommandMultiWindowCoverageItem[] =
+    [...new Set(activeActionDeckLane?.observabilityMappingIds ?? [])]
+      .map((mappingId) => {
+        const mapping = data.windowing.observability.mappings.find((entry) => entry.id === mappingId);
+
+        if (!mapping) {
+          return null;
+        }
+
+        const mappingStage = selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, mapping.reviewPosture.deliveryChainStageId);
+        const mappingWindow = data.windowing.roster.windows.find((entry) => entry.id === mapping.windowId) ?? null;
+        const mappingLane = data.windowing.sharedState.lanes.find((entry) => entry.id === mapping.sharedStateLaneId) ?? null;
+        const mappingBoard = data.windowing.orchestration.boards.find((entry) => entry.id === mapping.orchestrationBoardId) ?? null;
+        const mappingReviewSurfaceActions = activeActionDeckLaneReviewSurfaceActions.filter(
+          (action) =>
+            action.observabilityMappingId === mapping.id ||
+            (action.deliveryChainStageId === mapping.reviewPosture.deliveryChainStageId &&
+              action.windowId === mapping.windowId &&
+              action.sharedStateLaneId === mapping.sharedStateLaneId &&
+              action.orchestrationBoardId === mapping.orchestrationBoardId)
+        );
+        const preferredAction =
+          mappingReviewSurfaceActions.find((action) => action.id === resolvedReviewSurfaceAction?.id) ??
+          mappingReviewSurfaceActions.find((action) => action.id === selectedReviewSurfaceAction?.id) ??
+          mappingReviewSurfaceActions[0] ??
+          null;
+
+        return {
+          id: mapping.id,
+          label: mapping.label,
+          detail: mapping.summary,
+          tone: mapping.tone,
+          active:
+            mapping.id === resolvedCoverageMapping?.id ||
+            mapping.id === resolvedReviewSurfaceAction?.observabilityMappingId ||
+            mapping.id === activeActionDeckLane?.focusObservabilityMappingId,
+          relationshipLabel: formatReviewPostureRelationship(mapping.relationship),
+          coverageLabel: `${mappingStage?.label ?? mapping.reviewPosture.stageLabel} / ${mappingWindow?.label ?? mapping.windowId} / ${mapping.routeId}`,
+          pathLabel: `${mappingLane?.label ?? mapping.sharedStateLaneId} / ${mappingBoard?.label ?? mapping.orchestrationBoardId}`,
+          reviewSurfaceCount: mappingReviewSurfaceActions.length,
+          reviewSurfaceLabels: mappingReviewSurfaceActions.map((action) => formatReviewSurfaceKind(action.reviewSurfaceKind)),
+          action: preferredAction
+        };
+      })
+      .filter((item): item is ContextualCommandMultiWindowCoverageItem => Boolean(item))
+      .sort((left, right) => Number(right.active) - Number(left.active) || left.label.localeCompare(right.label));
   const paletteShortcutHints: CommandPaletteShortcutHint[] = data.commandSurface.keyboardRouting.shortcuts.slice(0, 8).map((shortcut) => ({
     id: shortcut.id,
     combo: shortcut.combo,
@@ -1199,6 +1260,12 @@ export function App() {
     actionDeckSummary: activeActionDeck?.summary,
     actionDeckLanes,
     reviewSurfaceItems,
+    multiWindowCoverageLabel: activeActionDeckLane?.label ?? resolvedReviewSurfaceAction?.label,
+    multiWindowCoverageSummary:
+      activeActionDeckLane && multiWindowCoverageItems.length
+        ? `${resolvedReviewSurfaceAction?.label ?? "The active review surface"} keeps ${multiWindowCoverageItems.length} mapped window, lane, board, and observability paths visible through ${activeActionDeckLane.label}, so companion review surfaces remain reachable without leaving the current local-only command flow.`
+        : undefined,
+    multiWindowCoverageItems,
     nextStepBoardLabel: activeNextStepBoard?.label,
     nextStepBoardSummary: activeNextStepBoard?.summary,
     nextStepItems,
@@ -1799,7 +1866,7 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase60 slice 5 adds coverage-driven review-surface navigation on top of the review-only delivery chain; it still does not install, publish, sign, orchestrate live approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
+        "Phase60 slice 6 adds command-surface multi-window review coverage on top of slice 5 review-surface navigation; it still does not install, publish, sign, orchestrate live approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -2736,10 +2803,10 @@ export function App() {
                   <h2>Delivery-chain Workspace</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but phase60 slice 5 now turns the review-only delivery chain into a
-                  usable stage explorer plus review-surface navigator, so operator board ownership, reviewer queues, acknowledgement state,
-                  stage-level artifacts, promotion review flow, publish gating, rollback readiness, blockers, handoff posture, and the
-                  cross-window shared-state review layer stay visible as one local-only non-executing surface.
+                  The alpha shell still does not build a real installer, but phase60 slice 6 now keeps the review-only delivery chain anchored in a
+                  usable stage explorer plus review-surface navigator while adding command-surface multi-window review coverage, so operator board
+                  ownership, reviewer queues, acknowledgement state, stage-level artifacts, promotion review flow, publish gating, rollback
+                  readiness, blockers, handoff posture, and companion mapped review paths stay visible as one local-only non-executing surface.
                 </p>
               </div>
               <div className="foundation-card__metrics">
@@ -2832,7 +2899,7 @@ export function App() {
             onRunReviewSurfaceAction={handleRunReviewSurfaceAction}
             eyebrow="Phase60"
             title="Delivery-chain Workspace"
-            summary="Phase60 slice 5 adds coverage-driven review-surface navigation so the shell can pivot across attestation, operator review, promotion, publish, and rollback stages while keeping ownership, review surfaces, linked artifacts, blockers, handoff posture, and observability mapping together."
+            summary="Phase60 slice 6 keeps coverage-driven review-surface navigation in place and adds command-surface multi-window review coverage, so the shell can pivot across attestation, operator review, promotion, publish, and rollback stages while keeping ownership, review surfaces, linked artifacts, blockers, handoff posture, and observability mapping together."
           />
 
           <section className="surface card window-workbench">

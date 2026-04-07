@@ -118,6 +118,7 @@ async function verifyRendererFocusedSlotUi() {
     "Evidence Closeout",
     "Closeout Window",
     "Review Surface Navigator",
+    "Multi-window Review Coverage",
     "Coverage-driven Review Surfaces",
     "Focus Publish Decision Gate",
     "Cross-window Observability",
