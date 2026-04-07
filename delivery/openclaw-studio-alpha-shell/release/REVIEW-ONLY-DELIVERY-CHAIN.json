@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-review-only-delivery-chain/v1",
-  "generatedAt": "2026-04-07T20:58:47.700Z",
+  "generatedAt": "2026-04-07T21:23:11.801Z",
   "phase": "phase60",
   "mode": "local-only-review",
   "title": "Delivery-chain Workspace",
@@ -14,7 +14,7 @@
     "id": "packaged-app-materialization-contract",
     "label": "Packaged-app Materialization Contract",
     "mode": "review-only",
-    "summary": "Directory materialization, staged-output manifests, bundle-sealing checkpoints, packet-level handoffs, validator-linked observability, and failure-path command previews now stay inspectable as one per-platform local-only contract, so promotion readiness can review roots, handoff continuity, failure posture, seal paths, and cross-surface progression without materializing, signing, or publishing anything.",
+    "summary": "Directory materialization, staged-output manifests, bundle-sealing checkpoints, packet-level handoffs, validator-linked observability, failure-surface continuity, and failure-path command previews now stay inspectable as one per-platform local-only contract, so promotion readiness can review roots, handoff continuity, failure posture, seal paths, and cross-surface progression without materializing, signing, or publishing anything.",
     "ownerStageId": "delivery-chain-promotion-readiness",
     "downstreamGateStageId": "delivery-chain-publish-decision",
     "artifacts": [
