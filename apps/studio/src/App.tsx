@@ -2738,7 +2738,7 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase60 slice 27 keeps replay scenario packs local-only, then layers a Final Verdict Console, an Acceptance Closeout Timeline, inspector-command verdict drilldowns, and multi-window observability closeout on top of Final Review Settlement, Final Review Closeout, Signoff Readiness Queue, the Reviewer Signoff Board, the Acceptance Reading Queue, the Evidence Trace Lens, the Acceptance Storyboard, the Evidence Dossier, and the Pack Closeout Board so verdict progression, closeout timing, proof linkage, and pack settlement framing read as one reviewer-facing closure console without installing, publishing, signing, orchestrating live approvals, advancing staged decision lifecycles, settling publication receipts, rolling back publish state, or enabling host-side execution."
+        "Phase60 slice 28 keeps replay scenario packs local-only, then turns the slice27 observability closeout into a review-state continuity contract that threads the active review surface, window / lane / board spine, reviewer queue, closeout timing, mapped review path, and inspector / windows readouts through the same local-only continuity chain without installing, publishing, signing, orchestrating live approvals, advancing staged decision lifecycles, settling publication receipts, rolling back publish state, or enabling host-side execution."
     }
   ];
   const buildPaletteEntryDetailLines = (
@@ -4246,14 +4246,15 @@ export function App() {
                   <h2>Delivery-chain Workspace</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but phase60 slice 27 now keeps the review-only delivery chain anchored in a
-                  usable stage explorer plus route replay board with a screenshot-driven acceptance review pack, explicit acceptance pass progression,
+                  The alpha shell still does not build a real installer, but phase60 slice 28 now keeps the review-only delivery chain anchored in a
+                  usable stage explorer plus route replay board, screenshot-driven acceptance review pack, explicit acceptance pass progression,
                   screenshot pass records, a Reviewer Flow Ladder, an Acceptance Reading Queue, a Reviewer Signoff Board, a Signoff Readiness Queue, a
                   Final Review Closeout, a Final Review Settlement, a Final Verdict Console, an Acceptance Closeout Timeline, a Pack Closeout Board, an
-                  Acceptance Storyboard, an Evidence Dossier, Acceptance Evidence Continuity, and an Evidence Trace Lens, so review-surface navigation,
-                  remembered handoff restore, active sequence replay, multi-window coverage, operator board ownership, reviewer queues,
-                  acknowledgement state, stage-level artifacts, promotion review flow, publish gating, rollback readiness, blockers, handoff posture,
-                  ordered companion steps, and explicit companion review paths stay visible as one local-only non-executing surface.
+                  Acceptance Storyboard, an Evidence Dossier, Acceptance Evidence Continuity, an Evidence Trace Lens, and a Review State Continuity
+                  contract, so review-surface navigation, remembered handoff restore, active sequence replay, multi-window coverage, operator board
+                  ownership, reviewer queues, acknowledgement state, stage-level artifacts, promotion review flow, publish gating, rollback readiness,
+                  blockers, handoff posture, ordered companion steps, explicit companion review paths, and cross-window shared-state continuity readouts
+                  stay visible as one local-only non-executing surface.
                 </p>
               </div>
               <div className="foundation-card__metrics">
@@ -4353,7 +4354,7 @@ export function App() {
             onRunCompanionRouteHistory={handleRunCompanionRouteHistory}
             eyebrow="Phase60"
             title="Delivery-chain Workspace"
-            summary="Phase60 slice 27 keeps coverage-driven review-surface navigation, multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, and companion route-history memory in place, then layers a Final Verdict Console and an Acceptance Closeout Timeline on top of Final Review Settlement, Final Review Closeout, Signoff Readiness Queue, the Reviewer Signoff Board, the Reviewer Flow Ladder, the Acceptance Reading Queue, the Evidence Trace Lens, the Acceptance Storyboard, the Evidence Dossier, Acceptance Evidence Continuity, and the Pack Closeout Board so route replay board, replay scenario packs, capture review, proof bundles, continuity handoffs, scenario-level signoff verdicts, closeout timing, verdict progression, and pack settlement posture stay readable as one ordered interface-review walkthrough along the same publish-gate, approval-queue, rollback-shadow, or handoff relay path while ownership, ordered companion steps, linked artifacts, blockers, handoff posture, route state, and observability mapping remain local-only."
+            summary="Phase60 slice 28 keeps coverage-driven review-surface navigation, multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, companion route-history memory, and the slice27 observability closeout in place, then turns them into a selector-backed review-state continuity contract so route replay board, replay scenario packs, capture review, proof bundles, continuity handoffs, scenario-level signoff verdicts, closeout timing, verdict progression, pack settlement posture, inspector continuity readouts, and windows-rail continuity linkage stay readable as one ordered local-only interface-review walkthrough."
           />
 
           <section className="surface card window-workbench">
