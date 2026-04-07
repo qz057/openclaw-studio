@@ -14,6 +14,8 @@ import type {
   StudioReleasePackagedAppMaterializationReviewPacketStep,
   StudioReleasePackagedAppMaterializationValidatorObservabilityBridge,
   StudioReleasePackagedAppMaterializationValidatorObservabilityReadout,
+  StudioReleasePackagedAppMaterializationFailurePath,
+  StudioReleasePackagedAppMaterializationFailureReadout,
   StudioReleaseQaCloseoutReadinessTrack,
   StudioReleasePackagedAppStagedOutputChain,
   StudioReleasePackagedAppStagedOutputChainStep,
@@ -246,6 +248,37 @@ export function selectStudioReleasePackagedAppMaterializationContractNextValidat
   }
 
   return bridge.readouts.find((readout) => readout.id === bridge.nextReadoutId);
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractFailurePath(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+): StudioReleasePackagedAppMaterializationFailurePath | undefined {
+  return selectStudioReleasePackagedAppMaterializationContractPlatform(deliveryChain, platformOrId)?.failurePath;
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractFailureReadout(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null,
+  readoutOrId?: Pick<StudioReleasePackagedAppMaterializationFailureReadout, "id"> | string | null
+): StudioReleasePackagedAppMaterializationFailureReadout | undefined {
+  const failurePath = selectStudioReleasePackagedAppMaterializationContractFailurePath(deliveryChain, platformOrId);
+  const readoutId = typeof readoutOrId === "string" ? readoutOrId : readoutOrId?.id ?? failurePath?.activeReadoutId;
+
+  return failurePath?.readouts.find((readout) => readout.id === readoutId) ?? failurePath?.readouts[0];
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractNextFailureReadout(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+): StudioReleasePackagedAppMaterializationFailureReadout | undefined {
+  const failurePath = selectStudioReleasePackagedAppMaterializationContractFailurePath(deliveryChain, platformOrId);
+
+  if (!failurePath?.nextReadoutId) {
+    return undefined;
+  }
+
+  return failurePath.readouts.find((readout) => readout.id === failurePath.nextReadoutId);
 }
 
 function scoreStudioReleasePackagedAppMaterializationBridgeContinuityEntry(

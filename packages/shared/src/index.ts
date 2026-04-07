@@ -1103,6 +1103,35 @@ export interface StudioReleasePackagedAppMaterializationValidatorObservabilityBr
   blockedBy: string[];
 }
 
+export interface StudioReleasePackagedAppMaterializationFailureReadout {
+  id: string;
+  label: string;
+  failureCode: StudioHostFailureCode;
+  failureDisposition: StudioHostFailureDisposition;
+  summary: string;
+  taskId: string;
+  reviewPacketStepId: string;
+  validatorReadoutId: string;
+  deliveryChainStageId: string;
+  rollbackContractId: string;
+  rollbackCheckpointId: string;
+  commandDeckLaneId: string;
+  commandActionIds: string[];
+  observabilitySignalIds: string[];
+  reviewChecks: string[];
+}
+
+export interface StudioReleasePackagedAppMaterializationFailurePath {
+  id: string;
+  label: string;
+  taskState: StudioReleasePackagedAppMaterializationTaskState;
+  summary: string;
+  activeReadoutId: string;
+  nextReadoutId: string | null;
+  readouts: StudioReleasePackagedAppMaterializationFailureReadout[];
+  blockedBy: string[];
+}
+
 export interface StudioReleasePackagedAppMaterializationContractPlatform {
   id: string;
   platform: StudioPackagedAppPlatform;
@@ -1129,6 +1158,7 @@ export interface StudioReleasePackagedAppMaterializationContractPlatform {
   bundleSealingReadiness: StudioReleasePackagedAppBundleSealingReadiness;
   localMaterializationProgress: StudioReleasePackagedAppLocalMaterializationProgress;
   validatorObservabilityBridge: StudioReleasePackagedAppMaterializationValidatorObservabilityBridge;
+  failurePath: StudioReleasePackagedAppMaterializationFailurePath;
   tasks: StudioReleasePackagedAppMaterializationContractTask[];
   blockedBy: string[];
 }
@@ -1251,6 +1281,8 @@ export type StudioCommandActionSafety = "local-only" | "preview-host";
 export type StudioCommandFlowSurface = "shell" | StudioPageId;
 export type StudioCommandReviewSurfaceKind =
   | "review-packet"
+  | "validator-bridge"
+  | "failure-path"
   | "reviewer-queue"
   | "decision-handoff"
   | "evidence-closeout"
@@ -2324,6 +2356,9 @@ export {
   selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityBridge,
   selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityReadout,
   selectStudioReleasePackagedAppMaterializationContractNextValidatorObservabilityReadout,
+  selectStudioReleasePackagedAppMaterializationContractFailurePath,
+  selectStudioReleasePackagedAppMaterializationContractFailureReadout,
+  selectStudioReleasePackagedAppMaterializationContractNextFailureReadout,
   selectStudioReleasePackagedAppMaterializationContractValidatorObservabilitySurfaceMatch,
   selectStudioReleasePackagedAppMaterializationContractNearbyStageCReadiness,
   selectStudioReleaseQaCloseoutReadinessTrack,

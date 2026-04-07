@@ -328,6 +328,46 @@ const mockCommandSurface: StudioCommandSurface = {
       observabilityMappingId: "observability-mapping-lifecycle-preview"
     },
     {
+      id: "command-focus-materialization-validator-bridge",
+      label: "Focus Materialization Validator Bridge",
+      description:
+        "Pivot into the validator-linked materialization bridge so staged-output continuity, observability rows, and the active review lane stay aligned.",
+      kind: "focus-review-coverage",
+      scope: "window",
+      safety: "local-only",
+      tone: "warning",
+      keywords: ["materialization", "validator", "bridge", "staged-output", "observability", "review-deck"],
+      rightRailTabId: "windows",
+      bottomDockTabId: "windows",
+      windowIntentId: "window-intent-trace-workspace",
+      reviewSurfaceKind: "validator-bridge",
+      deliveryChainStageId: "delivery-chain-promotion-readiness",
+      windowId: "window-trace-review",
+      sharedStateLaneId: "shared-state-lane-trace-review",
+      orchestrationBoardId: "orchestration-board-trace-review",
+      observabilityMappingId: "observability-mapping-approval-active"
+    },
+    {
+      id: "command-focus-materialization-failure-path",
+      label: "Focus Materialization Failure Path",
+      description:
+        "Keep the active materialization failure path in scope so checksum drift, rollback posture, publish gating, and command preview stay readable together.",
+      kind: "focus-review-coverage",
+      scope: "window",
+      safety: "local-only",
+      tone: "warning",
+      keywords: ["materialization", "failure", "rollback", "checksum", "publish", "command", "review-deck"],
+      rightRailTabId: "windows",
+      bottomDockTabId: "windows",
+      windowIntentId: "window-intent-trace-workspace",
+      reviewSurfaceKind: "failure-path",
+      deliveryChainStageId: "delivery-chain-promotion-readiness",
+      windowId: "window-trace-review",
+      sharedStateLaneId: "shared-state-lane-trace-review",
+      orchestrationBoardId: "orchestration-board-trace-review",
+      observabilityMappingId: "observability-mapping-rollback-shadow"
+    },
+    {
       id: "command-focus-approval-reviewer-queue",
       label: "Focus Active Approval Queue",
       description:
@@ -569,6 +609,8 @@ const mockCommandSurface: StudioCommandSurface = {
         "command-open-review-view",
         "command-open-windows-observability",
         "command-focus-lifecycle-review-packet",
+        "command-focus-materialization-validator-bridge",
+        "command-focus-materialization-failure-path",
         "command-focus-publish-decision-gate",
         "command-stage-review-window",
         "command-stage-trace-window",
@@ -616,13 +658,16 @@ const mockCommandSurface: StudioCommandSurface = {
     {
       id: "group-review-coverage",
       label: "Review Coverage Routing",
-      summary: "Keep review-deck intent, delivery coverage, review-surface pivots, and cross-window observability visible as one local-only command surface.",
+      summary:
+        "Keep review-deck intent, delivery coverage, validator/failure pivots, review-surface actions, and cross-window observability visible as one local-only command surface.",
       tone: "positive",
       actionIds: [
         "command-open-review-view",
         "command-stage-review-window",
         "command-open-windows-observability",
         "command-focus-lifecycle-review-packet",
+        "command-focus-materialization-validator-bridge",
+        "command-focus-materialization-failure-path",
         "command-focus-publish-decision-gate",
         "command-focus-rollback-closeout-window",
         "command-advance-workflow"
@@ -631,10 +676,13 @@ const mockCommandSurface: StudioCommandSurface = {
     {
       id: "group-review-surface-actions",
       label: "Review Surface Actions",
-      summary: "Review packet, queue, handoff, closeout, publish gate, and rollback closeout pivots stay addressable as explicit local-only actions.",
+      summary:
+        "Review packet, validator bridge, failure path, queue, handoff, closeout, publish gate, and rollback closeout pivots stay addressable as explicit local-only actions.",
       tone: "warning",
       actionIds: [
         "command-focus-lifecycle-review-packet",
+        "command-focus-materialization-validator-bridge",
+        "command-focus-materialization-failure-path",
         "command-focus-approval-reviewer-queue",
         "command-focus-approval-decision-handoff",
         "command-focus-approval-evidence-closeout",
@@ -708,18 +756,24 @@ const mockCommandSurface: StudioCommandSurface = {
       id: "sequence-review-coverage-flow",
       label: "Review Coverage Flow",
       summary:
-        "When Review Deck is active, focus the review workspace intent, surface cross-window observability, and keep delivery coverage visible while the current lane advances locally.",
+        "When Review Deck is active, focus the review workspace intent, walk through lifecycle packet, validator bridge, and failure-path coverage, then keep downstream publish and rollback posture visible while the current lane advances locally.",
       tone: "positive",
       safety: "local-only",
       actionIds: [
         "command-stage-review-window",
         "command-focus-lifecycle-review-packet",
+        "command-focus-materialization-validator-bridge",
+        "command-focus-materialization-failure-path",
         "command-open-windows-observability",
         "command-focus-publish-decision-gate",
         "command-advance-workflow"
       ],
       recommendedActionId: "command-focus-lifecycle-review-packet",
-      followUpActionIds: ["command-open-windows-observability", "command-focus-publish-decision-gate"],
+      followUpActionIds: [
+        "command-focus-materialization-validator-bridge",
+        "command-focus-materialization-failure-path",
+        "command-focus-publish-decision-gate"
+      ],
       match: {
         routeIds: ["settings", "agents", "codex"],
         workspaceViewIds: ["review-deck"],
@@ -790,10 +844,14 @@ const mockCommandSurface: StudioCommandSurface = {
       surfaceIds: ["shell", "settings", "agents", "codex"],
       label: "Review Coverage Flow",
       summary:
-        "When Review Deck and its review-workspace intent are active, command-surface pivots into delivery coverage, review-surface actions, and cross-window observability instead of staying in generic route recovery mode.",
+        "When Review Deck and its review-workspace intent are active, command-surface pivots into delivery coverage, validator/failure readouts, review-surface actions, and cross-window observability instead of staying in generic route recovery mode.",
       sequenceId: "sequence-review-coverage-flow",
       recommendedActionId: "command-focus-lifecycle-review-packet",
-      followUpActionIds: ["command-open-windows-observability", "command-focus-publish-decision-gate"],
+      followUpActionIds: [
+        "command-focus-materialization-validator-bridge",
+        "command-focus-materialization-failure-path",
+        "command-focus-publish-decision-gate"
+      ],
       groupIds: ["group-review-coverage", "group-review-surface-actions", "group-workflow-lane"],
       keyboardShortcutIds: ["keyboard-run-active-flow", "keyboard-run-review-sequence", "keyboard-open-settings"],
       match: {
