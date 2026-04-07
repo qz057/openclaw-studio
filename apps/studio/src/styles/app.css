@@ -420,6 +420,8 @@ button:disabled {
 .delivery-chain-workspace__artifact-groups,
 .delivery-chain-workspace__acceptance-grid,
 .delivery-chain-workspace__pass-grid,
+.delivery-chain-workspace__pass-record-list,
+.delivery-chain-workspace__capture-flow,
 .delivery-chain-workspace__acceptance-status-list {
   display: grid;
   gap: 16px;
@@ -430,7 +432,7 @@ button:disabled {
 }
 
 .delivery-chain-workspace__acceptance-metrics {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
 }
 
 .delivery-chain-workspace__stage-strip {
@@ -444,7 +446,7 @@ button:disabled {
 
 .delivery-chain-workspace__acceptance-grid,
 .delivery-chain-workspace__pass-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
 .delivery-chain-workspace__artifact-groups {
@@ -457,6 +459,68 @@ button:disabled {
 
 .delivery-chain-workspace__acceptance-grid .windowing-summary-card {
   align-content: start;
+}
+
+.delivery-chain-workspace__pass-record,
+.delivery-chain-workspace__capture-group {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 176, 208, 0.14);
+  background: rgba(7, 16, 24, 0.62);
+}
+
+.delivery-chain-workspace__pass-record--positive,
+.delivery-chain-workspace__capture-group--positive {
+  border-color: rgba(100, 236, 178, 0.24);
+  background: rgba(14, 32, 28, 0.62);
+}
+
+.delivery-chain-workspace__pass-record--neutral,
+.delivery-chain-workspace__capture-group--neutral {
+  border-color: rgba(105, 193, 255, 0.22);
+}
+
+.delivery-chain-workspace__pass-record--warning,
+.delivery-chain-workspace__capture-group--warning {
+  border-color: rgba(255, 209, 92, 0.22);
+}
+
+.delivery-chain-workspace__pass-record-header,
+.delivery-chain-workspace__capture-group-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.delivery-chain-workspace__capture-group-header div,
+.delivery-chain-workspace__pass-record-body {
+  display: grid;
+  gap: 6px;
+}
+
+.delivery-chain-workspace__pass-record-header span,
+.delivery-chain-workspace__capture-group-header span {
+  color: #8fa3ba;
+  font-size: 0.78rem;
+}
+
+.delivery-chain-workspace__pass-record-header strong,
+.delivery-chain-workspace__capture-group-header strong {
+  color: #d8e5f2;
+}
+
+.delivery-chain-workspace__pass-record-body h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.delivery-chain-workspace__pass-record-body p {
+  margin: 0;
+  color: #8fa3ba;
+  line-height: 1.5;
 }
 
 .delivery-chain-workspace__pass-card {

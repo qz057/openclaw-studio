@@ -1141,6 +1141,9 @@ export interface StudioCommandReplayScreenshotReviewItem {
   surface: string;
   posture: StudioCommandReplayScreenshotReviewPosture;
   detail: string;
+  captureGroup?: string;
+  comparisonFrame?: string;
+  linkedEvidenceItemIds?: string[];
 }
 
 export interface StudioCommandReplayScenarioPack {
