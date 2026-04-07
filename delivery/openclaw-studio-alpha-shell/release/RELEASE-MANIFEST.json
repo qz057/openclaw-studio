@@ -1,12 +1,12 @@
 {
   "schemaVersion": "openclaw-studio-release-manifest/v1",
-  "generatedAt": "2026-04-07T19:53:59.163Z",
+  "generatedAt": "2026-04-07T20:01:10.847Z",
   "packageId": "openclaw-studio-alpha-shell",
   "packageName": "OpenClaw Studio Alpha Shell",
   "packageKind": "alpha-shell-release-skeleton",
   "channel": "alpha",
   "phase": "phase60",
-  "milestone": "phase60 delivery-chain workspace / stage explorer / review flow ladder / acceptance reading queue / reviewer signoff board / signoff readiness queue / final review closeout / final verdict console / acceptance closeout timeline / final review settlement / pack closeout board / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass progression / screenshot pass records / capture review flow / proof-linked evidence bundle / acceptance evidence continuity / reviewer brief / proof bundle / product-review console polish / acceptance storyboard / evidence dossier / evidence trace lens / acceptance scoreboard / replay acceptance checklist / command-surface observability linkage / inspector-command linkage / review state continuity / observability closeout / linked review artifacts / blockers / handoff posture / observability mapping / packaged-app materialization contract / packaged-app task-state linkage / typed Stage C readiness / withheld-future boundary bridge / staged-output review readout / bundle-sealing review readout / local materialization review packet / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout",
+  "milestone": "phase60 delivery-chain workspace / stage explorer / review flow ladder / acceptance reading queue / reviewer signoff board / signoff readiness queue / final review closeout / final verdict console / acceptance closeout timeline / final review settlement / pack closeout board / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass progression / screenshot pass records / capture review flow / proof-linked evidence bundle / acceptance evidence continuity / reviewer brief / proof bundle / product-review console polish / acceptance storyboard / evidence dossier / evidence trace lens / acceptance scoreboard / replay acceptance checklist / command-surface observability linkage / inspector-command linkage / review state continuity / observability closeout / linked review artifacts / blockers / handoff posture / observability mapping / packaged-app materialization contract / packaged-app task-state linkage / typed Stage C readiness / withheld-future boundary bridge / staged-output review readout / bundle-sealing review readout / local materialization review packet / validator continuity surface match / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout",
   "version": "0.1.0",
   "docs": [
     {
@@ -498,7 +498,7 @@
       "label": "Renderer bundle",
       "outputRoot": "artifacts/renderer",
       "fileCount": 11,
-      "totalBytes": 1056203,
+      "totalBytes": 1057056,
       "entrypoints": [
         "artifacts/renderer/index.html"
       ]
@@ -536,22 +536,22 @@
       "sha256": "cb7ae03992daad83f5279a53c1754c93a60195f17c7d3ee587eb908c0138bd55"
     },
     {
-      "id": "renderer:assets/fallback-B8uERPmv.js",
+      "id": "renderer:assets/fallback-DV1_m9kw.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/fallback-B8uERPmv.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/fallback-B8uERPmv.js",
+      "path": "artifacts/renderer/assets/fallback-DV1_m9kw.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/fallback-DV1_m9kw.js",
       "sizeBytes": 391245,
-      "sha256": "457b98fcbb06935fd579d2b0107c930d1cfb37dfbef397b5c822570da8a4b8f3"
+      "sha256": "ff3247eafa4c8162db0cc18a1b2a825581e4319e01a5be0c87486dde927df463"
     },
     {
-      "id": "renderer:assets/HomePage-_P6ekgxl.js",
+      "id": "renderer:assets/HomePage-hRy2JtGz.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/HomePage-_P6ekgxl.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/HomePage-_P6ekgxl.js",
+      "path": "artifacts/renderer/assets/HomePage-hRy2JtGz.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/HomePage-hRy2JtGz.js",
       "sizeBytes": 3031,
-      "sha256": "51af5644a9d609a0fe1ca4b146dc4650feb83e23855677ebd5f2e43344e36b0c"
+      "sha256": "4722d9c898dae7516e9b03ab6414996f9b7e03a4f6cdfd1735995c4fd01d6a50"
     },
     {
       "id": "renderer:assets/index-B_qerrmh.css",
@@ -563,13 +563,13 @@
       "sha256": "5487a33344a92a01cb2506ade3a2b786cd93a07993767ebc867ee379c08e6618"
     },
     {
-      "id": "renderer:assets/index-CL71s3Uv.js",
+      "id": "renderer:assets/index-DKLuhCKv.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/index-CL71s3Uv.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-CL71s3Uv.js",
-      "sizeBytes": 468149,
-      "sha256": "98b7bd278baf6390f6302795697125127586f24b72367881c515ae8f925a1111"
+      "path": "artifacts/renderer/assets/index-DKLuhCKv.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-DKLuhCKv.js",
+      "sizeBytes": 469002,
+      "sha256": "8115529128b503ee6ed72bd5544558f76dbd2723e0794fd1343e0bff34d2d0bd"
     },
     {
       "id": "renderer:assets/SessionsPage-CeRZOu_6.js",
@@ -581,22 +581,22 @@
       "sha256": "54e5f8966e3a61a332401dc09750246fa9ca2aea2468085b38fcbb5f11184452"
     },
     {
-      "id": "renderer:assets/SettingsPage-C1_rCFCv.js",
+      "id": "renderer:assets/SettingsPage-CRL5Urs2.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/SettingsPage-C1_rCFCv.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/SettingsPage-C1_rCFCv.js",
+      "path": "artifacts/renderer/assets/SettingsPage-CRL5Urs2.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/SettingsPage-CRL5Urs2.js",
       "sizeBytes": 1687,
-      "sha256": "bd9a04396c80fe3cec48e0518621696eb28c937060dd02f41799e6842c31f457"
+      "sha256": "47b8bc1fc569c0d404807aaf1dcc5afe29ebbfe8510284ad4e11ec51c149a49f"
     },
     {
-      "id": "renderer:assets/SkillsPage-CXTPHt7f.js",
+      "id": "renderer:assets/SkillsPage-DHONsRnM.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/SkillsPage-CXTPHt7f.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/SkillsPage-CXTPHt7f.js",
+      "path": "artifacts/renderer/assets/SkillsPage-DHONsRnM.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/SkillsPage-DHONsRnM.js",
       "sizeBytes": 9335,
-      "sha256": "d67f5e4cc76a6b695b303a6c97688599231c76719c6f7592faf231a6cb790297"
+      "sha256": "d644b9e233861166eec74f8c2bc5649d3d3c0a9a1c0ef3adb3807a0a5aba07b7"
     },
     {
       "id": "renderer:assets/vendor-D7f9BLy3.js",
@@ -614,7 +614,7 @@
       "path": "artifacts/renderer/index.html",
       "sourceRelativePath": "apps/studio/dist-renderer/index.html",
       "sizeBytes": 496,
-      "sha256": "bb62b56f66b01da579dd2dfb8568e9a086424baa2f1927af7ca37f1bc1139fcc"
+      "sha256": "86b2e2f9fcf624bc853920b8a9870167bd9e11deac7f321a53c932cc29e2987f"
     },
     {
       "id": "electron:electron/main.js",
@@ -757,7 +757,7 @@
     "built renderer bundle copied into artifacts/renderer",
     "built Electron bundle copied into artifacts/electron",
     "review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase60 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything",
-    "delivery-chain workspace, stage explorer, a packaged-app materialization contract, staged-output review readouts, bundle-sealing review readouts, local materialization review packets, review flow ladder, an acceptance reading queue, a reviewer signoff board, a signoff readiness queue, a final review closeout, a final verdict console, an acceptance closeout timeline, a final review settlement, a pack closeout board, delivery coverage matrix, review-deck coverage routing, review-surface coverage actions, command-surface multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, companion route-history memory, a route replay board, replay scenario packs, a screenshot-driven acceptance review pack, acceptance pass progression, screenshot pass records, capture review flows, a proof-linked evidence bundle, acceptance evidence continuity, reviewer briefs, proof bundles, product-review console polish, an acceptance storyboard, an evidence dossier, an evidence trace lens, an acceptance scoreboard, a replay acceptance checklist, and a review-state continuity contract, and the review-deck orchestration action deck linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, observability mapping, command-surface review posture, multi-window coverage, cross-window shared-state continuity readouts, packaged-app materialization roots, and packet-level handoff continuity into one staged local-only workflow without executing anything",
+    "delivery-chain workspace, stage explorer, a packaged-app materialization contract, staged-output review readouts, bundle-sealing review readouts, local materialization review packets, validator continuity surface matches, review flow ladder, an acceptance reading queue, a reviewer signoff board, a signoff readiness queue, a final review closeout, a final verdict console, an acceptance closeout timeline, a final review settlement, a pack closeout board, delivery coverage matrix, review-deck coverage routing, review-surface coverage actions, command-surface multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, companion route-history memory, a route replay board, replay scenario packs, a screenshot-driven acceptance review pack, acceptance pass progression, screenshot pass records, capture review flows, a proof-linked evidence bundle, acceptance evidence continuity, reviewer briefs, proof bundles, product-review console polish, an acceptance storyboard, an evidence dossier, an evidence trace lens, an acceptance scoreboard, a replay acceptance checklist, and a review-state continuity contract, and the review-deck orchestration action deck linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, observability mapping, command-surface review posture, multi-window coverage, cross-window shared-state continuity readouts, packaged-app materialization roots, validator-facing observability rows, and packet-level handoff continuity into one staged local-only workflow without executing anything",
     "deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references",
     "deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, review-posture ownership, inspector-command linkage, reviewer navigation, and verdict-aware inspector context",
     "persisted shell layout foundation backed by localStorage",

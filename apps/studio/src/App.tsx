@@ -9,6 +9,7 @@ import {
   selectStudioReleasePackagedAppMaterializationContractStagedOutputChain,
   selectStudioReleasePackagedAppMaterializationContractStagedOutputStep,
   selectStudioReleasePackagedAppMaterializationContractTask,
+  selectStudioReleasePackagedAppMaterializationContractValidatorObservabilitySurfaceMatch,
   selectStudioReleaseReviewerQueue,
   selectStudioWindowObservabilityActiveMapping,
   studioPageIds,
@@ -261,7 +262,7 @@ function resolveReviewSurfaceRouteLabel(
 function resolveReleaseBridgeValue(stageId: string | null | undefined): string | null {
   switch (stageId) {
     case "delivery-chain-promotion-readiness":
-      return "Packaged-app continuity / staged output / bundle sealing";
+      return "Packaged-app continuity / validator bridge / bundle sealing";
     case "delivery-chain-publish-decision":
       return "Installer-signing QA closeout / blocked publish gate";
     case "delivery-chain-rollback-readiness":
@@ -681,6 +682,17 @@ function formatMaterializationTaskState(
   }
 }
 
+function formatMaterializationValidatorStatus(status: "ready" | "watch" | "blocked"): string {
+  switch (status) {
+    case "ready":
+      return "Ready";
+    case "watch":
+      return "Watch";
+    default:
+      return "Blocked";
+  }
+}
+
 function formatReviewPostureRelationship(
   relationship: StudioShellState["windowing"]["observability"]["mappings"][number]["relationship"]
 ): string {
@@ -949,6 +961,13 @@ export function App() {
     ) ?? null;
   const activeMaterializationTask =
     selectStudioReleasePackagedAppMaterializationContractTask(releaseApprovalPipeline.deliveryChain, activeMaterializationPlatform?.id) ?? null;
+  const activeMaterializationValidatorSurface =
+    selectStudioReleasePackagedAppMaterializationContractValidatorObservabilitySurfaceMatch(
+      releaseApprovalPipeline.deliveryChain,
+      data.windowing,
+      data.reviewStateContinuity,
+      activeMaterializationPlatform?.id
+    );
   const dockItems = createDockItems(hostTraceFocus);
   const activePageMeta = data.pages.find((page) => page.id === activePage) ?? {
     id: activePage,
@@ -2487,10 +2506,29 @@ export function App() {
       id: "release-depth-local-materialization-contract",
       label: "Packaged-app Local Materialization Contract",
       value: activeMaterializationPlatform
-        ? `${formatPackagedAppPlatform(activeMaterializationPlatform.platform)} / ${formatMaterializationTaskState(activeMaterializationPlatform.taskState)}${activeStagedOutputStep ? ` / ${activeStagedOutputStep.label}` : activeMaterializationTask ? ` / ${activeMaterializationTask.label}` : ""}${activeMaterializationProgress ? ` / ${activeMaterializationProgress.completedTaskCount + 1}/${activeMaterializationProgress.totalTaskCount} checkpoints` : ""}`
+        ? `${formatPackagedAppPlatform(activeMaterializationPlatform.platform)} / ${formatMaterializationTaskState(activeMaterializationPlatform.taskState)}${
+            activeMaterializationValidatorSurface.activeReadout
+              ? ` / ${activeMaterializationValidatorSurface.activeReadout.label}`
+              : activeStagedOutputStep
+                ? ` / ${activeStagedOutputStep.label}`
+                : activeMaterializationTask
+                  ? ` / ${activeMaterializationTask.label}`
+                  : ""
+          }${activeMaterializationProgress ? ` / ${activeMaterializationProgress.completedTaskCount + 1}/${activeMaterializationProgress.totalTaskCount} checkpoints` : ""}`
         : "Unavailable",
       detail:
-        "The packaged-app materialization contract now exposes per-platform staged-output chain steps, bundle-sealing readiness, and local progression alongside task evidence and delivery-stage linkage, so the review lane reads like one orchestrated local handoff spine instead of only flat path metadata."
+        "The packaged-app materialization contract now exposes per-platform staged-output chain steps, bundle-sealing readiness, local progression, and validator-linked observability alongside task evidence and delivery-stage linkage, so the review lane reads like one orchestrated local handoff spine instead of only flat path metadata."
+    },
+    {
+      id: "release-depth-materialization-validator-bridge",
+      label: "Materialization Validator Bridge",
+      value: activeMaterializationValidatorSurface.activeReadout
+        ? `${activeMaterializationValidatorSurface.activeReadout.label} / ${formatMaterializationValidatorStatus(
+            activeMaterializationValidatorSurface.activeReadout.status
+          )} / ${activeMaterializationValidatorSurface.observabilityMapping?.label ?? activeMaterializationValidatorSurface.activeReadout.observabilityMappingId}`
+        : "Unavailable",
+      detail:
+        "The packaged-app materialization contract now carries a validator / observability bridge that maps the current local-only slice onto concrete window, lane, board, and observability surfaces, so inspector and windows readouts can stay aligned with the same progression contract."
     },
     {
       id: "release-depth-staged-output",
@@ -2837,7 +2875,7 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase60 slice 32 keeps replay, review-state continuity, packaged-app materialization task-state linkage, and typed Stage C readiness threaded through one local-only chain, so the active review surface, window / lane / board spine, reviewer queue, closeout timing, current task evidence, approval workflow stages, checkpoint linkage, rollback contracts, boundary handoff posture, materialization roots, staged-output handoff, and bundle-sealing posture stay readable without installing, publishing, signing, or enabling host-side execution."
+        "Phase60 slice 34 keeps replay, review-state continuity, packaged-app materialization task-state linkage, validator / observability bridge readouts, and typed Stage C readiness threaded through one local-only chain, so the active review surface, window / lane / board spine, reviewer queue, closeout timing, current task evidence, approval workflow stages, checkpoint linkage, rollback contracts, boundary handoff posture, materialization roots, staged-output handoff, bundle-sealing posture, and cross-window validator linkage stay readable without installing, publishing, signing, or enabling host-side execution."
     }
   ];
   const buildPaletteEntryDetailLines = (

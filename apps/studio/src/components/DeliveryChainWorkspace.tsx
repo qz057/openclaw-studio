@@ -6389,7 +6389,7 @@ export function DeliveryChainWorkspace({
                   <strong>{bundleSealingStage ? `${bundleSealingStage.label} / ${bundleSealingStage.status}` : "Unavailable"}</strong>
                 </div>
                 <div className={`workflow-readiness-line workflow-readiness-line--${resolveMaterializationTaskTone(selectedValidatorBridge?.taskState ?? "blocked")}`}>
-                  <span>Validator / observability bridge</span>
+                  <span>Validator / Observability Bridge</span>
                   <strong>
                     {selectedValidatorBridge
                       ? `${formatMaterializationTaskState(selectedValidatorBridge.taskState)} / ${
