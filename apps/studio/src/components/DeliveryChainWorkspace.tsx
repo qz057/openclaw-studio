@@ -6,12 +6,17 @@ import {
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseEscalationWindow,
+  selectStudioReleasePackagedAppMaterializationContractBundleSealingCheckpoint,
   selectStudioReleasePackagedAppMaterializationContractBundleSealingReadiness,
+  selectStudioReleasePackagedAppMaterializationContractNearbyStageCReadiness,
+  selectStudioReleasePackagedAppMaterializationContractNextProgressSegment,
   selectStudioReleasePackagedAppMaterializationContractPlatform,
   selectStudioReleasePackagedAppMaterializationContractProgress,
+  selectStudioReleasePackagedAppMaterializationContractProgressSegment,
   selectStudioReleasePackagedAppMaterializationContractReviewPacket,
   selectStudioReleasePackagedAppMaterializationContractReviewPacketStep,
   selectStudioReleasePackagedAppMaterializationContractStagedOutputChain,
+  selectStudioReleasePackagedAppMaterializationContractStagedOutputNextStep,
   selectStudioReleasePackagedAppMaterializationContractStagedOutputStep,
   selectStudioReleasePackagedAppMaterializationContractTask,
   selectStudioReleaseQaCloseoutReadinessTrack,
@@ -301,6 +306,72 @@ function formatMaterializationTaskState(
     default:
       return "Blocked";
   }
+}
+
+function resolveMaterializationSegmentTone(status: "completed" | "active" | "up-next" | "blocked"): Tone {
+  switch (status) {
+    case "completed":
+      return "positive";
+    case "active":
+    case "up-next":
+      return "neutral";
+    default:
+      return "warning";
+  }
+}
+
+function formatMaterializationSegmentStatus(status: "completed" | "active" | "up-next" | "blocked"): string {
+  switch (status) {
+    case "completed":
+      return "Completed";
+    case "active":
+      return "Current";
+    case "up-next":
+      return "Up next";
+    default:
+      return "Blocked";
+  }
+}
+
+function resolveBundleSealingCheckpointTone(status: "ready" | "watch" | "blocked"): Tone {
+  switch (status) {
+    case "ready":
+      return "positive";
+    case "watch":
+      return "neutral";
+    default:
+      return "warning";
+  }
+}
+
+function formatBundleSealingCheckpointStatus(status: "ready" | "watch" | "blocked"): string {
+  switch (status) {
+    case "ready":
+      return "Ready";
+    case "watch":
+      return "Watch";
+    default:
+      return "Blocked";
+  }
+}
+
+function resolveStagedOutputStepPosture(
+  chain: StudioReleaseApprovalPipeline["deliveryChain"]["packagedAppMaterializationContract"]["platforms"][number]["stagedOutputChain"],
+  step: StudioReleaseApprovalPipeline["deliveryChain"]["packagedAppMaterializationContract"]["platforms"][number]["stagedOutputChain"]["steps"][number]
+): { label: string; tone: Tone } {
+  if (chain.completedStepIds.includes(step.id)) {
+    return { label: "Completed handoff", tone: "positive" };
+  }
+
+  if (chain.currentStepId === step.id) {
+    return { label: "Current review", tone: resolveMaterializationTaskTone(step.taskState) };
+  }
+
+  if (chain.nextStepId === step.id) {
+    return { label: "Up next", tone: "neutral" };
+  }
+
+  return { label: "Linked step", tone: resolveMaterializationTaskTone(step.taskState) };
 }
 
 function resolveReviewerQueueTone(status: StudioReleaseReviewerQueueStatus): Tone {
@@ -1613,6 +1684,31 @@ export function DeliveryChainWorkspace({
       pipeline.deliveryChain,
       selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
     ) ?? null;
+  const activeMaterializationSegment =
+    selectStudioReleasePackagedAppMaterializationContractProgressSegment(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
+    ) ?? null;
+  const nextMaterializationSegment =
+    selectStudioReleasePackagedAppMaterializationContractNextProgressSegment(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
+    ) ?? null;
+  const selectedStagedOutputNextStep =
+    selectStudioReleasePackagedAppMaterializationContractStagedOutputNextStep(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
+    ) ?? null;
+  const selectedBundleSealingCheckpoint =
+    selectStudioReleasePackagedAppMaterializationContractBundleSealingCheckpoint(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
+    ) ?? null;
+  const nearbyMaterializationStageCReadiness =
+    selectStudioReleasePackagedAppMaterializationContractNearbyStageCReadiness(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
+    );
   const materializationOwnerStage =
     selectStudioReleaseDeliveryChainStage(pipeline, packagedAppMaterializationContract.ownerStageId) ?? null;
   const materializationGateStage =
@@ -1633,6 +1729,12 @@ export function DeliveryChainWorkspace({
     selectedMaterializationPlatform?.tasks.filter((task) => task.taskState === "review-ready").length ?? 0;
   const materializationBlockedCount =
     selectedMaterializationPlatform?.tasks.filter((task) => task.taskState === "blocked").length ?? 0;
+  const bundleSealingReadyCount =
+    selectedBundleSealingReadiness?.checkpoints.filter((checkpoint) => checkpoint.status === "ready").length ?? 0;
+  const bundleSealingWatchCount =
+    selectedBundleSealingReadiness?.checkpoints.filter((checkpoint) => checkpoint.status === "watch").length ?? 0;
+  const bundleSealingBlockedCount =
+    selectedBundleSealingReadiness?.checkpoints.filter((checkpoint) => checkpoint.status === "blocked").length ?? 0;
   const nextReviewPacketStep =
     selectedReviewPacket?.nextStepId
       ? selectedReviewPacket.steps.find((step) => step.id === selectedReviewPacket.nextStepId) ?? null
@@ -1657,6 +1759,10 @@ export function DeliveryChainWorkspace({
   const selectedRollbackContractStage = selectedRollbackContract
     ? selectStudioReleaseDeliveryChainStage(pipeline, selectedRollbackContract.deliveryChainStageId) ?? null
     : null;
+  const nearbyMaterializationQaTrack = nearbyMaterializationStageCReadiness.qaTracks[0] ?? selectedQaTrack ?? null;
+  const nearbyMaterializationWorkflowStage = nearbyMaterializationStageCReadiness.workflowStages[0] ?? selectedApprovalWorkflowStage ?? null;
+  const nearbyMaterializationCheckpoint = nearbyMaterializationStageCReadiness.checkpoints[0] ?? selectedStageCCheckpoint ?? null;
+  const nearbyMaterializationRollbackContract = nearbyMaterializationStageCReadiness.rollbackContracts[0] ?? selectedRollbackContract ?? null;
   const selectedStageCBoundarySteps =
     selectedStageCCheckpoint?.boundaryStepIds
       .map((stepId) => boundary?.withheldExecutionPlan.find((step) => step.id === stepId) ?? null)
@@ -6115,23 +6221,38 @@ export function DeliveryChainWorkspace({
                   <strong>{materializationTaskStage ? `${materializationTaskStage.label} / ${materializationTaskStage.status}` : "Unavailable"}</strong>
                 </div>
                 <div className={`workflow-readiness-line workflow-readiness-line--${resolveMaterializationTaskTone(selectedMaterializationProgress?.taskState ?? "blocked")}`}>
-                  <span>Local progression</span>
+                  <span>Local Materialization Progression</span>
                   <strong>
                     {selectedMaterializationProgress
-                      ? `${selectedMaterializationProgress.completedTaskCount + 1}/${selectedMaterializationProgress.totalTaskCount} checkpoints / ${
-                          selectedMaterializationProgress.nextTaskId
-                            ? selectedMaterializationPlatform.tasks.find((task) => task.id === selectedMaterializationProgress.nextTaskId)?.label ??
-                              selectedMaterializationProgress.nextTaskId
-                            : "Final checkpoint"
+                      ? `${selectedMaterializationProgress.completedTaskCount}/${selectedMaterializationProgress.totalTaskCount} completed / ${
+                          activeMaterializationSegment?.label ?? "No active slice"
                         }`
                       : "Unavailable"}
                   </strong>
                 </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveMaterializationSegmentTone(activeMaterializationSegment?.status ?? "blocked")}`}>
+                  <span>Current progression slice</span>
+                  <strong>
+                    {activeMaterializationSegment
+                      ? `${activeMaterializationSegment.label} / ${formatMaterializationSegmentStatus(activeMaterializationSegment.status)}`
+                      : "Unavailable"}
+                  </strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveMaterializationSegmentTone(nextMaterializationSegment?.status ?? "blocked")}`}>
+                  <span>Next progression slice</span>
+                  <strong>
+                    {nextMaterializationSegment
+                      ? `${nextMaterializationSegment.label} / ${formatMaterializationSegmentStatus(nextMaterializationSegment.status)}`
+                      : "Final checkpoint"}
+                  </strong>
+                </div>
                 <div className={`workflow-readiness-line workflow-readiness-line--${resolveMaterializationTaskTone(selectedStagedOutputStep?.taskState ?? "blocked")}`}>
-                  <span>Staged-output chain</span>
+                  <span>Staged-output posture</span>
                   <strong>
                     {selectedStagedOutputChain
-                      ? `${selectedStagedOutputStep?.label ?? "No active step"} / ${selectedStagedOutputChain.steps.length} steps`
+                      ? `${selectedStagedOutputChain.completedStepIds.length}/${selectedStagedOutputChain.steps.length} completed / ${
+                          selectedStagedOutputStep?.label ?? "No active step"
+                        } / ${selectedStagedOutputNextStep?.label ?? "Seal handoff next"}`
                       : "Unavailable"}
                   </strong>
                 </div>
@@ -6183,9 +6304,24 @@ export function DeliveryChainWorkspace({
                       : "Unavailable"}
                   </strong>
                 </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveBundleSealingCheckpointTone(selectedBundleSealingCheckpoint?.status ?? "blocked")}`}>
+                  <span>Bundle-seal checkpoints</span>
+                  <strong>
+                    {selectedBundleSealingReadiness
+                      ? `${bundleSealingReadyCount} ready / ${bundleSealingWatchCount} watch / ${bundleSealingBlockedCount} blocked`
+                      : "Unavailable"}
+                  </strong>
+                </div>
                 <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(bundleSealingStage?.status ?? "blocked")}`}>
                   <span>Seal delivery stage</span>
                   <strong>{bundleSealingStage ? `${bundleSealingStage.label} / ${bundleSealingStage.status}` : "Unavailable"}</strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(nearbyMaterializationCheckpoint?.state ?? "blocked")}`}>
+                  <span>Nearby Stage C review</span>
+                  <strong>
+                    {nearbyMaterializationQaTrack?.label ?? "No QA track"} / {nearbyMaterializationWorkflowStage?.label ?? "No workflow"} /{" "}
+                    {nearbyMaterializationCheckpoint?.label ?? "No checkpoint"}
+                  </strong>
                 </div>
                 <div className="workflow-readiness-line workflow-readiness-line--neutral">
                   <span>Review-ready tasks</span>
@@ -6224,6 +6360,34 @@ export function DeliveryChainWorkspace({
                   </button>
                 ))}
               </div>
+              {selectedMaterializationProgress ? (
+                <div className="delivery-chain-workspace__artifact-groups">
+                  {selectedMaterializationProgress.segments.map((segment) => {
+                    const linkedStage = selectStudioReleaseDeliveryChainStage(pipeline, segment.deliveryChainStageId);
+                    const active = segment.id === activeMaterializationSegment?.id;
+                    const next = segment.id === nextMaterializationSegment?.id && !active;
+
+                    return (
+                      <div key={segment.id} className={active ? "windowing-card windowing-card--active" : "windowing-card"}>
+                        <span>{segment.label}</span>
+                        <strong>{formatMaterializationSegmentStatus(segment.status)}</strong>
+                        <p>{segment.summary}</p>
+                        <div className="windowing-card__meta">
+                          <span
+                            className={`windowing-badge${
+                              resolveMaterializationSegmentTone(segment.status) === "positive" || active ? " windowing-badge--active" : ""
+                            }`}
+                          >
+                            {linkedStage?.label ?? segment.deliveryChainStageId}
+                          </span>
+                          {segment.linkedStepIds.length > 0 ? <span className="windowing-badge">{segment.linkedStepIds.length} linked steps</span> : null}
+                          {next ? <span className="windowing-badge">Next slice</span> : null}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
               {selectedStagedOutputChain ? (
                 <div className="delivery-chain-workspace__artifact-groups">
                   {selectedStagedOutputChain.steps.map((step) => (
@@ -6236,8 +6400,18 @@ export function DeliveryChainWorkspace({
                       }}
                     >
                       <span>{step.label}</span>
-                      <strong>{formatMaterializationTaskState(step.taskState)}</strong>
+                      <strong>{resolveStagedOutputStepPosture(selectedStagedOutputChain, step).label}</strong>
                       <p>{step.summary}</p>
+                      <div className="windowing-card__meta">
+                        <span
+                          className={`windowing-badge${
+                            resolveStagedOutputStepPosture(selectedStagedOutputChain, step).tone === "positive" ? " windowing-badge--active" : ""
+                          }`}
+                        >
+                          {formatMaterializationTaskState(step.taskState)}
+                        </span>
+                        <span className="windowing-badge">{step.manifestPath}</span>
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -6260,6 +6434,61 @@ export function DeliveryChainWorkspace({
                   ))}
                 </div>
               ) : null}
+              {selectedBundleSealingReadiness ? (
+                <div className="delivery-chain-workspace__artifact-groups">
+                  {selectedBundleSealingReadiness.checkpoints.map((checkpoint) => (
+                    <div
+                      key={checkpoint.id}
+                      className={
+                        checkpoint.id === selectedBundleSealingCheckpoint?.id ? "windowing-card windowing-card--active" : "windowing-card"
+                      }
+                    >
+                      <span>{checkpoint.label}</span>
+                      <strong>{formatBundleSealingCheckpointStatus(checkpoint.status)}</strong>
+                      <p>{checkpoint.detail}</p>
+                      <div className="windowing-card__meta">
+                        <span
+                          className={`windowing-badge${
+                            resolveBundleSealingCheckpointTone(checkpoint.status) === "positive" ? " windowing-badge--active" : ""
+                          }`}
+                        >
+                          {checkpoint.artifactPath}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+              <div className="delivery-chain-workspace__artifact-groups">
+                {nearbyMaterializationQaTrack ? (
+                  <div className="windowing-card">
+                    <span>Nearby QA closeout</span>
+                    <strong>{nearbyMaterializationQaTrack.label}</strong>
+                    <p>{nearbyMaterializationQaTrack.reviewChecks[0] ?? nearbyMaterializationQaTrack.artifacts[0] ?? "No nearby QA detail"}</p>
+                  </div>
+                ) : null}
+                {nearbyMaterializationWorkflowStage ? (
+                  <div className="windowing-card">
+                    <span>Nearby approval workflow</span>
+                    <strong>{nearbyMaterializationWorkflowStage.label}</strong>
+                    <p>{nearbyMaterializationWorkflowStage.evidence[0] ?? nearbyMaterializationWorkflowStage.status}</p>
+                  </div>
+                ) : null}
+                {nearbyMaterializationCheckpoint ? (
+                  <div className="windowing-card">
+                    <span>Nearby Stage C entry</span>
+                    <strong>{nearbyMaterializationCheckpoint.label}</strong>
+                    <p>{nearbyMaterializationCheckpoint.reviewChecks[0] ?? nearbyMaterializationCheckpoint.evidence[0] ?? "No nearby checkpoint detail"}</p>
+                  </div>
+                ) : null}
+                {nearbyMaterializationRollbackContract ? (
+                  <div className="windowing-card">
+                    <span>Nearby rollback readiness</span>
+                    <strong>{nearbyMaterializationRollbackContract.from}{" -> "}{nearbyMaterializationRollbackContract.to}</strong>
+                    <p>{nearbyMaterializationRollbackContract.readinessChecks[0] ?? nearbyMaterializationRollbackContract.status}</p>
+                  </div>
+                ) : null}
+              </div>
               <div className="windowing-preview-list">
                 <div className="windowing-preview-line windowing-preview-line--stacked">
                   <span>Materialization root</span>
@@ -6384,6 +6613,12 @@ export function DeliveryChainWorkspace({
                     <strong>{selectedBundleSealingReadiness.currentCheckpoint}</strong>
                   </div>
                 ) : null}
+                {selectedBundleSealingCheckpoint ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Active seal checkpoint</span>
+                    <strong>{selectedBundleSealingCheckpoint.label} / {selectedBundleSealingCheckpoint.detail}</strong>
+                  </div>
+                ) : null}
                 {(compact ? selectedBundleSealingReadiness?.reviewChecks.slice(0, 2) ?? [] : selectedBundleSealingReadiness?.reviewChecks ?? []).map((check) => (
                   <div key={check} className="windowing-preview-line windowing-preview-line--stacked">
                     <span>Seal review check</span>
@@ -6402,6 +6637,24 @@ export function DeliveryChainWorkspace({
                     <strong>{check}</strong>
                   </div>
                 ))}
+                {nearbyMaterializationQaTrack ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Nearby QA closeout</span>
+                    <strong>{nearbyMaterializationQaTrack.label} / {nearbyMaterializationQaTrack.owner}</strong>
+                  </div>
+                ) : null}
+                {nearbyMaterializationWorkflowStage ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Nearby approval workflow</span>
+                    <strong>{nearbyMaterializationWorkflowStage.label} / {formatStageReadinessStatus(nearbyMaterializationWorkflowStage.status)}</strong>
+                  </div>
+                ) : null}
+                {nearbyMaterializationCheckpoint ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Nearby Stage C entry</span>
+                    <strong>{nearbyMaterializationCheckpoint.label} / {formatStageReadinessStatus(nearbyMaterializationCheckpoint.state)}</strong>
+                  </div>
+                ) : null}
                 {(compact ? selectedMaterializationPlatform.blockedBy.slice(0, 2) : selectedMaterializationPlatform.blockedBy).map((blocker) => (
                   <div key={blocker} className="windowing-preview-line windowing-preview-line--stacked">
                     <span>Blocker</span>

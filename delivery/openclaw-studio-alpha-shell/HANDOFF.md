@@ -70,6 +70,7 @@
   - phase60 slice31 已继续把 Packaged-app Materialization Contract 推进成更明确的 task-state linkage，让 per-platform current task、task evidence、delivery-stage linkage、以及 directory / staged-output / bundle-seal readiness 在同一张 Stage Explorer 里保持只读可见，并继续保持 local-only / review-only posture
   - phase60 slice32 已继续把 Approval-Audit-Rollback Entry 推进成更明确的 typed Stage C readiness，让 QA closeout tracks、approval workflow stages、checkpoint-level evidence、rollback live-readiness contracts、以及 withheld / future-executor boundary linkage 在同一张 Stage Explorer / inspector / windows surface 里保持只读可见，并继续保持 local-only / review-only posture
   - phase60 slice33 已继续把 Packaged-app Materialization Contract 推进成更明确的 local materialization review packet，让 per-platform directory -> staged-output -> bundle-seal handoff、current review step、packet evidence、以及 rollback anchor 在同一张 Stage Explorer 里保持只读可见，并继续保持 local-only / review-only posture
+  - phase60 slice34 已继续把 Packaged-app Materialization Contract 推进成更明确的 validator / observability bridge，让 progression segments、staged-output next step、active bundle-sealing checkpoint、以及 nearby QA / approval / Stage C readiness linkage 在同一张 Stage Explorer / windows surface 里保持只读可见，并继续保持 local-only / review-only posture
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-build-metadata/v1",
-  "generatedAt": "2026-04-07T19:23:15.970Z",
+  "generatedAt": "2026-04-07T19:41:10.385Z",
   "app": {
     "name": "OpenClaw Studio",
     "workspacePackage": "@openclaw/studio",
@@ -523,7 +523,7 @@
       "sourceRoot": "/home/qz057/.openclaw/workspace/openclaw-studio/apps/studio/dist-renderer",
       "outputRoot": "artifacts/renderer",
       "fileCount": 11,
-      "totalBytes": 1027441,
+      "totalBytes": 1035078,
       "entrypoints": [
         "artifacts/renderer/index.html"
       ]
