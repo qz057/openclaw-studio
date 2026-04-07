@@ -5,6 +5,8 @@ import {
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseEscalationWindow,
+  selectStudioReleasePackagedAppMaterializationContractPlatform,
+  selectStudioReleasePackagedAppMaterializationContractValidatorObservabilitySurfaceMatch,
   selectStudioReleaseQaCloseoutReadinessTrack,
   selectStudioReleaseRollbackLiveReadinessContract,
   selectStudioReleaseReviewerQueue,
@@ -159,6 +161,19 @@ function formatWindowKind(kind: StudioShellState["windowing"]["roster"]["windows
   }
 }
 
+function formatPackagedAppPlatform(
+  platform: StudioReleaseApprovalPipeline["deliveryChain"]["packagedAppMaterializationContract"]["platforms"][number]["platform"]
+): string {
+  switch (platform) {
+    case "windows":
+      return "Windows";
+    case "macos":
+      return "macOS";
+    default:
+      return "Linux";
+  }
+}
+
 function formatBoundaryLayerLabel(
   layer: StudioShellState["boundary"]["currentLayer"] | StudioShellState["boundary"]["nextLayer"]
 ): string {
@@ -190,6 +205,17 @@ function formatReviewPostureRelationship(
       return "Escalation shadow";
     default:
       return "Blocked decision gate";
+  }
+}
+
+function formatMaterializationValidatorStatus(status: "ready" | "watch" | "blocked"): string {
+  switch (status) {
+    case "ready":
+      return "Ready";
+    case "watch":
+      return "Watch";
+    default:
+      return "Blocked";
   }
 }
 
@@ -401,6 +427,16 @@ export function WindowSharedStateBoard({
     releaseApprovalPipeline ? selectStudioReleaseEscalationWindow(releaseApprovalPipeline, currentReleaseStage ?? undefined) : null;
   const currentCloseoutWindow =
     releaseApprovalPipeline ? selectStudioReleaseCloseoutWindow(releaseApprovalPipeline, currentReleaseStage ?? undefined) : null;
+  const activeMaterializationPlatform =
+    releaseApprovalPipeline ? selectStudioReleasePackagedAppMaterializationContractPlatform(releaseApprovalPipeline.deliveryChain) ?? null : null;
+  const activeMaterializationValidatorSurface = releaseApprovalPipeline
+    ? selectStudioReleasePackagedAppMaterializationContractValidatorObservabilitySurfaceMatch(
+        releaseApprovalPipeline.deliveryChain,
+        windowing,
+        reviewStateContinuity,
+        activeMaterializationPlatform?.id
+      )
+    : null;
   const activeQueueEntry =
     currentReviewerQueue?.entries.find((entry) => entry.id === currentReviewerQueue.activeEntryId) ?? currentReviewerQueue?.entries[0] ?? null;
   const deliveryCoverageEntries = releaseApprovalPipeline
@@ -1047,6 +1083,116 @@ export function WindowSharedStateBoard({
                 <strong>{rollbackDeliveryStage ? `${rollbackDeliveryStage.label} / ${rollbackDeliveryStage.status}` : "Unavailable"}</strong>
               </div>
             </div>
+          </article>
+        ) : null}
+
+        {releaseApprovalPipeline ? (
+          <article className="windowing-summary-card">
+            <span>Materialization Validator Bridge</span>
+            <strong>
+              {activeMaterializationPlatform
+                ? `${formatPackagedAppPlatform(activeMaterializationPlatform.platform)} / ${
+                    activeMaterializationValidatorSurface?.activeReadout?.label ??
+                    activeMaterializationValidatorSurface?.bridge?.label ??
+                    "No validator readout"
+                  }`
+                : "No materialization bridge"}
+            </strong>
+            <p>
+              {activeMaterializationValidatorSurface?.bridge?.summary ??
+                "Validator-facing materialization progression is unavailable, so this board cannot show how the active local-only slice maps back into the current window/lane/board observability spine."}
+            </p>
+            <div className="workflow-readiness-list">
+              <div
+                className={`workflow-readiness-line workflow-readiness-line--${
+                  activeMaterializationValidatorSurface?.activeReadout?.status === "ready"
+                    ? "positive"
+                    : activeMaterializationValidatorSurface?.activeReadout?.status === "watch"
+                      ? "neutral"
+                      : "warning"
+                }`}
+              >
+                <span>Current validator</span>
+                <strong>
+                  {activeMaterializationValidatorSurface?.activeReadout
+                    ? `${activeMaterializationValidatorSurface.activeReadout.label} / ${formatMaterializationValidatorStatus(
+                        activeMaterializationValidatorSurface.activeReadout.status
+                      )}`
+                    : "Unavailable"}
+                </strong>
+              </div>
+              <div
+                className={`workflow-readiness-line workflow-readiness-line--${
+                  activeMaterializationValidatorSurface?.nextReadout?.status === "ready"
+                    ? "positive"
+                    : activeMaterializationValidatorSurface?.nextReadout?.status === "watch"
+                      ? "neutral"
+                      : "warning"
+                }`}
+              >
+                <span>Next validator</span>
+                <strong>
+                  {activeMaterializationValidatorSurface?.nextReadout
+                    ? `${activeMaterializationValidatorSurface.nextReadout.label} / ${formatMaterializationValidatorStatus(
+                        activeMaterializationValidatorSurface.nextReadout.status
+                      )}`
+                    : "Final validator"}
+                </strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Observability row</span>
+                <strong>
+                  {activeMaterializationValidatorSurface?.activeReadout
+                    ? `${activeMaterializationValidatorSurface.observabilityMapping?.label ?? activeMaterializationValidatorSurface.activeReadout.observabilityMappingId} / ${
+                        activeMaterializationValidatorSurface.lane?.label ?? activeMaterializationValidatorSurface.activeReadout.sharedStateLaneId
+                      }`
+                    : "Unavailable"}
+                </strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Review continuity</span>
+                <strong>
+                  {activeMaterializationValidatorSurface?.reviewStateContinuityEntry?.label ??
+                    (activeMaterializationValidatorSurface?.activeReadout
+                      ? `${activeMaterializationValidatorSurface.window?.label ?? activeMaterializationValidatorSurface.activeReadout.windowId} / ${
+                          activeMaterializationValidatorSurface.board?.label ??
+                          activeMaterializationValidatorSurface.activeReadout.orchestrationBoardId
+                        }`
+                      : "Unavailable")}
+                </strong>
+              </div>
+            </div>
+            {activeMaterializationValidatorSurface?.activeReadout ? (
+              <div className="windowing-preview-list">
+                <div className="windowing-preview-line windowing-preview-line--stacked">
+                  <span>Current validator summary</span>
+                  <strong>{activeMaterializationValidatorSurface.activeReadout.summary}</strong>
+                </div>
+                <div className="windowing-preview-line windowing-preview-line--stacked">
+                  <span>Window / lane / board</span>
+                  <strong>
+                    {activeMaterializationValidatorSurface.window?.label ?? activeMaterializationValidatorSurface.activeReadout.windowId}
+                    {" -> "}
+                    {activeMaterializationValidatorSurface.lane?.label ?? activeMaterializationValidatorSurface.activeReadout.sharedStateLaneId}
+                    {" -> "}
+                    {activeMaterializationValidatorSurface.board?.label ?? activeMaterializationValidatorSurface.activeReadout.orchestrationBoardId}
+                  </strong>
+                </div>
+                {activeMaterializationValidatorSurface.observabilitySignals.map((signal) => (
+                  <div key={signal.id} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>{signal.label}</span>
+                    <strong>{signal.value}</strong>
+                    <p>{signal.detail}</p>
+                  </div>
+                ))}
+                {activeMaterializationValidatorSurface.activeReadout.validatorChecks.map((check) => (
+                  <div key={check} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Validator check</span>
+                    <strong>{check}</strong>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </article>
         ) : null}
 

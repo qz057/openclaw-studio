@@ -4450,6 +4450,7 @@ export function App() {
             pipeline={releaseApprovalPipeline}
             boundary={data.boundary}
             windowing={data.windowing}
+            reviewStateContinuity={data.reviewStateContinuity}
             actionDeck={activeActionDeck}
             reviewSurfaceActions={reviewCoverageActions}
             activeReviewSurfaceActionId={resolvedReviewSurfaceAction?.id ?? null}
@@ -4465,7 +4466,7 @@ export function App() {
             onRunCompanionRouteHistory={handleRunCompanionRouteHistory}
             eyebrow="Phase60"
             title="Delivery-chain Workspace"
-            summary="Phase60 slice 32 keeps the selector-backed review-state continuity contract from slice28 in place, then deepens the same Stage Explorer with packaged-app task-state linkage plus typed Stage C readiness so per-platform current task, task evidence, verification manifests, staged-output roots, seal manifests, approval workflow stages, checkpoint evidence, rollback contracts, boundary handoff posture, route replay packs, continuity handoffs, closeout timing, and windows-rail linkage stay readable as one ordered local-only interface-review walkthrough."
+            summary="Phase60 slice35 keeps the selector-backed review-state continuity contract and Stage C readiness chain in place, then deepens the same Stage Explorer with validator-facing materialization readouts, observability surface matches, continuity entry linkage, signals, and checks so the active packaged-app handoff can be re-read across the same local-only window/lane/board spine."
           />
 
           <section className="surface card window-workbench">

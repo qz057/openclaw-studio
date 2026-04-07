@@ -17,6 +17,9 @@ import {
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseEscalationWindow,
+  selectStudioReleasePackagedAppMaterializationContractPlatform,
+  selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityBridge,
+  selectStudioReleasePackagedAppMaterializationContractValidatorObservabilitySurfaceMatch,
   selectStudioReleaseQaCloseoutReadinessTrack,
   selectStudioReleaseRollbackLiveReadinessContract,
   selectStudioReviewStateContinuityEntry,
@@ -99,6 +102,17 @@ function formatReviewPostureRelationship(
       return "Escalation shadow";
     default:
       return "Blocked decision gate";
+  }
+}
+
+function formatMaterializationValidatorStatus(status: "ready" | "watch" | "blocked"): string {
+  switch (status) {
+    case "ready":
+      return "Ready";
+    case "watch":
+      return "Watch";
+    default:
+      return "Blocked";
   }
 }
 
@@ -189,6 +203,20 @@ export function createInspectorSections(
   const currentCloseoutWindow = selectStudioReleaseCloseoutWindow(boundary.hostExecutor.releaseApprovalPipeline, currentReleaseStage);
   const publishDeliveryStage = selectStudioReleaseDeliveryChainStage(boundary.hostExecutor.releaseApprovalPipeline, "delivery-chain-publish-decision");
   const rollbackDeliveryStage = selectStudioReleaseDeliveryChainStage(boundary.hostExecutor.releaseApprovalPipeline, "delivery-chain-rollback-readiness");
+  const activeMaterializationPlatform =
+    selectStudioReleasePackagedAppMaterializationContractPlatform(boundary.hostExecutor.releaseApprovalPipeline.deliveryChain) ?? null;
+  const activeMaterializationValidatorBridge =
+    selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityBridge(
+      boundary.hostExecutor.releaseApprovalPipeline.deliveryChain,
+      activeMaterializationPlatform?.id
+    ) ?? null;
+  const activeMaterializationValidatorSurface =
+    selectStudioReleasePackagedAppMaterializationContractValidatorObservabilitySurfaceMatch(
+      boundary.hostExecutor.releaseApprovalPipeline.deliveryChain,
+      windowing,
+      options?.reviewStateContinuity,
+      activeMaterializationPlatform?.id
+    );
   const stageCReadiness = boundary.hostExecutor.releaseApprovalPipeline.deliveryChain.stageCReadiness;
   const stageCQaTrack = selectStudioReleaseQaCloseoutReadinessTrack(boundary.hostExecutor.releaseApprovalPipeline.deliveryChain);
   const stageCWorkflowStage = selectStudioReleaseApprovalWorkflowStage(boundary.hostExecutor.releaseApprovalPipeline.deliveryChain);
@@ -333,6 +361,36 @@ export function createInspectorSections(
       id: "stage-c-boundary",
       label: "Boundary bridge",
       value: `${stageCBoundaryValue} / ${stageCBoundaryCounts}`
+    },
+    {
+      id: "materialization-validator",
+      label: "Materialization bridge",
+      value: activeMaterializationValidatorBridge
+        ? `${activeMaterializationValidatorSurface.activeReadout?.label ?? activeMaterializationValidatorBridge.label} / ${
+            activeMaterializationValidatorSurface.activeReadout
+              ? formatMaterializationValidatorStatus(activeMaterializationValidatorSurface.activeReadout.status)
+              : "Unavailable"
+          }`
+        : "Unavailable"
+    },
+    {
+      id: "materialization-observability",
+      label: "Materialization observability",
+      value: activeMaterializationValidatorSurface.activeReadout
+        ? `${activeMaterializationValidatorSurface.observabilityMapping?.label ?? activeMaterializationValidatorSurface.activeReadout.observabilityMappingId} / ${
+            activeMaterializationValidatorSurface.lane?.label ?? activeMaterializationValidatorSurface.activeReadout.sharedStateLaneId
+          }`
+        : "Unavailable"
+    },
+    {
+      id: "materialization-continuity",
+      label: "Materialization continuity",
+      value: activeMaterializationValidatorSurface.activeReadout
+        ? activeMaterializationValidatorSurface.reviewStateContinuityEntry?.label ??
+          `${activeMaterializationValidatorSurface.window?.label ?? activeMaterializationValidatorSurface.activeReadout.windowId} / ${
+            activeMaterializationValidatorSurface.board?.label ?? activeMaterializationValidatorSurface.activeReadout.orchestrationBoardId
+          }`
+        : "Unavailable"
     },
     {
       id: "window-focus",

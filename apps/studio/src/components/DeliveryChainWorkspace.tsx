@@ -19,6 +19,10 @@ import {
   selectStudioReleasePackagedAppMaterializationContractStagedOutputNextStep,
   selectStudioReleasePackagedAppMaterializationContractStagedOutputStep,
   selectStudioReleasePackagedAppMaterializationContractTask,
+  selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityBridge,
+  selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityReadout,
+  selectStudioReleasePackagedAppMaterializationContractValidatorObservabilitySurfaceMatch,
+  selectStudioReleasePackagedAppMaterializationContractNextValidatorObservabilityReadout,
   selectStudioReleaseQaCloseoutReadinessTrack,
   selectStudioReleaseRollbackLiveReadinessContract,
   selectStudioReleaseReviewerQueue,
@@ -38,6 +42,7 @@ interface DeliveryChainWorkspaceProps {
   pipeline: StudioReleaseApprovalPipeline;
   boundary?: StudioShellState["boundary"];
   windowing?: StudioShellState["windowing"];
+  reviewStateContinuity?: StudioShellState["reviewStateContinuity"];
   actionDeck?: StudioCommandActionDeck | null;
   reviewSurfaceActions?: StudioCommandAction[];
   activeReviewSurfaceActionId?: string | null;
@@ -345,6 +350,28 @@ function resolveBundleSealingCheckpointTone(status: "ready" | "watch" | "blocked
 }
 
 function formatBundleSealingCheckpointStatus(status: "ready" | "watch" | "blocked"): string {
+  switch (status) {
+    case "ready":
+      return "Ready";
+    case "watch":
+      return "Watch";
+    default:
+      return "Blocked";
+  }
+}
+
+function resolveValidatorReadoutTone(status: "ready" | "watch" | "blocked"): Tone {
+  switch (status) {
+    case "ready":
+      return "positive";
+    case "watch":
+      return "neutral";
+    default:
+      return "warning";
+  }
+}
+
+function formatValidatorReadoutStatus(status: "ready" | "watch" | "blocked"): string {
   switch (status) {
     case "ready":
       return "Ready";
@@ -1458,6 +1485,7 @@ export function DeliveryChainWorkspace({
   pipeline,
   boundary,
   windowing,
+  reviewStateContinuity,
   actionDeck,
   reviewSurfaceActions = [],
   activeReviewSurfaceActionId,
@@ -1485,6 +1513,7 @@ export function DeliveryChainWorkspace({
   const [selectedMaterializationTaskId, setSelectedMaterializationTaskId] = useState<string | null>(null);
   const [selectedStagedOutputStepId, setSelectedStagedOutputStepId] = useState<string | null>(null);
   const [selectedReviewPacketStepId, setSelectedReviewPacketStepId] = useState<string | null>(null);
+  const [selectedValidatorReadoutId, setSelectedValidatorReadoutId] = useState<string | null>(null);
   const [selectedQaTrackId, setSelectedQaTrackId] = useState<string | null>(null);
   const [selectedApprovalWorkflowStageId, setSelectedApprovalWorkflowStageId] = useState<string | null>(null);
   const [selectedStageCCheckpointId, setSelectedStageCCheckpointId] = useState<string | null>(null);
@@ -1646,6 +1675,23 @@ export function DeliveryChainWorkspace({
     }
   }, [selectedMaterializationPlatform, selectedReviewPacketStepId]);
 
+  useEffect(() => {
+    if (!selectedMaterializationPlatform?.validatorObservabilityBridge.readouts.length) {
+      if (selectedValidatorReadoutId !== null) {
+        setSelectedValidatorReadoutId(null);
+      }
+
+      return;
+    }
+
+    if (
+      !selectedValidatorReadoutId ||
+      !selectedMaterializationPlatform.validatorObservabilityBridge.readouts.some((readout) => readout.id === selectedValidatorReadoutId)
+    ) {
+      setSelectedValidatorReadoutId(selectedMaterializationPlatform.validatorObservabilityBridge.activeReadoutId);
+    }
+  }, [selectedMaterializationPlatform, selectedValidatorReadoutId]);
+
   const selectedMaterializationTask =
     selectStudioReleasePackagedAppMaterializationContractTask(
       pipeline.deliveryChain,
@@ -1704,6 +1750,29 @@ export function DeliveryChainWorkspace({
       pipeline.deliveryChain,
       selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
     ) ?? null;
+  const selectedValidatorBridge =
+    selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityBridge(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
+    ) ?? null;
+  const selectedValidatorReadout =
+    selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityReadout(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId,
+      selectedValidatorReadoutId
+    ) ?? null;
+  const nextValidatorReadout =
+    selectStudioReleasePackagedAppMaterializationContractNextValidatorObservabilityReadout(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
+    ) ?? null;
+  const validatorSurfaceMatch = selectStudioReleasePackagedAppMaterializationContractValidatorObservabilitySurfaceMatch(
+    pipeline.deliveryChain,
+    windowing,
+    reviewStateContinuity,
+    selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId,
+    selectedValidatorReadoutId
+  );
   const nearbyMaterializationStageCReadiness =
     selectStudioReleasePackagedAppMaterializationContractNearbyStageCReadiness(
       pipeline.deliveryChain,
@@ -1724,6 +1793,9 @@ export function DeliveryChainWorkspace({
     : null;
   const bundleSealingStage = selectedBundleSealingReadiness
     ? selectStudioReleaseDeliveryChainStage(pipeline, selectedBundleSealingReadiness.deliveryChainStageId) ?? null
+    : null;
+  const selectedValidatorStage = selectedValidatorReadout
+    ? selectStudioReleaseDeliveryChainStage(pipeline, selectedValidatorReadout.deliveryChainStageId) ?? null
     : null;
   const materializationReviewReadyCount =
     selectedMaterializationPlatform?.tasks.filter((task) => task.taskState === "review-ready").length ?? 0;
@@ -6316,6 +6388,60 @@ export function DeliveryChainWorkspace({
                   <span>Seal delivery stage</span>
                   <strong>{bundleSealingStage ? `${bundleSealingStage.label} / ${bundleSealingStage.status}` : "Unavailable"}</strong>
                 </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveMaterializationTaskTone(selectedValidatorBridge?.taskState ?? "blocked")}`}>
+                  <span>Validator / observability bridge</span>
+                  <strong>
+                    {selectedValidatorBridge
+                      ? `${formatMaterializationTaskState(selectedValidatorBridge.taskState)} / ${
+                          selectedValidatorBridge.readouts.length
+                        } readouts`
+                      : "Unavailable"}
+                  </strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveValidatorReadoutTone(selectedValidatorReadout?.status ?? "blocked")}`}>
+                  <span>Current validator readout</span>
+                  <strong>
+                    {selectedValidatorReadout
+                      ? `${selectedValidatorReadout.label} / ${formatValidatorReadoutStatus(selectedValidatorReadout.status)}`
+                      : "Unavailable"}
+                  </strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveValidatorReadoutTone(nextValidatorReadout?.status ?? "blocked")}`}>
+                  <span>Next validator readout</span>
+                  <strong>
+                    {nextValidatorReadout
+                      ? `${nextValidatorReadout.label} / ${formatValidatorReadoutStatus(nextValidatorReadout.status)}`
+                      : "Final validator checkpoint"}
+                  </strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(selectedValidatorStage?.status ?? "blocked")}`}>
+                  <span>Validator delivery stage</span>
+                  <strong>{selectedValidatorStage ? `${selectedValidatorStage.label} / ${selectedValidatorStage.status}` : "Unavailable"}</strong>
+                </div>
+                <div
+                  className={`workflow-readiness-line workflow-readiness-line--${
+                    validatorSurfaceMatch.reviewStateContinuityEntry?.tone ??
+                    validatorSurfaceMatch.observabilityMapping?.tone ??
+                    "warning"
+                  }`}
+                >
+                  <span>Validator surface match</span>
+                  <strong>
+                    {validatorSurfaceMatch.observabilityMapping
+                      ? `${validatorSurfaceMatch.observabilityMapping.label} / ${formatReviewPostureRelationship(
+                          validatorSurfaceMatch.observabilityMapping.relationship
+                        )}`
+                      : "Unavailable"}
+                  </strong>
+                </div>
+                <div
+                  className={`workflow-readiness-line workflow-readiness-line--${
+                    validatorSurfaceMatch.reviewStateContinuityEntry?.tone ?? "warning"
+                  }`}
+                >
+                  <span>Matched continuity entry</span>
+                  <strong>{validatorSurfaceMatch.reviewStateContinuityEntry?.label ?? "Unavailable"}</strong>
+                </div>
                 <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(nearbyMaterializationCheckpoint?.state ?? "blocked")}`}>
                   <span>Nearby Stage C review</span>
                   <strong>
@@ -6336,7 +6462,7 @@ export function DeliveryChainWorkspace({
                   <strong>{selectedMaterializationPlatform.localRoots.stagedOutputRoot}</strong>
                 </div>
                 <div className="workflow-readiness-line workflow-readiness-line--warning">
-                  <span>Seal manifest</span>
+                  <span>seal manifests</span>
                   <strong>{selectedMaterializationPlatform.manifests.bundleSeal}</strong>
                 </div>
                 <div className="workflow-readiness-line workflow-readiness-line--warning">
@@ -6457,6 +6583,77 @@ export function DeliveryChainWorkspace({
                       </div>
                     </div>
                   ))}
+                </div>
+              ) : null}
+              {selectedValidatorBridge ? (
+                <div className="delivery-chain-workspace__artifact-groups">
+                  {selectedValidatorBridge.readouts.map((readout) => {
+                    const active = readout.id === selectedValidatorReadout?.id;
+
+                    return (
+                      <button
+                        key={readout.id}
+                        type="button"
+                        className={active ? "windowing-card windowing-card--active" : "windowing-card"}
+                        onClick={() => {
+                          setSelectedValidatorReadoutId(readout.id);
+                        }}
+                      >
+                        <span>{readout.label}</span>
+                        <strong>{formatValidatorReadoutStatus(readout.status)}</strong>
+                        <p>{readout.summary}</p>
+                        <div className="windowing-card__meta">
+                          <span
+                            className={`windowing-badge${
+                              resolveValidatorReadoutTone(readout.status) === "positive" ? " windowing-badge--active" : ""
+                            }`}
+                          >
+                            {readout.taskId}
+                          </span>
+                          <span className="windowing-badge">{readout.observabilitySignalIds.length} observability signals</span>
+                          <span className="windowing-badge">{readout.validatorChecks.length} validator checks</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
+              {selectedValidatorReadout ? (
+                <div className="delivery-chain-workspace__artifact-groups">
+                  <div className="windowing-card">
+                    <span>Matched observability path</span>
+                    <strong>
+                      {validatorSurfaceMatch.observabilityMapping
+                        ? `${validatorSurfaceMatch.observabilityMapping.label} / ${formatReviewPostureRelationship(
+                            validatorSurfaceMatch.observabilityMapping.relationship
+                          )}`
+                        : "No observability path"}
+                    </strong>
+                    <p>
+                      {validatorSurfaceMatch.observabilityMapping?.summary ??
+                        "The selected validator readout is not yet attached to a typed cross-window observability row."}
+                    </p>
+                  </div>
+                  <div className="windowing-card">
+                    <span>Matched surface spine</span>
+                    <strong>
+                      {validatorSurfaceMatch.window?.label ?? selectedValidatorReadout.windowId} /{" "}
+                      {validatorSurfaceMatch.lane?.label ?? selectedValidatorReadout.sharedStateLaneId}
+                    </strong>
+                    <p>
+                      {validatorSurfaceMatch.board?.label ?? selectedValidatorReadout.orchestrationBoardId}
+                      {" / "}
+                      {selectedValidatorReadout.observabilityMappingId}
+                    </p>
+                  </div>
+                  <div className="windowing-card">
+                    <span>Matched continuity entry</span>
+                    <strong>{validatorSurfaceMatch.reviewStateContinuityEntry?.label ?? "No continuity entry"}</strong>
+                    <p>
+                      {validatorSurfaceMatch.reviewStateContinuityEntry?.summary ??
+                        "Review-state continuity is unavailable for the selected validator readout."}
+                    </p>
+                  </div>
                 </div>
               ) : null}
               <div className="delivery-chain-workspace__artifact-groups">
@@ -6619,6 +6816,64 @@ export function DeliveryChainWorkspace({
                     <strong>{selectedBundleSealingCheckpoint.label} / {selectedBundleSealingCheckpoint.detail}</strong>
                   </div>
                 ) : null}
+                {selectedValidatorBridge ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Validator bridge summary</span>
+                    <strong>{selectedValidatorBridge.summary}</strong>
+                  </div>
+                ) : null}
+                {selectedValidatorReadout ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Validator readout surface</span>
+                    <strong>
+                      {selectedValidatorReadout.label} / {validatorSurfaceMatch.window?.label ?? selectedValidatorReadout.windowId} /{" "}
+                      {validatorSurfaceMatch.board?.label ?? selectedValidatorReadout.orchestrationBoardId}
+                    </strong>
+                  </div>
+                ) : null}
+                {selectedValidatorReadout ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Validator readout summary</span>
+                    <strong>{selectedValidatorReadout.summary}</strong>
+                  </div>
+                ) : null}
+                {nextValidatorReadout ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Validator handoff next</span>
+                    <strong>{nextValidatorReadout.label} / {nextValidatorReadout.taskId}</strong>
+                  </div>
+                ) : null}
+                {validatorSurfaceMatch.reviewStateContinuityEntry ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Matched continuity spine</span>
+                    <strong>
+                      {validatorSurfaceMatch.reviewStateContinuityEntry.label} /{" "}
+                      {validatorSurfaceMatch.reviewStateContinuityEntry.spine.windowId} /{" "}
+                      {validatorSurfaceMatch.reviewStateContinuityEntry.spine.sharedStateLaneId}
+                    </strong>
+                  </div>
+                ) : null}
+                {(compact
+                  ? validatorSurfaceMatch.observabilitySignals.slice(0, 2)
+                  : validatorSurfaceMatch.observabilitySignals
+                ).map((signal) => (
+                  <div key={signal.id} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Observability signal</span>
+                    <strong>{signal.label} / {signal.value}</strong>
+                  </div>
+                ))}
+                {(compact ? selectedValidatorReadout?.validatorChecks.slice(0, 2) ?? [] : selectedValidatorReadout?.validatorChecks ?? []).map((check) => (
+                  <div key={check} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Validator check</span>
+                    <strong>{check}</strong>
+                  </div>
+                ))}
+                {(compact ? selectedValidatorBridge?.blockedBy.slice(0, 2) ?? [] : selectedValidatorBridge?.blockedBy ?? []).map((blocker) => (
+                  <div key={blocker} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Validator bridge blocker</span>
+                    <strong>{blocker}</strong>
+                  </div>
+                ))}
                 {(compact ? selectedBundleSealingReadiness?.reviewChecks.slice(0, 2) ?? [] : selectedBundleSealingReadiness?.reviewChecks ?? []).map((check) => (
                   <div key={check} className="windowing-preview-line windowing-preview-line--stacked">
                     <span>Seal review check</span>
