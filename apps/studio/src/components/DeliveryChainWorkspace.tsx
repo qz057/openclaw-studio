@@ -1943,6 +1943,8 @@ export function DeliveryChainWorkspace({
   const materializationStageCReadoutPath = [
     selectedReviewPacketStep?.label ?? selectedReviewPacket?.label ?? null,
     selectedValidatorReadout?.label ?? selectedValidatorBridge?.label ?? null,
+    selectedFailureReadout?.label ?? selectedFailurePath?.label ?? null,
+    failureCommandPreviewActions[0]?.label ?? failureCommandPreviewLane?.label ?? null,
     nearbyMaterializationCheckpoint?.label ?? nearbyMaterializationQaTrack?.label ?? nearbyMaterializationWorkflowStage?.label ?? null
   ]
     .filter((label): label is string => Boolean(label))
@@ -1999,6 +2001,59 @@ export function DeliveryChainWorkspace({
             validatorSurfaceMatch.reviewStateContinuityEntry?.label ?? null,
             `${validatorSurfaceMatch.observabilitySignals.length} signals`,
             nextValidatorReadout ? `Next ${nextValidatorReadout.label}` : selectedValidatorBridge ? "Final validator checkpoint" : null
+          ].filter((badge): badge is string => Boolean(badge))
+        },
+        {
+          id: "failure-path",
+          label: "Failure path",
+          title: selectedFailureReadout?.label ?? selectedFailurePath?.label ?? "No failure-path readout",
+          status: selectedFailureReadout
+            ? `${selectedFailureReadout.failureCode} / ${formatFailureDisposition(selectedFailureReadout.failureDisposition)}`
+            : selectedFailurePath
+              ? formatMaterializationTaskState(selectedFailurePath.taskState)
+              : "Unavailable",
+          detail: selectedFailureReadout
+            ? `${selectedFailureReviewPacketStep?.label ?? selectedFailureReadout.reviewPacketStepId} / ${
+                selectedFailureValidatorReadout?.label ?? selectedFailureReadout.validatorReadoutId
+              } / ${selectedFailureReadout.summary}`
+            : selectedFailurePath?.summary ?? "Failure-path coverage is unavailable for the selected platform.",
+          tone: selectedFailureReadout
+            ? resolveFailureDispositionTone(selectedFailureReadout.failureDisposition)
+            : resolveMaterializationTaskTone(selectedFailurePath?.taskState ?? "blocked"),
+          stageLabel: selectedFailureStage ? `${selectedFailureStage.label} / ${selectedFailureStage.status}` : "No linked stage",
+          badges: [
+            selectedFailureRollbackContract
+              ? `Rollback ${selectedFailureRollbackContract.from} -> ${selectedFailureRollbackContract.to}`
+              : null,
+            selectedFailureReadout ? `Checkpoint ${selectedFailureReadout.rollbackCheckpointId}` : null,
+            nextFailureReadout ? `Next ${nextFailureReadout.label}` : selectedFailurePath ? "Final failure branch" : null
+          ].filter((badge): badge is string => Boolean(badge))
+        },
+        {
+          id: "command-preview",
+          label: "Command preview",
+          title: failureCommandPreviewActions[0]?.label ?? failureCommandPreviewLane?.label ?? "No command preview",
+          status: failureCommandPreviewActions.length
+            ? `${failureCommandPreviewActions.length} actions`
+            : failureCommandPreviewLane
+              ? "Lane linked"
+              : "Unavailable",
+          detail: failureCommandPreviewActions.length
+            ? failureCommandPreviewActions
+                .map((action) => `${action.label} / ${formatReviewSurfaceKind(action.reviewSurfaceKind)}`)
+                .join(" -> ")
+            : failureCommandPreviewLane?.summary ?? "No materialization command preview is available for the selected failure path.",
+          tone:
+            activeReviewSurfaceActionId && failureCommandPreviewActions.some((action) => action.id === activeReviewSurfaceActionId)
+              ? "positive"
+              : selectedFailureReadout
+                ? resolveFailureDispositionTone(selectedFailureReadout.failureDisposition)
+                : "neutral",
+          stageLabel: failureCommandPreviewLane?.label ?? "No action-deck lane",
+          badges: [
+            failureCommandPreviewLane ? `${failureCommandPreviewLane.actionIds.length} lane actions` : null,
+            failureObservabilitySignals[0]?.label ?? null,
+            failureCommandPreviewActions[1]?.label ?? null
           ].filter((badge): badge is string => Boolean(badge))
         },
         {
@@ -6612,6 +6667,42 @@ export function DeliveryChainWorkspace({
                 </div>
                 <div
                   className={`workflow-readiness-line workflow-readiness-line--${
+                    selectedFailureReadout ? resolveFailureDispositionTone(selectedFailureReadout.failureDisposition) : "warning"
+                  }`}
+                >
+                  <span>Current failure-path readout</span>
+                  <strong>
+                    {selectedFailureReadout
+                      ? `${selectedFailureReadout.label} / ${formatFailureDisposition(selectedFailureReadout.failureDisposition)}`
+                      : "Unavailable"}
+                  </strong>
+                </div>
+                <div
+                  className={`workflow-readiness-line workflow-readiness-line--${
+                    nextFailureReadout ? resolveFailureDispositionTone(nextFailureReadout.failureDisposition) : "warning"
+                  }`}
+                >
+                  <span>Next failure-path readout</span>
+                  <strong>
+                    {nextFailureReadout
+                      ? `${nextFailureReadout.label} / ${formatFailureDisposition(nextFailureReadout.failureDisposition)}`
+                      : "Final failure branch"}
+                  </strong>
+                </div>
+                <div
+                  className={`workflow-readiness-line workflow-readiness-line--${
+                    failureCommandPreviewActions.length ? "neutral" : "warning"
+                  }`}
+                >
+                  <span>Failure command preview</span>
+                  <strong>
+                    {failureCommandPreviewActions.length
+                      ? failureCommandPreviewActions.map((action) => action.label).join(" -> ")
+                      : failureCommandPreviewLane?.label ?? "Unavailable"}
+                  </strong>
+                </div>
+                <div
+                  className={`workflow-readiness-line workflow-readiness-line--${
                     validatorSurfaceMatch.reviewStateContinuityEntry?.tone ??
                     validatorSurfaceMatch.observabilityMapping?.tone ??
                     "warning"
@@ -7061,6 +7152,47 @@ export function DeliveryChainWorkspace({
                     <strong>{nextValidatorReadout.label} / {nextValidatorReadout.taskId}</strong>
                   </div>
                 ) : null}
+                {selectedFailurePath ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Failure-path summary</span>
+                    <strong>{selectedFailurePath.summary}</strong>
+                  </div>
+                ) : null}
+                {selectedFailureReadout ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Failure code / disposition</span>
+                    <strong>
+                      {selectedFailureReadout.failureCode} / {formatFailureDisposition(selectedFailureReadout.failureDisposition)}
+                    </strong>
+                  </div>
+                ) : null}
+                {selectedFailureRollbackContract ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Failure rollback anchor</span>
+                    <strong>
+                      {selectedFailureRollbackContract.from} → {selectedFailureRollbackContract.to} /{" "}
+                      {selectedFailureReadout?.rollbackCheckpointId ?? "No checkpoint"}
+                    </strong>
+                  </div>
+                ) : null}
+                {failureCommandPreviewActions.length > 0 ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Command preview</span>
+                    <strong>{failureCommandPreviewActions.map((action) => action.label).join(" → ")}</strong>
+                  </div>
+                ) : null}
+                {(compact ? failureObservabilitySignals.slice(0, 2) : failureObservabilitySignals).map((signal) => (
+                  <div key={signal.id} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Failure observability signal</span>
+                    <strong>{signal.label} / {signal.value}</strong>
+                  </div>
+                ))}
+                {(compact ? selectedFailureReadout?.reviewChecks.slice(0, 2) ?? [] : selectedFailureReadout?.reviewChecks ?? []).map((check) => (
+                  <div key={check} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Failure review check</span>
+                    <strong>{check}</strong>
+                  </div>
+                ))}
                 {validatorSurfaceMatch.reviewStateContinuityEntry ? (
                   <div className="windowing-preview-line windowing-preview-line--stacked">
                     <span>Matched continuity spine</span>

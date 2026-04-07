@@ -2261,6 +2261,180 @@ function createPackagedAppMaterializationValidatorObservabilityBridge({
   };
 }
 
+function createPackagedAppMaterializationFailureReadout({
+  pathId,
+  idPrefix,
+  taskIdPrefix = "packaged-app-materialization-task",
+  key,
+  label,
+  failureCode,
+  failureDisposition,
+  summary,
+  rollbackContractId,
+  rollbackCheckpointId,
+  reviewChecks
+}) {
+  const reviewPacketId = `packaged-app-review-packet-${idPrefix}`;
+  const validatorBridgeId = `packaged-app-materialization-validator-observability-${idPrefix}`;
+  const taskId =
+    key === "directory"
+      ? `${taskIdPrefix}-${idPrefix}-directory`
+      : key === "staged-output"
+        ? `${taskIdPrefix}-${idPrefix}-staged-output`
+        : `${taskIdPrefix}-${idPrefix}-bundle-seal`;
+  const reviewPacketStepId =
+    key === "directory"
+      ? `${reviewPacketId}-directory-to-output`
+      : key === "staged-output"
+        ? `${reviewPacketId}-output-to-checksum`
+        : `${reviewPacketId}-checksum-to-seal`;
+  const deliveryChainStageId =
+    key === "directory"
+      ? "delivery-chain-attestation-intake"
+      : key === "staged-output"
+        ? "delivery-chain-operator-review"
+        : "delivery-chain-promotion-readiness";
+  const commandActionIds =
+    key === "directory"
+      ? ["command-focus-materialization-validator-bridge", "command-focus-materialization-failure-path"]
+      : key === "staged-output"
+        ? [
+            "command-focus-materialization-failure-path",
+            "command-focus-publish-decision-gate",
+            "command-focus-rollback-closeout-window"
+          ]
+        : [
+            "command-focus-materialization-validator-bridge",
+            "command-focus-materialization-failure-path",
+            "command-focus-publish-decision-gate"
+          ];
+  const observabilitySignalIds =
+    key === "directory"
+      ? [
+          "observability-signal-owner",
+          "observability-signal-route-window",
+          "observability-signal-lane-board"
+        ]
+      : key === "staged-output"
+        ? [
+            "observability-signal-owner",
+            "observability-signal-queue",
+            "observability-signal-escalation-closeout"
+          ]
+        : [
+            "observability-signal-owner",
+            "observability-signal-lane-board",
+            "observability-signal-mapped-windows"
+          ];
+
+  return {
+    id: `${pathId}-${key}`,
+    label,
+    failureCode,
+    failureDisposition,
+    summary,
+    taskId,
+    reviewPacketStepId,
+    validatorReadoutId: `${validatorBridgeId}-${key}`,
+    deliveryChainStageId,
+    rollbackContractId,
+    rollbackCheckpointId,
+    commandDeckLaneId: "deck-lane-review-deck-materialization-failure",
+    commandActionIds,
+    observabilitySignalIds,
+    reviewChecks
+  };
+}
+
+function createPackagedAppMaterializationFailurePath({
+  idPrefix,
+  platformLabel,
+  taskIdPrefix = "packaged-app-materialization-task",
+  taskState,
+  summary,
+  activeReadout,
+  nextReadout,
+  directoryLabel,
+  directoryFailureCode,
+  directoryFailureDisposition,
+  directorySummary,
+  directoryReviewChecks,
+  stagedOutputLabel,
+  stagedOutputFailureCode,
+  stagedOutputFailureDisposition,
+  stagedOutputSummary,
+  stagedOutputReviewChecks,
+  bundleSealingLabel,
+  bundleSealingFailureCode,
+  bundleSealingFailureDisposition,
+  bundleSealingSummary,
+  bundleSealingReviewChecks,
+  rollbackContractId,
+  rollbackCheckpointId
+}) {
+  const pathId = `packaged-app-materialization-failure-path-${idPrefix}`;
+  const readoutIds = {
+    directory: `${pathId}-directory`,
+    "staged-output": `${pathId}-staged-output`,
+    "bundle-sealing": `${pathId}-bundle-sealing`
+  };
+
+  return {
+    id: pathId,
+    label: `${platformLabel} materialization failure path`,
+    taskState,
+    summary,
+    activeReadoutId: readoutIds[activeReadout],
+    nextReadoutId: nextReadout ? readoutIds[nextReadout] : null,
+    readouts: [
+      createPackagedAppMaterializationFailureReadout({
+        pathId,
+        idPrefix,
+        taskIdPrefix,
+        key: "directory",
+        label: directoryLabel,
+        failureCode: directoryFailureCode,
+        failureDisposition: directoryFailureDisposition,
+        summary: directorySummary,
+        rollbackContractId,
+        rollbackCheckpointId,
+        reviewChecks: directoryReviewChecks
+      }),
+      createPackagedAppMaterializationFailureReadout({
+        pathId,
+        idPrefix,
+        taskIdPrefix,
+        key: "staged-output",
+        label: stagedOutputLabel,
+        failureCode: stagedOutputFailureCode,
+        failureDisposition: stagedOutputFailureDisposition,
+        summary: stagedOutputSummary,
+        rollbackContractId,
+        rollbackCheckpointId,
+        reviewChecks: stagedOutputReviewChecks
+      }),
+      createPackagedAppMaterializationFailureReadout({
+        pathId,
+        idPrefix,
+        taskIdPrefix,
+        key: "bundle-sealing",
+        label: bundleSealingLabel,
+        failureCode: bundleSealingFailureCode,
+        failureDisposition: bundleSealingFailureDisposition,
+        summary: bundleSealingSummary,
+        rollbackContractId,
+        rollbackCheckpointId,
+        reviewChecks: bundleSealingReviewChecks
+      })
+    ],
+    blockedBy: [
+      "failure path remains review-only",
+      "command preview remains local-only",
+      "host-side execution remains disabled"
+    ]
+  };
+}
+
 function buildPackagedAppLocalMaterializationContract({ generatedAt }) {
   return {
     schemaVersion: "openclaw-studio-packaged-app-local-materialization-contract/v1",
