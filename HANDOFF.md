@@ -152,10 +152,6 @@ npm run release:plan
 - phase60 slice25 进一步补齐 Acceptance Closeout Timeline、route replay restore / reading queue / trace / storyboard / dossier / signoff / queue / pack closeout 的显式时间序列
 - phase60 slice26 进一步补齐 command palette / inspector deepening，让 richer preview、cross-section filtering、reviewer navigation lines、以及关键 jump actions 在同一条 reviewer-facing command surface 上更直接
 - phase60 slice27 进一步补齐 Review State Continuity / Observability Closeout、window / lane / board spine、reviewer queue、closeout timing、以及 mapped review path 的统一多窗口收口视图
-  - phase60 slice24 进一步补齐 Final Verdict Console、reviewer decision context、settlement route anchor、evidence chain、以及当前 replay pack 的 verdict-facing judgement framing
-  - phase60 slice25 进一步补齐 Acceptance Closeout Timeline、replay route restore / reading queue / trace / storyboard / dossier / signoff / pack closeout 的显式时间线、以及当前 replay pack 的 ordered closeout walkthrough
-  - phase60 slice26 进一步补齐 richer Command Palette preview / filtering / multi-window coverage entries、Inspector Review Navigation、以及 reviewer-facing jump actions
-  - phase60 slice27 进一步补齐 Review State Continuity、Observability Closeout、Mapped Review Path、以及 windows surface 上更完整的同态 review context
 - 仍然不做真实外部窗口编排
 
 ## Phase25 Boundary Model
