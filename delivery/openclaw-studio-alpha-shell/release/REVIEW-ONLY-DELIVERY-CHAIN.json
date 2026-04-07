@@ -1,10 +1,10 @@
 {
   "schemaVersion": "openclaw-studio-review-only-delivery-chain/v1",
-  "generatedAt": "2026-04-07T20:49:02.893Z",
+  "generatedAt": "2026-04-07T20:58:47.700Z",
   "phase": "phase60",
   "mode": "local-only-review",
   "title": "Delivery-chain Workspace",
-  "summary": "Stage Explorer keeps operator review board, promotion readiness, publish decision gates, rollback readiness, stage-level artifacts, packaged-app materialization roots, packet-level handoffs, blockers, handoff posture, and observability mapping grouped into one staged local-only delivery workflow.",
+  "summary": "Stage Explorer keeps operator review board, promotion readiness, publish decision gates, rollback readiness, stage-level artifacts, packaged-app materialization roots, packet-level handoffs, failure-path command previews, blockers, handoff posture, and observability mapping grouped into one staged local-only delivery workflow.",
   "activeStageId": "delivery-chain-operator-review",
   "operatorReviewBoardPath": "release/OPERATOR-REVIEW-BOARD.json",
   "releaseDecisionHandoffPath": "release/RELEASE-DECISION-HANDOFF.json",
