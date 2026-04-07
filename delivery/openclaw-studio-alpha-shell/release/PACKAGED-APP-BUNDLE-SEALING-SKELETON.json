@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-packaged-app-bundle-sealing-skeleton/v1",
-  "generatedAt": "2026-04-07T17:25:26.047Z",
+  "generatedAt": "2026-04-07T18:46:00.404Z",
   "phase": "phase60",
   "mode": "review-only",
   "bundles": [
@@ -35,6 +35,28 @@
         "digest publication remains blocked",
         "host-side execution remains disabled"
       ],
+      "bundleSealingReadiness": {
+        "id": "bundle-sealing-readiness-windows",
+        "label": "Windows bundle-sealing readiness",
+        "taskState": "blocked",
+        "summary": "Seal and integrity manifests are declared, but the Windows seal handoff remains blocked until the staged-output chain stops being metadata-only and the publish gate remains review-only.",
+        "currentCheckpoint": "seal manifest declared / staged-output review still active",
+        "deliveryChainStageId": "delivery-chain-promotion-readiness",
+        "downstreamGateStageId": "delivery-chain-publish-decision",
+        "dependsOnTaskId": "staged-output-windows",
+        "sealManifestPath": "future/sealed-bundles/windows/bundle-seal-manifest.json",
+        "integrityManifestPath": "future/sealed-bundles/windows/bundle-integrity-manifest.json",
+        "reviewChecks": [
+          "seal manifest declared",
+          "integrity manifest declared",
+          "publish gate remains review-only"
+        ],
+        "blockedBy": [
+          "staged outputs remain metadata-only",
+          "bundle sealing remains metadata-only",
+          "host-side execution remains disabled"
+        ]
+      },
       "canSeal": false
     },
     {
@@ -68,6 +90,28 @@
         "digest publication remains blocked",
         "host-side execution remains disabled"
       ],
+      "bundleSealingReadiness": {
+        "id": "bundle-sealing-readiness-macos",
+        "label": "macOS bundle-sealing readiness",
+        "taskState": "blocked",
+        "summary": "Seal and integrity manifests are declared, but the macOS seal handoff remains blocked while staged-output review, signing, and notarization all stay metadata-only.",
+        "currentCheckpoint": "seal manifest declared / notarization path still blocked",
+        "deliveryChainStageId": "delivery-chain-promotion-readiness",
+        "downstreamGateStageId": "delivery-chain-publish-decision",
+        "dependsOnTaskId": "staged-output-macos",
+        "sealManifestPath": "future/sealed-bundles/macos/bundle-seal-manifest.json",
+        "integrityManifestPath": "future/sealed-bundles/macos/bundle-integrity-manifest.json",
+        "reviewChecks": [
+          "seal manifest declared",
+          "integrity manifest declared",
+          "notarization path remains review-only"
+        ],
+        "blockedBy": [
+          "staged outputs remain metadata-only",
+          "bundle sealing remains metadata-only",
+          "host-side execution remains disabled"
+        ]
+      },
       "canSeal": false
     },
     {
@@ -101,6 +145,28 @@
         "digest publication remains blocked",
         "host-side execution remains disabled"
       ],
+      "bundleSealingReadiness": {
+        "id": "bundle-sealing-readiness-linux",
+        "label": "Linux bundle-sealing readiness",
+        "taskState": "blocked",
+        "summary": "Seal and integrity manifests are declared, but the Linux seal handoff remains blocked while staged-output review and later package publication stay metadata-only.",
+        "currentCheckpoint": "seal manifest declared / publish path still blocked",
+        "deliveryChainStageId": "delivery-chain-promotion-readiness",
+        "downstreamGateStageId": "delivery-chain-publish-decision",
+        "dependsOnTaskId": "staged-output-linux",
+        "sealManifestPath": "future/sealed-bundles/linux/bundle-seal-manifest.json",
+        "integrityManifestPath": "future/sealed-bundles/linux/bundle-integrity-manifest.json",
+        "reviewChecks": [
+          "seal manifest declared",
+          "integrity manifest declared",
+          "package publication remains review-only"
+        ],
+        "blockedBy": [
+          "staged outputs remain metadata-only",
+          "bundle sealing remains metadata-only",
+          "host-side execution remains disabled"
+        ]
+      },
       "canSeal": false
     }
   ]

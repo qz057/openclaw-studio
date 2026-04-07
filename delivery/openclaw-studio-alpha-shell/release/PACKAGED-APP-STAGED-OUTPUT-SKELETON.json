@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-packaged-app-staged-output-skeleton/v1",
-  "generatedAt": "2026-04-07T17:25:26.047Z",
+  "generatedAt": "2026-04-07T18:46:00.404Z",
   "phase": "phase60",
   "outputs": [
     {
@@ -27,6 +27,43 @@
         "staged output manifest declared",
         "checksum manifest declared",
         "bundle sealing handoff declared"
+      ],
+      "currentStepId": "staged-output-step-windows-output-manifest",
+      "steps": [
+        {
+          "id": "staged-output-step-windows-directory-verification",
+          "label": "Directory verification handoff",
+          "taskState": "review-ready",
+          "summary": "Verification metadata is ready so the staged-output lane starts from an explicit packaged-app root review checkpoint.",
+          "manifestPath": "future/packaged-app/windows/materialization-manifest.json",
+          "deliveryChainStageId": "delivery-chain-attestation-intake",
+          "dependsOn": [
+            "directory-materialization-windows"
+          ]
+        },
+        {
+          "id": "staged-output-step-windows-output-manifest",
+          "label": "Output manifest staging",
+          "taskState": "reviewing",
+          "summary": "The output manifest is the current Windows review focus so the staged-output handoff stays readable without producing a real packaged bundle.",
+          "manifestPath": "future/staged-output/windows/output-manifest.json",
+          "deliveryChainStageId": "delivery-chain-operator-review",
+          "dependsOn": [
+            "directory-materialization-windows",
+            "materialize-windows-packaged-app"
+          ]
+        },
+        {
+          "id": "staged-output-step-windows-checksum-manifest",
+          "label": "Checksum manifest staging",
+          "taskState": "reviewing",
+          "summary": "Checksum metadata remains chained behind the same staged-output task so output proof and digest posture stay in one lane.",
+          "manifestPath": "future/staged-output/windows/checksum-manifest.json",
+          "deliveryChainStageId": "delivery-chain-operator-review",
+          "dependsOn": [
+            "staged-output-windows"
+          ]
+        }
       ],
       "blockedBy": [
         "staged outputs remain metadata-only",
@@ -59,6 +96,43 @@
         "checksum manifest declared",
         "bundle sealing handoff declared"
       ],
+      "currentStepId": "staged-output-step-macos-directory-verification",
+      "steps": [
+        {
+          "id": "staged-output-step-macos-directory-verification",
+          "label": "Directory verification handoff",
+          "taskState": "review-ready",
+          "summary": "The .app verification manifest is ready so staged-output review starts from a concrete launcher and bundle-layout checkpoint.",
+          "manifestPath": "future/packaged-app/macos/materialization-manifest.json",
+          "deliveryChainStageId": "delivery-chain-attestation-intake",
+          "dependsOn": [
+            "directory-materialization-macos"
+          ]
+        },
+        {
+          "id": "staged-output-step-macos-output-manifest",
+          "label": "Output manifest staging",
+          "taskState": "review-ready",
+          "summary": "The output manifest stays chained to the same macOS review lane so .app staged-output posture stays visible without building anything.",
+          "manifestPath": "future/staged-output/macos/output-manifest.json",
+          "deliveryChainStageId": "delivery-chain-operator-review",
+          "dependsOn": [
+            "directory-materialization-macos",
+            "materialize-macos-packaged-app"
+          ]
+        },
+        {
+          "id": "staged-output-step-macos-checksum-manifest",
+          "label": "Checksum manifest staging",
+          "taskState": "review-ready",
+          "summary": "Checksum metadata is ready for review so bundle-seal prerequisites stay explicit before any later signing or notarization path exists.",
+          "manifestPath": "future/staged-output/macos/checksum-manifest.json",
+          "deliveryChainStageId": "delivery-chain-operator-review",
+          "dependsOn": [
+            "staged-output-macos"
+          ]
+        }
+      ],
       "blockedBy": [
         "staged outputs remain metadata-only",
         "bundle sealing remains metadata-only",
@@ -89,6 +163,43 @@
         "staged output manifest declared",
         "checksum manifest declared",
         "bundle sealing handoff declared"
+      ],
+      "currentStepId": "staged-output-step-linux-directory-verification",
+      "steps": [
+        {
+          "id": "staged-output-step-linux-directory-verification",
+          "label": "Directory verification handoff",
+          "taskState": "review-ready",
+          "summary": "Verification metadata is ready so the Linux staged-output lane starts from an explicit package-root checkpoint.",
+          "manifestPath": "future/packaged-app/linux/materialization-manifest.json",
+          "deliveryChainStageId": "delivery-chain-attestation-intake",
+          "dependsOn": [
+            "directory-materialization-linux"
+          ]
+        },
+        {
+          "id": "staged-output-step-linux-output-manifest",
+          "label": "Output manifest staging",
+          "taskState": "review-ready",
+          "summary": "The output manifest stays chained to the same Linux review lane so staged-output posture stays readable without emitting any package target.",
+          "manifestPath": "future/staged-output/linux/output-manifest.json",
+          "deliveryChainStageId": "delivery-chain-operator-review",
+          "dependsOn": [
+            "directory-materialization-linux",
+            "materialize-linux-packaged-app"
+          ]
+        },
+        {
+          "id": "staged-output-step-linux-checksum-manifest",
+          "label": "Checksum manifest staging",
+          "taskState": "review-ready",
+          "summary": "Checksum metadata is ready for review so bundle-seal prerequisites stay explicit before any publish path exists.",
+          "manifestPath": "future/staged-output/linux/checksum-manifest.json",
+          "deliveryChainStageId": "delivery-chain-operator-review",
+          "dependsOn": [
+            "staged-output-linux"
+          ]
+        }
       ],
       "blockedBy": [
         "staged outputs remain metadata-only",

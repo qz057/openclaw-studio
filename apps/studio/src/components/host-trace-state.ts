@@ -11,10 +11,14 @@ import type {
   StudioTone
 } from "@openclaw/shared";
 import {
+  selectStudioReleaseApprovalAuditRollbackEntryCheckpoint,
   selectStudioReleaseApprovalPipelineStage,
+  selectStudioReleaseApprovalWorkflowStage,
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseEscalationWindow,
+  selectStudioReleaseQaCloseoutReadinessTrack,
+  selectStudioReleaseRollbackLiveReadinessContract,
   selectStudioReviewStateContinuityEntry,
   selectStudioReleaseReviewerQueue,
   selectStudioWindowObservabilityMapping
@@ -185,6 +189,11 @@ export function createInspectorSections(
   const currentCloseoutWindow = selectStudioReleaseCloseoutWindow(boundary.hostExecutor.releaseApprovalPipeline, currentReleaseStage);
   const publishDeliveryStage = selectStudioReleaseDeliveryChainStage(boundary.hostExecutor.releaseApprovalPipeline, "delivery-chain-publish-decision");
   const rollbackDeliveryStage = selectStudioReleaseDeliveryChainStage(boundary.hostExecutor.releaseApprovalPipeline, "delivery-chain-rollback-readiness");
+  const stageCReadiness = boundary.hostExecutor.releaseApprovalPipeline.deliveryChain.stageCReadiness;
+  const stageCQaTrack = selectStudioReleaseQaCloseoutReadinessTrack(boundary.hostExecutor.releaseApprovalPipeline.deliveryChain);
+  const stageCWorkflowStage = selectStudioReleaseApprovalWorkflowStage(boundary.hostExecutor.releaseApprovalPipeline.deliveryChain);
+  const stageCCheckpoint = selectStudioReleaseApprovalAuditRollbackEntryCheckpoint(boundary.hostExecutor.releaseApprovalPipeline.deliveryChain);
+  const rollbackReadinessContract = selectStudioReleaseRollbackLiveReadinessContract(boundary.hostExecutor.releaseApprovalPipeline.deliveryChain);
   const activeLane =
     (activeLaneId ? windowing?.sharedState.lanes.find((lane) => lane.id === activeLaneId) : undefined) ??
     (windowing ? windowing.sharedState.lanes.find((lane) => lane.id === windowing.sharedState.activeLaneId) : undefined) ??
@@ -218,6 +227,8 @@ export function createInspectorSections(
     activeReviewContinuity?.readouts.find((line) => line.id === "closeout-timing")?.value ?? "Unavailable";
   const mappedReviewPathValue =
     activeReviewContinuity?.readouts.find((line) => line.id === "mapped-review-path")?.value ?? "Unavailable";
+  const stageCBoundaryValue = `${formatBoundaryLayerLabel(stageCReadiness.boundaryLinkage.currentBoundaryLayer)} -> ${formatBoundaryLayerLabel(stageCReadiness.boundaryLinkage.nextBoundaryLayer)}`;
+  const stageCBoundaryCounts = `${stageCReadiness.boundaryLinkage.withheldPlanStepIds.length} withheld / ${stageCReadiness.boundaryLinkage.futureExecutorSlotIds.length} future`;
 
   return [
     {
@@ -293,7 +304,7 @@ export function createInspectorSections(
     {
       id: "release-qa-closeout",
       label: "QA closeout",
-      value: "RELEASE-QA-CLOSEOUT-READINESS / review-only"
+      value: stageCQaTrack ? `${stageCQaTrack.label} / ${stageCQaTrack.status}` : "Unavailable"
     },
     {
       id: "publish-rollback",
@@ -306,7 +317,22 @@ export function createInspectorSections(
     {
       id: "stage-c-entry",
       label: "Stage C entry",
-      value: "APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT / non-executing"
+      value: stageCCheckpoint ? `${stageCCheckpoint.label} / ${stageCCheckpoint.state}` : "Unavailable"
+    },
+    {
+      id: "stage-c-workflow",
+      label: "Approval workflow",
+      value: stageCWorkflowStage ? `${stageCWorkflowStage.label} / ${stageCWorkflowStage.status}` : "Unavailable"
+    },
+    {
+      id: "stage-c-rollback",
+      label: "Rollback readiness",
+      value: rollbackReadinessContract ? `${rollbackReadinessContract.from} -> ${rollbackReadinessContract.to} / ${rollbackReadinessContract.status}` : "Unavailable"
+    },
+    {
+      id: "stage-c-boundary",
+      label: "Boundary bridge",
+      value: `${stageCBoundaryValue} / ${stageCBoundaryCounts}`
     },
     {
       id: "window-focus",

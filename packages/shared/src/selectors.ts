@@ -1,11 +1,19 @@
 import type {
+  StudioReleaseApprovalAuditRollbackEntryCheckpoint,
   StudioReleaseApprovalPipeline,
+  StudioReleaseApprovalWorkflowStage,
   StudioReleaseApprovalPipelineStage,
+  StudioReleasePackagedAppBundleSealingReadiness,
   StudioReleaseCloseoutWindow,
   StudioReleaseDeliveryChainStage,
   StudioReleaseEscalationWindow,
+  StudioReleasePackagedAppLocalMaterializationProgress,
+  StudioReleaseQaCloseoutReadinessTrack,
+  StudioReleasePackagedAppStagedOutputChain,
+  StudioReleasePackagedAppStagedOutputChainStep,
   StudioReleasePackagedAppMaterializationContractPlatform,
   StudioReleasePackagedAppMaterializationContractTask,
+  StudioReleaseRollbackLiveReadinessContract,
   StudioReleaseReviewerQueue,
   StudioReviewStateContinuity,
   StudioReviewStateContinuityEntry,
@@ -93,6 +101,78 @@ export function selectStudioReleasePackagedAppMaterializationContractTask(
   const taskId = typeof taskOrId === "string" ? taskOrId : taskOrId?.id ?? platform?.currentTaskId;
 
   return platform?.tasks.find((task) => task.id === taskId) ?? platform?.tasks[0];
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractStagedOutputChain(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+): StudioReleasePackagedAppStagedOutputChain | undefined {
+  return selectStudioReleasePackagedAppMaterializationContractPlatform(deliveryChain, platformOrId)?.stagedOutputChain;
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractStagedOutputStep(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null,
+  stepOrId?: Pick<StudioReleasePackagedAppStagedOutputChainStep, "id"> | string | null
+): StudioReleasePackagedAppStagedOutputChainStep | undefined {
+  const chain = selectStudioReleasePackagedAppMaterializationContractStagedOutputChain(deliveryChain, platformOrId);
+  const stepId = typeof stepOrId === "string" ? stepOrId : stepOrId?.id ?? chain?.currentStepId;
+
+  return chain?.steps.find((step) => step.id === stepId) ?? chain?.steps[0];
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractBundleSealingReadiness(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+): StudioReleasePackagedAppBundleSealingReadiness | undefined {
+  return selectStudioReleasePackagedAppMaterializationContractPlatform(deliveryChain, platformOrId)?.bundleSealingReadiness;
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractProgress(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+): StudioReleasePackagedAppLocalMaterializationProgress | undefined {
+  return selectStudioReleasePackagedAppMaterializationContractPlatform(deliveryChain, platformOrId)?.localMaterializationProgress;
+}
+
+export function selectStudioReleaseQaCloseoutReadinessTrack(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "stageCReadiness">,
+  trackOrId?: Pick<StudioReleaseQaCloseoutReadinessTrack, "id"> | string | null
+): StudioReleaseQaCloseoutReadinessTrack | undefined {
+  const readiness = deliveryChain.stageCReadiness.releaseQaCloseoutReadiness;
+  const trackId = typeof trackOrId === "string" ? trackOrId : trackOrId?.id ?? readiness.activeTrackId;
+
+  return readiness.tracks.find((track) => track.id === trackId) ?? readiness.tracks[0];
+}
+
+export function selectStudioReleaseApprovalWorkflowStage(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "stageCReadiness">,
+  stageOrId?: Pick<StudioReleaseApprovalWorkflowStage, "id"> | string | null
+): StudioReleaseApprovalWorkflowStage | undefined {
+  const workflow = deliveryChain.stageCReadiness.approvalWorkflow;
+  const stageId = typeof stageOrId === "string" ? stageOrId : stageOrId?.id ?? workflow.activeStageId;
+
+  return workflow.stages.find((stage) => stage.id === stageId) ?? workflow.stages[0];
+}
+
+export function selectStudioReleaseApprovalAuditRollbackEntryCheckpoint(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "stageCReadiness">,
+  checkpointOrId?: Pick<StudioReleaseApprovalAuditRollbackEntryCheckpoint, "id"> | string | null
+): StudioReleaseApprovalAuditRollbackEntryCheckpoint | undefined {
+  const entryContract = deliveryChain.stageCReadiness.entryContract;
+  const checkpointId = typeof checkpointOrId === "string" ? checkpointOrId : checkpointOrId?.id ?? entryContract.activeCheckpointId;
+
+  return entryContract.checkpoints.find((checkpoint) => checkpoint.id === checkpointId) ?? entryContract.checkpoints[0];
+}
+
+export function selectStudioReleaseRollbackLiveReadinessContract(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "stageCReadiness">,
+  contractOrId?: Pick<StudioReleaseRollbackLiveReadinessContract, "id"> | string | null
+): StudioReleaseRollbackLiveReadinessContract | undefined {
+  const rollbackReadiness = deliveryChain.stageCReadiness.rollbackLiveReadiness;
+  const contractId = typeof contractOrId === "string" ? contractOrId : contractOrId?.id ?? rollbackReadiness.activeContractId;
+
+  return rollbackReadiness.contracts.find((contract) => contract.id === contractId) ?? rollbackReadiness.contracts[0];
 }
 
 export function selectStudioReviewStateContinuityActiveEntry(

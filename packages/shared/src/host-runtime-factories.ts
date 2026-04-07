@@ -13,11 +13,17 @@ import type {
   StudioHostTraceSlotState,
   StudioHostTraceState,
   StudioReleaseApprovalPipeline,
+  StudioReleaseApprovalAuditRollbackEntryContract,
   StudioReleaseApprovalPipelineStage,
+  StudioReleaseApprovalWorkflow,
   StudioReleaseCloseoutWindow,
   StudioReleaseDeliveryChain,
   StudioReleaseEscalationWindow,
   StudioReleasePackagedAppMaterializationContract,
+  StudioReleaseQaCloseoutReadiness,
+  StudioReleaseRollbackLiveReadiness,
+  StudioReleaseStageCBoundaryLinkage,
+  StudioReleaseStageCReadiness,
   StudioReleaseReviewerQueue
 } from "./index.js";
 import { selectStudioHostTraceFocusSlotId } from "./host-runtime-selectors.js";
@@ -326,21 +332,628 @@ export function createStudioHostTraceState(
   };
 }
 
+function createStudioReleaseQaCloseoutReadiness(): StudioReleaseQaCloseoutReadiness {
+  return {
+    id: "release-qa-closeout-readiness",
+    label: "Release QA Closeout Readiness",
+    mode: "review-only",
+    summary:
+      "Packaged-app continuity, installer/signing handshake verification, release proof bundles, and delivery closeout settlement now stay grouped as one typed Stage C readiness surface instead of a flat list of closeout artifacts.",
+    canCloseOut: false,
+    activeTrackId: "release-qa-delivery-closeout",
+    reviewOnlyDeliveryChainPath: "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
+    releaseApprovalWorkflowPath: "release/RELEASE-APPROVAL-WORKFLOW.json",
+    reviewEvidenceCloseoutPath: "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+    releaseSummaryPath: "release/RELEASE-SUMMARY.md",
+    releaseChecklistPath: "release/RELEASE-CHECKLIST.md",
+    tracks: [
+      {
+        id: "release-qa-materialization-continuity",
+        label: "Packaged-app materialization continuity",
+        owner: "release-engineering",
+        status: "ready",
+        deliveryChainStageId: "delivery-chain-promotion-readiness",
+        artifacts: [
+          "release/PACKAGED-APP-DIRECTORY-SKELETON.json",
+          "release/PACKAGED-APP-MATERIALIZATION-SKELETON.json",
+          "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+          "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+          "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+          "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json"
+        ],
+        reviewChecks: [
+          "directory skeleton declared",
+          "materialization sequence declared",
+          "staged outputs linked",
+          "bundle sealing linked",
+          "integrity contract linked"
+        ],
+        blockedBy: ["packaged output materialization remains metadata-only", "bundle sealing remains metadata-only"],
+        checkpointIds: ["entry-audit-retention", "entry-approval-routing"]
+      },
+      {
+        id: "release-qa-installer-signing-handshake",
+        label: "Installer / signing handshake verification",
+        owner: "platform-owner",
+        status: "ready",
+        deliveryChainStageId: "delivery-chain-publish-decision",
+        artifacts: [
+          "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
+          "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
+          "release/INSTALLER-BUILDER-ORCHESTRATION.json",
+          "release/INSTALLER-CHANNEL-ROUTING.json",
+          "release/SIGNING-METADATA.json",
+          "release/NOTARIZATION-PLAN.json",
+          "release/SIGNING-PUBLISH-PIPELINE.json",
+          "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+          "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
+          "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json"
+        ],
+        reviewChecks: [
+          "installer targets linked",
+          "builder execution skeleton linked",
+          "channel routing declared",
+          "notarization plan declared",
+          "signing/publish handshake linked"
+        ],
+        blockedBy: ["installer builder remains non-executing", "signing/notarization remain metadata-only"],
+        checkpointIds: ["entry-approval-routing"]
+      },
+      {
+        id: "release-qa-proof-bundle",
+        label: "Release QA proof bundle",
+        owner: "qa-owner",
+        status: "in-review",
+        deliveryChainStageId: "delivery-chain-operator-review",
+        artifacts: [
+          "release/REVIEW-MANIFEST.json",
+          "release/RELEASE-SUMMARY.md",
+          "release/RELEASE-CHECKLIST.md",
+          "release/REVIEW-EVIDENCE-CLOSEOUT.json"
+        ],
+        reviewChecks: [
+          "review manifest listed",
+          "release summary generated",
+          "checklist includes validation chain",
+          "evidence closeout linked"
+        ],
+        blockedBy: ["reviewer acknowledgement remains metadata-only", "final signoff remains local-only"],
+        checkpointIds: ["entry-audit-retention", "entry-receipt-settlement"]
+      },
+      {
+        id: "release-qa-delivery-closeout",
+        label: "Delivery closeout settlement",
+        owner: "release-manager",
+        status: "planned",
+        deliveryChainStageId: "delivery-chain-rollback-readiness",
+        artifacts: [
+          "release/RELEASE-DECISION-HANDOFF.json",
+          "release/RELEASE-APPROVAL-WORKFLOW.json",
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
+          "release/RELEASE-QA-CLOSEOUT-READINESS.json"
+        ],
+        reviewChecks: [
+          "decision handoff linked",
+          "approval workflow linked",
+          "receipt settlement closeout linked",
+          "QA closeout route declared"
+        ],
+        blockedBy: ["delivery closeout remains review-only", "publish lifecycle remains non-executing"],
+        checkpointIds: ["entry-receipt-settlement", "entry-rollback-live-readiness"]
+      }
+    ],
+    blockedBy: [
+      "release QA closeout remains review-only metadata",
+      "installer/signing verification remains non-executing",
+      "host-side execution remains disabled"
+    ]
+  };
+}
+
+function createStudioReleaseApprovalWorkflow(): StudioReleaseApprovalWorkflow {
+  return {
+    id: "release-approval-workflow",
+    label: "Release Approval Workflow",
+    mode: "review-only",
+    summary:
+      "Approval routing is now readable as a typed Stage C workflow, so approver roles, delivery-stage linkage, and checkpoint coverage stay visible without opening any signing, publish, rollback, or host execution path.",
+    canApprove: false,
+    activeStageId: "approval-stage-c-entry",
+    gatingHandshakePath: "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+    approvalBridgePath: "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
+    promotionHandshakePath: "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+    releaseQaCloseoutReadinessPath: "release/RELEASE-QA-CLOSEOUT-READINESS.json",
+    approvalAuditRollbackEntryContractPath: "release/APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT.json",
+    reviewOnlyDeliveryChainPath: "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
+    operatorReviewBoardPath: "release/OPERATOR-REVIEW-BOARD.json",
+    releaseDecisionHandoffPath: "release/RELEASE-DECISION-HANDOFF.json",
+    reviewEvidenceCloseoutPath: "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+    blockedBy: [
+      "approval handshake is not executable yet",
+      "operator review board remains local-only metadata",
+      "release QA closeout remains review-only metadata",
+      "approval / audit / rollback Stage C entry remains non-executing",
+      "signing / notarization remain metadata-only",
+      "signing-publish gating handshake remains metadata-only",
+      "publish rollback handshake remains metadata-only",
+      "publish / promotion automation is still blocked",
+      "host-side execution remains disabled"
+    ],
+    stages: [
+      {
+        id: "approval-docs-manifest",
+        label: "Docs and manifest review",
+        status: "ready",
+        approverRoles: ["release-engineering"],
+        evidence: ["release/RELEASE-MANIFEST.json", "release/BUILD-METADATA.json", "release/REVIEW-MANIFEST.json"],
+        deliveryChainStageIds: ["delivery-chain-attestation-intake"],
+        checkpointIds: ["entry-audit-retention"]
+      },
+      {
+        id: "approval-packaged-app",
+        label: "Packaged app directory review",
+        status: "planned",
+        approverRoles: ["release-engineering", "platform-owner"],
+        evidence: [
+          "release/BUNDLE-ASSEMBLY.json",
+          "release/PACKAGED-APP-DIRECTORY-SKELETON.json",
+          "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+          "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+          "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
+          "release/INSTALLER-TARGETS.json"
+        ],
+        deliveryChainStageIds: ["delivery-chain-promotion-readiness"],
+        checkpointIds: ["entry-audit-retention"]
+      },
+      {
+        id: "approval-attestation-verification",
+        label: "Attestation verification, dispatch, reconciliation, approval-routing-contract, and approval-orchestration review",
+        status: "planned",
+        approverRoles: ["release-engineering", "security"],
+        evidence: [
+          "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
+          "release/ATTESTATION-VERIFICATION-PACKS.json",
+          "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
+          "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json",
+          "release/ATTESTATION-OPERATOR-WORKLISTS.json",
+          "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json",
+          "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json",
+          "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
+          "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
+          "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+          "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
+          "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+          "release/OPERATOR-REVIEW-BOARD.json"
+        ],
+        deliveryChainStageIds: ["delivery-chain-attestation-intake", "delivery-chain-operator-review"],
+        checkpointIds: ["entry-approval-routing", "entry-audit-retention"]
+      },
+      {
+        id: "approval-operator-board",
+        label: "Operator review board, reviewer queue, acknowledgement, escalation window, decision handoff, and evidence closeout review",
+        status: "in-review",
+        approverRoles: ["release-manager", "product-owner", "runtime-owner"],
+        evidence: [
+          "release/OPERATOR-REVIEW-BOARD.json",
+          "release/RELEASE-DECISION-HANDOFF.json",
+          "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+          "release/RELEASE-APPROVAL-WORKFLOW.json"
+        ],
+        deliveryChainStageIds: ["delivery-chain-operator-review"],
+        checkpointIds: ["entry-approval-routing"]
+      },
+      {
+        id: "approval-qa-closeout",
+        label: "Release QA closeout readiness review",
+        status: "in-review",
+        approverRoles: ["release-manager", "qa-owner", "product-owner"],
+        evidence: [
+          "release/RELEASE-QA-CLOSEOUT-READINESS.json",
+          "release/RELEASE-CHECKLIST.md",
+          "release/RELEASE-SUMMARY.md",
+          "release/REVIEW-EVIDENCE-CLOSEOUT.json"
+        ],
+        deliveryChainStageIds: ["delivery-chain-operator-review", "delivery-chain-rollback-readiness"],
+        checkpointIds: ["entry-audit-retention", "entry-receipt-settlement"]
+      },
+      {
+        id: "approval-installer-builders",
+        label: "Installer builder execution review",
+        status: "planned",
+        approverRoles: ["release-engineering", "platform-owner"],
+        evidence: [
+          "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
+          "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
+          "release/INSTALLER-CHANNEL-ROUTING.json",
+          "release/CHANNEL-PROMOTION-EVIDENCE.json"
+        ],
+        deliveryChainStageIds: ["delivery-chain-publish-decision"],
+        checkpointIds: ["entry-approval-routing"]
+      },
+      {
+        id: "approval-promotion-apply",
+        label: "Promotion apply, command-sheet, closeout-journal, enforcement-contract, enforcement-lifecycle, and execution checkpoint review",
+        status: "planned",
+        approverRoles: ["release-manager", "product-owner"],
+        evidence: [
+          "release/PROMOTION-APPLY-READINESS.json",
+          "release/PROMOTION-APPLY-MANIFESTS.json",
+          "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
+          "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json",
+          "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
+          "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json",
+          "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
+          "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
+          "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
+          "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+        ],
+        deliveryChainStageIds: ["delivery-chain-promotion-readiness"],
+        checkpointIds: ["entry-approval-routing", "entry-rollback-live-readiness"]
+      },
+      {
+        id: "approval-stage-c-entry",
+        label: "Approval / audit / rollback Stage C entry review",
+        status: "planned",
+        approverRoles: ["release-manager", "runtime-owner", "security"],
+        evidence: [
+          "release/APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT.json",
+          "release/RELEASE-QA-CLOSEOUT-READINESS.json",
+          "release/RELEASE-APPROVAL-WORKFLOW.json",
+          "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+        ],
+        deliveryChainStageIds: ["delivery-chain-rollback-readiness"],
+        checkpointIds: [
+          "entry-approval-routing",
+          "entry-audit-retention",
+          "entry-rollback-live-readiness",
+          "entry-receipt-settlement"
+        ]
+      },
+      {
+        id: "approval-decision-receipts",
+        label: "Approval orchestration, staged release decision enforcement lifecycle, and publication receipt settlement closeout review",
+        status: "blocked",
+        approverRoles: ["release-engineering", "release-manager", "product-owner"],
+        evidence: [
+          "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
+          "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+          "release/OPERATOR-REVIEW-BOARD.json",
+          "release/RELEASE-DECISION-HANDOFF.json",
+          "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json",
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
+          "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json",
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
+          "release/RELEASE-APPROVAL-WORKFLOW.json",
+          "release/PUBLISH-GATES.json"
+        ],
+        deliveryChainStageIds: ["delivery-chain-rollback-readiness", "delivery-chain-publish-decision"],
+        checkpointIds: ["entry-receipt-settlement"]
+      },
+      {
+        id: "approval-signing",
+        label: "Signing, notarization, and gating handshake review",
+        status: "blocked",
+        approverRoles: ["security", "platform-owner"],
+        evidence: [
+          "release/SIGNING-METADATA.json",
+          "release/NOTARIZATION-PLAN.json",
+          "release/SIGNING-PUBLISH-PIPELINE.json",
+          "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json"
+        ],
+        deliveryChainStageIds: ["delivery-chain-publish-decision"],
+        checkpointIds: ["entry-approval-routing"]
+      },
+      {
+        id: "approval-publish-promotion",
+        label: "Publish, rollback, outcome-report, closeout-contract, settlement-closeout, and promotion review",
+        status: "blocked",
+        approverRoles: ["release-manager", "product-owner"],
+        evidence: [
+          "release/RELEASE-NOTES.md",
+          "release/PUBLISH-GATES.json",
+          "release/PROMOTION-GATES.json",
+          "release/CHANNEL-PROMOTION-EVIDENCE.json",
+          "release/PROMOTION-APPLY-MANIFESTS.json",
+          "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
+          "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+          "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+          "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+          "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
+          "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
+          "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
+          "release/ROLLBACK-CUTOVER-READINESS-MAPS.json",
+          "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
+          "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
+          "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
+          "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
+          "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+        ],
+        deliveryChainStageIds: [
+          "delivery-chain-promotion-readiness",
+          "delivery-chain-publish-decision",
+          "delivery-chain-rollback-readiness"
+        ],
+        checkpointIds: ["entry-rollback-live-readiness", "entry-receipt-settlement"]
+      },
+      {
+        id: "approval-host-safety",
+        label: "Host safety boundary review",
+        status: "blocked",
+        approverRoles: ["runtime-owner"],
+        evidence: ["release/INSTALLER-PLACEHOLDER.json"],
+        deliveryChainStageIds: ["delivery-chain-rollback-readiness"],
+        checkpointIds: ["entry-rollback-live-readiness"]
+      }
+    ]
+  };
+}
+
+function createStudioReleaseApprovalAuditRollbackEntryContract(): StudioReleaseApprovalAuditRollbackEntryContract {
+  return {
+    id: "approval-audit-rollback-entry-contract",
+    label: "Approval / Audit / Rollback Entry",
+    mode: "review-only",
+    summary:
+      "The first safe Stage C entry now carries typed checkpoint coverage, workflow linkage, and boundary handoff context so approval, audit, rollback, and receipt settlement stay grouped as one non-executing contract.",
+    canEnterExecutableApproval: false,
+    activeCheckpointId: "entry-rollback-live-readiness",
+    releaseQaCloseoutReadinessPath: "release/RELEASE-QA-CLOSEOUT-READINESS.json",
+    approvalWorkflowPath: "release/RELEASE-APPROVAL-WORKFLOW.json",
+    reviewOnlyDeliveryChainPath: "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
+    reviewManifestPath: "release/REVIEW-MANIFEST.json",
+    attestationApplyAuditPacksPath: "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
+    rollbackLiveReadinessContractsPath: "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
+    rollbackCutoverPublicationReceiptSettlementCloseoutPath: "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
+    checkpoints: [
+      {
+        id: "entry-approval-routing",
+        label: "Approval routing posture",
+        owner: "release-manager",
+        state: "in-review",
+        deliveryChainStageId: "delivery-chain-rollback-readiness",
+        evidence: [
+          "release/RELEASE-APPROVAL-WORKFLOW.json",
+          "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
+          "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json"
+        ],
+        reviewChecks: ["approval workflow linked", "routing contracts linked", "orchestration linked"],
+        blockedBy: ["approval remains metadata-only", "reviewer baton remains non-executing"],
+        workflowStageIds: ["approval-operator-board", "approval-stage-c-entry", "approval-signing"],
+        boundaryStepIds: ["withheld-plan-approval"],
+        futureExecutorSlotIds: ["slot-root-connect", "slot-bridge-attach"]
+      },
+      {
+        id: "entry-audit-retention",
+        label: "Audit retention posture",
+        owner: "runtime-owner",
+        state: "planned",
+        deliveryChainStageId: "delivery-chain-operator-review",
+        evidence: [
+          "release/BUILD-METADATA.json",
+          "release/REVIEW-MANIFEST.json",
+          "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
+          "release/RELEASE-QA-CLOSEOUT-READINESS.json"
+        ],
+        reviewChecks: ["build metadata linked", "review manifest linked", "audit packs linked", "QA closeout proof linked"],
+        blockedBy: ["audit retention remains review-only", "no executable audit emission yet"],
+        workflowStageIds: ["approval-docs-manifest", "approval-attestation-verification", "approval-qa-closeout", "approval-stage-c-entry"],
+        boundaryStepIds: ["withheld-plan-root", "withheld-plan-bridge", "withheld-plan-approval"],
+        futureExecutorSlotIds: ["slot-root-connect", "slot-bridge-attach"]
+      },
+      {
+        id: "entry-rollback-live-readiness",
+        label: "Rollback live-readiness posture",
+        owner: "runtime-owner",
+        state: "planned",
+        deliveryChainStageId: "delivery-chain-rollback-readiness",
+        evidence: [
+          "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
+          "release/ROLLBACK-CUTOVER-READINESS-MAPS.json",
+          "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json"
+        ],
+        reviewChecks: [
+          "live-readiness contracts linked",
+          "cutover readiness maps linked",
+          "handoff plans linked"
+        ],
+        blockedBy: ["rollback remains non-executing", "cutover remains review-only"],
+        workflowStageIds: ["approval-promotion-apply", "approval-stage-c-entry", "approval-publish-promotion", "approval-host-safety"],
+        boundaryStepIds: ["withheld-plan-execute"],
+        futureExecutorSlotIds: ["slot-lifecycle", "slot-lane-apply"]
+      },
+      {
+        id: "entry-receipt-settlement",
+        label: "Receipt settlement closeout posture",
+        owner: "release-engineering",
+        state: "planned",
+        deliveryChainStageId: "delivery-chain-rollback-readiness",
+        evidence: [
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json",
+          "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json",
+          "release/RELEASE-QA-CLOSEOUT-READINESS.json"
+        ],
+        reviewChecks: [
+          "receipt closeout contracts linked",
+          "receipt settlement closeout linked",
+          "delivery QA closeout linked"
+        ],
+        blockedBy: ["publication receipt closeout remains metadata-only", "no executable rollback settlement yet"],
+        workflowStageIds: ["approval-qa-closeout", "approval-stage-c-entry", "approval-decision-receipts", "approval-publish-promotion"],
+        boundaryStepIds: ["withheld-plan-approval", "withheld-plan-execute"],
+        futureExecutorSlotIds: ["slot-lane-apply"]
+      }
+    ],
+    blockedBy: [
+      "Stage C entry remains a local-only contract surface",
+      "approval / audit / rollback remain non-executing",
+      "host-side execution remains disabled"
+    ]
+  };
+}
+
+function createStudioReleaseRollbackLiveReadiness(): StudioReleaseRollbackLiveReadiness {
+  return {
+    id: "rollback-live-readiness",
+    label: "Rollback Live-readiness",
+    mode: "review-only",
+    summary:
+      "Rollback readiness now stays linked to Stage C checkpoints, withheld execution steps, and future executor slots, so the shell can inspect rollback entry posture without enabling any live publish or recovery path.",
+    activeContractId: "rollback-readiness-alpha-to-beta",
+    contracts: [
+      {
+        id: "rollback-readiness-alpha-to-beta",
+        from: "alpha",
+        to: "beta",
+        publishRollbackPathId: "publish-rollback-alpha-to-beta",
+        promotionOperatorHandoffRailId: "promotion-handoff-alpha-to-beta",
+        rollbackExecutionRehearsalLedgerId: "rollback-rehearsal-alpha-to-beta",
+        rollbackOperatorDrillbookId: "rollback-drillbook-alpha-to-beta",
+        rollbackCutoverReadinessMapId: "rollback-cutover-map-alpha-to-beta",
+        promotionStagedApplyRunsheetId: "promotion-runsheet-alpha-to-beta",
+        rollbackCutoverHandoffPlanId: "rollback-handoff-alpha-to-beta",
+        promotionStagedApplyCommandSheetId: "promotion-command-sheet-alpha-to-beta",
+        rollbackCutoverExecutionChecklistId: "rollback-checklist-alpha-to-beta",
+        status: "blocked",
+        readinessContractPath: "future/publish/alpha-to-beta/rollback-live-readiness-contract.json",
+        readinessChecks: [
+          "rollback rehearsal ledger linked",
+          "rollback operator drillbook linked",
+          "promotion operator handoff rail linked",
+          "promotion command sheet linked",
+          "recovery channel remains review-only",
+          "rollback cutover readiness map anchor declared",
+          "rollback cutover handoff plan anchor declared",
+          "rollback cutover execution checklist anchor declared"
+        ],
+        blockedBy: [
+          "rollback live-readiness remains metadata-only",
+          "live publish remains blocked",
+          "host-side execution remains disabled"
+        ],
+        canEnterLiveRollback: false,
+        deliveryChainStageId: "delivery-chain-rollback-readiness",
+        checkpointId: "entry-rollback-live-readiness",
+        boundaryStepIds: ["withheld-plan-execute"],
+        futureExecutorSlotIds: ["slot-lifecycle", "slot-lane-apply"]
+      },
+      {
+        id: "rollback-readiness-beta-to-stable",
+        from: "beta",
+        to: "stable",
+        publishRollbackPathId: "publish-rollback-beta-to-stable",
+        promotionOperatorHandoffRailId: "promotion-handoff-beta-to-stable",
+        rollbackExecutionRehearsalLedgerId: "rollback-rehearsal-beta-to-stable",
+        rollbackOperatorDrillbookId: "rollback-drillbook-beta-to-stable",
+        rollbackCutoverReadinessMapId: "rollback-cutover-map-beta-to-stable",
+        promotionStagedApplyRunsheetId: "promotion-runsheet-beta-to-stable",
+        rollbackCutoverHandoffPlanId: "rollback-handoff-beta-to-stable",
+        promotionStagedApplyCommandSheetId: "promotion-command-sheet-beta-to-stable",
+        rollbackCutoverExecutionChecklistId: "rollback-checklist-beta-to-stable",
+        status: "blocked",
+        readinessContractPath: "future/publish/beta-to-stable/rollback-live-readiness-contract.json",
+        readinessChecks: [
+          "rollback rehearsal ledger linked",
+          "rollback operator drillbook linked",
+          "promotion operator handoff rail linked",
+          "promotion command sheet linked",
+          "recovery channel remains review-only",
+          "rollback cutover readiness map anchor declared",
+          "rollback cutover handoff plan anchor declared",
+          "rollback cutover execution checklist anchor declared"
+        ],
+        blockedBy: [
+          "rollback live-readiness remains metadata-only",
+          "live publish remains blocked",
+          "host-side execution remains disabled"
+        ],
+        canEnterLiveRollback: false,
+        deliveryChainStageId: "delivery-chain-rollback-readiness",
+        checkpointId: "entry-rollback-live-readiness",
+        boundaryStepIds: ["withheld-plan-execute"],
+        futureExecutorSlotIds: ["slot-lifecycle", "slot-lane-apply"]
+      }
+    ],
+    blockedBy: [
+      "rollback live-readiness remains metadata-only",
+      "live publish remains blocked",
+      "host-side execution remains disabled"
+    ]
+  };
+}
+
+function createStudioReleaseStageCBoundaryLinkage(): StudioReleaseStageCBoundaryLinkage {
+  return {
+    id: "stage-c-boundary-linkage",
+    label: "Withheld / Future-executor Bridge",
+    summary:
+      "Stage C stays inside the safe boundary, but the same review surface now shows which withheld handoff steps and future executor slots would need to exist before approval, audit, rollback, or apply could ever cross out of local-only review posture.",
+    currentBoundaryLayer: "local-only",
+    nextBoundaryLayer: "preview-host",
+    checkpointIds: [
+      "entry-approval-routing",
+      "entry-audit-retention",
+      "entry-rollback-live-readiness",
+      "entry-receipt-settlement"
+    ],
+    workflowStageIds: ["approval-stage-c-entry", "approval-publish-promotion", "approval-host-safety"],
+    releaseQaTrackIds: ["release-qa-proof-bundle", "release-qa-delivery-closeout"],
+    withheldPlanStepIds: ["withheld-plan-root", "withheld-plan-bridge", "withheld-plan-approval", "withheld-plan-execute"],
+    futureExecutorSlotIds: ["slot-root-connect", "slot-bridge-attach", "slot-lifecycle", "slot-lane-apply"],
+    blockedBy: [
+      "approval handshake remains withheld",
+      "host mutation bridge remains disabled",
+      "lifecycle runner is still missing",
+      "rollback-aware live apply remains future-only"
+    ]
+  };
+}
+
+function createStudioReleaseStageCReadiness(): StudioReleaseStageCReadiness {
+  return {
+    id: "stage-c-readiness",
+    label: "Stage C Readiness",
+    mode: "review-only",
+    summary:
+      "Stage C is no longer just an entry artifact: QA closeout tracks, approval workflow stages, checkpoint-level evidence, rollback live-readiness, and withheld-to-future boundary linkage now stay aligned as one typed local-only readiness spine.",
+    stageBBridgeStageId: "delivery-chain-publish-decision",
+    entryStageId: "delivery-chain-rollback-readiness",
+    releaseQaCloseoutReadiness: createStudioReleaseQaCloseoutReadiness(),
+    approvalWorkflow: createStudioReleaseApprovalWorkflow(),
+    entryContract: createStudioReleaseApprovalAuditRollbackEntryContract(),
+    rollbackLiveReadiness: createStudioReleaseRollbackLiveReadiness(),
+    boundaryLinkage: createStudioReleaseStageCBoundaryLinkage(),
+    blockedBy: [
+      "Stage C readiness remains non-executing",
+      "withheld execution plan remains boundary-linked only",
+      "future executor slots remain unimplemented",
+      "host-side execution remains disabled"
+    ]
+  };
+}
+
 function createStudioReleaseDeliveryChain(
   currentStage: StudioReleaseApprovalPipelineStage,
   stages: StudioReleaseApprovalPipelineStage[]
 ): StudioReleaseDeliveryChain {
   const currentDeliveryStageId = currentStage.deliveryChainStageId;
   const packagedAppMaterializationContract = createStudioPackagedAppMaterializationContract();
+  const stageCReadiness = createStudioReleaseStageCReadiness();
 
   return {
     id: "release-delivery-chain-phase60",
     title: "Delivery-chain Workspace",
     summary:
-      "Phase60 slice 31 keeps the review-only delivery chain readable as a stage explorer while also surfacing packaged-app task-state continuity, so per-platform roots, current task evidence, staged-output manifests, and bundle-sealing checkpoints stay inspectable inside the same local-only metadata spine.",
+      "Phase60 slice 32 keeps the review-only delivery chain readable as a stage explorer while also surfacing packaged-app staged-output task orchestration, bundle-sealing readiness, local progression, and a deeper Stage C readiness spine, so per-platform roots, current task evidence, staged-output manifests, seal checkpoints, QA closeout tracks, approval workflow stages, rollback live-readiness contracts, and boundary handoff posture stay inspectable inside the same local-only metadata spine.",
     mode: "review-only",
     currentStageId: currentDeliveryStageId,
     packagedAppMaterializationContract,
+    stageCReadiness,
     promotionStageIds: ["delivery-chain-promotion-readiness"],
     publishStageIds: ["delivery-chain-publish-decision"],
     rollbackStageIds: ["delivery-chain-rollback-readiness"],
@@ -632,7 +1245,7 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
     label: "Packaged-app Materialization Contract",
     mode: "review-only",
     summary:
-      "Packaged-app directory materialization, staged-output manifests, and bundle-sealing checkpoints now stay inspectable as one per-platform task-state contract, so the shell can review active local roots, evidence handoffs, and seal readiness without materializing, signing, or publishing anything.",
+      "Packaged-app directory materialization, staged-output task chains, bundle-sealing readiness, and local progression now stay inspectable as one per-platform task-state contract, so the shell can review active roots, evidence handoffs, and seal posture without materializing, signing, or publishing anything.",
     currentTaskState: "reviewing",
     activePlatformId: "packaged-app-materialization-platform-windows",
     ownerStageId: "delivery-chain-promotion-readiness",
@@ -695,6 +1308,85 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
           "seal manifest declared",
           "integrity manifest path declared"
         ],
+        stagedOutputChain: {
+          id: "packaged-app-staged-output-chain-windows",
+          label: "Windows staged-output chain",
+          summary:
+            "Directory verification, output-manifest staging, and checksum-manifest staging stay chained as one local-only Windows handoff before bundle sealing can be reviewed.",
+          currentStepId: "packaged-app-staged-output-step-windows-output-manifest",
+          downstreamBundleSealingId: "bundle-sealing-windows",
+          steps: [
+            {
+              id: "packaged-app-staged-output-step-windows-directory-verification",
+              label: "Directory verification handoff",
+              taskState: "review-ready",
+              summary: "Verification metadata is ready so the staged-output lane starts from an explicit packaged-app root review checkpoint.",
+              manifestPath: "future/packaged-app/windows/materialization-manifest.json",
+              deliveryChainStageId: "delivery-chain-attestation-intake",
+              dependsOn: ["packaged-app-materialization-task-windows-directory"]
+            },
+            {
+              id: "packaged-app-staged-output-step-windows-output-manifest",
+              label: "Output manifest staging",
+              taskState: "reviewing",
+              summary:
+                "The output manifest is the current Windows review focus so the staged-output handoff stays readable without producing a real packaged bundle.",
+              manifestPath: "future/staged-output/windows/output-manifest.json",
+              deliveryChainStageId: "delivery-chain-operator-review",
+              dependsOn: ["packaged-app-materialization-task-windows-directory"]
+            },
+            {
+              id: "packaged-app-staged-output-step-windows-checksum-manifest",
+              label: "Checksum manifest staging",
+              taskState: "reviewing",
+              summary: "Checksum metadata remains chained behind the same staged-output task so output proof and digest posture stay in one lane.",
+              manifestPath: "future/staged-output/windows/checksum-manifest.json",
+              deliveryChainStageId: "delivery-chain-operator-review",
+              dependsOn: ["packaged-app-materialization-task-windows-staged-output"]
+            }
+          ]
+        },
+        bundleSealingReadiness: {
+          id: "packaged-app-bundle-sealing-readiness-windows",
+          label: "Windows bundle-sealing readiness",
+          taskState: "blocked",
+          summary:
+            "Seal and integrity manifests are declared, but the Windows seal handoff remains blocked until the staged-output chain stops being metadata-only and the publish gate remains review-only.",
+          currentCheckpoint: "seal manifest declared / staged-output review still active",
+          deliveryChainStageId: "delivery-chain-promotion-readiness",
+          downstreamGateStageId: "delivery-chain-publish-decision",
+          dependsOnTaskId: "packaged-app-materialization-task-windows-staged-output",
+          sealManifestPath: "future/sealed-bundles/windows/bundle-seal-manifest.json",
+          integrityManifestPath: "future/sealed-bundles/windows/bundle-integrity-manifest.json",
+          reviewChecks: [
+            "seal manifest declared",
+            "integrity manifest declared",
+            "publish gate remains review-only"
+          ],
+          blockedBy: [
+            "staged outputs remain metadata-only",
+            "bundle sealing remains metadata-only",
+            "host-side execution remains disabled"
+          ]
+        },
+        localMaterializationProgress: {
+          id: "packaged-app-local-materialization-progress-windows",
+          label: "Windows local materialization progression",
+          taskState: "reviewing",
+          summary:
+            "Directory review is complete, staged-output review is current, and bundle sealing stays queued as the next local-only checkpoint.",
+          currentTaskId: "packaged-app-materialization-task-windows-staged-output",
+          nextTaskId: "packaged-app-materialization-task-windows-bundle-seal",
+          completedTaskCount: 1,
+          blockedTaskCount: 1,
+          totalTaskCount: 3,
+          completedTaskIds: ["packaged-app-materialization-task-windows-directory"],
+          stageSequence: [
+            "delivery-chain-attestation-intake",
+            "delivery-chain-operator-review",
+            "delivery-chain-promotion-readiness"
+          ]
+        },
         tasks: [
           {
             id: "packaged-app-materialization-task-windows-directory",
@@ -797,6 +1489,85 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
           "seal manifest declared",
           "integrity manifest path declared"
         ],
+        stagedOutputChain: {
+          id: "packaged-app-staged-output-chain-macos",
+          label: "macOS staged-output chain",
+          summary:
+            "Directory verification, output-manifest staging, and checksum-manifest staging stay chained as one local-only .app handoff before bundle sealing can be reviewed.",
+          currentStepId: "packaged-app-staged-output-step-macos-directory-verification",
+          downstreamBundleSealingId: "bundle-sealing-macos",
+          steps: [
+            {
+              id: "packaged-app-staged-output-step-macos-directory-verification",
+              label: "Directory verification handoff",
+              taskState: "review-ready",
+              summary: "The .app verification manifest is ready so staged-output review starts from a concrete launcher and bundle-layout checkpoint.",
+              manifestPath: "future/packaged-app/macos/materialization-manifest.json",
+              deliveryChainStageId: "delivery-chain-attestation-intake",
+              dependsOn: ["packaged-app-materialization-task-macos-directory"]
+            },
+            {
+              id: "packaged-app-staged-output-step-macos-output-manifest",
+              label: "Output manifest staging",
+              taskState: "review-ready",
+              summary:
+                "The output manifest stays chained to the same macOS review lane so .app staged-output posture stays visible without building anything.",
+              manifestPath: "future/staged-output/macos/output-manifest.json",
+              deliveryChainStageId: "delivery-chain-operator-review",
+              dependsOn: ["packaged-app-materialization-task-macos-directory"]
+            },
+            {
+              id: "packaged-app-staged-output-step-macos-checksum-manifest",
+              label: "Checksum manifest staging",
+              taskState: "review-ready",
+              summary: "Checksum metadata is ready for review so bundle-seal prerequisites stay explicit before any later signing or notarization path exists.",
+              manifestPath: "future/staged-output/macos/checksum-manifest.json",
+              deliveryChainStageId: "delivery-chain-operator-review",
+              dependsOn: ["packaged-app-materialization-task-macos-staged-output"]
+            }
+          ]
+        },
+        bundleSealingReadiness: {
+          id: "packaged-app-bundle-sealing-readiness-macos",
+          label: "macOS bundle-sealing readiness",
+          taskState: "blocked",
+          summary:
+            "Seal and integrity manifests are declared, but the macOS seal handoff remains blocked while staged-output review, signing, and notarization all stay metadata-only.",
+          currentCheckpoint: "seal manifest declared / notarization path still blocked",
+          deliveryChainStageId: "delivery-chain-promotion-readiness",
+          downstreamGateStageId: "delivery-chain-publish-decision",
+          dependsOnTaskId: "packaged-app-materialization-task-macos-staged-output",
+          sealManifestPath: "future/sealed-bundles/macos/bundle-seal-manifest.json",
+          integrityManifestPath: "future/sealed-bundles/macos/bundle-integrity-manifest.json",
+          reviewChecks: [
+            "seal manifest declared",
+            "integrity manifest declared",
+            "notarization path remains review-only"
+          ],
+          blockedBy: [
+            "staged outputs remain metadata-only",
+            "bundle sealing remains metadata-only",
+            "host-side execution remains disabled"
+          ]
+        },
+        localMaterializationProgress: {
+          id: "packaged-app-local-materialization-progress-macos",
+          label: "macOS local materialization progression",
+          taskState: "review-ready",
+          summary:
+            "Directory review is the current macOS checkpoint, with staged-output review queued next and bundle sealing still held behind the same local-only chain.",
+          currentTaskId: "packaged-app-materialization-task-macos-directory",
+          nextTaskId: "packaged-app-materialization-task-macos-staged-output",
+          completedTaskCount: 0,
+          blockedTaskCount: 1,
+          totalTaskCount: 3,
+          completedTaskIds: [],
+          stageSequence: [
+            "delivery-chain-attestation-intake",
+            "delivery-chain-operator-review",
+            "delivery-chain-promotion-readiness"
+          ]
+        },
         tasks: [
           {
             id: "packaged-app-materialization-task-macos-directory",
@@ -899,6 +1670,85 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
           "seal manifest declared",
           "integrity manifest path declared"
         ],
+        stagedOutputChain: {
+          id: "packaged-app-staged-output-chain-linux",
+          label: "Linux staged-output chain",
+          summary:
+            "Directory verification, output-manifest staging, and checksum-manifest staging stay chained as one local-only Linux handoff before bundle sealing can be reviewed.",
+          currentStepId: "packaged-app-staged-output-step-linux-directory-verification",
+          downstreamBundleSealingId: "bundle-sealing-linux",
+          steps: [
+            {
+              id: "packaged-app-staged-output-step-linux-directory-verification",
+              label: "Directory verification handoff",
+              taskState: "review-ready",
+              summary: "Verification metadata is ready so the Linux staged-output lane starts from an explicit package-root checkpoint.",
+              manifestPath: "future/packaged-app/linux/materialization-manifest.json",
+              deliveryChainStageId: "delivery-chain-attestation-intake",
+              dependsOn: ["packaged-app-materialization-task-linux-directory"]
+            },
+            {
+              id: "packaged-app-staged-output-step-linux-output-manifest",
+              label: "Output manifest staging",
+              taskState: "review-ready",
+              summary:
+                "The output manifest stays chained to the same Linux review lane so staged-output posture stays readable without emitting any package target.",
+              manifestPath: "future/staged-output/linux/output-manifest.json",
+              deliveryChainStageId: "delivery-chain-operator-review",
+              dependsOn: ["packaged-app-materialization-task-linux-directory"]
+            },
+            {
+              id: "packaged-app-staged-output-step-linux-checksum-manifest",
+              label: "Checksum manifest staging",
+              taskState: "review-ready",
+              summary: "Checksum metadata is ready for review so bundle-seal prerequisites stay explicit before any publish path exists.",
+              manifestPath: "future/staged-output/linux/checksum-manifest.json",
+              deliveryChainStageId: "delivery-chain-operator-review",
+              dependsOn: ["packaged-app-materialization-task-linux-staged-output"]
+            }
+          ]
+        },
+        bundleSealingReadiness: {
+          id: "packaged-app-bundle-sealing-readiness-linux",
+          label: "Linux bundle-sealing readiness",
+          taskState: "blocked",
+          summary:
+            "Seal and integrity manifests are declared, but the Linux seal handoff remains blocked while staged-output review and later package publication stay metadata-only.",
+          currentCheckpoint: "seal manifest declared / publish path still blocked",
+          deliveryChainStageId: "delivery-chain-promotion-readiness",
+          downstreamGateStageId: "delivery-chain-publish-decision",
+          dependsOnTaskId: "packaged-app-materialization-task-linux-staged-output",
+          sealManifestPath: "future/sealed-bundles/linux/bundle-seal-manifest.json",
+          integrityManifestPath: "future/sealed-bundles/linux/bundle-integrity-manifest.json",
+          reviewChecks: [
+            "seal manifest declared",
+            "integrity manifest declared",
+            "package publication remains review-only"
+          ],
+          blockedBy: [
+            "staged outputs remain metadata-only",
+            "bundle sealing remains metadata-only",
+            "host-side execution remains disabled"
+          ]
+        },
+        localMaterializationProgress: {
+          id: "packaged-app-local-materialization-progress-linux",
+          label: "Linux local materialization progression",
+          taskState: "review-ready",
+          summary:
+            "Directory review is the current Linux checkpoint, with staged-output review queued next and bundle sealing still held behind the same local-only chain.",
+          currentTaskId: "packaged-app-materialization-task-linux-directory",
+          nextTaskId: "packaged-app-materialization-task-linux-staged-output",
+          completedTaskCount: 0,
+          blockedTaskCount: 1,
+          totalTaskCount: 3,
+          completedTaskIds: [],
+          stageSequence: [
+            "delivery-chain-attestation-intake",
+            "delivery-chain-operator-review",
+            "delivery-chain-promotion-readiness"
+          ]
+        },
         tasks: [
           {
             id: "packaged-app-materialization-task-linux-directory",

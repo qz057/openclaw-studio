@@ -1,9 +1,10 @@
 {
   "schemaVersion": "openclaw-studio-release-qa-closeout-readiness/v1",
-  "generatedAt": "2026-04-07T17:25:26.047Z",
+  "generatedAt": "2026-04-07T18:46:00.404Z",
   "phase": "phase60",
   "mode": "local-only-review",
   "canCloseOut": false,
+  "activeTrackId": "release-qa-delivery-closeout",
   "summary": "Packaged-app materialization continuity, installer/signing handshake verification, release checklist proof, and delivery closeout posture now stay grouped as one local-only QA closeout surface.",
   "reviewOnlyDeliveryChainPath": "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
   "releaseApprovalWorkflowPath": "release/RELEASE-APPROVAL-WORKFLOW.json",
@@ -35,6 +36,10 @@
       "blockedBy": [
         "packaged output materialization remains metadata-only",
         "bundle sealing remains metadata-only"
+      ],
+      "checkpointIds": [
+        "entry-audit-retention",
+        "entry-approval-routing"
       ]
     },
     {
@@ -65,6 +70,9 @@
       "blockedBy": [
         "installer builder remains non-executing",
         "signing/notarization remain metadata-only"
+      ],
+      "checkpointIds": [
+        "entry-approval-routing"
       ]
     },
     {
@@ -88,6 +96,10 @@
       "blockedBy": [
         "reviewer acknowledgement remains metadata-only",
         "final signoff remains local-only"
+      ],
+      "checkpointIds": [
+        "entry-audit-retention",
+        "entry-receipt-settlement"
       ]
     },
     {
@@ -111,6 +123,10 @@
       "blockedBy": [
         "delivery closeout remains review-only",
         "publish lifecycle remains non-executing"
+      ],
+      "checkpointIds": [
+        "entry-receipt-settlement",
+        "entry-rollback-live-readiness"
       ]
     }
   ],

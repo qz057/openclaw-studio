@@ -1,11 +1,19 @@
 import { useEffect, useState } from "react";
 import {
+  selectStudioReleaseApprovalAuditRollbackEntryCheckpoint,
   selectStudioReleaseApprovalPipelineStage,
+  selectStudioReleaseApprovalWorkflowStage,
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseEscalationWindow,
+  selectStudioReleasePackagedAppMaterializationContractBundleSealingReadiness,
   selectStudioReleasePackagedAppMaterializationContractPlatform,
+  selectStudioReleasePackagedAppMaterializationContractProgress,
+  selectStudioReleasePackagedAppMaterializationContractStagedOutputChain,
+  selectStudioReleasePackagedAppMaterializationContractStagedOutputStep,
   selectStudioReleasePackagedAppMaterializationContractTask,
+  selectStudioReleaseQaCloseoutReadinessTrack,
+  selectStudioReleaseRollbackLiveReadinessContract,
   selectStudioReleaseReviewerQueue,
   type StudioReleaseAcknowledgementState,
   type StudioReleaseApprovalPipeline,
@@ -21,6 +29,7 @@ import { resolveCompanionRouteContext, type ReviewCoverageAction } from "../revi
 
 interface DeliveryChainWorkspaceProps {
   pipeline: StudioReleaseApprovalPipeline;
+  boundary?: StudioShellState["boundary"];
   windowing?: StudioShellState["windowing"];
   actionDeck?: StudioCommandActionDeck | null;
   reviewSurfaceActions?: StudioCommandAction[];
@@ -200,20 +209,7 @@ type ReplayAcceptanceCloseoutTimelineItem = {
   badges: string[];
 };
 
-type DeliveryArtifactGroup = StudioReleaseApprovalPipeline["deliveryChain"]["stages"][number]["artifactGroups"][number];
-
 const ALL_REPLAY_EVIDENCE_TRACE_ID = "replay-evidence-trace-all";
-
-function findDeliveryArtifactGroup(
-  stage: StudioReleaseApprovalPipeline["deliveryChain"]["stages"][number] | null,
-  groupId: string
-): DeliveryArtifactGroup | null {
-  return stage?.artifactGroups.find((group) => group.id === groupId) ?? null;
-}
-
-function collectDeliveryArtifactGroupArtifacts(groups: Array<DeliveryArtifactGroup | null | undefined>): string[] {
-  return [...new Set(groups.flatMap((group) => group?.artifacts ?? []))];
-}
 
 function resolveStageTone(status: StudioReleaseApprovalPipeline["stages"][number]["status"]): Tone {
   switch (status) {
@@ -224,6 +220,19 @@ function resolveStageTone(status: StudioReleaseApprovalPipeline["stages"][number
       return "neutral";
     default:
       return "warning";
+  }
+}
+
+function formatStageReadinessStatus(status: StudioReleaseApprovalPipeline["stages"][number]["status"]): string {
+  switch (status) {
+    case "ready":
+      return "Ready";
+    case "in-review":
+      return "In review";
+    case "planned":
+      return "Planned";
+    default:
+      return "Blocked";
   }
 }
 
@@ -248,6 +257,21 @@ function formatPackagedAppPlatform(platform: string): string {
       return "Linux";
     default:
       return platform;
+  }
+}
+
+function formatBoundaryLayerLabel(
+  layer: StudioShellState["boundary"]["currentLayer"] | StudioShellState["boundary"]["nextLayer"]
+): string {
+  switch (layer) {
+    case "local-only":
+      return "Local-only";
+    case "preview-host":
+      return "Preview-host";
+    case "withheld":
+      return "Withheld";
+    default:
+      return "Future executor";
   }
 }
 
@@ -669,6 +693,61 @@ function createReplayEvidenceTraceEvidenceItemId(evidenceItemId: string): string
 
 function createReplayEvidenceTraceContinuityHandoffId(handoffId: string): string {
   return `replay-evidence-trace-continuity-handoff-${handoffId}`;
+}
+
+function resolveStageCQaTrackId(pipeline: StudioReleaseApprovalPipeline, deliveryStageId?: string | null): string {
+  switch (deliveryStageId) {
+    case "delivery-chain-promotion-readiness":
+      return "release-qa-materialization-continuity";
+    case "delivery-chain-publish-decision":
+      return "release-qa-installer-signing-handshake";
+    case "delivery-chain-operator-review":
+      return "release-qa-proof-bundle";
+    case "delivery-chain-rollback-readiness":
+      return "release-qa-delivery-closeout";
+    default:
+      return pipeline.deliveryChain.stageCReadiness.releaseQaCloseoutReadiness.activeTrackId;
+  }
+}
+
+function resolveStageCApprovalWorkflowStageId(pipeline: StudioReleaseApprovalPipeline, deliveryStageId?: string | null): string {
+  switch (deliveryStageId) {
+    case "delivery-chain-attestation-intake":
+      return "approval-attestation-verification";
+    case "delivery-chain-promotion-readiness":
+      return "approval-promotion-apply";
+    case "delivery-chain-publish-decision":
+      return "approval-signing";
+    case "delivery-chain-operator-review":
+      return "approval-operator-board";
+    case "delivery-chain-rollback-readiness":
+      return "approval-stage-c-entry";
+    default:
+      return pipeline.deliveryChain.stageCReadiness.approvalWorkflow.activeStageId;
+  }
+}
+
+function resolveStageCCheckpointId(pipeline: StudioReleaseApprovalPipeline, deliveryStageId?: string | null): string {
+  switch (deliveryStageId) {
+    case "delivery-chain-attestation-intake":
+    case "delivery-chain-operator-review":
+      return "entry-audit-retention";
+    case "delivery-chain-publish-decision":
+      return "entry-approval-routing";
+    case "delivery-chain-promotion-readiness":
+    case "delivery-chain-rollback-readiness":
+      return "entry-rollback-live-readiness";
+    default:
+      return pipeline.deliveryChain.stageCReadiness.entryContract.activeCheckpointId;
+  }
+}
+
+function resolveStageCRollbackContractId(pipeline: StudioReleaseApprovalPipeline, deliveryStageId?: string | null): string {
+  if (deliveryStageId === "delivery-chain-rollback-readiness" || deliveryStageId === "delivery-chain-publish-decision") {
+    return pipeline.deliveryChain.stageCReadiness.rollbackLiveReadiness.contracts[0]?.id ?? "";
+  }
+
+  return pipeline.deliveryChain.stageCReadiness.rollbackLiveReadiness.activeContractId;
 }
 
 function createReplayEvidenceTraceIdFromWalkthroughTrace(
@@ -1304,6 +1383,7 @@ function resolveArtifactCoverage(
 
 export function DeliveryChainWorkspace({
   pipeline,
+  boundary,
   windowing,
   actionDeck,
   reviewSurfaceActions = [],
@@ -1330,6 +1410,11 @@ export function DeliveryChainWorkspace({
   const [selectedArtifactGroupId, setSelectedArtifactGroupId] = useState<string | null>(null);
   const [selectedMaterializationPlatformId, setSelectedMaterializationPlatformId] = useState<string | null>(null);
   const [selectedMaterializationTaskId, setSelectedMaterializationTaskId] = useState<string | null>(null);
+  const [selectedStagedOutputStepId, setSelectedStagedOutputStepId] = useState<string | null>(null);
+  const [selectedQaTrackId, setSelectedQaTrackId] = useState<string | null>(null);
+  const [selectedApprovalWorkflowStageId, setSelectedApprovalWorkflowStageId] = useState<string | null>(null);
+  const [selectedStageCCheckpointId, setSelectedStageCCheckpointId] = useState<string | null>(null);
+  const [selectedRollbackContractId, setSelectedRollbackContractId] = useState<string | null>(null);
   const [activeReplayEvidenceTraceId, setActiveReplayEvidenceTraceId] = useState<string>(ALL_REPLAY_EVIDENCE_TRACE_ID);
   const selectedStageId = controlledStageId ?? localSelectedStageId;
 
@@ -1349,6 +1434,7 @@ export function DeliveryChainWorkspace({
     pipeline.stages.find((stage) => stage.deliveryChainStageId === selectedDeliveryStage?.id) ??
     currentPipelineStage;
   const packagedAppMaterializationContract = pipeline.deliveryChain.packagedAppMaterializationContract;
+  const stageCReadiness = pipeline.deliveryChain.stageCReadiness;
 
   useEffect(() => {
     if (!selectedDeliveryStage) {
@@ -1385,6 +1471,38 @@ export function DeliveryChainWorkspace({
     selectedMaterializationPlatformId
   ]);
 
+  useEffect(() => {
+    const nextQaTrackId = resolveStageCQaTrackId(pipeline, selectedDeliveryStage?.id);
+
+    if (nextQaTrackId && selectedQaTrackId !== nextQaTrackId) {
+      setSelectedQaTrackId(nextQaTrackId);
+    }
+  }, [pipeline, selectedDeliveryStage?.id]);
+
+  useEffect(() => {
+    const nextWorkflowStageId = resolveStageCApprovalWorkflowStageId(pipeline, selectedDeliveryStage?.id);
+
+    if (nextWorkflowStageId && selectedApprovalWorkflowStageId !== nextWorkflowStageId) {
+      setSelectedApprovalWorkflowStageId(nextWorkflowStageId);
+    }
+  }, [pipeline, selectedDeliveryStage?.id]);
+
+  useEffect(() => {
+    const nextCheckpointId = resolveStageCCheckpointId(pipeline, selectedDeliveryStage?.id);
+
+    if (nextCheckpointId && selectedStageCCheckpointId !== nextCheckpointId) {
+      setSelectedStageCCheckpointId(nextCheckpointId);
+    }
+  }, [pipeline, selectedDeliveryStage?.id]);
+
+  useEffect(() => {
+    const nextRollbackContractId = resolveStageCRollbackContractId(pipeline, selectedDeliveryStage?.id);
+
+    if (nextRollbackContractId && selectedRollbackContractId !== nextRollbackContractId) {
+      setSelectedRollbackContractId(nextRollbackContractId);
+    }
+  }, [pipeline, selectedDeliveryStage?.id]);
+
   const selectedReviewerQueue = selectedPipelineStage ? selectStudioReleaseReviewerQueue(pipeline, selectedPipelineStage) ?? null : null;
   const selectedEscalationWindow = selectedPipelineStage ? selectStudioReleaseEscalationWindow(pipeline, selectedPipelineStage) ?? null : null;
   const selectedCloseoutWindow = selectedPipelineStage ? selectStudioReleaseCloseoutWindow(pipeline, selectedPipelineStage) ?? null : null;
@@ -1395,6 +1513,13 @@ export function DeliveryChainWorkspace({
   const selectedMaterializationPlatform =
     selectStudioReleasePackagedAppMaterializationContractPlatform(pipeline.deliveryChain, selectedMaterializationPlatformId) ??
     null;
+  const selectedQaTrack = selectStudioReleaseQaCloseoutReadinessTrack(pipeline.deliveryChain, selectedQaTrackId) ?? null;
+  const selectedApprovalWorkflowStage =
+    selectStudioReleaseApprovalWorkflowStage(pipeline.deliveryChain, selectedApprovalWorkflowStageId) ?? null;
+  const selectedStageCCheckpoint =
+    selectStudioReleaseApprovalAuditRollbackEntryCheckpoint(pipeline.deliveryChain, selectedStageCCheckpointId) ?? null;
+  const selectedRollbackContract =
+    selectStudioReleaseRollbackLiveReadinessContract(pipeline.deliveryChain, selectedRollbackContractId) ?? null;
 
   useEffect(() => {
     if (!selectedMaterializationPlatform?.tasks.length) {
@@ -1413,11 +1538,49 @@ export function DeliveryChainWorkspace({
     }
   }, [selectedMaterializationPlatform, selectedMaterializationTaskId]);
 
+  useEffect(() => {
+    if (!selectedMaterializationPlatform?.stagedOutputChain.steps.length) {
+      if (selectedStagedOutputStepId !== null) {
+        setSelectedStagedOutputStepId(null);
+      }
+
+      return;
+    }
+
+    if (
+      !selectedStagedOutputStepId ||
+      !selectedMaterializationPlatform.stagedOutputChain.steps.some((step) => step.id === selectedStagedOutputStepId)
+    ) {
+      setSelectedStagedOutputStepId(selectedMaterializationPlatform.stagedOutputChain.currentStepId);
+    }
+  }, [selectedMaterializationPlatform, selectedStagedOutputStepId]);
+
   const selectedMaterializationTask =
     selectStudioReleasePackagedAppMaterializationContractTask(
       pipeline.deliveryChain,
       selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId,
       selectedMaterializationTaskId
+    ) ?? null;
+  const selectedStagedOutputChain =
+    selectStudioReleasePackagedAppMaterializationContractStagedOutputChain(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
+    ) ?? null;
+  const selectedStagedOutputStep =
+    selectStudioReleasePackagedAppMaterializationContractStagedOutputStep(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId,
+      selectedStagedOutputStepId
+    ) ?? null;
+  const selectedBundleSealingReadiness =
+    selectStudioReleasePackagedAppMaterializationContractBundleSealingReadiness(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
+    ) ?? null;
+  const selectedMaterializationProgress =
+    selectStudioReleasePackagedAppMaterializationContractProgress(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
     ) ?? null;
   const materializationOwnerStage =
     selectStudioReleaseDeliveryChainStage(pipeline, packagedAppMaterializationContract.ownerStageId) ?? null;
@@ -1426,26 +1589,44 @@ export function DeliveryChainWorkspace({
   const materializationTaskStage = selectedMaterializationTask
     ? selectStudioReleaseDeliveryChainStage(pipeline, selectedMaterializationTask.deliveryChainStageId) ?? null
     : null;
+  const selectedStagedOutputStepStage = selectedStagedOutputStep
+    ? selectStudioReleaseDeliveryChainStage(pipeline, selectedStagedOutputStep.deliveryChainStageId) ?? null
+    : null;
+  const bundleSealingStage = selectedBundleSealingReadiness
+    ? selectStudioReleaseDeliveryChainStage(pipeline, selectedBundleSealingReadiness.deliveryChainStageId) ?? null
+    : null;
   const materializationReviewReadyCount =
     selectedMaterializationPlatform?.tasks.filter((task) => task.taskState === "review-ready").length ?? 0;
   const materializationBlockedCount =
     selectedMaterializationPlatform?.tasks.filter((task) => task.taskState === "blocked").length ?? 0;
-  const operatorReviewStage = selectStudioReleaseDeliveryChainStage(pipeline, "delivery-chain-operator-review") ?? null;
-  const publishDecisionStage = selectStudioReleaseDeliveryChainStage(pipeline, "delivery-chain-publish-decision") ?? null;
   const rollbackDecisionStage = selectStudioReleaseDeliveryChainStage(pipeline, "delivery-chain-rollback-readiness") ?? null;
-  const operatorQaCloseoutGroup = findDeliveryArtifactGroup(operatorReviewStage, "delivery-chain-operator-review-qa-closeout");
-  const publishSigningGroup = findDeliveryArtifactGroup(publishDecisionStage, "delivery-chain-publish-decision-signing");
-  const publishQaCloseoutGroup = findDeliveryArtifactGroup(publishDecisionStage, "delivery-chain-publish-decision-qa-closeout");
-  const rollbackStageCEntryGroup = findDeliveryArtifactGroup(
-    rollbackDecisionStage,
-    "delivery-chain-rollback-readiness-stage-c-entry"
-  );
-  const releaseQaCloseoutArtifacts = collectDeliveryArtifactGroupArtifacts([
-    operatorQaCloseoutGroup,
-    publishSigningGroup,
-    publishQaCloseoutGroup
-  ]);
-  const approvalAuditRollbackEntryArtifacts = collectDeliveryArtifactGroupArtifacts([rollbackStageCEntryGroup]);
+  const selectedQaTrackStage = selectedQaTrack ? selectStudioReleaseDeliveryChainStage(pipeline, selectedQaTrack.deliveryChainStageId) ?? null : null;
+  const selectedApprovalWorkflowStages =
+    selectedApprovalWorkflowStage?.deliveryChainStageIds
+      .map((stageId) => selectStudioReleaseDeliveryChainStage(pipeline, stageId))
+      .filter((stage): stage is NonNullable<typeof stage> => Boolean(stage)) ?? [];
+  const selectedStageCCheckpointStage = selectedStageCCheckpoint
+    ? selectStudioReleaseDeliveryChainStage(pipeline, selectedStageCCheckpoint.deliveryChainStageId) ?? null
+    : null;
+  const selectedRollbackContractStage = selectedRollbackContract
+    ? selectStudioReleaseDeliveryChainStage(pipeline, selectedRollbackContract.deliveryChainStageId) ?? null
+    : null;
+  const selectedStageCBoundarySteps =
+    selectedStageCCheckpoint?.boundaryStepIds
+      .map((stepId) => boundary?.withheldExecutionPlan.find((step) => step.id === stepId) ?? null)
+      .filter((step): step is NonNullable<typeof step> => Boolean(step)) ?? [];
+  const selectedStageCFutureSlots =
+    selectedStageCCheckpoint?.futureExecutorSlotIds
+      .map((slotId) => boundary?.futureExecutorSlots.find((slot) => slot.id === slotId) ?? null)
+      .filter((slot): slot is NonNullable<typeof slot> => Boolean(slot)) ?? [];
+  const boundaryLinkageWithheldSteps =
+    stageCReadiness.boundaryLinkage.withheldPlanStepIds
+      .map((stepId) => boundary?.withheldExecutionPlan.find((step) => step.id === stepId) ?? null)
+      .filter((step): step is NonNullable<typeof step> => Boolean(step)) ?? [];
+  const boundaryLinkageFutureSlots =
+    stageCReadiness.boundaryLinkage.futureExecutorSlotIds
+      .map((slotId) => boundary?.futureExecutorSlots.find((slot) => slot.id === slotId) ?? null)
+      .filter((slot): slot is NonNullable<typeof slot> => Boolean(slot)) ?? [];
   const stageMappings =
     windowing?.observability.mappings.filter((mapping) => mapping.reviewPosture.deliveryChainStageId === selectedDeliveryStage?.id) ?? [];
   const activeStageMapping =
@@ -5887,6 +6068,47 @@ export function DeliveryChainWorkspace({
                   <span>Task delivery stage</span>
                   <strong>{materializationTaskStage ? `${materializationTaskStage.label} / ${materializationTaskStage.status}` : "Unavailable"}</strong>
                 </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveMaterializationTaskTone(selectedMaterializationProgress?.taskState ?? "blocked")}`}>
+                  <span>Local progression</span>
+                  <strong>
+                    {selectedMaterializationProgress
+                      ? `${selectedMaterializationProgress.completedTaskCount + 1}/${selectedMaterializationProgress.totalTaskCount} checkpoints / ${
+                          selectedMaterializationProgress.nextTaskId
+                            ? selectedMaterializationPlatform.tasks.find((task) => task.id === selectedMaterializationProgress.nextTaskId)?.label ??
+                              selectedMaterializationProgress.nextTaskId
+                            : "Final checkpoint"
+                        }`
+                      : "Unavailable"}
+                  </strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveMaterializationTaskTone(selectedStagedOutputStep?.taskState ?? "blocked")}`}>
+                  <span>Staged-output chain</span>
+                  <strong>
+                    {selectedStagedOutputChain
+                      ? `${selectedStagedOutputStep?.label ?? "No active step"} / ${selectedStagedOutputChain.steps.length} steps`
+                      : "Unavailable"}
+                  </strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(selectedStagedOutputStepStage?.status ?? "blocked")}`}>
+                  <span>Chain delivery stage</span>
+                  <strong>
+                    {selectedStagedOutputStepStage
+                      ? `${selectedStagedOutputStepStage.label} / ${selectedStagedOutputStepStage.status}`
+                      : "Unavailable"}
+                  </strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveMaterializationTaskTone(selectedBundleSealingReadiness?.taskState ?? "blocked")}`}>
+                  <span>Bundle-seal readiness</span>
+                  <strong>
+                    {selectedBundleSealingReadiness
+                      ? `${formatMaterializationTaskState(selectedBundleSealingReadiness.taskState)} / ${selectedBundleSealingReadiness.currentCheckpoint}`
+                      : "Unavailable"}
+                  </strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(bundleSealingStage?.status ?? "blocked")}`}>
+                  <span>Seal delivery stage</span>
+                  <strong>{bundleSealingStage ? `${bundleSealingStage.label} / ${bundleSealingStage.status}` : "Unavailable"}</strong>
+                </div>
                 <div className="workflow-readiness-line workflow-readiness-line--neutral">
                   <span>Review-ready tasks</span>
                   <strong>{materializationReviewReadyCount} ready / {materializationBlockedCount} blocked</strong>
@@ -5924,6 +6146,24 @@ export function DeliveryChainWorkspace({
                   </button>
                 ))}
               </div>
+              {selectedStagedOutputChain ? (
+                <div className="delivery-chain-workspace__artifact-groups">
+                  {selectedStagedOutputChain.steps.map((step) => (
+                    <button
+                      key={step.id}
+                      type="button"
+                      className={step.id === selectedStagedOutputStep?.id ? "windowing-card windowing-card--active" : "windowing-card"}
+                      onClick={() => {
+                        setSelectedStagedOutputStepId(step.id);
+                      }}
+                    >
+                      <span>{step.label}</span>
+                      <strong>{formatMaterializationTaskState(step.taskState)}</strong>
+                      <p>{step.summary}</p>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
               <div className="windowing-preview-list">
                 <div className="windowing-preview-line windowing-preview-line--stacked">
                   <span>Materialization root</span>
@@ -5953,6 +6193,20 @@ export function DeliveryChainWorkspace({
                     <strong>{selectedMaterializationTask.summary}</strong>
                   </div>
                 ) : null}
+                {selectedMaterializationProgress ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Progress summary</span>
+                    <strong>{selectedMaterializationProgress.summary}</strong>
+                  </div>
+                ) : null}
+                {(compact ? selectedMaterializationProgress?.stageSequence.slice(0, 2) ?? [] : selectedMaterializationProgress?.stageSequence ?? []).map(
+                  (stageId) => (
+                    <div key={stageId} className="windowing-preview-line windowing-preview-line--stacked">
+                      <span>Progress stage</span>
+                      <strong>{selectStudioReleaseDeliveryChainStage(pipeline, stageId)?.label ?? stageId}</strong>
+                    </div>
+                  )
+                )}
                 {(compact ? selectedMaterializationTask?.evidence.slice(0, 2) ?? [] : selectedMaterializationTask?.evidence ?? []).map((artifact) => (
                   <div key={artifact} className="windowing-preview-line windowing-preview-line--stacked">
                     <span>Task evidence</span>
@@ -5963,6 +6217,48 @@ export function DeliveryChainWorkspace({
                   <div key={dependency} className="windowing-preview-line windowing-preview-line--stacked">
                     <span>Depends on</span>
                     <strong>{dependency}</strong>
+                  </div>
+                ))}
+                {selectedStagedOutputStep ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Staged-output step</span>
+                    <strong>{selectedStagedOutputStep.label} / {selectedStagedOutputStep.manifestPath}</strong>
+                  </div>
+                ) : null}
+                {selectedStagedOutputStep ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Step summary</span>
+                    <strong>{selectedStagedOutputStep.summary}</strong>
+                  </div>
+                ) : null}
+                {(compact ? selectedStagedOutputStep?.dependsOn.slice(0, 2) ?? [] : selectedStagedOutputStep?.dependsOn ?? []).map((dependency) => (
+                  <div key={dependency} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Chain depends on</span>
+                    <strong>{dependency}</strong>
+                  </div>
+                ))}
+                {selectedBundleSealingReadiness ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Bundle-seal summary</span>
+                    <strong>{selectedBundleSealingReadiness.summary}</strong>
+                  </div>
+                ) : null}
+                {selectedBundleSealingReadiness ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Current checkpoint</span>
+                    <strong>{selectedBundleSealingReadiness.currentCheckpoint}</strong>
+                  </div>
+                ) : null}
+                {(compact ? selectedBundleSealingReadiness?.reviewChecks.slice(0, 2) ?? [] : selectedBundleSealingReadiness?.reviewChecks ?? []).map((check) => (
+                  <div key={check} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Seal review check</span>
+                    <strong>{check}</strong>
+                  </div>
+                ))}
+                {(compact ? selectedBundleSealingReadiness?.blockedBy.slice(0, 2) ?? [] : selectedBundleSealingReadiness?.blockedBy ?? []).map((blocker) => (
+                  <div key={blocker} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Seal blocker</span>
+                    <strong>{blocker}</strong>
                   </div>
                 ))}
                 {(compact ? selectedMaterializationPlatform.reviewChecks.slice(0, 2) : selectedMaterializationPlatform.reviewChecks).map((check) => (
@@ -5985,101 +6281,315 @@ export function DeliveryChainWorkspace({
         <article className="windowing-summary-card">
           <span>Release QA Closeout Readiness</span>
           <strong>
-            {publishDecisionStage
-              ? `${publishDecisionStage.label} / ${publishDecisionStage.status}`
-              : operatorReviewStage
-                ? `${operatorReviewStage.label} / ${operatorReviewStage.status}`
-                : "No QA closeout posture"}
+            {selectedQaTrack
+              ? `${selectedQaTrack.label} / ${formatStageReadinessStatus(selectedQaTrack.status)}`
+              : "No QA closeout posture"}
           </strong>
-          <p>
-            Release QA closeout now keeps installer/signing handshake verification, review checklist proof, release summary closeout, and evidence sealing
-            readable as one local-only delivery closeout surface.
-          </p>
-          <div className="workflow-readiness-list">
-            <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(operatorReviewStage?.status ?? "blocked")}`}>
-              <span>Review closeout owner</span>
-              <strong>{operatorReviewStage ? `${operatorReviewStage.label} / ${operatorReviewStage.status}` : "Unavailable"}</strong>
-            </div>
-            <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(publishDecisionStage?.status ?? "blocked")}`}>
-              <span>Installer / signing gate</span>
-              <strong>{publishDecisionStage ? `${publishDecisionStage.label} / ${publishDecisionStage.status}` : "Unavailable"}</strong>
-            </div>
-            <div className="workflow-readiness-line workflow-readiness-line--neutral">
-              <span>Linked artifacts</span>
-              <strong>{releaseQaCloseoutArtifacts.length} closeout artifacts</strong>
-            </div>
-            <div className={`workflow-readiness-line workflow-readiness-line--${resolveCloseoutWindowTone(selectedCloseoutWindow?.state ?? "blocked")}`}>
-              <span>Current closeout window</span>
-              <strong>{selectedCloseoutWindow ? `${selectedCloseoutWindow.label} / ${selectedCloseoutWindow.state}` : "Unavailable"}</strong>
-            </div>
+          <p>{stageCReadiness.releaseQaCloseoutReadiness.summary}</p>
+          <div className="windowing-card__meta">
+            <span className="windowing-badge">{stageCReadiness.releaseQaCloseoutReadiness.tracks.length} tracks</span>
+            <span className="windowing-badge">
+              {stageCReadiness.releaseQaCloseoutReadiness.canCloseOut ? "closeout-ready" : "review-only"}
+            </span>
+            <span className="windowing-badge">
+              {selectedQaTrackStage ? `${selectedQaTrackStage.label} / ${selectedQaTrackStage.status}` : "No linked stage"}
+            </span>
+            <span className="windowing-badge">local-only</span>
           </div>
-          <div className="windowing-preview-list">
-            {(compact ? releaseQaCloseoutArtifacts.slice(0, 5) : releaseQaCloseoutArtifacts).map((artifact) => (
-              <div key={artifact} className="windowing-preview-line windowing-preview-line--stacked">
-                <span>Release QA proof</span>
-                <strong>{artifact}</strong>
-                <p>
-                  {artifact.endsWith("RELEASE-QA-CLOSEOUT-READINESS.json")
-                    ? publishQaCloseoutGroup?.summary ?? operatorQaCloseoutGroup?.summary ?? "QA closeout route remains review-only."
-                    : artifact.endsWith("RELEASE-CHECKLIST.md")
-                      ? "Checklist proof stays attached to the same delivery closeout surface instead of becoming a separate packaging note."
-                      : artifact.endsWith("RELEASE-SUMMARY.md")
-                        ? "Release summary stays grouped with the same closeout route so review closure is readable before publish is allowed."
-                        : publishSigningGroup?.summary ?? "Installer/signing handshake evidence remains local-only and non-executing."}
-                </p>
-              </div>
+          <div className="delivery-chain-workspace__artifact-groups">
+            {stageCReadiness.releaseQaCloseoutReadiness.tracks.map((track) => (
+              <button
+                key={track.id}
+                type="button"
+                className={track.id === selectedQaTrack?.id ? "windowing-card windowing-card--active" : "windowing-card"}
+                onClick={() => {
+                  setSelectedQaTrackId(track.id);
+                }}
+              >
+                <span>{track.label}</span>
+                <strong>{track.owner} / {formatStageReadinessStatus(track.status)}</strong>
+                <p>{track.reviewChecks[0] ?? track.artifacts[0] ?? "No QA track detail"}</p>
+              </button>
             ))}
           </div>
+          {selectedQaTrack ? (
+            <>
+              <div className="workflow-readiness-list">
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(selectedQaTrack.status)}`}>
+                  <span>Track owner</span>
+                  <strong>{selectedQaTrack.owner} / {formatStageReadinessStatus(selectedQaTrack.status)}</strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(selectedQaTrackStage?.status ?? "blocked")}`}>
+                  <span>Delivery stage</span>
+                  <strong>{selectedQaTrackStage ? `${selectedQaTrackStage.label} / ${selectedQaTrackStage.status}` : "Unavailable"}</strong>
+                </div>
+                <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                  <span>Linked checkpoints</span>
+                  <strong>{selectedQaTrack.checkpointIds.length} Stage C checkpoints</strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveCloseoutWindowTone(selectedCloseoutWindow?.state ?? "blocked")}`}>
+                  <span>Current closeout window</span>
+                  <strong>{selectedCloseoutWindow ? `${selectedCloseoutWindow.label} / ${selectedCloseoutWindow.state}` : "Unavailable"}</strong>
+                </div>
+              </div>
+              <div className="windowing-preview-list">
+                {(compact ? selectedQaTrack.artifacts.slice(0, 4) : selectedQaTrack.artifacts).map((artifact) => (
+                  <div key={artifact} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Release QA artifact</span>
+                    <strong>{artifact}</strong>
+                  </div>
+                ))}
+                {(compact ? selectedQaTrack.reviewChecks.slice(0, 3) : selectedQaTrack.reviewChecks).map((check) => (
+                  <div key={check} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Review check</span>
+                    <strong>{check}</strong>
+                  </div>
+                ))}
+                {(compact ? selectedQaTrack.blockedBy.slice(0, 2) : selectedQaTrack.blockedBy).map((blocker) => (
+                  <div key={blocker} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Blocker</span>
+                    <strong>{blocker}</strong>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : null}
+        </article>
+
+        <article className="windowing-summary-card">
+          <span>Release Approval Workflow</span>
+          <strong>
+            {selectedApprovalWorkflowStage
+              ? `${selectedApprovalWorkflowStage.label} / ${formatStageReadinessStatus(selectedApprovalWorkflowStage.status)}`
+              : "No approval workflow posture"}
+          </strong>
+          <p>{stageCReadiness.approvalWorkflow.summary}</p>
+          <div className="windowing-card__meta">
+            <span className="windowing-badge">{stageCReadiness.approvalWorkflow.stages.length} workflow stages</span>
+            <span className="windowing-badge">
+              {stageCReadiness.approvalWorkflow.canApprove ? "approvable" : "review-only"}
+            </span>
+            <span className="windowing-badge">blocked approval handshake</span>
+          </div>
+          <div className="delivery-chain-workspace__artifact-groups">
+            {stageCReadiness.approvalWorkflow.stages.map((stage) => (
+              <button
+                key={stage.id}
+                type="button"
+                className={stage.id === selectedApprovalWorkflowStage?.id ? "windowing-card windowing-card--active" : "windowing-card"}
+                onClick={() => {
+                  setSelectedApprovalWorkflowStageId(stage.id);
+                }}
+              >
+                <span>{stage.label}</span>
+                <strong>{formatStageReadinessStatus(stage.status)} / {stage.approverRoles.length} approver roles</strong>
+                <p>{stage.evidence[0] ?? "No workflow evidence"}</p>
+              </button>
+            ))}
+          </div>
+          {selectedApprovalWorkflowStage ? (
+            <>
+              <div className="workflow-readiness-list">
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(selectedApprovalWorkflowStage.status)}`}>
+                  <span>Workflow stage</span>
+                  <strong>{formatStageReadinessStatus(selectedApprovalWorkflowStage.status)} / {selectedApprovalWorkflowStage.approverRoles.join(" / ")}</strong>
+                </div>
+                <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                  <span>Linked delivery stages</span>
+                  <strong>
+                    {selectedApprovalWorkflowStages.length > 0
+                      ? selectedApprovalWorkflowStages.map((stage) => stage.label).join(" -> ")
+                      : "No linked delivery stage"}
+                  </strong>
+                </div>
+                <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                  <span>Linked checkpoints</span>
+                  <strong>{selectedApprovalWorkflowStage.checkpointIds.length} Stage C checkpoints</strong>
+                </div>
+                <div className="workflow-readiness-line workflow-readiness-line--warning">
+                  <span>Execution posture</span>
+                  <strong>Approval routing stays non-executing</strong>
+                </div>
+              </div>
+              <div className="windowing-preview-list">
+                {(compact ? selectedApprovalWorkflowStage.evidence.slice(0, 5) : selectedApprovalWorkflowStage.evidence).map((artifact) => (
+                  <div key={artifact} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Workflow evidence</span>
+                    <strong>{artifact}</strong>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : null}
         </article>
 
         <article className="windowing-summary-card">
           <span>Approval / Audit / Rollback Entry</span>
           <strong>
-            {rollbackDecisionStage
-              ? `${rollbackDecisionStage.label} / ${rollbackDecisionStage.status}`
+            {selectedStageCCheckpoint
+              ? `${selectedStageCCheckpoint.label} / ${formatStageReadinessStatus(selectedStageCCheckpoint.state)}`
               : "No Stage C entry posture"}
           </strong>
-          <p>
-            The first safe Stage C entry now ties approval workflow, audit retention posture, rollback live-readiness, and receipt settlement closeout
-            into one non-executing contract instead of leaving those surfaces as separate metadata tails.
-          </p>
-          <div className="workflow-readiness-list">
-            <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(rollbackDecisionStage?.status ?? "blocked")}`}>
-              <span>Rollback owner</span>
-              <strong>{rollbackDecisionStage ? `${rollbackDecisionStage.label} / ${rollbackDecisionStage.status}` : "Unavailable"}</strong>
-            </div>
-            <div className="workflow-readiness-line workflow-readiness-line--neutral">
-              <span>Approval workflow</span>
-              <strong>RELEASE-APPROVAL-WORKFLOW / local-only</strong>
-            </div>
-            <div className="workflow-readiness-line workflow-readiness-line--warning">
-              <span>Execution posture</span>
-              <strong>Stage C entry / non-executing</strong>
-            </div>
-            <div className="workflow-readiness-line workflow-readiness-line--neutral">
-              <span>Entry artifacts</span>
-              <strong>{approvalAuditRollbackEntryArtifacts.length} linked contracts</strong>
-            </div>
+          <p>{stageCReadiness.entryContract.summary}</p>
+          <div className="windowing-card__meta">
+            <span className="windowing-badge">{stageCReadiness.entryContract.checkpoints.length} checkpoints</span>
+            <span className="windowing-badge">
+              {stageCReadiness.entryContract.canEnterExecutableApproval ? "executable" : "non-executing"}
+            </span>
+            <span className="windowing-badge">{rollbackDecisionStage ? `${rollbackDecisionStage.label} / ${rollbackDecisionStage.status}` : "No rollback stage"}</span>
           </div>
-          <div className="windowing-preview-list">
-            {(compact ? approvalAuditRollbackEntryArtifacts.slice(0, 5) : approvalAuditRollbackEntryArtifacts).map((artifact) => (
-              <div key={artifact} className="windowing-preview-line windowing-preview-line--stacked">
-                <span>Stage C entry artifact</span>
-                <strong>{artifact}</strong>
-                <p>
-                  {artifact.endsWith("APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT.json")
-                    ? rollbackStageCEntryGroup?.summary ?? "Stage C entry remains local-only."
-                    : artifact.endsWith("RELEASE-APPROVAL-WORKFLOW.json")
-                      ? "Approval routing stays review-only and blocks any live signing, publish, rollback, or host execution."
-                      : artifact.endsWith("ATTESTATION-APPLY-AUDIT-PACKS.json")
-                        ? "Audit retention posture remains linked through reviewable audit packs rather than executable audit emission."
-                        : artifact.endsWith("ROLLBACK-LIVE-READINESS-CONTRACTS.json")
-                          ? "Rollback live-readiness remains inspectable without enabling a live rollback path."
-                          : "Receipt settlement closeout stays review-only and blocks any real rollback settlement."}
-                </p>
-              </div>
+          <div className="delivery-chain-workspace__artifact-groups">
+            {stageCReadiness.entryContract.checkpoints.map((checkpoint) => (
+              <button
+                key={checkpoint.id}
+                type="button"
+                className={checkpoint.id === selectedStageCCheckpoint?.id ? "windowing-card windowing-card--active" : "windowing-card"}
+                onClick={() => {
+                  setSelectedStageCCheckpointId(checkpoint.id);
+                }}
+              >
+                <span>{checkpoint.label}</span>
+                <strong>{checkpoint.owner} / {formatStageReadinessStatus(checkpoint.state)}</strong>
+                <p>{checkpoint.reviewChecks[0] ?? checkpoint.evidence[0] ?? "No checkpoint detail"}</p>
+              </button>
             ))}
           </div>
+          {selectedStageCCheckpoint ? (
+            <>
+              <div className="workflow-readiness-list">
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(selectedStageCCheckpoint.state)}`}>
+                  <span>Checkpoint owner</span>
+                  <strong>{selectedStageCCheckpoint.owner} / {formatStageReadinessStatus(selectedStageCCheckpoint.state)}</strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(selectedStageCCheckpointStage?.status ?? "blocked")}`}>
+                  <span>Linked delivery stage</span>
+                  <strong>
+                    {selectedStageCCheckpointStage
+                      ? `${selectedStageCCheckpointStage.label} / ${selectedStageCCheckpointStage.status}`
+                      : "Unavailable"}
+                  </strong>
+                </div>
+                <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                  <span>Workflow linkage</span>
+                  <strong>{selectedStageCCheckpoint.workflowStageIds.length} approval workflow stages</strong>
+                </div>
+                <div className="workflow-readiness-line workflow-readiness-line--warning">
+                  <span>Boundary handoff</span>
+                  <strong>{selectedStageCBoundarySteps.length} withheld steps / {selectedStageCFutureSlots.length} future slots</strong>
+                </div>
+              </div>
+              <div className="windowing-preview-list">
+                {(compact ? selectedStageCCheckpoint.evidence.slice(0, 4) : selectedStageCCheckpoint.evidence).map((artifact) => (
+                  <div key={artifact} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Checkpoint evidence</span>
+                    <strong>{artifact}</strong>
+                  </div>
+                ))}
+                {(compact ? selectedStageCCheckpoint.reviewChecks.slice(0, 3) : selectedStageCCheckpoint.reviewChecks).map((check) => (
+                  <div key={check} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Review check</span>
+                    <strong>{check}</strong>
+                  </div>
+                ))}
+                {(compact ? selectedStageCCheckpoint.blockedBy.slice(0, 2) : selectedStageCCheckpoint.blockedBy).map((blocker) => (
+                  <div key={blocker} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Blocker</span>
+                    <strong>{blocker}</strong>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : null}
+        </article>
+
+        <article className="windowing-summary-card">
+          <span>Withheld / Future-executor Bridge</span>
+          <strong>
+            {boundary
+              ? `${formatBoundaryLayerLabel(stageCReadiness.boundaryLinkage.currentBoundaryLayer)} -> ${formatBoundaryLayerLabel(stageCReadiness.boundaryLinkage.nextBoundaryLayer)}`
+              : "No boundary linkage"}
+          </strong>
+          <p>{stageCReadiness.boundaryLinkage.summary}</p>
+          <div className="windowing-card__meta">
+            <span className="windowing-badge">{boundaryLinkageWithheldSteps.length} withheld steps</span>
+            <span className="windowing-badge">{boundaryLinkageFutureSlots.length} future slots</span>
+            <span className="windowing-badge">{stageCReadiness.rollbackLiveReadiness.contracts.length} rollback contracts</span>
+            <span className="windowing-badge">preview-host bridge only</span>
+          </div>
+          <div className="delivery-chain-workspace__artifact-groups">
+            {stageCReadiness.rollbackLiveReadiness.contracts.map((contract) => (
+              <button
+                key={contract.id}
+                type="button"
+                className={contract.id === selectedRollbackContract?.id ? "windowing-card windowing-card--active" : "windowing-card"}
+                onClick={() => {
+                  setSelectedRollbackContractId(contract.id);
+                }}
+              >
+                <span>{contract.from}{" -> "}{contract.to}</span>
+                <strong>{formatStageReadinessStatus(contract.status)}</strong>
+                <p>{contract.readinessChecks[0] ?? contract.readinessContractPath}</p>
+              </button>
+            ))}
+          </div>
+          {selectedRollbackContract ? (
+            <>
+              <div className="workflow-readiness-list">
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(selectedRollbackContract.status)}`}>
+                  <span>Rollback contract</span>
+                  <strong>
+                    {selectedRollbackContract.from}
+                    {" -> "}
+                    {selectedRollbackContract.to} / {formatStageReadinessStatus(selectedRollbackContract.status)}
+                  </strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(selectedRollbackContractStage?.status ?? "blocked")}`}>
+                  <span>Linked rollback stage</span>
+                  <strong>
+                    {selectedRollbackContractStage
+                      ? `${selectedRollbackContractStage.label} / ${selectedRollbackContractStage.status}`
+                      : "Unavailable"}
+                  </strong>
+                </div>
+                <div className="workflow-readiness-line workflow-readiness-line--warning">
+                  <span>Checkpoint linkage</span>
+                  <strong>{selectedRollbackContract.checkpointId} / live rollback blocked</strong>
+                </div>
+                <div className="workflow-readiness-line workflow-readiness-line--warning">
+                  <span>Boundary bridge</span>
+                  <strong>{selectedRollbackContract.boundaryStepIds.length} withheld steps / {selectedRollbackContract.futureExecutorSlotIds.length} future slots</strong>
+                </div>
+              </div>
+              <div className="windowing-preview-list">
+                {(compact ? selectedRollbackContract.readinessChecks.slice(0, 4) : selectedRollbackContract.readinessChecks).map((check) => (
+                  <div key={check} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Readiness check</span>
+                    <strong>{check}</strong>
+                  </div>
+                ))}
+                {(compact ? boundaryLinkageWithheldSteps.slice(0, 3) : boundaryLinkageWithheldSteps).map((step) => (
+                  <div key={step.id} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Withheld execution step</span>
+                    <strong>{step.label}</strong>
+                    <p>{step.detail}</p>
+                  </div>
+                ))}
+                {(compact ? boundaryLinkageFutureSlots.slice(0, 3) : boundaryLinkageFutureSlots).map((slot) => (
+                  <div key={slot.id} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Future executor slot</span>
+                    <strong>{slot.label}</strong>
+                    <p>{slot.detail}</p>
+                  </div>
+                ))}
+                {(compact ? stageCReadiness.boundaryLinkage.blockedBy.slice(0, 2) : stageCReadiness.boundaryLinkage.blockedBy).map((blocker) => (
+                  <div key={blocker} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Boundary blocker</span>
+                    <strong>{blocker}</strong>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : null}
         </article>
 
         <article className="windowing-summary-card">

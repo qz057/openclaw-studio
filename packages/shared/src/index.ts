@@ -789,6 +789,159 @@ export interface StudioReleaseDeliveryChainArtifactGroup {
   artifacts: string[];
 }
 
+export interface StudioReleaseQaCloseoutReadinessTrack {
+  id: string;
+  label: string;
+  owner: string;
+  status: StudioReleaseApprovalPipelineStageStatus;
+  deliveryChainStageId: string;
+  artifacts: string[];
+  reviewChecks: string[];
+  blockedBy: string[];
+  checkpointIds: string[];
+}
+
+export interface StudioReleaseQaCloseoutReadiness {
+  id: string;
+  label: string;
+  mode: StudioReleaseApprovalPipelineMode;
+  summary: string;
+  canCloseOut: boolean;
+  activeTrackId: string;
+  reviewOnlyDeliveryChainPath: string;
+  releaseApprovalWorkflowPath: string;
+  reviewEvidenceCloseoutPath: string;
+  releaseSummaryPath: string;
+  releaseChecklistPath: string;
+  tracks: StudioReleaseQaCloseoutReadinessTrack[];
+  blockedBy: string[];
+}
+
+export interface StudioReleaseApprovalWorkflowStage {
+  id: string;
+  label: string;
+  status: StudioReleaseApprovalPipelineStageStatus;
+  approverRoles: string[];
+  evidence: string[];
+  deliveryChainStageIds: string[];
+  checkpointIds: string[];
+}
+
+export interface StudioReleaseApprovalWorkflow {
+  id: string;
+  label: string;
+  mode: StudioReleaseApprovalPipelineMode;
+  summary: string;
+  canApprove: boolean;
+  activeStageId: string;
+  gatingHandshakePath: string;
+  approvalBridgePath: string;
+  promotionHandshakePath: string;
+  releaseQaCloseoutReadinessPath: string;
+  approvalAuditRollbackEntryContractPath: string;
+  reviewOnlyDeliveryChainPath: string;
+  operatorReviewBoardPath: string;
+  releaseDecisionHandoffPath: string;
+  reviewEvidenceCloseoutPath: string;
+  blockedBy: string[];
+  stages: StudioReleaseApprovalWorkflowStage[];
+}
+
+export interface StudioReleaseApprovalAuditRollbackEntryCheckpoint {
+  id: string;
+  label: string;
+  owner: string;
+  state: StudioReleaseApprovalPipelineStageStatus;
+  deliveryChainStageId: string;
+  evidence: string[];
+  reviewChecks: string[];
+  blockedBy: string[];
+  workflowStageIds: string[];
+  boundaryStepIds: string[];
+  futureExecutorSlotIds: string[];
+}
+
+export interface StudioReleaseApprovalAuditRollbackEntryContract {
+  id: string;
+  label: string;
+  mode: StudioReleaseApprovalPipelineMode;
+  summary: string;
+  canEnterExecutableApproval: boolean;
+  activeCheckpointId: string;
+  releaseQaCloseoutReadinessPath: string;
+  approvalWorkflowPath: string;
+  reviewOnlyDeliveryChainPath: string;
+  reviewManifestPath: string;
+  attestationApplyAuditPacksPath: string;
+  rollbackLiveReadinessContractsPath: string;
+  rollbackCutoverPublicationReceiptSettlementCloseoutPath: string;
+  checkpoints: StudioReleaseApprovalAuditRollbackEntryCheckpoint[];
+  blockedBy: string[];
+}
+
+export interface StudioReleaseRollbackLiveReadinessContract {
+  id: string;
+  from: string;
+  to: string;
+  status: StudioReleaseApprovalPipelineStageStatus;
+  publishRollbackPathId: string;
+  promotionOperatorHandoffRailId: string;
+  rollbackExecutionRehearsalLedgerId: string;
+  rollbackOperatorDrillbookId: string;
+  rollbackCutoverReadinessMapId: string;
+  promotionStagedApplyRunsheetId: string;
+  rollbackCutoverHandoffPlanId: string;
+  promotionStagedApplyCommandSheetId: string;
+  rollbackCutoverExecutionChecklistId: string;
+  readinessContractPath: string;
+  readinessChecks: string[];
+  blockedBy: string[];
+  canEnterLiveRollback: boolean;
+  deliveryChainStageId: string;
+  checkpointId: string;
+  boundaryStepIds: string[];
+  futureExecutorSlotIds: string[];
+}
+
+export interface StudioReleaseRollbackLiveReadiness {
+  id: string;
+  label: string;
+  mode: StudioReleaseApprovalPipelineMode;
+  summary: string;
+  activeContractId: string;
+  contracts: StudioReleaseRollbackLiveReadinessContract[];
+  blockedBy: string[];
+}
+
+export interface StudioReleaseStageCBoundaryLinkage {
+  id: string;
+  label: string;
+  summary: string;
+  currentBoundaryLayer: StudioBoundaryLayer;
+  nextBoundaryLayer: StudioBoundaryLayer;
+  checkpointIds: string[];
+  workflowStageIds: string[];
+  releaseQaTrackIds: string[];
+  withheldPlanStepIds: string[];
+  futureExecutorSlotIds: string[];
+  blockedBy: string[];
+}
+
+export interface StudioReleaseStageCReadiness {
+  id: string;
+  label: string;
+  mode: StudioReleaseApprovalPipelineMode;
+  summary: string;
+  stageBBridgeStageId: string;
+  entryStageId: string;
+  releaseQaCloseoutReadiness: StudioReleaseQaCloseoutReadiness;
+  approvalWorkflow: StudioReleaseApprovalWorkflow;
+  entryContract: StudioReleaseApprovalAuditRollbackEntryContract;
+  rollbackLiveReadiness: StudioReleaseRollbackLiveReadiness;
+  boundaryLinkage: StudioReleaseStageCBoundaryLinkage;
+  blockedBy: string[];
+}
+
 export type StudioPackagedAppPlatform = "windows" | "macos" | "linux";
 export type StudioReleasePackagedAppMaterializationTaskState = "review-ready" | "reviewing" | "blocked";
 export type StudioReleasePackagedAppMaterializationTaskStageId =
@@ -821,6 +974,54 @@ export interface StudioReleasePackagedAppMaterializationContractTask {
   deliveryChainStageId: string;
 }
 
+export interface StudioReleasePackagedAppStagedOutputChainStep {
+  id: string;
+  label: string;
+  taskState: StudioReleasePackagedAppMaterializationTaskState;
+  summary: string;
+  manifestPath: string;
+  deliveryChainStageId: string;
+  dependsOn: string[];
+}
+
+export interface StudioReleasePackagedAppStagedOutputChain {
+  id: string;
+  label: string;
+  summary: string;
+  currentStepId: string;
+  downstreamBundleSealingId: string;
+  steps: StudioReleasePackagedAppStagedOutputChainStep[];
+}
+
+export interface StudioReleasePackagedAppBundleSealingReadiness {
+  id: string;
+  label: string;
+  taskState: StudioReleasePackagedAppMaterializationTaskState;
+  summary: string;
+  currentCheckpoint: string;
+  deliveryChainStageId: string;
+  downstreamGateStageId: string;
+  dependsOnTaskId: string;
+  sealManifestPath: string;
+  integrityManifestPath: string;
+  reviewChecks: string[];
+  blockedBy: string[];
+}
+
+export interface StudioReleasePackagedAppLocalMaterializationProgress {
+  id: string;
+  label: string;
+  taskState: StudioReleasePackagedAppMaterializationTaskState;
+  summary: string;
+  currentTaskId: string;
+  nextTaskId: string | null;
+  completedTaskCount: number;
+  blockedTaskCount: number;
+  totalTaskCount: number;
+  completedTaskIds: string[];
+  stageSequence: string[];
+}
+
 export interface StudioReleasePackagedAppMaterializationContractPlatform {
   id: string;
   platform: StudioPackagedAppPlatform;
@@ -842,6 +1043,9 @@ export interface StudioReleasePackagedAppMaterializationContractPlatform {
   reviewChecks: string[];
   localRoots: StudioReleasePackagedAppMaterializationContractLocalRoots;
   manifests: StudioReleasePackagedAppMaterializationContractManifests;
+  stagedOutputChain: StudioReleasePackagedAppStagedOutputChain;
+  bundleSealingReadiness: StudioReleasePackagedAppBundleSealingReadiness;
+  localMaterializationProgress: StudioReleasePackagedAppLocalMaterializationProgress;
   tasks: StudioReleasePackagedAppMaterializationContractTask[];
   blockedBy: string[];
 }
@@ -886,6 +1090,7 @@ export interface StudioReleaseDeliveryChain {
   mode: StudioReleaseApprovalPipelineMode;
   currentStageId: string;
   packagedAppMaterializationContract: StudioReleasePackagedAppMaterializationContract;
+  stageCReadiness: StudioReleaseStageCReadiness;
   promotionStageIds: string[];
   publishStageIds: string[];
   rollbackStageIds: string[];
@@ -2023,6 +2228,14 @@ export {
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleasePackagedAppMaterializationContractPlatform,
   selectStudioReleasePackagedAppMaterializationContractTask,
+  selectStudioReleasePackagedAppMaterializationContractStagedOutputChain,
+  selectStudioReleasePackagedAppMaterializationContractStagedOutputStep,
+  selectStudioReleasePackagedAppMaterializationContractBundleSealingReadiness,
+  selectStudioReleasePackagedAppMaterializationContractProgress,
+  selectStudioReleaseQaCloseoutReadinessTrack,
+  selectStudioReleaseApprovalWorkflowStage,
+  selectStudioReleaseApprovalAuditRollbackEntryCheckpoint,
+  selectStudioReleaseRollbackLiveReadinessContract,
   selectStudioReviewStateContinuityActiveEntry,
   selectStudioReviewStateContinuityEntry,
   selectStudioWindowObservabilityActiveMapping,

@@ -1,8 +1,9 @@
 {
   "schemaVersion": "openclaw-studio-rollback-live-readiness-contracts/v1",
-  "generatedAt": "2026-04-07T17:25:26.047Z",
+  "generatedAt": "2026-04-07T18:46:00.404Z",
   "phase": "phase60",
   "mode": "local-only-review",
+  "activeContractId": "rollback-readiness-alpha-to-beta",
   "contracts": [
     {
       "id": "rollback-readiness-alpha-to-beta",
@@ -34,7 +35,16 @@
         "live publish remains blocked",
         "host-side execution remains disabled"
       ],
-      "canEnterLiveRollback": false
+      "canEnterLiveRollback": false,
+      "deliveryChainStageId": "delivery-chain-rollback-readiness",
+      "checkpointId": "entry-rollback-live-readiness",
+      "boundaryStepIds": [
+        "withheld-plan-execute"
+      ],
+      "futureExecutorSlotIds": [
+        "slot-lifecycle",
+        "slot-lane-apply"
+      ]
     },
     {
       "id": "rollback-readiness-beta-to-stable",
@@ -66,7 +76,16 @@
         "live publish remains blocked",
         "host-side execution remains disabled"
       ],
-      "canEnterLiveRollback": false
+      "canEnterLiveRollback": false,
+      "deliveryChainStageId": "delivery-chain-rollback-readiness",
+      "checkpointId": "entry-rollback-live-readiness",
+      "boundaryStepIds": [
+        "withheld-plan-execute"
+      ],
+      "futureExecutorSlotIds": [
+        "slot-lifecycle",
+        "slot-lane-apply"
+      ]
     }
   ]
 }

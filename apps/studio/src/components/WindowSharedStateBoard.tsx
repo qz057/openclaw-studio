@@ -1,8 +1,12 @@
 import {
+  selectStudioReleaseApprovalAuditRollbackEntryCheckpoint,
   selectStudioReleaseApprovalPipelineStage,
+  selectStudioReleaseApprovalWorkflowStage,
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseEscalationWindow,
+  selectStudioReleaseQaCloseoutReadinessTrack,
+  selectStudioReleaseRollbackLiveReadinessContract,
   selectStudioReleaseReviewerQueue,
   selectStudioReviewStateContinuityEntry,
   selectStudioWindowObservabilityMapping,
@@ -19,6 +23,7 @@ import {
 
 interface WindowSharedStateBoardProps {
   windowing: StudioShellState["windowing"];
+  boundary?: StudioShellState["boundary"];
   reviewStateContinuity?: StudioShellState["reviewStateContinuity"];
   releaseApprovalPipeline?: StudioReleaseApprovalPipeline;
   actionDeck?: StudioCommandActionDeck | null;
@@ -55,6 +60,18 @@ function resolveLaneTone(status: StudioShellState["windowing"]["sharedState"]["l
     case "active":
       return "positive";
     case "handoff-ready":
+      return "neutral";
+    default:
+      return "warning";
+  }
+}
+
+function resolveStageTone(status: StudioReleaseApprovalPipeline["stages"][number]["status"]): "positive" | "neutral" | "warning" {
+  switch (status) {
+    case "ready":
+      return "positive";
+    case "in-review":
+    case "planned":
       return "neutral";
     default:
       return "warning";
@@ -107,6 +124,19 @@ function resolveCloseoutWindowTone(state: StudioReleaseCloseoutWindowState): "po
   }
 }
 
+function formatStageReadinessStatus(status: StudioReleaseApprovalPipeline["stages"][number]["status"]): string {
+  switch (status) {
+    case "ready":
+      return "Ready";
+    case "in-review":
+      return "In review";
+    case "planned":
+      return "Planned";
+    default:
+      return "Blocked";
+  }
+}
+
 function formatOwnershipMode(mode: StudioShellState["windowing"]["sharedState"]["lanes"][number]["ownership"]["mode"]): string {
   switch (mode) {
     case "owned":
@@ -126,6 +156,21 @@ function formatWindowKind(kind: StudioShellState["windowing"]["roster"]["windows
       return "Workspace";
     default:
       return "Detached Candidate";
+  }
+}
+
+function formatBoundaryLayerLabel(
+  layer: StudioShellState["boundary"]["currentLayer"] | StudioShellState["boundary"]["nextLayer"]
+): string {
+  switch (layer) {
+    case "local-only":
+      return "Local-only";
+    case "preview-host":
+      return "Preview-host";
+    case "withheld":
+      return "Withheld";
+    default:
+      return "Future executor";
   }
 }
 
@@ -301,6 +346,7 @@ function resolveActiveOrchestrationBoard(
 
 export function WindowSharedStateBoard({
   windowing,
+  boundary,
   reviewStateContinuity,
   releaseApprovalPipeline,
   actionDeck,
@@ -331,6 +377,25 @@ export function WindowSharedStateBoard({
     releaseApprovalPipeline ? selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, "delivery-chain-publish-decision") : null;
   const rollbackDeliveryStage =
     releaseApprovalPipeline ? selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, "delivery-chain-rollback-readiness") : null;
+  const stageCReadiness = releaseApprovalPipeline?.deliveryChain.stageCReadiness ?? null;
+  const activeQaTrack = releaseApprovalPipeline ? selectStudioReleaseQaCloseoutReadinessTrack(releaseApprovalPipeline.deliveryChain) ?? null : null;
+  const activeApprovalWorkflowStage = releaseApprovalPipeline
+    ? selectStudioReleaseApprovalWorkflowStage(releaseApprovalPipeline.deliveryChain) ?? null
+    : null;
+  const activeStageCCheckpoint = releaseApprovalPipeline
+    ? selectStudioReleaseApprovalAuditRollbackEntryCheckpoint(releaseApprovalPipeline.deliveryChain) ?? null
+    : null;
+  const activeRollbackContract = releaseApprovalPipeline
+    ? selectStudioReleaseRollbackLiveReadinessContract(releaseApprovalPipeline.deliveryChain) ?? null
+    : null;
+  const boundaryWithheldStepCount =
+    stageCReadiness?.boundaryLinkage.withheldPlanStepIds.filter(
+      (stepId) => Boolean(boundary?.withheldExecutionPlan.find((step) => step.id === stepId))
+    ).length ?? 0;
+  const boundaryFutureSlotCount =
+    stageCReadiness?.boundaryLinkage.futureExecutorSlotIds.filter(
+      (slotId) => Boolean(boundary?.futureExecutorSlots.find((slot) => slot.id === slotId))
+    ).length ?? 0;
   const currentReviewerQueue = releaseApprovalPipeline ? selectStudioReleaseReviewerQueue(releaseApprovalPipeline, currentReleaseStage ?? undefined) : null;
   const currentEscalationWindow =
     releaseApprovalPipeline ? selectStudioReleaseEscalationWindow(releaseApprovalPipeline, currentReleaseStage ?? undefined) : null;
@@ -1000,15 +1065,43 @@ export function WindowSharedStateBoard({
             <div className="workflow-readiness-list">
               <div className="workflow-readiness-line workflow-readiness-line--neutral">
                 <span>Materialization</span>
-                <strong>Packaged-app continuity / local-only</strong>
+                <strong>{releaseApprovalPipeline.deliveryChain.packagedAppMaterializationContract.label} / {releaseApprovalPipeline.deliveryChain.packagedAppMaterializationContract.currentTaskState}</strong>
               </div>
-              <div className="workflow-readiness-line workflow-readiness-line--warning">
+              <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(activeQaTrack?.status ?? "blocked")}`}>
                 <span>QA closeout</span>
-                <strong>RELEASE-QA-CLOSEOUT-READINESS / review-only</strong>
+                <strong>{activeQaTrack ? `${activeQaTrack.label} / ${formatStageReadinessStatus(activeQaTrack.status)}` : "Unavailable"}</strong>
+              </div>
+              <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(activeApprovalWorkflowStage?.status ?? "blocked")}`}>
+                <span>Approval workflow</span>
+                <strong>
+                  {activeApprovalWorkflowStage
+                    ? `${activeApprovalWorkflowStage.label} / ${formatStageReadinessStatus(activeApprovalWorkflowStage.status)}`
+                    : "Unavailable"}
+                </strong>
+              </div>
+              <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(activeStageCCheckpoint?.state ?? "blocked")}`}>
+                <span>Stage C entry</span>
+                <strong>
+                  {activeStageCCheckpoint
+                    ? `${activeStageCCheckpoint.label} / ${formatStageReadinessStatus(activeStageCCheckpoint.state)}`
+                    : "Unavailable"}
+                </strong>
               </div>
               <div className="workflow-readiness-line workflow-readiness-line--warning">
-                <span>Stage C entry</span>
-                <strong>APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT / non-executing</strong>
+                <span>Boundary bridge</span>
+                <strong>
+                  {stageCReadiness
+                    ? `${formatBoundaryLayerLabel(stageCReadiness.boundaryLinkage.currentBoundaryLayer)} -> ${formatBoundaryLayerLabel(stageCReadiness.boundaryLinkage.nextBoundaryLayer)} / ${boundaryWithheldStepCount} withheld / ${boundaryFutureSlotCount} future`
+                    : "Unavailable"}
+                </strong>
+              </div>
+              <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(activeRollbackContract?.status ?? "blocked")}`}>
+                <span>Rollback readiness</span>
+                <strong>
+                  {activeRollbackContract
+                    ? `${activeRollbackContract.from} -> ${activeRollbackContract.to} / ${formatStageReadinessStatus(activeRollbackContract.status)}`
+                    : "Unavailable"}
+                </strong>
               </div>
             </div>
           </article>
