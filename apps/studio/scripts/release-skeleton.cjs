@@ -2096,6 +2096,170 @@ function createPackagedAppLocalMaterializationSegments({
   ];
 }
 
+function createPackagedAppMaterializationValidatorReadout({
+  bridgeId,
+  platformLabel,
+  key,
+  label,
+  status,
+  summary,
+  taskId,
+  segmentId,
+  deliveryChainStageId
+}) {
+  switch (key) {
+    case "directory":
+      return {
+        id: `${bridgeId}-${key}`,
+        label,
+        status,
+        summary,
+        taskId,
+        segmentId,
+        deliveryChainStageId,
+        windowId: "window-shell-main",
+        sharedStateLaneId: "shared-state-lane-boundary-review",
+        orchestrationBoardId: "orchestration-board-boundary-review",
+        observabilityMappingId: "observability-mapping-boundary-intake",
+        observabilitySignalIds: [
+          "observability-signal-owner",
+          "observability-signal-route-window",
+          "observability-signal-lane-board"
+        ],
+        validatorChecks: [
+          `${platformLabel} verification manifest linked`,
+          `${platformLabel} materialization root declared`,
+          "boundary intake visibility linked"
+        ]
+      };
+    case "staged-output":
+      return {
+        id: `${bridgeId}-${key}`,
+        label,
+        status,
+        summary,
+        taskId,
+        segmentId,
+        deliveryChainStageId,
+        windowId: "window-trace-review",
+        sharedStateLaneId: "shared-state-lane-trace-review",
+        orchestrationBoardId: "orchestration-board-trace-review",
+        observabilityMappingId: "observability-mapping-approval-active",
+        observabilitySignalIds: [
+          "observability-signal-owner",
+          "observability-signal-queue",
+          "observability-signal-escalation-closeout"
+        ],
+        validatorChecks: [
+          `${platformLabel} output manifest linked`,
+          `${platformLabel} checksum manifest linked`,
+          "operator review visibility linked"
+        ]
+      };
+    default:
+      return {
+        id: `${bridgeId}-${key}`,
+        label,
+        status,
+        summary,
+        taskId,
+        segmentId,
+        deliveryChainStageId,
+        windowId: "window-review-board",
+        sharedStateLaneId: "shared-state-lane-preview-review",
+        orchestrationBoardId: "orchestration-board-preview-review",
+        observabilityMappingId: "observability-mapping-lifecycle-preview",
+        observabilitySignalIds: [
+          "observability-signal-owner",
+          "observability-signal-lane-board",
+          "observability-signal-mapped-windows"
+        ],
+        validatorChecks: [
+          `${platformLabel} active bundle-sealing checkpoint linked`,
+          "preview lifecycle visibility linked",
+          "downstream publish gate remains review-only"
+        ]
+      };
+  }
+}
+
+function createPackagedAppMaterializationValidatorObservabilityBridge({
+  idPrefix,
+  platformLabel,
+  taskState,
+  summary,
+  activeReadout,
+  nextReadout,
+  directoryTaskId,
+  directorySegmentId,
+  directoryStatus,
+  directorySummary,
+  stagedOutputTaskId,
+  stagedOutputSegmentId,
+  stagedOutputStatus,
+  stagedOutputSummary,
+  bundleSealTaskId,
+  bundleSealSegmentId,
+  bundleSealStatus,
+  bundleSealSummary
+}) {
+  const bridgeId = `packaged-app-materialization-validator-observability-${idPrefix}`;
+  const readoutIds = {
+    directory: `${bridgeId}-directory`,
+    "staged-output": `${bridgeId}-staged-output`,
+    "bundle-sealing": `${bridgeId}-bundle-sealing`
+  };
+
+  return {
+    id: bridgeId,
+    label: `${platformLabel} validator / observability bridge`,
+    taskState,
+    summary,
+    activeReadoutId: readoutIds[activeReadout],
+    nextReadoutId: nextReadout ? readoutIds[nextReadout] : null,
+    readouts: [
+      createPackagedAppMaterializationValidatorReadout({
+        bridgeId,
+        platformLabel,
+        key: "directory",
+        label: "Directory continuity validator",
+        status: directoryStatus,
+        summary: directorySummary,
+        taskId: directoryTaskId,
+        segmentId: directorySegmentId,
+        deliveryChainStageId: "delivery-chain-attestation-intake"
+      }),
+      createPackagedAppMaterializationValidatorReadout({
+        bridgeId,
+        platformLabel,
+        key: "staged-output",
+        label: "Staged-output continuity validator",
+        status: stagedOutputStatus,
+        summary: stagedOutputSummary,
+        taskId: stagedOutputTaskId,
+        segmentId: stagedOutputSegmentId,
+        deliveryChainStageId: "delivery-chain-operator-review"
+      }),
+      createPackagedAppMaterializationValidatorReadout({
+        bridgeId,
+        platformLabel,
+        key: "bundle-sealing",
+        label: "Bundle-sealing continuity validator",
+        status: bundleSealStatus,
+        summary: bundleSealSummary,
+        taskId: bundleSealTaskId,
+        segmentId: bundleSealSegmentId,
+        deliveryChainStageId: "delivery-chain-promotion-readiness"
+      })
+    ],
+    blockedBy: [
+      "validator bridge remains review-only",
+      "cross-window linkage remains metadata-only",
+      "host-side execution remains disabled"
+    ]
+  };
+}
+
 function buildPackagedAppLocalMaterializationContract({ generatedAt }) {
   return {
     schemaVersion: "openclaw-studio-packaged-app-local-materialization-contract/v1",
@@ -2257,6 +2421,30 @@ function buildPackagedAppLocalMaterializationContract({ generatedAt }) {
             bundleSealSummary: "Bundle sealing is the next downstream slice, but it stays blocked behind the current staged-output review and review-only publish gate."
           })
         },
+        validatorObservabilityBridge: createPackagedAppMaterializationValidatorObservabilityBridge({
+          idPrefix: "windows",
+          platformLabel: "Windows",
+          taskState: "reviewing",
+          summary:
+            "Windows keeps directory, staged-output, and bundle-sealing validation mapped onto the boundary, approval, and preview observability rows so validator-facing progression can be followed outside the Stage Explorer without opening execution.",
+          activeReadout: "staged-output",
+          nextReadout: "bundle-sealing",
+          directoryTaskId: "local-materialization-task-windows-directory",
+          directorySegmentId: "packaged-app-local-materialization-segment-windows-directory",
+          directoryStatus: "ready",
+          directorySummary:
+            "Windows directory verification is already visible on the boundary intake row, so main-shell review can re-read packaged roots and verification evidence without leaving the local-only lane.",
+          stagedOutputTaskId: "local-materialization-task-windows-staged-output",
+          stagedOutputSegmentId: "packaged-app-local-materialization-segment-windows-staged-output",
+          stagedOutputStatus: "watch",
+          stagedOutputSummary:
+            "Windows staged-output review is the active validator slice, and the trace review row keeps output/checksum evidence aligned with the same local-only approval posture.",
+          bundleSealTaskId: "local-materialization-task-windows-bundle-seal",
+          bundleSealSegmentId: "packaged-app-local-materialization-segment-windows-bundle-sealing",
+          bundleSealStatus: "watch",
+          bundleSealSummary:
+            "Windows bundle-sealing readiness is already mirrored onto the preview lifecycle row so the next checkpoint stays visible while staged-output review remains active."
+        }),
         tasks: [
           {
             id: "local-materialization-task-windows-directory",
@@ -2465,6 +2653,30 @@ function buildPackagedAppLocalMaterializationContract({ generatedAt }) {
             bundleSealSummary: "Bundle sealing remains downstream but blocked until staged outputs, signing posture, and notarization readiness stop being metadata-only."
           })
         },
+        validatorObservabilityBridge: createPackagedAppMaterializationValidatorObservabilityBridge({
+          idPrefix: "macos",
+          platformLabel: "macOS",
+          taskState: "review-ready",
+          summary:
+            "macOS keeps directory, staged-output, and bundle-sealing validation mapped across the same boundary, approval, and preview review surfaces so validator-facing handoffs stay visible even before notarization can exist.",
+          activeReadout: "directory",
+          nextReadout: "staged-output",
+          directoryTaskId: "local-materialization-task-macos-directory",
+          directorySegmentId: "packaged-app-local-materialization-segment-macos-directory",
+          directoryStatus: "watch",
+          directorySummary:
+            "macOS directory validation is the active bridge slice, and the boundary intake row keeps the .app root, launcher layout, and verification manifest visible as the current reviewer pickup surface.",
+          stagedOutputTaskId: "local-materialization-task-macos-staged-output",
+          stagedOutputSegmentId: "packaged-app-local-materialization-segment-macos-staged-output",
+          stagedOutputStatus: "ready",
+          stagedOutputSummary:
+            "macOS staged-output review is already pre-mapped to the trace review row so output/checksum continuity can be checked before the active directory slice closes.",
+          bundleSealTaskId: "local-materialization-task-macos-bundle-seal",
+          bundleSealSegmentId: "packaged-app-local-materialization-segment-macos-bundle-sealing",
+          bundleSealStatus: "blocked",
+          bundleSealSummary:
+            "macOS bundle-sealing continuity stays blocked on the preview lifecycle row while staged-output review, signing posture, and notarization all remain metadata-only."
+        }),
         tasks: [
           {
             id: "local-materialization-task-macos-directory",
@@ -2673,6 +2885,30 @@ function buildPackagedAppLocalMaterializationContract({ generatedAt }) {
             bundleSealSummary: "Bundle sealing remains downstream but blocked until staged outputs settle and the package publication gate stays purely review-only."
           })
         },
+        validatorObservabilityBridge: createPackagedAppMaterializationValidatorObservabilityBridge({
+          idPrefix: "linux",
+          platformLabel: "Linux",
+          taskState: "review-ready",
+          summary:
+            "Linux keeps directory, staged-output, and bundle-sealing validation mapped across the same boundary, approval, and preview review surfaces so validator-facing package-root continuity stays inspectable without emitting any package target.",
+          activeReadout: "directory",
+          nextReadout: "staged-output",
+          directoryTaskId: "local-materialization-task-linux-directory",
+          directorySegmentId: "packaged-app-local-materialization-segment-linux-directory",
+          directoryStatus: "watch",
+          directorySummary:
+            "Linux directory validation is the active bridge slice, and the boundary intake row keeps package-root evidence visible while the current review stays local-only.",
+          stagedOutputTaskId: "local-materialization-task-linux-staged-output",
+          stagedOutputSegmentId: "packaged-app-local-materialization-segment-linux-staged-output",
+          stagedOutputStatus: "ready",
+          stagedOutputSummary:
+            "Linux staged-output continuity is already mapped onto the trace review row so output/checksum manifests stay visible as the next validator-facing handoff.",
+          bundleSealTaskId: "local-materialization-task-linux-bundle-seal",
+          bundleSealSegmentId: "packaged-app-local-materialization-segment-linux-bundle-sealing",
+          bundleSealStatus: "blocked",
+          bundleSealSummary:
+            "Linux bundle-sealing continuity stays blocked on the preview lifecycle row until staged outputs settle and the downstream package publication gate remains metadata-only."
+        }),
         tasks: [
           {
             id: "local-materialization-task-linux-directory",
@@ -8947,7 +9183,7 @@ function buildReviewOnlyDeliveryChain({ generatedAt }) {
     label: "Packaged-app Materialization Contract",
     mode: "review-only",
     summary:
-      "Directory materialization, staged-output manifests, bundle-sealing checkpoints, and packet-level handoffs now stay inspectable as one per-platform local-only contract, so promotion readiness can review roots, handoff continuity, and seal paths without materializing, signing, or publishing anything.",
+      "Directory materialization, staged-output manifests, bundle-sealing checkpoints, packet-level handoffs, and validator-linked observability now stay inspectable as one per-platform local-only contract, so promotion readiness can review roots, handoff continuity, seal paths, and cross-surface progression without materializing, signing, or publishing anything.",
     ownerStageId: "delivery-chain-promotion-readiness",
     downstreamGateStageId: "delivery-chain-publish-decision",
     artifacts: [
@@ -9004,6 +9240,30 @@ function buildReviewOnlyDeliveryChain({ generatedAt }) {
           sealManifestPath: "future/sealed-bundles/windows/bundle-seal-manifest.json",
           rollbackCheckpointId: "sealed-bundle-checkpoint-windows"
         }),
+        validatorObservabilityBridge: createPackagedAppMaterializationValidatorObservabilityBridge({
+          idPrefix: "windows",
+          platformLabel: "Windows",
+          taskState: "reviewing",
+          summary:
+            "Windows keeps directory, staged-output, and bundle-sealing validation mapped onto the boundary, approval, and preview observability rows so validator-facing progression can be re-read from the delivery-chain workspace.",
+          activeReadout: "staged-output",
+          nextReadout: "bundle-sealing",
+          directoryTaskId: "packaged-app-materialization-task-windows-directory",
+          directorySegmentId: "packaged-app-local-materialization-segment-windows-directory",
+          directoryStatus: "ready",
+          directorySummary:
+            "Windows directory verification is already visible on the boundary intake row, so main-shell review can re-read packaged roots and verification evidence without leaving the local-only lane.",
+          stagedOutputTaskId: "packaged-app-materialization-task-windows-staged-output",
+          stagedOutputSegmentId: "packaged-app-local-materialization-segment-windows-staged-output",
+          stagedOutputStatus: "watch",
+          stagedOutputSummary:
+            "Windows staged-output review is the active validator slice, and the trace review row keeps output/checksum evidence aligned with the same local-only approval posture.",
+          bundleSealTaskId: "packaged-app-materialization-task-windows-bundle-seal",
+          bundleSealSegmentId: "packaged-app-local-materialization-segment-windows-bundle-sealing",
+          bundleSealStatus: "watch",
+          bundleSealSummary:
+            "Windows bundle-sealing readiness is already mirrored onto the preview lifecycle row so the next checkpoint stays visible while staged-output review remains active."
+        }),
         blockedBy: [
           "materialization remains review-only",
           "staged outputs remain task-state metadata",
@@ -9056,6 +9316,30 @@ function buildReviewOnlyDeliveryChain({ generatedAt }) {
           sealManifestPath: "future/sealed-bundles/macos/bundle-seal-manifest.json",
           rollbackCheckpointId: "sealed-bundle-checkpoint-macos"
         }),
+        validatorObservabilityBridge: createPackagedAppMaterializationValidatorObservabilityBridge({
+          idPrefix: "macos",
+          platformLabel: "macOS",
+          taskState: "review-ready",
+          summary:
+            "macOS keeps directory, staged-output, and bundle-sealing validation mapped across the same boundary, approval, and preview review surfaces so validator-facing handoffs stay visible even before notarization can exist.",
+          activeReadout: "directory",
+          nextReadout: "staged-output",
+          directoryTaskId: "packaged-app-materialization-task-macos-directory",
+          directorySegmentId: "packaged-app-local-materialization-segment-macos-directory",
+          directoryStatus: "watch",
+          directorySummary:
+            "macOS directory validation is the active bridge slice, and the boundary intake row keeps the .app root, launcher layout, and verification manifest visible as the current reviewer pickup surface.",
+          stagedOutputTaskId: "packaged-app-materialization-task-macos-staged-output",
+          stagedOutputSegmentId: "packaged-app-local-materialization-segment-macos-staged-output",
+          stagedOutputStatus: "ready",
+          stagedOutputSummary:
+            "macOS staged-output review is already pre-mapped to the trace review row so output/checksum continuity can be checked before the active directory slice closes.",
+          bundleSealTaskId: "packaged-app-materialization-task-macos-bundle-seal",
+          bundleSealSegmentId: "packaged-app-local-materialization-segment-macos-bundle-sealing",
+          bundleSealStatus: "blocked",
+          bundleSealSummary:
+            "macOS bundle-sealing continuity stays blocked on the preview lifecycle row while staged-output review, signing posture, and notarization all remain metadata-only."
+        }),
         blockedBy: [
           "materialization remains review-only",
           "staged outputs remain task-state metadata",
@@ -9107,6 +9391,30 @@ function buildReviewOnlyDeliveryChain({ generatedAt }) {
           checksumManifestPath: "future/staged-output/linux/checksum-manifest.json",
           sealManifestPath: "future/sealed-bundles/linux/bundle-seal-manifest.json",
           rollbackCheckpointId: "sealed-bundle-checkpoint-linux"
+        }),
+        validatorObservabilityBridge: createPackagedAppMaterializationValidatorObservabilityBridge({
+          idPrefix: "linux",
+          platformLabel: "Linux",
+          taskState: "review-ready",
+          summary:
+            "Linux keeps directory, staged-output, and bundle-sealing validation mapped across the same boundary, approval, and preview review surfaces so validator-facing package-root continuity stays inspectable without emitting any package target.",
+          activeReadout: "directory",
+          nextReadout: "staged-output",
+          directoryTaskId: "packaged-app-materialization-task-linux-directory",
+          directorySegmentId: "packaged-app-local-materialization-segment-linux-directory",
+          directoryStatus: "watch",
+          directorySummary:
+            "Linux directory validation is the active bridge slice, and the boundary intake row keeps package-root evidence visible while the current review stays local-only.",
+          stagedOutputTaskId: "packaged-app-materialization-task-linux-staged-output",
+          stagedOutputSegmentId: "packaged-app-local-materialization-segment-linux-staged-output",
+          stagedOutputStatus: "ready",
+          stagedOutputSummary:
+            "Linux staged-output continuity is already mapped onto the trace review row so output/checksum manifests stay visible as the next validator-facing handoff.",
+          bundleSealTaskId: "packaged-app-materialization-task-linux-bundle-seal",
+          bundleSealSegmentId: "packaged-app-local-materialization-segment-linux-bundle-sealing",
+          bundleSealStatus: "blocked",
+          bundleSealSummary:
+            "Linux bundle-sealing continuity stays blocked on the preview lifecycle row until staged outputs settle and the downstream package publication gate remains metadata-only."
         }),
         blockedBy: [
           "materialization remains review-only",
@@ -11529,7 +11837,28 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
         Array.isArray(platform.reviewPacket?.steps) &&
         platform.reviewPacket.steps.length >= 3 &&
         Array.isArray(platform.reviewPacket?.reviewEvidence) &&
-        platform.reviewPacket.reviewEvidence.length >= 3
+        platform.reviewPacket.reviewEvidence.length >= 3 &&
+        typeof platform.validatorObservabilityBridge?.activeReadoutId === "string" &&
+        Array.isArray(platform.validatorObservabilityBridge?.readouts) &&
+        platform.validatorObservabilityBridge.readouts.length === 3 &&
+        platform.validatorObservabilityBridge.readouts.some(
+          (readout) => readout.id === platform.validatorObservabilityBridge.activeReadoutId
+        ) &&
+        (!platform.validatorObservabilityBridge.nextReadoutId ||
+          platform.validatorObservabilityBridge.readouts.some(
+            (readout) => readout.id === platform.validatorObservabilityBridge.nextReadoutId
+          )) &&
+        platform.validatorObservabilityBridge.readouts.every(
+          (readout) =>
+            typeof readout.windowId === "string" &&
+            typeof readout.sharedStateLaneId === "string" &&
+            typeof readout.orchestrationBoardId === "string" &&
+            typeof readout.observabilityMappingId === "string" &&
+            Array.isArray(readout.observabilitySignalIds) &&
+            readout.observabilitySignalIds.length > 0 &&
+            Array.isArray(readout.validatorChecks) &&
+            readout.validatorChecks.length > 0
+        )
     ) ||
     !Array.isArray(writtenReviewOnlyDeliveryChain.stages) ||
     writtenReviewOnlyDeliveryChain.stages.length < 5 ||
@@ -11645,6 +11974,27 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
         contract.reviewPacket.steps.length >= 3 &&
         Array.isArray(contract.reviewPacket?.reviewEvidence) &&
         contract.reviewPacket.reviewEvidence.length >= 3 &&
+        typeof contract.validatorObservabilityBridge?.activeReadoutId === "string" &&
+        Array.isArray(contract.validatorObservabilityBridge?.readouts) &&
+        contract.validatorObservabilityBridge.readouts.length === 3 &&
+        contract.validatorObservabilityBridge.readouts.some(
+          (readout) => readout.id === contract.validatorObservabilityBridge.activeReadoutId
+        ) &&
+        (!contract.validatorObservabilityBridge.nextReadoutId ||
+          contract.validatorObservabilityBridge.readouts.some(
+            (readout) => readout.id === contract.validatorObservabilityBridge.nextReadoutId
+          )) &&
+        contract.validatorObservabilityBridge.readouts.every(
+          (readout) =>
+            typeof readout.windowId === "string" &&
+            typeof readout.sharedStateLaneId === "string" &&
+            typeof readout.orchestrationBoardId === "string" &&
+            typeof readout.observabilityMappingId === "string" &&
+            Array.isArray(readout.observabilitySignalIds) &&
+            readout.observabilitySignalIds.length > 0 &&
+            Array.isArray(readout.validatorChecks) &&
+            readout.validatorChecks.length > 0
+        ) &&
         contract.tasks.every(
           (task) =>
             typeof task.summary === "string" &&

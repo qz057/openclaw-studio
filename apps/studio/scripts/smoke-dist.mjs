@@ -2783,6 +2783,27 @@ function verifyReleaseSkeletonContract() {
         Array.isArray(contract.tasks) &&
         contract.tasks.length === 3 &&
         contract.tasks.some((task) => task.id === contract.currentTaskId) &&
+        typeof contract.validatorObservabilityBridge?.activeReadoutId === "string" &&
+        Array.isArray(contract.validatorObservabilityBridge?.readouts) &&
+        contract.validatorObservabilityBridge.readouts.length === 3 &&
+        contract.validatorObservabilityBridge.readouts.some(
+          (readout) => readout.id === contract.validatorObservabilityBridge.activeReadoutId
+        ) &&
+        (!contract.validatorObservabilityBridge.nextReadoutId ||
+          contract.validatorObservabilityBridge.readouts.some(
+            (readout) => readout.id === contract.validatorObservabilityBridge.nextReadoutId
+          )) &&
+        contract.validatorObservabilityBridge.readouts.every(
+          (readout) =>
+            typeof readout.windowId === "string" &&
+            typeof readout.sharedStateLaneId === "string" &&
+            typeof readout.orchestrationBoardId === "string" &&
+            typeof readout.observabilityMappingId === "string" &&
+            Array.isArray(readout.observabilitySignalIds) &&
+            readout.observabilitySignalIds.length > 0 &&
+            Array.isArray(readout.validatorChecks) &&
+            readout.validatorChecks.length > 0
+        ) &&
         contract.tasks.every(
           (task) =>
             typeof task.summary === "string" &&
@@ -2866,6 +2887,30 @@ function verifyReleaseSkeletonContract() {
     skeleton.reviewOnlyDeliveryChain.packagedAppMaterializationContract.artifacts.length < 5 ||
     !Array.isArray(skeleton.reviewOnlyDeliveryChain?.packagedAppMaterializationContract?.platforms) ||
     skeleton.reviewOnlyDeliveryChain.packagedAppMaterializationContract.platforms.length < 3 ||
+    !skeleton.reviewOnlyDeliveryChain.packagedAppMaterializationContract.platforms.every(
+      (platform) =>
+        typeof platform.validatorObservabilityBridge?.activeReadoutId === "string" &&
+        Array.isArray(platform.validatorObservabilityBridge?.readouts) &&
+        platform.validatorObservabilityBridge.readouts.length === 3 &&
+        platform.validatorObservabilityBridge.readouts.some(
+          (readout) => readout.id === platform.validatorObservabilityBridge.activeReadoutId
+        ) &&
+        (!platform.validatorObservabilityBridge.nextReadoutId ||
+          platform.validatorObservabilityBridge.readouts.some(
+            (readout) => readout.id === platform.validatorObservabilityBridge.nextReadoutId
+          )) &&
+        platform.validatorObservabilityBridge.readouts.every(
+          (readout) =>
+            typeof readout.windowId === "string" &&
+            typeof readout.sharedStateLaneId === "string" &&
+            typeof readout.orchestrationBoardId === "string" &&
+            typeof readout.observabilityMappingId === "string" &&
+            Array.isArray(readout.observabilitySignalIds) &&
+            readout.observabilitySignalIds.length > 0 &&
+            Array.isArray(readout.validatorChecks) &&
+            readout.validatorChecks.length > 0
+        )
+    ) ||
     !Array.isArray(skeleton.reviewOnlyDeliveryChain?.stages) ||
     skeleton.reviewOnlyDeliveryChain.stages.length < 5 ||
     !skeleton.reviewOnlyDeliveryChain.stages.every(

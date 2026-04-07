@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-review-only-delivery-chain/v1",
-  "generatedAt": "2026-04-07T19:41:10.385Z",
+  "generatedAt": "2026-04-07T19:48:23.247Z",
   "phase": "phase60",
   "mode": "local-only-review",
   "title": "Delivery-chain Workspace",
@@ -14,7 +14,7 @@
     "id": "packaged-app-materialization-contract",
     "label": "Packaged-app Materialization Contract",
     "mode": "review-only",
-    "summary": "Directory materialization, staged-output manifests, bundle-sealing checkpoints, and packet-level handoffs now stay inspectable as one per-platform local-only contract, so promotion readiness can review roots, handoff continuity, and seal paths without materializing, signing, or publishing anything.",
+    "summary": "Directory materialization, staged-output manifests, bundle-sealing checkpoints, packet-level handoffs, and validator-linked observability now stay inspectable as one per-platform local-only contract, so promotion readiness can review roots, handoff continuity, seal paths, and cross-surface progression without materializing, signing, or publishing anything.",
     "ownerStageId": "delivery-chain-promotion-readiness",
     "downstreamGateStageId": "delivery-chain-publish-decision",
     "artifacts": [
@@ -125,6 +125,90 @@
             "host-side execution remains disabled"
           ]
         },
+        "validatorObservabilityBridge": {
+          "id": "packaged-app-materialization-validator-observability-windows",
+          "label": "Windows validator / observability bridge",
+          "taskState": "reviewing",
+          "summary": "Windows keeps directory, staged-output, and bundle-sealing validation mapped onto the boundary, approval, and preview observability rows so validator-facing progression can be re-read from the delivery-chain workspace.",
+          "activeReadoutId": "packaged-app-materialization-validator-observability-windows-staged-output",
+          "nextReadoutId": "packaged-app-materialization-validator-observability-windows-bundle-sealing",
+          "readouts": [
+            {
+              "id": "packaged-app-materialization-validator-observability-windows-directory",
+              "label": "Directory continuity validator",
+              "status": "ready",
+              "summary": "Windows directory verification is already visible on the boundary intake row, so main-shell review can re-read packaged roots and verification evidence without leaving the local-only lane.",
+              "taskId": "packaged-app-materialization-task-windows-directory",
+              "segmentId": "packaged-app-local-materialization-segment-windows-directory",
+              "deliveryChainStageId": "delivery-chain-attestation-intake",
+              "windowId": "window-shell-main",
+              "sharedStateLaneId": "shared-state-lane-boundary-review",
+              "orchestrationBoardId": "orchestration-board-boundary-review",
+              "observabilityMappingId": "observability-mapping-boundary-intake",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-route-window",
+                "observability-signal-lane-board"
+              ],
+              "validatorChecks": [
+                "Windows verification manifest linked",
+                "Windows materialization root declared",
+                "boundary intake visibility linked"
+              ]
+            },
+            {
+              "id": "packaged-app-materialization-validator-observability-windows-staged-output",
+              "label": "Staged-output continuity validator",
+              "status": "watch",
+              "summary": "Windows staged-output review is the active validator slice, and the trace review row keeps output/checksum evidence aligned with the same local-only approval posture.",
+              "taskId": "packaged-app-materialization-task-windows-staged-output",
+              "segmentId": "packaged-app-local-materialization-segment-windows-staged-output",
+              "deliveryChainStageId": "delivery-chain-operator-review",
+              "windowId": "window-trace-review",
+              "sharedStateLaneId": "shared-state-lane-trace-review",
+              "orchestrationBoardId": "orchestration-board-trace-review",
+              "observabilityMappingId": "observability-mapping-approval-active",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-queue",
+                "observability-signal-escalation-closeout"
+              ],
+              "validatorChecks": [
+                "Windows output manifest linked",
+                "Windows checksum manifest linked",
+                "operator review visibility linked"
+              ]
+            },
+            {
+              "id": "packaged-app-materialization-validator-observability-windows-bundle-sealing",
+              "label": "Bundle-sealing continuity validator",
+              "status": "watch",
+              "summary": "Windows bundle-sealing readiness is already mirrored onto the preview lifecycle row so the next checkpoint stays visible while staged-output review remains active.",
+              "taskId": "packaged-app-materialization-task-windows-bundle-seal",
+              "segmentId": "packaged-app-local-materialization-segment-windows-bundle-sealing",
+              "deliveryChainStageId": "delivery-chain-promotion-readiness",
+              "windowId": "window-review-board",
+              "sharedStateLaneId": "shared-state-lane-preview-review",
+              "orchestrationBoardId": "orchestration-board-preview-review",
+              "observabilityMappingId": "observability-mapping-lifecycle-preview",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-lane-board",
+                "observability-signal-mapped-windows"
+              ],
+              "validatorChecks": [
+                "Windows active bundle-sealing checkpoint linked",
+                "preview lifecycle visibility linked",
+                "downstream publish gate remains review-only"
+              ]
+            }
+          ],
+          "blockedBy": [
+            "validator bridge remains review-only",
+            "cross-window linkage remains metadata-only",
+            "host-side execution remains disabled"
+          ]
+        },
         "blockedBy": [
           "materialization remains review-only",
           "staged outputs remain task-state metadata",
@@ -231,6 +315,90 @@
             "host-side execution remains disabled"
           ]
         },
+        "validatorObservabilityBridge": {
+          "id": "packaged-app-materialization-validator-observability-macos",
+          "label": "macOS validator / observability bridge",
+          "taskState": "review-ready",
+          "summary": "macOS keeps directory, staged-output, and bundle-sealing validation mapped across the same boundary, approval, and preview review surfaces so validator-facing handoffs stay visible even before notarization can exist.",
+          "activeReadoutId": "packaged-app-materialization-validator-observability-macos-directory",
+          "nextReadoutId": "packaged-app-materialization-validator-observability-macos-staged-output",
+          "readouts": [
+            {
+              "id": "packaged-app-materialization-validator-observability-macos-directory",
+              "label": "Directory continuity validator",
+              "status": "watch",
+              "summary": "macOS directory validation is the active bridge slice, and the boundary intake row keeps the .app root, launcher layout, and verification manifest visible as the current reviewer pickup surface.",
+              "taskId": "packaged-app-materialization-task-macos-directory",
+              "segmentId": "packaged-app-local-materialization-segment-macos-directory",
+              "deliveryChainStageId": "delivery-chain-attestation-intake",
+              "windowId": "window-shell-main",
+              "sharedStateLaneId": "shared-state-lane-boundary-review",
+              "orchestrationBoardId": "orchestration-board-boundary-review",
+              "observabilityMappingId": "observability-mapping-boundary-intake",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-route-window",
+                "observability-signal-lane-board"
+              ],
+              "validatorChecks": [
+                "macOS verification manifest linked",
+                "macOS materialization root declared",
+                "boundary intake visibility linked"
+              ]
+            },
+            {
+              "id": "packaged-app-materialization-validator-observability-macos-staged-output",
+              "label": "Staged-output continuity validator",
+              "status": "ready",
+              "summary": "macOS staged-output review is already pre-mapped to the trace review row so output/checksum continuity can be checked before the active directory slice closes.",
+              "taskId": "packaged-app-materialization-task-macos-staged-output",
+              "segmentId": "packaged-app-local-materialization-segment-macos-staged-output",
+              "deliveryChainStageId": "delivery-chain-operator-review",
+              "windowId": "window-trace-review",
+              "sharedStateLaneId": "shared-state-lane-trace-review",
+              "orchestrationBoardId": "orchestration-board-trace-review",
+              "observabilityMappingId": "observability-mapping-approval-active",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-queue",
+                "observability-signal-escalation-closeout"
+              ],
+              "validatorChecks": [
+                "macOS output manifest linked",
+                "macOS checksum manifest linked",
+                "operator review visibility linked"
+              ]
+            },
+            {
+              "id": "packaged-app-materialization-validator-observability-macos-bundle-sealing",
+              "label": "Bundle-sealing continuity validator",
+              "status": "blocked",
+              "summary": "macOS bundle-sealing continuity stays blocked on the preview lifecycle row while staged-output review, signing posture, and notarization all remain metadata-only.",
+              "taskId": "packaged-app-materialization-task-macos-bundle-seal",
+              "segmentId": "packaged-app-local-materialization-segment-macos-bundle-sealing",
+              "deliveryChainStageId": "delivery-chain-promotion-readiness",
+              "windowId": "window-review-board",
+              "sharedStateLaneId": "shared-state-lane-preview-review",
+              "orchestrationBoardId": "orchestration-board-preview-review",
+              "observabilityMappingId": "observability-mapping-lifecycle-preview",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-lane-board",
+                "observability-signal-mapped-windows"
+              ],
+              "validatorChecks": [
+                "macOS active bundle-sealing checkpoint linked",
+                "preview lifecycle visibility linked",
+                "downstream publish gate remains review-only"
+              ]
+            }
+          ],
+          "blockedBy": [
+            "validator bridge remains review-only",
+            "cross-window linkage remains metadata-only",
+            "host-side execution remains disabled"
+          ]
+        },
         "blockedBy": [
           "materialization remains review-only",
           "staged outputs remain task-state metadata",
@@ -334,6 +502,90 @@
           "blockedBy": [
             "staged outputs remain metadata-only",
             "bundle sealing remains metadata-only",
+            "host-side execution remains disabled"
+          ]
+        },
+        "validatorObservabilityBridge": {
+          "id": "packaged-app-materialization-validator-observability-linux",
+          "label": "Linux validator / observability bridge",
+          "taskState": "review-ready",
+          "summary": "Linux keeps directory, staged-output, and bundle-sealing validation mapped across the same boundary, approval, and preview review surfaces so validator-facing package-root continuity stays inspectable without emitting any package target.",
+          "activeReadoutId": "packaged-app-materialization-validator-observability-linux-directory",
+          "nextReadoutId": "packaged-app-materialization-validator-observability-linux-staged-output",
+          "readouts": [
+            {
+              "id": "packaged-app-materialization-validator-observability-linux-directory",
+              "label": "Directory continuity validator",
+              "status": "watch",
+              "summary": "Linux directory validation is the active bridge slice, and the boundary intake row keeps package-root evidence visible while the current review stays local-only.",
+              "taskId": "packaged-app-materialization-task-linux-directory",
+              "segmentId": "packaged-app-local-materialization-segment-linux-directory",
+              "deliveryChainStageId": "delivery-chain-attestation-intake",
+              "windowId": "window-shell-main",
+              "sharedStateLaneId": "shared-state-lane-boundary-review",
+              "orchestrationBoardId": "orchestration-board-boundary-review",
+              "observabilityMappingId": "observability-mapping-boundary-intake",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-route-window",
+                "observability-signal-lane-board"
+              ],
+              "validatorChecks": [
+                "Linux verification manifest linked",
+                "Linux materialization root declared",
+                "boundary intake visibility linked"
+              ]
+            },
+            {
+              "id": "packaged-app-materialization-validator-observability-linux-staged-output",
+              "label": "Staged-output continuity validator",
+              "status": "ready",
+              "summary": "Linux staged-output continuity is already mapped onto the trace review row so output/checksum manifests stay visible as the next validator-facing handoff.",
+              "taskId": "packaged-app-materialization-task-linux-staged-output",
+              "segmentId": "packaged-app-local-materialization-segment-linux-staged-output",
+              "deliveryChainStageId": "delivery-chain-operator-review",
+              "windowId": "window-trace-review",
+              "sharedStateLaneId": "shared-state-lane-trace-review",
+              "orchestrationBoardId": "orchestration-board-trace-review",
+              "observabilityMappingId": "observability-mapping-approval-active",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-queue",
+                "observability-signal-escalation-closeout"
+              ],
+              "validatorChecks": [
+                "Linux output manifest linked",
+                "Linux checksum manifest linked",
+                "operator review visibility linked"
+              ]
+            },
+            {
+              "id": "packaged-app-materialization-validator-observability-linux-bundle-sealing",
+              "label": "Bundle-sealing continuity validator",
+              "status": "blocked",
+              "summary": "Linux bundle-sealing continuity stays blocked on the preview lifecycle row until staged outputs settle and the downstream package publication gate remains metadata-only.",
+              "taskId": "packaged-app-materialization-task-linux-bundle-seal",
+              "segmentId": "packaged-app-local-materialization-segment-linux-bundle-sealing",
+              "deliveryChainStageId": "delivery-chain-promotion-readiness",
+              "windowId": "window-review-board",
+              "sharedStateLaneId": "shared-state-lane-preview-review",
+              "orchestrationBoardId": "orchestration-board-preview-review",
+              "observabilityMappingId": "observability-mapping-lifecycle-preview",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-lane-board",
+                "observability-signal-mapped-windows"
+              ],
+              "validatorChecks": [
+                "Linux active bundle-sealing checkpoint linked",
+                "preview lifecycle visibility linked",
+                "downstream publish gate remains review-only"
+              ]
+            }
+          ],
+          "blockedBy": [
+            "validator bridge remains review-only",
+            "cross-window linkage remains metadata-only",
             "host-side execution remains disabled"
           ]
         },

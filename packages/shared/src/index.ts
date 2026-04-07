@@ -951,6 +951,7 @@ export type StudioReleasePackagedAppMaterializationTaskStageId =
 export type StudioReleasePackagedAppLocalMaterializationSegmentKind = "directory" | "staged-output" | "bundle-sealing";
 export type StudioReleasePackagedAppLocalMaterializationSegmentStatus = "completed" | "active" | "up-next" | "blocked";
 export type StudioReleasePackagedAppBundleSealingCheckpointStatus = "ready" | "watch" | "blocked";
+export type StudioReleasePackagedAppMaterializationValidatorStatus = "ready" | "watch" | "blocked";
 
 export interface StudioReleasePackagedAppMaterializationContractLocalRoots {
   materializationRoot: string;
@@ -1075,6 +1076,33 @@ export interface StudioReleasePackagedAppLocalMaterializationProgress {
   segments: StudioReleasePackagedAppLocalMaterializationSegment[];
 }
 
+export interface StudioReleasePackagedAppMaterializationValidatorObservabilityReadout {
+  id: string;
+  label: string;
+  status: StudioReleasePackagedAppMaterializationValidatorStatus;
+  summary: string;
+  taskId: string;
+  segmentId: string;
+  deliveryChainStageId: string;
+  windowId: string;
+  sharedStateLaneId: string;
+  orchestrationBoardId: string;
+  observabilityMappingId: string;
+  observabilitySignalIds: string[];
+  validatorChecks: string[];
+}
+
+export interface StudioReleasePackagedAppMaterializationValidatorObservabilityBridge {
+  id: string;
+  label: string;
+  taskState: StudioReleasePackagedAppMaterializationTaskState;
+  summary: string;
+  activeReadoutId: string;
+  nextReadoutId: string | null;
+  readouts: StudioReleasePackagedAppMaterializationValidatorObservabilityReadout[];
+  blockedBy: string[];
+}
+
 export interface StudioReleasePackagedAppMaterializationContractPlatform {
   id: string;
   platform: StudioPackagedAppPlatform;
@@ -1100,6 +1128,7 @@ export interface StudioReleasePackagedAppMaterializationContractPlatform {
   reviewPacket: StudioReleasePackagedAppMaterializationReviewPacket;
   bundleSealingReadiness: StudioReleasePackagedAppBundleSealingReadiness;
   localMaterializationProgress: StudioReleasePackagedAppLocalMaterializationProgress;
+  validatorObservabilityBridge: StudioReleasePackagedAppMaterializationValidatorObservabilityBridge;
   tasks: StudioReleasePackagedAppMaterializationContractTask[];
   blockedBy: string[];
 }
@@ -2292,6 +2321,10 @@ export {
   selectStudioReleasePackagedAppMaterializationContractProgress,
   selectStudioReleasePackagedAppMaterializationContractProgressSegment,
   selectStudioReleasePackagedAppMaterializationContractNextProgressSegment,
+  selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityBridge,
+  selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityReadout,
+  selectStudioReleasePackagedAppMaterializationContractNextValidatorObservabilityReadout,
+  selectStudioReleasePackagedAppMaterializationContractValidatorObservabilitySurfaceMatch,
   selectStudioReleasePackagedAppMaterializationContractNearbyStageCReadiness,
   selectStudioReleaseQaCloseoutReadinessTrack,
   selectStudioReleaseApprovalWorkflowStage,

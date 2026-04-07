@@ -24,6 +24,9 @@ import type {
   StudioReleasePackagedAppLocalMaterializationSegment,
   StudioReleasePackagedAppMaterializationReviewPacket,
   StudioReleasePackagedAppMaterializationTaskState,
+  StudioReleasePackagedAppMaterializationValidatorObservabilityBridge,
+  StudioReleasePackagedAppMaterializationValidatorObservabilityReadout,
+  StudioReleasePackagedAppMaterializationValidatorStatus,
   StudioReleaseQaCloseoutReadiness,
   StudioReleaseRollbackLiveReadiness,
   StudioReleaseStageCBoundaryLinkage,
@@ -955,7 +958,7 @@ function createStudioReleaseDeliveryChain(
     id: "release-delivery-chain-phase60",
     title: "Delivery-chain Workspace",
     summary:
-      "Phase60 slice 33 keeps the review-only delivery chain readable as a stage explorer while also surfacing packaged-app staged-output task orchestration, bundle-sealing readiness, local review packets, local progression, and a deeper Stage C readiness spine, so per-platform roots, current task evidence, packet handoffs, staged-output manifests, seal checkpoints, QA closeout tracks, approval workflow stages, rollback live-readiness contracts, and boundary handoff posture stay inspectable inside the same local-only metadata spine.",
+      "Phase60 slice 34 keeps the review-only delivery chain readable as a stage explorer while also surfacing packaged-app staged-output task orchestration, bundle-sealing readiness, local review packets, local progression, validator-linked observability, and a deeper Stage C readiness spine, so per-platform roots, current task evidence, packet handoffs, staged-output manifests, seal checkpoints, cross-window bridge rows, QA closeout tracks, approval workflow stages, rollback live-readiness contracts, and boundary handoff posture stay inspectable inside the same local-only metadata spine.",
     mode: "review-only",
     currentStageId: currentDeliveryStageId,
     packagedAppMaterializationContract,
@@ -1452,13 +1455,208 @@ function createStudioPackagedAppLocalMaterializationSegments({
   ];
 }
 
+type StudioPackagedAppMaterializationValidatorReadoutKey = "directory" | "staged-output" | "bundle-sealing";
+
+function createStudioPackagedAppMaterializationValidatorReadout({
+  bridgeId,
+  platformLabel,
+  key,
+  label,
+  status,
+  summary,
+  taskId,
+  segmentId,
+  deliveryChainStageId
+}: {
+  bridgeId: string;
+  platformLabel: string;
+  key: StudioPackagedAppMaterializationValidatorReadoutKey;
+  label: string;
+  status: StudioReleasePackagedAppMaterializationValidatorStatus;
+  summary: string;
+  taskId: string;
+  segmentId: string;
+  deliveryChainStageId: string;
+}): StudioReleasePackagedAppMaterializationValidatorObservabilityReadout {
+  switch (key) {
+    case "directory":
+      return {
+        id: `${bridgeId}-${key}`,
+        label,
+        status,
+        summary,
+        taskId,
+        segmentId,
+        deliveryChainStageId,
+        windowId: "window-shell-main",
+        sharedStateLaneId: "shared-state-lane-boundary-review",
+        orchestrationBoardId: "orchestration-board-boundary-review",
+        observabilityMappingId: "observability-mapping-boundary-intake",
+        observabilitySignalIds: [
+          "observability-signal-owner",
+          "observability-signal-route-window",
+          "observability-signal-lane-board"
+        ],
+        validatorChecks: [
+          `${platformLabel} verification manifest linked`,
+          `${platformLabel} materialization root declared`,
+          "boundary intake visibility linked"
+        ]
+      };
+    case "staged-output":
+      return {
+        id: `${bridgeId}-${key}`,
+        label,
+        status,
+        summary,
+        taskId,
+        segmentId,
+        deliveryChainStageId,
+        windowId: "window-trace-review",
+        sharedStateLaneId: "shared-state-lane-trace-review",
+        orchestrationBoardId: "orchestration-board-trace-review",
+        observabilityMappingId: "observability-mapping-approval-active",
+        observabilitySignalIds: [
+          "observability-signal-owner",
+          "observability-signal-queue",
+          "observability-signal-escalation-closeout"
+        ],
+        validatorChecks: [
+          `${platformLabel} output manifest linked`,
+          `${platformLabel} checksum manifest linked`,
+          "operator review visibility linked"
+        ]
+      };
+    default:
+      return {
+        id: `${bridgeId}-${key}`,
+        label,
+        status,
+        summary,
+        taskId,
+        segmentId,
+        deliveryChainStageId,
+        windowId: "window-review-board",
+        sharedStateLaneId: "shared-state-lane-preview-review",
+        orchestrationBoardId: "orchestration-board-preview-review",
+        observabilityMappingId: "observability-mapping-lifecycle-preview",
+        observabilitySignalIds: [
+          "observability-signal-owner",
+          "observability-signal-lane-board",
+          "observability-signal-mapped-windows"
+        ],
+        validatorChecks: [
+          `${platformLabel} active bundle-sealing checkpoint linked`,
+          "preview lifecycle visibility linked",
+          "downstream publish gate remains review-only"
+        ]
+      };
+  }
+}
+
+function createStudioPackagedAppMaterializationValidatorObservabilityBridge({
+  idPrefix,
+  platformLabel,
+  taskState,
+  summary,
+  activeReadout,
+  nextReadout,
+  directoryTaskId,
+  directorySegmentId,
+  directoryStatus,
+  directorySummary,
+  stagedOutputTaskId,
+  stagedOutputSegmentId,
+  stagedOutputStatus,
+  stagedOutputSummary,
+  bundleSealTaskId,
+  bundleSealSegmentId,
+  bundleSealStatus,
+  bundleSealSummary
+}: {
+  idPrefix: string;
+  platformLabel: string;
+  taskState: StudioReleasePackagedAppMaterializationTaskState;
+  summary: string;
+  activeReadout: StudioPackagedAppMaterializationValidatorReadoutKey;
+  nextReadout: StudioPackagedAppMaterializationValidatorReadoutKey | null;
+  directoryTaskId: string;
+  directorySegmentId: string;
+  directoryStatus: StudioReleasePackagedAppMaterializationValidatorStatus;
+  directorySummary: string;
+  stagedOutputTaskId: string;
+  stagedOutputSegmentId: string;
+  stagedOutputStatus: StudioReleasePackagedAppMaterializationValidatorStatus;
+  stagedOutputSummary: string;
+  bundleSealTaskId: string;
+  bundleSealSegmentId: string;
+  bundleSealStatus: StudioReleasePackagedAppMaterializationValidatorStatus;
+  bundleSealSummary: string;
+}): StudioReleasePackagedAppMaterializationValidatorObservabilityBridge {
+  const bridgeId = `packaged-app-materialization-validator-observability-${idPrefix}`;
+  const readoutIds = {
+    directory: `${bridgeId}-directory`,
+    "staged-output": `${bridgeId}-staged-output`,
+    "bundle-sealing": `${bridgeId}-bundle-sealing`
+  } as const;
+
+  return {
+    id: bridgeId,
+    label: `${platformLabel} validator / observability bridge`,
+    taskState,
+    summary,
+    activeReadoutId: readoutIds[activeReadout],
+    nextReadoutId: nextReadout ? readoutIds[nextReadout] : null,
+    readouts: [
+      createStudioPackagedAppMaterializationValidatorReadout({
+        bridgeId,
+        platformLabel,
+        key: "directory",
+        label: "Directory continuity validator",
+        status: directoryStatus,
+        summary: directorySummary,
+        taskId: directoryTaskId,
+        segmentId: directorySegmentId,
+        deliveryChainStageId: "delivery-chain-attestation-intake"
+      }),
+      createStudioPackagedAppMaterializationValidatorReadout({
+        bridgeId,
+        platformLabel,
+        key: "staged-output",
+        label: "Staged-output continuity validator",
+        status: stagedOutputStatus,
+        summary: stagedOutputSummary,
+        taskId: stagedOutputTaskId,
+        segmentId: stagedOutputSegmentId,
+        deliveryChainStageId: "delivery-chain-operator-review"
+      }),
+      createStudioPackagedAppMaterializationValidatorReadout({
+        bridgeId,
+        platformLabel,
+        key: "bundle-sealing",
+        label: "Bundle-sealing continuity validator",
+        status: bundleSealStatus,
+        summary: bundleSealSummary,
+        taskId: bundleSealTaskId,
+        segmentId: bundleSealSegmentId,
+        deliveryChainStageId: "delivery-chain-promotion-readiness"
+      })
+    ],
+    blockedBy: [
+      "validator bridge remains review-only",
+      "cross-window linkage remains metadata-only",
+      "host-side execution remains disabled"
+    ]
+  };
+}
+
 function createStudioPackagedAppMaterializationContract(): StudioReleasePackagedAppMaterializationContract {
   return {
     id: "packaged-app-materialization-contract",
     label: "Packaged-app Materialization Contract",
     mode: "review-only",
     summary:
-      "Packaged-app directory materialization, staged-output task chains, bundle-sealing readiness, local review packets, and local progression now stay inspectable as one per-platform task-state contract, so the shell can review active roots, evidence handoffs, and seal posture without materializing, signing, or publishing anything.",
+      "Packaged-app directory materialization, staged-output task chains, bundle-sealing readiness, local review packets, local progression, and validator-linked observability now stay inspectable as one per-platform task-state contract, so the shell can review active roots, evidence handoffs, seal posture, and cross-surface continuity without materializing, signing, or publishing anything.",
     currentTaskState: "reviewing",
     activePlatformId: "packaged-app-materialization-platform-windows",
     ownerStageId: "delivery-chain-promotion-readiness",
@@ -1644,6 +1842,30 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
             bundleSealSummary: "Bundle sealing is the next downstream slice, but it stays blocked behind the current staged-output review and review-only publish gate."
           })
         },
+        validatorObservabilityBridge: createStudioPackagedAppMaterializationValidatorObservabilityBridge({
+          idPrefix: "windows",
+          platformLabel: "Windows",
+          taskState: "reviewing",
+          summary:
+            "Windows keeps directory, staged-output, and bundle-sealing validation mapped onto the boundary, approval, and preview observability rows so validator-facing progression can be followed outside the Stage Explorer without opening execution.",
+          activeReadout: "staged-output",
+          nextReadout: "bundle-sealing",
+          directoryTaskId: "packaged-app-materialization-task-windows-directory",
+          directorySegmentId: "packaged-app-local-materialization-segment-windows-directory",
+          directoryStatus: "ready",
+          directorySummary:
+            "Windows directory verification is already visible on the boundary intake row, so main-shell review can re-read packaged roots and verification evidence without leaving the local-only lane.",
+          stagedOutputTaskId: "packaged-app-materialization-task-windows-staged-output",
+          stagedOutputSegmentId: "packaged-app-local-materialization-segment-windows-staged-output",
+          stagedOutputStatus: "watch",
+          stagedOutputSummary:
+            "Windows staged-output review is the active validator slice, and the trace review row keeps output/checksum evidence aligned with the same local-only approval posture.",
+          bundleSealTaskId: "packaged-app-materialization-task-windows-bundle-seal",
+          bundleSealSegmentId: "packaged-app-local-materialization-segment-windows-bundle-sealing",
+          bundleSealStatus: "watch",
+          bundleSealSummary:
+            "Windows bundle-sealing readiness is already mirrored onto the preview lifecycle row so the next checkpoint stays visible while staged-output review remains active."
+        }),
         tasks: [
           {
             id: "packaged-app-materialization-task-windows-directory",
@@ -1869,6 +2091,30 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
             bundleSealSummary: "Bundle sealing remains downstream but blocked until staged outputs, signing posture, and notarization readiness stop being metadata-only."
           })
         },
+        validatorObservabilityBridge: createStudioPackagedAppMaterializationValidatorObservabilityBridge({
+          idPrefix: "macos",
+          platformLabel: "macOS",
+          taskState: "review-ready",
+          summary:
+            "macOS keeps directory, staged-output, and bundle-sealing validation mapped across the same boundary, approval, and preview review surfaces so validator-facing handoffs stay visible even before notarization can exist.",
+          activeReadout: "directory",
+          nextReadout: "staged-output",
+          directoryTaskId: "packaged-app-materialization-task-macos-directory",
+          directorySegmentId: "packaged-app-local-materialization-segment-macos-directory",
+          directoryStatus: "watch",
+          directorySummary:
+            "macOS directory validation is the active bridge slice, and the boundary intake row keeps the .app root, launcher layout, and verification manifest visible as the current reviewer pickup surface.",
+          stagedOutputTaskId: "packaged-app-materialization-task-macos-staged-output",
+          stagedOutputSegmentId: "packaged-app-local-materialization-segment-macos-staged-output",
+          stagedOutputStatus: "ready",
+          stagedOutputSummary:
+            "macOS staged-output review is already pre-mapped to the trace review row so output/checksum continuity can be checked before the active directory slice closes.",
+          bundleSealTaskId: "packaged-app-materialization-task-macos-bundle-seal",
+          bundleSealSegmentId: "packaged-app-local-materialization-segment-macos-bundle-sealing",
+          bundleSealStatus: "blocked",
+          bundleSealSummary:
+            "macOS bundle-sealing continuity stays blocked on the preview lifecycle row while staged-output review, signing posture, and notarization all remain metadata-only."
+        }),
         tasks: [
           {
             id: "packaged-app-materialization-task-macos-directory",
@@ -2094,6 +2340,30 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
             bundleSealSummary: "Bundle sealing remains downstream but blocked until staged outputs settle and the package publication gate stays purely review-only."
           })
         },
+        validatorObservabilityBridge: createStudioPackagedAppMaterializationValidatorObservabilityBridge({
+          idPrefix: "linux",
+          platformLabel: "Linux",
+          taskState: "review-ready",
+          summary:
+            "Linux keeps directory, staged-output, and bundle-sealing validation mapped across the same boundary, approval, and preview review surfaces so validator-facing package-root continuity stays inspectable without emitting any package target.",
+          activeReadout: "directory",
+          nextReadout: "staged-output",
+          directoryTaskId: "packaged-app-materialization-task-linux-directory",
+          directorySegmentId: "packaged-app-local-materialization-segment-linux-directory",
+          directoryStatus: "watch",
+          directorySummary:
+            "Linux directory validation is the active bridge slice, and the boundary intake row keeps package-root evidence visible while the current review stays local-only.",
+          stagedOutputTaskId: "packaged-app-materialization-task-linux-staged-output",
+          stagedOutputSegmentId: "packaged-app-local-materialization-segment-linux-staged-output",
+          stagedOutputStatus: "ready",
+          stagedOutputSummary:
+            "Linux staged-output continuity is already mapped onto the trace review row so output/checksum manifests stay visible as the next validator-facing handoff.",
+          bundleSealTaskId: "packaged-app-materialization-task-linux-bundle-seal",
+          bundleSealSegmentId: "packaged-app-local-materialization-segment-linux-bundle-sealing",
+          bundleSealStatus: "blocked",
+          bundleSealSummary:
+            "Linux bundle-sealing continuity stays blocked on the preview lifecycle row until staged outputs settle and the downstream package publication gate remains metadata-only."
+        }),
         tasks: [
           {
             id: "packaged-app-materialization-task-linux-directory",

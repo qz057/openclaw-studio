@@ -12,6 +12,8 @@ import type {
   StudioReleasePackagedAppLocalMaterializationSegment,
   StudioReleasePackagedAppMaterializationReviewPacket,
   StudioReleasePackagedAppMaterializationReviewPacketStep,
+  StudioReleasePackagedAppMaterializationValidatorObservabilityBridge,
+  StudioReleasePackagedAppMaterializationValidatorObservabilityReadout,
   StudioReleaseQaCloseoutReadinessTrack,
   StudioReleasePackagedAppStagedOutputChain,
   StudioReleasePackagedAppStagedOutputChainStep,
@@ -22,7 +24,11 @@ import type {
   StudioReviewStateContinuity,
   StudioReviewStateContinuityEntry,
   StudioReviewStateContinuityMatch,
+  StudioWindowObservabilitySignal,
   StudioWindowObservabilityMapping,
+  StudioWindowOrchestrationBoard,
+  StudioWindowRosterEntry,
+  StudioWindowSharedStateLane,
   StudioWindowing
 } from "./index.js";
 
@@ -209,6 +215,135 @@ export function selectStudioReleasePackagedAppMaterializationContractNextProgres
     progress.segments.find((segment) => segment.status === "up-next" || segment.status === "blocked");
 
   return nextSegment;
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityBridge(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+): StudioReleasePackagedAppMaterializationValidatorObservabilityBridge | undefined {
+  return selectStudioReleasePackagedAppMaterializationContractPlatform(deliveryChain, platformOrId)?.validatorObservabilityBridge;
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityReadout(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null,
+  readoutOrId?: Pick<StudioReleasePackagedAppMaterializationValidatorObservabilityReadout, "id"> | string | null
+): StudioReleasePackagedAppMaterializationValidatorObservabilityReadout | undefined {
+  const bridge = selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityBridge(deliveryChain, platformOrId);
+  const readoutId = typeof readoutOrId === "string" ? readoutOrId : readoutOrId?.id ?? bridge?.activeReadoutId;
+
+  return bridge?.readouts.find((readout) => readout.id === readoutId) ?? bridge?.readouts[0];
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractNextValidatorObservabilityReadout(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+): StudioReleasePackagedAppMaterializationValidatorObservabilityReadout | undefined {
+  const bridge = selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityBridge(deliveryChain, platformOrId);
+
+  if (!bridge?.nextReadoutId) {
+    return undefined;
+  }
+
+  return bridge.readouts.find((readout) => readout.id === bridge.nextReadoutId);
+}
+
+function scoreStudioReleasePackagedAppMaterializationBridgeContinuityEntry(
+  entry: StudioReviewStateContinuityEntry,
+  readout: StudioReleasePackagedAppMaterializationValidatorObservabilityReadout
+): number {
+  let score = 0;
+
+  if (entry.spine.sharedStateLaneId === readout.sharedStateLaneId) {
+    score += 16;
+  }
+
+  if (entry.spine.orchestrationBoardId === readout.orchestrationBoardId) {
+    score += 8;
+  }
+
+  if (entry.spine.windowId === readout.windowId) {
+    score += 4;
+  }
+
+  if (entry.deliveryChainStageId === readout.deliveryChainStageId) {
+    score += 2;
+  }
+
+  return score;
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractValidatorObservabilitySurfaceMatch(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  windowing?: Pick<StudioWindowing, "observability" | "roster" | "sharedState" | "orchestration"> | null,
+  reviewStateContinuity?: Pick<StudioReviewStateContinuity, "entries" | "activeEntryId"> | null,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null,
+  readoutOrId?: Pick<StudioReleasePackagedAppMaterializationValidatorObservabilityReadout, "id"> | string | null
+): {
+  bridge: StudioReleasePackagedAppMaterializationValidatorObservabilityBridge | null;
+  activeReadout: StudioReleasePackagedAppMaterializationValidatorObservabilityReadout | null;
+  nextReadout: StudioReleasePackagedAppMaterializationValidatorObservabilityReadout | null;
+  observabilityMapping: StudioWindowObservabilityMapping | null;
+  observabilitySignals: StudioWindowObservabilitySignal[];
+  window: StudioWindowRosterEntry | null;
+  lane: StudioWindowSharedStateLane | null;
+  board: StudioWindowOrchestrationBoard | null;
+  reviewStateContinuityEntry: StudioReviewStateContinuityEntry | null;
+} {
+  const bridge = selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityBridge(deliveryChain, platformOrId) ?? null;
+  const activeReadout =
+    selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityReadout(
+      deliveryChain,
+      platformOrId,
+      readoutOrId
+    ) ?? null;
+  const nextReadout =
+    selectStudioReleasePackagedAppMaterializationContractNextValidatorObservabilityReadout(deliveryChain, platformOrId) ?? null;
+
+  if (!windowing || !activeReadout) {
+    return {
+      bridge,
+      activeReadout,
+      nextReadout,
+      observabilityMapping: null,
+      observabilitySignals: [],
+      window: null,
+      lane: null,
+      board: null,
+      reviewStateContinuityEntry: null
+    };
+  }
+
+  const observabilityMapping = selectStudioWindowObservabilityMapping(windowing, activeReadout.observabilityMappingId) ?? null;
+  const observabilitySignals = activeReadout.observabilitySignalIds
+    .map((signalId) => windowing.observability.signals.find((signal) => signal.id === signalId) ?? null)
+    .filter((signal): signal is StudioWindowObservabilitySignal => Boolean(signal));
+  const window = windowing.roster.windows.find((entry) => entry.id === activeReadout.windowId) ?? null;
+  const lane = windowing.sharedState.lanes.find((entry) => entry.id === activeReadout.sharedStateLaneId) ?? null;
+  const board = windowing.orchestration.boards.find((entry) => entry.id === activeReadout.orchestrationBoardId) ?? null;
+  const exactMappingEntries =
+    reviewStateContinuity?.entries.filter(
+      (entry) => entry.spine.observabilityMappingId === activeReadout.observabilityMappingId
+    ) ?? [];
+  const reviewStateContinuityEntry =
+    exactMappingEntries
+      .map((entry) => ({
+        entry,
+        score: scoreStudioReleasePackagedAppMaterializationBridgeContinuityEntry(entry, activeReadout)
+      }))
+      .sort((left, right) => right.score - left.score)[0]?.entry ?? null;
+
+  return {
+    bridge,
+    activeReadout,
+    nextReadout,
+    observabilityMapping,
+    observabilitySignals,
+    window,
+    lane,
+    board,
+    reviewStateContinuityEntry
+  };
 }
 
 function collectStudioReleasePackagedAppMaterializationRelatedStageIds(
