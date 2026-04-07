@@ -2597,7 +2597,7 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase60 slice 11 adds a route replay board, replay acceptance checklist, and direct restore / replay controls on top of companion route-history memory, delivery-gate companion sequence switching, sequence-aware companion review navigation, typed companion review-path orchestration, and multi-window review coverage; it still does not install, publish, sign, orchestrate live approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
+        "Phase60 slice 12 adds replay scenario packs, an acceptance-pass surface, and screenshot review metadata on top of the route replay board, replay acceptance checklist, and direct restore / replay controls; it still does not install, publish, sign, orchestrate live approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -3805,11 +3805,11 @@ export function App() {
                   <h2>Delivery-chain Workspace</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but phase60 slice 11 now keeps the review-only delivery chain anchored in a
-                  usable stage explorer plus route replay board, so review-surface navigation, remembered handoff restore, active sequence replay,
-                  acceptance checks, multi-window coverage, operator board ownership, reviewer queues, acknowledgement state, stage-level artifacts,
-                  promotion review flow, publish gating, rollback readiness, blockers, handoff posture, ordered companion steps, and explicit companion
-                  review paths stay visible as one local-only non-executing surface.
+                  The alpha shell still does not build a real installer, but phase60 slice 12 now keeps the review-only delivery chain anchored in a
+                  usable stage explorer plus route replay board with replay scenario packs, acceptance-pass checks, and screenshot review metadata, so
+                  review-surface navigation, remembered handoff restore, active sequence replay, multi-window coverage, operator board ownership,
+                  reviewer queues, acknowledgement state, stage-level artifacts, promotion review flow, publish gating, rollback readiness, blockers,
+                  handoff posture, ordered companion steps, and explicit companion review paths stay visible as one local-only non-executing surface.
                 </p>
               </div>
               <div className="foundation-card__metrics">
@@ -3909,7 +3909,7 @@ export function App() {
             onRunCompanionRouteHistory={handleRunCompanionRouteHistory}
             eyebrow="Phase60"
             title="Delivery-chain Workspace"
-            summary="Phase60 slice 11 keeps coverage-driven review-surface navigation, multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, and companion route-history memory in place, then turns them into a route replay board with acceptance-facing restore, replay, and checklist posture so the shell can return to the last publish-gate, approval-queue, rollback-shadow, or handoff relay path while keeping ownership, review surfaces, ordered companion steps, linked artifacts, blockers, handoff posture, route state, and observability mapping together."
+            summary="Phase60 slice 12 keeps coverage-driven review-surface navigation, multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, and companion route-history memory in place, then turns them into a route replay board with replay scenario packs, an acceptance-pass surface, screenshot review metadata, and direct restore / replay posture so the shell can return to the last publish-gate, approval-queue, rollback-shadow, or handoff relay path while keeping ownership, review surfaces, ordered companion steps, linked artifacts, blockers, handoff posture, route state, observability mapping, and review evidence posture together."
           />
 
           <section className="surface card window-workbench">

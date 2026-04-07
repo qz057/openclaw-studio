@@ -41,6 +41,11 @@ interface DeliveryChainWorkspaceProps {
 }
 
 type Tone = "positive" | "neutral" | "warning";
+type ReplayScenarioPackItem = {
+  lane: StudioCommandActionDeck["lanes"][number];
+  pack: NonNullable<StudioCommandActionDeck["lanes"][number]["replayScenarioPack"]>;
+  entries: StudioCommandCompanionRouteHistoryEntry[];
+};
 
 function resolveStageTone(status: StudioReleaseApprovalPipeline["stages"][number]["status"]): Tone {
   switch (status) {
@@ -208,6 +213,45 @@ function formatCompanionPathHandoffStability(
       return "Restored";
     default:
       return "Watch";
+  }
+}
+
+function resolveReplayAcceptanceTone(
+  state: NonNullable<StudioCommandCompanionRouteHistoryEntry["acceptanceChecks"]>[number]["state"]
+): Tone {
+  switch (state) {
+    case "ready":
+      return "positive";
+    case "watch":
+      return "neutral";
+    default:
+      return "warning";
+  }
+}
+
+function resolveReplayScreenshotTone(
+  posture: NonNullable<StudioCommandCompanionRouteHistoryEntry["screenshotReviewItems"]>[number]["posture"]
+): Tone {
+  switch (posture) {
+    case "linked":
+      return "positive";
+    case "staged":
+      return "neutral";
+    default:
+      return "warning";
+  }
+}
+
+function formatReplayScreenshotPosture(
+  posture: NonNullable<StudioCommandCompanionRouteHistoryEntry["screenshotReviewItems"]>[number]["posture"]
+): string {
+  switch (posture) {
+    case "linked":
+      return "Linked";
+    case "staged":
+      return "Staged";
+    default:
+      return "Required";
   }
 }
 
@@ -505,6 +549,27 @@ export function DeliveryChainWorkspace({
       ? windowing?.observability.mappings.find((entry) => entry.id === replayRestoreRouteState.observabilityMappingId) ?? null
       : null) ??
     activeStageMapping;
+  const replayScenarioPacks: ReplayScenarioPackItem[] = relevantActionDeckLanes.flatMap((lane) => {
+    if (!lane.replayScenarioPack) {
+      return [];
+    }
+
+    const entries = relevantCompanionRouteHistoryEntries.filter((entry) =>
+      (lane.companionRouteHistory ?? []).some((laneEntry) => laneEntry.id === entry.id)
+    );
+
+    return entries.length ? [{ lane, pack: lane.replayScenarioPack, entries }] : [];
+  });
+  const activeReplayScenarioPack =
+    replayScenarioPacks.find((item) => item.entries.some((entry) => entry.id === replayRestoreEntry?.id)) ?? replayScenarioPacks[0] ?? null;
+  const activeReplayScenarioEntry =
+    (replayRestoreEntry && activeReplayScenarioPack?.entries.find((entry) => entry.id === replayRestoreEntry.id)) ??
+    activeReplayScenarioPack?.entries[0] ??
+    null;
+  const activeReplayScenarioAcceptanceChecks = activeReplayScenarioEntry?.acceptanceChecks ?? [];
+  const activeReplayScenarioAcceptanceReady = activeReplayScenarioAcceptanceChecks.filter((check) => check.state === "ready").length;
+  const activeReplayScenarioScreenshotItems = activeReplayScenarioEntry?.screenshotReviewItems ?? [];
+  const activeReplayScenarioScreenshotReady = activeReplayScenarioScreenshotItems.filter((item) => item.posture !== "required").length;
   const replayAcceptanceChecksReady =
     Number(Boolean(replayRestoreEntry)) +
     Number(Boolean(replayRestoreSequence?.steps.length)) +
@@ -526,7 +591,7 @@ export function DeliveryChainWorkspace({
           <h2>{title ?? "Delivery-chain Workspace"}</h2>
           <p>
             {summary ??
-              "Stage Explorer ties the operator board, delivery stage, review artifacts, promotion/publish/rollback flow, blockers, handoff posture, and observability mapping into one local-only review surface."}
+              "Stage Explorer ties the operator board, delivery stage, review artifacts, replay scenario packs, acceptance-pass evidence, promotion/publish/rollback flow, blockers, handoff posture, and observability mapping into one local-only review surface."}
           </p>
         </div>
         <div className="windowing-card__meta">
@@ -1008,13 +1073,14 @@ export function DeliveryChainWorkspace({
             <strong>{replayRestoreEntry?.label ?? activeCompanionPathHandoff?.label ?? "No replay target"}</strong>
             <p>
               The selected stage now turns remembered route transitions into an acceptance-facing restore surface, so product testing can restore the
-              last handoff, replay the active companion sequence, and verify the same review surface plus window / lane / board / observability
-              contract without leaving local-only review posture.
+              last handoff, replay the active companion sequence, load a replay scenario pack, and verify the same review surface plus window / lane /
+              board / observability contract without leaving local-only review posture.
             </p>
             <div className="windowing-card__meta">
               <span className="windowing-badge windowing-badge--active">{replayAcceptanceChecksReady} / 5 checks ready</span>
               <span className="windowing-badge">{replayRestoreRouteState?.label ?? "No route snapshot"}</span>
               <span className="windowing-badge">{replayRestoreStage?.label ?? "No delivery stage"}</span>
+              {activeReplayScenarioPack ? <span className="windowing-badge">{activeReplayScenarioPack.pack.label}</span> : null}
             </div>
             <div className="workflow-readiness-list">
               <div
@@ -1110,6 +1176,75 @@ export function DeliveryChainWorkspace({
                   ) : null}
                 </div>
               </div>
+              {activeReplayScenarioPack ? (
+                <div className="windowing-preview-line windowing-preview-line--stacked">
+                  <span>Replay Scenario Pack</span>
+                  <strong>{activeReplayScenarioPack.pack.label}</strong>
+                  <p>{activeReplayScenarioPack.pack.summary}</p>
+                  <div className="trace-note-links">
+                    <span className="windowing-badge windowing-badge--active">{activeReplayScenarioPack.entries.length} scenario cards</span>
+                    <span className="windowing-badge">{activeReplayScenarioPack.pack.reviewerPosture}</span>
+                    <span className="windowing-badge">{activeReplayScenarioPack.pack.acceptancePosture}</span>
+                    <span className="windowing-badge">{activeReplayScenarioPack.pack.safety}</span>
+                  </div>
+                </div>
+              ) : null}
+              {activeReplayScenarioEntry ? (
+                <div className="windowing-preview-line windowing-preview-line--stacked">
+                  <span>Acceptance Pass Surface</span>
+                  <strong>{activeReplayScenarioEntry.scenarioLabel ?? activeReplayScenarioEntry.label}</strong>
+                  <p>{activeReplayScenarioEntry.scenarioSummary ?? activeReplayScenarioEntry.summary}</p>
+                  <div className="trace-note-links">
+                    <span className="windowing-badge windowing-badge--active">
+                      {activeReplayScenarioAcceptanceReady} / {activeReplayScenarioAcceptanceChecks.length || 0} route checks ready
+                    </span>
+                    <span className="windowing-badge">
+                      {activeReplayScenarioEntry.reviewerPosture ?? activeReplayScenarioPack?.pack.reviewerPosture ?? "No reviewer posture"}
+                    </span>
+                    <span className="windowing-badge">
+                      {activeReplayScenarioEntry.evidencePosture ?? activeReplayScenarioPack?.pack.evidencePosture ?? "No evidence posture"}
+                    </span>
+                  </div>
+                  {activeReplayScenarioAcceptanceChecks.length ? (
+                    <div className="workflow-readiness-list">
+                      {activeReplayScenarioAcceptanceChecks.map((check) => (
+                        <div
+                          key={check.id}
+                          className={`workflow-readiness-line workflow-readiness-line--${resolveReplayAcceptanceTone(check.state)}`}
+                        >
+                          <span>{check.label}</span>
+                          <strong>{check.detail}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+              {activeReplayScenarioEntry ? (
+                <div className="windowing-preview-line windowing-preview-line--stacked">
+                  <span>Screenshot Review</span>
+                  <strong>{activeReplayScenarioScreenshotReady} / {activeReplayScenarioScreenshotItems.length || 0} capture targets staged</strong>
+                  <p>
+                    Screenshot metadata stays review-only: capture targets, comparison surfaces, and evidence posture are listed for acceptance review
+                    without invoking any host execution.
+                  </p>
+                  <div className="windowing-preview-list">
+                    {(compact ? activeReplayScenarioScreenshotItems.slice(0, 2) : activeReplayScenarioScreenshotItems).map((item) => (
+                      <div key={item.id} className="windowing-preview-line windowing-preview-line--stacked">
+                        <span>{formatReplayScreenshotPosture(item.posture)}</span>
+                        <strong>{item.label}</strong>
+                        <p>{item.detail}</p>
+                        <div className="trace-note-links">
+                          <span className={`windowing-badge${item.posture !== "required" ? " windowing-badge--active" : ""}`}>{item.surface}</span>
+                          <span className={`windowing-badge${resolveReplayScreenshotTone(item.posture) !== "warning" ? " windowing-badge--active" : ""}`}>
+                            {formatReplayScreenshotPosture(item.posture)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
               {(compact ? relevantCompanionPathHandoffs.slice(0, 2) : relevantCompanionPathHandoffs).map((handoff) => {
                 const targetAction = reviewSurfaceActionById.get(handoff.targetActionId) ?? null;
                 const handoffStage = handoff.deliveryChainStageId
@@ -1175,38 +1310,106 @@ export function DeliveryChainWorkspace({
                   </div>
                 );
               })}
-              {(compact ? relevantCompanionRouteHistoryEntries.slice(0, 2) : relevantCompanionRouteHistoryEntries).map((entry) => {
-                const targetAction = reviewSurfaceActionById.get(entry.targetActionId) ?? null;
-                const active = entry.id === activeCompanionRouteHistoryEntry?.id;
+              {!activeReplayScenarioPack
+                ? (compact ? relevantCompanionRouteHistoryEntries.slice(0, 2) : relevantCompanionRouteHistoryEntries).map((entry) => {
+                    const targetAction = reviewSurfaceActionById.get(entry.targetActionId) ?? null;
+                    const active = entry.id === activeCompanionRouteHistoryEntry?.id;
 
-                return (
-                  <div key={entry.id} className="windowing-preview-line windowing-preview-line--stacked">
-                    <span>{entry.timestampLabel}</span>
-                    <strong>{active ? `${entry.label} / active memory` : entry.label}</strong>
-                    <p>{entry.summary}</p>
-                    <div className="trace-note-links">
-                      <span className={`windowing-badge${active ? " windowing-badge--active" : ""}`}>
-                        {formatCompanionRouteTransitionKind(entry.transitionKind)}
-                      </span>
-                      {entry.sequenceId ? <span className="windowing-badge">{entry.sequenceId}</span> : null}
-                    </div>
-                    {onRunCompanionRouteHistory ? (
-                      <div className="windowing-card__actions">
-                        <button type="button" className="secondary-button" onClick={() => onRunCompanionRouteHistory(entry.id)}>
-                          {active ? "Refresh restore" : "Restore memory"}
-                        </button>
+                    return (
+                      <div key={entry.id} className="windowing-preview-line windowing-preview-line--stacked">
+                        <span>{entry.timestampLabel}</span>
+                        <strong>{active ? `${entry.label} / active memory` : entry.label}</strong>
+                        <p>{entry.summary}</p>
+                        <div className="trace-note-links">
+                          <span className={`windowing-badge${active ? " windowing-badge--active" : ""}`}>
+                            {formatCompanionRouteTransitionKind(entry.transitionKind)}
+                          </span>
+                          {entry.sequenceId ? <span className="windowing-badge">{entry.sequenceId}</span> : null}
+                        </div>
+                        {onRunCompanionRouteHistory ? (
+                          <div className="windowing-card__actions">
+                            <button type="button" className="secondary-button" onClick={() => onRunCompanionRouteHistory(entry.id)}>
+                              {active ? "Refresh restore" : "Restore memory"}
+                            </button>
+                          </div>
+                        ) : onRunReviewSurfaceAction && targetAction ? (
+                          <div className="windowing-card__actions">
+                            <button type="button" className="secondary-button" onClick={() => onRunReviewSurfaceAction(targetAction)}>
+                              {active ? "Refresh memory" : "Focus memory"}
+                            </button>
+                          </div>
+                        ) : null}
                       </div>
-                    ) : onRunReviewSurfaceAction && targetAction ? (
-                      <div className="windowing-card__actions">
-                        <button type="button" className="secondary-button" onClick={() => onRunReviewSurfaceAction(targetAction)}>
-                          {active ? "Refresh memory" : "Focus memory"}
-                        </button>
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })}
+                    );
+                  })
+                : null}
             </div>
+            {activeReplayScenarioPack ? (
+              <>
+                <div className="panel-title-row">
+                  <h3>Scenario Roster</h3>
+                  <span>{activeReplayScenarioPack.entries.length} cards</span>
+                </div>
+                <div className={compact ? "workflow-step-grid workflow-step-grid--compact" : "workflow-step-grid"}>
+                  {activeReplayScenarioPack.entries.map((entry) => {
+                    const targetAction = reviewSurfaceActionById.get(entry.targetActionId) ?? null;
+                    const scenarioRouteState = entry.routeStateId
+                      ? relevantCompanionRouteStates.find((routeState) => routeState.id === entry.routeStateId) ?? null
+                      : null;
+                    const scenarioStage = entry.deliveryChainStageId
+                      ? selectStudioReleaseDeliveryChainStage(pipeline, entry.deliveryChainStageId)
+                      : targetAction?.deliveryChainStageId
+                        ? selectStudioReleaseDeliveryChainStage(pipeline, targetAction.deliveryChainStageId)
+                        : null;
+                    const readyChecks = entry.acceptanceChecks?.filter((check) => check.state === "ready").length ?? 0;
+                    const active = entry.id === replayRestoreEntry?.id;
+
+                    return (
+                      <article
+                        key={entry.id}
+                        className={active ? "windowing-summary-card windowing-summary-card--active" : "windowing-summary-card"}
+                      >
+                        <span>{entry.timestampLabel}</span>
+                        <strong>{entry.scenarioLabel ?? entry.label}</strong>
+                        <p>{entry.scenarioSummary ?? entry.summary}</p>
+                        <div className="trace-note-links">
+                          <span className={`windowing-badge${active ? " windowing-badge--active" : ""}`}>
+                            {scenarioStage?.label ?? entry.deliveryChainStageId ?? "No stage"}
+                          </span>
+                          <span className="windowing-badge">{scenarioRouteState?.label ?? entry.routeStateId ?? "No route state"}</span>
+                          <span className="windowing-badge">
+                            {readyChecks} / {entry.acceptanceChecks?.length ?? 0} checks ready
+                          </span>
+                          <span className="windowing-badge">{entry.screenshotReviewItems?.length ?? 0} screenshot targets</span>
+                        </div>
+                        <div className="trace-note-links">
+                          <span className="windowing-badge">
+                            {entry.reviewerPosture ?? activeReplayScenarioPack.pack.reviewerPosture}
+                          </span>
+                          <span className="windowing-badge">
+                            {entry.evidencePosture ?? activeReplayScenarioPack.pack.evidencePosture}
+                          </span>
+                          <span className="windowing-badge">{formatCompanionRouteTransitionKind(entry.transitionKind)}</span>
+                        </div>
+                        {onRunCompanionRouteHistory ? (
+                          <div className="windowing-card__actions">
+                            <button type="button" className="secondary-button" onClick={() => onRunCompanionRouteHistory(entry.id)}>
+                              {active ? "Refresh scenario" : "Load scenario"}
+                            </button>
+                          </div>
+                        ) : onRunReviewSurfaceAction && targetAction ? (
+                          <div className="windowing-card__actions">
+                            <button type="button" className="secondary-button" onClick={() => onRunReviewSurfaceAction(targetAction)}>
+                              {active ? "Refresh scenario" : "Focus scenario"}
+                            </button>
+                          </div>
+                        ) : null}
+                      </article>
+                    );
+                  })}
+                </div>
+              </>
+            ) : null}
           </article>
         ) : null}
 

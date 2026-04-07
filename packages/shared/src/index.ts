@@ -998,6 +998,8 @@ export type StudioCommandCompanionReviewSequenceStepRole =
   | "follow-up-companion";
 export type StudioCommandCompanionRouteStatePosture = "active-route" | "alternate-route";
 export type StudioCommandCompanionRouteSequenceSwitchPosture = "active-sequence" | "switchable-sequence";
+export type StudioCommandReplayAcceptanceCheckState = "ready" | "watch" | "blocked";
+export type StudioCommandReplayScreenshotReviewPosture = "required" | "staged" | "linked";
 export type StudioCommandCompanionRouteTransitionKind =
   | "activate-route"
   | "switch-sequence"
@@ -1106,6 +1108,31 @@ export interface StudioCommandCompanionPathHandoff {
   stability: StudioCommandCompanionPathHandoffStability;
 }
 
+export interface StudioCommandReplayAcceptanceCheck {
+  id: string;
+  label: string;
+  detail: string;
+  state: StudioCommandReplayAcceptanceCheckState;
+}
+
+export interface StudioCommandReplayScreenshotReviewItem {
+  id: string;
+  label: string;
+  surface: string;
+  posture: StudioCommandReplayScreenshotReviewPosture;
+  detail: string;
+}
+
+export interface StudioCommandReplayScenarioPack {
+  id: string;
+  label: string;
+  summary: string;
+  reviewerPosture: string;
+  evidencePosture: string;
+  acceptancePosture: string;
+  safety: "local-only";
+}
+
 export interface StudioCommandCompanionRouteHistoryEntry {
   id: string;
   label: string;
@@ -1126,6 +1153,12 @@ export interface StudioCommandCompanionRouteHistoryEntry {
   orchestrationBoardId?: string;
   observabilityMappingId?: string;
   timestampLabel: string;
+  scenarioLabel?: string;
+  scenarioSummary?: string;
+  reviewerPosture?: string;
+  evidencePosture?: string;
+  acceptanceChecks?: StudioCommandReplayAcceptanceCheck[];
+  screenshotReviewItems?: StudioCommandReplayScreenshotReviewItem[];
 }
 
 export interface StudioCommandActionDeckLane {
@@ -1148,6 +1181,7 @@ export interface StudioCommandActionDeckLane {
   focusOrchestrationBoardId?: string;
   observabilityMappingIds?: string[];
   focusObservabilityMappingId?: string;
+  replayScenarioPack?: StudioCommandReplayScenarioPack;
   companionSequences?: StudioCommandCompanionReviewSequence[];
   companionReviewPaths?: StudioCommandCompanionReviewPath[];
   companionRouteStates?: StudioCommandCompanionRouteState[];
