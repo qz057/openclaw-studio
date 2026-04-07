@@ -2875,7 +2875,7 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase60 slice 35 keeps replay, review-state continuity, packaged-app materialization task-state linkage, validator / observability bridge readouts, a materialization Stage C readout chain, and typed Stage C readiness threaded through one local-only chain, so the active review surface, packet handoff, window / lane / board spine, reviewer queue, closeout timing, current task evidence, approval workflow stages, checkpoint linkage, rollback contracts, boundary handoff posture, materialization roots, staged-output handoff, bundle-sealing posture, and cross-window validator linkage stay readable without installing, publishing, signing, or enabling host-side execution."
+        "Phase60 slice 36 keeps replay, review-state continuity, packaged-app materialization task-state linkage, validator / observability bridge readouts, a materialization Stage C readout chain, and typed Stage C readiness threaded through one local-only chain, so the active review surface, packet handoff, window / lane / board spine, reviewer queue, closeout timing, current task evidence, approval workflow stages, checkpoint linkage, rollback contracts, boundary handoff posture, materialization roots, staged-output handoff, bundle-sealing posture, and cross-window validator linkage stay readable without installing, publishing, signing, or enabling host-side execution."
     }
   ];
   const buildPaletteEntryDetailLines = (
@@ -4393,7 +4393,7 @@ export function App() {
                   <h2>Delivery-chain Workspace</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but phase60 slice 35 now keeps the review-only delivery chain anchored in a
+                  The alpha shell still does not build a real installer, but phase60 slice 36 now keeps the review-only delivery chain anchored in a
                   usable stage explorer plus route replay board, screenshot-driven acceptance review pack, explicit acceptance pass progression,
                   screenshot pass records, a Reviewer Flow Ladder, an Acceptance Reading Queue, a Reviewer Signoff Board, a Signoff Readiness Queue, a
                   Final Review Closeout, a Final Review Settlement, a Final Verdict Console, an Acceptance Closeout Timeline, a Pack Closeout Board, an
@@ -4505,7 +4505,7 @@ export function App() {
             onRunCompanionRouteHistory={handleRunCompanionRouteHistory}
             eyebrow="Phase60"
             title="Delivery-chain Workspace"
-            summary="Phase60 slice35 keeps the selector-backed review-state continuity contract and Stage C readiness chain in place, then deepens the same Stage Explorer with a materialization Stage C readout chain so the active local review packet handoff, validator surface match, continuity spine, and nearby QA / approval / entry / rollback posture can be re-read across the same local-only window/lane/board spine."
+            summary="Phase60 slice36 keeps the selector-backed review-state continuity contract and Stage C readiness chain in place, then deepens the same Stage Explorer with a materialization Stage C readout chain so the active local review packet handoff, validator surface match, continuity spine, and nearby QA / approval / entry / rollback posture can be re-read across the same local-only window/lane/board spine."
           />
 
           <section className="surface card window-workbench">
