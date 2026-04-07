@@ -14,7 +14,7 @@ import { mockBoundarySummary } from "./mock-host.js";
 const mockCommandSurface: StudioCommandSurface = {
   title: "Command Palette",
   summary:
-    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, typed companion review-path orchestration, ordered companion review sequences, review-surface coverage pivots, multi-window review coverage, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
+    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, typed companion review-path orchestration, ordered companion review sequences, typed companion route states, explicit active/alternate routes, switchable sequence posture, review-surface coverage pivots, multi-window review coverage, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
   placeholder: "Search orchestration, delivery coverage, observability, navigation, next steps, flow state, detached workspace, or keyboard routes",
   quickActionIds: [
     "command-open-home",
@@ -903,7 +903,7 @@ const mockCommandSurface: StudioCommandSurface = {
       id: "deck-review-deck-orchestration",
       label: "Review Deck Orchestration Deck",
       summary:
-        "Review-deck posture now carries a dedicated local-only action deck so workspace entry, review-workspace intent, delivery-stage coverage, typed companion review-path orchestration, review-surface pivots, multi-window review coverage, and cross-window handoff coverage stay grouped instead of being inferred from separate cards.",
+        "Review-deck posture now carries a dedicated local-only action deck so workspace entry, review-workspace intent, delivery-stage coverage, typed companion review-path orchestration, delivery-gate companion sequence switching, review-surface pivots, multi-window review coverage, and cross-window handoff coverage stay grouped instead of being inferred from separate cards.",
       tone: "positive",
       flowId: "flow-review-deck-coverage",
       sequenceId: "sequence-review-coverage-flow",
@@ -975,6 +975,45 @@ const mockCommandSurface: StudioCommandSurface = {
               primaryActionId: "command-focus-publish-decision-gate",
               followUpActionIds: ["command-focus-approval-reviewer-queue"]
             }
+          ],
+          companionRouteStates: [
+            {
+              id: "companion-route-state-lifecycle-packet",
+              label: "Lifecycle Packet Active Route",
+              summary:
+                "Keep the lifecycle packet as the active route while publish gate and approval queue stay sequenced under the same review workspace entry instead of collapsing into one flat jump.",
+              tone: "warning",
+              posture: "active-route",
+              sourceActionId: "command-focus-lifecycle-review-packet",
+              currentActionId: "command-focus-lifecycle-review-packet",
+              routeActionIds: [
+                "command-focus-lifecycle-review-packet",
+                "command-focus-publish-decision-gate",
+                "command-focus-approval-reviewer-queue"
+              ],
+              workspaceViewId: "review-deck",
+              windowIntentId: "window-intent-review-workspace",
+              deliveryChainStageId: "delivery-chain-promotion-readiness",
+              windowId: "window-review-board",
+              sharedStateLaneId: "shared-state-lane-preview-review",
+              orchestrationBoardId: "orchestration-board-preview-review",
+              observabilityMappingId: "observability-mapping-lifecycle-preview",
+              activeSequenceId: "companion-sequence-lifecycle-gate-coverage",
+              activeReviewPathId: "companion-path-lifecycle-packet-publish-gate",
+              sequenceSwitches: [
+                {
+                  id: "companion-route-switch-lifecycle-packet",
+                  label: "Lifecycle gate route",
+                  summary:
+                    "Keep the lifecycle packet current while publish gate and approval queue remain sequenced from the same local-only review route.",
+                  tone: "warning",
+                  posture: "active-sequence",
+                  sequenceId: "companion-sequence-lifecycle-gate-coverage",
+                  targetActionId: "command-focus-lifecycle-review-packet",
+                  reviewPathId: "companion-path-lifecycle-packet-publish-gate"
+                }
+              ]
+            }
           ]
         },
         {
@@ -1023,9 +1062,9 @@ const mockCommandSurface: StudioCommandSurface = {
           companionSequences: [
             {
               id: "companion-sequence-delivery-gate-loop",
-              label: "Delivery Gate Coverage Loop",
+              label: "Publish Gate Decision Loop",
               summary:
-                "Sequence publish gate, approval queue, and rollback closeout so the current review surface can move across downstream decision coverage without losing the same local-only lane.",
+                "Anchor the sequence on the publish gate so final go/no-go review can step forward into reviewer ownership and rollback shadow coverage without losing the same local-only lane.",
               tone: "warning",
               steps: [
                 {
@@ -1045,6 +1084,60 @@ const mockCommandSurface: StudioCommandSurface = {
                   actionId: "command-focus-rollback-closeout-window",
                   role: "follow-up-companion",
                   summary: "Keep rollback closeout visible as the trailing recovery step behind the same decision chain."
+                }
+              ]
+            },
+            {
+              id: "companion-sequence-delivery-queue-handoff",
+              label: "Approval Queue Handoff Loop",
+              summary:
+                "Anchor the sequence on the active approval queue so reviewer ownership can hand back into the publish gate while rollback shadow coverage stays attached to the same cross-window path.",
+              tone: "warning",
+              steps: [
+                {
+                  id: "companion-sequence-step-delivery-queue-current",
+                  actionId: "command-focus-approval-reviewer-queue",
+                  role: "current-review-surface",
+                  summary: "Treat the approval queue as the current surface while reviewer ownership and acknowledgement posture stay active."
+                },
+                {
+                  id: "companion-sequence-step-delivery-queue-publish-gate",
+                  actionId: "command-focus-publish-decision-gate",
+                  role: "primary-companion",
+                  summary: "Lift the publish gate back into the primary slot so the live decision gate stays paired with the current queue owner."
+                },
+                {
+                  id: "companion-sequence-step-delivery-queue-rollback-closeout",
+                  actionId: "command-focus-rollback-closeout-window",
+                  role: "follow-up-companion",
+                  summary: "Keep rollback closeout visible behind the queue handoff so downstream recovery posture never drops out of the same path."
+                }
+              ]
+            },
+            {
+              id: "companion-sequence-delivery-rollback-shadow",
+              label: "Rollback Shadow Recovery Loop",
+              summary:
+                "Anchor the sequence on rollback closeout so recovery shadow review can step back into the publish gate and approval queue without losing the same local-only lane.",
+              tone: "warning",
+              steps: [
+                {
+                  id: "companion-sequence-step-delivery-rollback-current",
+                  actionId: "command-focus-rollback-closeout-window",
+                  role: "current-review-surface",
+                  summary: "Treat rollback closeout as the current surface while recovery timing and acknowledgement shadow remain active."
+                },
+                {
+                  id: "companion-sequence-step-delivery-rollback-publish-gate",
+                  actionId: "command-focus-publish-decision-gate",
+                  role: "primary-companion",
+                  summary: "Lift the publish gate into the next slot so the live decision gate stays attached to the recovery shadow."
+                },
+                {
+                  id: "companion-sequence-step-delivery-rollback-reviewer-queue",
+                  actionId: "command-focus-approval-reviewer-queue",
+                  role: "follow-up-companion",
+                  summary: "Keep the approval queue nearby so reviewer ownership remains visible behind the rollback shadow route."
                 }
               ]
             }
@@ -1069,7 +1162,7 @@ const mockCommandSurface: StudioCommandSurface = {
                 "When the approval queue is current, promote the publish decision gate to the primary companion so reviewer ownership, final gating, and rollback shadow coverage remain visible as one review path.",
               tone: "warning",
               kind: "stage-companion",
-              sequenceId: "companion-sequence-delivery-gate-loop",
+              sequenceId: "companion-sequence-delivery-queue-handoff",
               sourceActionId: "command-focus-approval-reviewer-queue",
               primaryActionId: "command-focus-publish-decision-gate",
               followUpActionIds: ["command-focus-rollback-closeout-window"]
@@ -1081,10 +1174,189 @@ const mockCommandSurface: StudioCommandSurface = {
                 "When rollback closeout is current, lift the publish decision gate back into the primary companion slot and keep the approval queue nearby so recovery posture never detaches from the live decision gate review.",
               tone: "warning",
               kind: "rollback-companion",
-              sequenceId: "companion-sequence-delivery-gate-loop",
+              sequenceId: "companion-sequence-delivery-rollback-shadow",
               sourceActionId: "command-focus-rollback-closeout-window",
               primaryActionId: "command-focus-publish-decision-gate",
               followUpActionIds: ["command-focus-approval-reviewer-queue"]
+            }
+          ],
+          companionRouteStates: [
+            {
+              id: "companion-route-state-publish-gate",
+              label: "Publish Gate Active Route",
+              summary:
+                "Treat the publish decision gate as the active route so approval queue and rollback shadow coverage can switch in without dropping the same review-deck lane, window, board, or observability posture.",
+              tone: "warning",
+              posture: "active-route",
+              sourceActionId: "command-focus-publish-decision-gate",
+              currentActionId: "command-focus-publish-decision-gate",
+              routeActionIds: [
+                "command-focus-publish-decision-gate",
+                "command-focus-approval-reviewer-queue",
+                "command-focus-rollback-closeout-window"
+              ],
+              workspaceViewId: "review-deck",
+              windowIntentId: "window-intent-review-workspace",
+              deliveryChainStageId: "delivery-chain-publish-decision",
+              windowId: "window-shell-main",
+              sharedStateLaneId: "shared-state-lane-boundary-review",
+              orchestrationBoardId: "orchestration-board-boundary-review",
+              observabilityMappingId: "observability-mapping-final-gate",
+              activeSequenceId: "companion-sequence-delivery-gate-loop",
+              activeReviewPathId: "companion-path-publish-gate-reviewer-queue",
+              sequenceSwitches: [
+                {
+                  id: "companion-route-switch-publish-gate-active",
+                  label: "Publish gate decision loop",
+                  summary:
+                    "Keep the publish gate current so final go/no-go review stays attached to the same delivery coverage route.",
+                  tone: "warning",
+                  posture: "active-sequence",
+                  sequenceId: "companion-sequence-delivery-gate-loop",
+                  targetActionId: "command-focus-publish-decision-gate",
+                  reviewPathId: "companion-path-publish-gate-reviewer-queue"
+                },
+                {
+                  id: "companion-route-switch-publish-gate-queue",
+                  label: "Switch to approval queue route",
+                  summary:
+                    "Move the current route over to the approval queue so reviewer ownership becomes the active sequence anchor.",
+                  tone: "warning",
+                  posture: "switchable-sequence",
+                  sequenceId: "companion-sequence-delivery-queue-handoff",
+                  targetActionId: "command-focus-approval-reviewer-queue",
+                  reviewPathId: "companion-path-reviewer-queue-publish-gate"
+                },
+                {
+                  id: "companion-route-switch-publish-gate-rollback",
+                  label: "Switch to rollback shadow route",
+                  summary:
+                    "Move the current route over to rollback closeout so recovery shadow review becomes the active sequence anchor.",
+                  tone: "warning",
+                  posture: "switchable-sequence",
+                  sequenceId: "companion-sequence-delivery-rollback-shadow",
+                  targetActionId: "command-focus-rollback-closeout-window",
+                  reviewPathId: "companion-path-rollback-closeout-publish-gate"
+                }
+              ]
+            },
+            {
+              id: "companion-route-state-approval-queue",
+              label: "Approval Queue Alternate Route",
+              summary:
+                "Treat the approval queue as the active route so reviewer ownership can hand back into the publish gate while rollback shadow coverage remains nearby as an alternate review route.",
+              tone: "warning",
+              posture: "alternate-route",
+              sourceActionId: "command-focus-approval-reviewer-queue",
+              currentActionId: "command-focus-approval-reviewer-queue",
+              routeActionIds: [
+                "command-focus-approval-reviewer-queue",
+                "command-focus-publish-decision-gate",
+                "command-focus-rollback-closeout-window"
+              ],
+              workspaceViewId: "review-deck",
+              windowIntentId: "window-intent-review-workspace",
+              deliveryChainStageId: "delivery-chain-operator-review",
+              windowId: "window-trace-review",
+              sharedStateLaneId: "shared-state-lane-trace-review",
+              orchestrationBoardId: "orchestration-board-trace-review",
+              observabilityMappingId: "observability-mapping-approval-active",
+              activeSequenceId: "companion-sequence-delivery-queue-handoff",
+              activeReviewPathId: "companion-path-reviewer-queue-publish-gate",
+              sequenceSwitches: [
+                {
+                  id: "companion-route-switch-approval-queue-active",
+                  label: "Approval queue handoff loop",
+                  summary:
+                    "Keep the approval queue current so reviewer ownership remains the active sequence anchor on the same review route.",
+                  tone: "warning",
+                  posture: "active-sequence",
+                  sequenceId: "companion-sequence-delivery-queue-handoff",
+                  targetActionId: "command-focus-approval-reviewer-queue",
+                  reviewPathId: "companion-path-reviewer-queue-publish-gate"
+                },
+                {
+                  id: "companion-route-switch-approval-queue-publish",
+                  label: "Switch to publish gate route",
+                  summary:
+                    "Move the active route back to the publish gate without dropping the same delivery coverage context.",
+                  tone: "warning",
+                  posture: "switchable-sequence",
+                  sequenceId: "companion-sequence-delivery-gate-loop",
+                  targetActionId: "command-focus-publish-decision-gate",
+                  reviewPathId: "companion-path-publish-gate-reviewer-queue"
+                },
+                {
+                  id: "companion-route-switch-approval-queue-rollback",
+                  label: "Switch to rollback shadow route",
+                  summary:
+                    "Move the active route over to rollback closeout so the same cross-window coverage can pivot into recovery posture.",
+                  tone: "warning",
+                  posture: "switchable-sequence",
+                  sequenceId: "companion-sequence-delivery-rollback-shadow",
+                  targetActionId: "command-focus-rollback-closeout-window",
+                  reviewPathId: "companion-path-rollback-closeout-publish-gate"
+                }
+              ]
+            },
+            {
+              id: "companion-route-state-rollback-shadow",
+              label: "Rollback Shadow Alternate Route",
+              summary:
+                "Treat rollback closeout as the active route so recovery shadow review can hand back into the publish gate and approval queue without losing the same delivery coverage chain.",
+              tone: "warning",
+              posture: "alternate-route",
+              sourceActionId: "command-focus-rollback-closeout-window",
+              currentActionId: "command-focus-rollback-closeout-window",
+              routeActionIds: [
+                "command-focus-rollback-closeout-window",
+                "command-focus-publish-decision-gate",
+                "command-focus-approval-reviewer-queue"
+              ],
+              workspaceViewId: "review-deck",
+              windowIntentId: "window-intent-review-workspace",
+              deliveryChainStageId: "delivery-chain-rollback-readiness",
+              windowId: "window-trace-review",
+              sharedStateLaneId: "shared-state-lane-trace-review",
+              orchestrationBoardId: "orchestration-board-trace-review",
+              observabilityMappingId: "observability-mapping-rollback-shadow",
+              activeSequenceId: "companion-sequence-delivery-rollback-shadow",
+              activeReviewPathId: "companion-path-rollback-closeout-publish-gate",
+              sequenceSwitches: [
+                {
+                  id: "companion-route-switch-rollback-shadow-active",
+                  label: "Rollback shadow recovery loop",
+                  summary:
+                    "Keep rollback closeout current so recovery shadow posture remains the active sequence anchor on the same review route.",
+                  tone: "warning",
+                  posture: "active-sequence",
+                  sequenceId: "companion-sequence-delivery-rollback-shadow",
+                  targetActionId: "command-focus-rollback-closeout-window",
+                  reviewPathId: "companion-path-rollback-closeout-publish-gate"
+                },
+                {
+                  id: "companion-route-switch-rollback-shadow-publish",
+                  label: "Switch to publish gate route",
+                  summary:
+                    "Move the active route back to the publish gate so the live decision gate becomes the sequence anchor again.",
+                  tone: "warning",
+                  posture: "switchable-sequence",
+                  sequenceId: "companion-sequence-delivery-gate-loop",
+                  targetActionId: "command-focus-publish-decision-gate",
+                  reviewPathId: "companion-path-publish-gate-reviewer-queue"
+                },
+                {
+                  id: "companion-route-switch-rollback-shadow-queue",
+                  label: "Switch to approval queue route",
+                  summary:
+                    "Move the active route over to the approval queue so reviewer ownership becomes the sequence anchor again.",
+                  tone: "warning",
+                  posture: "switchable-sequence",
+                  sequenceId: "companion-sequence-delivery-queue-handoff",
+                  targetActionId: "command-focus-approval-reviewer-queue",
+                  reviewPathId: "companion-path-reviewer-queue-publish-gate"
+                }
+              ]
             }
           ]
         },
@@ -1175,6 +1447,84 @@ const mockCommandSurface: StudioCommandSurface = {
               sourceActionId: "command-focus-approval-evidence-closeout",
               primaryActionId: "command-focus-approval-decision-handoff",
               followUpActionIds: ["command-focus-publish-decision-gate"]
+            }
+          ],
+          companionRouteStates: [
+            {
+              id: "companion-route-state-decision-handoff",
+              label: "Decision Handoff Active Route",
+              summary:
+                "Keep decision handoff as the active route so evidence closeout, reviewer queue, and publish gate stay sequenced from the same trace-owned stabilization lane.",
+              tone: "warning",
+              posture: "active-route",
+              sourceActionId: "command-focus-approval-decision-handoff",
+              currentActionId: "command-focus-approval-decision-handoff",
+              routeActionIds: [
+                "command-focus-approval-decision-handoff",
+                "command-focus-approval-evidence-closeout",
+                "command-focus-approval-reviewer-queue",
+                "command-focus-publish-decision-gate"
+              ],
+              workspaceViewId: "review-deck",
+              windowIntentId: "window-intent-review-workspace",
+              deliveryChainStageId: "delivery-chain-operator-review",
+              windowId: "window-trace-review",
+              sharedStateLaneId: "shared-state-lane-trace-review",
+              orchestrationBoardId: "orchestration-board-trace-review",
+              observabilityMappingId: "observability-mapping-approval-active",
+              activeSequenceId: "companion-sequence-handoff-stabilization",
+              activeReviewPathId: "companion-path-decision-handoff-evidence-closeout",
+              sequenceSwitches: [
+                {
+                  id: "companion-route-switch-decision-handoff",
+                  label: "Handoff stabilization relay",
+                  summary:
+                    "Keep decision handoff current while evidence closeout, reviewer ownership, and publish posture remain visible on the same relay.",
+                  tone: "warning",
+                  posture: "active-sequence",
+                  sequenceId: "companion-sequence-handoff-stabilization",
+                  targetActionId: "command-focus-approval-decision-handoff",
+                  reviewPathId: "companion-path-decision-handoff-evidence-closeout"
+                }
+              ]
+            },
+            {
+              id: "companion-route-state-evidence-closeout",
+              label: "Evidence Closeout Alternate Route",
+              summary:
+                "Treat evidence closeout as an alternate route so sealing posture can become current without dropping the same handoff stabilization relay.",
+              tone: "warning",
+              posture: "alternate-route",
+              sourceActionId: "command-focus-approval-evidence-closeout",
+              currentActionId: "command-focus-approval-evidence-closeout",
+              routeActionIds: [
+                "command-focus-approval-evidence-closeout",
+                "command-focus-approval-decision-handoff",
+                "command-focus-approval-reviewer-queue",
+                "command-focus-publish-decision-gate"
+              ],
+              workspaceViewId: "review-deck",
+              windowIntentId: "window-intent-review-workspace",
+              deliveryChainStageId: "delivery-chain-operator-review",
+              windowId: "window-trace-review",
+              sharedStateLaneId: "shared-state-lane-trace-review",
+              orchestrationBoardId: "orchestration-board-trace-review",
+              observabilityMappingId: "observability-mapping-approval-active",
+              activeSequenceId: "companion-sequence-handoff-stabilization",
+              activeReviewPathId: "companion-path-evidence-closeout-decision-handoff",
+              sequenceSwitches: [
+                {
+                  id: "companion-route-switch-evidence-closeout",
+                  label: "Handoff stabilization relay",
+                  summary:
+                    "Keep evidence closeout current while decision handoff, reviewer ownership, and publish posture remain visible on the same relay.",
+                  tone: "warning",
+                  posture: "active-sequence",
+                  sequenceId: "companion-sequence-handoff-stabilization",
+                  targetActionId: "command-focus-approval-evidence-closeout",
+                  reviewPathId: "companion-path-evidence-closeout-decision-handoff"
+                }
+              ]
             }
           ]
         }

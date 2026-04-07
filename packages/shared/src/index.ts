@@ -996,6 +996,8 @@ export type StudioCommandCompanionReviewSequenceStepRole =
   | "current-review-surface"
   | "primary-companion"
   | "follow-up-companion";
+export type StudioCommandCompanionRouteStatePosture = "active-route" | "alternate-route";
+export type StudioCommandCompanionRouteSequenceSwitchPosture = "active-sequence" | "switchable-sequence";
 
 export interface StudioCommandNextStep {
   id: string;
@@ -1043,6 +1045,39 @@ export interface StudioCommandCompanionReviewSequence {
   steps: StudioCommandCompanionReviewSequenceStep[];
 }
 
+export interface StudioCommandCompanionRouteSequenceSwitch {
+  id: string;
+  label: string;
+  summary: string;
+  tone: StudioTone;
+  posture: StudioCommandCompanionRouteSequenceSwitchPosture;
+  sequenceId: string;
+  targetActionId: string;
+  reviewPathId?: string;
+}
+
+export interface StudioCommandCompanionRouteState {
+  id: string;
+  label: string;
+  summary: string;
+  tone: StudioTone;
+  posture: StudioCommandCompanionRouteStatePosture;
+  sourceActionId: string;
+  currentActionId: string;
+  routeActionIds: string[];
+  routeId?: StudioPageId;
+  workspaceViewId?: StudioWorkspaceViewId;
+  windowIntentId?: string;
+  deliveryChainStageId?: string;
+  windowId?: string;
+  sharedStateLaneId?: string;
+  orchestrationBoardId?: string;
+  observabilityMappingId?: string;
+  activeSequenceId: string;
+  activeReviewPathId?: string;
+  sequenceSwitches: StudioCommandCompanionRouteSequenceSwitch[];
+}
+
 export interface StudioCommandActionDeckLane {
   id: string;
   label: string;
@@ -1065,6 +1100,7 @@ export interface StudioCommandActionDeckLane {
   focusObservabilityMappingId?: string;
   companionSequences?: StudioCommandCompanionReviewSequence[];
   companionReviewPaths?: StudioCommandCompanionReviewPath[];
+  companionRouteStates?: StudioCommandCompanionRouteState[];
 }
 
 export interface StudioCommandActionDeck {

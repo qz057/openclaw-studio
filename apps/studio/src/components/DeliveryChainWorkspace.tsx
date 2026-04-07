@@ -14,6 +14,7 @@ import {
   type StudioReleaseReviewerQueueStatus,
   type StudioShellState
 } from "@openclaw/shared";
+import { resolveCompanionRouteContext, type ReviewCoverageAction } from "../reviewCoverageRouteState";
 
 interface DeliveryChainWorkspaceProps {
   pipeline: StudioReleaseApprovalPipeline;
@@ -21,9 +22,12 @@ interface DeliveryChainWorkspaceProps {
   actionDeck?: StudioCommandActionDeck | null;
   reviewSurfaceActions?: StudioCommandAction[];
   activeReviewSurfaceActionId?: string | null;
+  activeCompanionRouteStateId?: string | null;
+  activeCompanionSequenceId?: string | null;
   selectedStageId?: string | null;
   onSelectStage?: (stageId: string) => void;
   onRunReviewSurfaceAction?: (action: StudioCommandAction) => void;
+  onRunCompanionSequence?: (sequenceId: string) => void;
   compact?: boolean;
   nested?: boolean;
   eyebrow?: string;
@@ -162,6 +166,39 @@ function formatCompanionReviewSequenceStepRole(
   }
 }
 
+function formatCompanionRouteStatePosture(
+  posture: NonNullable<StudioCommandActionDeck["lanes"][number]["companionRouteStates"]>[number]["posture"]
+): string {
+  return posture === "active-route" ? "Active route" : "Alternate route";
+}
+
+function formatCompanionRouteSequenceSwitchPosture(
+  posture: NonNullable<
+    NonNullable<StudioCommandActionDeck["lanes"][number]["companionRouteStates"]>[number]["sequenceSwitches"][number]["posture"]
+  >
+): string {
+  return posture === "active-sequence" ? "Active sequence" : "Switchable sequence";
+}
+
+function formatCompanionRouteState(action: StudioCommandAction | null | undefined, windowing?: StudioShellState["windowing"]): string {
+  const linkedIntent = action?.windowIntentId
+    ? windowing?.windowIntents.find((entry) => entry.id === action.windowIntentId) ?? null
+    : null;
+  const routeId = linkedIntent?.shellLink.pageId ?? action?.routeId ?? "No route";
+  const workspaceViewId = linkedIntent?.workspaceViewId ?? action?.workspaceViewId ?? "No workspace";
+  const intentLabel = linkedIntent?.label ?? action?.windowIntentId ?? "No intent";
+
+  return `${routeId} / ${workspaceViewId} / ${intentLabel}`;
+}
+
+function isReviewCoverageAction(
+  action: StudioCommandAction | undefined
+): action is StudioCommandAction & {
+  kind: "focus-review-coverage";
+} {
+  return Boolean(action && action.kind === "focus-review-coverage");
+}
+
 function formatReviewPostureRelationship(
   relationship: StudioShellState["windowing"]["observability"]["mappings"][number]["relationship"]
 ): string {
@@ -253,9 +290,12 @@ export function DeliveryChainWorkspace({
   actionDeck,
   reviewSurfaceActions = [],
   activeReviewSurfaceActionId,
+  activeCompanionRouteStateId,
+  activeCompanionSequenceId,
   selectedStageId: controlledStageId,
   onSelectStage,
   onRunReviewSurfaceAction,
+  onRunCompanionSequence,
   compact = false,
   nested = false,
   eyebrow = "Delivery",
@@ -334,7 +374,9 @@ export function DeliveryChainWorkspace({
     selectedReviewerQueue?.entries.find((entry) => entry.id === selectedReviewerQueue.activeEntryId) ?? selectedReviewerQueue?.entries[0] ?? null;
   const publishStage = selectStudioReleaseDeliveryChainStage(pipeline, "delivery-chain-publish-decision") ?? null;
   const rollbackStage = selectStudioReleaseDeliveryChainStage(pipeline, "delivery-chain-rollback-readiness") ?? null;
-  const stageReviewSurfaceActions = reviewSurfaceActions.filter((action) => action.deliveryChainStageId === selectedDeliveryStage?.id);
+  const stageReviewSurfaceActions = reviewSurfaceActions
+    .filter(isReviewCoverageAction)
+    .filter((action) => action.deliveryChainStageId === selectedDeliveryStage?.id);
   const activeStageReviewSurfaceAction =
     stageReviewSurfaceActions.find((action) => action.id === activeReviewSurfaceActionId) ?? stageReviewSurfaceActions[0] ?? null;
   const relevantActionDeckLanes =
@@ -343,46 +385,23 @@ export function DeliveryChainWorkspace({
   const relevantActionDeckWindowIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => lane.windowIds ?? []))];
   const relevantActionDeckBoardIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => lane.orchestrationBoardIds ?? []))];
   const relevantActionDeckSequenceIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => (lane.companionSequences ?? []).map((sequence) => sequence.id)))];
-  const reviewSurfaceActionById = new Map(reviewSurfaceActions.map((action) => [action.id, action]));
-  const relevantCompanionSequences = relevantActionDeckLanes
-    .flatMap((lane) => lane.companionSequences ?? [])
-    .filter((sequence, index, sequences) => sequences.findIndex((entry) => entry.id === sequence.id) === index)
-    .filter((sequence) => {
-      const linkedActions = sequence.steps
-        .map((step) => reviewSurfaceActionById.get(step.actionId))
-        .filter((action): action is StudioCommandAction => Boolean(action));
-
-      return linkedActions.some((action) => action.deliveryChainStageId === selectedDeliveryStage?.id) || sequence.steps.some((step) => step.actionId === activeStageReviewSurfaceAction?.id);
-    })
-    .sort(
-      (left, right) =>
-        Number(right.steps.some((step) => step.actionId === activeStageReviewSurfaceAction?.id)) -
-        Number(left.steps.some((step) => step.actionId === activeStageReviewSurfaceAction?.id))
-    );
-  const activeCompanionSequence =
-    relevantCompanionSequences.find((sequence) => sequence.steps.some((step) => step.actionId === activeStageReviewSurfaceAction?.id)) ??
-    relevantCompanionSequences[0] ??
-    null;
-  const relevantCompanionReviewPaths = relevantActionDeckLanes
-    .flatMap((lane) => lane.companionReviewPaths ?? [])
-    .filter((path, index, paths) => paths.findIndex((entry) => entry.id === path.id) === index)
-    .filter((path) => {
-      const linkedActions = [path.sourceActionId, path.primaryActionId, ...(path.followUpActionIds ?? [])]
-        .map((actionId) => reviewSurfaceActionById.get(actionId))
-        .filter((action): action is StudioCommandAction => Boolean(action));
-
-      return linkedActions.some((action) => action.deliveryChainStageId === selectedDeliveryStage?.id) || path.sourceActionId === activeStageReviewSurfaceAction?.id;
-    });
-  const activeCompanionReviewPaths = relevantCompanionReviewPaths.filter((path) => path.sourceActionId === activeStageReviewSurfaceAction?.id);
-  const resolvedCompanionReviewPaths = activeCompanionReviewPaths.length
-    ? activeCompanionReviewPaths
-    : activeCompanionSequence
-      ? relevantCompanionReviewPaths.filter((path) => path.sequenceId === activeCompanionSequence.id)
-      : relevantCompanionReviewPaths;
-  const activeCompanionReviewPath =
-    resolvedCompanionReviewPaths.find((path) => path.sourceActionId === activeStageReviewSurfaceAction?.id) ?? resolvedCompanionReviewPaths[0] ?? null;
-  const activeCompanionSequenceCurrentStepIndex =
-    activeCompanionSequence?.steps.findIndex((step) => step.actionId === activeStageReviewSurfaceAction?.id) ?? -1;
+  const {
+    reviewSurfaceActionById,
+    relevantCompanionSequences,
+    activeCompanionSequence,
+    activeCompanionSequenceCurrentStepIndex,
+    resolvedCompanionReviewPaths,
+    activeCompanionReviewPath,
+    relevantCompanionRouteStates,
+    activeCompanionRouteState
+  } = resolveCompanionRouteContext({
+    lanes: relevantActionDeckLanes,
+    contextReviewSurfaceActions: stageReviewSurfaceActions,
+    allReviewSurfaceActions: reviewSurfaceActions.filter(isReviewCoverageAction),
+    activeReviewSurfaceActionId: activeStageReviewSurfaceAction?.id ?? null,
+    companionRouteStateId: activeCompanionRouteStateId,
+    companionSequenceId: activeCompanionSequenceId
+  });
   const panelClassName = [
     nested ? "delivery-chain-workspace delivery-chain-workspace--nested" : "surface card delivery-chain-workspace",
     compact ? "delivery-chain-workspace--compact" : ""
@@ -760,6 +779,120 @@ export function DeliveryChainWorkspace({
           </article>
         ) : null}
 
+        {activeCompanionRouteState ? (
+          <article className="windowing-summary-card">
+            <span>Companion Route State</span>
+            <strong>{activeCompanionRouteState.label}</strong>
+            <p>
+              The selected stage now resolves through an explicit companion route state, so active route, alternate routes, and switchable sequence
+              posture stay attached to the same local-only review coverage chain.
+            </p>
+            <div className="workflow-readiness-list">
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Route posture</span>
+                <strong>{formatCompanionRouteStatePosture(activeCompanionRouteState.posture)}</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Alternate routes</span>
+                <strong>{Math.max(relevantCompanionRouteStates.length - 1, 0)} linked routes</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Switchable sequences</span>
+                <strong>
+                  {
+                    activeCompanionRouteState.sequenceSwitches.filter((switchItem) => switchItem.posture === "switchable-sequence").length
+                  }{" "}
+                  switch targets
+                </strong>
+              </div>
+            </div>
+            <div className="windowing-preview-list">
+              {(compact ? relevantCompanionRouteStates.slice(0, 2) : relevantCompanionRouteStates).map((routeState) => {
+                const routeAction = reviewSurfaceActionById.get(routeState.currentActionId) ?? null;
+                const routeStage = routeState.deliveryChainStageId
+                  ? selectStudioReleaseDeliveryChainStage(pipeline, routeState.deliveryChainStageId)
+                  : routeAction?.deliveryChainStageId
+                    ? selectStudioReleaseDeliveryChainStage(pipeline, routeAction.deliveryChainStageId)
+                    : null;
+                const routeWindow = routeState.windowId
+                  ? windowing?.roster.windows.find((entry) => entry.id === routeState.windowId) ?? null
+                  : routeAction?.windowId
+                    ? windowing?.roster.windows.find((entry) => entry.id === routeAction.windowId) ?? null
+                    : null;
+                const routeLane = routeState.sharedStateLaneId
+                  ? windowing?.sharedState.lanes.find((entry) => entry.id === routeState.sharedStateLaneId) ?? null
+                  : routeAction?.sharedStateLaneId
+                    ? windowing?.sharedState.lanes.find((entry) => entry.id === routeAction.sharedStateLaneId) ?? null
+                    : null;
+                const routeBoard = routeState.orchestrationBoardId
+                  ? windowing?.orchestration.boards.find((entry) => entry.id === routeState.orchestrationBoardId) ?? null
+                  : routeAction?.orchestrationBoardId
+                    ? windowing?.orchestration.boards.find((entry) => entry.id === routeAction.orchestrationBoardId) ?? null
+                    : null;
+                const routeMapping = routeState.observabilityMappingId
+                  ? windowing?.observability.mappings.find((entry) => entry.id === routeState.observabilityMappingId) ?? null
+                  : routeAction?.observabilityMappingId
+                    ? windowing?.observability.mappings.find((entry) => entry.id === routeAction.observabilityMappingId) ?? null
+                    : null;
+                const routeSequence = relevantCompanionSequences.find((sequence) => sequence.id === routeState.activeSequenceId) ?? null;
+                const active = routeState.id === activeCompanionRouteState.id;
+
+                return (
+                  <div key={routeState.id} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>{formatCompanionRouteStatePosture(routeState.posture)}</span>
+                    <strong>{active ? `${routeState.label} / active route` : routeState.label}</strong>
+                    <p>{routeState.summary}</p>
+                    <div className="trace-note-links">
+                      <span className={`windowing-badge${active ? " windowing-badge--active" : ""}`}>
+                        {routeSequence?.label ?? routeState.activeSequenceId}
+                      </span>
+                      <span className="windowing-badge">
+                        {routeStage?.label ?? routeState.deliveryChainStageId ?? "No stage"} / {routeWindow?.label ?? routeState.windowId ?? "No window"}
+                      </span>
+                      <span className="windowing-badge">
+                        {routeLane?.label ?? routeState.sharedStateLaneId ?? "No lane"} / {routeBoard?.label ?? routeState.orchestrationBoardId ?? "No board"}
+                      </span>
+                      <span className="windowing-badge">{routeMapping?.label ?? routeState.observabilityMappingId ?? "No observability path"}</span>
+                      {routeState.sequenceSwitches.map((switchItem) => (
+                        <span key={switchItem.id} className="windowing-badge">
+                          {formatCompanionRouteSequenceSwitchPosture(switchItem.posture)} / {switchItem.label}
+                        </span>
+                      ))}
+                    </div>
+                    {onRunReviewSurfaceAction && routeAction ? (
+                      <div className="windowing-card__actions">
+                        <button type="button" className="secondary-button" onClick={() => onRunReviewSurfaceAction(routeAction)}>
+                          {active ? "Refresh route" : "Focus route"}
+                        </button>
+                        {routeState.sequenceSwitches
+                          .filter((switchItem) => switchItem.targetActionId !== routeAction.id)
+                          .map((switchItem) => {
+                            const switchAction = reviewSurfaceActionById.get(switchItem.targetActionId) ?? null;
+
+                            if (!switchAction) {
+                              return null;
+                            }
+
+                            return (
+                              <button
+                                key={switchItem.id}
+                                type="button"
+                                className="secondary-button"
+                                onClick={() => onRunReviewSurfaceAction(switchAction)}
+                              >
+                                {switchItem.label}
+                              </button>
+                            );
+                          })}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </article>
+        ) : null}
+
         {activeCompanionSequence ? (
           <article className="windowing-summary-card">
             <span>Companion Sequence Navigator</span>
@@ -782,6 +915,42 @@ export function DeliveryChainWorkspace({
                 </strong>
               </div>
             </div>
+            {relevantCompanionSequences.length > 1 ? (
+              <div className="windowing-preview-list">
+                {relevantCompanionSequences.map((sequence) => {
+                  const sourceAction = reviewSurfaceActionById.get(sequence.steps[0]?.actionId ?? "") ?? null;
+                  const sourceStage = sourceAction
+                    ? selectStudioReleaseDeliveryChainStage(pipeline, sourceAction.deliveryChainStageId ?? "")
+                    : null;
+                  const sourceWindow = sourceAction?.windowId
+                    ? windowing?.roster.windows.find((entry) => entry.id === sourceAction.windowId) ?? null
+                    : null;
+                  const active = sequence.id === activeCompanionSequence.id;
+
+                  return (
+                    <div key={sequence.id} className="windowing-preview-line windowing-preview-line--stacked">
+                      <span>Companion Sequence Switcher</span>
+                      <strong>{active ? `${sequence.label} / active sequence` : sequence.label}</strong>
+                      <p>{sequence.summary}</p>
+                      <div className="trace-note-links">
+                        <span className={`windowing-badge${active ? " windowing-badge--active" : ""}`}>{sequence.steps.length} steps</span>
+                        <span className="windowing-badge">
+                          {sourceStage?.label ?? sourceAction?.deliveryChainStageId ?? "No stage"} / {sourceWindow?.label ?? sourceAction?.windowId ?? "No window"}
+                        </span>
+                        <span className="windowing-badge">{formatCompanionRouteState(sourceAction, windowing)}</span>
+                      </div>
+                      {onRunCompanionSequence && sourceAction ? (
+                        <div className="windowing-card__actions">
+                          <button type="button" className="secondary-button" onClick={() => onRunCompanionSequence(sequence.id)}>
+                            {active ? "Refresh sequence" : "Switch sequence"}
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
             <div className="windowing-preview-list">
               {(compact ? activeCompanionSequence.steps.slice(0, 3) : activeCompanionSequence.steps).map((step, index) => {
                 const stepAction = reviewSurfaceActionById.get(step.actionId) ?? null;
@@ -820,6 +989,7 @@ export function DeliveryChainWorkspace({
                         {stepLane?.label ?? stepAction?.sharedStateLaneId ?? "No lane"} / {stepBoard?.label ?? stepAction?.orchestrationBoardId ?? "No board"}
                       </span>
                       <span className="windowing-badge">{stepMapping?.label ?? stepAction?.observabilityMappingId ?? "No observability path"}</span>
+                      <span className="windowing-badge">{formatCompanionRouteState(stepAction, windowing)}</span>
                     </div>
                     {onRunReviewSurfaceAction && stepAction ? (
                       <div className="windowing-card__actions">
@@ -859,8 +1029,8 @@ export function DeliveryChainWorkspace({
                 const primaryAction = reviewSurfaceActionById.get(path.primaryActionId) ?? null;
                 const companionSequence = relevantCompanionSequences.find((sequence) => sequence.id === path.sequenceId) ?? null;
                 const followUpActions = (path.followUpActionIds ?? [])
-                  .map((actionId) => reviewSurfaceActionById.get(actionId))
-                  .filter((action): action is StudioCommandAction => Boolean(action));
+                  .map((actionId) => reviewSurfaceActionById.get(actionId) ?? null)
+                  .filter((action): action is ReviewCoverageAction => Boolean(action));
                 const primaryStage = primaryAction
                   ? selectStudioReleaseDeliveryChainStage(pipeline, primaryAction.deliveryChainStageId ?? "")
                   : null;
@@ -892,6 +1062,11 @@ export function DeliveryChainWorkspace({
                       </span>
                       <span className="windowing-badge">
                         {primaryLane?.label ?? primaryAction?.sharedStateLaneId ?? "No lane"} / {primaryBoard?.label ?? primaryAction?.orchestrationBoardId ?? "No board"}
+                      </span>
+                      <span className="windowing-badge">
+                        {formatCompanionRouteState(sourceAction, windowing)}
+                        {" -> "}
+                        {formatCompanionRouteState(primaryAction, windowing)}
                       </span>
                       {followUpActions.map((action) => (
                         <span key={`${path.id}-${action.id}`} className="windowing-badge">

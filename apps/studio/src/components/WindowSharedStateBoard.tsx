@@ -22,7 +22,9 @@ interface WindowSharedStateBoardProps {
   actionDeck?: StudioCommandActionDeck | null;
   reviewSurfaceActions?: StudioCommandAction[];
   activeReviewSurfaceActionId?: string | null;
+  activeCompanionSequenceId?: string | null;
   onRunReviewSurfaceAction?: (action: StudioCommandAction) => void;
+  onRunCompanionSequence?: (sequenceId: string) => void;
   activeRouteId?: StudioPageId;
   activeWindowId?: string | null;
   activeLaneId?: string | null;
@@ -177,6 +179,15 @@ function formatCompanionReviewPathKind(
   }
 }
 
+function formatCompanionRouteState(action: StudioCommandAction | null | undefined, windowing: StudioShellState["windowing"]): string {
+  const linkedIntent = action?.windowIntentId ? windowing.windowIntents.find((entry) => entry.id === action.windowIntentId) ?? null : null;
+  const routeId = linkedIntent?.shellLink.pageId ?? action?.routeId ?? "No route";
+  const workspaceViewId = linkedIntent?.workspaceViewId ?? action?.workspaceViewId ?? "No workspace";
+  const intentLabel = linkedIntent?.label ?? action?.windowIntentId ?? "No intent";
+
+  return `${routeId} / ${workspaceViewId} / ${intentLabel}`;
+}
+
 function formatCompanionReviewSequenceStepRole(
   role: NonNullable<StudioCommandActionDeck["lanes"][number]["companionSequences"]>[number]["steps"][number]["role"]
 ): string {
@@ -291,7 +302,9 @@ export function WindowSharedStateBoard({
   actionDeck,
   reviewSurfaceActions = [],
   activeReviewSurfaceActionId,
+  activeCompanionSequenceId,
   onRunReviewSurfaceAction,
+  onRunCompanionSequence,
   activeRouteId,
   activeWindowId,
   activeLaneId,
@@ -390,6 +403,7 @@ export function WindowSharedStateBoard({
         Number(left.steps.some((step) => step.actionId === activeReviewSurfaceAction?.id))
     );
   const activeCompanionSequence =
+    (activeCompanionSequenceId ? relevantCompanionSequences.find((sequence) => sequence.id === activeCompanionSequenceId) : undefined) ??
     relevantCompanionSequences.find((sequence) => sequence.steps.some((step) => step.actionId === activeReviewSurfaceAction?.id)) ??
     relevantCompanionSequences[0] ??
     null;
@@ -601,6 +615,44 @@ export function WindowSharedStateBoard({
                 </strong>
               </div>
             </div>
+            {relevantCompanionSequences.length > 1 ? (
+              <div className="windowing-preview-list">
+                {relevantCompanionSequences.map((sequence) => {
+                  const sourceAction = reviewSurfaceActionById.get(sequence.steps[0]?.actionId ?? "") ?? null;
+                  const sourceStage = sourceAction?.deliveryChainStageId
+                    ? releaseApprovalPipeline
+                      ? selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, sourceAction.deliveryChainStageId)
+                      : null
+                    : null;
+                  const sourceWindow = sourceAction?.windowId
+                    ? windowing.roster.windows.find((entry) => entry.id === sourceAction.windowId) ?? null
+                    : null;
+                  const active = sequence.id === activeCompanionSequence.id;
+
+                  return (
+                    <div key={sequence.id} className="windowing-preview-line windowing-preview-line--stacked">
+                      <span>Companion Sequence Switcher</span>
+                      <strong>{active ? `${sequence.label} / active sequence` : sequence.label}</strong>
+                      <p>{sequence.summary}</p>
+                      <div className="trace-note-links">
+                        <span className={`windowing-badge${active ? " windowing-badge--active" : ""}`}>{sequence.steps.length} steps</span>
+                        <span className="windowing-badge">
+                          {sourceStage?.label ?? sourceAction?.deliveryChainStageId ?? "No stage"} / {sourceWindow?.label ?? sourceAction?.windowId ?? "No window"}
+                        </span>
+                        <span className="windowing-badge">{formatCompanionRouteState(sourceAction, windowing)}</span>
+                      </div>
+                      {onRunCompanionSequence && sourceAction ? (
+                        <div className="windowing-card__actions">
+                          <button type="button" className="secondary-button" onClick={() => onRunCompanionSequence(sequence.id)}>
+                            {active ? "Refresh sequence" : "Switch sequence"}
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
             <div className="windowing-preview-list">
               {(compact ? activeCompanionSequence.steps.slice(0, 3) : activeCompanionSequence.steps).map((step, index) => {
                 const stepAction = reviewSurfaceActionById.get(step.actionId) ?? null;
@@ -641,6 +693,7 @@ export function WindowSharedStateBoard({
                         {stepLane?.label ?? stepAction?.sharedStateLaneId ?? "No lane"} / {stepBoard?.label ?? stepAction?.orchestrationBoardId ?? "No board"}
                       </span>
                       <span className="windowing-badge">{stepMapping?.label ?? stepAction?.observabilityMappingId ?? "No observability path"}</span>
+                      <span className="windowing-badge">{formatCompanionRouteState(stepAction, windowing)}</span>
                     </div>
                     {onRunReviewSurfaceAction && stepAction ? (
                       <div className="windowing-card__actions">
@@ -715,6 +768,11 @@ export function WindowSharedStateBoard({
                       </span>
                       <span className="windowing-badge">
                         {primaryLane?.label ?? primaryAction?.sharedStateLaneId ?? "No lane"} / {primaryBoard?.label ?? primaryAction?.orchestrationBoardId ?? "No board"}
+                      </span>
+                      <span className="windowing-badge">
+                        {formatCompanionRouteState(sourceAction, windowing)}
+                        {" -> "}
+                        {formatCompanionRouteState(primaryAction, windowing)}
                       </span>
                       {followUpActions.map((action) => (
                         <span key={`${path.id}-${action.id}`} className="windowing-badge">

@@ -120,6 +120,7 @@ async function verifyRendererFocusedSlotUi() {
     "Review Surface Navigator",
     "Multi-window Review Coverage",
     "Coverage-driven Review Surfaces",
+    "Companion Sequence Switcher",
     "Focus Publish Decision Gate",
     "Cross-window Observability",
     "Stage Ownership",
@@ -885,6 +886,10 @@ function assertCommandSurfaceContract(commandSurface, shellState) {
 
   if (!commandSurface.actionDecks.some((deck) => deck.lanes.some((lane) => (lane.companionSequences?.length ?? 0) > 0))) {
     throw new Error("Shell command surface action decks are missing sequence-aware companion review navigation.");
+  }
+
+  if (!commandSurface.actionDecks.some((deck) => deck.lanes.some((lane) => (lane.companionSequences?.length ?? 0) > 1))) {
+    throw new Error("Shell command surface action decks are missing companion sequence switching coverage.");
   }
 
   for (const shortcut of commandSurface.keyboardRouting.shortcuts) {
