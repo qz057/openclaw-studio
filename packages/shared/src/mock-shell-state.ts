@@ -967,6 +967,22 @@ const mockCommandSurface: StudioCommandSurface = {
       actionId: "command-focus-lifecycle-review-packet"
     },
     {
+      id: "next-step-settings-validator-bridge",
+      label: "Inspect validator bridge",
+      detail: "Bring the materialization validator bridge into scope so the current packet handoff and observability row stay aligned.",
+      tone: "warning",
+      kind: "window",
+      actionId: "command-focus-materialization-validator-bridge"
+    },
+    {
+      id: "next-step-settings-failure-path",
+      label: "Inspect failure path",
+      detail: "Keep the active materialization failure path and its rollback-aware command preview visible before moving downstream.",
+      tone: "warning",
+      kind: "trace",
+      actionId: "command-focus-materialization-failure-path"
+    },
+    {
       id: "next-step-settings-lane",
       label: "Advance review orchestration",
       detail: "Move the active review lane toward its next staged handoff posture.",
@@ -1012,13 +1028,16 @@ const mockCommandSurface: StudioCommandSurface = {
     {
       id: "board-settings-review-deck",
       label: "Settings Route-aware Next-step Board",
-      summary: "Settings groups review-deck entry, review-workspace intent, lifecycle packet coverage, windows observability, and lane advance into one coordination board.",
+      summary:
+        "Settings groups review-deck entry, review-workspace intent, lifecycle packet coverage, validator/failure readouts, windows observability, and lane advance into one coordination board.",
       flowId: "flow-settings-review-deck",
       sequenceId: "sequence-settings-review-deck",
       stepIds: [
         "next-step-settings-review",
         "next-step-settings-intent",
         "next-step-settings-review-surface",
+        "next-step-settings-validator-bridge",
+        "next-step-settings-failure-path",
         "next-step-settings-observability",
         "next-step-settings-lane"
       ],
@@ -1029,12 +1048,15 @@ const mockCommandSurface: StudioCommandSurface = {
     {
       id: "board-review-deck-coverage",
       label: "Review Deck Coverage Board",
-      summary: "When Review Deck is active, keep review intent, review-surface focus, windows observability, and lane advance grouped as one local-only coverage board.",
+      summary:
+        "When Review Deck is active, keep review intent, validator/failure readouts, windows observability, and lane advance grouped as one local-only coverage board.",
       flowId: "flow-review-deck-coverage",
       sequenceId: "sequence-review-coverage-flow",
       stepIds: [
         "next-step-settings-intent",
         "next-step-settings-review-surface",
+        "next-step-settings-validator-bridge",
+        "next-step-settings-failure-path",
         "next-step-settings-observability",
         "next-step-settings-lane"
       ],
@@ -2494,6 +2516,44 @@ const mockCommandSurface: StudioCommandSurface = {
               ]
             }
           ]
+        },
+        {
+          id: "deck-lane-review-deck-materialization-failure",
+          label: "Materialization Failure Route",
+          summary:
+            "Keep validator bridge, failure path, publish gate, and rollback closeout visible together so promotion-readiness review can inspect failure posture without leaving the same local-only command lane.",
+          tone: "warning",
+          actionIds: [
+            "command-stage-review-window",
+            "command-open-windows-observability",
+            "command-focus-lifecycle-review-packet",
+            "command-focus-materialization-validator-bridge",
+            "command-focus-materialization-failure-path",
+            "command-focus-publish-decision-gate",
+            "command-focus-rollback-closeout-window"
+          ],
+          primaryActionId: "command-focus-materialization-failure-path",
+          followUpActionIds: [
+            "command-focus-materialization-validator-bridge",
+            "command-focus-publish-decision-gate",
+            "command-focus-rollback-closeout-window"
+          ],
+          workspaceViewIds: ["review-deck"],
+          windowIntentIds: ["window-intent-review-workspace"],
+          deliveryChainStageIds: ["delivery-chain-promotion-readiness"],
+          focusDeliveryChainStageId: "delivery-chain-promotion-readiness",
+          windowIds: ["window-trace-review", "window-review-board"],
+          focusWindowId: "window-trace-review",
+          sharedStateLaneIds: ["shared-state-lane-trace-review", "shared-state-lane-preview-review"],
+          focusSharedStateLaneId: "shared-state-lane-trace-review",
+          orchestrationBoardIds: ["orchestration-board-trace-review", "orchestration-board-preview-review"],
+          focusOrchestrationBoardId: "orchestration-board-trace-review",
+          observabilityMappingIds: [
+            "observability-mapping-approval-active",
+            "observability-mapping-rollback-shadow",
+            "observability-mapping-lifecycle-preview"
+          ],
+          focusObservabilityMappingId: "observability-mapping-approval-active"
         },
         {
           id: "deck-lane-review-deck-handoff",
