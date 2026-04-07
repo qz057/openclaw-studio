@@ -1866,7 +1866,7 @@ function createStudioPackagedAppMaterializationContract(): StudioReleasePackaged
     label: "Packaged-app Materialization Contract",
     mode: "review-only",
     summary:
-      "Packaged-app directory materialization, staged-output task chains, bundle-sealing readiness, local review packets, validator-linked observability, and command-linked failure paths now stay inspectable as one per-platform task-state contract, so the shell can review active roots, evidence handoffs, failure posture, seal posture, and cross-surface continuity without materializing, signing, or publishing anything.",
+      "Packaged-app directory materialization, staged-output task chains, bundle-sealing readiness, local review packets, validator-linked observability, failure-surface continuity, and command-linked failure paths now stay inspectable as one per-platform task-state contract, so the shell can review active roots, evidence handoffs, failure posture, seal posture, and cross-surface continuity without materializing, signing, or publishing anything.",
     currentTaskState: "reviewing",
     activePlatformId: "packaged-app-materialization-platform-windows",
     ownerStageId: "delivery-chain-promotion-readiness",

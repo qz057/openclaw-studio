@@ -5,6 +5,7 @@ import {
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseEscalationWindow,
+  selectStudioReleasePackagedAppMaterializationContractFailureSurfaceMatch,
   selectStudioReleasePackagedAppMaterializationContractPlatform,
   selectStudioReleasePackagedAppMaterializationContractValidatorObservabilitySurfaceMatch,
   selectStudioReleaseQaCloseoutReadinessTrack,
@@ -216,6 +217,31 @@ function formatMaterializationValidatorStatus(status: "ready" | "watch" | "block
       return "Watch";
     default:
       return "Blocked";
+  }
+}
+
+function formatFailureDisposition(disposition: "blocked" | "abort" | "partial-apply" | "rollback"): string {
+  switch (disposition) {
+    case "blocked":
+      return "Blocked";
+    case "abort":
+      return "Abort";
+    case "partial-apply":
+      return "Partial apply";
+    default:
+      return "Rollback";
+  }
+}
+
+function resolveFailureDispositionTone(disposition: "blocked" | "abort" | "partial-apply" | "rollback"): "positive" | "neutral" | "warning" {
+  switch (disposition) {
+    case "abort":
+      return "neutral";
+    case "blocked":
+    case "partial-apply":
+    case "rollback":
+    default:
+      return "warning";
   }
 }
 
@@ -438,6 +464,16 @@ export function WindowSharedStateBoard({
         releaseApprovalPipeline.deliveryChain,
         windowing,
         reviewStateContinuity,
+        activeMaterializationPlatform?.id
+      )
+    : null;
+  const activeMaterializationFailureSurface = releaseApprovalPipeline
+    ? selectStudioReleasePackagedAppMaterializationContractFailureSurfaceMatch(
+        releaseApprovalPipeline.deliveryChain,
+        windowing,
+        reviewStateContinuity,
+        actionDeck,
+        reviewSurfaceActions,
         activeMaterializationPlatform?.id
       )
     : null;
@@ -1192,6 +1228,176 @@ export function WindowSharedStateBoard({
                 {activeMaterializationValidatorSurface.activeReadout.validatorChecks.map((check) => (
                   <div key={check} className="windowing-preview-line windowing-preview-line--stacked">
                     <span>Validator check</span>
+                    <strong>{check}</strong>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </article>
+        ) : null}
+
+        {releaseApprovalPipeline ? (
+          <article className="windowing-summary-card">
+            <span>Materialization Failure Continuity</span>
+            <strong>
+              {activeMaterializationPlatform
+                ? `${formatPackagedAppPlatform(activeMaterializationPlatform.platform)} / ${
+                    activeMaterializationFailureSurface?.activeReadout?.label ??
+                    activeMaterializationFailureSurface?.failurePath?.label ??
+                    "No failure readout"
+                  }`
+                : "No failure continuity"}
+            </strong>
+            <p>
+              {activeMaterializationFailureSurface?.activeReadout?.summary ??
+                activeMaterializationFailureSurface?.failurePath?.summary ??
+                "Failure-facing materialization continuity is unavailable, so this board cannot show how the active checksum / rollback / publish-gate posture resolves through the current window, shared-state lane, orchestration board, and command lane."}
+            </p>
+            <div className="workflow-readiness-list">
+              <div
+                className={`workflow-readiness-line workflow-readiness-line--${
+                  activeMaterializationFailureSurface?.activeReadout
+                    ? resolveFailureDispositionTone(activeMaterializationFailureSurface.activeReadout.failureDisposition)
+                    : "warning"
+                }`}
+              >
+                <span>Current failure</span>
+                <strong>
+                  {activeMaterializationFailureSurface?.activeReadout
+                    ? `${activeMaterializationFailureSurface.activeReadout.label} / ${formatFailureDisposition(
+                        activeMaterializationFailureSurface.activeReadout.failureDisposition
+                      )}`
+                    : "Unavailable"}
+                </strong>
+              </div>
+              <div
+                className={`workflow-readiness-line workflow-readiness-line--${
+                  activeMaterializationFailureSurface?.nextReadout
+                    ? resolveFailureDispositionTone(activeMaterializationFailureSurface.nextReadout.failureDisposition)
+                    : "warning"
+                }`}
+              >
+                <span>Next failure</span>
+                <strong>
+                  {activeMaterializationFailureSurface?.nextReadout
+                    ? `${activeMaterializationFailureSurface.nextReadout.label} / ${formatFailureDisposition(
+                        activeMaterializationFailureSurface.nextReadout.failureDisposition
+                      )}`
+                    : "Final failure branch"}
+                </strong>
+              </div>
+              <div
+                className={`workflow-readiness-line workflow-readiness-line--${
+                  activeMaterializationFailureSurface?.reviewStateContinuityEntry?.tone ??
+                  activeMaterializationFailureSurface?.observabilityMapping?.tone ??
+                  "warning"
+                }`}
+              >
+                <span>Failure surface match</span>
+                <strong>
+                  {activeMaterializationFailureSurface?.observabilityMapping
+                    ? `${activeMaterializationFailureSurface.observabilityMapping.label} / ${formatReviewPostureRelationship(
+                        activeMaterializationFailureSurface.observabilityMapping.relationship
+                      )}`
+                    : activeMaterializationFailureSurface?.primaryAction
+                      ? `${activeMaterializationFailureSurface.window?.label ?? activeMaterializationFailureSurface.primaryAction.windowId} / ${
+                          activeMaterializationFailureSurface.lane?.label ?? activeMaterializationFailureSurface.primaryAction.sharedStateLaneId
+                        }`
+                      : "Unavailable"}
+                </strong>
+              </div>
+              <div
+                className={`workflow-readiness-line workflow-readiness-line--${
+                  activeMaterializationFailureSurface?.reviewStateContinuityEntry?.tone ??
+                  activeMaterializationFailureSurface?.observabilityMapping?.tone ??
+                  "warning"
+                }`}
+              >
+                <span>Review continuity</span>
+                <strong>
+                  {activeMaterializationFailureSurface?.reviewStateContinuityEntry?.label ??
+                    (activeMaterializationFailureSurface?.primaryAction
+                      ? `${activeMaterializationFailureSurface.window?.label ?? activeMaterializationFailureSurface.primaryAction.windowId} / ${
+                          activeMaterializationFailureSurface.board?.label ??
+                          activeMaterializationFailureSurface.primaryAction.orchestrationBoardId
+                        }`
+                      : "Unavailable")}
+                </strong>
+              </div>
+              <div
+                className={`workflow-readiness-line workflow-readiness-line--${
+                  activeMaterializationFailureSurface?.commandPreviewActions.length ? "neutral" : "warning"
+                }`}
+              >
+                <span>Command lane</span>
+                <strong>
+                  {activeMaterializationFailureSurface?.commandDeckLane
+                    ? `${activeMaterializationFailureSurface.commandDeckLane.label} / ${
+                        activeMaterializationFailureSurface.commandDeckLane.actionIds.length
+                      } actions`
+                    : activeMaterializationFailureSurface?.primaryAction?.label ?? "Unavailable"}
+                </strong>
+              </div>
+            </div>
+            {activeMaterializationFailureSurface?.activeReadout ? (
+              <div className="windowing-preview-list">
+                <div className="windowing-preview-line windowing-preview-line--stacked">
+                  <span>Failure summary</span>
+                  <strong>{activeMaterializationFailureSurface.activeReadout.summary}</strong>
+                </div>
+                <div className="windowing-preview-line windowing-preview-line--stacked">
+                  <span>Review packet / validator</span>
+                  <strong>
+                    {activeMaterializationFailureSurface.reviewPacketStep?.label ??
+                      activeMaterializationFailureSurface.activeReadout.reviewPacketStepId}
+                    {" -> "}
+                    {activeMaterializationFailureSurface.validatorReadout?.label ??
+                      activeMaterializationFailureSurface.activeReadout.validatorReadoutId}
+                  </strong>
+                </div>
+                {activeMaterializationFailureSurface.primaryAction ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Window / lane / board</span>
+                    <strong>
+                      {activeMaterializationFailureSurface.window?.label ?? activeMaterializationFailureSurface.primaryAction.windowId}
+                      {" -> "}
+                      {activeMaterializationFailureSurface.lane?.label ?? activeMaterializationFailureSurface.primaryAction.sharedStateLaneId}
+                      {" -> "}
+                      {activeMaterializationFailureSurface.board?.label ?? activeMaterializationFailureSurface.primaryAction.orchestrationBoardId}
+                    </strong>
+                  </div>
+                ) : null}
+                {activeMaterializationFailureSurface.rollbackContract ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Rollback anchor</span>
+                    <strong>
+                      {activeMaterializationFailureSurface.rollbackContract.from} -&gt; {activeMaterializationFailureSurface.rollbackContract.to} /{" "}
+                      {activeMaterializationFailureSurface.activeReadout.rollbackCheckpointId}
+                    </strong>
+                  </div>
+                ) : null}
+                {activeMaterializationFailureSurface.commandPreviewActions.length > 0 ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Command preview</span>
+                    <strong>{activeMaterializationFailureSurface.commandPreviewActions.map((action) => action.label).join(" -> ")}</strong>
+                  </div>
+                ) : null}
+                {activeMaterializationFailureSurface.commandDeckLane ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Lane summary</span>
+                    <strong>{activeMaterializationFailureSurface.commandDeckLane.summary}</strong>
+                  </div>
+                ) : null}
+                {activeMaterializationFailureSurface.observabilitySignals.map((signal) => (
+                  <div key={signal.id} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>{signal.label}</span>
+                    <strong>{signal.value}</strong>
+                    <p>{signal.detail}</p>
+                  </div>
+                ))}
+                {activeMaterializationFailureSurface.activeReadout.reviewChecks.map((check) => (
+                  <div key={check} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Failure check</span>
                     <strong>{check}</strong>
                   </div>
                 ))}

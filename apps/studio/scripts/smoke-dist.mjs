@@ -195,6 +195,10 @@ async function verifyRendererFocusedSlotUi() {
     "Current failure-path readout",
     "Next failure-path readout",
     "Failure command preview",
+    "Materialization Failure Continuity",
+    "Failure surface match",
+    "Failure continuity",
+    "Failure command lane",
     "Failure path",
     "Failure code / disposition",
     "Validator surface match",
@@ -320,6 +324,7 @@ async function verifyElectronRuntime() {
 
   const { createStudioRuntime } = require(electronRuntimePath);
   const { analyzeCodexAgentLoop } = require(codexAgentLoopPath);
+  const sharedModule = await import(pathToFileURL(sharedDistPath).href);
   const runtime = createStudioRuntime();
   const [shellState, sessions, codexTasks, hostExecutor, hostBridge] = await Promise.all([
     runtime.getShellState(),
@@ -339,6 +344,7 @@ async function verifyElectronRuntime() {
   assertCommandSurfaceContract(shellState.commandSurface, shellState);
   assertLayoutContract(shellState.layout, shellState.windowing);
   assertWindowingContract(shellState.windowing, shellState.layout, shellState.boundary.hostExecutor.bridge);
+  assertMaterializationFailureContinuityContract(shellState, sharedModule);
   assertCodexLoopContract(shellState.codex, codexTasks);
   assertCodexContextContract(shellState.codex);
   assertSkillExtensionContract(shellState.skills);
@@ -362,6 +368,59 @@ async function verifyElectronRuntime() {
     rosterWindows: shellState.windowing.roster.windows.length,
     sharedStateLanes: shellState.windowing.sharedState.lanes.length
   };
+}
+
+function assertMaterializationFailureContinuityContract(shellState, sharedModule) {
+  const selectFailureSurfaceMatch = sharedModule.selectStudioReleasePackagedAppMaterializationContractFailureSurfaceMatch;
+
+  if (typeof selectFailureSurfaceMatch !== "function") {
+    throw new Error("Shared package is missing the materialization failure continuity selector export.");
+  }
+
+  const contract = shellState.boundary?.hostExecutor?.releaseApprovalPipeline?.deliveryChain?.packagedAppMaterializationContract;
+  const activePlatform =
+    contract?.platforms.find((platform) => platform.id === contract.activePlatformId) ?? contract?.platforms[0] ?? null;
+  const activeReadout =
+    activePlatform?.failurePath.readouts.find((readout) => readout.id === activePlatform.failurePath.activeReadoutId) ??
+    activePlatform?.failurePath.readouts[0] ??
+    null;
+  const actionDeck =
+    shellState.commandSurface.actionDecks.find((deck) => deck.lanes.some((lane) => lane.id === activeReadout?.commandDeckLaneId)) ??
+    shellState.commandSurface.actionDecks[0] ??
+    null;
+  const failureSurfaceMatch = selectFailureSurfaceMatch(
+    shellState.boundary.hostExecutor.releaseApprovalPipeline.deliveryChain,
+    shellState.windowing,
+    shellState.reviewStateContinuity,
+    actionDeck,
+    shellState.commandSurface.actions,
+    activePlatform?.id
+  );
+
+  if (
+    !failureSurfaceMatch?.activeReadout ||
+    !failureSurfaceMatch?.primaryAction ||
+    !failureSurfaceMatch?.commandDeckLane ||
+    !failureSurfaceMatch?.observabilityMapping ||
+    !failureSurfaceMatch?.window ||
+    !failureSurfaceMatch?.lane ||
+    !failureSurfaceMatch?.board ||
+    !failureSurfaceMatch?.reviewStateContinuityEntry
+  ) {
+    throw new Error("Built shell state is missing the phase60 materialization failure continuity surface match.");
+  }
+
+  if (failureSurfaceMatch.primaryAction.reviewSurfaceKind !== "failure-path") {
+    throw new Error("Materialization failure continuity resolved to a non-failure review surface.");
+  }
+
+  if (failureSurfaceMatch.reviewStateContinuityEntry.surface.actionId !== failureSurfaceMatch.primaryAction.id) {
+    throw new Error("Materialization failure continuity is not aligned with the matched review-state entry.");
+  }
+
+  if (!failureSurfaceMatch.commandPreviewActions.some((action) => action.id === failureSurfaceMatch.primaryAction.id)) {
+    throw new Error("Materialization failure continuity lost the active failure action from its command preview lane.");
+  }
 }
 
 function assertCodexLoopContract(codexState, codexTasks) {

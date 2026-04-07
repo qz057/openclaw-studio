@@ -1293,6 +1293,8 @@ export function App() {
     {
       windowing: data.windowing,
       reviewStateContinuity: data.reviewStateContinuity,
+      actionDeck: activeActionDeck,
+      reviewSurfaceActions: reviewCoverageActions,
       activeLaneId: windowingSurface.activeLaneId,
       activeWindowId: windowingSurface.activeWindowId,
       activeBoardId: windowingSurface.activeBoardId,

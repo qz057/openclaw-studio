@@ -1,4 +1,6 @@
 import type {
+  StudioCommandAction,
+  StudioCommandActionDeck,
   StudioReleaseApprovalAuditRollbackEntryCheckpoint,
   StudioReleaseApprovalPipeline,
   StudioReleaseApprovalWorkflowStage,
@@ -33,6 +35,29 @@ import type {
   StudioWindowSharedStateLane,
   StudioWindowing
 } from "./index.js";
+
+function isStudioReviewCoverageAction(
+  action: StudioCommandAction
+): action is StudioCommandAction &
+  {
+    kind: "focus-review-coverage";
+  } &
+  Required<
+    Pick<
+      StudioCommandAction,
+      "reviewSurfaceKind" | "deliveryChainStageId" | "windowId" | "sharedStateLaneId" | "orchestrationBoardId" | "observabilityMappingId"
+    >
+  > {
+  return Boolean(
+    action.kind === "focus-review-coverage" &&
+      action.reviewSurfaceKind &&
+      action.deliveryChainStageId &&
+      action.windowId &&
+      action.sharedStateLaneId &&
+      action.orchestrationBoardId &&
+      action.observabilityMappingId
+  );
+}
 
 export function selectStudioReleaseApprovalPipelineStage(
   pipeline: Pick<StudioReleaseApprovalPipeline, "stages" | "currentStageId">
@@ -279,6 +304,161 @@ export function selectStudioReleasePackagedAppMaterializationContractNextFailure
   }
 
   return failurePath.readouts.find((readout) => readout.id === failurePath.nextReadoutId);
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractFailureSurfaceMatch(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract" | "stageCReadiness">,
+  windowing?: Pick<StudioWindowing, "observability" | "roster" | "sharedState" | "orchestration"> | null,
+  reviewStateContinuity?: Pick<StudioReviewStateContinuity, "entries" | "activeEntryId"> | null,
+  actionDeck?: Pick<StudioCommandActionDeck, "lanes"> | null,
+  reviewSurfaceActions?: StudioCommandAction[] | null,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null,
+  readoutOrId?: Pick<StudioReleasePackagedAppMaterializationFailureReadout, "id"> | string | null
+): {
+  failurePath: StudioReleasePackagedAppMaterializationFailurePath | null;
+  activeReadout: StudioReleasePackagedAppMaterializationFailureReadout | null;
+  nextReadout: StudioReleasePackagedAppMaterializationFailureReadout | null;
+  reviewPacketStep: StudioReleasePackagedAppMaterializationReviewPacketStep | null;
+  validatorReadout: StudioReleasePackagedAppMaterializationValidatorObservabilityReadout | null;
+  rollbackContract: StudioReleaseRollbackLiveReadinessContract | null;
+  primaryAction: (StudioCommandAction &
+    {
+      kind: "focus-review-coverage";
+    } &
+    Required<
+      Pick<
+        StudioCommandAction,
+        "reviewSurfaceKind" | "deliveryChainStageId" | "windowId" | "sharedStateLaneId" | "orchestrationBoardId" | "observabilityMappingId"
+      >
+    >) | null;
+  commandPreviewActions: Array<
+    StudioCommandAction &
+      {
+        kind: "focus-review-coverage";
+      } &
+      Required<
+        Pick<
+          StudioCommandAction,
+          "reviewSurfaceKind" | "deliveryChainStageId" | "windowId" | "sharedStateLaneId" | "orchestrationBoardId" | "observabilityMappingId"
+        >
+      >
+  >;
+  commandDeckLane: StudioCommandActionDeck["lanes"][number] | null;
+  observabilityMapping: StudioWindowObservabilityMapping | null;
+  observabilitySignals: StudioWindowObservabilitySignal[];
+  window: StudioWindowRosterEntry | null;
+  lane: StudioWindowSharedStateLane | null;
+  board: StudioWindowOrchestrationBoard | null;
+  reviewStateContinuityEntry: StudioReviewStateContinuityEntry | null;
+} {
+  const failurePath = selectStudioReleasePackagedAppMaterializationContractFailurePath(deliveryChain, platformOrId) ?? null;
+  const activeReadout =
+    selectStudioReleasePackagedAppMaterializationContractFailureReadout(deliveryChain, platformOrId, readoutOrId) ?? null;
+  const nextReadout = selectStudioReleasePackagedAppMaterializationContractNextFailureReadout(deliveryChain, platformOrId) ?? null;
+
+  if (!activeReadout) {
+    return {
+      failurePath,
+      activeReadout,
+      nextReadout,
+      reviewPacketStep: null,
+      validatorReadout: null,
+      rollbackContract: null,
+      primaryAction: null,
+      commandPreviewActions: [],
+      commandDeckLane: null,
+      observabilityMapping: null,
+      observabilitySignals: [],
+      window: null,
+      lane: null,
+      board: null,
+      reviewStateContinuityEntry: null
+    };
+  }
+
+  const reviewPacketStep =
+    selectStudioReleasePackagedAppMaterializationContractReviewPacketStep(
+      deliveryChain,
+      platformOrId,
+      activeReadout.reviewPacketStepId
+    ) ?? null;
+  const validatorReadout =
+    selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityReadout(
+      deliveryChain,
+      platformOrId,
+      activeReadout.validatorReadoutId
+    ) ?? null;
+  const rollbackContract = selectStudioReleaseRollbackLiveReadinessContract(deliveryChain, activeReadout.rollbackContractId) ?? null;
+  const commandPreviewActions =
+    reviewSurfaceActions
+      ?.filter(isStudioReviewCoverageAction)
+      .filter((action) => activeReadout.commandActionIds.includes(action.id)) ?? [];
+  const commandDeckLane =
+    actionDeck?.lanes.find((lane) => lane.id === activeReadout.commandDeckLaneId) ??
+    actionDeck?.lanes.find((lane) => lane.actionIds.includes(activeReadout.commandActionIds[0] ?? "")) ??
+    null;
+  const primaryAction =
+    commandPreviewActions.find((action) => action.reviewSurfaceKind === "failure-path") ??
+    (commandDeckLane?.primaryActionId
+      ? commandPreviewActions.find((action) => action.id === commandDeckLane.primaryActionId) ?? null
+      : null) ??
+    commandPreviewActions[0] ??
+    null;
+
+  if (!windowing || !primaryAction) {
+    return {
+      failurePath,
+      activeReadout,
+      nextReadout,
+      reviewPacketStep,
+      validatorReadout,
+      rollbackContract,
+      primaryAction,
+      commandPreviewActions,
+      commandDeckLane,
+      observabilityMapping: null,
+      observabilitySignals: [],
+      window: null,
+      lane: null,
+      board: null,
+      reviewStateContinuityEntry: null
+    };
+  }
+
+  const observabilityMapping = selectStudioWindowObservabilityMapping(windowing, primaryAction.observabilityMappingId) ?? null;
+  const observabilitySignals = activeReadout.observabilitySignalIds
+    .map((signalId) => windowing.observability.signals.find((signal) => signal.id === signalId) ?? null)
+    .filter((signal): signal is StudioWindowObservabilitySignal => Boolean(signal));
+  const window = windowing.roster.windows.find((entry) => entry.id === primaryAction.windowId) ?? null;
+  const lane = windowing.sharedState.lanes.find((entry) => entry.id === primaryAction.sharedStateLaneId) ?? null;
+  const board = windowing.orchestration.boards.find((entry) => entry.id === primaryAction.orchestrationBoardId) ?? null;
+  const reviewStateContinuityEntry = reviewStateContinuity
+    ? selectStudioReviewStateContinuityEntry(reviewStateContinuity, {
+        reviewSurfaceActionId: primaryAction.id,
+        observabilityMappingId: primaryAction.observabilityMappingId,
+        sharedStateLaneId: primaryAction.sharedStateLaneId,
+        orchestrationBoardId: primaryAction.orchestrationBoardId,
+        windowId: primaryAction.windowId
+      }) ?? null
+    : null;
+
+  return {
+    failurePath,
+    activeReadout,
+    nextReadout,
+    reviewPacketStep,
+    validatorReadout,
+    rollbackContract,
+    primaryAction,
+    commandPreviewActions,
+    commandDeckLane,
+    observabilityMapping,
+    observabilitySignals,
+    window,
+    lane,
+    board,
+    reviewStateContinuityEntry
+  };
 }
 
 function scoreStudioReleasePackagedAppMaterializationBridgeContinuityEntry(

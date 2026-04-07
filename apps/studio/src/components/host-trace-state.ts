@@ -1,4 +1,6 @@
 import type {
+  StudioCommandAction,
+  StudioCommandActionDeck,
   DockItem,
   StudioBoundarySummary,
   StudioHostExecutorState,
@@ -17,6 +19,7 @@ import {
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseEscalationWindow,
+  selectStudioReleasePackagedAppMaterializationContractFailureSurfaceMatch,
   selectStudioReleasePackagedAppMaterializationContractPlatform,
   selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityBridge,
   selectStudioReleasePackagedAppMaterializationContractValidatorObservabilitySurfaceMatch,
@@ -116,6 +119,19 @@ function formatMaterializationValidatorStatus(status: "ready" | "watch" | "block
   }
 }
 
+function formatFailureDisposition(disposition: "blocked" | "abort" | "partial-apply" | "rollback"): string {
+  switch (disposition) {
+    case "blocked":
+      return "Blocked";
+    case "abort":
+      return "Abort";
+    case "partial-apply":
+      return "Partial apply";
+    default:
+      return "Rollback";
+  }
+}
+
 export function getDefaultTraceFocusSlotId(hostExecutor: StudioHostExecutorState): string | null {
   return hostExecutor.bridge.trace.focusSlotId || hostExecutor.bridge.trace.slotRoster[0]?.slotId || null;
 }
@@ -175,6 +191,8 @@ export function createInspectorSections(
   options?: {
     windowing?: StudioShellState["windowing"];
     reviewStateContinuity?: StudioShellState["reviewStateContinuity"];
+    actionDeck?: StudioCommandActionDeck | null;
+    reviewSurfaceActions?: StudioCommandAction[] | null;
     activeLaneId?: string | null;
     activeWindowId?: string | null;
     activeBoardId?: string | null;
@@ -215,6 +233,15 @@ export function createInspectorSections(
       boundary.hostExecutor.releaseApprovalPipeline.deliveryChain,
       windowing,
       options?.reviewStateContinuity,
+      activeMaterializationPlatform?.id
+    );
+  const activeMaterializationFailureSurface =
+    selectStudioReleasePackagedAppMaterializationContractFailureSurfaceMatch(
+      boundary.hostExecutor.releaseApprovalPipeline.deliveryChain,
+      windowing,
+      options?.reviewStateContinuity,
+      options?.actionDeck,
+      options?.reviewSurfaceActions,
       activeMaterializationPlatform?.id
     );
   const stageCReadiness = boundary.hostExecutor.releaseApprovalPipeline.deliveryChain.stageCReadiness;
@@ -389,6 +416,34 @@ export function createInspectorSections(
         ? activeMaterializationValidatorSurface.reviewStateContinuityEntry?.label ??
           `${activeMaterializationValidatorSurface.window?.label ?? activeMaterializationValidatorSurface.activeReadout.windowId} / ${
             activeMaterializationValidatorSurface.board?.label ?? activeMaterializationValidatorSurface.activeReadout.orchestrationBoardId
+          }`
+        : "Unavailable"
+    },
+    {
+      id: "materialization-failure",
+      label: "Materialization failure",
+      value: activeMaterializationFailureSurface.activeReadout
+        ? `${activeMaterializationFailureSurface.activeReadout.label} / ${formatFailureDisposition(
+            activeMaterializationFailureSurface.activeReadout.failureDisposition
+          )}`
+        : "Unavailable"
+    },
+    {
+      id: "failure-surface",
+      label: "Failure surface",
+      value: activeMaterializationFailureSurface.primaryAction
+        ? `${activeMaterializationFailureSurface.observabilityMapping?.label ?? activeMaterializationFailureSurface.primaryAction.observabilityMappingId} / ${
+            activeMaterializationFailureSurface.lane?.label ?? activeMaterializationFailureSurface.primaryAction.sharedStateLaneId
+          }`
+        : "Unavailable"
+    },
+    {
+      id: "failure-continuity",
+      label: "Failure continuity",
+      value: activeMaterializationFailureSurface.primaryAction
+        ? activeMaterializationFailureSurface.reviewStateContinuityEntry?.label ??
+          `${activeMaterializationFailureSurface.window?.label ?? activeMaterializationFailureSurface.primaryAction.windowId} / ${
+            activeMaterializationFailureSurface.board?.label ?? activeMaterializationFailureSurface.primaryAction.orchestrationBoardId
           }`
         : "Unavailable"
     },

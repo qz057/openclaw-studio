@@ -10,6 +10,7 @@ import {
   selectStudioReleasePackagedAppMaterializationContractBundleSealingReadiness,
   selectStudioReleasePackagedAppMaterializationContractFailurePath,
   selectStudioReleasePackagedAppMaterializationContractFailureReadout,
+  selectStudioReleasePackagedAppMaterializationContractFailureSurfaceMatch,
   selectStudioReleasePackagedAppMaterializationContractNextFailureReadout,
   selectStudioReleasePackagedAppMaterializationContractNearbyStageCReadiness,
   selectStudioReleasePackagedAppMaterializationContractNextProgressSegment,
@@ -1821,6 +1822,14 @@ export function DeliveryChainWorkspace({
       pipeline.deliveryChain,
       selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
     ) ?? null;
+  const failureSurfaceMatch = selectStudioReleasePackagedAppMaterializationContractFailureSurfaceMatch(
+    pipeline.deliveryChain,
+    windowing,
+    reviewStateContinuity,
+    actionDeck,
+    reviewSurfaceActions,
+    selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
+  );
   const validatorSurfaceMatch = selectStudioReleasePackagedAppMaterializationContractValidatorObservabilitySurfaceMatch(
     pipeline.deliveryChain,
     windowing,
@@ -1878,31 +1887,12 @@ export function DeliveryChainWorkspace({
       ? selectedMaterializationPlatform.tasks.find((task) => task.id === selectedReviewPacketStep.toTaskId) ?? null
       : null;
   const selectedFailureReviewPacketStep =
-    selectedFailureReadout && selectedReviewPacket
-      ? selectedReviewPacket.steps.find((step) => step.id === selectedFailureReadout.reviewPacketStepId) ?? null
-      : null;
-  const selectedFailureValidatorReadout =
-    selectedFailureReadout && selectedValidatorBridge
-      ? selectedValidatorBridge.readouts.find((readout) => readout.id === selectedFailureReadout.validatorReadoutId) ?? null
-      : null;
-  const selectedFailureRollbackContract = selectedFailureReadout
-    ? selectStudioReleaseRollbackLiveReadinessContract(pipeline.deliveryChain, selectedFailureReadout.rollbackContractId) ?? null
-    : null;
-  const failureCommandPreviewActions = selectedFailureReadout
-    ? selectedFailureReadout.commandActionIds
-        .map(
-          (actionId) =>
-            reviewSurfaceActions.find((action): action is ReviewCoverageAction => isReviewCoverageAction(action) && action.id === actionId) ?? null
-        )
-        .filter((action): action is ReviewCoverageAction => Boolean(action))
-    : [];
-  const failureCommandPreviewLane =
-    actionDeck?.lanes.find((lane) => lane.id === selectedFailureReadout?.commandDeckLaneId) ?? null;
-  const failureObservabilitySignals = selectedFailureReadout
-    ? selectedFailureReadout.observabilitySignalIds
-        .map((signalId) => windowing?.observability.signals.find((signal) => signal.id === signalId) ?? null)
-        .filter((signal): signal is NonNullable<typeof signal> => Boolean(signal))
-    : [];
+    failureSurfaceMatch.reviewPacketStep;
+  const selectedFailureValidatorReadout = failureSurfaceMatch.validatorReadout;
+  const selectedFailureRollbackContract = failureSurfaceMatch.rollbackContract;
+  const failureCommandPreviewActions = failureSurfaceMatch.commandPreviewActions;
+  const failureCommandPreviewLane = failureSurfaceMatch.commandDeckLane;
+  const failureObservabilitySignals = failureSurfaceMatch.observabilitySignals;
   const rollbackDecisionStage = selectStudioReleaseDeliveryChainStage(pipeline, "delivery-chain-rollback-readiness") ?? null;
   const selectedQaTrackStage = selectedQaTrack ? selectStudioReleaseDeliveryChainStage(pipeline, selectedQaTrack.deliveryChainStageId) ?? null : null;
   const selectedApprovalWorkflowStages =
@@ -2014,7 +2004,10 @@ export function DeliveryChainWorkspace({
               : "Unavailable",
           detail: selectedFailureReadout
             ? `${selectedFailureReviewPacketStep?.label ?? selectedFailureReadout.reviewPacketStepId} / ${
-                selectedFailureValidatorReadout?.label ?? selectedFailureReadout.validatorReadoutId
+                failureSurfaceMatch.observabilityMapping?.label ??
+                failureSurfaceMatch.primaryAction?.label ??
+                selectedFailureValidatorReadout?.label ??
+                selectedFailureReadout.validatorReadoutId
               } / ${selectedFailureReadout.summary}`
             : selectedFailurePath?.summary ?? "Failure-path coverage is unavailable for the selected platform.",
           tone: selectedFailureReadout
@@ -2025,7 +2018,7 @@ export function DeliveryChainWorkspace({
             selectedFailureRollbackContract
               ? `Rollback ${selectedFailureRollbackContract.from} -> ${selectedFailureRollbackContract.to}`
               : null,
-            selectedFailureReadout ? `Checkpoint ${selectedFailureReadout.rollbackCheckpointId}` : null,
+            failureSurfaceMatch.reviewStateContinuityEntry?.label ?? (selectedFailureReadout ? `Checkpoint ${selectedFailureReadout.rollbackCheckpointId}` : null),
             nextFailureReadout ? `Next ${nextFailureReadout.label}` : selectedFailurePath ? "Final failure branch" : null
           ].filter((badge): badge is string => Boolean(badge))
         },
@@ -2049,10 +2042,13 @@ export function DeliveryChainWorkspace({
               : selectedFailureReadout
                 ? resolveFailureDispositionTone(selectedFailureReadout.failureDisposition)
                 : "neutral",
-          stageLabel: failureCommandPreviewLane?.label ?? "No action-deck lane",
+          stageLabel:
+            failureCommandPreviewLane?.label ??
+            failureSurfaceMatch.primaryAction?.label ??
+            "No action-deck lane",
           badges: [
             failureCommandPreviewLane ? `${failureCommandPreviewLane.actionIds.length} lane actions` : null,
-            failureObservabilitySignals[0]?.label ?? null,
+            failureSurfaceMatch.observabilityMapping?.label ?? failureObservabilitySignals[0]?.label ?? null,
             failureCommandPreviewActions[1]?.label ?? null
           ].filter((badge): badge is string => Boolean(badge))
         },
@@ -6703,27 +6699,40 @@ export function DeliveryChainWorkspace({
                 </div>
                 <div
                   className={`workflow-readiness-line workflow-readiness-line--${
-                    validatorSurfaceMatch.reviewStateContinuityEntry?.tone ??
-                    validatorSurfaceMatch.observabilityMapping?.tone ??
+                    failureSurfaceMatch.reviewStateContinuityEntry?.tone ??
+                    failureSurfaceMatch.observabilityMapping?.tone ??
                     "warning"
                   }`}
                 >
-                  <span>Validator surface match</span>
+                  <span>Failure surface match</span>
                   <strong>
-                    {validatorSurfaceMatch.observabilityMapping
-                      ? `${validatorSurfaceMatch.observabilityMapping.label} / ${formatReviewPostureRelationship(
-                          validatorSurfaceMatch.observabilityMapping.relationship
+                    {failureSurfaceMatch.observabilityMapping
+                      ? `${failureSurfaceMatch.observabilityMapping.label} / ${formatReviewPostureRelationship(
+                          failureSurfaceMatch.observabilityMapping.relationship
                         )}`
+                      : failureSurfaceMatch.primaryAction
+                        ? `${failureSurfaceMatch.window?.label ?? failureSurfaceMatch.primaryAction.windowId} / ${
+                            failureSurfaceMatch.lane?.label ?? failureSurfaceMatch.primaryAction.sharedStateLaneId
+                          }`
                       : "Unavailable"}
                   </strong>
                 </div>
                 <div
                   className={`workflow-readiness-line workflow-readiness-line--${
-                    validatorSurfaceMatch.reviewStateContinuityEntry?.tone ?? "warning"
+                    failureSurfaceMatch.reviewStateContinuityEntry?.tone ??
+                    failureSurfaceMatch.observabilityMapping?.tone ??
+                    "warning"
                   }`}
                 >
-                  <span>Matched continuity entry</span>
-                  <strong>{validatorSurfaceMatch.reviewStateContinuityEntry?.label ?? "Unavailable"}</strong>
+                  <span>Failure continuity</span>
+                  <strong>
+                    {failureSurfaceMatch.reviewStateContinuityEntry?.label ??
+                      (failureSurfaceMatch.primaryAction
+                        ? `${failureSurfaceMatch.window?.label ?? failureSurfaceMatch.primaryAction.windowId} / ${
+                            failureSurfaceMatch.board?.label ?? failureSurfaceMatch.primaryAction.orchestrationBoardId
+                          }`
+                        : "Unavailable")}
+                  </strong>
                 </div>
                 <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(nearbyMaterializationCheckpoint?.state ?? "blocked")}`}>
                   <span>Nearby Stage C review</span>
@@ -6930,7 +6939,7 @@ export function DeliveryChainWorkspace({
               {selectedValidatorReadout ? (
                 <div className="delivery-chain-workspace__artifact-groups">
                   <div className="windowing-card">
-                    <span>Matched observability path</span>
+                    <span>Validator surface match</span>
                     <strong>
                       {validatorSurfaceMatch.observabilityMapping
                         ? `${validatorSurfaceMatch.observabilityMapping.label} / ${formatReviewPostureRelationship(
@@ -7181,6 +7190,31 @@ export function DeliveryChainWorkspace({
                     <strong>{failureCommandPreviewActions.map((action) => action.label).join(" → ")}</strong>
                   </div>
                 ) : null}
+                {failureSurfaceMatch.primaryAction ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Failure surface match</span>
+                    <strong>
+                      {failureSurfaceMatch.observabilityMapping?.label ?? failureSurfaceMatch.primaryAction.observabilityMappingId} /{" "}
+                      {failureSurfaceMatch.window?.label ?? failureSurfaceMatch.primaryAction.windowId} /{" "}
+                      {failureSurfaceMatch.lane?.label ?? failureSurfaceMatch.primaryAction.sharedStateLaneId}
+                    </strong>
+                  </div>
+                ) : null}
+                {failureSurfaceMatch.reviewStateContinuityEntry ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Failure continuity</span>
+                    <strong>
+                      {failureSurfaceMatch.reviewStateContinuityEntry.label} / {failureSurfaceMatch.reviewStateContinuityEntry.spine.windowId} /{" "}
+                      {failureSurfaceMatch.reviewStateContinuityEntry.spine.sharedStateLaneId}
+                    </strong>
+                  </div>
+                ) : null}
+                {failureCommandPreviewLane ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Failure command lane</span>
+                    <strong>{failureCommandPreviewLane.label} / {failureCommandPreviewLane.primaryActionId}</strong>
+                  </div>
+                ) : null}
                 {(compact ? failureObservabilitySignals.slice(0, 2) : failureObservabilitySignals).map((signal) => (
                   <div key={signal.id} className="windowing-preview-line windowing-preview-line--stacked">
                     <span>Failure observability signal</span>
@@ -7193,16 +7227,6 @@ export function DeliveryChainWorkspace({
                     <strong>{check}</strong>
                   </div>
                 ))}
-                {validatorSurfaceMatch.reviewStateContinuityEntry ? (
-                  <div className="windowing-preview-line windowing-preview-line--stacked">
-                    <span>Matched continuity spine</span>
-                    <strong>
-                      {validatorSurfaceMatch.reviewStateContinuityEntry.label} /{" "}
-                      {validatorSurfaceMatch.reviewStateContinuityEntry.spine.windowId} /{" "}
-                      {validatorSurfaceMatch.reviewStateContinuityEntry.spine.sharedStateLaneId}
-                    </strong>
-                  </div>
-                ) : null}
                 {(compact
                   ? validatorSurfaceMatch.observabilitySignals.slice(0, 2)
                   : validatorSurfaceMatch.observabilitySignals
