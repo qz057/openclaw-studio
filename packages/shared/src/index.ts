@@ -1139,6 +1139,57 @@ export interface StudioCommandReplayEvidenceContinuityCheck {
   state: StudioCommandReplayEvidenceContinuityCheckState;
 }
 
+export type StudioCommandReplayReviewerSignoffState = "ready" | "watch" | "blocked";
+
+export interface StudioCommandReplayReviewerSignoffCheckpoint {
+  id: string;
+  label: string;
+  owner: string;
+  detail: string;
+  state: StudioCommandReplayReviewerSignoffState;
+}
+
+export interface StudioCommandReplayReviewerSignoff {
+  label: string;
+  owner: string;
+  summary: string;
+  verdict: string;
+  nextHandoff: string;
+  state: StudioCommandReplayReviewerSignoffState;
+  blockers: string[];
+  checkpoints: StudioCommandReplayReviewerSignoffCheckpoint[];
+}
+
+export type StudioCommandReplayReviewerWalkthroughStepKind =
+  | "route"
+  | "checks"
+  | "capture-group"
+  | "evidence-item"
+  | "continuity-handoff";
+
+export type StudioCommandReplayReviewerWalkthroughTraceKind = "capture-group" | "evidence-item" | "continuity-handoff";
+
+export interface StudioCommandReplayReviewerWalkthroughTraceRef {
+  kind: StudioCommandReplayReviewerWalkthroughTraceKind;
+  targetId: string;
+}
+
+export interface StudioCommandReplayReviewerWalkthroughStep {
+  id: string;
+  kind: StudioCommandReplayReviewerWalkthroughStepKind;
+  label: string;
+  owner: string;
+  detail: string;
+  trace?: StudioCommandReplayReviewerWalkthroughTraceRef;
+}
+
+export interface StudioCommandReplayReviewerWalkthrough {
+  summary: string;
+  readingQueueSummary: string;
+  completionDetail: string;
+  steps: StudioCommandReplayReviewerWalkthroughStep[];
+}
+
 export type StudioCommandReplayScreenshotStoryboardRole = "baseline" | "handoff" | "return" | "re-entry";
 
 export interface StudioCommandReplayScreenshotReviewItem {
@@ -1152,6 +1203,7 @@ export interface StudioCommandReplayScreenshotReviewItem {
   focus: string;
   framing: string;
   detail: string;
+  captureGroupId?: string;
   captureGroup?: string;
   comparisonFrame?: string;
   linkedEvidenceItemIds?: string[];
@@ -1206,6 +1258,8 @@ export interface StudioCommandCompanionRouteHistoryEntry {
   scenarioSummary?: string;
   reviewerPosture?: string;
   evidencePosture?: string;
+  reviewerSignoff?: StudioCommandReplayReviewerSignoff;
+  reviewerWalkthrough?: StudioCommandReplayReviewerWalkthrough;
   acceptanceChecks?: StudioCommandReplayAcceptanceCheck[];
   scenarioEvidenceItems?: StudioCommandReplayScenarioEvidenceItem[];
   evidenceContinuityChecks?: StudioCommandReplayEvidenceContinuityCheck[];

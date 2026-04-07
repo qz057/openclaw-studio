@@ -1,12 +1,12 @@
 {
   "schemaVersion": "openclaw-studio-release-manifest/v1",
-  "generatedAt": "2026-04-07T09:28:37.574Z",
+  "generatedAt": "2026-04-07T09:57:21.043Z",
   "packageId": "openclaw-studio-alpha-shell",
   "packageName": "OpenClaw Studio Alpha Shell",
   "packageKind": "alpha-shell-release-skeleton",
   "channel": "alpha",
   "phase": "phase60",
-  "milestone": "phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass progression / screenshot pass records / capture review flow / proof-linked evidence bundle / acceptance evidence continuity / reviewer brief / proof bundle / product-review console polish / acceptance storyboard / evidence dossier / evidence trace lens / acceptance scoreboard / replay acceptance checklist / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout",
+  "milestone": "phase60 delivery-chain workspace / stage explorer / review flow ladder / acceptance reading queue / reviewer signoff board / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass progression / screenshot pass records / capture review flow / proof-linked evidence bundle / acceptance evidence continuity / reviewer brief / proof bundle / product-review console polish / acceptance storyboard / evidence dossier / evidence trace lens / acceptance scoreboard / replay acceptance checklist / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout",
   "version": "0.1.0",
   "docs": [
     {
@@ -480,7 +480,7 @@
       "label": "Renderer bundle",
       "outputRoot": "artifacts/renderer",
       "fileCount": 11,
-      "totalBytes": 820693,
+      "totalBytes": 854996,
       "entrypoints": [
         "artifacts/renderer/index.html"
       ]
@@ -518,22 +518,22 @@
       "sha256": "cb7ae03992daad83f5279a53c1754c93a60195f17c7d3ee587eb908c0138bd55"
     },
     {
-      "id": "renderer:assets/fallback-3lnRn0-C.js",
+      "id": "renderer:assets/fallback-wZ2gcKwp.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/fallback-3lnRn0-C.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/fallback-3lnRn0-C.js",
-      "sizeBytes": 292488,
-      "sha256": "0a8ab28a9fadea4eb51246785e54350c356706fe06f0a0a7435bb2cff4a13c9a"
+      "path": "artifacts/renderer/assets/fallback-wZ2gcKwp.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/fallback-wZ2gcKwp.js",
+      "sizeBytes": 310923,
+      "sha256": "4fc68f34d46c5a91678b0fd825d902dbd7dca308425c939a5b1ce979bb08263a"
     },
     {
-      "id": "renderer:assets/HomePage-C2oiG1Jy.js",
+      "id": "renderer:assets/HomePage-0boOqjOt.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/HomePage-C2oiG1Jy.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/HomePage-C2oiG1Jy.js",
+      "path": "artifacts/renderer/assets/HomePage-0boOqjOt.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/HomePage-0boOqjOt.js",
       "sizeBytes": 3031,
-      "sha256": "59b0a8dc3decec80e426fb3f2d7e23315c0ca90768de5e67fe6d9fd8a929851c"
+      "sha256": "e9598fcb9249a3365572d321d9240f6d8d2d6d1fa7673da910c76fc0f8b93b64"
     },
     {
       "id": "renderer:assets/index-BM6FxYSi.css",
@@ -545,13 +545,13 @@
       "sha256": "54e0d902877d4c197e8fefbebf0e03b17f155408604e1ea3d151a3324a2cab25"
     },
     {
-      "id": "renderer:assets/index-DJR25ktM.js",
+      "id": "renderer:assets/index-CKjF1Cxh.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/index-DJR25ktM.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-DJR25ktM.js",
-      "sizeBytes": 333941,
-      "sha256": "d24576f601e0d8e0f5a8bab45e0e52cc6f602a9c0d53e550008933a627f0e33f"
+      "path": "artifacts/renderer/assets/index-CKjF1Cxh.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-CKjF1Cxh.js",
+      "sizeBytes": 349809,
+      "sha256": "5aea3c6bc0db849f031eeadb88153a6e10e512e9c9927c686bbe0fb110d558a3"
     },
     {
       "id": "renderer:assets/SessionsPage-CeRZOu_6.js",
@@ -563,22 +563,22 @@
       "sha256": "54e5f8966e3a61a332401dc09750246fa9ca2aea2468085b38fcbb5f11184452"
     },
     {
-      "id": "renderer:assets/SettingsPage-DCHBA8li.js",
+      "id": "renderer:assets/SettingsPage-hB1zL3Dk.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/SettingsPage-DCHBA8li.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/SettingsPage-DCHBA8li.js",
+      "path": "artifacts/renderer/assets/SettingsPage-hB1zL3Dk.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/SettingsPage-hB1zL3Dk.js",
       "sizeBytes": 1687,
-      "sha256": "837a08900887aed5ea8df0122a880018cc49cedeb19c8ef09fdde5eeb6480420"
+      "sha256": "299bcf2a3a8573e1d5eaaf269f238d886d06f956253ffeb12b459340adc6dc3d"
     },
     {
-      "id": "renderer:assets/SkillsPage-OfhHp8qq.js",
+      "id": "renderer:assets/SkillsPage-D5ySxf3V.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/SkillsPage-OfhHp8qq.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/SkillsPage-OfhHp8qq.js",
+      "path": "artifacts/renderer/assets/SkillsPage-D5ySxf3V.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/SkillsPage-D5ySxf3V.js",
       "sizeBytes": 9335,
-      "sha256": "84cd2a2e9a670f88dc1f639cbcd9fcfa16d9556ccbea35e6676248e5fb3d7b4f"
+      "sha256": "67584d58aa1f92e50d1dedf1af65786edb77d4b85c1348d30a2d3280556c8487"
     },
     {
       "id": "renderer:assets/vendor-D7f9BLy3.js",
@@ -596,7 +596,7 @@
       "path": "artifacts/renderer/index.html",
       "sourceRelativePath": "apps/studio/dist-renderer/index.html",
       "sizeBytes": 496,
-      "sha256": "ad9b80a39a770c656ddd4a22a70fd6f6dde3542554e9a83a60c2c4e9c2961ef3"
+      "sha256": "5e6e83fbefc894e0dd3ba68d95429c6177bb419e3d4f102e4d72f825de5c988f"
     },
     {
       "id": "electron:electron/main.js",
@@ -739,7 +739,7 @@
     "built renderer bundle copied into artifacts/renderer",
     "built Electron bundle copied into artifacts/electron",
     "review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase60 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything",
-    "delivery-chain workspace, stage explorer, review flow ladder, delivery coverage matrix, review-deck coverage routing, review-surface coverage actions, command-surface multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, companion route-history memory, a route replay board, replay scenario packs, a screenshot-driven acceptance review pack, acceptance pass progression, screenshot pass records, capture review flows, a proof-linked evidence bundle, acceptance evidence continuity, reviewer briefs, proof bundles, product-review console polish, an acceptance storyboard, an evidence dossier, an evidence trace lens, an acceptance scoreboard, and a replay acceptance checklist, and the review-deck orchestration action deck linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, observability mapping, command-surface review posture, and multi-window coverage into one staged local-only workflow without executing anything",
+    "delivery-chain workspace, stage explorer, review flow ladder, an acceptance reading queue, a reviewer signoff board, delivery coverage matrix, review-deck coverage routing, review-surface coverage actions, command-surface multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, companion route-history memory, a route replay board, replay scenario packs, a screenshot-driven acceptance review pack, acceptance pass progression, screenshot pass records, capture review flows, a proof-linked evidence bundle, acceptance evidence continuity, reviewer briefs, proof bundles, product-review console polish, an acceptance storyboard, an evidence dossier, an evidence trace lens, an acceptance scoreboard, and a replay acceptance checklist, and the review-deck orchestration action deck linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, observability mapping, command-surface review posture, and multi-window coverage into one staged local-only workflow without executing anything",
     "deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references",
     "deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, review-posture ownership, and inspector-command linkage",
     "persisted shell layout foundation backed by localStorage",
