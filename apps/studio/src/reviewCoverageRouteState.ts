@@ -1,8 +1,10 @@
 import type {
   StudioCommandAction,
   StudioCommandActionDeckLane,
+  StudioCommandCompanionPathHandoff,
   StudioCommandCompanionReviewPath,
   StudioCommandCompanionReviewSequence,
+  StudioCommandCompanionRouteHistoryEntry,
   StudioCommandCompanionRouteSequenceSwitch,
   StudioCommandCompanionRouteState
 } from "@openclaw/shared";
@@ -18,6 +20,9 @@ interface ResolveCompanionRouteContextOptions {
   activeReviewSurfaceActionId?: string | null;
   companionRouteStateId?: string | null;
   companionSequenceId?: string | null;
+  companionRouteHistoryEntryId?: string | null;
+  companionPathHandoffId?: string | null;
+  additionalCompanionRouteHistoryEntries?: StudioCommandCompanionRouteHistoryEntry[];
 }
 
 export interface ResolvedCompanionRouteContext {
@@ -33,6 +38,10 @@ export interface ResolvedCompanionRouteContext {
   activeCompanionRouteState: StudioCommandCompanionRouteState | null;
   alternateCompanionRouteStates: StudioCommandCompanionRouteState[];
   activeSequenceSwitch: StudioCommandCompanionRouteSequenceSwitch | null;
+  relevantCompanionPathHandoffs: StudioCommandCompanionPathHandoff[];
+  activeCompanionPathHandoff: StudioCommandCompanionPathHandoff | null;
+  relevantCompanionRouteHistoryEntries: StudioCommandCompanionRouteHistoryEntry[];
+  activeCompanionRouteHistoryEntry: StudioCommandCompanionRouteHistoryEntry | null;
 }
 
 function dedupeById<T extends { id: string }>(items: T[]): T[] {
@@ -91,13 +100,68 @@ function includesContextAction(
   return actionIds.some((actionId) => contextActionIds.has(actionId)) || Boolean(activeReviewSurfaceActionId && actionIds.includes(activeReviewSurfaceActionId));
 }
 
+function scorePathHandoff(
+  handoff: StudioCommandCompanionPathHandoff,
+  activeReviewSurfaceActionId: string | null | undefined,
+  companionPathHandoffId: string | null | undefined
+): number {
+  let score = 0;
+
+  if (companionPathHandoffId && handoff.id === companionPathHandoffId) {
+    score += 10;
+  }
+
+  if (activeReviewSurfaceActionId) {
+    if (handoff.targetActionId === activeReviewSurfaceActionId) {
+      score += 8;
+    } else if (handoff.sourceActionId === activeReviewSurfaceActionId || handoff.followUpActionId === activeReviewSurfaceActionId) {
+      score += 5;
+    }
+  }
+
+  if (handoff.stability === "stable") {
+    score += 2;
+  }
+
+  return score;
+}
+
+function scoreRouteHistoryEntry(
+  entry: StudioCommandCompanionRouteHistoryEntry,
+  activeReviewSurfaceActionId: string | null | undefined,
+  companionRouteHistoryEntryId: string | null | undefined
+): number {
+  let score = 0;
+
+  if (companionRouteHistoryEntryId && entry.id === companionRouteHistoryEntryId) {
+    score += 10;
+  }
+
+  if (activeReviewSurfaceActionId) {
+    if (entry.targetActionId === activeReviewSurfaceActionId) {
+      score += 8;
+    } else if (entry.sourceActionId === activeReviewSurfaceActionId) {
+      score += 4;
+    }
+  }
+
+  if (entry.transitionKind === "resume-history") {
+    score += 2;
+  }
+
+  return score;
+}
+
 export function resolveCompanionRouteContext({
   lanes,
   contextReviewSurfaceActions,
   allReviewSurfaceActions = contextReviewSurfaceActions,
   activeReviewSurfaceActionId = null,
   companionRouteStateId = null,
-  companionSequenceId = null
+  companionSequenceId = null,
+  companionRouteHistoryEntryId = null,
+  companionPathHandoffId = null,
+  additionalCompanionRouteHistoryEntries = []
 }: ResolveCompanionRouteContextOptions): ResolvedCompanionRouteContext {
   const reviewSurfaceActionById = new Map(allReviewSurfaceActions.map((action) => [action.id, action]));
   const contextActionIds = new Set(contextReviewSurfaceActions.map((action) => action.id));
@@ -192,6 +256,50 @@ export function resolveCompanionRouteContext({
     resolvedCompanionReviewPaths.find((path) => path.sourceActionId === activeReviewSurfaceActionId) ??
     resolvedCompanionReviewPaths[0] ??
     null;
+  const relevantCompanionPathHandoffs = dedupeById(lanes.flatMap((lane) => lane.companionPathHandoffs ?? []))
+    .filter((handoff) =>
+      includesContextAction(
+        [handoff.sourceActionId, handoff.targetActionId, handoff.followUpActionId].filter((actionId): actionId is string => Boolean(actionId)),
+        contextActionIds,
+        activeReviewSurfaceActionId
+      )
+    )
+    .sort(
+      (left, right) =>
+        scorePathHandoff(right, activeReviewSurfaceActionId, companionPathHandoffId) -
+          scorePathHandoff(left, activeReviewSurfaceActionId, companionPathHandoffId) || left.label.localeCompare(right.label)
+    );
+  const activeCompanionPathHandoff =
+    (companionPathHandoffId ? relevantCompanionPathHandoffs.find((handoff) => handoff.id === companionPathHandoffId) : undefined) ??
+    relevantCompanionPathHandoffs.find((handoff) => handoff.reviewPathId === activeCompanionReviewPath?.id) ??
+    relevantCompanionPathHandoffs.find((handoff) => handoff.routeStateId === activeCompanionRouteState?.id) ??
+    relevantCompanionPathHandoffs.find((handoff) => handoff.targetActionId === activeReviewSurfaceActionId) ??
+    relevantCompanionPathHandoffs[0] ??
+    null;
+  const relevantCompanionRouteHistoryEntries = dedupeById([
+    ...additionalCompanionRouteHistoryEntries,
+    ...lanes.flatMap((lane) => lane.companionRouteHistory ?? [])
+  ])
+    .filter((entry) =>
+      includesContextAction([entry.sourceActionId, entry.targetActionId], contextActionIds, activeReviewSurfaceActionId)
+    )
+    .sort(
+      (left, right) =>
+        scoreRouteHistoryEntry(right, activeReviewSurfaceActionId, companionRouteHistoryEntryId) -
+          scoreRouteHistoryEntry(left, activeReviewSurfaceActionId, companionRouteHistoryEntryId) || left.label.localeCompare(right.label)
+    );
+  const activeCompanionRouteHistoryEntry =
+    (companionRouteHistoryEntryId
+      ? relevantCompanionRouteHistoryEntries.find((entry) => entry.id === companionRouteHistoryEntryId)
+      : undefined) ??
+    relevantCompanionRouteHistoryEntries.find(
+      (entry) =>
+        entry.targetActionId === activeReviewSurfaceActionId &&
+        (!entry.routeStateId || entry.routeStateId === activeCompanionRouteState?.id)
+    ) ??
+    relevantCompanionRouteHistoryEntries.find((entry) => entry.reviewPathId === activeCompanionReviewPath?.id) ??
+    relevantCompanionRouteHistoryEntries[0] ??
+    null;
 
   return {
     reviewSurfaceActionById,
@@ -205,6 +313,10 @@ export function resolveCompanionRouteContext({
     relevantCompanionRouteStates,
     activeCompanionRouteState,
     alternateCompanionRouteStates,
-    activeSequenceSwitch
+    activeSequenceSwitch,
+    relevantCompanionPathHandoffs,
+    activeCompanionPathHandoff,
+    relevantCompanionRouteHistoryEntries,
+    activeCompanionRouteHistoryEntry
   };
 }

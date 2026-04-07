@@ -10,6 +10,7 @@ import {
   type StudioReleaseCloseoutWindowState,
   type StudioCommandAction,
   type StudioCommandActionDeck,
+  type StudioCommandCompanionRouteHistoryEntry,
   type StudioReleaseEscalationWindowState,
   type StudioReleaseReviewerQueueStatus,
   type StudioShellState
@@ -24,6 +25,9 @@ interface DeliveryChainWorkspaceProps {
   activeReviewSurfaceActionId?: string | null;
   activeCompanionRouteStateId?: string | null;
   activeCompanionSequenceId?: string | null;
+  activeCompanionRouteHistoryEntryId?: string | null;
+  activeCompanionPathHandoffId?: string | null;
+  companionRouteHistoryEntries?: StudioCommandCompanionRouteHistoryEntry[];
   selectedStageId?: string | null;
   onSelectStage?: (stageId: string) => void;
   onRunReviewSurfaceAction?: (action: StudioCommandAction) => void;
@@ -180,6 +184,32 @@ function formatCompanionRouteSequenceSwitchPosture(
   return posture === "active-sequence" ? "Active sequence" : "Switchable sequence";
 }
 
+function formatCompanionRouteTransitionKind(kind: StudioCommandCompanionRouteHistoryEntry["transitionKind"]): string {
+  switch (kind) {
+    case "switch-sequence":
+      return "Sequence switch";
+    case "stabilize-handoff":
+      return "Path handoff stabilization";
+    case "resume-history":
+      return "History resume";
+    default:
+      return "Route activation";
+  }
+}
+
+function formatCompanionPathHandoffStability(
+  stability: NonNullable<StudioCommandActionDeck["lanes"][number]["companionPathHandoffs"]>[number]["stability"]
+): string {
+  switch (stability) {
+    case "stable":
+      return "Stable";
+    case "restored":
+      return "Restored";
+    default:
+      return "Watch";
+  }
+}
+
 function formatCompanionRouteState(action: StudioCommandAction | null | undefined, windowing?: StudioShellState["windowing"]): string {
   const linkedIntent = action?.windowIntentId
     ? windowing?.windowIntents.find((entry) => entry.id === action.windowIntentId) ?? null
@@ -292,6 +322,9 @@ export function DeliveryChainWorkspace({
   activeReviewSurfaceActionId,
   activeCompanionRouteStateId,
   activeCompanionSequenceId,
+  activeCompanionRouteHistoryEntryId,
+  activeCompanionPathHandoffId,
+  companionRouteHistoryEntries = [],
   selectedStageId: controlledStageId,
   onSelectStage,
   onRunReviewSurfaceAction,
@@ -393,14 +426,21 @@ export function DeliveryChainWorkspace({
     resolvedCompanionReviewPaths,
     activeCompanionReviewPath,
     relevantCompanionRouteStates,
-    activeCompanionRouteState
+    activeCompanionRouteState,
+    relevantCompanionPathHandoffs,
+    activeCompanionPathHandoff,
+    relevantCompanionRouteHistoryEntries,
+    activeCompanionRouteHistoryEntry
   } = resolveCompanionRouteContext({
     lanes: relevantActionDeckLanes,
     contextReviewSurfaceActions: stageReviewSurfaceActions,
     allReviewSurfaceActions: reviewSurfaceActions.filter(isReviewCoverageAction),
     activeReviewSurfaceActionId: activeStageReviewSurfaceAction?.id ?? null,
     companionRouteStateId: activeCompanionRouteStateId,
-    companionSequenceId: activeCompanionSequenceId
+    companionSequenceId: activeCompanionSequenceId,
+    companionRouteHistoryEntryId: activeCompanionRouteHistoryEntryId,
+    companionPathHandoffId: activeCompanionPathHandoffId,
+    additionalCompanionRouteHistoryEntries: companionRouteHistoryEntries
   });
   const panelClassName = [
     nested ? "delivery-chain-workspace delivery-chain-workspace--nested" : "surface card delivery-chain-workspace",
@@ -884,6 +924,117 @@ export function DeliveryChainWorkspace({
                               </button>
                             );
                           })}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </article>
+        ) : null}
+
+        {activeCompanionPathHandoff || relevantCompanionRouteHistoryEntries.length > 0 ? (
+          <article className="windowing-summary-card">
+            <span>Path Handoff Stabilization</span>
+            <strong>{activeCompanionPathHandoff?.label ?? activeCompanionRouteHistoryEntry?.label ?? "No stabilized handoff"}</strong>
+            <p>
+              The selected stage now keeps typed path handoff posture and remembered route transitions together, so returning to the same delivery lane
+              restores the last companion path instead of flattening back to the default review surface.
+            </p>
+            <div className="workflow-readiness-list">
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Handoff stability</span>
+                <strong>
+                  {activeCompanionPathHandoff ? formatCompanionPathHandoffStability(activeCompanionPathHandoff.stability) : "No active handoff"}
+                </strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Companion Route History</span>
+                <strong>{relevantCompanionRouteHistoryEntries.length} remembered routes</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Latest transition</span>
+                <strong>
+                  {activeCompanionRouteHistoryEntry
+                    ? formatCompanionRouteTransitionKind(activeCompanionRouteHistoryEntry.transitionKind)
+                    : "No remembered transition"}
+                </strong>
+              </div>
+            </div>
+            <div className="windowing-preview-list">
+              {(compact ? relevantCompanionPathHandoffs.slice(0, 2) : relevantCompanionPathHandoffs).map((handoff) => {
+                const targetAction = reviewSurfaceActionById.get(handoff.targetActionId) ?? null;
+                const handoffStage = handoff.deliveryChainStageId
+                  ? selectStudioReleaseDeliveryChainStage(pipeline, handoff.deliveryChainStageId)
+                  : targetAction?.deliveryChainStageId
+                    ? selectStudioReleaseDeliveryChainStage(pipeline, targetAction.deliveryChainStageId)
+                    : null;
+                const handoffWindow = handoff.windowId
+                  ? windowing?.roster.windows.find((entry) => entry.id === handoff.windowId) ?? null
+                  : targetAction?.windowId
+                    ? windowing?.roster.windows.find((entry) => entry.id === targetAction.windowId) ?? null
+                    : null;
+                const handoffLane = handoff.sharedStateLaneId
+                  ? windowing?.sharedState.lanes.find((entry) => entry.id === handoff.sharedStateLaneId) ?? null
+                  : targetAction?.sharedStateLaneId
+                    ? windowing?.sharedState.lanes.find((entry) => entry.id === targetAction.sharedStateLaneId) ?? null
+                    : null;
+                const handoffBoard = handoff.orchestrationBoardId
+                  ? windowing?.orchestration.boards.find((entry) => entry.id === handoff.orchestrationBoardId) ?? null
+                  : targetAction?.orchestrationBoardId
+                    ? windowing?.orchestration.boards.find((entry) => entry.id === targetAction.orchestrationBoardId) ?? null
+                    : null;
+                const handoffMapping = handoff.observabilityMappingId
+                  ? windowing?.observability.mappings.find((entry) => entry.id === handoff.observabilityMappingId) ?? null
+                  : targetAction?.observabilityMappingId
+                    ? windowing?.observability.mappings.find((entry) => entry.id === targetAction.observabilityMappingId) ?? null
+                    : null;
+                const active = handoff.id === activeCompanionPathHandoff?.id;
+
+                return (
+                  <div key={handoff.id} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>{formatCompanionPathHandoffStability(handoff.stability)}</span>
+                    <strong>{active ? `${handoff.label} / active handoff` : handoff.label}</strong>
+                    <p>{handoff.summary}</p>
+                    <div className="trace-note-links">
+                      <span className={`windowing-badge${active ? " windowing-badge--active" : ""}`}>
+                        {handoffStage?.label ?? handoff.deliveryChainStageId ?? "No stage"} / {handoffWindow?.label ?? handoff.windowId ?? "No window"}
+                      </span>
+                      <span className="windowing-badge">
+                        {handoffLane?.label ?? handoff.sharedStateLaneId ?? "No lane"} / {handoffBoard?.label ?? handoff.orchestrationBoardId ?? "No board"}
+                      </span>
+                      <span className="windowing-badge">{handoffMapping?.label ?? handoff.observabilityMappingId ?? "No observability path"}</span>
+                    </div>
+                    {onRunReviewSurfaceAction && targetAction ? (
+                      <div className="windowing-card__actions">
+                        <button type="button" className="secondary-button" onClick={() => onRunReviewSurfaceAction(targetAction)}>
+                          {active ? "Refresh handoff" : "Focus handoff"}
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+              {(compact ? relevantCompanionRouteHistoryEntries.slice(0, 2) : relevantCompanionRouteHistoryEntries).map((entry) => {
+                const targetAction = reviewSurfaceActionById.get(entry.targetActionId) ?? null;
+                const active = entry.id === activeCompanionRouteHistoryEntry?.id;
+
+                return (
+                  <div key={entry.id} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>{entry.timestampLabel}</span>
+                    <strong>{active ? `${entry.label} / active memory` : entry.label}</strong>
+                    <p>{entry.summary}</p>
+                    <div className="trace-note-links">
+                      <span className={`windowing-badge${active ? " windowing-badge--active" : ""}`}>
+                        {formatCompanionRouteTransitionKind(entry.transitionKind)}
+                      </span>
+                      {entry.sequenceId ? <span className="windowing-badge">{entry.sequenceId}</span> : null}
+                    </div>
+                    {onRunReviewSurfaceAction && targetAction ? (
+                      <div className="windowing-card__actions">
+                        <button type="button" className="secondary-button" onClick={() => onRunReviewSurfaceAction(targetAction)}>
+                          {active ? "Refresh memory" : "Focus memory"}
+                        </button>
                       </div>
                     ) : null}
                   </div>

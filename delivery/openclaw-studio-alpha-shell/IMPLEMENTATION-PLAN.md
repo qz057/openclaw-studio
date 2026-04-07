@@ -306,8 +306,9 @@
 - phase60 slice7 继续把 action-deck companion coverage 推进成 typed companion review-path orchestration，让当前 review surface 能显式暴露 source / primary companion / follow-up review actions，并保持 route / workspace / window / lane / board / observability coherence
 - phase60 slice8 继续把 typed companion review-path orchestration 推进成 sequence-aware companion review navigation，让当前 review surface 显式暴露 ordered companion steps、active sequence step、以及与 route / workspace / window / lane / board / observability path 绑定的 sequence context
 - phase60 slice9 继续把 sequence-aware companion review navigation 推进成 delivery-gate companion sequence switching，让 publish gate / approval queue / rollback shadow 三条 companion 序列可以在同一条 local-only review lane 里显式切换，并把 route / workspace / intent state 一起带入 active / alternate companion coverage
-- smoke 已提升到验证 phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review coverage flow / action deck coverage / review-surface navigator / multi-window review coverage / companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / command-surface observability linkage / artifact coverage / blockers / handoff posture renderer markers
-- README / HANDOFF / package snapshot 已同步反映 phase60 slice9 reality
+- phase60 slice10 继续把 delivery-gate companion sequence switching 推进成 companion route-history memory，让 review-deck lane 能记住最近一次 publish gate / approval queue / rollback shadow / handoff relay 的 companion handoff，并在重新进入同一条 local-only review route 时恢复 route state / sequence / review-surface / multi-window posture
+- smoke 已提升到验证 phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review coverage flow / action deck coverage / review-surface navigator / multi-window review coverage / companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / command-surface observability linkage / artifact coverage / blockers / handoff posture renderer markers
+- README / HANDOFF / package snapshot 已同步反映 phase60 slice10 reality
 
 ## 当前明确边界
 
@@ -317,7 +318,7 @@
 - dry-run / preview / simulate
 - Studio-local execute（只改应用内 in-memory state/history）
 - phase27 command surface / layout persistence / window intent staging
-- phase60 delivery-chain workspace / stage explorer / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface
+- phase60 delivery-chain workspace / stage explorer / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface
 - phase26/27/28 release skeleton / artifact review / handoff docs / package metadata
 
 当前明确禁止：

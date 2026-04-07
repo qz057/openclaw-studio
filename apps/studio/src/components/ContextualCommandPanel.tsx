@@ -111,6 +111,21 @@ export interface ContextualCommandCompanionRouteStateItem {
   action: StudioCommandAction | null;
 }
 
+export interface ContextualCommandCompanionRouteHistoryItem {
+  id: string;
+  label: string;
+  detail: string;
+  tone: StudioTone;
+  active: boolean;
+  transitionLabel: string;
+  coverageLabel: string;
+  routeLabel: string;
+  pathLabel: string;
+  sequenceLabel?: string;
+  timestamp: string;
+  action: StudioCommandAction | null;
+}
+
 export interface ContextualCommandCompanionReviewPathItem {
   id: string;
   label: string;
@@ -159,6 +174,9 @@ export interface ContextualCommandPanelProps {
   companionRouteStatesLabel?: string;
   companionRouteStatesSummary?: string;
   companionRouteStateItems: ContextualCommandCompanionRouteStateItem[];
+  companionRouteHistoryLabel?: string;
+  companionRouteHistorySummary?: string;
+  companionRouteHistoryItems: ContextualCommandCompanionRouteHistoryItem[];
   companionSequenceLabel?: string;
   companionSequenceSummary?: string;
   companionSequenceItems: ContextualCommandCompanionSequenceItem[];
@@ -183,6 +201,7 @@ export interface ContextualCommandPanelProps {
   onRunFlow: () => void;
   onRunAction: (action: StudioCommandAction) => void;
   onRunActionDeckLane?: (laneId: string) => void;
+  onRunCompanionRouteHistory?: (entryId: string) => void;
   onRunCompanionSequence?: (sequenceId: string) => void;
 }
 
@@ -214,6 +233,9 @@ export function ContextualCommandPanel({
   companionRouteStatesLabel,
   companionRouteStatesSummary,
   companionRouteStateItems,
+  companionRouteHistoryLabel,
+  companionRouteHistorySummary,
+  companionRouteHistoryItems,
   companionSequenceLabel,
   companionSequenceSummary,
   companionSequenceItems,
@@ -238,6 +260,7 @@ export function ContextualCommandPanel({
   onRunFlow,
   onRunAction,
   onRunActionDeckLane,
+  onRunCompanionRouteHistory,
   onRunCompanionSequence
 }: ContextualCommandPanelProps) {
   return (
@@ -457,6 +480,11 @@ export function ContextualCommandPanel({
                     type="button"
                     className="action-button"
                     onClick={() => {
+                      if (onRunCompanionRouteHistory) {
+                        onRunCompanionRouteHistory(item.id);
+                        return;
+                      }
+
                       onRunAction(item.action as StudioCommandAction);
                     }}
                     title={item.action.description}
@@ -528,6 +556,49 @@ export function ContextualCommandPanel({
                       </button>
                     ))}
                 </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {companionRouteHistoryItems.length ? (
+        <div className="contextual-command-panel__section">
+          <div className="contextual-command-panel__section-header">
+            <span>Companion Route History</span>
+            <strong>{companionRouteHistoryLabel ?? `${companionRouteHistoryItems.length} remembered handoffs`}</strong>
+          </div>
+          <p className="panel-summary panel-summary--tight">
+            {companionRouteHistorySummary ??
+              "Recent companion handoffs stay remembered so returning to the same review lane restores the last route, sequence, and review-surface posture instead of recomputing it from scratch."}
+          </p>
+          <div className="contextual-command-panel__next-step-list">
+            {companionRouteHistoryItems.map((item) => (
+              <article key={item.id} className={`contextual-command-next-step contextual-command-next-step--${item.tone}`}>
+                <div>
+                  <span>{item.timestamp}</span>
+                  <strong>{item.active ? `${item.label} · Active memory` : item.label}</strong>
+                  <p>{item.detail}</p>
+                  <div className="contextual-command-panel__chips">
+                    <span className={`command-context-pill${item.active ? " workflow-chip--active" : ""}`}>{item.transitionLabel}</span>
+                    <span className="command-context-pill">{item.coverageLabel}</span>
+                    <span className="command-context-pill">{item.routeLabel}</span>
+                    <span className="command-context-pill">{item.pathLabel}</span>
+                    {item.sequenceLabel ? <span className="command-context-pill">{item.sequenceLabel}</span> : null}
+                  </div>
+                </div>
+                {item.action ? (
+                  <button
+                    type="button"
+                    className="action-button"
+                    onClick={() => {
+                      onRunAction(item.action as StudioCommandAction);
+                    }}
+                    title={item.action.description}
+                  >
+                    {item.active ? "Refresh handoff" : "Resume handoff"}
+                  </button>
+                ) : null}
               </article>
             ))}
           </div>

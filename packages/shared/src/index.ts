@@ -998,6 +998,12 @@ export type StudioCommandCompanionReviewSequenceStepRole =
   | "follow-up-companion";
 export type StudioCommandCompanionRouteStatePosture = "active-route" | "alternate-route";
 export type StudioCommandCompanionRouteSequenceSwitchPosture = "active-sequence" | "switchable-sequence";
+export type StudioCommandCompanionRouteTransitionKind =
+  | "activate-route"
+  | "switch-sequence"
+  | "stabilize-handoff"
+  | "resume-history";
+export type StudioCommandCompanionPathHandoffStability = "stable" | "watch" | "restored";
 
 export interface StudioCommandNextStep {
   id: string;
@@ -1078,6 +1084,50 @@ export interface StudioCommandCompanionRouteState {
   sequenceSwitches: StudioCommandCompanionRouteSequenceSwitch[];
 }
 
+export interface StudioCommandCompanionPathHandoff {
+  id: string;
+  label: string;
+  summary: string;
+  tone: StudioTone;
+  routeStateId: string;
+  sequenceId: string;
+  reviewPathId: string;
+  sourceActionId: string;
+  targetActionId: string;
+  followUpActionId?: string;
+  routeId?: StudioPageId;
+  workspaceViewId?: StudioWorkspaceViewId;
+  windowIntentId?: string;
+  deliveryChainStageId?: string;
+  windowId?: string;
+  sharedStateLaneId?: string;
+  orchestrationBoardId?: string;
+  observabilityMappingId?: string;
+  stability: StudioCommandCompanionPathHandoffStability;
+}
+
+export interface StudioCommandCompanionRouteHistoryEntry {
+  id: string;
+  label: string;
+  summary: string;
+  tone: StudioTone;
+  transitionKind: StudioCommandCompanionRouteTransitionKind;
+  sourceActionId: string;
+  targetActionId: string;
+  routeStateId?: string;
+  sequenceId?: string;
+  reviewPathId?: string;
+  routeId?: StudioPageId;
+  workspaceViewId?: StudioWorkspaceViewId;
+  windowIntentId?: string;
+  deliveryChainStageId?: string;
+  windowId?: string;
+  sharedStateLaneId?: string;
+  orchestrationBoardId?: string;
+  observabilityMappingId?: string;
+  timestampLabel: string;
+}
+
 export interface StudioCommandActionDeckLane {
   id: string;
   label: string;
@@ -1101,6 +1151,8 @@ export interface StudioCommandActionDeckLane {
   companionSequences?: StudioCommandCompanionReviewSequence[];
   companionReviewPaths?: StudioCommandCompanionReviewPath[];
   companionRouteStates?: StudioCommandCompanionRouteState[];
+  companionPathHandoffs?: StudioCommandCompanionPathHandoff[];
+  companionRouteHistory?: StudioCommandCompanionRouteHistoryEntry[];
 }
 
 export interface StudioCommandActionDeck {

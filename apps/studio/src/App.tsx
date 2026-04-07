@@ -7,6 +7,9 @@ import {
   studioPageIds,
   type StudioCommandAction,
   type StudioCommandActionGroup,
+  type StudioCommandCompanionPathHandoffStability,
+  type StudioCommandCompanionRouteHistoryEntry,
+  type StudioCommandCompanionRouteTransitionKind,
   type StudioCommandContextualFlow,
   type StudioCommandMatcher,
   type StudioCommandSequence,
@@ -37,6 +40,7 @@ import {
 import {
   ContextualCommandPanel,
   type ContextualCommandActionDeckLaneItem,
+  type ContextualCommandCompanionRouteHistoryItem,
   type ContextualCommandCompanionRouteStateItem,
   type ContextualCommandCompanionSequenceItem,
   type ContextualCommandCompanionSequenceStepItem,
@@ -54,6 +58,14 @@ import {
   resolvePersistedShellLayoutState,
   writePersistedShellLayoutState
 } from "./components/shell-layout-persistence";
+import {
+  createEmptyReviewCoverageSelectionMemory,
+  readPersistedCompanionRouteMemory,
+  writePersistedCompanionRouteMemory,
+  type CompanionRouteHistoryMemoryEntry,
+  type CompanionRouteMemoryState,
+  type ReviewCoverageSelectionMemory
+} from "./components/companion-route-history-persistence";
 import { resolveCompanionRouteContext, type ReviewCoverageAction } from "./reviewCoverageRouteState";
 
 const LazyHomePage = lazy(async () => {
@@ -114,6 +126,10 @@ function dedupeCommandActions(actions: Array<StudioCommandAction | undefined>): 
   }
 
   return resolved;
+}
+
+function dedupeById<T extends { id: string }>(items: T[]): T[] {
+  return items.filter((item, index, entries) => entries.findIndex((entry) => entry.id === item.id) === index);
 }
 
 function isReviewCoverageAction(
@@ -183,6 +199,30 @@ function formatCompanionRouteSequenceSwitchPosture(
   >
 ): string {
   return posture === "active-sequence" ? "Active sequence" : "Switchable sequence";
+}
+
+function formatCompanionRouteTransitionKind(kind: StudioCommandCompanionRouteTransitionKind): string {
+  switch (kind) {
+    case "switch-sequence":
+      return "Sequence switch";
+    case "stabilize-handoff":
+      return "Path handoff stabilization";
+    case "resume-history":
+      return "History resume";
+    default:
+      return "Route activation";
+  }
+}
+
+function formatCompanionPathHandoffStability(stability: StudioCommandCompanionPathHandoffStability): string {
+  switch (stability) {
+    case "stable":
+      return "Stable";
+    case "restored":
+      return "Restored";
+    default:
+      return "Watch";
+  }
 }
 
 function resolveReviewSurfaceRouteLabel(
@@ -430,16 +470,92 @@ interface CommandSequenceProgress {
   steps: ContextualCommandStep[];
 }
 
-interface ReviewCoverageSelection {
-  actionDeckLaneId: string | null;
-  companionRouteStateId: string | null;
-  companionSequenceId: string | null;
-  reviewSurfaceActionId: string | null;
-  deliveryStageId: string | null;
-  windowId: string | null;
-  sharedStateLaneId: string | null;
-  orchestrationBoardId: string | null;
-  observabilityMappingId: string | null;
+type ReviewCoverageSelection = ReviewCoverageSelectionMemory;
+
+function createInitialCompanionRouteMemory(): CompanionRouteMemoryState {
+  return (
+    readPersistedCompanionRouteMemory() ?? {
+      selection: createEmptyReviewCoverageSelectionMemory(),
+      entries: []
+    }
+  );
+}
+
+function hasReviewCoverageSelection(selection: ReviewCoverageSelection | null | undefined): boolean {
+  return Boolean(
+    selection &&
+      (selection.actionDeckLaneId ||
+        selection.reviewSurfaceActionId ||
+        selection.companionRouteStateId ||
+        selection.companionSequenceId ||
+        selection.deliveryStageId)
+  );
+}
+
+function areReviewCoverageSelectionsEqual(left: ReviewCoverageSelection | null | undefined, right: ReviewCoverageSelection | null | undefined): boolean {
+  if (!left || !right) {
+    return left === right;
+  }
+
+  return (
+    left.actionDeckLaneId === right.actionDeckLaneId &&
+    left.companionRouteStateId === right.companionRouteStateId &&
+    left.companionSequenceId === right.companionSequenceId &&
+    left.companionRouteHistoryEntryId === right.companionRouteHistoryEntryId &&
+    left.companionPathHandoffId === right.companionPathHandoffId &&
+    left.reviewSurfaceActionId === right.reviewSurfaceActionId &&
+    left.deliveryStageId === right.deliveryStageId &&
+    left.windowId === right.windowId &&
+    left.sharedStateLaneId === right.sharedStateLaneId &&
+    left.orchestrationBoardId === right.orchestrationBoardId &&
+    left.observabilityMappingId === right.observabilityMappingId
+  );
+}
+
+function formatRecordedAt(recordedAt: string): string {
+  const timestamp = new Date(recordedAt);
+
+  if (Number.isNaN(timestamp.valueOf())) {
+    return "Stored handoff";
+  }
+
+  return timestamp.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function resolveCompanionRouteTransitionKind(
+  previousSelection: ReviewCoverageSelection | null | undefined,
+  nextSelection: ReviewCoverageSelection,
+  fallback: StudioCommandCompanionRouteTransitionKind = "activate-route"
+): StudioCommandCompanionRouteTransitionKind {
+  if (fallback !== "activate-route") {
+    return fallback;
+  }
+
+  if (nextSelection.companionPathHandoffId && previousSelection?.companionPathHandoffId !== nextSelection.companionPathHandoffId) {
+    return "stabilize-handoff";
+  }
+
+  if (
+    previousSelection?.actionDeckLaneId === nextSelection.actionDeckLaneId &&
+    previousSelection?.companionSequenceId &&
+    nextSelection.companionSequenceId &&
+    previousSelection.companionSequenceId !== nextSelection.companionSequenceId
+  ) {
+    return "switch-sequence";
+  }
+
+  if (
+    previousSelection?.actionDeckLaneId === nextSelection.actionDeckLaneId &&
+    previousSelection?.reviewSurfaceActionId === nextSelection.reviewSurfaceActionId &&
+    previousSelection?.companionRouteStateId === nextSelection.companionRouteStateId
+  ) {
+    return "resume-history";
+  }
+
+  return "activate-route";
 }
 
 function createWindowIntentStateMap(
@@ -646,17 +762,9 @@ export function App() {
   const [windowIntentStates, setWindowIntentStates] = useState<WindowIntentStateMap>({});
   const [commandLog, setCommandLog] = useState<CommandLogEntry[]>([]);
   const [selectedPaletteEntryId, setSelectedPaletteEntryId] = useState<string | null>(null);
-  const [reviewCoverageSelection, setReviewCoverageSelection] = useState<ReviewCoverageSelection>({
-    actionDeckLaneId: null,
-    companionRouteStateId: null,
-    companionSequenceId: null,
-    reviewSurfaceActionId: null,
-    deliveryStageId: null,
-    windowId: null,
-    sharedStateLaneId: null,
-    orchestrationBoardId: null,
-    observabilityMappingId: null
-  });
+  const [companionRouteMemory, setCompanionRouteMemory] = useState<CompanionRouteMemoryState>(createInitialCompanionRouteMemory);
+  const reviewCoverageSelection = companionRouteMemory.selection;
+  const companionRouteHistory = companionRouteMemory.entries;
 
   useEffect(() => {
     const syncRoute = () => {
@@ -704,6 +812,10 @@ export function App() {
 
     writePersistedShellLayoutState(data, layoutState);
   }, [data, layoutState]);
+
+  useEffect(() => {
+    writePersistedCompanionRouteMemory(companionRouteMemory);
+  }, [companionRouteMemory]);
 
   useEffect(() => {
     if (!data) {
@@ -1096,7 +1208,61 @@ export function App() {
   const activeActionDeckLaneReviewSurfaceActions: ReviewCoverageAction[] = dedupeCommandActions(
     activeActionDeckLane?.actionIds.map((actionId) => actionById.get(actionId)) ?? []
   ).filter(isReviewCoverageAction);
+  const activeActionDeckRouteStates = dedupeById((activeActionDeck?.lanes ?? []).flatMap((lane) => lane.companionRouteStates ?? []));
+  const activeActionDeckSequences = dedupeById((activeActionDeck?.lanes ?? []).flatMap((lane) => lane.companionSequences ?? []));
+  const persistedCompanionRouteEntries: StudioCommandCompanionRouteHistoryEntry[] = companionRouteHistory
+    .filter((entry) =>
+      entry.nextSelection.actionDeckLaneId ? activeActionDeck?.lanes.some((lane) => lane.id === entry.nextSelection.actionDeckLaneId) ?? false : false
+    )
+    .flatMap((entry) => {
+      const nextSelection = entry.nextSelection;
+      const previousSelection = entry.previousSelection;
+      const nextActionCandidate = nextSelection.reviewSurfaceActionId ? actionById.get(nextSelection.reviewSurfaceActionId) : undefined;
+      const nextAction = isReviewCoverageAction(nextActionCandidate) ? nextActionCandidate : null;
+
+      if (!nextAction) {
+        return [];
+      }
+
+      const nextRouteState =
+        (nextSelection.companionRouteStateId
+          ? activeActionDeckRouteStates.find((routeState) => routeState.id === nextSelection.companionRouteStateId)
+          : undefined) ?? null;
+      const previousRouteState =
+        (previousSelection?.companionRouteStateId
+          ? activeActionDeckRouteStates.find((routeState) => routeState.id === previousSelection.companionRouteStateId)
+          : undefined) ?? null;
+
+      return [
+        {
+          id: entry.id,
+          label: nextRouteState?.label ?? nextAction.label,
+          summary: previousRouteState
+            ? `Resume the ${previousRouteState.label} -> ${nextRouteState?.label ?? nextAction.label} handoff without dropping the last local-only companion lane.`
+            : "Resume the last local-only companion handoff for this lane instead of recomputing the route from the active surface only.",
+          tone: nextRouteState?.tone ?? nextAction.tone ?? "neutral",
+          transitionKind: resolveCompanionRouteTransitionKind(entry.previousSelection, nextSelection, entry.transitionKind),
+          sourceActionId: entry.previousSelection?.reviewSurfaceActionId ?? nextAction.id,
+          targetActionId: nextAction.id,
+          routeStateId: nextSelection.companionRouteStateId ?? undefined,
+          sequenceId: nextSelection.companionSequenceId ?? undefined,
+          reviewPathId: nextRouteState?.activeReviewPathId,
+          routeId: nextAction.routeId ?? nextRouteState?.routeId,
+          workspaceViewId: nextAction.workspaceViewId ?? nextRouteState?.workspaceViewId,
+          windowIntentId: nextAction.windowIntentId ?? nextRouteState?.windowIntentId,
+          deliveryChainStageId: nextSelection.deliveryStageId ?? nextAction.deliveryChainStageId ?? nextRouteState?.deliveryChainStageId,
+          windowId: nextSelection.windowId ?? nextAction.windowId ?? nextRouteState?.windowId,
+          sharedStateLaneId: nextSelection.sharedStateLaneId ?? nextAction.sharedStateLaneId ?? nextRouteState?.sharedStateLaneId,
+          orchestrationBoardId:
+            nextSelection.orchestrationBoardId ?? nextAction.orchestrationBoardId ?? nextRouteState?.orchestrationBoardId,
+          observabilityMappingId:
+            nextSelection.observabilityMappingId ?? nextAction.observabilityMappingId ?? nextRouteState?.observabilityMappingId,
+          timestampLabel: formatRecordedAt(entry.recordedAt)
+        }
+      ];
+    });
   const {
+    reviewSurfaceActionById,
     relevantCompanionSequences: activeActionDeckLaneCompanionSequences,
     activeCompanionSequence,
     activeCompanionSequenceCurrentStep,
@@ -1105,7 +1271,11 @@ export function App() {
     activeCompanionReviewPath,
     relevantCompanionRouteStates,
     activeCompanionRouteState,
-    activeSequenceSwitch
+    activeSequenceSwitch,
+    relevantCompanionPathHandoffs,
+    activeCompanionPathHandoff,
+    relevantCompanionRouteHistoryEntries,
+    activeCompanionRouteHistoryEntry
   } = resolveCompanionRouteContext({
     lanes: activeActionDeckLane ? [activeActionDeckLane] : [],
     contextReviewSurfaceActions: activeActionDeckLaneReviewSurfaceActions.length
@@ -1114,7 +1284,10 @@ export function App() {
     allReviewSurfaceActions: reviewCoverageActions,
     activeReviewSurfaceActionId: resolvedReviewSurfaceAction?.id ?? null,
     companionRouteStateId: reviewCoverageSelection.companionRouteStateId,
-    companionSequenceId: reviewCoverageSelection.companionSequenceId
+    companionSequenceId: reviewCoverageSelection.companionSequenceId,
+    companionRouteHistoryEntryId: reviewCoverageSelection.companionRouteHistoryEntryId,
+    companionPathHandoffId: reviewCoverageSelection.companionPathHandoffId,
+    additionalCompanionRouteHistoryEntries: persistedCompanionRouteEntries
   });
   const activeCompanionSequenceStepLabel =
     activeCompanionSequence && activeCompanionSequenceCurrentStepIndex >= 0
@@ -1123,6 +1296,59 @@ export function App() {
         ? `${activeCompanionSequence.steps.length} ordered steps`
         : "No companion sequence";
   const historyEntries = commandLog.slice(0, data.commandSurface.history.retention);
+  const companionRouteHistoryItems: ContextualCommandCompanionRouteHistoryItem[] = relevantCompanionRouteHistoryEntries
+    .map((entry) => {
+      const nextActionCandidate = reviewSurfaceActionById.get(entry.targetActionId) ?? actionById.get(entry.targetActionId);
+      const nextAction = isReviewCoverageAction(nextActionCandidate) ? nextActionCandidate : null;
+      const sourceActionCandidate = reviewSurfaceActionById.get(entry.sourceActionId) ?? actionById.get(entry.sourceActionId);
+      const sourceAction = isReviewCoverageAction(sourceActionCandidate) ? sourceActionCandidate : null;
+      const nextRouteState = entry.routeStateId ? relevantCompanionRouteStates.find((routeState) => routeState.id === entry.routeStateId) ?? null : null;
+      const nextSequence = entry.sequenceId ? activeActionDeckSequences.find((sequence) => sequence.id === entry.sequenceId) ?? null : null;
+      const nextStage =
+        (entry.deliveryChainStageId ? selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, entry.deliveryChainStageId) : null) ??
+        (nextAction?.deliveryChainStageId ? selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, nextAction.deliveryChainStageId) : null);
+      const nextWindow =
+        (entry.windowId ? data.windowing.roster.windows.find((window) => window.id === entry.windowId) : undefined) ??
+        (nextAction?.windowId ? data.windowing.roster.windows.find((window) => window.id === nextAction.windowId) : undefined) ??
+        null;
+      const nextLane =
+        (entry.sharedStateLaneId ? data.windowing.sharedState.lanes.find((lane) => lane.id === entry.sharedStateLaneId) : undefined) ??
+        (nextAction?.sharedStateLaneId ? data.windowing.sharedState.lanes.find((lane) => lane.id === nextAction.sharedStateLaneId) : undefined) ??
+        null;
+      const nextBoard =
+        (entry.orchestrationBoardId ? data.windowing.orchestration.boards.find((board) => board.id === entry.orchestrationBoardId) : undefined) ??
+        (nextAction?.orchestrationBoardId ? data.windowing.orchestration.boards.find((board) => board.id === nextAction.orchestrationBoardId) : undefined) ??
+        null;
+      const nextMapping =
+        (entry.observabilityMappingId
+          ? data.windowing.observability.mappings.find((mapping) => mapping.id === entry.observabilityMappingId)
+          : undefined) ??
+        (nextAction?.observabilityMappingId
+          ? data.windowing.observability.mappings.find((mapping) => mapping.id === nextAction.observabilityMappingId)
+          : undefined) ??
+        null;
+      const routeLabel = resolveReviewSurfaceRouteLabel(nextAction ?? sourceAction, data.windowing);
+      const sourceLabel = sourceAction?.label ?? nextRouteState?.label ?? entry.sourceActionId;
+      const targetLabel = nextAction?.label ?? nextRouteState?.label ?? entry.targetActionId;
+
+      return {
+        id: entry.id,
+        label: nextRouteState?.label ?? targetLabel,
+        detail: entry.summary,
+        tone: nextRouteState?.tone ?? nextAction?.tone ?? entry.tone ?? "neutral",
+        active: entry.id === activeCompanionRouteHistoryEntry?.id,
+        transitionLabel: `${formatCompanionRouteTransitionKind(entry.transitionKind)} / ${sourceLabel} -> ${targetLabel}`,
+        coverageLabel: `${nextStage?.label ?? entry.deliveryChainStageId ?? "No stage"} / ${nextWindow?.label ?? entry.windowId ?? "No window"}`,
+        routeLabel,
+        pathLabel: `${nextLane?.label ?? entry.sharedStateLaneId ?? "No lane"} / ${
+          nextBoard?.label ?? entry.orchestrationBoardId ?? "No board"
+        } / ${nextMapping?.label ?? entry.observabilityMappingId ?? "No observability path"}`,
+        sequenceLabel: nextSequence?.label,
+        timestamp: entry.timestampLabel,
+        action: nextAction
+      };
+    })
+    .slice(0, data.commandSurface.history.retention);
   const activeFlowState: ContextualCommandStateLine[] = [
     {
       id: "flow-state-route",
@@ -1205,6 +1431,31 @@ export function App() {
         ? `${activeCompanionRouteState.label} / ${formatCompanionRouteStatePosture(activeCompanionRouteState.posture)}`
         : "No companion route",
       tone: activeCompanionRouteState?.tone ?? "neutral"
+    },
+    {
+      id: "flow-state-path-handoff",
+      label: "Path Handoff Stabilization",
+      value: activeCompanionPathHandoff
+        ? `${activeCompanionPathHandoff.label} / ${formatCompanionPathHandoffStability(activeCompanionPathHandoff.stability)}`
+        : activeCompanionRouteHistoryEntry
+          ? `${activeCompanionRouteHistoryEntry.label} / ${formatCompanionRouteTransitionKind(activeCompanionRouteHistoryEntry.transitionKind)}`
+          : "No stabilized handoff",
+      tone:
+        activeCompanionPathHandoff?.stability === "stable" || activeCompanionPathHandoff?.stability === "restored"
+          ? "positive"
+          : activeCompanionPathHandoff
+            ? "warning"
+            : activeCompanionRouteHistoryEntry
+              ? activeCompanionRouteHistoryEntry.tone
+              : "neutral"
+    },
+    {
+      id: "flow-state-companion-memory",
+      label: "Companion Route History",
+      value: companionRouteHistoryItems.length
+        ? `${companionRouteHistoryItems.length} remembered / ${companionRouteHistoryItems[0]?.label ?? "Latest handoff"}`
+        : "No remembered handoff",
+      tone: companionRouteHistoryItems.length ? "positive" : "neutral"
     },
     {
       id: "flow-state-observability",
@@ -1558,6 +1809,14 @@ export function App() {
         ? `${resolvedReviewSurfaceAction?.label ?? "The active review surface"} now resolves through ${activeCompanionRouteState.label}, where ${companionRouteStateItems.length} explicit route states keep active route, alternate routes, and switchable sequence posture tied to the same local-only route, workspace, window, lane, board, and observability chain.`
         : undefined,
     companionRouteStateItems,
+    companionRouteHistoryLabel: activeActionDeckLane?.label ? `${activeActionDeckLane.label} remembered handoffs` : undefined,
+    companionRouteHistorySummary:
+      activeActionDeckLane && companionRouteHistoryItems.length
+        ? `${activeActionDeckLane.label} now remembers ${companionRouteHistoryItems.length} typed companion handoffs, while ${
+            activeCompanionPathHandoff?.label ?? "the active path handoff"
+          } keeps route-history memory and path stabilization tied to the same review lane instead of flattening back to the default path.`
+        : undefined,
+    companionRouteHistoryItems,
     companionSequenceLabel: activeCompanionSequence?.label,
     companionSequenceSummary:
       activeCompanionSequence && companionSequenceStepItems.length
@@ -1613,6 +1872,21 @@ export function App() {
         return;
       }
 
+      const rememberedSelection = resolveRememberedReviewCoverageSelection(lane.id);
+      const rememberedActionCandidate = rememberedSelection?.reviewSurfaceActionId
+        ? actionById.get(rememberedSelection.reviewSurfaceActionId)
+        : undefined;
+      const rememberedAction = isReviewCoverageAction(rememberedActionCandidate) ? rememberedActionCandidate : null;
+
+      if (rememberedAction && rememberedSelection) {
+        applyReviewCoverageAction(rememberedAction, {
+          actionDeckLaneId: lane.id,
+          selectionOverride: rememberedSelection,
+          transitionKind: "resume-history"
+        });
+        return;
+      }
+
       const primaryAction = actionById.get(lane.primaryActionId);
       if (isReviewCoverageAction(primaryAction)) {
         applyReviewCoverageAction(primaryAction, {
@@ -1624,17 +1898,35 @@ export function App() {
           resolveCompanionSequenceId(lane, reviewCoverageSelection.reviewSurfaceActionId, companionRouteStateId) ??
           lane.companionSequences?.[0]?.id ??
           null;
-        setReviewCoverageSelection({
-          actionDeckLaneId: lane.id,
-          companionRouteStateId,
-          companionSequenceId,
-          reviewSurfaceActionId: reviewCoverageSelection.reviewSurfaceActionId,
-          deliveryStageId: lane.focusDeliveryChainStageId ?? lane.deliveryChainStageIds?.[0] ?? null,
-          windowId: lane.focusWindowId ?? lane.windowIds?.[0] ?? null,
-          sharedStateLaneId: lane.focusSharedStateLaneId ?? lane.sharedStateLaneIds?.[0] ?? null,
-          orchestrationBoardId: lane.focusOrchestrationBoardId ?? lane.orchestrationBoardIds?.[0] ?? null,
-          observabilityMappingId: lane.focusObservabilityMappingId ?? lane.observabilityMappingIds?.[0] ?? null
-        });
+        commitReviewCoverageSelection(
+          {
+            actionDeckLaneId: lane.id,
+            companionRouteStateId,
+            companionSequenceId,
+            companionRouteHistoryEntryId: resolveCompanionRouteHistoryEntryId(
+              lane,
+              reviewCoverageSelection.reviewSurfaceActionId,
+              companionRouteStateId,
+              companionSequenceId,
+              resolveCompanionPathHandoffId(lane, reviewCoverageSelection.reviewSurfaceActionId, companionRouteStateId, companionSequenceId)
+            ),
+            companionPathHandoffId: resolveCompanionPathHandoffId(
+              lane,
+              reviewCoverageSelection.reviewSurfaceActionId,
+              companionRouteStateId,
+              companionSequenceId
+            ),
+            reviewSurfaceActionId: reviewCoverageSelection.reviewSurfaceActionId,
+            deliveryStageId: lane.focusDeliveryChainStageId ?? lane.deliveryChainStageIds?.[0] ?? null,
+            windowId: lane.focusWindowId ?? lane.windowIds?.[0] ?? null,
+            sharedStateLaneId: lane.focusSharedStateLaneId ?? lane.sharedStateLaneIds?.[0] ?? null,
+            orchestrationBoardId: lane.focusOrchestrationBoardId ?? lane.orchestrationBoardIds?.[0] ?? null,
+            observabilityMappingId: lane.focusObservabilityMappingId ?? lane.observabilityMappingIds?.[0] ?? null
+          },
+          {
+            recordHistory: false
+          }
+        );
         executeCommand(primaryAction);
       } else {
         const companionRouteStateId = resolveCompanionRouteStateId(lane, reviewCoverageSelection.reviewSurfaceActionId, lane.companionSequences?.[0]?.id ?? null);
@@ -1642,20 +1934,39 @@ export function App() {
           resolveCompanionSequenceId(lane, reviewCoverageSelection.reviewSurfaceActionId, companionRouteStateId) ??
           lane.companionSequences?.[0]?.id ??
           null;
-        setReviewCoverageSelection({
-          actionDeckLaneId: lane.id,
-          companionRouteStateId,
-          companionSequenceId,
-          reviewSurfaceActionId: reviewCoverageSelection.reviewSurfaceActionId,
-          deliveryStageId: lane.focusDeliveryChainStageId ?? lane.deliveryChainStageIds?.[0] ?? null,
-          windowId: lane.focusWindowId ?? lane.windowIds?.[0] ?? null,
-          sharedStateLaneId: lane.focusSharedStateLaneId ?? lane.sharedStateLaneIds?.[0] ?? null,
-          orchestrationBoardId: lane.focusOrchestrationBoardId ?? lane.orchestrationBoardIds?.[0] ?? null,
-          observabilityMappingId: lane.focusObservabilityMappingId ?? lane.observabilityMappingIds?.[0] ?? null
-        });
+        commitReviewCoverageSelection(
+          {
+            actionDeckLaneId: lane.id,
+            companionRouteStateId,
+            companionSequenceId,
+            companionRouteHistoryEntryId: resolveCompanionRouteHistoryEntryId(
+              lane,
+              reviewCoverageSelection.reviewSurfaceActionId,
+              companionRouteStateId,
+              companionSequenceId,
+              resolveCompanionPathHandoffId(lane, reviewCoverageSelection.reviewSurfaceActionId, companionRouteStateId, companionSequenceId)
+            ),
+            companionPathHandoffId: resolveCompanionPathHandoffId(
+              lane,
+              reviewCoverageSelection.reviewSurfaceActionId,
+              companionRouteStateId,
+              companionSequenceId
+            ),
+            reviewSurfaceActionId: reviewCoverageSelection.reviewSurfaceActionId,
+            deliveryStageId: lane.focusDeliveryChainStageId ?? lane.deliveryChainStageIds?.[0] ?? null,
+            windowId: lane.focusWindowId ?? lane.windowIds?.[0] ?? null,
+            sharedStateLaneId: lane.focusSharedStateLaneId ?? lane.sharedStateLaneIds?.[0] ?? null,
+            orchestrationBoardId: lane.focusOrchestrationBoardId ?? lane.orchestrationBoardIds?.[0] ?? null,
+            observabilityMappingId: lane.focusObservabilityMappingId ?? lane.observabilityMappingIds?.[0] ?? null
+          },
+          {
+            recordHistory: false
+          }
+        );
       }
     },
-    onRunCompanionSequence: handleRunCompanionSequence
+    onRunCompanionSequence: handleRunCompanionSequence,
+    onRunCompanionRouteHistory: handleRunCompanionRouteHistory
   };
   function handleRunReviewSurfaceAction(action: StudioCommandAction) {
     if (isReviewCoverageAction(action)) {
@@ -1674,22 +1985,84 @@ export function App() {
       applyReviewCoverageAction(sourceAction, {
         actionDeckLaneId: activeActionDeckLane?.id ?? reviewCoverageSelection.actionDeckLaneId,
         companionRouteStateId,
-        companionSequenceId: sequenceId
+        companionSequenceId: sequenceId,
+        transitionKind: "switch-sequence"
       });
       return;
     }
 
-    setReviewCoverageSelection({
+    commitReviewCoverageSelection({
       actionDeckLaneId: activeActionDeckLane?.id ?? reviewCoverageSelection.actionDeckLaneId,
       companionRouteStateId,
       companionSequenceId: sequenceId,
+      companionRouteHistoryEntryId: resolveCompanionRouteHistoryEntryId(
+        activeActionDeckLane,
+        reviewCoverageSelection.reviewSurfaceActionId,
+        companionRouteStateId,
+        sequenceId,
+        resolveCompanionPathHandoffId(activeActionDeckLane, reviewCoverageSelection.reviewSurfaceActionId, companionRouteStateId, sequenceId)
+      ),
+      companionPathHandoffId: resolveCompanionPathHandoffId(
+        activeActionDeckLane,
+        reviewCoverageSelection.reviewSurfaceActionId,
+        companionRouteStateId,
+        sequenceId
+      ),
       reviewSurfaceActionId: reviewCoverageSelection.reviewSurfaceActionId,
       deliveryStageId: reviewCoverageSelection.deliveryStageId,
       windowId: reviewCoverageSelection.windowId,
       sharedStateLaneId: reviewCoverageSelection.sharedStateLaneId,
       orchestrationBoardId: reviewCoverageSelection.orchestrationBoardId,
       observabilityMappingId: reviewCoverageSelection.observabilityMappingId
+    }, {
+      transitionKind: "switch-sequence"
     });
+  }
+  function handleRunCompanionRouteHistory(entryId: string) {
+    const historyEntry: CompanionRouteHistoryMemoryEntry | null = companionRouteHistory.find((entry) => entry.id === entryId) ?? null;
+    const nextSelection = historyEntry?.nextSelection ?? null;
+    const historyActionCandidate = nextSelection?.reviewSurfaceActionId ? actionById.get(nextSelection.reviewSurfaceActionId) : undefined;
+
+    if (nextSelection && isReviewCoverageAction(historyActionCandidate)) {
+      applyReviewCoverageAction(historyActionCandidate, {
+        actionDeckLaneId: nextSelection.actionDeckLaneId,
+        selectionOverride: nextSelection,
+        transitionKind: "resume-history"
+      });
+      return;
+    }
+
+    const contractHistoryEntry = relevantCompanionRouteHistoryEntries.find((entry) => entry.id === entryId) ?? null;
+    const contractActionCandidate = contractHistoryEntry ? actionById.get(contractHistoryEntry.targetActionId) : undefined;
+
+    if (contractHistoryEntry && isReviewCoverageAction(contractActionCandidate)) {
+      const handoffId = resolveCompanionPathHandoffId(
+        activeActionDeckLane,
+        contractActionCandidate.id,
+        contractHistoryEntry.routeStateId ?? null,
+        contractHistoryEntry.sequenceId ?? null
+      );
+
+      applyReviewCoverageAction(contractActionCandidate, {
+        actionDeckLaneId: activeActionDeckLane?.id ?? reviewCoverageSelection.actionDeckLaneId,
+        companionRouteStateId: contractHistoryEntry.routeStateId ?? null,
+        companionSequenceId: contractHistoryEntry.sequenceId ?? null,
+        selectionOverride: {
+          actionDeckLaneId: activeActionDeckLane?.id ?? reviewCoverageSelection.actionDeckLaneId,
+          companionRouteStateId: contractHistoryEntry.routeStateId ?? null,
+          companionSequenceId: contractHistoryEntry.sequenceId ?? null,
+          companionRouteHistoryEntryId: contractHistoryEntry.id,
+          companionPathHandoffId: handoffId,
+          reviewSurfaceActionId: contractActionCandidate.id,
+          deliveryStageId: contractHistoryEntry.deliveryChainStageId ?? contractActionCandidate.deliveryChainStageId ?? null,
+          windowId: contractHistoryEntry.windowId ?? contractActionCandidate.windowId ?? null,
+          sharedStateLaneId: contractHistoryEntry.sharedStateLaneId ?? contractActionCandidate.sharedStateLaneId ?? null,
+          orchestrationBoardId: contractHistoryEntry.orchestrationBoardId ?? contractActionCandidate.orchestrationBoardId ?? null,
+          observabilityMappingId: contractHistoryEntry.observabilityMappingId ?? contractActionCandidate.observabilityMappingId ?? null
+        },
+        transitionKind: "resume-history"
+      });
+    }
   }
   function handleSelectDeliveryStage(stageId: string) {
     const matchingAction =
@@ -1702,16 +2075,20 @@ export function App() {
       return;
     }
 
-    setReviewCoverageSelection({
+    commitReviewCoverageSelection({
       actionDeckLaneId: reviewCoverageSelection.actionDeckLaneId,
       companionRouteStateId: null,
       companionSequenceId: null,
+      companionRouteHistoryEntryId: null,
+      companionPathHandoffId: null,
       reviewSurfaceActionId: null,
       deliveryStageId: stageId,
       windowId: reviewCoverageSelection.windowId,
       sharedStateLaneId: reviewCoverageSelection.sharedStateLaneId,
       orchestrationBoardId: reviewCoverageSelection.orchestrationBoardId,
       observabilityMappingId: reviewCoverageSelection.observabilityMappingId
+    }, {
+      recordHistory: false
     });
   }
   const crossViewCoordinationMatrix = [
@@ -2220,7 +2597,7 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase60 slice 9 adds delivery-gate companion sequence switching on top of sequence-aware companion review navigation, typed companion review-path orchestration, and multi-window review coverage; it still does not install, publish, sign, orchestrate live approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
+        "Phase60 slice 10 adds companion route-history memory on top of delivery-gate companion sequence switching, sequence-aware companion review navigation, typed companion review-path orchestration, and multi-window review coverage; it still does not install, publish, sign, orchestrate live approvals, advance staged decision lifecycles, settle publication receipts, roll back publish state, or enable host-side execution."
     }
   ];
   const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
@@ -2278,8 +2655,20 @@ export function App() {
             ? `${sourceItem?.label ?? "Companion route"} · ${sourceSwitch.postureLabel}`
             : sourceItem
               ? `${sourceItem.label} · ${sourceItem.postureLabel}`
-              : "Companion route"
+          : "Companion route"
         );
+      })
+    },
+    {
+      id: "section-companion-route-history",
+      label: activeActionDeckLane?.label ?? "Companion Route History",
+      summary:
+        activeCompanionPathHandoff?.summary ??
+        "Remembered companion handoffs keep route-history memory and path stabilization available inside the same local-only review lane.",
+      entries: dedupeCommandActions(companionRouteHistoryItems.map((item) => item.action ?? undefined)).map((action) => {
+        const sourceItem = companionRouteHistoryItems.find((item) => item.action?.id === action.id);
+
+        return actionToPaletteEntry(action, sourceItem ? sourceItem.transitionLabel : "Remembered handoff");
       })
     },
     {
@@ -2600,6 +2989,132 @@ export function App() {
     );
   };
 
+  const resolveCompanionPathHandoffId = (
+    lane: CommandActionDeck["lanes"][number] | null | undefined,
+    actionId: string | null,
+    routeStateId?: string | null,
+    sequenceId?: string | null
+  ) => {
+    if (!lane) {
+      return null;
+    }
+
+    return (
+      (routeStateId
+        ? lane.companionPathHandoffs?.find(
+            (handoff) =>
+              handoff.routeStateId === routeStateId &&
+              (handoff.targetActionId === actionId || handoff.sourceActionId === actionId || handoff.followUpActionId === actionId)
+          )?.id
+        : undefined) ??
+      (sequenceId
+        ? lane.companionPathHandoffs?.find(
+            (handoff) =>
+              handoff.sequenceId === sequenceId &&
+              (handoff.targetActionId === actionId || handoff.sourceActionId === actionId || handoff.followUpActionId === actionId)
+          )?.id
+        : undefined) ??
+      lane.companionPathHandoffs?.find(
+        (handoff) => handoff.targetActionId === actionId || handoff.sourceActionId === actionId || handoff.followUpActionId === actionId
+      )?.id ??
+      null
+    );
+  };
+
+  const resolveCompanionRouteHistoryEntryId = (
+    lane: CommandActionDeck["lanes"][number] | null | undefined,
+    actionId: string | null,
+    routeStateId?: string | null,
+    sequenceId?: string | null,
+    pathHandoffId?: string | null
+  ) => {
+    if (!lane) {
+      return null;
+    }
+
+    const handoff = pathHandoffId ? lane.companionPathHandoffs?.find((entry) => entry.id === pathHandoffId) ?? null : null;
+
+    return (
+      lane.companionRouteHistory?.find(
+        (entry) =>
+          Boolean(actionId) &&
+          entry.targetActionId === actionId &&
+          (!routeStateId || entry.routeStateId === routeStateId) &&
+          (!sequenceId || entry.sequenceId === sequenceId)
+      )?.id ??
+      (handoff ? lane.companionRouteHistory?.find((entry) => entry.reviewPathId === handoff.reviewPathId)?.id : undefined) ??
+      lane.companionRouteHistory?.find(
+        (entry) => Boolean(actionId) && (entry.targetActionId === actionId || entry.sourceActionId === actionId)
+      )?.id ??
+      null
+    );
+  };
+
+  const resolveRememberedReviewCoverageSelection = (laneId: string | null | undefined): ReviewCoverageSelection | null => {
+    if (!laneId) {
+      return null;
+    }
+
+    if (reviewCoverageSelection.actionDeckLaneId === laneId && hasReviewCoverageSelection(reviewCoverageSelection)) {
+      return reviewCoverageSelection;
+    }
+
+    return (
+      companionRouteHistory.find(
+        (entry) => entry.nextSelection.actionDeckLaneId === laneId && hasReviewCoverageSelection(entry.nextSelection)
+      )?.nextSelection ?? null
+    );
+  };
+
+  const commitReviewCoverageSelection = (
+    nextSelection: ReviewCoverageSelection,
+    options?: {
+      recordHistory?: boolean;
+      transitionKind?: StudioCommandCompanionRouteTransitionKind;
+    }
+  ) => {
+    const nextSelectionSnapshot: ReviewCoverageSelection = {
+      ...nextSelection
+    };
+
+    setCompanionRouteMemory((current) => {
+      const selectionChanged = !areReviewCoverageSelectionsEqual(current.selection, nextSelectionSnapshot);
+      const shouldRecordHistory =
+        options?.recordHistory !== false &&
+        selectionChanged &&
+        nextSelectionSnapshot.actionDeckLaneId &&
+        nextSelectionSnapshot.reviewSurfaceActionId &&
+        (current.selection.actionDeckLaneId !== nextSelectionSnapshot.actionDeckLaneId ||
+          current.selection.reviewSurfaceActionId !== nextSelectionSnapshot.reviewSurfaceActionId ||
+          current.selection.companionRouteStateId !== nextSelectionSnapshot.companionRouteStateId ||
+          current.selection.companionSequenceId !== nextSelectionSnapshot.companionSequenceId ||
+          current.selection.companionPathHandoffId !== nextSelectionSnapshot.companionPathHandoffId);
+
+      const previousSelectionSnapshot = hasReviewCoverageSelection(current.selection)
+        ? {
+            ...current.selection
+          }
+        : null;
+      const nextEntries = shouldRecordHistory
+        ? [
+            {
+              id: `companion-route-memory-${Date.now()}-${current.entries.length + 1}`,
+              recordedAt: new Date().toISOString(),
+              transitionKind: resolveCompanionRouteTransitionKind(previousSelectionSnapshot, nextSelectionSnapshot, options?.transitionKind),
+              previousSelection: previousSelectionSnapshot,
+              nextSelection: nextSelectionSnapshot
+            },
+            ...current.entries
+          ].slice(0, data.commandSurface.history.retention)
+        : current.entries;
+
+      return {
+        selection: nextSelectionSnapshot,
+        entries: nextEntries
+      };
+    });
+  };
+
   const applyReviewCoverageAction = (
     action: StudioCommandAction & {
       kind: "focus-review-coverage";
@@ -2608,10 +3123,14 @@ export function App() {
       actionDeckLaneId?: string | null;
       companionRouteStateId?: string | null;
       companionSequenceId?: string | null;
+      selectionOverride?: ReviewCoverageSelection | null;
       record?: boolean;
+      transitionKind?: StudioCommandCompanionRouteTransitionKind;
     }
   ) => {
+    const selectionOverride = options?.selectionOverride;
     const linkedLaneId =
+      selectionOverride?.actionDeckLaneId ??
       options?.actionDeckLaneId ??
       activeActionDeck?.lanes.find((lane) => lane.actionIds.includes(action.id))?.id ??
       reviewCoverageSelection.actionDeckLaneId;
@@ -2620,11 +3139,20 @@ export function App() {
       activeActionDeck?.lanes.find((lane) => lane.actionIds.includes(action.id)) ??
       null;
     const companionRouteStateId =
-      options?.companionRouteStateId ?? resolveCompanionRouteStateId(linkedLane, action.id, options?.companionSequenceId ?? null);
+      selectionOverride?.companionRouteStateId ??
+      options?.companionRouteStateId ??
+      resolveCompanionRouteStateId(linkedLane, action.id, selectionOverride?.companionSequenceId ?? options?.companionSequenceId ?? null);
     const companionSequenceId =
+      selectionOverride?.companionSequenceId ??
       options?.companionSequenceId ??
       resolveCompanionSequenceId(linkedLane, action.id, companionRouteStateId) ??
       null;
+    const companionPathHandoffId =
+      selectionOverride?.companionPathHandoffId ??
+      resolveCompanionPathHandoffId(linkedLane, action.id, companionRouteStateId, companionSequenceId);
+    const companionRouteHistoryEntryId =
+      selectionOverride?.companionRouteHistoryEntryId ??
+      resolveCompanionRouteHistoryEntryId(linkedLane, action.id, companionRouteStateId, companionSequenceId, companionPathHandoffId);
 
     if (action.windowIntentId) {
       stageWindowIntent(action.windowIntentId, {
@@ -2645,17 +3173,25 @@ export function App() {
       bottomDockTabId: action.bottomDockTabId ?? "windows"
     });
 
-    setReviewCoverageSelection({
-      actionDeckLaneId: linkedLaneId ?? null,
-      companionRouteStateId,
-      companionSequenceId,
-      reviewSurfaceActionId: action.id,
-      deliveryStageId: action.deliveryChainStageId ?? null,
-      windowId: action.windowId ?? null,
-      sharedStateLaneId: action.sharedStateLaneId ?? null,
-      orchestrationBoardId: action.orchestrationBoardId ?? null,
-      observabilityMappingId: action.observabilityMappingId ?? null
-    });
+    commitReviewCoverageSelection(
+      {
+        actionDeckLaneId: linkedLaneId ?? null,
+        companionRouteStateId,
+        companionSequenceId,
+        companionRouteHistoryEntryId,
+        companionPathHandoffId,
+        reviewSurfaceActionId: action.id,
+        deliveryStageId: selectionOverride?.deliveryStageId ?? action.deliveryChainStageId ?? null,
+        windowId: selectionOverride?.windowId ?? action.windowId ?? null,
+        sharedStateLaneId: selectionOverride?.sharedStateLaneId ?? action.sharedStateLaneId ?? null,
+        orchestrationBoardId: selectionOverride?.orchestrationBoardId ?? action.orchestrationBoardId ?? null,
+        observabilityMappingId: selectionOverride?.observabilityMappingId ?? action.observabilityMappingId ?? null
+      },
+      {
+        recordHistory: options?.record,
+        transitionKind: options?.transitionKind
+      }
+    );
 
     if (options?.record !== false) {
       recordCommand(
@@ -3269,8 +3805,8 @@ export function App() {
                   <h2>Delivery-chain Workspace</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but phase60 slice 9 now keeps the review-only delivery chain anchored in a
-                  usable stage explorer plus review-surface navigator while adding delivery-gate companion sequence switching on top of
+                  The alpha shell still does not build a real installer, but phase60 slice 10 now keeps the review-only delivery chain anchored in a
+                  usable stage explorer plus review-surface navigator while adding companion route-history memory on top of delivery-gate companion sequence switching,
                   sequence-aware companion review navigation, typed companion review-path orchestration, and multi-window review coverage, so operator board ownership, reviewer queues,
                   acknowledgement state, stage-level artifacts, promotion review flow, publish gating, rollback readiness, blockers, handoff
                   posture, ordered companion steps, and explicit companion review paths stay visible as one local-only non-executing surface.
@@ -3361,14 +3897,18 @@ export function App() {
             actionDeck={activeActionDeck}
             reviewSurfaceActions={reviewCoverageActions}
             activeReviewSurfaceActionId={resolvedReviewSurfaceAction?.id ?? null}
+            activeCompanionRouteStateId={activeCompanionRouteState?.id ?? null}
             activeCompanionSequenceId={activeCompanionSequence?.id ?? null}
+            activeCompanionRouteHistoryEntryId={activeCompanionRouteHistoryEntry?.id ?? null}
+            activeCompanionPathHandoffId={activeCompanionPathHandoff?.id ?? null}
+            companionRouteHistoryEntries={persistedCompanionRouteEntries}
             selectedStageId={resolvedDeliveryCoverageStage?.id ?? null}
             onSelectStage={handleSelectDeliveryStage}
             onRunReviewSurfaceAction={handleRunReviewSurfaceAction}
             onRunCompanionSequence={handleRunCompanionSequence}
             eyebrow="Phase60"
             title="Delivery-chain Workspace"
-            summary="Phase60 slice 9 keeps coverage-driven review-surface navigation, multi-window review coverage, typed companion review-path orchestration, and sequence-aware companion review navigation in place, then adds delivery-gate companion sequence switching so the shell can pivot across publish-gate, approval-queue, and rollback-shadow review paths while keeping ownership, review surfaces, ordered companion steps, linked artifacts, blockers, handoff posture, route state, and observability mapping together."
+            summary="Phase60 slice 10 keeps coverage-driven review-surface navigation, multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, and delivery-gate companion sequence switching in place, then adds deeper companion route transitions, route-history memory, and path handoff stabilization so the shell can return to the last publish-gate, approval-queue, rollback-shadow, or handoff relay path while keeping ownership, review surfaces, ordered companion steps, linked artifacts, blockers, handoff posture, route state, and observability mapping together."
           />
 
           <section className="surface card window-workbench">

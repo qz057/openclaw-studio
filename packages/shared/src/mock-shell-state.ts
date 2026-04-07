@@ -14,7 +14,7 @@ import { mockBoundarySummary } from "./mock-host.js";
 const mockCommandSurface: StudioCommandSurface = {
   title: "Command Palette",
   summary:
-    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, typed companion review-path orchestration, ordered companion review sequences, typed companion route states, explicit active/alternate routes, switchable sequence posture, review-surface coverage pivots, multi-window review coverage, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
+    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, typed companion review-path orchestration, ordered companion review sequences, typed companion route states, explicit active/alternate routes, switchable sequence posture, companion route-history memory, stabilized path handoffs, review-surface coverage pivots, multi-window review coverage, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
   placeholder: "Search orchestration, delivery coverage, observability, navigation, next steps, flow state, detached workspace, or keyboard routes",
   quickActionIds: [
     "command-open-home",
@@ -903,7 +903,7 @@ const mockCommandSurface: StudioCommandSurface = {
       id: "deck-review-deck-orchestration",
       label: "Review Deck Orchestration Deck",
       summary:
-        "Review-deck posture now carries a dedicated local-only action deck so workspace entry, review-workspace intent, delivery-stage coverage, typed companion review-path orchestration, delivery-gate companion sequence switching, review-surface pivots, multi-window review coverage, and cross-window handoff coverage stay grouped instead of being inferred from separate cards.",
+        "Review-deck posture now carries a dedicated local-only action deck so workspace entry, review-workspace intent, delivery-stage coverage, typed companion review-path orchestration, delivery-gate companion sequence switching, companion route-history memory, stabilized path handoffs, review-surface pivots, multi-window review coverage, and cross-window handoff coverage stay grouped instead of being inferred from separate cards.",
       tone: "positive",
       flowId: "flow-review-deck-coverage",
       sequenceId: "sequence-review-coverage-flow",
@@ -1013,6 +1013,52 @@ const mockCommandSurface: StudioCommandSurface = {
                   reviewPathId: "companion-path-lifecycle-packet-publish-gate"
                 }
               ]
+            }
+          ],
+          companionPathHandoffs: [
+            {
+              id: "companion-path-handoff-lifecycle-publish-gate",
+              label: "Lifecycle gate handoff",
+              summary:
+                "Keep the lifecycle packet -> publish gate handoff stabilized so promotion readiness can return to the same companion path instead of recomputing the next review surface from scratch.",
+              tone: "warning",
+              routeStateId: "companion-route-state-lifecycle-packet",
+              sequenceId: "companion-sequence-lifecycle-gate-coverage",
+              reviewPathId: "companion-path-lifecycle-packet-publish-gate",
+              sourceActionId: "command-focus-lifecycle-review-packet",
+              targetActionId: "command-focus-publish-decision-gate",
+              followUpActionId: "command-focus-approval-reviewer-queue",
+              workspaceViewId: "review-deck",
+              windowIntentId: "window-intent-review-workspace",
+              deliveryChainStageId: "delivery-chain-promotion-readiness",
+              windowId: "window-review-board",
+              sharedStateLaneId: "shared-state-lane-preview-review",
+              orchestrationBoardId: "orchestration-board-preview-review",
+              observabilityMappingId: "observability-mapping-lifecycle-preview",
+              stability: "stable"
+            }
+          ],
+          companionRouteHistory: [
+            {
+              id: "companion-route-history-lifecycle-publish-gate",
+              label: "Lifecycle -> Publish Gate",
+              summary:
+                "Remember the last lifecycle packet -> publish gate handoff so returning to the workspace entry restores promotion readiness coverage with the same downstream reviewer path.",
+              tone: "warning",
+              transitionKind: "stabilize-handoff",
+              sourceActionId: "command-focus-lifecycle-review-packet",
+              targetActionId: "command-focus-publish-decision-gate",
+              routeStateId: "companion-route-state-lifecycle-packet",
+              sequenceId: "companion-sequence-lifecycle-gate-coverage",
+              reviewPathId: "companion-path-lifecycle-packet-publish-gate",
+              workspaceViewId: "review-deck",
+              windowIntentId: "window-intent-review-workspace",
+              deliveryChainStageId: "delivery-chain-promotion-readiness",
+              windowId: "window-review-board",
+              sharedStateLaneId: "shared-state-lane-preview-review",
+              orchestrationBoardId: "orchestration-board-preview-review",
+              observabilityMappingId: "observability-mapping-lifecycle-preview",
+              timestampLabel: "Seeded memory"
             }
           ]
         },
@@ -1358,6 +1404,136 @@ const mockCommandSurface: StudioCommandSurface = {
                 }
               ]
             }
+          ],
+          companionPathHandoffs: [
+            {
+              id: "companion-path-handoff-publish-gate-queue",
+              label: "Publish gate handoff",
+              summary:
+                "Keep the publish gate -> approval queue path stabilized so the same delivery lane can reopen reviewer ownership without dropping publish posture.",
+              tone: "warning",
+              routeStateId: "companion-route-state-publish-gate",
+              sequenceId: "companion-sequence-delivery-gate-loop",
+              reviewPathId: "companion-path-publish-gate-reviewer-queue",
+              sourceActionId: "command-focus-publish-decision-gate",
+              targetActionId: "command-focus-approval-reviewer-queue",
+              followUpActionId: "command-focus-rollback-closeout-window",
+              workspaceViewId: "review-deck",
+              windowIntentId: "window-intent-review-workspace",
+              deliveryChainStageId: "delivery-chain-publish-decision",
+              windowId: "window-shell-main",
+              sharedStateLaneId: "shared-state-lane-boundary-review",
+              orchestrationBoardId: "orchestration-board-boundary-review",
+              observabilityMappingId: "observability-mapping-final-gate",
+              stability: "stable"
+            },
+            {
+              id: "companion-path-handoff-approval-queue-publish-gate",
+              label: "Approval queue handoff",
+              summary:
+                "Keep the approval queue -> publish gate path on watch so reviewer ownership can hand back into the live decision gate without drifting off the same coverage chain.",
+              tone: "warning",
+              routeStateId: "companion-route-state-approval-queue",
+              sequenceId: "companion-sequence-delivery-queue-handoff",
+              reviewPathId: "companion-path-reviewer-queue-publish-gate",
+              sourceActionId: "command-focus-approval-reviewer-queue",
+              targetActionId: "command-focus-publish-decision-gate",
+              followUpActionId: "command-focus-rollback-closeout-window",
+              workspaceViewId: "review-deck",
+              windowIntentId: "window-intent-review-workspace",
+              deliveryChainStageId: "delivery-chain-operator-review",
+              windowId: "window-trace-review",
+              sharedStateLaneId: "shared-state-lane-trace-review",
+              orchestrationBoardId: "orchestration-board-trace-review",
+              observabilityMappingId: "observability-mapping-approval-active",
+              stability: "watch"
+            },
+            {
+              id: "companion-path-handoff-rollback-shadow-publish-gate",
+              label: "Rollback shadow handoff",
+              summary:
+                "Keep the rollback closeout -> publish gate path restorable so recovery shadow review can hand back into the live decision gate with the same cross-window linkage.",
+              tone: "warning",
+              routeStateId: "companion-route-state-rollback-shadow",
+              sequenceId: "companion-sequence-delivery-rollback-shadow",
+              reviewPathId: "companion-path-rollback-closeout-publish-gate",
+              sourceActionId: "command-focus-rollback-closeout-window",
+              targetActionId: "command-focus-publish-decision-gate",
+              followUpActionId: "command-focus-approval-reviewer-queue",
+              workspaceViewId: "review-deck",
+              windowIntentId: "window-intent-review-workspace",
+              deliveryChainStageId: "delivery-chain-rollback-readiness",
+              windowId: "window-trace-review",
+              sharedStateLaneId: "shared-state-lane-trace-review",
+              orchestrationBoardId: "orchestration-board-trace-review",
+              observabilityMappingId: "observability-mapping-rollback-shadow",
+              stability: "restored"
+            }
+          ],
+          companionRouteHistory: [
+            {
+              id: "companion-route-history-publish-gate-queue",
+              label: "Publish Gate -> Approval Queue",
+              summary:
+                "Remember the publish gate -> approval queue switch so reviewer ownership can reopen inside the same delivery lane without losing publish coverage.",
+              tone: "warning",
+              transitionKind: "switch-sequence",
+              sourceActionId: "command-focus-publish-decision-gate",
+              targetActionId: "command-focus-approval-reviewer-queue",
+              routeStateId: "companion-route-state-publish-gate",
+              sequenceId: "companion-sequence-delivery-gate-loop",
+              reviewPathId: "companion-path-publish-gate-reviewer-queue",
+              workspaceViewId: "review-deck",
+              windowIntentId: "window-intent-review-workspace",
+              deliveryChainStageId: "delivery-chain-publish-decision",
+              windowId: "window-shell-main",
+              sharedStateLaneId: "shared-state-lane-boundary-review",
+              orchestrationBoardId: "orchestration-board-boundary-review",
+              observabilityMappingId: "observability-mapping-final-gate",
+              timestampLabel: "Latest queue pivot"
+            },
+            {
+              id: "companion-route-history-approval-queue-publish-gate",
+              label: "Approval Queue -> Publish Gate",
+              summary:
+                "Remember the approval queue -> publish gate handback so final go/no-go review can resume with the same queue-owned context still visible.",
+              tone: "warning",
+              transitionKind: "resume-history",
+              sourceActionId: "command-focus-approval-reviewer-queue",
+              targetActionId: "command-focus-publish-decision-gate",
+              routeStateId: "companion-route-state-approval-queue",
+              sequenceId: "companion-sequence-delivery-queue-handoff",
+              reviewPathId: "companion-path-reviewer-queue-publish-gate",
+              workspaceViewId: "review-deck",
+              windowIntentId: "window-intent-review-workspace",
+              deliveryChainStageId: "delivery-chain-operator-review",
+              windowId: "window-trace-review",
+              sharedStateLaneId: "shared-state-lane-trace-review",
+              orchestrationBoardId: "orchestration-board-trace-review",
+              observabilityMappingId: "observability-mapping-approval-active",
+              timestampLabel: "Latest publish handback"
+            },
+            {
+              id: "companion-route-history-rollback-shadow-publish-gate",
+              label: "Rollback Shadow -> Publish Gate",
+              summary:
+                "Remember the rollback shadow -> publish gate stabilization so recovery review can re-enter the live decision gate with the same traced fallback path.",
+              tone: "warning",
+              transitionKind: "stabilize-handoff",
+              sourceActionId: "command-focus-rollback-closeout-window",
+              targetActionId: "command-focus-publish-decision-gate",
+              routeStateId: "companion-route-state-rollback-shadow",
+              sequenceId: "companion-sequence-delivery-rollback-shadow",
+              reviewPathId: "companion-path-rollback-closeout-publish-gate",
+              workspaceViewId: "review-deck",
+              windowIntentId: "window-intent-review-workspace",
+              deliveryChainStageId: "delivery-chain-rollback-readiness",
+              windowId: "window-trace-review",
+              sharedStateLaneId: "shared-state-lane-trace-review",
+              orchestrationBoardId: "orchestration-board-trace-review",
+              observabilityMappingId: "observability-mapping-rollback-shadow",
+              timestampLabel: "Recovery shadow memory"
+            }
           ]
         },
         {
@@ -1526,6 +1702,94 @@ const mockCommandSurface: StudioCommandSurface = {
                 }
               ]
             }
+          ],
+          companionPathHandoffs: [
+            {
+              id: "companion-path-handoff-decision-handoff-closeout",
+              label: "Decision baton handoff",
+              summary:
+                "Keep the decision handoff -> evidence closeout path stabilized so baton posture and sealing posture resume together inside the same trace-owned lane.",
+              tone: "warning",
+              routeStateId: "companion-route-state-decision-handoff",
+              sequenceId: "companion-sequence-handoff-stabilization",
+              reviewPathId: "companion-path-decision-handoff-evidence-closeout",
+              sourceActionId: "command-focus-approval-decision-handoff",
+              targetActionId: "command-focus-approval-evidence-closeout",
+              followUpActionId: "command-focus-approval-reviewer-queue",
+              workspaceViewId: "review-deck",
+              windowIntentId: "window-intent-review-workspace",
+              deliveryChainStageId: "delivery-chain-operator-review",
+              windowId: "window-trace-review",
+              sharedStateLaneId: "shared-state-lane-trace-review",
+              orchestrationBoardId: "orchestration-board-trace-review",
+              observabilityMappingId: "observability-mapping-approval-active",
+              stability: "stable"
+            },
+            {
+              id: "companion-path-handoff-closeout-decision-handoff",
+              label: "Closeout return handoff",
+              summary:
+                "Keep the evidence closeout -> decision handoff path restorable so sealing review can hand back into the baton owner without losing the same trace posture.",
+              tone: "warning",
+              routeStateId: "companion-route-state-evidence-closeout",
+              sequenceId: "companion-sequence-handoff-stabilization",
+              reviewPathId: "companion-path-evidence-closeout-decision-handoff",
+              sourceActionId: "command-focus-approval-evidence-closeout",
+              targetActionId: "command-focus-approval-decision-handoff",
+              followUpActionId: "command-focus-publish-decision-gate",
+              workspaceViewId: "review-deck",
+              windowIntentId: "window-intent-review-workspace",
+              deliveryChainStageId: "delivery-chain-operator-review",
+              windowId: "window-trace-review",
+              sharedStateLaneId: "shared-state-lane-trace-review",
+              orchestrationBoardId: "orchestration-board-trace-review",
+              observabilityMappingId: "observability-mapping-approval-active",
+              stability: "restored"
+            }
+          ],
+          companionRouteHistory: [
+            {
+              id: "companion-route-history-decision-handoff-closeout",
+              label: "Decision Handoff -> Evidence Closeout",
+              summary:
+                "Remember the baton -> closeout handoff so returning to the stabilization lane restores sealing posture with the same acknowledgement chain still attached.",
+              tone: "warning",
+              transitionKind: "stabilize-handoff",
+              sourceActionId: "command-focus-approval-decision-handoff",
+              targetActionId: "command-focus-approval-evidence-closeout",
+              routeStateId: "companion-route-state-decision-handoff",
+              sequenceId: "companion-sequence-handoff-stabilization",
+              reviewPathId: "companion-path-decision-handoff-evidence-closeout",
+              workspaceViewId: "review-deck",
+              windowIntentId: "window-intent-review-workspace",
+              deliveryChainStageId: "delivery-chain-operator-review",
+              windowId: "window-trace-review",
+              sharedStateLaneId: "shared-state-lane-trace-review",
+              orchestrationBoardId: "orchestration-board-trace-review",
+              observabilityMappingId: "observability-mapping-approval-active",
+              timestampLabel: "Decision memory"
+            },
+            {
+              id: "companion-route-history-closeout-decision-handoff",
+              label: "Evidence Closeout -> Decision Handoff",
+              summary:
+                "Remember the closeout -> decision handback so baton posture can resume from sealing review with the same downstream publish gate still in scope.",
+              tone: "warning",
+              transitionKind: "resume-history",
+              sourceActionId: "command-focus-approval-evidence-closeout",
+              targetActionId: "command-focus-approval-decision-handoff",
+              routeStateId: "companion-route-state-evidence-closeout",
+              sequenceId: "companion-sequence-handoff-stabilization",
+              reviewPathId: "companion-path-evidence-closeout-decision-handoff",
+              workspaceViewId: "review-deck",
+              windowIntentId: "window-intent-review-workspace",
+              deliveryChainStageId: "delivery-chain-operator-review",
+              windowId: "window-trace-review",
+              sharedStateLaneId: "shared-state-lane-trace-review",
+              orchestrationBoardId: "orchestration-board-trace-review",
+              observabilityMappingId: "observability-mapping-approval-active",
+              timestampLabel: "Closeout memory"
+            }
           ]
         }
       ],
@@ -1536,7 +1800,7 @@ const mockCommandSurface: StudioCommandSurface = {
   ],
   history: {
     title: "Recent Command History",
-    summary: "Recent local-only commands stay visible so route changes, flow advances, slot focus, and staged window intents remain auditable inside the shell.",
+    summary: "Recent local-only commands stay visible so route changes, remembered companion handoffs, flow advances, slot focus, and staged window intents remain auditable inside the shell.",
     retention: 8,
     emptyState: "No local command history yet."
   },
