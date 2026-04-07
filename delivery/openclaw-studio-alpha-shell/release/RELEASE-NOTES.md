@@ -17,4 +17,4 @@ Milestone: phase60 delivery-chain workspace / stage explorer / review flow ladde
 - still not an installer
 - still no real publish/upload/sign/notarize actions
 
-Generated: 2026-04-07T14:15:17.220Z
+Generated: 2026-04-07T16:08:22.660Z

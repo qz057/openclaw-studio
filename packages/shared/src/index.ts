@@ -1735,6 +1735,93 @@ export interface StudioWindowing {
   windowIntents: StudioWindowIntent[];
 }
 
+export interface StudioReviewStateContinuityReadout {
+  id: string;
+  label: string;
+  value: string;
+  detail: string;
+  tone: StudioTone;
+}
+
+export interface StudioReviewStateContinuitySurface {
+  actionId: string;
+  kind: StudioCommandReviewSurfaceKind;
+  routeId: StudioPageId;
+  workspaceViewId: StudioWorkspaceViewId;
+  deliveryChainStageId: string;
+  summary: string;
+  windowIntentId?: string;
+}
+
+export interface StudioReviewStateContinuitySpine {
+  routeId: StudioPageId;
+  workspaceViewId: StudioWorkspaceViewId;
+  windowId: string;
+  sharedStateLaneId: string;
+  orchestrationBoardId: string;
+  observabilityMappingId: string;
+  summary: string;
+}
+
+export interface StudioReviewStateContinuityReviewerQueue {
+  id: string;
+  status: StudioReleaseReviewerQueueStatus;
+  owner: string;
+  acknowledgementState: StudioReleaseAcknowledgementState;
+  activeEntryId?: string;
+  summary: string;
+}
+
+export interface StudioReviewStateContinuityCloseoutTiming {
+  escalationWindowId: string;
+  escalationState: StudioReleaseEscalationWindowState;
+  escalationDeadlineLabel: string;
+  closeoutWindowId: string;
+  closeoutState: StudioReleaseCloseoutWindowState;
+  closeoutDeadlineLabel: string;
+  summary: string;
+}
+
+export interface StudioReviewStateContinuityMappedReviewPath {
+  actionDeckLaneIds: string[];
+  reviewSurfaceActionIds: string[];
+  windowIds: string[];
+  sharedStateLaneIds: string[];
+  orchestrationBoardIds: string[];
+  observabilityMappingIds: string[];
+  summary: string;
+}
+
+export interface StudioReviewStateContinuityEntry {
+  id: string;
+  label: string;
+  tone: StudioTone;
+  summary: string;
+  deliveryChainStageId: string;
+  surface: StudioReviewStateContinuitySurface;
+  spine: StudioReviewStateContinuitySpine;
+  reviewerQueue: StudioReviewStateContinuityReviewerQueue;
+  closeoutTiming: StudioReviewStateContinuityCloseoutTiming;
+  mappedReviewPath: StudioReviewStateContinuityMappedReviewPath;
+  readouts: StudioReviewStateContinuityReadout[];
+}
+
+export interface StudioReviewStateContinuityMatch {
+  entryId?: string | null;
+  reviewSurfaceActionId?: string | null;
+  observabilityMappingId?: string | null;
+  sharedStateLaneId?: string | null;
+  orchestrationBoardId?: string | null;
+  windowId?: string | null;
+}
+
+export interface StudioReviewStateContinuity {
+  title: string;
+  summary: string;
+  activeEntryId: string;
+  entries: StudioReviewStateContinuityEntry[];
+}
+
 export interface StudioDetailSection {
   id: string;
   title: string;
@@ -1802,6 +1889,7 @@ export interface StudioShellState {
   commandSurface: StudioCommandSurface;
   layout: StudioShellLayout;
   windowing: StudioWindowing;
+  reviewStateContinuity: StudioReviewStateContinuity;
   dashboard: {
     headline: string;
     metrics: StudioMetric[];
@@ -1862,6 +1950,8 @@ export {
   selectStudioReleaseEscalationWindow,
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
+  selectStudioReviewStateContinuityActiveEntry,
+  selectStudioReviewStateContinuityEntry,
   selectStudioWindowObservabilityActiveMapping,
   selectStudioWindowObservabilityMapping
 } from "./selectors.js";

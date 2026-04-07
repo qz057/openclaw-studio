@@ -4,7 +4,8 @@ import {
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseEscalationWindow,
   selectStudioReleaseReviewerQueue,
-  selectStudioWindowObservabilityActiveMapping,
+  selectStudioReviewStateContinuityEntry,
+  selectStudioWindowObservabilityMapping,
   type StudioCommandAction,
   type StudioCommandActionDeck,
   type StudioPageId,
@@ -18,6 +19,7 @@ import {
 
 interface WindowSharedStateBoardProps {
   windowing: StudioShellState["windowing"];
+  reviewStateContinuity?: StudioShellState["reviewStateContinuity"];
   releaseApprovalPipeline?: StudioReleaseApprovalPipeline;
   actionDeck?: StudioCommandActionDeck | null;
   reviewSurfaceActions?: StudioCommandAction[];
@@ -29,6 +31,7 @@ interface WindowSharedStateBoardProps {
   activeWindowId?: string | null;
   activeLaneId?: string | null;
   activeBoardId?: string | null;
+  activeMappingId?: string | null;
   compact?: boolean;
   nested?: boolean;
   eyebrow?: string;
@@ -298,6 +301,7 @@ function resolveActiveOrchestrationBoard(
 
 export function WindowSharedStateBoard({
   windowing,
+  reviewStateContinuity,
   releaseApprovalPipeline,
   actionDeck,
   reviewSurfaceActions = [],
@@ -309,6 +313,7 @@ export function WindowSharedStateBoard({
   activeWindowId,
   activeLaneId,
   activeBoardId,
+  activeMappingId,
   compact = false,
   nested = false,
   eyebrow = "Windows",
@@ -318,7 +323,7 @@ export function WindowSharedStateBoard({
   const activeLane = resolveActiveWindowSharedStateLane(windowing, activeLaneId, activeBoardId, activeRouteId);
   const activeWindow = resolveActiveWindowRosterEntry(windowing, activeWindowId, activeLane, activeRouteId);
   const activeBoard = resolveActiveOrchestrationBoard(windowing, activeBoardId, activeLane, activeRouteId);
-  const activeObservabilityMapping = selectStudioWindowObservabilityActiveMapping(windowing) ?? null;
+  const activeObservabilityMapping = selectStudioWindowObservabilityMapping(windowing, activeMappingId) ?? null;
   const observabilityMappings = windowing.observability.mappings;
   const currentReleaseStage = releaseApprovalPipeline ? selectStudioReleaseApprovalPipelineStage(releaseApprovalPipeline) : null;
   const currentDeliveryStage = releaseApprovalPipeline ? selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, currentReleaseStage ?? undefined) : null;
@@ -383,6 +388,15 @@ export function WindowSharedStateBoard({
   });
   const activeReviewSurfaceAction =
     relevantReviewSurfaceActions.find((action) => action.id === activeReviewSurfaceActionId) ?? relevantReviewSurfaceActions[0] ?? null;
+  const activeReviewContinuity = reviewStateContinuity
+    ? selectStudioReviewStateContinuityEntry(reviewStateContinuity, {
+        reviewSurfaceActionId: activeReviewSurfaceAction?.id ?? activeReviewSurfaceActionId,
+        observabilityMappingId: activeObservabilityMapping?.id ?? activeMappingId,
+        sharedStateLaneId: activeLane?.id ?? activeLaneId,
+        orchestrationBoardId: activeBoard?.id ?? activeBoardId,
+        windowId: activeWindow?.id ?? activeWindowId
+      }) ?? null
+    : null;
   const relevantActionDeckActionIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => lane.actionIds))];
   const relevantActionDeckStageIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => lane.deliveryChainStageIds ?? []))];
   const relevantActionDeckSequenceIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => (lane.companionSequences ?? []).map((sequence) => sequence.id)))];
@@ -431,12 +445,12 @@ export function WindowSharedStateBoard({
     activeReviewSurfaceAction?.deliveryChainStageId && releaseApprovalPipeline
       ? selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, activeReviewSurfaceAction.deliveryChainStageId)
       : currentDeliveryStage;
-  const activeReviewSurfaceLabel = activeReviewSurfaceAction
-    ? `${activeReviewSurfaceAction.label} / ${formatReviewSurfaceKind(activeReviewSurfaceAction.reviewSurfaceKind)}`
-    : "No active review surface";
-  const activeWindowStateContinuity = `${activeWindow?.label ?? "No window"} -> ${activeLane?.label ?? "No lane"} -> ${
-    activeBoard?.label ?? "No board"
-  }`;
+  const activeReviewSurfaceLabel =
+    activeReviewContinuity?.readouts.find((line) => line.id === "review-surface")?.value ??
+    (activeReviewSurfaceAction ? `${activeReviewSurfaceAction.label} / ${formatReviewSurfaceKind(activeReviewSurfaceAction.reviewSurfaceKind)}` : "No active review surface");
+  const activeWindowStateContinuity =
+    activeReviewContinuity?.readouts.find((line) => line.id === "continuity-spine")?.value ??
+    `${activeWindow?.label ?? "No window"} -> ${activeLane?.label ?? "No lane"} -> ${activeBoard?.label ?? "No board"}`;
   const activeObservabilityCloseoutLabel = activeObservabilityMapping
     ? `${activeObservabilityMapping.label} / ${formatReviewPostureRelationship(activeObservabilityMapping.relationship)}`
     : "No observability closeout";
@@ -448,11 +462,32 @@ export function WindowSharedStateBoard({
     )
   ];
   const activeReviewSurfaceLabels = [...new Set(relevantReviewSurfaceActions.map((action) => formatReviewSurfaceKind(action.reviewSurfaceKind)))];
-  const reviewStateContinuitySummary = activeReviewSurfaceAction
-    ? `${activeReviewSurfaceAction.label} stays anchored to ${activeWindowStateContinuity} while ${
+  const reviewStateContinuitySummary = activeReviewContinuity?.summary ??
+    (activeReviewSurfaceAction
+      ? `${activeReviewSurfaceAction.label} stays anchored to ${activeWindowStateContinuity} while ${
         activeObservabilityMapping?.label ?? "the active observability row"
       } keeps reviewer queue, closeout timing, and companion coverage attached to the same local-only review state.`
-    : "The current window, lane, board, and observability row do not yet expose a shared review surface.";
+      : "The current window, lane, board, and observability row do not yet expose a shared review surface.");
+  const activeReviewerQueueLabel =
+    activeReviewContinuity?.readouts.find((line) => line.id === "reviewer-queue")?.value ??
+    (currentReviewerQueue ? `${currentReviewerQueue.label} / ${currentReviewerQueue.status}` : "No reviewer queue");
+  const activeContinuityCloseoutLabel =
+    activeReviewContinuity?.readouts.find((line) => line.id === "closeout-timing")?.value ??
+    (currentCloseoutWindow ? `${currentCloseoutWindow.label} / ${currentCloseoutWindow.state}` : "No closeout window");
+  const continuitySpineDetail =
+    activeReviewContinuity?.readouts.find((line) => line.id === "continuity-spine")?.detail ??
+    "Active window, shared-state lane, and orchestration board stay aligned so the same review posture can move between the delivery workspace, inspector, and windows rail without losing ownership context.";
+  const closeoutTimingDetail =
+    activeReviewContinuity?.readouts.find((line) => line.id === "closeout-timing")?.detail ??
+    (activeQueueEntry
+      ? `${activeQueueEntry.label} remains tied to ${currentCloseoutWindow?.label ?? "the current closeout window"}, so reviewer ownership and closeout timing stay readable from the same observability row.`
+      : "Reviewer queue, escalation, and closeout timing remain attached to the current observability row.");
+  const mappedReviewPathValue =
+    activeReviewContinuity?.readouts.find((line) => line.id === "mapped-review-path")?.value ??
+    (activeMappedWindowLabels.join(" / ") || "No mapped windows");
+  const mappedReviewPathDetail =
+    activeReviewContinuity?.readouts.find((line) => line.id === "mapped-review-path")?.detail ??
+    (activeReviewSurfaceLabels.join(" / ") || "No linked review surfaces");
   const panelClassName = [
     nested ? "window-shared-board window-shared-board--nested" : "surface card window-shared-board",
     compact ? "window-shared-board--compact" : ""
@@ -483,37 +518,24 @@ export function WindowSharedStateBoard({
           <div className="trace-note-links">
             <span className="windowing-badge windowing-badge--active">{activeReviewSurfaceStage?.label ?? "No delivery stage"}</span>
             <span className="windowing-badge">{activeObservabilityCloseoutLabel}</span>
-            <span className="windowing-badge">
-              {currentReviewerQueue ? `${currentReviewerQueue.label} / ${currentReviewerQueue.status}` : "No reviewer queue"}
-            </span>
-            <span className="windowing-badge">
-              {currentCloseoutWindow ? `${currentCloseoutWindow.label} / ${currentCloseoutWindow.state}` : "No closeout window"}
-            </span>
+            <span className="windowing-badge">{activeReviewerQueueLabel}</span>
+            <span className="windowing-badge">{activeContinuityCloseoutLabel}</span>
           </div>
           <div className="windowing-preview-list">
             <div className="windowing-preview-line windowing-preview-line--stacked">
               <span>Context spine</span>
               <strong>{activeWindowStateContinuity}</strong>
-              <p>
-                Active window, shared-state lane, and orchestration board stay aligned so the same review posture can move between the delivery
-                workspace, inspector, and windows rail without losing ownership context.
-              </p>
+              <p>{continuitySpineDetail}</p>
             </div>
             <div className="windowing-preview-line windowing-preview-line--stacked">
               <span>Observability closeout</span>
-              <strong>{activeObservabilityCloseoutLabel}</strong>
-              <p>
-                {activeQueueEntry
-                  ? `${activeQueueEntry.label} remains tied to ${
-                      currentCloseoutWindow?.label ?? "the current closeout window"
-                    }, so reviewer ownership and closeout timing stay readable from the same observability row.`
-                  : "Reviewer queue, escalation, and closeout timing remain attached to the current observability row."}
-              </p>
+              <strong>{activeContinuityCloseoutLabel}</strong>
+              <p>{closeoutTimingDetail}</p>
             </div>
             <div className="windowing-preview-line windowing-preview-line--stacked">
               <span>Mapped review path</span>
-              <strong>{activeMappedWindowLabels.join(" / ") || "No mapped windows"}</strong>
-              <p>{activeReviewSurfaceLabels.join(" / ") || "No linked review surfaces"}</p>
+              <strong>{mappedReviewPathValue}</strong>
+              <p>{mappedReviewPathDetail}</p>
             </div>
           </div>
           {onRunReviewSurfaceAction && activeReviewSurfaceAction ? (

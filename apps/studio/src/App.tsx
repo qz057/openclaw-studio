@@ -1199,9 +1199,15 @@ export function App() {
   const inspectorSections = createInspectorSections(
     data.boundary,
     hostTraceFocus,
-    data.windowing,
-    windowingSurface.activeLaneId,
-    windowingSurface.activeWindowId
+    {
+      windowing: data.windowing,
+      reviewStateContinuity: data.reviewStateContinuity,
+      activeLaneId: windowingSurface.activeLaneId,
+      activeWindowId: windowingSurface.activeWindowId,
+      activeBoardId: windowingSurface.activeBoardId,
+      activeMappingId: windowingSurface.activeMappingId,
+      activeReviewSurfaceActionId: resolvedReviewSurfaceAction?.id ?? null
+    }
   );
   const nextStepItems =
     activeNextStepBoard?.stepIds.flatMap((stepId) => {
@@ -4432,6 +4438,7 @@ export function App() {
             </div>
             <WindowSharedStateBoard
               windowing={data.windowing}
+              reviewStateContinuity={data.reviewStateContinuity}
               releaseApprovalPipeline={releaseApprovalPipeline}
               actionDeck={activeActionDeck}
               reviewSurfaceActions={reviewCoverageActions}
@@ -4443,6 +4450,7 @@ export function App() {
               activeWindowId={windowingSurface.activeWindowId}
               activeLaneId={windowingSurface.activeLaneId}
               activeBoardId={windowingSurface.activeBoardId}
+              activeMappingId={windowingSurface.activeMappingId}
               eyebrow="Phase60"
               title="Cross-window Coordination Board"
               summary="Window roster, shared-state lane ownership, orchestration board ownership, review posture ownership, reviewer queue posture, acknowledgement state, escalation windows, closeout windows, sync health, last handoff, route/workspace intent links, the delivery-chain workspace, and local-only blockers now stay visible inside the same shell runtime."
@@ -4755,6 +4763,7 @@ export function App() {
 
                 <WindowSharedStateBoard
                   windowing={data.windowing}
+                  reviewStateContinuity={data.reviewStateContinuity}
                   releaseApprovalPipeline={releaseApprovalPipeline}
                   actionDeck={activeActionDeck}
                   reviewSurfaceActions={reviewCoverageActions}
@@ -4766,6 +4775,7 @@ export function App() {
                   activeWindowId={windowingSurface.activeWindowId}
                   activeLaneId={windowingSurface.activeLaneId}
                   activeBoardId={windowingSurface.activeBoardId}
+                  activeMappingId={windowingSurface.activeMappingId}
                   compact
                   nested
                   eyebrow="Phase60"

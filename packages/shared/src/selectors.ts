@@ -5,6 +5,9 @@ import type {
   StudioReleaseDeliveryChainStage,
   StudioReleaseEscalationWindow,
   StudioReleaseReviewerQueue,
+  StudioReviewStateContinuity,
+  StudioReviewStateContinuityEntry,
+  StudioReviewStateContinuityMatch,
   StudioWindowObservabilityMapping,
   StudioWindowing
 } from "./index.js";
@@ -63,6 +66,71 @@ export function selectStudioReleaseDeliveryChainStage(
     pipeline.deliveryChain.stages.find((stage) => stage.id === pipeline.deliveryChain.currentStageId) ??
     pipeline.deliveryChain.stages[0]
   );
+}
+
+export function selectStudioReviewStateContinuityActiveEntry(
+  continuity: Pick<StudioReviewStateContinuity, "entries" | "activeEntryId">
+): StudioReviewStateContinuityEntry | undefined {
+  return continuity.entries.find((entry) => entry.id === continuity.activeEntryId) ?? continuity.entries[0];
+}
+
+function scoreStudioReviewStateContinuityEntry(
+  entry: StudioReviewStateContinuityEntry,
+  match: StudioReviewStateContinuityMatch | undefined
+): number {
+  if (!match) {
+    return 0;
+  }
+
+  let score = 0;
+
+  if (match.reviewSurfaceActionId && entry.surface.actionId === match.reviewSurfaceActionId) {
+    score += 64;
+  }
+
+  if (match.observabilityMappingId && entry.spine.observabilityMappingId === match.observabilityMappingId) {
+    score += 32;
+  }
+
+  if (match.sharedStateLaneId && entry.spine.sharedStateLaneId === match.sharedStateLaneId) {
+    score += 16;
+  }
+
+  if (match.orchestrationBoardId && entry.spine.orchestrationBoardId === match.orchestrationBoardId) {
+    score += 8;
+  }
+
+  if (match.windowId && entry.spine.windowId === match.windowId) {
+    score += 4;
+  }
+
+  return score;
+}
+
+export function selectStudioReviewStateContinuityEntry(
+  continuity: Pick<StudioReviewStateContinuity, "entries" | "activeEntryId">,
+  match?: StudioReviewStateContinuityMatch
+): StudioReviewStateContinuityEntry | undefined {
+  if (match?.entryId) {
+    const exactEntry = continuity.entries.find((entry) => entry.id === match.entryId);
+
+    if (exactEntry) {
+      return exactEntry;
+    }
+  }
+
+  const scoredEntries = continuity.entries
+    .map((entry) => ({
+      entry,
+      score: scoreStudioReviewStateContinuityEntry(entry, match)
+    }))
+    .sort((left, right) => right.score - left.score);
+
+  if ((scoredEntries[0]?.score ?? 0) > 0) {
+    return scoredEntries[0]?.entry;
+  }
+
+  return selectStudioReviewStateContinuityActiveEntry(continuity);
 }
 
 export function selectStudioWindowObservabilityActiveMapping(

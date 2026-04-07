@@ -1,7 +1,9 @@
 import type {
+  StudioReleaseApprovalPipeline,
   StudioCommandCompanionRouteHistoryEntry,
   StudioCommandSurface,
   StudioReleaseAcknowledgementState,
+  StudioReviewStateContinuity,
   StudioShellLayout,
   StudioShellState,
   StudioWindowObservability,
@@ -3331,6 +3333,262 @@ function createStudioWindowReviewPostureLink(
   };
 }
 
+function formatReviewSurfaceKind(kind: NonNullable<StudioCommandSurface["actions"][number]["reviewSurfaceKind"]>): string {
+  switch (kind) {
+    case "review-packet":
+      return "Review packet";
+    case "reviewer-queue":
+      return "Reviewer queue";
+    case "decision-handoff":
+      return "Decision handoff";
+    case "evidence-closeout":
+      return "Evidence closeout";
+    case "decision-gate":
+      return "Decision gate";
+    default:
+      return "Closeout window";
+  }
+}
+
+function resolveReviewerQueueTone(
+  status: StudioReleaseApprovalPipeline["reviewerQueues"][number]["status"]
+): "positive" | "neutral" | "warning" {
+  switch (status) {
+    case "closed":
+      return "positive";
+    case "active":
+    case "handoff-ready":
+      return "neutral";
+    default:
+      return "warning";
+  }
+}
+
+function resolveEscalationWindowTone(
+  state: StudioReleaseApprovalPipeline["escalationWindows"][number]["state"]
+): "positive" | "neutral" | "warning" {
+  switch (state) {
+    case "watch":
+      return "positive";
+    case "open":
+      return "neutral";
+    default:
+      return "warning";
+  }
+}
+
+function resolveCloseoutWindowTone(
+  state: StudioReleaseApprovalPipeline["closeoutWindows"][number]["state"]
+): "positive" | "neutral" | "warning" {
+  switch (state) {
+    case "ready-to-seal":
+      return "positive";
+    case "scheduled":
+    case "open":
+      return "neutral";
+    default:
+      return "warning";
+  }
+}
+
+function dedupeValues<T>(values: Array<T | null | undefined>): T[] {
+  return [...new Set(values.filter((value): value is T => value !== null && value !== undefined))];
+}
+
+function isReviewCoverageAction(
+  action: StudioCommandSurface["actions"][number]
+): action is StudioCommandSurface["actions"][number] &
+  Required<
+    Pick<
+      StudioCommandSurface["actions"][number],
+      "reviewSurfaceKind" | "deliveryChainStageId" | "windowId" | "sharedStateLaneId" | "orchestrationBoardId" | "observabilityMappingId"
+    >
+  > {
+  return Boolean(
+    action.kind === "focus-review-coverage" &&
+      action.reviewSurfaceKind &&
+      action.deliveryChainStageId &&
+      action.windowId &&
+      action.sharedStateLaneId &&
+      action.orchestrationBoardId &&
+      action.observabilityMappingId
+  );
+}
+
+function createStudioReviewStateContinuity(
+  commandSurface: StudioCommandSurface,
+  windowing: StudioWindowing,
+  releaseApprovalPipeline: StudioReleaseApprovalPipeline
+): StudioReviewStateContinuity {
+  const actionById = new Map(commandSurface.actions.map((action) => [action.id, action]));
+  const actionDeckLanes = commandSurface.actionDecks.flatMap((deck) => deck.lanes);
+  const reviewSurfaceActions = commandSurface.actions.filter(isReviewCoverageAction);
+  const entries: StudioReviewStateContinuity["entries"] = reviewSurfaceActions.map((action) => {
+    const deliveryStage = releaseApprovalPipeline.deliveryChain.stages.find((stage) => stage.id === action.deliveryChainStageId);
+    const reviewerQueue = releaseApprovalPipeline.reviewerQueues.find((queue) => queue.id === deliveryStage?.reviewerQueueId);
+    const escalationWindow = releaseApprovalPipeline.escalationWindows.find((window) => window.id === deliveryStage?.escalationWindowId);
+    const closeoutWindow = releaseApprovalPipeline.closeoutWindows.find((window) => window.id === deliveryStage?.closeoutWindowId);
+    const windowEntry = windowing.roster.windows.find((entry) => entry.id === action.windowId);
+    const laneEntry = windowing.sharedState.lanes.find((entry) => entry.id === action.sharedStateLaneId);
+    const boardEntry = windowing.orchestration.boards.find((entry) => entry.id === action.orchestrationBoardId);
+    const mappingEntry = windowing.observability.mappings.find((entry) => entry.id === action.observabilityMappingId);
+
+    if (!deliveryStage || !reviewerQueue || !escalationWindow || !closeoutWindow || !windowEntry || !laneEntry || !boardEntry || !mappingEntry) {
+      throw new Error(`Review state continuity requires complete delivery/window linkage for ${action.id}.`);
+    }
+
+    const relevantLanes = actionDeckLanes.filter((lane) => lane.actionIds.includes(action.id));
+    const mappedReviewSurfaceActionIds = dedupeValues(
+      relevantLanes.flatMap((lane) =>
+        lane.actionIds.flatMap((actionId) => {
+          const linkedAction = actionById.get(actionId);
+          return linkedAction?.reviewSurfaceKind ? [actionId] : [];
+        })
+      )
+    );
+    const mappedWindowIds = dedupeValues([
+      action.windowId,
+      ...relevantLanes.flatMap((lane) => lane.windowIds ?? []),
+      ...mappedReviewSurfaceActionIds.map((actionId) => actionById.get(actionId)?.windowId)
+    ]);
+    const mappedSharedStateLaneIds = dedupeValues([
+      action.sharedStateLaneId,
+      ...relevantLanes.flatMap((lane) => lane.sharedStateLaneIds ?? []),
+      ...mappedReviewSurfaceActionIds.map((actionId) => actionById.get(actionId)?.sharedStateLaneId)
+    ]);
+    const mappedBoardIds = dedupeValues([
+      action.orchestrationBoardId,
+      ...relevantLanes.flatMap((lane) => lane.orchestrationBoardIds ?? []),
+      ...mappedReviewSurfaceActionIds.map((actionId) => actionById.get(actionId)?.orchestrationBoardId)
+    ]);
+    const mappedObservabilityMappingIds = dedupeValues([
+      action.observabilityMappingId,
+      ...relevantLanes.flatMap((lane) => lane.observabilityMappingIds ?? []),
+      ...mappedReviewSurfaceActionIds.map((actionId) => actionById.get(actionId)?.observabilityMappingId)
+    ]);
+    const mappedReviewSurfaceLabels = mappedReviewSurfaceActionIds.map((actionId) => actionById.get(actionId)?.label ?? actionId);
+    const primaryLane = relevantLanes.find((lane) => lane.primaryActionId === action.id) ?? relevantLanes[0] ?? null;
+
+    const readouts: StudioReviewStateContinuity["entries"][number]["readouts"] = [
+      {
+        id: "review-surface",
+        label: "Active review surface",
+        value: `${action.label} / ${formatReviewSurfaceKind(action.reviewSurfaceKind)}`,
+        detail: action.description,
+        tone: action.tone
+      },
+      {
+        id: "continuity-spine",
+        label: "Window / lane / board spine",
+        value: `${windowEntry.label} -> ${laneEntry.label} -> ${boardEntry.label}`,
+        detail: mappingEntry.summary,
+        tone: mappingEntry.tone
+      },
+      {
+        id: "reviewer-queue",
+        label: "Reviewer queue",
+        value: `${reviewerQueue.label} / ${reviewerQueue.status} / ${reviewerQueue.acknowledgementState}`,
+        detail:
+          reviewerQueue.entries.find((entry) => entry.id === reviewerQueue.activeEntryId)?.summary ??
+          reviewerQueue.summary,
+        tone: resolveReviewerQueueTone(reviewerQueue.status)
+      },
+      {
+        id: "closeout-timing",
+        label: "Closeout timing",
+        value: `${escalationWindow.label} / ${escalationWindow.state} -> ${closeoutWindow.label} / ${closeoutWindow.state}`,
+        detail: `${escalationWindow.deadlineLabel} -> ${closeoutWindow.deadlineLabel}`,
+        tone:
+          resolveCloseoutWindowTone(closeoutWindow.state) === "warning" || resolveEscalationWindowTone(escalationWindow.state) === "warning"
+            ? "warning"
+            : resolveCloseoutWindowTone(closeoutWindow.state) === "neutral" || resolveEscalationWindowTone(escalationWindow.state) === "neutral"
+              ? "neutral"
+              : "positive"
+      },
+      {
+        id: "mapped-review-path",
+        label: "Mapped review path",
+        value: mappedReviewSurfaceLabels.join(" / ") || action.label,
+        detail:
+          primaryLane?.summary ??
+          `${mappedWindowIds.length} windows and ${mappedObservabilityMappingIds.length} observability rows remain tied to the same review surface.`,
+        tone: primaryLane?.tone ?? mappingEntry.tone
+      }
+    ];
+
+    return {
+      id: `review-state-continuity-${action.id.replace(/^command-/, "")}`,
+      label: `${action.label} / ${formatReviewSurfaceKind(action.reviewSurfaceKind)}`,
+      tone: action.tone,
+      summary: `${action.label} now keeps ${windowEntry.label}, ${laneEntry.label}, ${boardEntry.label}, ${reviewerQueue.label}, and ${closeoutWindow.label} inside one explicit local-only review continuity contract instead of leaving those surfaces to be reassembled from separate cards.`,
+      deliveryChainStageId: action.deliveryChainStageId,
+      surface: {
+        actionId: action.id,
+        kind: action.reviewSurfaceKind,
+        routeId: mappingEntry.routeId,
+        workspaceViewId: mappingEntry.workspaceViewId,
+        deliveryChainStageId: action.deliveryChainStageId,
+        summary: action.description,
+        windowIntentId: action.windowIntentId
+      },
+      spine: {
+        routeId: mappingEntry.routeId,
+        workspaceViewId: mappingEntry.workspaceViewId,
+        windowId: action.windowId,
+        sharedStateLaneId: action.sharedStateLaneId,
+        orchestrationBoardId: action.orchestrationBoardId,
+        observabilityMappingId: action.observabilityMappingId,
+        summary: mappingEntry.summary
+      },
+      reviewerQueue: {
+        id: reviewerQueue.id,
+        status: reviewerQueue.status,
+        owner: reviewerQueue.owner,
+        acknowledgementState: reviewerQueue.acknowledgementState,
+        activeEntryId: reviewerQueue.activeEntryId,
+        summary: reviewerQueue.summary
+      },
+      closeoutTiming: {
+        escalationWindowId: escalationWindow.id,
+        escalationState: escalationWindow.state,
+        escalationDeadlineLabel: escalationWindow.deadlineLabel,
+        closeoutWindowId: closeoutWindow.id,
+        closeoutState: closeoutWindow.state,
+        closeoutDeadlineLabel: closeoutWindow.deadlineLabel,
+        summary: `${escalationWindow.summary} ${closeoutWindow.summary}`
+      },
+      mappedReviewPath: {
+        actionDeckLaneIds: dedupeValues(relevantLanes.map((lane) => lane.id)),
+        reviewSurfaceActionIds: mappedReviewSurfaceActionIds.length ? mappedReviewSurfaceActionIds : [action.id],
+        windowIds: mappedWindowIds,
+        sharedStateLaneIds: mappedSharedStateLaneIds,
+        orchestrationBoardIds: mappedBoardIds,
+        observabilityMappingIds: mappedObservabilityMappingIds,
+        summary:
+          primaryLane?.summary ??
+          `${mappingEntry.label} keeps ${mappedReviewSurfaceLabels.length} linked review surfaces visible through the same shared-state path.`
+      },
+      readouts
+    };
+  });
+  const activeEntry =
+    entries.find((entry) => entry.surface.actionId === "command-focus-approval-reviewer-queue") ??
+    entries.find((entry) => entry.spine.observabilityMappingId === windowing.observability.activeMappingId) ??
+    entries[0];
+
+  if (!activeEntry) {
+    throw new Error("Review state continuity requires at least one typed review coverage entry.");
+  }
+
+  return {
+    title: "Review State Continuity Contract",
+    summary:
+      "Active review surface, window / lane / board spine, reviewer queue, closeout timing, and mapped review path now resolve through one explicit shared-state continuity contract so Inspector, Windows, and delivery readouts can stay synchronized.",
+    activeEntryId: activeEntry.id,
+    entries
+  };
+}
+
 function createStudioWindowObservability(windowing: StudioWindowing): StudioWindowObservability {
   const boundaryLane = windowing.sharedState.lanes.find((lane) => lane.id === "shared-state-lane-boundary-review");
   const traceLane = windowing.sharedState.lanes.find((lane) => lane.id === "shared-state-lane-trace-review");
@@ -4799,6 +5057,14 @@ const mockWindowing: StudioWindowing = {
 };
 
 mockWindowing.observability = createStudioWindowObservability(mockWindowing);
+const mockReviewStateContinuity = createStudioReviewStateContinuity(
+  mockCommandSurface,
+  mockWindowing,
+  mockBoundarySummary.hostExecutor.releaseApprovalPipeline
+);
+const mockActiveReviewStateContinuity =
+  mockReviewStateContinuity.entries.find((entry) => entry.id === mockReviewStateContinuity.activeEntryId) ??
+  mockReviewStateContinuity.entries[0];
 
 export const mockShellState: StudioShellState = {
   appName: "OpenClaw Studio",
@@ -4820,6 +5086,7 @@ export const mockShellState: StudioShellState = {
   commandSurface: mockCommandSurface,
   layout: mockLayout,
   windowing: mockWindowing,
+  reviewStateContinuity: mockReviewStateContinuity,
   boundary: mockBoundarySummary,
   dashboard: {
     headline:
@@ -5506,7 +5773,7 @@ export const mockShellState: StudioShellState = {
   inspector: {
     title: "Inspector",
     summary:
-      "Boundary policy, active flow state, focused-slot posture, review posture ownership, delivery-chain workspace state, final verdict context, acceptance closeout timeline anchors, reviewer queues, acknowledgement windows, and cross-window shared-state linkage stay visible here across the shell.",
+      "Boundary policy, active flow state, focused-slot posture, review posture ownership, review-state continuity contract, delivery-chain workspace state, final verdict context, acceptance closeout timeline anchors, reviewer queues, acknowledgement windows, and cross-window shared-state linkage stay visible here across the shell.",
     boundary: mockBoundarySummary,
     route: {
       routeId: "dashboard",
@@ -5560,6 +5827,23 @@ export const mockShellState: StudioShellState = {
       { id: "shared-state", label: "Shared-state lane", value: "Trace Review Lane / synced" },
       { id: "orchestration-board", label: "Orchestration board", value: "Trace Review Orchestration / approval orchestration" },
       { id: "review-posture", label: "Review posture owner", value: "release-manager / owns-current-posture" },
+      {
+        id: "review-continuity",
+        label: "Review continuity",
+        value: mockActiveReviewStateContinuity
+          ? `${mockActiveReviewStateContinuity.label} / ${mockActiveReviewStateContinuity.readouts.find((line) => line.id === "continuity-spine")?.value ?? "No spine"}`
+          : "Unavailable"
+      },
+      {
+        id: "continuity-closeout",
+        label: "Closeout timing",
+        value: mockActiveReviewStateContinuity?.readouts.find((line) => line.id === "closeout-timing")?.value ?? "Unavailable"
+      },
+      {
+        id: "mapped-review-path",
+        label: "Mapped review path",
+        value: mockActiveReviewStateContinuity?.readouts.find((line) => line.id === "mapped-review-path")?.value ?? "Unavailable"
+      },
       { id: "rollback", label: "Rollback posture", value: "Incomplete / rollback-incomplete" },
       { id: "audit", label: "Audit posture", value: "Placeholder linked" },
       { id: "blocked", label: "Blocked reasons", value: "4 active" },
@@ -5884,6 +6168,120 @@ export const mockShellState: StudioShellState = {
             ]
           }
         ]
+      },
+      {
+        id: "drilldown-review-state-continuity",
+        label: "Review State Continuity Contract",
+        summary:
+          mockActiveReviewStateContinuity?.summary ??
+          "No explicit review-state continuity contract is attached to the current inspector snapshot.",
+        lines: mockActiveReviewStateContinuity
+          ? [
+              {
+                id: "drilldown-review-continuity-surface",
+                label: "Active review surface",
+                value: mockActiveReviewStateContinuity.readouts.find((line) => line.id === "review-surface")?.value ?? mockActiveReviewStateContinuity.label,
+                detail:
+                  mockActiveReviewStateContinuity.readouts.find((line) => line.id === "review-surface")?.detail ??
+                  mockActiveReviewStateContinuity.surface.summary,
+                tone: mockActiveReviewStateContinuity.readouts.find((line) => line.id === "review-surface")?.tone ?? mockActiveReviewStateContinuity.tone,
+                links: [
+                  {
+                    id: "inspector-link-review-continuity-surface",
+                    label: mockActiveReviewStateContinuity.surface.actionId,
+                    kind: "review-stage",
+                    target: mockActiveReviewStateContinuity.surface.deliveryChainStageId
+                  }
+                ]
+              },
+              {
+                id: "drilldown-review-continuity-spine",
+                label: "Window / lane / board spine",
+                value: mockActiveReviewStateContinuity.readouts.find((line) => line.id === "continuity-spine")?.value ?? "Unavailable",
+                detail:
+                  mockActiveReviewStateContinuity.readouts.find((line) => line.id === "continuity-spine")?.detail ??
+                  mockActiveReviewStateContinuity.spine.summary,
+                tone: mockActiveReviewStateContinuity.readouts.find((line) => line.id === "continuity-spine")?.tone ?? mockActiveReviewStateContinuity.tone,
+                links: [
+                  {
+                    id: "inspector-link-review-continuity-window",
+                    label: mockActiveReviewStateContinuity.spine.windowId,
+                    kind: "window-roster",
+                    target: mockActiveReviewStateContinuity.spine.windowId
+                  },
+                  {
+                    id: "inspector-link-review-continuity-lane",
+                    label: mockActiveReviewStateContinuity.spine.sharedStateLaneId,
+                    kind: "shared-state-lane",
+                    target: mockActiveReviewStateContinuity.spine.sharedStateLaneId
+                  },
+                  {
+                    id: "inspector-link-review-continuity-board",
+                    label: mockActiveReviewStateContinuity.spine.orchestrationBoardId,
+                    kind: "orchestration-board",
+                    target: mockActiveReviewStateContinuity.spine.orchestrationBoardId
+                  }
+                ]
+              },
+              {
+                id: "drilldown-review-continuity-queue",
+                label: "Reviewer queue",
+                value: mockActiveReviewStateContinuity.readouts.find((line) => line.id === "reviewer-queue")?.value ?? "Unavailable",
+                detail:
+                  mockActiveReviewStateContinuity.readouts.find((line) => line.id === "reviewer-queue")?.detail ??
+                  mockActiveReviewStateContinuity.reviewerQueue.summary,
+                tone: mockActiveReviewStateContinuity.readouts.find((line) => line.id === "reviewer-queue")?.tone ?? mockActiveReviewStateContinuity.tone,
+                links: [
+                  {
+                    id: "inspector-link-review-continuity-queue",
+                    label: mockActiveReviewStateContinuity.reviewerQueue.id,
+                    kind: "reviewer-queue",
+                    target: mockActiveReviewStateContinuity.reviewerQueue.id
+                  }
+                ]
+              },
+              {
+                id: "drilldown-review-continuity-closeout",
+                label: "Closeout timing",
+                value: mockActiveReviewStateContinuity.readouts.find((line) => line.id === "closeout-timing")?.value ?? "Unavailable",
+                detail:
+                  mockActiveReviewStateContinuity.readouts.find((line) => line.id === "closeout-timing")?.detail ??
+                  mockActiveReviewStateContinuity.closeoutTiming.summary,
+                tone: mockActiveReviewStateContinuity.readouts.find((line) => line.id === "closeout-timing")?.tone ?? mockActiveReviewStateContinuity.tone,
+                links: [
+                  {
+                    id: "inspector-link-review-continuity-escalation",
+                    label: mockActiveReviewStateContinuity.closeoutTiming.escalationWindowId,
+                    kind: "escalation-window",
+                    target: mockActiveReviewStateContinuity.closeoutTiming.escalationWindowId
+                  },
+                  {
+                    id: "inspector-link-review-continuity-closeout-window",
+                    label: mockActiveReviewStateContinuity.closeoutTiming.closeoutWindowId,
+                    kind: "closeout-window",
+                    target: mockActiveReviewStateContinuity.closeoutTiming.closeoutWindowId
+                  }
+                ]
+              },
+              {
+                id: "drilldown-review-continuity-path",
+                label: "Mapped review path",
+                value: mockActiveReviewStateContinuity.readouts.find((line) => line.id === "mapped-review-path")?.value ?? "Unavailable",
+                detail:
+                  mockActiveReviewStateContinuity.readouts.find((line) => line.id === "mapped-review-path")?.detail ??
+                  mockActiveReviewStateContinuity.mappedReviewPath.summary,
+                tone: mockActiveReviewStateContinuity.readouts.find((line) => line.id === "mapped-review-path")?.tone ?? mockActiveReviewStateContinuity.tone,
+                links: [
+                  {
+                    id: "inspector-link-review-continuity-mapping",
+                    label: mockActiveReviewStateContinuity.spine.observabilityMappingId,
+                    kind: "orchestration-board",
+                    target: mockActiveReviewStateContinuity.spine.observabilityMappingId
+                  }
+                ]
+              }
+            ]
+          : []
       },
       {
         id: "drilldown-orchestration-state",

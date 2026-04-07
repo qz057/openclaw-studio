@@ -15,8 +15,9 @@ import {
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseEscalationWindow,
+  selectStudioReviewStateContinuityEntry,
   selectStudioReleaseReviewerQueue,
-  selectStudioWindowObservabilityActiveMapping
+  selectStudioWindowObservabilityMapping
 } from "@openclaw/shared";
 
 export interface ResolvedHostTraceFocus {
@@ -153,10 +154,22 @@ export function resolveHostTraceFocus(
 export function createInspectorSections(
   boundary: StudioBoundarySummary,
   focus: ResolvedHostTraceFocus | null,
-  windowing?: StudioShellState["windowing"],
-  activeLaneId?: string | null,
-  activeWindowId?: string | null
+  options?: {
+    windowing?: StudioShellState["windowing"];
+    reviewStateContinuity?: StudioShellState["reviewStateContinuity"];
+    activeLaneId?: string | null;
+    activeWindowId?: string | null;
+    activeBoardId?: string | null;
+    activeMappingId?: string | null;
+    activeReviewSurfaceActionId?: string | null;
+  }
 ) {
+  const windowing = options?.windowing;
+  const activeLaneId = options?.activeLaneId;
+  const activeWindowId = options?.activeWindowId;
+  const activeBoardId = options?.activeBoardId;
+  const activeMappingId = options?.activeMappingId;
+  const activeReviewSurfaceActionId = options?.activeReviewSurfaceActionId;
   const rollbackValue = focus
     ? focus.usesHandoff
       ? focus.rollbackAuditValue
@@ -182,10 +195,29 @@ export function createInspectorSections(
     (windowing ? windowing.roster.windows.find((entry) => entry.id === windowing.roster.activeWindowId) : undefined) ??
     null;
   const activeBoard =
+    (activeBoardId ? windowing?.orchestration.boards.find((board) => board.id === activeBoardId) : undefined) ??
     (activeLane && windowing ? windowing.orchestration.boards.find((board) => board.laneId === activeLane.workflowLaneId) : undefined) ??
     (windowing ? windowing.orchestration.boards.find((board) => board.id === windowing.orchestration.activeBoardId) : undefined) ??
     null;
-  const activeObservabilityMapping = windowing ? selectStudioWindowObservabilityActiveMapping(windowing) ?? null : null;
+  const activeObservabilityMapping = windowing ? selectStudioWindowObservabilityMapping(windowing, activeMappingId) ?? null : null;
+  const activeReviewContinuity = options?.reviewStateContinuity
+    ? selectStudioReviewStateContinuityEntry(options.reviewStateContinuity, {
+        reviewSurfaceActionId: activeReviewSurfaceActionId,
+        observabilityMappingId: activeMappingId,
+        sharedStateLaneId: activeLaneId,
+        orchestrationBoardId: activeBoardId,
+        windowId: activeWindowId
+      }) ?? null
+    : null;
+  const reviewContinuityValue = activeReviewContinuity
+    ? `${activeReviewContinuity.label} / ${
+        activeReviewContinuity.readouts.find((line) => line.id === "continuity-spine")?.value ?? "No continuity spine"
+      }`
+    : "Unavailable";
+  const continuityCloseoutValue =
+    activeReviewContinuity?.readouts.find((line) => line.id === "closeout-timing")?.value ?? "Unavailable";
+  const mappedReviewPathValue =
+    activeReviewContinuity?.readouts.find((line) => line.id === "mapped-review-path")?.value ?? "Unavailable";
 
   return [
     {
@@ -287,6 +319,21 @@ export function createInspectorSections(
       value: activeObservabilityMapping
         ? `${activeObservabilityMapping.owner} / ${formatReviewPostureRelationship(activeObservabilityMapping.relationship)}`
         : "Unavailable"
+    },
+    {
+      id: "review-continuity",
+      label: "Review continuity",
+      value: reviewContinuityValue
+    },
+    {
+      id: "continuity-closeout",
+      label: "Closeout timing",
+      value: continuityCloseoutValue
+    },
+    {
+      id: "mapped-review-path",
+      label: "Mapped review path",
+      value: mappedReviewPathValue
     },
     {
       id: "rollback",
