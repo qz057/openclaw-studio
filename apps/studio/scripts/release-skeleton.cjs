@@ -3168,6 +3168,48 @@ function buildPackagedAppLocalMaterializationContract({ generatedAt }) {
           bundleSealSummary:
             "Linux bundle-sealing continuity stays blocked on the preview lifecycle row until staged outputs settle and the downstream package publication gate remains metadata-only."
         }),
+        failurePath: createPackagedAppMaterializationFailurePath({
+          idPrefix: "linux",
+          platformLabel: "Linux",
+          taskIdPrefix: "local-materialization-task",
+          taskState: "review-ready",
+          summary:
+            "Linux threads package-root preconditions, staged-output checksum holds, and package-publication blockage into one local-only failure path so validator, rollback, and command posture stay readable from the same Stage Explorer slice.",
+          activeReadout: "directory",
+          nextReadout: "staged-output",
+          directoryLabel: "Package-root precondition gate",
+          directoryFailureCode: "precondition-missing",
+          directoryFailureDisposition: "blocked",
+          directorySummary:
+            "If the Linux package root or resources tree no longer satisfy the declared verification manifest, the local review packet stays blocked at the directory checkpoint.",
+          directoryReviewChecks: [
+            "package-root verification manifest stays linked",
+            "directory checkpoint remains the active local review surface",
+            "validator bridge still exposes the boundary intake row"
+          ],
+          stagedOutputLabel: "Checksum staging hold path",
+          stagedOutputFailureCode: "partial-apply",
+          stagedOutputFailureDisposition: "partial-apply",
+          stagedOutputSummary:
+            "If output and checksum manifests drift apart, the Linux staged-output lane holds in review so package publication stays blocked beside the same validator slice.",
+          stagedOutputReviewChecks: [
+            "staged-output manifests stay compared before any package publication",
+            "trace-row observability remains linked to the active validator readout",
+            "rollback posture remains visible from the same command lane"
+          ],
+          bundleSealingLabel: "Package publication gate remains blocked",
+          bundleSealingFailureCode: "approval-missing",
+          bundleSealingFailureDisposition: "blocked",
+          bundleSealingSummary:
+            "Bundle sealing stays blocked while downstream package publication remains metadata-only, so the final failure path still lands on an explicit publish gate.",
+          bundleSealingReviewChecks: [
+            "seal manifest remains declared for review pickup",
+            "package publication gate remains explicitly blocked",
+            "command preview keeps publish-gate review attached"
+          ],
+          rollbackContractId: "rollback-readiness-alpha-to-beta",
+          rollbackCheckpointId: "sealed-bundle-checkpoint-linux"
+        }),
         tasks: [
           {
             id: "local-materialization-task-linux-directory",
@@ -9442,7 +9484,7 @@ function buildReviewOnlyDeliveryChain({ generatedAt }) {
     label: "Packaged-app Materialization Contract",
     mode: "review-only",
     summary:
-      "Directory materialization, staged-output manifests, bundle-sealing checkpoints, packet-level handoffs, and validator-linked observability now stay inspectable as one per-platform local-only contract, so promotion readiness can review roots, handoff continuity, seal paths, and cross-surface progression without materializing, signing, or publishing anything.",
+      "Directory materialization, staged-output manifests, bundle-sealing checkpoints, packet-level handoffs, validator-linked observability, and failure-path command previews now stay inspectable as one per-platform local-only contract, so promotion readiness can review roots, handoff continuity, failure posture, seal paths, and cross-surface progression without materializing, signing, or publishing anything.",
     ownerStageId: "delivery-chain-promotion-readiness",
     downstreamGateStageId: "delivery-chain-publish-decision",
     artifacts: [
@@ -9522,6 +9564,47 @@ function buildReviewOnlyDeliveryChain({ generatedAt }) {
           bundleSealStatus: "watch",
           bundleSealSummary:
             "Windows bundle-sealing readiness is already mirrored onto the preview lifecycle row so the next checkpoint stays visible while staged-output review remains active."
+        }),
+        failurePath: createPackagedAppMaterializationFailurePath({
+          idPrefix: "windows",
+          platformLabel: "Windows",
+          taskState: "reviewing",
+          summary:
+            "Windows threads checksum drift, seal-gate blockage, and rollback-owned closeout into one local-only failure path so the active materialization slice can be reviewed beside its validator bridge and recommended commands.",
+          activeReadout: "staged-output",
+          nextReadout: "bundle-sealing",
+          directoryLabel: "Directory manifest drift abort path",
+          directoryFailureCode: "handoff-invalid",
+          directoryFailureDisposition: "abort",
+          directorySummary:
+            "If the Windows materialization manifest drifts away from the declared package root, the packet aborts before staged-output review can continue.",
+          directoryReviewChecks: [
+            "verification manifest stays matched to the package root",
+            "directory handoff remains attached to the first review packet step",
+            "validator bridge still exposes the boundary intake row"
+          ],
+          stagedOutputLabel: "Checksum drift rollback path",
+          stagedOutputFailureCode: "rollback-required",
+          stagedOutputFailureDisposition: "rollback",
+          stagedOutputSummary:
+            "If output and checksum manifests diverge, Windows pivots into rollback-owned closeout before bundle sealing can advance, while the packet and validator readouts remain visible.",
+          stagedOutputReviewChecks: [
+            "output and checksum manifests stay compared in one lane",
+            "rollback checkpoint stays attached to the active packet handoff",
+            "publish decision gate remains blocked and review-only"
+          ],
+          bundleSealingLabel: "Seal handoff approval gate remains blocked",
+          bundleSealingFailureCode: "approval-missing",
+          bundleSealingFailureDisposition: "blocked",
+          bundleSealingSummary:
+            "Seal handoff remains blocked until staged-output review settles and the downstream approval / publish gates stop being metadata-only.",
+          bundleSealingReviewChecks: [
+            "bundle-seal checkpoint remains linked to the failure path",
+            "approval gate remains explicitly non-executing",
+            "rollback contract stays reachable from the same command preview"
+          ],
+          rollbackContractId: "rollback-readiness-alpha-to-beta",
+          rollbackCheckpointId: "sealed-bundle-checkpoint-windows"
         }),
         blockedBy: [
           "materialization remains review-only",

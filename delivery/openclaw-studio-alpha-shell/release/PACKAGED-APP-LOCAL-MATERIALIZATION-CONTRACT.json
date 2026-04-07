@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-packaged-app-local-materialization-contract/v1",
-  "generatedAt": "2026-04-07T20:46:22.462Z",
+  "generatedAt": "2026-04-07T20:47:49.735Z",
   "phase": "phase60",
   "mode": "review-only",
   "scope": "local-only",
@@ -1305,6 +1305,107 @@
         "blockedBy": [
           "validator bridge remains review-only",
           "cross-window linkage remains metadata-only",
+          "host-side execution remains disabled"
+        ]
+      },
+      "failurePath": {
+        "id": "packaged-app-materialization-failure-path-linux",
+        "label": "Linux materialization failure path",
+        "taskState": "review-ready",
+        "summary": "Linux threads package-root preconditions, staged-output checksum holds, and package-publication blockage into one local-only failure path so validator, rollback, and command posture stay readable from the same Stage Explorer slice.",
+        "activeReadoutId": "packaged-app-materialization-failure-path-linux-directory",
+        "nextReadoutId": "packaged-app-materialization-failure-path-linux-staged-output",
+        "readouts": [
+          {
+            "id": "packaged-app-materialization-failure-path-linux-directory",
+            "label": "Package-root precondition gate",
+            "failureCode": "precondition-missing",
+            "failureDisposition": "blocked",
+            "summary": "If the Linux package root or resources tree no longer satisfy the declared verification manifest, the local review packet stays blocked at the directory checkpoint.",
+            "taskId": "local-materialization-task-linux-directory",
+            "reviewPacketStepId": "packaged-app-review-packet-linux-directory-to-output",
+            "validatorReadoutId": "packaged-app-materialization-validator-observability-linux-directory",
+            "deliveryChainStageId": "delivery-chain-attestation-intake",
+            "rollbackContractId": "rollback-readiness-alpha-to-beta",
+            "rollbackCheckpointId": "sealed-bundle-checkpoint-linux",
+            "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+            "commandActionIds": [
+              "command-focus-materialization-validator-bridge",
+              "command-focus-materialization-failure-path"
+            ],
+            "observabilitySignalIds": [
+              "observability-signal-owner",
+              "observability-signal-route-window",
+              "observability-signal-lane-board"
+            ],
+            "reviewChecks": [
+              "package-root verification manifest stays linked",
+              "directory checkpoint remains the active local review surface",
+              "validator bridge still exposes the boundary intake row"
+            ]
+          },
+          {
+            "id": "packaged-app-materialization-failure-path-linux-staged-output",
+            "label": "Checksum staging hold path",
+            "failureCode": "partial-apply",
+            "failureDisposition": "partial-apply",
+            "summary": "If output and checksum manifests drift apart, the Linux staged-output lane holds in review so package publication stays blocked beside the same validator slice.",
+            "taskId": "local-materialization-task-linux-staged-output",
+            "reviewPacketStepId": "packaged-app-review-packet-linux-output-to-checksum",
+            "validatorReadoutId": "packaged-app-materialization-validator-observability-linux-staged-output",
+            "deliveryChainStageId": "delivery-chain-operator-review",
+            "rollbackContractId": "rollback-readiness-alpha-to-beta",
+            "rollbackCheckpointId": "sealed-bundle-checkpoint-linux",
+            "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+            "commandActionIds": [
+              "command-focus-materialization-failure-path",
+              "command-focus-publish-decision-gate",
+              "command-focus-rollback-closeout-window"
+            ],
+            "observabilitySignalIds": [
+              "observability-signal-owner",
+              "observability-signal-queue",
+              "observability-signal-escalation-closeout"
+            ],
+            "reviewChecks": [
+              "staged-output manifests stay compared before any package publication",
+              "trace-row observability remains linked to the active validator readout",
+              "rollback posture remains visible from the same command lane"
+            ]
+          },
+          {
+            "id": "packaged-app-materialization-failure-path-linux-bundle-sealing",
+            "label": "Package publication gate remains blocked",
+            "failureCode": "approval-missing",
+            "failureDisposition": "blocked",
+            "summary": "Bundle sealing stays blocked while downstream package publication remains metadata-only, so the final failure path still lands on an explicit publish gate.",
+            "taskId": "local-materialization-task-linux-bundle-seal",
+            "reviewPacketStepId": "packaged-app-review-packet-linux-checksum-to-seal",
+            "validatorReadoutId": "packaged-app-materialization-validator-observability-linux-bundle-sealing",
+            "deliveryChainStageId": "delivery-chain-promotion-readiness",
+            "rollbackContractId": "rollback-readiness-alpha-to-beta",
+            "rollbackCheckpointId": "sealed-bundle-checkpoint-linux",
+            "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+            "commandActionIds": [
+              "command-focus-materialization-validator-bridge",
+              "command-focus-materialization-failure-path",
+              "command-focus-publish-decision-gate"
+            ],
+            "observabilitySignalIds": [
+              "observability-signal-owner",
+              "observability-signal-lane-board",
+              "observability-signal-mapped-windows"
+            ],
+            "reviewChecks": [
+              "seal manifest remains declared for review pickup",
+              "package publication gate remains explicitly blocked",
+              "command preview keeps publish-gate review attached"
+            ]
+          }
+        ],
+        "blockedBy": [
+          "failure path remains review-only",
+          "command preview remains local-only",
           "host-side execution remains disabled"
         ]
       },
