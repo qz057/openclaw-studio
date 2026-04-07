@@ -2,7 +2,7 @@
 
 ## Snapshot
 
-- 当前已验证里程碑：**phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass layer / screenshot pass records / capture review flow / proof-linked evidence bundle / acceptance evidence continuity / reviewer brief / proof bundle / product-review console polish / acceptance storyboard / evidence dossier / acceptance scoreboard / replay acceptance checklist / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface + docs / smoke / package / release-plan / UI / shared data closeout**
+- 当前已验证里程碑：**phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass layer / screenshot pass records / capture review flow / proof-linked evidence bundle / acceptance evidence continuity / reviewer brief / proof bundle / product-review console polish / acceptance storyboard / evidence dossier / evidence trace lens / acceptance scoreboard / replay acceptance checklist / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface + docs / smoke / package / release-plan / UI / shared data closeout**
 - 当前主视图：
   - `Dashboard`
   - `Home`
@@ -53,6 +53,7 @@
   - phase60 slice14 已继续把 screenshot-driven acceptance review pack 推进成 acceptance pass layer / evidence bundle surface / reviewer brief / proof bundle / screenshot target framing，让 delivery workspace 可以把 replay route、reviewer brief、scenario evidence、continuity anchors、proof bundle、以及 screenshot targets 收敛成更完整的本地产品验收链
   - phase60 slice15 已继续把 acceptance pass layer 推进成 Product Review Console / Screenshot Pass Records / Capture Review Flow / Proof-linked Evidence Bundle，让 delivery workspace 可以把 grouped screenshot comparison、linked proof mapping、以及 product-review console polish 收敛成更像真实产品审阅台的本地验收链
   - phase60 slice16 已继续把 Product Review Console 推进成 Acceptance Storyboard / Evidence Dossier / Acceptance Evidence Continuity，让 delivery workspace 可以把 ordered screenshot shots、viewport / framing guidance、owner-tagged proof bundles、review-pack scenario handoff、proof anchors、以及 screenshot capture lineage 收敛成更完整的本地验收证据链
+  - phase60 slice17 已继续把 Acceptance Storyboard / Evidence Dossier / Acceptance Evidence Continuity 推进成 Evidence Trace Lens，让 delivery workspace 可以把 focused proof trails、storyboard shots、dossier proof items、以及 continuity handoffs 收敛成更易读的本地产品审阅链
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline
@@ -89,7 +90,7 @@ npm run release:plan
 - `workspace views` / `window intents` / `detached panel placeholders`
 - detached workspace workflow：用户现在能看到 workspace entry / detached candidate / workflow posture / switch path
 - window intents 现在具备 staged / focused / preview / shell link 之外，还补齐 workflow step / readiness / handoff posture
-- command surface 现在具备 action groups / sequences / contextual flows / keyboard routing / action decks / review-surface coverage actions / multi-window review coverage / companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay restore / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass layer / screenshot pass records / capture review flow / proof-linked evidence bundle / acceptance evidence continuity / reviewer brief / proof bundle / product-review console polish / acceptance storyboard / evidence dossier / acceptance scoreboard / replay acceptance checks
+- command surface 现在具备 action groups / sequences / contextual flows / keyboard routing / action decks / review-surface coverage actions / multi-window review coverage / companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay restore / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass layer / screenshot pass records / capture review flow / proof-linked evidence bundle / acceptance evidence continuity / reviewer brief / proof bundle / product-review console polish / acceptance storyboard / evidence dossier / evidence trace lens / acceptance scoreboard / replay acceptance checks
 - Dashboard / Home / Skills 会对当前 route / workflow lane / focused slot 给出一致的 recommended next actions
 - inspector 与 windowing 现在补齐 route-aware drilldowns、recent command history、以及 Local Orchestration Board
 - phase32 进一步补齐 Cross-view Coordination Matrix、Inspector-Command Linkage、Packaging Pipeline Depth
@@ -130,6 +131,7 @@ npm run release:plan
 - phase60 slice14 进一步补齐 Acceptance Pass Layer、Evidence Bundle、Reviewer Brief、Proof Bundle、Screenshot Target Framing、以及当前 replay route 的 evidence anchors / continuity handoff / local-only acceptance proofing
 - phase60 slice15 进一步补齐 Product Review Console、Screenshot Pass Records、Capture Review Flow、Proof-linked Evidence Bundle、以及当前 replay route 的 grouped screenshot comparison / linked proof mapping / product-review console polish
 - phase60 slice16 进一步补齐 Acceptance Storyboard、Evidence Dossier、Acceptance Evidence Continuity、Viewport / Framing Guidance、review-pack scenario handoff、proof anchors、capture lineage、以及当前 replay pack 的 continuity-linked acceptance evidence chain
+- phase60 slice17 进一步补齐 Evidence Trace Lens、focused proof trails、storyboard / dossier / continuity 联动聚焦、以及当前 replay pack 的 screenshot-driven review ergonomics
 - 仍然不做真实外部窗口编排
 
 ## Phase25 Boundary Model

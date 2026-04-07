@@ -130,6 +130,7 @@ async function verifyRendererFocusedSlotUi() {
     "Acceptance pass progression",
     "Capture Review Flow",
     "Acceptance Evidence Continuity",
+    "Evidence Trace Lens",
     "Reviewer brief",
     "Proof bundle",
     "Proof-linked Evidence Bundle",

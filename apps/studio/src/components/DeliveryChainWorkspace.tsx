@@ -83,6 +83,24 @@ type ReplayScenarioPassRecord = {
   badges: string[];
 };
 
+type ReplayEvidenceTraceKind = "all" | "capture-group" | "evidence-item" | "continuity-handoff";
+
+type ReplayEvidenceTrace = {
+  id: string;
+  kind: ReplayEvidenceTraceKind;
+  label: string;
+  summary: string;
+  detail: string;
+  tone: Tone;
+  evidenceItemIds: string[];
+  screenshotIds: string[];
+  continuityHandoffIds: string[];
+  hiddenEvidenceItemCount: number;
+  hiddenScreenshotCount: number;
+};
+
+const ALL_REPLAY_EVIDENCE_TRACE_ID = "replay-evidence-trace-all";
+
 function resolveStageTone(status: StudioReleaseApprovalPipeline["stages"][number]["status"]): Tone {
   switch (status) {
     case "ready":
@@ -377,6 +395,31 @@ function formatReplayScreenshotShotIndex(
   return `Shot ${String(shotIndex).padStart(2, "0")}`;
 }
 
+function formatReplayEvidenceTraceKind(kind: ReplayEvidenceTraceKind): string {
+  switch (kind) {
+    case "capture-group":
+      return "Capture group";
+    case "evidence-item":
+      return "Proof item";
+    case "continuity-handoff":
+      return "Continuity handoff";
+    default:
+      return "All evidence";
+  }
+}
+
+function createReplayEvidenceTraceCaptureGroupId(groupId: string): string {
+  return `replay-evidence-trace-capture-group-${groupId}`;
+}
+
+function createReplayEvidenceTraceEvidenceItemId(evidenceItemId: string): string {
+  return `replay-evidence-trace-evidence-item-${evidenceItemId}`;
+}
+
+function createReplayEvidenceTraceContinuityHandoffId(handoffId: string): string {
+  return `replay-evidence-trace-continuity-handoff-${handoffId}`;
+}
+
 function createReplayScreenshotCaptureGroups({
   screenshotItems,
   evidenceItems
@@ -458,6 +501,121 @@ function createReplayScreenshotCaptureGroups({
 
 function countReplayLinkedProofItems(groups: ReplayScreenshotCaptureGroup[]): number {
   return new Set(groups.flatMap((group) => group.linkedEvidenceItems.map((item) => item.id))).size;
+}
+
+function createReplayEvidenceTraces({
+  captureGroups,
+  evidenceItems,
+  screenshotItems,
+  continuityHandoffs
+}: {
+  captureGroups: ReplayScreenshotCaptureGroup[];
+  evidenceItems: ReplayScenarioEvidenceItem[];
+  screenshotItems: ReplayScenarioScreenshotItem[];
+  continuityHandoffs: ReplayScenarioPackContinuityHandoff[];
+}): ReplayEvidenceTrace[] {
+  const evidenceIdSet = new Set(evidenceItems.map((item) => item.id));
+  const screenshotIdSet = new Set(screenshotItems.map((item) => item.id));
+  const relevantHandoffs = continuityHandoffs.filter(
+    (handoff) =>
+      handoff.linkedEvidenceItemIds.some((itemId) => evidenceIdSet.has(itemId)) ||
+      handoff.linkedScreenshotIds.some((itemId) => screenshotIdSet.has(itemId))
+  );
+  const readyEvidenceCount = evidenceItems.filter((item) => item.posture !== "pending").length;
+  const readyScreenshotCount = screenshotItems.filter((item) => item.posture !== "required").length;
+  const readyHandoffCount = relevantHandoffs.filter((handoff) => handoff.state === "ready").length;
+  const traces: ReplayEvidenceTrace[] = [
+    {
+      id: ALL_REPLAY_EVIDENCE_TRACE_ID,
+      kind: "all",
+      label: "All acceptance evidence",
+      summary: `${captureGroups.length} capture groups / ${relevantHandoffs.length} continuity handoffs`,
+      detail: `${screenshotItems.length} storyboard shots · ${evidenceItems.length} proof items · ${relevantHandoffs.length} continuity handoffs`,
+      tone: resolveReplayProgressTone(
+        readyEvidenceCount + readyScreenshotCount + readyHandoffCount,
+        evidenceItems.length + screenshotItems.length + relevantHandoffs.length
+      ),
+      evidenceItemIds: evidenceItems.map((item) => item.id),
+      screenshotIds: screenshotItems.map((item) => item.id),
+      continuityHandoffIds: relevantHandoffs.map((handoff) => handoff.id),
+      hiddenEvidenceItemCount: 0,
+      hiddenScreenshotCount: 0
+    }
+  ];
+
+  captureGroups.forEach((group) => {
+    const groupEvidenceIds = group.linkedEvidenceItems.map((item) => item.id);
+    const groupScreenshotIds = group.items.map((item) => item.id);
+    const groupContinuityHandoffIds = relevantHandoffs
+      .filter(
+        (handoff) =>
+          handoff.linkedEvidenceItemIds.some((itemId) => groupEvidenceIds.includes(itemId)) ||
+          handoff.linkedScreenshotIds.some((itemId) => groupScreenshotIds.includes(itemId))
+      )
+      .map((handoff) => handoff.id);
+
+    traces.push({
+      id: createReplayEvidenceTraceCaptureGroupId(group.id),
+      kind: "capture-group",
+      label: group.label,
+      summary: group.comparisonFrame,
+      detail: `${groupScreenshotIds.length} storyboard shots · ${groupEvidenceIds.length} proof items · ${groupContinuityHandoffIds.length} continuity handoffs`,
+      tone: group.tone,
+      evidenceItemIds: groupEvidenceIds,
+      screenshotIds: groupScreenshotIds,
+      continuityHandoffIds: groupContinuityHandoffIds,
+      hiddenEvidenceItemCount: 0,
+      hiddenScreenshotCount: 0
+    });
+  });
+
+  evidenceItems.forEach((item) => {
+    const linkedScreenshotIds = screenshotItems
+      .filter((screenshot) => screenshot.linkedEvidenceItemIds?.includes(item.id))
+      .map((screenshot) => screenshot.id);
+    const continuityHandoffIds = relevantHandoffs
+      .filter(
+        (handoff) =>
+          handoff.linkedEvidenceItemIds.includes(item.id) ||
+          handoff.linkedScreenshotIds.some((itemId) => linkedScreenshotIds.includes(itemId))
+      )
+      .map((handoff) => handoff.id);
+
+    traces.push({
+      id: createReplayEvidenceTraceEvidenceItemId(item.id),
+      kind: "evidence-item",
+      label: item.label,
+      summary: `${item.dossierSection} / ${item.owner}`,
+      detail: `${linkedScreenshotIds.length} storyboard shots · ${continuityHandoffIds.length} continuity handoffs`,
+      tone: resolveReplayScenarioEvidenceTone(item.posture),
+      evidenceItemIds: [item.id],
+      screenshotIds: linkedScreenshotIds,
+      continuityHandoffIds,
+      hiddenEvidenceItemCount: 0,
+      hiddenScreenshotCount: 0
+    });
+  });
+
+  relevantHandoffs.forEach((handoff) => {
+    const localEvidenceItemIds = handoff.linkedEvidenceItemIds.filter((itemId) => evidenceIdSet.has(itemId));
+    const localScreenshotIds = handoff.linkedScreenshotIds.filter((itemId) => screenshotIdSet.has(itemId));
+
+    traces.push({
+      id: createReplayEvidenceTraceContinuityHandoffId(handoff.id),
+      kind: "continuity-handoff",
+      label: handoff.label,
+      summary: `${handoff.sourceLabel} -> ${handoff.targetLabel}`,
+      detail: `${localScreenshotIds.length} storyboard shots · ${localEvidenceItemIds.length} proof items`,
+      tone: resolveReplayEvidenceContinuityTone(handoff.state),
+      evidenceItemIds: localEvidenceItemIds,
+      screenshotIds: localScreenshotIds,
+      continuityHandoffIds: [handoff.id],
+      hiddenEvidenceItemCount: handoff.linkedEvidenceItemIds.length - localEvidenceItemIds.length,
+      hiddenScreenshotCount: handoff.linkedScreenshotIds.length - localScreenshotIds.length
+    });
+  });
+
+  return traces;
 }
 
 function createReplayScenarioPassRecords({
@@ -832,6 +990,7 @@ export function DeliveryChainWorkspace({
   const currentDeliveryStage = selectStudioReleaseDeliveryChainStage(pipeline, currentPipelineStage ?? undefined) ?? pipeline.deliveryChain.stages[0] ?? null;
   const [localSelectedStageId, setLocalSelectedStageId] = useState<string>(currentDeliveryStage?.id ?? pipeline.deliveryChain.currentStageId);
   const [selectedArtifactGroupId, setSelectedArtifactGroupId] = useState<string | null>(null);
+  const [activeReplayEvidenceTraceId, setActiveReplayEvidenceTraceId] = useState<string>(ALL_REPLAY_EVIDENCE_TRACE_ID);
   const selectedStageId = controlledStageId ?? localSelectedStageId;
 
   useEffect(() => {
@@ -1210,6 +1369,17 @@ export function DeliveryChainWorkspace({
     screenshotItems: activeReplayScenarioScreenshotItems,
     evidenceItems: activeReplayScenarioEvidenceItems
   });
+  const activeReplayScenarioRelevantContinuityHandoffs = activeReplayScenarioPackContinuityHandoffs.filter(
+    (handoff) =>
+      handoff.linkedEvidenceItemIds.some((itemId) => activeReplayScenarioEvidenceItemById.has(itemId)) ||
+      handoff.linkedScreenshotIds.some((itemId) => activeReplayScenarioScreenshotItemById.has(itemId))
+  );
+  const activeReplayScenarioEvidenceTraces = createReplayEvidenceTraces({
+    captureGroups: activeReplayScenarioCaptureGroups,
+    evidenceItems: activeReplayScenarioEvidenceItems,
+    screenshotItems: activeReplayScenarioScreenshotItems,
+    continuityHandoffs: activeReplayScenarioRelevantContinuityHandoffs
+  });
   const activeReplayScenarioReadyCaptureGroupCount = activeReplayScenarioCaptureGroups.filter((group) => group.tone === "positive").length;
   const activeReplayScenarioLinkedProofCount = countReplayLinkedProofItems(activeReplayScenarioCaptureGroups);
   const activeReplayScenarioPassRecords = activeReplayScenarioEntry
@@ -1278,12 +1448,32 @@ export function DeliveryChainWorkspace({
     Number(Boolean(replayRestoreAction)) +
     Number(Boolean(replayRestoreWindow && replayRestoreLane && replayRestoreBoard && replayRestoreMapping)) +
     1;
+  const activeReplayEvidenceTrace =
+    activeReplayScenarioEvidenceTraces.find((trace) => trace.id === activeReplayEvidenceTraceId) ??
+    activeReplayScenarioEvidenceTraces[0] ??
+    null;
+  const activeReplayEvidenceTraceEvidenceIds = new Set(activeReplayEvidenceTrace?.evidenceItemIds ?? []);
+  const activeReplayEvidenceTraceScreenshotIds = new Set(activeReplayEvidenceTrace?.screenshotIds ?? []);
+  const activeReplayEvidenceTraceContinuityHandoffIds = new Set(activeReplayEvidenceTrace?.continuityHandoffIds ?? []);
+  const activeReplayEvidenceTracePackOnlyLinkCount =
+    (activeReplayEvidenceTrace?.hiddenEvidenceItemCount ?? 0) + (activeReplayEvidenceTrace?.hiddenScreenshotCount ?? 0);
+  const hasActiveReplayEvidenceTraceFilter = Boolean(activeReplayEvidenceTrace && activeReplayEvidenceTrace.kind !== "all");
   const panelClassName = [
     nested ? "delivery-chain-workspace delivery-chain-workspace--nested" : "surface card delivery-chain-workspace",
     compact ? "delivery-chain-workspace--compact" : ""
   ]
     .filter(Boolean)
     .join(" ");
+
+  useEffect(() => {
+    setActiveReplayEvidenceTraceId(ALL_REPLAY_EVIDENCE_TRACE_ID);
+  }, [activeReplayScenarioEntry?.id]);
+
+  const toggleReplayEvidenceTrace = (traceId: string) => {
+    setActiveReplayEvidenceTraceId((currentTraceId) =>
+      currentTraceId === traceId ? ALL_REPLAY_EVIDENCE_TRACE_ID : traceId
+    );
+  };
 
   return (
     <article className={panelClassName}>
@@ -1965,6 +2155,61 @@ export function DeliveryChainWorkspace({
                     </div>
                   </article>
                   {activeReplayScenarioEntry ? (
+                    <article
+                      className={`windowing-summary-card${
+                        activeReplayEvidenceTrace?.tone === "positive" ? " windowing-summary-card--active" : ""
+                      }`}
+                    >
+                      <span>Evidence Trace Lens</span>
+                      <strong>{activeReplayEvidenceTrace?.label ?? "All acceptance evidence"}</strong>
+                      <p>
+                        Focus one proof trail at a time so storyboard shots, dossier items, and continuity handoffs stay readable without dropping
+                        the full local-only review pack.
+                      </p>
+                      <div className="trace-note-links">
+                        <span
+                          className={`windowing-badge${
+                            activeReplayEvidenceTrace && activeReplayEvidenceTrace.kind !== "all" ? " windowing-badge--active" : ""
+                          }`}
+                        >
+                          {formatReplayEvidenceTraceKind(activeReplayEvidenceTrace?.kind ?? "all")}
+                        </span>
+                        <span className="windowing-badge">
+                          {activeReplayEvidenceTrace?.screenshotIds.length ?? 0} storyboard shots
+                        </span>
+                        <span className="windowing-badge">{activeReplayEvidenceTrace?.evidenceItemIds.length ?? 0} proof items</span>
+                        <span className="windowing-badge">
+                          {activeReplayEvidenceTrace?.continuityHandoffIds.length ?? 0} continuity handoffs
+                        </span>
+                        {activeReplayEvidenceTracePackOnlyLinkCount > 0 ? (
+                          <span className="windowing-badge">{activeReplayEvidenceTracePackOnlyLinkCount} pack-only links</span>
+                        ) : null}
+                      </div>
+                      <div className="windowing-preview-line windowing-preview-line--stacked">
+                        <span>Focused acceptance evidence</span>
+                        <strong>{activeReplayEvidenceTrace?.detail ?? "All acceptance evidence remains visible."}</strong>
+                        <p>
+                          {activeReplayEvidenceTrace?.summary ??
+                            "All storyboard shots, proof items, and continuity handoffs remain visible while the acceptance pack stays local-only."}
+                        </p>
+                      </div>
+                      <div className="focus-pill-row">
+                        {activeReplayScenarioEvidenceTraces.map((trace) => (
+                          <button
+                            key={trace.id}
+                            type="button"
+                            className={`focus-pill${trace.id === activeReplayEvidenceTrace?.id ? " focus-pill--active" : ""}`}
+                            onClick={() => setActiveReplayEvidenceTraceId(trace.id)}
+                          >
+                            <span>{formatReplayEvidenceTraceKind(trace.kind)}</span>
+                            <strong>{trace.label}</strong>
+                            <small>{trace.summary}</small>
+                          </button>
+                        ))}
+                      </div>
+                    </article>
+                  ) : null}
+                  {activeReplayScenarioEntry ? (
                     <article className={`windowing-summary-card${activeReplayScenarioTone === "positive" ? " windowing-summary-card--active" : ""}`}>
                       <span>Screenshot Pass Records</span>
                       <strong>Acceptance pass progression</strong>
@@ -2046,81 +2291,115 @@ export function DeliveryChainWorkspace({
                       </div>
                       <div className="delivery-chain-workspace__storyboard">
                         {activeReplayScenarioCaptureGroups.length ? (
-                          (compact ? activeReplayScenarioCaptureGroups.slice(0, 1) : activeReplayScenarioCaptureGroups).map((group) => (
-                            <section
-                              key={group.id}
-                              className={`delivery-chain-workspace__storyboard-group delivery-chain-workspace__storyboard-group--${group.tone}`}
-                            >
-                              <div className="delivery-chain-workspace__storyboard-group-header">
-                                <div>
-                                  <span>{group.label}</span>
-                                  <strong>{group.comparisonFrame}</strong>
-                                </div>
-                                <span className={`windowing-badge${group.tone === "positive" ? " windowing-badge--active" : ""}`}>
-                                  {group.readyCount} / {group.totalCount} staged
-                                </span>
-                              </div>
-                              <div className="trace-note-links">
-                                <span className="windowing-badge">{group.linkedEvidenceItems.length} proof links</span>
-                                {group.linkedEvidenceItems.map((item) => (
-                                  <span key={`${group.id}-${item.id}`} className="windowing-badge">
-                                    {item.dossierSection}
-                                  </span>
-                                ))}
-                              </div>
-                              <div className="delivery-chain-workspace__storyboard-strip">
-                                {group.items.map((item) => {
-                                  const linkedEvidenceItems = (item.linkedEvidenceItemIds ?? [])
-                                    .map((evidenceId) => activeReplayScenarioEvidenceItemById.get(evidenceId))
-                                    .filter((linkedItem): linkedItem is ReplayScenarioEvidenceItem => Boolean(linkedItem));
+                          (compact ? activeReplayScenarioCaptureGroups.slice(0, 1) : activeReplayScenarioCaptureGroups).map((group) => {
+                            const traceId = createReplayEvidenceTraceCaptureGroupId(group.id);
+                            const activeTrace = activeReplayEvidenceTrace?.id === traceId;
+                            const groupInTrace =
+                              !hasActiveReplayEvidenceTraceFilter ||
+                              group.items.some((item) => activeReplayEvidenceTraceScreenshotIds.has(item.id)) ||
+                              group.linkedEvidenceItems.some((item) => activeReplayEvidenceTraceEvidenceIds.has(item.id));
 
-                                  return (
-                                    <article
-                                      key={item.id}
-                                      className={`delivery-chain-workspace__storyboard-shot delivery-chain-workspace__storyboard-shot--${resolveReplayScreenshotTone(
-                                        item.posture
-                                      )}`}
-                                    >
-                                      <div className="delivery-chain-workspace__storyboard-shot-header">
-                                        <span>
-                                          {formatReplayScreenshotShotIndex(item.shotIndex)} /{" "}
-                                          {formatReplayScreenshotStoryboardRole(item.storyboardRole)}
-                                        </span>
-                                        <strong>{formatReplayScreenshotPosture(item.posture)}</strong>
-                                      </div>
-                                      <h3>{item.label}</h3>
-                                      <p>{item.detail}</p>
-                                      <div className="delivery-chain-workspace__storyboard-shot-fields">
-                                        <div className="delivery-chain-workspace__storyboard-shot-field">
-                                          <span>Viewport</span>
-                                          <strong>{item.viewport}</strong>
-                                        </div>
-                                        <div className="delivery-chain-workspace__storyboard-shot-field">
-                                          <span>Focus</span>
-                                          <strong>{item.focus}</strong>
-                                        </div>
-                                        <div className="delivery-chain-workspace__storyboard-shot-field delivery-chain-workspace__storyboard-shot-field--wide">
-                                          <span>Framing</span>
-                                          <strong>{item.framing}</strong>
-                                        </div>
-                                      </div>
-                                      <div className="trace-note-links">
-                                        <span className={`windowing-badge${item.posture !== "required" ? " windowing-badge--active" : ""}`}>
-                                          {item.surface}
-                                        </span>
-                                        <span className="windowing-badge">{formatReplayScreenshotStoryboardRole(item.storyboardRole)}</span>
-                                        {linkedEvidenceItems.map((linkedItem) => (
-                                          <span key={`${item.id}-${linkedItem.id}`} className="windowing-badge">
-                                            {linkedItem.label}
+                            return (
+                              <section
+                                key={group.id}
+                                className={`delivery-chain-workspace__storyboard-group delivery-chain-workspace__storyboard-group--${group.tone}${
+                                  hasActiveReplayEvidenceTraceFilter
+                                    ? groupInTrace
+                                      ? " delivery-chain-workspace__trace-card--focused"
+                                      : " delivery-chain-workspace__trace-card--muted"
+                                    : ""
+                                }`}
+                              >
+                                <div className="delivery-chain-workspace__storyboard-group-header">
+                                  <div>
+                                    <span>{group.label}</span>
+                                    <strong>{group.comparisonFrame}</strong>
+                                  </div>
+                                  <span className={`windowing-badge${group.tone === "positive" ? " windowing-badge--active" : ""}`}>
+                                    {group.readyCount} / {group.totalCount} staged
+                                  </span>
+                                </div>
+                                <div className="trace-note-links">
+                                  <span className="windowing-badge">{group.linkedEvidenceItems.length} proof links</span>
+                                  {group.linkedEvidenceItems.map((item) => (
+                                    <span key={`${group.id}-${item.id}`} className="windowing-badge">
+                                      {item.dossierSection}
+                                    </span>
+                                  ))}
+                                  <button
+                                    type="button"
+                                    className={`secondary-button delivery-chain-workspace__trace-toggle${
+                                      activeTrace ? " delivery-chain-workspace__trace-toggle--active" : ""
+                                    }`}
+                                    onClick={() => toggleReplayEvidenceTrace(traceId)}
+                                  >
+                                    {activeTrace ? "Show all evidence" : "Focus capture group"}
+                                  </button>
+                                </div>
+                                <div className="delivery-chain-workspace__storyboard-strip">
+                                  {group.items.map((item) => {
+                                    const linkedEvidenceItems = (item.linkedEvidenceItemIds ?? [])
+                                      .map((evidenceId) => activeReplayScenarioEvidenceItemById.get(evidenceId))
+                                      .filter((linkedItem): linkedItem is ReplayScenarioEvidenceItem => Boolean(linkedItem));
+                                    const itemInTrace =
+                                      !hasActiveReplayEvidenceTraceFilter ||
+                                      activeReplayEvidenceTraceScreenshotIds.has(item.id) ||
+                                      linkedEvidenceItems.some((linkedItem) => activeReplayEvidenceTraceEvidenceIds.has(linkedItem.id));
+
+                                    return (
+                                      <article
+                                        key={item.id}
+                                        className={`delivery-chain-workspace__storyboard-shot delivery-chain-workspace__storyboard-shot--${resolveReplayScreenshotTone(
+                                          item.posture
+                                        )}${
+                                          hasActiveReplayEvidenceTraceFilter
+                                            ? itemInTrace
+                                              ? " delivery-chain-workspace__trace-card--focused"
+                                              : " delivery-chain-workspace__trace-card--muted"
+                                            : ""
+                                        }`}
+                                      >
+                                        <div className="delivery-chain-workspace__storyboard-shot-header">
+                                          <span>
+                                            {formatReplayScreenshotShotIndex(item.shotIndex)} /{" "}
+                                            {formatReplayScreenshotStoryboardRole(item.storyboardRole)}
                                           </span>
-                                        ))}
-                                      </div>
-                                    </article>
-                                  );
-                                })}
-                              </div>
-                            </section>
-                          ))
+                                          <strong>{formatReplayScreenshotPosture(item.posture)}</strong>
+                                        </div>
+                                        <h3>{item.label}</h3>
+                                        <p>{item.detail}</p>
+                                        <div className="delivery-chain-workspace__storyboard-shot-fields">
+                                          <div className="delivery-chain-workspace__storyboard-shot-field">
+                                            <span>Viewport</span>
+                                            <strong>{item.viewport}</strong>
+                                          </div>
+                                          <div className="delivery-chain-workspace__storyboard-shot-field">
+                                            <span>Focus</span>
+                                            <strong>{item.focus}</strong>
+                                          </div>
+                                          <div className="delivery-chain-workspace__storyboard-shot-field delivery-chain-workspace__storyboard-shot-field--wide">
+                                            <span>Framing</span>
+                                            <strong>{item.framing}</strong>
+                                          </div>
+                                        </div>
+                                        <div className="trace-note-links">
+                                          <span className={`windowing-badge${item.posture !== "required" ? " windowing-badge--active" : ""}`}>
+                                            {item.surface}
+                                          </span>
+                                          <span className="windowing-badge">{formatReplayScreenshotStoryboardRole(item.storyboardRole)}</span>
+                                          {linkedEvidenceItems.map((linkedItem) => (
+                                            <span key={`${item.id}-${linkedItem.id}`} className="windowing-badge">
+                                              {linkedItem.label}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      </article>
+                                    );
+                                  })}
+                                </div>
+                              </section>
+                            );
+                          })
                         ) : (
                           <div className="windowing-preview-line windowing-preview-line--stacked">
                             <span>Acceptance Storyboard</span>
@@ -2176,11 +2455,24 @@ export function DeliveryChainWorkspace({
                               : `${sourceScenarioLabel} -> ${targetScenarioLabel}`
                             : sourceScenarioLabel ?? targetScenarioLabel ?? activeReplayScenarioPack.pack.label;
                         const handoffTone = resolveReplayEvidenceContinuityTone(handoff.state);
+                        const traceId = createReplayEvidenceTraceContinuityHandoffId(handoff.id);
+                        const activeTrace = activeReplayEvidenceTrace?.id === traceId;
+                        const handoffInTrace =
+                          !hasActiveReplayEvidenceTraceFilter ||
+                          activeReplayEvidenceTraceContinuityHandoffIds.has(handoff.id) ||
+                          handoff.linkedEvidenceItemIds.some((itemId) => activeReplayEvidenceTraceEvidenceIds.has(itemId)) ||
+                          handoff.linkedScreenshotIds.some((itemId) => activeReplayEvidenceTraceScreenshotIds.has(itemId));
 
                         return (
                           <div
                             key={handoff.id}
-                            className={`delivery-chain-workspace__continuity-handoff delivery-chain-workspace__continuity-handoff--${handoffTone}`}
+                            className={`delivery-chain-workspace__continuity-handoff delivery-chain-workspace__continuity-handoff--${handoffTone}${
+                              hasActiveReplayEvidenceTraceFilter
+                                ? handoffInTrace
+                                  ? " delivery-chain-workspace__trace-card--focused"
+                                  : " delivery-chain-workspace__trace-card--muted"
+                                : ""
+                            }`}
                           >
                             <div className="delivery-chain-workspace__continuity-handoff-header">
                               <div>
@@ -2196,6 +2488,15 @@ export function DeliveryChainWorkspace({
                               <span className="windowing-badge">{scenarioContext}</span>
                               <span className="windowing-badge">{linkedEvidenceItems.length} proof anchors</span>
                               <span className="windowing-badge">{linkedScreenshots.length} capture anchors</span>
+                              <button
+                                type="button"
+                                className={`secondary-button delivery-chain-workspace__trace-toggle${
+                                  activeTrace ? " delivery-chain-workspace__trace-toggle--active" : ""
+                                }`}
+                                onClick={() => toggleReplayEvidenceTrace(traceId)}
+                              >
+                                {activeTrace ? "Show all evidence" : "Focus handoff"}
+                              </button>
                             </div>
                             <div className="windowing-preview-list">
                               {linkedEvidenceItems.length ? (
@@ -2251,13 +2552,25 @@ export function DeliveryChainWorkspace({
                             const linkedScreenshots = activeReplayScenarioScreenshotItems.filter((screenshot) =>
                               screenshot.linkedEvidenceItemIds?.includes(item.id)
                             );
+                            const traceId = createReplayEvidenceTraceEvidenceItemId(item.id);
+                            const activeTrace = activeReplayEvidenceTrace?.id === traceId;
+                            const itemInTrace =
+                              !hasActiveReplayEvidenceTraceFilter ||
+                              activeReplayEvidenceTraceEvidenceIds.has(item.id) ||
+                              linkedScreenshots.some((screenshot) => activeReplayEvidenceTraceScreenshotIds.has(screenshot.id));
 
                             return (
                               <article
                                 key={item.id}
                                 className={`delivery-chain-workspace__evidence-dossier-item delivery-chain-workspace__evidence-dossier-item--${resolveReplayScenarioEvidenceTone(
                                   item.posture
-                                )}`}
+                                )}${
+                                  hasActiveReplayEvidenceTraceFilter
+                                    ? itemInTrace
+                                      ? " delivery-chain-workspace__trace-card--focused"
+                                      : " delivery-chain-workspace__trace-card--muted"
+                                    : ""
+                                }`}
                               >
                                 <div className="delivery-chain-workspace__evidence-dossier-header">
                                   <div>
@@ -2295,6 +2608,15 @@ export function DeliveryChainWorkspace({
                                       {formatReplayScreenshotShotIndex(screenshot.shotIndex)}
                                     </span>
                                   ))}
+                                  <button
+                                    type="button"
+                                    className={`secondary-button delivery-chain-workspace__trace-toggle${
+                                      activeTrace ? " delivery-chain-workspace__trace-toggle--active" : ""
+                                    }`}
+                                    onClick={() => toggleReplayEvidenceTrace(traceId)}
+                                  >
+                                    {activeTrace ? "Show all evidence" : "Focus proof item"}
+                                  </button>
                                 </div>
                               </article>
                             );

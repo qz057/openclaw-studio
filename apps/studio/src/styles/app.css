@@ -487,6 +487,12 @@ button:disabled {
   border-radius: 16px;
   border: 1px solid rgba(148, 176, 208, 0.14);
   background: rgba(7, 16, 24, 0.62);
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease,
+    opacity 140ms ease,
+    transform 140ms ease;
 }
 
 .delivery-chain-workspace__pass-record--positive,
@@ -610,6 +616,26 @@ button:disabled {
 .delivery-chain-workspace__evidence-dossier-field strong {
   color: #d8e5f2;
   line-height: 1.45;
+}
+
+.delivery-chain-workspace__trace-card--focused {
+  box-shadow: 0 0 0 1px rgba(105, 193, 255, 0.22), 0 18px 36px rgba(4, 10, 18, 0.24);
+  transform: translateY(-1px);
+}
+
+.delivery-chain-workspace__trace-card--muted {
+  opacity: 0.54;
+}
+
+.delivery-chain-workspace__trace-toggle {
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+}
+
+.delivery-chain-workspace__trace-toggle--active {
+  border-color: rgba(100, 236, 178, 0.28);
+  background: rgba(14, 32, 28, 0.72);
 }
 
 .delivery-chain-workspace__pass-card {
