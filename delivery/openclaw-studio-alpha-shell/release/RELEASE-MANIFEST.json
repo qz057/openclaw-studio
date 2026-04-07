@@ -1,12 +1,12 @@
 {
   "schemaVersion": "openclaw-studio-release-manifest/v1",
-  "generatedAt": "2026-04-07T00:20:01.269Z",
+  "generatedAt": "2026-04-07T00:53:09.685Z",
   "packageId": "openclaw-studio-alpha-shell",
   "packageName": "OpenClaw Studio Alpha Shell",
   "packageKind": "alpha-shell-release-skeleton",
   "channel": "alpha",
   "phase": "phase60",
-  "milestone": "phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout",
+  "milestone": "phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout",
   "version": "0.1.0",
   "docs": [
     {
@@ -480,7 +480,7 @@
       "label": "Renderer bundle",
       "outputRoot": "artifacts/renderer",
       "fileCount": 11,
-      "totalBytes": 608681,
+      "totalBytes": 625090,
       "entrypoints": [
         "artifacts/renderer/index.html"
       ]
@@ -518,31 +518,22 @@
       "sha256": "cb7ae03992daad83f5279a53c1754c93a60195f17c7d3ee587eb908c0138bd55"
     },
     {
-      "id": "renderer:assets/fallback-CPqLxHVb.js",
+      "id": "renderer:assets/fallback-B-OWd2Vn.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/fallback-CPqLxHVb.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/fallback-CPqLxHVb.js",
-      "sizeBytes": 219023,
-      "sha256": "afacce4e46285696341af5bd0e2e05fa36e87184976ae795c310747e37e69016"
+      "path": "artifacts/renderer/assets/fallback-B-OWd2Vn.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/fallback-B-OWd2Vn.js",
+      "sizeBytes": 225586,
+      "sha256": "1724d8e0bb25a7250f2eb1817644d2df128b8af223a2e94ce385dc9f0575e290"
     },
     {
-      "id": "renderer:assets/HomePage-D3tE24lI.js",
+      "id": "renderer:assets/HomePage-By3bV0GN.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/HomePage-D3tE24lI.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/HomePage-D3tE24lI.js",
+      "path": "artifacts/renderer/assets/HomePage-By3bV0GN.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/HomePage-By3bV0GN.js",
       "sizeBytes": 3031,
-      "sha256": "de26c58a91cc02476ae39edc2729d7e141f36e061de03abb0a3a0f7f4faa3f1b"
-    },
-    {
-      "id": "renderer:assets/index-DDmqAdQ1.js",
-      "groupId": "renderer",
-      "role": "asset",
-      "path": "artifacts/renderer/assets/index-DDmqAdQ1.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-DDmqAdQ1.js",
-      "sizeBytes": 202149,
-      "sha256": "2b7bc3352418fd22bb9043f3d7c4f554729cbfd169c0855c1dbcffc541b3b6e4"
+      "sha256": "8d2789f55088309f88c4c4715b6da9c96b73f21d48489ba60ed6372a521ffd6e"
     },
     {
       "id": "renderer:assets/index-DoEL3P9P.css",
@@ -554,6 +545,15 @@
       "sha256": "55ee80b0ef16619181212472ff8bb3c125532d4b52c1889509d5bb09499a6828"
     },
     {
+      "id": "renderer:assets/index-nlzxQbD-.js",
+      "groupId": "renderer",
+      "role": "asset",
+      "path": "artifacts/renderer/assets/index-nlzxQbD-.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-nlzxQbD-.js",
+      "sizeBytes": 211995,
+      "sha256": "4776c5b9a792ab3679c29a0570944b21962646e3eedbf43c4ff8cf3e19793924"
+    },
+    {
       "id": "renderer:assets/SessionsPage-CeRZOu_6.js",
       "groupId": "renderer",
       "role": "asset",
@@ -563,22 +563,22 @@
       "sha256": "54e5f8966e3a61a332401dc09750246fa9ca2aea2468085b38fcbb5f11184452"
     },
     {
-      "id": "renderer:assets/SettingsPage-Drw9f745.js",
+      "id": "renderer:assets/SettingsPage-4EoFGKzX.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/SettingsPage-Drw9f745.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/SettingsPage-Drw9f745.js",
+      "path": "artifacts/renderer/assets/SettingsPage-4EoFGKzX.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/SettingsPage-4EoFGKzX.js",
       "sizeBytes": 1687,
-      "sha256": "af56d901811b9f4753d983d8e2766d0bc7369379a8f68dcfc4b0299e3cb5dec9"
+      "sha256": "337338d9160e00ae17b4124bfdfea4d923b92fb42009678e9d3b49e75b4e9872"
     },
     {
-      "id": "renderer:assets/SkillsPage-Dt0eZTmK.js",
+      "id": "renderer:assets/SkillsPage-CqE36aNG.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/SkillsPage-Dt0eZTmK.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/SkillsPage-Dt0eZTmK.js",
+      "path": "artifacts/renderer/assets/SkillsPage-CqE36aNG.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/SkillsPage-CqE36aNG.js",
       "sizeBytes": 9335,
-      "sha256": "a459909f9379542ade10330e6451d814ca136a2d8212bc0eb024f0f7d22e3920"
+      "sha256": "f727389e2c521ab6f0b9f591faf2fb6adc9e3ab88aed5ab63278896666671c8c"
     },
     {
       "id": "renderer:assets/vendor-D7f9BLy3.js",
@@ -596,7 +596,7 @@
       "path": "artifacts/renderer/index.html",
       "sourceRelativePath": "apps/studio/dist-renderer/index.html",
       "sizeBytes": 496,
-      "sha256": "f780ad903cbf865f4d34b088025b38ddd8b19fceacec2439271d79fb90f65c62"
+      "sha256": "8bcf67033a2e30510273dc0c5a7007d571176457028f0c6da47ed0eaee0e2a71"
     },
     {
       "id": "electron:electron/main.js",
@@ -739,7 +739,7 @@
     "built renderer bundle copied into artifacts/renderer",
     "built Electron bundle copied into artifacts/electron",
     "review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase60 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything",
-    "delivery-chain workspace, stage explorer, review flow ladder, delivery coverage matrix, review-deck coverage routing, and the review-deck orchestration action deck linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, observability mapping, command-surface review posture, and multi-window coverage into one staged local-only workflow without executing anything",
+    "delivery-chain workspace, stage explorer, review flow ladder, delivery coverage matrix, review-deck coverage routing, review-surface coverage actions, and the review-deck orchestration action deck linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, observability mapping, command-surface review posture, and multi-window coverage into one staged local-only workflow without executing anything",
     "deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references",
     "deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, review-posture ownership, and inspector-command linkage",
     "persisted shell layout foundation backed by localStorage",

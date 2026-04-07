@@ -2,7 +2,7 @@
 
 ## Snapshot
 
-- 当前已验证里程碑：**phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface + docs / smoke / package / release-plan / UI / shared data closeout**
+- 当前已验证里程碑：**phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / command-surface observability linkage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface + docs / smoke / package / release-plan / UI / shared data closeout**
 - 当前主视图：
   - `Dashboard`
   - `Home`
@@ -42,6 +42,7 @@
   - phase60 slice2 已继续补齐 Review Flow Ladder 与 Delivery Coverage Matrix，把每个 delivery stage 的 queue / baton / closeout / mapped window coverage 收进更直接的 review surface
   - phase60 slice3 已把 review-deck intent / delivery coverage / cross-window observability 接进 command surface，让 review-deck posture 能切到更专门的 coverage flow
   - phase60 slice4 已把 review-deck posture 继续推进成 command-surface action deck，让同一组 local-only orchestration lanes 显式覆盖 promotion readiness / publish / rollback delivery stages，以及对应的 window / shared-state lane / orchestration board / observability row
+  - phase60 slice5 已把 review-deck posture 继续推进成 coverage-driven review-surface actions，让 command surface 能直接 focus review packet / reviewer queue / decision handoff / evidence closeout / publish decision gate / rollback closeout window，并把 delivery stage / window / shared-state lane / orchestration board / observability row 一起切到同一条 local-only review surface
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline
@@ -78,7 +79,7 @@ npm run release:plan
 - `workspace views` / `window intents` / `detached panel placeholders`
 - detached workspace workflow：用户现在能看到 workspace entry / detached candidate / workflow posture / switch path
 - window intents 现在具备 staged / focused / preview / shell link 之外，还补齐 workflow step / readiness / handoff posture
-- command surface 现在具备 action groups / sequences / contextual flows / keyboard routing / action decks
+- command surface 现在具备 action groups / sequences / contextual flows / keyboard routing / action decks / review-surface coverage actions
 - Dashboard / Home / Skills 会对当前 route / workflow lane / focused slot 给出一致的 recommended next actions
 - inspector 与 windowing 现在补齐 route-aware drilldowns、recent command history、以及 Local Orchestration Board
 - phase32 进一步补齐 Cross-view Coordination Matrix、Inspector-Command Linkage、Packaging Pipeline Depth
@@ -108,6 +109,7 @@ npm run release:plan
 - phase60 slice2 进一步补齐 Review Flow Ladder、Delivery Coverage Matrix、以及 delivery stage 到 window / lane / board / acknowledgement posture 的更直接可见性
 - phase60 slice3 进一步补齐 Review Coverage Flow、Focus Review Workspace Intent、Inspect Cross-window Observability、以及 review-deck posture 下更专门的 next-step / keyboard / active-flow linkage
 - phase60 slice4 进一步补齐 Review Deck Orchestration Deck、Command-surface Action Deck、以及 delivery stage / window / shared-state lane / orchestration board / observability row 的统一 coverage linkage
+- phase60 slice5 进一步补齐 Focus Review Coverage、Review Surface Navigator、Coverage-driven Review Surfaces、以及 review packet / reviewer queue / decision handoff / evidence closeout / publish decision gate / rollback closeout window 的统一 coverage linkage
 - 仍然不做真实外部窗口编排
 
 ## Phase25 Boundary Model

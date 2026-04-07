@@ -5,6 +5,7 @@ import {
   selectStudioReleaseEscalationWindow,
   selectStudioReleaseReviewerQueue,
   selectStudioWindowObservabilityActiveMapping,
+  type StudioCommandAction,
   type StudioCommandActionDeck,
   type StudioPageId,
   type StudioReleaseAcknowledgementState,
@@ -19,6 +20,9 @@ interface WindowSharedStateBoardProps {
   windowing: StudioShellState["windowing"];
   releaseApprovalPipeline?: StudioReleaseApprovalPipeline;
   actionDeck?: StudioCommandActionDeck | null;
+  reviewSurfaceActions?: StudioCommandAction[];
+  activeReviewSurfaceActionId?: string | null;
+  onRunReviewSurfaceAction?: (action: StudioCommandAction) => void;
   activeRouteId?: StudioPageId;
   activeWindowId?: string | null;
   activeLaneId?: string | null;
@@ -139,6 +143,25 @@ function formatReviewPostureRelationship(
   }
 }
 
+function formatReviewSurfaceKind(kind: StudioCommandAction["reviewSurfaceKind"]): string {
+  switch (kind) {
+    case "review-packet":
+      return "Review packet";
+    case "reviewer-queue":
+      return "Reviewer queue";
+    case "decision-handoff":
+      return "Decision handoff";
+    case "evidence-closeout":
+      return "Evidence closeout";
+    case "decision-gate":
+      return "Decision gate";
+    case "closeout-window":
+      return "Closeout window";
+    default:
+      return "Review surface";
+  }
+}
+
 export function resolveActiveWindowSharedStateLane(
   windowing: StudioShellState["windowing"],
   activeLaneId?: string | null,
@@ -238,6 +261,9 @@ export function WindowSharedStateBoard({
   windowing,
   releaseApprovalPipeline,
   actionDeck,
+  reviewSurfaceActions = [],
+  activeReviewSurfaceActionId,
+  onRunReviewSurfaceAction,
   activeRouteId,
   activeWindowId,
   activeLaneId,
@@ -306,6 +332,16 @@ export function WindowSharedStateBoard({
 
       return coversWindow || coversSharedStateLane || coversBoard || coversMapping;
     }) ?? [];
+  const relevantReviewSurfaceActions = reviewSurfaceActions.filter((action) => {
+    const coversWindow = activeWindow ? action.windowId === activeWindow.id : false;
+    const coversSharedStateLane = activeLane ? action.sharedStateLaneId === activeLane.id : false;
+    const coversBoard = activeBoard ? action.orchestrationBoardId === activeBoard.id : false;
+    const coversMapping = activeObservabilityMapping ? action.observabilityMappingId === activeObservabilityMapping.id : false;
+
+    return coversWindow || coversSharedStateLane || coversBoard || coversMapping;
+  });
+  const activeReviewSurfaceAction =
+    relevantReviewSurfaceActions.find((action) => action.id === activeReviewSurfaceActionId) ?? relevantReviewSurfaceActions[0] ?? null;
   const relevantActionDeckActionIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => lane.actionIds))];
   const relevantActionDeckStageIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => lane.deliveryChainStageIds ?? []))];
   const panelClassName = [
@@ -429,6 +465,43 @@ export function WindowSharedStateBoard({
                 })}
               </div>
             ) : null}
+          </article>
+        ) : null}
+
+        {relevantReviewSurfaceActions.length > 0 ? (
+          <article className="windowing-summary-card">
+            <span>Coverage-driven Review Surfaces</span>
+            <strong>{activeReviewSurfaceAction?.label ?? "No review surface"}</strong>
+            <p>
+              The active window, shared-state lane, orchestration board, and observability row now expose the same review-surface pivots used by the
+              command deck.
+            </p>
+            <div className="workflow-readiness-list">
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Surface pivots</span>
+                <strong>{relevantReviewSurfaceActions.length} linked actions</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Active kind</span>
+                <strong>{formatReviewSurfaceKind(activeReviewSurfaceAction?.reviewSurfaceKind)}</strong>
+              </div>
+            </div>
+            <div className="windowing-preview-list">
+              {(compact ? relevantReviewSurfaceActions.slice(0, 3) : relevantReviewSurfaceActions).map((action) => (
+                <div key={action.id} className="windowing-preview-line windowing-preview-line--stacked">
+                  <span>{formatReviewSurfaceKind(action.reviewSurfaceKind)}</span>
+                  <strong>{action.label}</strong>
+                  <p>{action.description}</p>
+                  {onRunReviewSurfaceAction ? (
+                    <div className="windowing-card__actions">
+                      <button type="button" className="secondary-button" onClick={() => onRunReviewSurfaceAction(action)}>
+                        {action.id === activeReviewSurfaceActionId ? "Refresh surface" : "Focus surface"}
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
           </article>
         ) : null}
 

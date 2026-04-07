@@ -880,6 +880,7 @@ export type StudioCommandActionKind =
   | "show-boundary"
   | "show-trace"
   | "show-preview"
+  | "focus-review-coverage"
   | "advance-workflow-lane"
   | "toggle-right-rail"
   | "toggle-bottom-dock"
@@ -889,6 +890,13 @@ export type StudioCommandActionKind =
 export type StudioCommandActionScope = "global" | "route" | "focus" | "layout" | "window";
 export type StudioCommandActionSafety = "local-only" | "preview-host";
 export type StudioCommandFlowSurface = "shell" | StudioPageId;
+export type StudioCommandReviewSurfaceKind =
+  | "review-packet"
+  | "reviewer-queue"
+  | "decision-handoff"
+  | "evidence-closeout"
+  | "decision-gate"
+  | "closeout-window";
 export type StudioKeyboardShortcutScope = "global" | "palette" | "route" | "flow";
 export type StudioKeyboardShortcutTarget = "open-palette" | "close-palette" | "action" | "sequence" | "active-flow";
 export type StudioRightRailTabId = "inspector" | "trace" | "windows";
@@ -921,6 +929,12 @@ export interface StudioCommandAction {
   bottomDockTabId?: StudioBottomDockTabId;
   workspaceViewId?: StudioWorkspaceViewId;
   windowIntentId?: string;
+  reviewSurfaceKind?: StudioCommandReviewSurfaceKind;
+  deliveryChainStageId?: string;
+  windowId?: string;
+  sharedStateLaneId?: string;
+  orchestrationBoardId?: string;
+  observabilityMappingId?: string;
 }
 
 export interface StudioCommandContext {

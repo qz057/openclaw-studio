@@ -45,6 +45,18 @@ export interface ContextualCommandActionDeckLaneItem {
   stageCount: number;
   windowCount: number;
   boardCount: number;
+  reviewSurfaceCount: number;
+}
+
+export interface ContextualCommandReviewSurfaceItem {
+  id: string;
+  label: string;
+  detail: string;
+  tone: StudioTone;
+  active: boolean;
+  kindLabel: string;
+  coverageLabel: string;
+  action: StudioCommandAction;
 }
 
 export interface ContextualCommandPanelProps {
@@ -60,6 +72,7 @@ export interface ContextualCommandPanelProps {
   actionDeckLabel?: string;
   actionDeckSummary?: string;
   actionDeckLanes: ContextualCommandActionDeckLaneItem[];
+  reviewSurfaceItems: ContextualCommandReviewSurfaceItem[];
   nextStepBoardLabel?: string;
   nextStepBoardSummary?: string;
   nextStepItems: ContextualCommandNextStepItem[];
@@ -100,6 +113,7 @@ export function ContextualCommandPanel({
   actionDeckLabel,
   actionDeckSummary,
   actionDeckLanes,
+  reviewSurfaceItems,
   nextStepBoardLabel,
   nextStepBoardSummary,
   nextStepItems,
@@ -234,6 +248,7 @@ export function ContextualCommandPanel({
                     <span className="command-context-pill">{lane.stageCount} stages</span>
                     <span className="command-context-pill">{lane.windowCount} windows</span>
                     <span className="command-context-pill">{lane.boardCount} boards</span>
+                    <span className="command-context-pill">{lane.reviewSurfaceCount} review surfaces</span>
                     {lane.followUpActionLabels.map((label) => (
                       <span key={`${lane.id}-${label}`} className="command-context-pill">
                         {label}
@@ -253,6 +268,42 @@ export function ContextualCommandPanel({
                     {lane.primaryActionLabel}
                   </button>
                 ) : null}
+              </article>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {reviewSurfaceItems.length ? (
+        <div className="contextual-command-panel__section">
+          <div className="contextual-command-panel__section-header">
+            <span>Review Surface Navigator</span>
+            <strong>{reviewSurfaceItems.length} surfaced</strong>
+          </div>
+          <p className="panel-summary panel-summary--tight">
+            Coverage actions now focus a typed review surface and move delivery stage, window, shared-state lane, board, and observability linkage together.
+          </p>
+          <div className="contextual-command-panel__next-step-list">
+            {reviewSurfaceItems.map((item) => (
+              <article key={item.id} className={`contextual-command-next-step contextual-command-next-step--${item.tone}`}>
+                <div>
+                  <span>{item.kindLabel}</span>
+                  <strong>{item.active ? `${item.label} · Active surface` : item.label}</strong>
+                  <p>{item.detail}</p>
+                  <div className="contextual-command-panel__chips">
+                    <span className={`command-context-pill${item.active ? " workflow-chip--active" : ""}`}>{item.coverageLabel}</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="action-button"
+                  onClick={() => {
+                    onRunAction(item.action);
+                  }}
+                  title={item.action.description}
+                >
+                  {item.action.label}
+                </button>
               </article>
             ))}
           </div>

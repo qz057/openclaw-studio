@@ -117,6 +117,9 @@ async function verifyRendererFocusedSlotUi() {
     "Escalation Window",
     "Evidence Closeout",
     "Closeout Window",
+    "Review Surface Navigator",
+    "Coverage-driven Review Surfaces",
+    "Focus Publish Decision Gate",
     "Cross-window Observability",
     "Stage Ownership",
     "Delivery-chain Workspace",
@@ -507,6 +510,7 @@ function assertCommandSurfaceContract(commandSurface, shellState) {
     "show-boundary",
     "show-trace",
     "show-preview",
+    "focus-review-coverage",
     "advance-workflow-lane",
     "toggle-right-rail",
     "toggle-bottom-dock",
@@ -566,6 +570,45 @@ function assertCommandSurfaceContract(commandSurface, shellState) {
   const deliveryChainStageIds = new Set(
     (shellState.boundary?.hostExecutor?.releaseApprovalPipeline?.deliveryChain?.stages ?? []).map((stage) => stage.id)
   );
+  const reviewCoverageActions = commandSurface.actions.filter((action) => action.kind === "focus-review-coverage");
+
+  if (reviewCoverageActions.length < 4) {
+    throw new Error("Shell command surface is missing the phase60 review-surface coverage actions.");
+  }
+
+  for (const action of reviewCoverageActions) {
+    if (
+      !action.reviewSurfaceKind ||
+      !action.deliveryChainStageId ||
+      !action.windowId ||
+      !action.sharedStateLaneId ||
+      !action.orchestrationBoardId ||
+      !action.observabilityMappingId
+    ) {
+      throw new Error(`Review coverage action ${action.id} is missing typed coverage targets.`);
+    }
+
+    if (!deliveryChainStageIds.has(action.deliveryChainStageId)) {
+      throw new Error(`Review coverage action ${action.id} points at unknown delivery stage ${action.deliveryChainStageId}.`);
+    }
+
+    if (!rosterWindowIds.has(action.windowId)) {
+      throw new Error(`Review coverage action ${action.id} points at unknown window ${action.windowId}.`);
+    }
+
+    if (!sharedStateLaneIds.has(action.sharedStateLaneId)) {
+      throw new Error(`Review coverage action ${action.id} points at unknown shared-state lane ${action.sharedStateLaneId}.`);
+    }
+
+    if (!orchestrationBoardIds.has(action.orchestrationBoardId)) {
+      throw new Error(`Review coverage action ${action.id} points at unknown orchestration board ${action.orchestrationBoardId}.`);
+    }
+
+    if (!observabilityMappingIds.has(action.observabilityMappingId)) {
+      throw new Error(`Review coverage action ${action.id} points at unknown observability mapping ${action.observabilityMappingId}.`);
+    }
+  }
+
   for (const sequence of commandSurface.sequences) {
     if (sequence.safety !== "local-only" || !Array.isArray(sequence.actionIds) || sequence.actionIds.length === 0) {
       throw new Error(`Command sequence ${sequence.id} drifted from the expected local-only posture.`);
@@ -770,6 +813,10 @@ function assertCommandSurfaceContract(commandSurface, shellState) {
 
   if (!commandSurface.actionDecks.some((deck) => deck.id === "deck-review-deck-orchestration")) {
     throw new Error("Shell command surface is missing the phase60 review-deck orchestration deck.");
+  }
+
+  if (!commandSurface.actionDecks.some((deck) => deck.lanes.some((lane) => lane.actionIds.some((actionId) => actionById.get(actionId)?.kind === "focus-review-coverage")))) {
+    throw new Error("Shell command surface action decks are missing review-surface coverage pivots.");
   }
 
   for (const shortcut of commandSurface.keyboardRouting.shortcuts) {

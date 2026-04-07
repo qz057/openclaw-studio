@@ -14,7 +14,7 @@ import { mockBoundarySummary } from "./mock-host.js";
 const mockCommandSurface: StudioCommandSurface = {
   title: "Command Palette",
   summary:
-    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
+    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, review-surface coverage pivots, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
   placeholder: "Search orchestration, delivery coverage, observability, navigation, next steps, flow state, detached workspace, or keyboard routes",
   quickActionIds: [
     "command-open-home",
@@ -224,6 +224,120 @@ const mockCommandSurface: StudioCommandSurface = {
       bottomDockTabId: "windows"
     },
     {
+      id: "command-focus-lifecycle-review-packet",
+      label: "Focus Lifecycle Review Packet",
+      description: "Bias Review Deck into the blocked lifecycle packet so promotion-readiness coverage, review posture, and preview handoff stay aligned.",
+      kind: "focus-review-coverage",
+      scope: "window",
+      safety: "local-only",
+      tone: "warning",
+      keywords: ["review", "packet", "promotion", "lifecycle", "coverage", "review-deck"],
+      rightRailTabId: "windows",
+      bottomDockTabId: "windows",
+      windowIntentId: "window-intent-review-workspace",
+      reviewSurfaceKind: "review-packet",
+      deliveryChainStageId: "delivery-chain-promotion-readiness",
+      windowId: "window-review-board",
+      sharedStateLaneId: "shared-state-lane-preview-review",
+      orchestrationBoardId: "orchestration-board-preview-review",
+      observabilityMappingId: "observability-mapping-lifecycle-preview"
+    },
+    {
+      id: "command-focus-approval-reviewer-queue",
+      label: "Focus Active Approval Queue",
+      description: "Jump into the live approval queue so operator review, acknowledgement posture, and trace-linked coverage stay synchronized.",
+      kind: "focus-review-coverage",
+      scope: "window",
+      safety: "local-only",
+      tone: "warning",
+      keywords: ["approval", "queue", "review", "coverage", "trace", "acknowledgement"],
+      rightRailTabId: "windows",
+      bottomDockTabId: "windows",
+      windowIntentId: "window-intent-trace-workspace",
+      reviewSurfaceKind: "reviewer-queue",
+      deliveryChainStageId: "delivery-chain-operator-review",
+      windowId: "window-trace-review",
+      sharedStateLaneId: "shared-state-lane-trace-review",
+      orchestrationBoardId: "orchestration-board-trace-review",
+      observabilityMappingId: "observability-mapping-approval-active"
+    },
+    {
+      id: "command-focus-approval-decision-handoff",
+      label: "Focus Decision Handoff Surface",
+      description: "Keep the active approval baton, acknowledgement state, and trace-linked window ownership in one explicit review surface.",
+      kind: "focus-review-coverage",
+      scope: "window",
+      safety: "local-only",
+      tone: "warning",
+      keywords: ["decision", "handoff", "approval", "baton", "coverage", "trace"],
+      rightRailTabId: "windows",
+      bottomDockTabId: "windows",
+      windowIntentId: "window-intent-trace-workspace",
+      reviewSurfaceKind: "decision-handoff",
+      deliveryChainStageId: "delivery-chain-operator-review",
+      windowId: "window-trace-review",
+      sharedStateLaneId: "shared-state-lane-trace-review",
+      orchestrationBoardId: "orchestration-board-trace-review",
+      observabilityMappingId: "observability-mapping-approval-active"
+    },
+    {
+      id: "command-focus-approval-evidence-closeout",
+      label: "Focus Evidence Closeout Surface",
+      description: "Surface the active closeout contract so sealed evidence, pending evidence, and trace-owned approval posture stay linked.",
+      kind: "focus-review-coverage",
+      scope: "window",
+      safety: "local-only",
+      tone: "warning",
+      keywords: ["evidence", "closeout", "approval", "coverage", "trace", "sealed"],
+      rightRailTabId: "windows",
+      bottomDockTabId: "windows",
+      windowIntentId: "window-intent-trace-workspace",
+      reviewSurfaceKind: "evidence-closeout",
+      deliveryChainStageId: "delivery-chain-operator-review",
+      windowId: "window-trace-review",
+      sharedStateLaneId: "shared-state-lane-trace-review",
+      orchestrationBoardId: "orchestration-board-trace-review",
+      observabilityMappingId: "observability-mapping-approval-active"
+    },
+    {
+      id: "command-focus-publish-decision-gate",
+      label: "Focus Publish Decision Gate",
+      description: "Pivot the shell into the blocked final decision gate so publish-facing window, board, and observability coverage stay explicit.",
+      kind: "focus-review-coverage",
+      scope: "window",
+      safety: "local-only",
+      tone: "warning",
+      keywords: ["publish", "decision", "gate", "coverage", "final", "review"],
+      rightRailTabId: "windows",
+      bottomDockTabId: "windows",
+      windowIntentId: "window-intent-inspector-detach",
+      reviewSurfaceKind: "decision-gate",
+      deliveryChainStageId: "delivery-chain-publish-decision",
+      windowId: "window-shell-main",
+      sharedStateLaneId: "shared-state-lane-boundary-review",
+      orchestrationBoardId: "orchestration-board-boundary-review",
+      observabilityMappingId: "observability-mapping-final-gate"
+    },
+    {
+      id: "command-focus-rollback-closeout-window",
+      label: "Focus Rollback Closeout Window",
+      description: "Bring the rollback settlement shadow into view so overdue acknowledgement, closeout timing, and trace-owned recovery coverage stay linked.",
+      kind: "focus-review-coverage",
+      scope: "window",
+      safety: "local-only",
+      tone: "warning",
+      keywords: ["rollback", "closeout", "window", "shadow", "coverage", "recovery"],
+      rightRailTabId: "windows",
+      bottomDockTabId: "windows",
+      windowIntentId: "window-intent-trace-workspace",
+      reviewSurfaceKind: "closeout-window",
+      deliveryChainStageId: "delivery-chain-rollback-readiness",
+      windowId: "window-trace-review",
+      sharedStateLaneId: "shared-state-lane-trace-review",
+      orchestrationBoardId: "orchestration-board-trace-review",
+      observabilityMappingId: "observability-mapping-rollback-shadow"
+    },
+    {
       id: "command-stage-review-window",
       label: "Focus Review Workspace Intent",
       description: "Focus the review-deck intent so delivery coverage and window-aware review posture stay aligned.",
@@ -304,7 +418,14 @@ const mockCommandSurface: StudioCommandSurface = {
       id: "sessions",
       label: "Sessions route actions",
       summary: "Actions that pivot from queues back into operator review surfaces.",
-      actionIds: ["command-open-dashboard", "command-show-trace", "command-open-review-view", "command-advance-workflow"]
+      actionIds: [
+        "command-open-dashboard",
+        "command-show-trace",
+        "command-open-review-view",
+        "command-focus-approval-reviewer-queue",
+        "command-focus-approval-decision-handoff",
+        "command-advance-workflow"
+      ]
     },
     {
       id: "agents",
@@ -314,6 +435,8 @@ const mockCommandSurface: StudioCommandSurface = {
         "command-open-review-view",
         "command-open-windows-observability",
         "command-stage-review-window",
+        "command-focus-approval-reviewer-queue",
+        "command-focus-publish-decision-gate",
         "command-stage-inspector-window",
         "command-advance-workflow",
         "command-toggle-compact-mode"
@@ -327,6 +450,8 @@ const mockCommandSurface: StudioCommandSurface = {
         "command-open-review-view",
         "command-open-windows-observability",
         "command-stage-review-window",
+        "command-focus-approval-decision-handoff",
+        "command-focus-rollback-closeout-window",
         "command-toggle-compact-mode",
         "command-open-settings",
         "command-advance-workflow"
@@ -354,6 +479,8 @@ const mockCommandSurface: StudioCommandSurface = {
         "command-open-settings",
         "command-open-review-view",
         "command-open-windows-observability",
+        "command-focus-lifecycle-review-packet",
+        "command-focus-publish-decision-gate",
         "command-stage-review-window",
         "command-stage-trace-window",
         "command-advance-workflow",
@@ -400,9 +527,31 @@ const mockCommandSurface: StudioCommandSurface = {
     {
       id: "group-review-coverage",
       label: "Review Coverage Routing",
-      summary: "Keep review-deck intent, delivery coverage, and cross-window observability visible as one local-only command surface.",
+      summary: "Keep review-deck intent, delivery coverage, review-surface pivots, and cross-window observability visible as one local-only command surface.",
       tone: "positive",
-      actionIds: ["command-open-review-view", "command-stage-review-window", "command-open-windows-observability", "command-advance-workflow"]
+      actionIds: [
+        "command-open-review-view",
+        "command-stage-review-window",
+        "command-open-windows-observability",
+        "command-focus-lifecycle-review-packet",
+        "command-focus-publish-decision-gate",
+        "command-focus-rollback-closeout-window",
+        "command-advance-workflow"
+      ]
+    },
+    {
+      id: "group-review-surface-actions",
+      label: "Review Surface Actions",
+      summary: "Review packet, queue, handoff, closeout, publish gate, and rollback closeout pivots stay addressable as explicit local-only actions.",
+      tone: "warning",
+      actionIds: [
+        "command-focus-lifecycle-review-packet",
+        "command-focus-approval-reviewer-queue",
+        "command-focus-approval-decision-handoff",
+        "command-focus-approval-evidence-closeout",
+        "command-focus-publish-decision-gate",
+        "command-focus-rollback-closeout-window"
+      ]
     },
     {
       id: "group-layout-routing",
@@ -473,9 +622,15 @@ const mockCommandSurface: StudioCommandSurface = {
         "When Review Deck is active, focus the review workspace intent, surface cross-window observability, and keep delivery coverage visible while the current lane advances locally.",
       tone: "positive",
       safety: "local-only",
-      actionIds: ["command-stage-review-window", "command-open-windows-observability", "command-advance-workflow"],
-      recommendedActionId: "command-stage-review-window",
-      followUpActionIds: ["command-open-windows-observability", "command-open-review-view"],
+      actionIds: [
+        "command-stage-review-window",
+        "command-focus-lifecycle-review-packet",
+        "command-open-windows-observability",
+        "command-focus-publish-decision-gate",
+        "command-advance-workflow"
+      ],
+      recommendedActionId: "command-focus-lifecycle-review-packet",
+      followUpActionIds: ["command-open-windows-observability", "command-focus-publish-decision-gate"],
       match: {
         routeIds: ["settings", "agents", "codex"],
         workspaceViewIds: ["review-deck"],
@@ -546,11 +701,11 @@ const mockCommandSurface: StudioCommandSurface = {
       surfaceIds: ["shell", "settings", "agents", "codex"],
       label: "Review Coverage Flow",
       summary:
-        "When Review Deck and its review-workspace intent are active, command-surface pivots into delivery coverage and cross-window observability instead of staying in generic route recovery mode.",
+        "When Review Deck and its review-workspace intent are active, command-surface pivots into delivery coverage, review-surface actions, and cross-window observability instead of staying in generic route recovery mode.",
       sequenceId: "sequence-review-coverage-flow",
-      recommendedActionId: "command-stage-review-window",
-      followUpActionIds: ["command-open-windows-observability", "command-advance-workflow"],
-      groupIds: ["group-review-coverage", "group-workflow-lane"],
+      recommendedActionId: "command-focus-lifecycle-review-packet",
+      followUpActionIds: ["command-open-windows-observability", "command-focus-publish-decision-gate"],
+      groupIds: ["group-review-coverage", "group-review-surface-actions", "group-workflow-lane"],
       keyboardShortcutIds: ["keyboard-run-active-flow", "keyboard-run-review-sequence", "keyboard-open-settings"],
       match: {
         routeIds: ["settings", "agents", "codex"],
@@ -657,6 +812,14 @@ const mockCommandSurface: StudioCommandSurface = {
       actionId: "command-open-windows-observability"
     },
     {
+      id: "next-step-settings-review-surface",
+      label: "Focus lifecycle review packet",
+      detail: "Drive the same coverage selection into Review Deck so the selected delivery stage, preview lane, board, and observability path move together.",
+      tone: "warning",
+      kind: "window",
+      actionId: "command-focus-lifecycle-review-packet"
+    },
+    {
       id: "next-step-settings-lane",
       label: "Advance review orchestration",
       detail: "Move the active review lane toward its next staged handoff posture.",
@@ -702,10 +865,16 @@ const mockCommandSurface: StudioCommandSurface = {
     {
       id: "board-settings-review-deck",
       label: "Settings Route-aware Next-step Board",
-      summary: "Settings groups review-deck entry, review-workspace intent, windows observability, and lane advance into one coordination board.",
+      summary: "Settings groups review-deck entry, review-workspace intent, lifecycle packet coverage, windows observability, and lane advance into one coordination board.",
       flowId: "flow-settings-review-deck",
       sequenceId: "sequence-settings-review-deck",
-      stepIds: ["next-step-settings-review", "next-step-settings-intent", "next-step-settings-observability", "next-step-settings-lane"],
+      stepIds: [
+        "next-step-settings-review",
+        "next-step-settings-intent",
+        "next-step-settings-review-surface",
+        "next-step-settings-observability",
+        "next-step-settings-lane"
+      ],
       match: {
         routeIds: ["settings"]
       }
@@ -713,10 +882,15 @@ const mockCommandSurface: StudioCommandSurface = {
     {
       id: "board-review-deck-coverage",
       label: "Review Deck Coverage Board",
-      summary: "When Review Deck is active, keep review intent, windows observability, and lane advance grouped as one local-only coverage board.",
+      summary: "When Review Deck is active, keep review intent, review-surface focus, windows observability, and lane advance grouped as one local-only coverage board.",
       flowId: "flow-review-deck-coverage",
       sequenceId: "sequence-review-coverage-flow",
-      stepIds: ["next-step-settings-intent", "next-step-settings-observability", "next-step-settings-lane"],
+      stepIds: [
+        "next-step-settings-intent",
+        "next-step-settings-review-surface",
+        "next-step-settings-observability",
+        "next-step-settings-lane"
+      ],
       match: {
         routeIds: ["settings", "agents", "codex"],
         workspaceViewIds: ["review-deck"],
@@ -729,7 +903,7 @@ const mockCommandSurface: StudioCommandSurface = {
       id: "deck-review-deck-orchestration",
       label: "Review Deck Orchestration Deck",
       summary:
-        "Review-deck posture now carries a dedicated local-only action deck so workspace entry, review-workspace intent, delivery-stage coverage, and cross-window handoff coverage stay grouped instead of being inferred from separate cards.",
+        "Review-deck posture now carries a dedicated local-only action deck so workspace entry, review-workspace intent, delivery-stage coverage, review-surface pivots, and cross-window handoff coverage stay grouped instead of being inferred from separate cards.",
       tone: "positive",
       flowId: "flow-review-deck-coverage",
       sequenceId: "sequence-review-coverage-flow",
@@ -738,10 +912,14 @@ const mockCommandSurface: StudioCommandSurface = {
           id: "deck-lane-review-deck-workspace",
           label: "Review Workspace Entry",
           summary:
-            "Move into Review Deck and focus the review workspace intent so the preview lane can own a staged local review posture before any future detached support exists.",
+            "Move into Review Deck and focus the lifecycle review packet so the preview lane can own a staged local review posture before any future detached support exists.",
           tone: "positive",
-          actionIds: ["command-open-review-view", "command-stage-review-window"],
-          primaryActionId: "command-open-review-view",
+          actionIds: [
+            "command-open-review-view",
+            "command-stage-review-window",
+            "command-focus-lifecycle-review-packet"
+          ],
+          primaryActionId: "command-focus-lifecycle-review-packet",
           followUpActionIds: ["command-stage-review-window"],
           workspaceViewIds: ["review-deck"],
           windowIntentIds: ["window-intent-review-workspace"],
@@ -760,11 +938,17 @@ const mockCommandSurface: StudioCommandSurface = {
           id: "deck-lane-review-deck-delivery-coverage",
           label: "Delivery Gate Coverage",
           summary:
-            "Cross-window observability keeps the preview stage tied to publish and rollback gates, so downstream coverage remains visible while every stage stays metadata-only and non-executing.",
+            "Cross-window observability now pivots directly into publish-gate, approval-queue, and rollback-closeout review surfaces, so downstream coverage remains visible while every stage stays metadata-only and non-executing.",
           tone: "warning",
-          actionIds: ["command-open-windows-observability", "command-stage-review-window"],
-          primaryActionId: "command-open-windows-observability",
-          followUpActionIds: ["command-stage-review-window"],
+          actionIds: [
+            "command-open-windows-observability",
+            "command-stage-review-window",
+            "command-focus-approval-reviewer-queue",
+            "command-focus-publish-decision-gate",
+            "command-focus-rollback-closeout-window"
+          ],
+          primaryActionId: "command-focus-publish-decision-gate",
+          followUpActionIds: ["command-focus-approval-reviewer-queue", "command-focus-rollback-closeout-window"],
           workspaceViewIds: ["review-deck"],
           windowIntentIds: ["window-intent-review-workspace"],
           deliveryChainStageIds: [
@@ -798,28 +982,30 @@ const mockCommandSurface: StudioCommandSurface = {
           id: "deck-lane-review-deck-handoff",
           label: "Preview Handoff Stabilization",
           summary:
-            "Advance the preview workflow lane only after Review Deck and windows observability are aligned, so handoff posture and closeout timing stay attached to the same local orchestration board.",
+            "Advance the preview workflow lane only after approval handoff and evidence closeout surfaces are aligned, so baton posture and closeout timing stay attached to the same local orchestration board.",
           tone: "warning",
           actionIds: [
             "command-open-review-view",
             "command-stage-review-window",
             "command-open-windows-observability",
+            "command-focus-approval-decision-handoff",
+            "command-focus-approval-evidence-closeout",
             "command-advance-workflow"
           ],
-          primaryActionId: "command-advance-workflow",
-          followUpActionIds: ["command-open-windows-observability", "command-stage-review-window"],
+          primaryActionId: "command-focus-approval-decision-handoff",
+          followUpActionIds: ["command-focus-approval-evidence-closeout", "command-advance-workflow"],
           workspaceViewIds: ["review-deck"],
           windowIntentIds: ["window-intent-review-workspace"],
-          deliveryChainStageIds: ["delivery-chain-promotion-readiness"],
-          focusDeliveryChainStageId: "delivery-chain-promotion-readiness",
-          windowIds: ["window-review-board"],
-          focusWindowId: "window-review-board",
-          sharedStateLaneIds: ["shared-state-lane-preview-review"],
-          focusSharedStateLaneId: "shared-state-lane-preview-review",
-          orchestrationBoardIds: ["orchestration-board-preview-review"],
-          focusOrchestrationBoardId: "orchestration-board-preview-review",
-          observabilityMappingIds: ["observability-mapping-lifecycle-preview"],
-          focusObservabilityMappingId: "observability-mapping-lifecycle-preview"
+          deliveryChainStageIds: ["delivery-chain-operator-review"],
+          focusDeliveryChainStageId: "delivery-chain-operator-review",
+          windowIds: ["window-trace-review"],
+          focusWindowId: "window-trace-review",
+          sharedStateLaneIds: ["shared-state-lane-trace-review"],
+          focusSharedStateLaneId: "shared-state-lane-trace-review",
+          orchestrationBoardIds: ["orchestration-board-trace-review"],
+          focusOrchestrationBoardId: "orchestration-board-trace-review",
+          observabilityMappingIds: ["observability-mapping-approval-active"],
+          focusObservabilityMappingId: "observability-mapping-approval-active"
         }
       ],
       match: {

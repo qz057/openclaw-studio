@@ -294,15 +294,16 @@
 - smoke 已提升到验证 phase58 review-only delivery-chain renderer markers、runtime contract、以及 release artifact contract
 - README / HANDOFF / package snapshot 已同步反映 phase58 slice 3 reality
 
-### Phase 60（当前已完成，slice 1-4）
+### Phase 60（当前已完成，slice 1-5）
 - phase58 slice 3 的 review-only delivery chain 已继续推进成更明确的 delivery-chain workspace / stage explorer
 - shared / runtime / renderer 现在显式带出 selected delivery stage、artifact coverage、related review surfaces、blockers / handoff posture、以及 observability mapping，并把它们收敛到同一个 shell explorer
 - App 主 shell 现在能直接在 operator review board 之后切换 attestation / review / promotion / publish / rollback stages，并看到同一阶段的 ownership、artifact groups、queue / handoff / closeout posture、以及跨窗口映射
 - phase60 slice2 继续补齐 Review Flow Ladder 与 Delivery Coverage Matrix，让每个 delivery stage 的 reviewer queue、decision baton、closeout window、以及 mapped window / lane / board coverage 直接可见
 - phase60 slice3 继续把 review-deck intent / delivery coverage / cross-window observability 接进 command surface，让 review-deck posture 下的 Settings / Agents / Codex 能切到更专门的 coverage flow、next-step board、keyboard routing、以及 active-flow state
 - phase60 slice4 继续把 review-deck posture 推进成 command-surface action deck，让同一组 local-only orchestration lanes 显式覆盖 promotion readiness / publish / rollback delivery stages，以及对应的 window / shared-state lane / orchestration board / observability row
-- smoke 已提升到验证 phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review coverage flow / action deck coverage / command-surface observability linkage / artifact coverage / blockers / handoff posture renderer markers
-- README / HANDOFF / package snapshot 已同步反映 phase60 slice4 reality
+- phase60 slice5 继续把 review-deck posture 推进成 coverage-driven review-surface navigation，让 command surface 可以直接 focus review packet / reviewer queue / decision handoff / evidence closeout / publish decision gate / rollback closeout window，并把 delivery stage / window / shared-state lane / orchestration board / observability row 一起切到同一条 local-only review surface
+- smoke 已提升到验证 phase60 delivery-chain workspace / stage explorer / review flow ladder / delivery coverage matrix / review coverage flow / action deck coverage / review-surface navigator / command-surface observability linkage / artifact coverage / blockers / handoff posture renderer markers
+- README / HANDOFF / package snapshot 已同步反映 phase60 slice5 reality
 
 ## 当前明确边界
 
@@ -312,7 +313,7 @@
 - dry-run / preview / simulate
 - Studio-local execute（只改应用内 in-memory state/history）
 - phase27 command surface / layout persistence / window intent staging
-- phase60 delivery-chain workspace / stage explorer / review-deck orchestration deck / command-surface action-deck coverage / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface
+- phase60 delivery-chain workspace / stage explorer / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / linked review artifacts / blockers / handoff posture / observability mapping / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface
 - phase26/27/28 release skeleton / artifact review / handoff docs / package metadata
 
 当前明确禁止：

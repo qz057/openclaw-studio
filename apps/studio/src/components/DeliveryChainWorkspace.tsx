@@ -8,6 +8,7 @@ import {
   type StudioReleaseAcknowledgementState,
   type StudioReleaseApprovalPipeline,
   type StudioReleaseCloseoutWindowState,
+  type StudioCommandAction,
   type StudioCommandActionDeck,
   type StudioReleaseEscalationWindowState,
   type StudioReleaseReviewerQueueStatus,
@@ -18,6 +19,11 @@ interface DeliveryChainWorkspaceProps {
   pipeline: StudioReleaseApprovalPipeline;
   windowing?: StudioShellState["windowing"];
   actionDeck?: StudioCommandActionDeck | null;
+  reviewSurfaceActions?: StudioCommandAction[];
+  activeReviewSurfaceActionId?: string | null;
+  selectedStageId?: string | null;
+  onSelectStage?: (stageId: string) => void;
+  onRunReviewSurfaceAction?: (action: StudioCommandAction) => void;
   compact?: boolean;
   nested?: boolean;
   eyebrow?: string;
@@ -106,6 +112,25 @@ function resolveSealTone(state: StudioReleaseApprovalPipeline["stages"][number][
       return "neutral";
     default:
       return "warning";
+  }
+}
+
+function formatReviewSurfaceKind(kind: StudioCommandAction["reviewSurfaceKind"]): string {
+  switch (kind) {
+    case "review-packet":
+      return "Review packet";
+    case "reviewer-queue":
+      return "Reviewer queue";
+    case "decision-handoff":
+      return "Decision handoff";
+    case "evidence-closeout":
+      return "Evidence closeout";
+    case "decision-gate":
+      return "Decision gate";
+    case "closeout-window":
+      return "Closeout window";
+    default:
+      return "Review surface";
   }
 }
 
@@ -198,6 +223,11 @@ export function DeliveryChainWorkspace({
   pipeline,
   windowing,
   actionDeck,
+  reviewSurfaceActions = [],
+  activeReviewSurfaceActionId,
+  selectedStageId: controlledStageId,
+  onSelectStage,
+  onRunReviewSurfaceAction,
   compact = false,
   nested = false,
   eyebrow = "Delivery",
@@ -206,12 +236,13 @@ export function DeliveryChainWorkspace({
 }: DeliveryChainWorkspaceProps) {
   const currentPipelineStage = selectStudioReleaseApprovalPipelineStage(pipeline) ?? pipeline.stages[0] ?? null;
   const currentDeliveryStage = selectStudioReleaseDeliveryChainStage(pipeline, currentPipelineStage ?? undefined) ?? pipeline.deliveryChain.stages[0] ?? null;
-  const [selectedStageId, setSelectedStageId] = useState<string>(currentDeliveryStage?.id ?? pipeline.deliveryChain.currentStageId);
+  const [localSelectedStageId, setLocalSelectedStageId] = useState<string>(currentDeliveryStage?.id ?? pipeline.deliveryChain.currentStageId);
   const [selectedArtifactGroupId, setSelectedArtifactGroupId] = useState<string | null>(null);
+  const selectedStageId = controlledStageId ?? localSelectedStageId;
 
   useEffect(() => {
     if (!pipeline.deliveryChain.stages.some((stage) => stage.id === selectedStageId)) {
-      setSelectedStageId(currentDeliveryStage?.id ?? pipeline.deliveryChain.currentStageId);
+      setLocalSelectedStageId(currentDeliveryStage?.id ?? pipeline.deliveryChain.currentStageId);
     }
   }, [currentDeliveryStage?.id, pipeline.deliveryChain.currentStageId, pipeline.deliveryChain.stages, selectedStageId]);
 
@@ -275,6 +306,9 @@ export function DeliveryChainWorkspace({
     selectedReviewerQueue?.entries.find((entry) => entry.id === selectedReviewerQueue.activeEntryId) ?? selectedReviewerQueue?.entries[0] ?? null;
   const publishStage = selectStudioReleaseDeliveryChainStage(pipeline, "delivery-chain-publish-decision") ?? null;
   const rollbackStage = selectStudioReleaseDeliveryChainStage(pipeline, "delivery-chain-rollback-readiness") ?? null;
+  const stageReviewSurfaceActions = reviewSurfaceActions.filter((action) => action.deliveryChainStageId === selectedDeliveryStage?.id);
+  const activeStageReviewSurfaceAction =
+    stageReviewSurfaceActions.find((action) => action.id === activeReviewSurfaceActionId) ?? stageReviewSurfaceActions[0] ?? null;
   const relevantActionDeckLanes =
     actionDeck?.lanes.filter((lane) => (selectedDeliveryStage ? (lane.deliveryChainStageIds ?? []).includes(selectedDeliveryStage.id) : false)) ?? [];
   const relevantActionDeckActionIds = [...new Set(relevantActionDeckLanes.flatMap((lane) => lane.actionIds))];
@@ -348,7 +382,8 @@ export function DeliveryChainWorkspace({
               type="button"
               className={`workflow-step-card workflow-step-card--${resolveStageTone(stage.status)}${active ? " workflow-step-card--active" : ""}`}
               onClick={() => {
-                setSelectedStageId(stage.id);
+                setLocalSelectedStageId(stage.id);
+                onSelectStage?.(stage.id);
               }}
             >
               <div className="workflow-step-card__meta">
@@ -611,6 +646,43 @@ export function DeliveryChainWorkspace({
                 })}
               </div>
             ) : null}
+          </article>
+        ) : null}
+
+        {stageReviewSurfaceActions.length > 0 ? (
+          <article className="windowing-summary-card">
+            <span>Review Surface Navigator</span>
+            <strong>{activeStageReviewSurfaceAction?.label ?? "No review surface"}</strong>
+            <p>
+              Coverage actions now move the selected stage together with its window, shared-state lane, orchestration board, and observability path
+              instead of leaving review surfaces buried inside separate cards.
+            </p>
+            <div className="workflow-readiness-list">
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Stage surfaces</span>
+                <strong>{stageReviewSurfaceActions.length} local-only pivots</strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Active kind</span>
+                <strong>{formatReviewSurfaceKind(activeStageReviewSurfaceAction?.reviewSurfaceKind)}</strong>
+              </div>
+            </div>
+            <div className="windowing-preview-list">
+              {(compact ? stageReviewSurfaceActions.slice(0, 3) : stageReviewSurfaceActions).map((action) => (
+                <div key={action.id} className="windowing-preview-line windowing-preview-line--stacked">
+                  <span>{formatReviewSurfaceKind(action.reviewSurfaceKind)}</span>
+                  <strong>{action.label}</strong>
+                  <p>{action.description}</p>
+                  {onRunReviewSurfaceAction ? (
+                    <div className="windowing-card__actions">
+                      <button type="button" className="secondary-button" onClick={() => onRunReviewSurfaceAction(action)}>
+                        {action.id === activeReviewSurfaceActionId ? "Refresh surface" : "Focus surface"}
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
           </article>
         ) : null}
 
