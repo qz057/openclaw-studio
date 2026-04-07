@@ -96,8 +96,8 @@ function createReplayReviewerWalkthrough({
 const mockCommandSurface: StudioCommandSurface = {
   title: "Command Palette",
   summary:
-    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, typed companion review-path orchestration, ordered companion review sequences, typed companion route states, explicit active/alternate routes, switchable sequence posture, companion route-history memory, route replay restore, replay scenario packs, screenshot-driven acceptance review packs, acceptance pass layers, screenshot pass records, reviewer flow ladders, acceptance reading queues, reviewer signoff boards, final review closeouts, capture review flows, proof-linked comparison bundles, acceptance storyboards, evidence dossiers, evidence trace lenses, product-review console polish, replay acceptance checks, stabilized path handoffs, review-surface coverage pivots, multi-window review coverage, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
-  placeholder: "Search orchestration, delivery coverage, observability, navigation, next steps, flow state, detached workspace, or keyboard routes",
+    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, typed companion review-path orchestration, ordered companion review sequences, typed companion route states, explicit active/alternate routes, switchable sequence posture, companion route-history memory, route replay restore, replay scenario packs, screenshot-driven acceptance review packs, acceptance pass layers, screenshot pass records, reviewer flow ladders, acceptance reading queues, reviewer signoff boards, final review closeouts, final verdict console framing, acceptance closeout timeline context, capture review flows, proof-linked comparison bundles, acceptance storyboards, evidence dossiers, evidence trace lenses, product-review console polish, replay acceptance checks, stabilized path handoffs, review-surface coverage pivots, multi-window review coverage, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
+  placeholder: "Search orchestration, delivery coverage, verdict context, closeout timeline, observability, navigation, next steps, detached workspace, or keyboard routes",
   quickActionIds: [
     "command-open-home",
     "command-inspect-boundary",
@@ -296,12 +296,13 @@ const mockCommandSurface: StudioCommandSurface = {
     {
       id: "command-open-windows-observability",
       label: "Inspect Cross-window Observability",
-      description: "Surface the windows rail and dock so delivery coverage, shared-state lanes, and observability mappings stay visible together.",
+      description:
+        "Surface the windows rail and dock so delivery coverage, closeout timing, shared-state lanes, and observability mappings stay visible together.",
       kind: "show-boundary",
       scope: "window",
       safety: "local-only",
       tone: "positive",
-      keywords: ["windows", "observability", "delivery", "coverage", "shared-state", "review"],
+      keywords: ["windows", "observability", "delivery", "coverage", "shared-state", "review", "closeout", "verdict", "timeline"],
       rightRailTabId: "windows",
       bottomDockTabId: "windows"
     },
@@ -327,12 +328,13 @@ const mockCommandSurface: StudioCommandSurface = {
     {
       id: "command-focus-approval-reviewer-queue",
       label: "Focus Active Approval Queue",
-      description: "Jump into the live approval queue so operator review, acknowledgement posture, and trace-linked coverage stay synchronized.",
+      description:
+        "Jump into the live approval queue so operator review, acknowledgement posture, signoff verdict framing, and trace-linked coverage stay synchronized.",
       kind: "focus-review-coverage",
       scope: "window",
       safety: "local-only",
       tone: "warning",
-      keywords: ["approval", "queue", "review", "coverage", "trace", "acknowledgement"],
+      keywords: ["approval", "queue", "review", "coverage", "trace", "acknowledgement", "signoff", "verdict"],
       rightRailTabId: "windows",
       bottomDockTabId: "windows",
       windowIntentId: "window-intent-trace-workspace",
@@ -365,12 +367,13 @@ const mockCommandSurface: StudioCommandSurface = {
     {
       id: "command-focus-approval-evidence-closeout",
       label: "Focus Evidence Closeout Surface",
-      description: "Surface the active closeout contract so sealed evidence, pending evidence, and trace-owned approval posture stay linked.",
+      description:
+        "Surface the active closeout contract so sealed evidence, pending evidence, acceptance closeout timing, and trace-owned approval posture stay linked.",
       kind: "focus-review-coverage",
       scope: "window",
       safety: "local-only",
       tone: "warning",
-      keywords: ["evidence", "closeout", "approval", "coverage", "trace", "sealed"],
+      keywords: ["evidence", "closeout", "approval", "coverage", "trace", "sealed", "timeline", "acceptance"],
       rightRailTabId: "windows",
       bottomDockTabId: "windows",
       windowIntentId: "window-intent-trace-workspace",
@@ -384,12 +387,13 @@ const mockCommandSurface: StudioCommandSurface = {
     {
       id: "command-focus-publish-decision-gate",
       label: "Focus Publish Decision Gate",
-      description: "Pivot the shell into the blocked final decision gate so publish-facing window, board, and observability coverage stay explicit.",
+      description:
+        "Pivot the shell into the blocked final decision gate so publish-facing window, board, observability coverage, and final verdict posture stay explicit.",
       kind: "focus-review-coverage",
       scope: "window",
       safety: "local-only",
       tone: "warning",
-      keywords: ["publish", "decision", "gate", "coverage", "final", "review"],
+      keywords: ["publish", "decision", "gate", "coverage", "final", "review", "verdict", "console"],
       rightRailTabId: "windows",
       bottomDockTabId: "windows",
       windowIntentId: "window-intent-inspector-detach",
@@ -403,12 +407,13 @@ const mockCommandSurface: StudioCommandSurface = {
     {
       id: "command-focus-rollback-closeout-window",
       label: "Focus Rollback Closeout Window",
-      description: "Bring the rollback settlement shadow into view so overdue acknowledgement, closeout timing, and trace-owned recovery coverage stay linked.",
+      description:
+        "Bring the rollback settlement shadow into view so overdue acknowledgement, closeout timing, observability closeout, and trace-owned recovery coverage stay linked.",
       kind: "focus-review-coverage",
       scope: "window",
       safety: "local-only",
       tone: "warning",
-      keywords: ["rollback", "closeout", "window", "shadow", "coverage", "recovery"],
+      keywords: ["rollback", "closeout", "window", "shadow", "coverage", "recovery", "timeline", "observability"],
       rightRailTabId: "windows",
       bottomDockTabId: "windows",
       windowIntentId: "window-intent-trace-workspace",
@@ -4261,7 +4266,7 @@ const mockWindowing: StudioWindowing = {
   orchestration: {
     title: "Local Orchestration Board",
     summary:
-      "Phase60 links route, workflow lane, command flow, focused slot, workspace, detached candidate, intent posture, review-posture ownership, and release-review posture into one local-only orchestration map so the shell reads like a staged multi-window board without opening a native window.",
+      "Phase60 links route, workflow lane, command flow, focused slot, workspace, detached candidate, intent posture, review-posture ownership, release-review posture, and observability closeout context into one local-only orchestration map so the shell reads like a staged multi-window board without opening a native window.",
     activeBoardId: "orchestration-board-trace-review",
     checkpoints: [
       {
@@ -5501,7 +5506,7 @@ export const mockShellState: StudioShellState = {
   inspector: {
     title: "Inspector",
     summary:
-      "Boundary policy, active flow state, focused-slot posture, review posture ownership, delivery-chain workspace state, reviewer queues, acknowledgement windows, and cross-window shared-state linkage stay visible here across the shell.",
+      "Boundary policy, active flow state, focused-slot posture, review posture ownership, delivery-chain workspace state, final verdict context, acceptance closeout timeline anchors, reviewer queues, acknowledgement windows, and cross-window shared-state linkage stay visible here across the shell.",
     boundary: mockBoundarySummary,
     route: {
       routeId: "dashboard",

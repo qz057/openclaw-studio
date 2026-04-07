@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useState } from "react";
 import {
+  selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseApprovalPipelineStage,
   selectStudioReleaseReviewerQueue,
@@ -34,6 +35,7 @@ import {
 import {
   CommandPalette,
   type CommandPaletteEntry,
+  type CommandPaletteEntryDetailLine,
   type CommandPaletteSection,
   type CommandPaletteShortcutHint
 } from "./components/CommandPalette";
@@ -222,6 +224,19 @@ function formatCompanionPathHandoffStability(stability: StudioCommandCompanionPa
       return "Restored";
     default:
       return "Watch";
+  }
+}
+
+function formatReplayReviewerSignoffStateLabel(state: "ready" | "watch" | "blocked" | undefined): string {
+  switch (state) {
+    case "ready":
+      return "Verdict settled";
+    case "blocked":
+      return "Verdict blocked";
+    case "watch":
+      return "Verdict in review";
+    default:
+      return "No verdict";
   }
 }
 
@@ -863,6 +878,7 @@ export function App() {
   const publishDeliveryStage = selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, "delivery-chain-publish-decision");
   const rollbackDeliveryStage = selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, "delivery-chain-rollback-readiness");
   const currentReviewerQueue = selectStudioReleaseReviewerQueue(releaseApprovalPipeline, currentReleaseStage);
+  const currentCloseoutWindow = selectStudioReleaseCloseoutWindow(releaseApprovalPipeline, currentReleaseStage);
   const currentDecisionHandoff = releaseApprovalPipeline.decisionHandoff;
   const currentEvidenceCloseout = releaseApprovalPipeline.evidenceCloseout;
   const dockItems = createDockItems(hostTraceFocus);
@@ -1349,6 +1365,56 @@ export function App() {
       };
     })
     .slice(0, data.commandSurface.history.retention);
+  const activeReplayScenarioPack = activeActionDeckLane?.replayScenarioPack ?? null;
+  const activeReplayScenarioLabel =
+    activeCompanionRouteHistoryEntry?.scenarioLabel ?? activeCompanionRouteHistoryEntry?.label ?? activeReplayScenarioPack?.label ?? "No replay scenario";
+  const activeReplayScenarioVerdict =
+    activeCompanionRouteHistoryEntry?.reviewerSignoff?.verdict ??
+    activeCompanionRouteHistoryEntry?.reviewerSignoff?.label ??
+    "No reviewer verdict";
+  const activeReplayScenarioNextHandoff =
+    activeCompanionRouteHistoryEntry?.reviewerSignoff?.nextHandoff ??
+    activeCompanionPathHandoff?.label ??
+    "No stabilized handoff";
+  const activeReplayScenarioEvidenceSummary = `${activeCompanionRouteHistoryEntry?.scenarioEvidenceItems?.length ?? 0} dossier items / ${
+    activeCompanionRouteHistoryEntry?.screenshotReviewItems?.length ?? 0
+  } storyboard shots / ${activeCompanionRouteHistoryEntry?.evidenceContinuityChecks?.length ?? 0} continuity checks`;
+  const activeReplayScenarioReadingSummary =
+    activeCompanionRouteHistoryEntry?.reviewerWalkthrough?.readingQueueSummary ??
+    activeCompanionRouteHistoryEntry?.reviewerWalkthrough?.summary ??
+    activeReplayScenarioPack?.summary ??
+    "No replay reading order is currently staged.";
+  const activeReplayScenarioCheckpointReadyCount =
+    activeCompanionRouteHistoryEntry?.reviewerSignoff?.checkpoints.filter((checkpoint) => checkpoint.state === "ready").length ?? 0;
+  const activeReplayScenarioCheckpointCount = activeCompanionRouteHistoryEntry?.reviewerSignoff?.checkpoints.length ?? 0;
+  const activeReplayPackEntries = dedupeById(
+    relevantCompanionRouteHistoryEntries.filter((entry) =>
+      Boolean(entry.scenarioLabel || entry.scenarioSummary || entry.reviewerSignoff || entry.reviewerWalkthrough)
+    )
+  );
+  const activeReplayPackReadyCount = activeReplayPackEntries.filter((entry) => entry.reviewerSignoff?.state === "ready").length;
+  const activeReplayPackBlockedCount = activeReplayPackEntries.filter((entry) => entry.reviewerSignoff?.state === "blocked").length;
+  const activeReplayPackInReviewCount = Math.max(
+    activeReplayPackEntries.length - activeReplayPackReadyCount - activeReplayPackBlockedCount,
+    0
+  );
+  const activeReplayCloseoutTimelineLabel = [
+    activeCompanionRouteHistoryEntry ? "Route replay" : null,
+    resolvedReviewSurfaceAction?.label ?? "Review surface",
+    currentCloseoutWindow?.label ?? "Closeout window",
+    activeObservabilityMapping?.label ?? "Observability path"
+  ]
+    .filter((label): label is string => Boolean(label))
+    .join(" -> ");
+  const activeReplayObservabilityCloseoutLabel =
+    activeObservabilityMapping && resolvedCoverageWindow && resolvedCoverageLane && resolvedCoverageBoard
+      ? `${activeObservabilityMapping.label} / ${resolvedCoverageWindow.label} -> ${resolvedCoverageLane.label} -> ${resolvedCoverageBoard.label}`
+      : activeObservabilityMapping
+        ? `${activeObservabilityMapping.label} / ${formatReviewPostureRelationship(activeObservabilityMapping.relationship)}`
+        : "No observability closeout path";
+  const activeReplayVerdictStateLabel = formatReplayReviewerSignoffStateLabel(activeCompanionRouteHistoryEntry?.reviewerSignoff?.state);
+  const latestReplayRestoreEntryId = activeCompanionRouteHistoryEntry?.id ?? companionRouteHistoryItems[0]?.id ?? null;
+  const windowsObservabilityAction = actionById.get("command-open-windows-observability");
   const activeFlowState: ContextualCommandStateLine[] = [
     {
       id: "flow-state-route",
@@ -2182,6 +2248,75 @@ export function App() {
       detail: "The right rail now calls out which route, window, lane, and board currently own the live review posture and which other windows map to it."
     }
   ];
+  const inspectorReviewConsoleLines = [
+    {
+      id: "inspector-review-pack",
+      label: "Replay pack",
+      value: activeReplayScenarioPack
+        ? `${activeReplayScenarioPack.label} / ${activeReplayScenarioPack.acceptancePosture}`
+        : "No replay pack",
+      detail:
+        activeReplayScenarioPack?.summary ??
+        "No reviewer-facing replay pack is currently attached to the active review lane."
+    },
+    {
+      id: "inspector-review-verdict",
+      label: "Final Verdict Console",
+      value: `${activeReplayScenarioLabel} / ${activeReplayScenarioVerdict}`,
+      detail:
+        activeCompanionRouteHistoryEntry?.reviewerSignoff?.summary ??
+        "No reviewer verdict summary is currently attached to the active route replay entry."
+    },
+    {
+      id: "inspector-review-route",
+      label: "Settlement route anchor",
+      value: `${resolvedDeliveryCoverageStage?.label ?? "No stage"} / ${resolvedCoverageWindow?.label ?? "No window"} / ${
+        resolvedCoverageLane?.label ?? "No lane"
+      } / ${resolvedCoverageBoard?.label ?? "No board"}`,
+      detail:
+        activeCompanionRouteState?.summary ??
+        "Route, window, lane, and board ownership are currently inferred from the active review coverage selection."
+    },
+    {
+      id: "inspector-review-evidence",
+      label: "Evidence chain",
+      value: activeReplayScenarioEvidenceSummary,
+      detail: activeReplayScenarioReadingSummary
+    },
+    {
+      id: "inspector-review-closeout-timeline",
+      label: "Acceptance closeout timeline",
+      value: activeReplayCloseoutTimelineLabel,
+      detail:
+        activeCompanionRouteHistoryEntry?.reviewerWalkthrough?.summary ??
+        "No replay closeout timeline is currently attached to the active route replay entry."
+    },
+    {
+      id: "inspector-review-observability-closeout",
+      label: "Multi-window closeout",
+      value: activeReplayObservabilityCloseoutLabel,
+      detail:
+        activeObservabilityMapping?.summary ??
+        "No active review posture currently links verdict settlement back into the windows observability map."
+    },
+    {
+      id: "inspector-review-handoff",
+      label: "Next handoff",
+      value: `${activeReplayVerdictStateLabel} / ${activeReplayScenarioNextHandoff}`,
+      detail:
+        activeCompanionPathHandoff?.summary ??
+        activeCompanionRouteHistoryEntry?.summary ??
+        "No stabilized reviewer handoff is currently attached to the active review surface."
+    },
+    {
+      id: "inspector-review-pack-closeout",
+      label: "Pack closeout queue",
+      value: `${activeReplayPackReadyCount} ready / ${activeReplayPackInReviewCount} in review / ${activeReplayPackBlockedCount} blocked`,
+      detail:
+        activeReplayScenarioPack?.continuitySummary ??
+        "No replay pack closeout queue is currently attached to the active review lane."
+    }
+  ];
   const releasePipelineDepth = [
     {
       id: "release-depth-manifest",
@@ -2597,31 +2732,157 @@ export function App() {
       label: "Safety posture",
       value: "local-only / non-installing / non-executing",
       detail:
-        "Phase60 slice 23 keeps replay scenario packs local-only, then layers a Final Review Settlement on top of Final Review Closeout, Signoff Readiness Queue, the Reviewer Signoff Board, the Acceptance Reading Queue, the Evidence Trace Lens, the Acceptance Storyboard, the Evidence Dossier, and the Pack Closeout Board so verdict progression, signoff settlement, proof linkage, and pack closeout framing read as one reviewer-facing closure console without installing, publishing, signing, orchestrating live approvals, advancing staged decision lifecycles, settling publication receipts, rolling back publish state, or enabling host-side execution."
+        "Phase60 slice 27 keeps replay scenario packs local-only, then layers a Final Verdict Console, an Acceptance Closeout Timeline, inspector-command verdict drilldowns, and multi-window observability closeout on top of Final Review Settlement, Final Review Closeout, Signoff Readiness Queue, the Reviewer Signoff Board, the Acceptance Reading Queue, the Evidence Trace Lens, the Acceptance Storyboard, the Evidence Dossier, and the Pack Closeout Board so verdict progression, closeout timing, proof linkage, and pack settlement framing read as one reviewer-facing closure console without installing, publishing, signing, orchestrating live approvals, advancing staged decision lifecycles, settling publication receipts, rolling back publish state, or enabling host-side execution."
     }
   ];
-  const actionToPaletteEntry = (action: StudioCommandAction, badge?: string): CommandPaletteEntry => ({
-    id: action.id,
+  const buildPaletteEntryDetailLines = (
+    action: StudioCommandAction,
+    prependLines: CommandPaletteEntryDetailLine[] = []
+  ): CommandPaletteEntryDetailLine[] => {
+    const stage = action.deliveryChainStageId
+      ? selectStudioReleaseDeliveryChainStage(releaseApprovalPipeline, action.deliveryChainStageId)
+      : null;
+    const windowEntry = action.windowId ? data.windowing.roster.windows.find((entry) => entry.id === action.windowId) ?? null : null;
+    const laneEntry = action.sharedStateLaneId
+      ? data.windowing.sharedState.lanes.find((entry) => entry.id === action.sharedStateLaneId) ?? null
+      : null;
+    const boardEntry = action.orchestrationBoardId
+      ? data.windowing.orchestration.boards.find((entry) => entry.id === action.orchestrationBoardId) ?? null
+      : null;
+    const mappingEntry = action.observabilityMappingId
+      ? data.windowing.observability.mappings.find((entry) => entry.id === action.observabilityMappingId) ?? null
+      : null;
+    const slotEntry = action.slotId
+      ? data.boundary.hostExecutor.bridge.trace.slotRoster.find((entry) => entry.slotId === action.slotId) ?? null
+      : null;
+    const routeLabel = resolveReviewSurfaceRouteLabel(action, data.windowing);
+    const lines = [...prependLines];
+
+    if (action.reviewSurfaceKind || stage) {
+      lines.push({
+        id: `${action.id}-detail-surface`,
+        label: "Review surface",
+        value: `${formatReviewSurfaceKind(action.reviewSurfaceKind)} / ${stage?.label ?? action.deliveryChainStageId ?? "No stage"}`
+      });
+    }
+
+    if (windowEntry || laneEntry || boardEntry) {
+      lines.push({
+        id: `${action.id}-detail-window-path`,
+        label: "Window path",
+        value: `${windowEntry?.label ?? action.windowId ?? "No window"} -> ${laneEntry?.label ?? action.sharedStateLaneId ?? "No lane"} -> ${
+          boardEntry?.label ?? action.orchestrationBoardId ?? "No board"
+        }`
+      });
+    }
+
+    if (mappingEntry) {
+      lines.push({
+        id: `${action.id}-detail-observability`,
+        label: "Observability",
+        value: `${mappingEntry.label} / ${formatReviewPostureRelationship(mappingEntry.relationship)}`
+      });
+    }
+
+    if (routeLabel !== "No route / No workspace / No intent") {
+      lines.push({
+        id: `${action.id}-detail-route`,
+        label: "Route context",
+        value: routeLabel
+      });
+    }
+
+    if (action.slotId || slotEntry) {
+      lines.push({
+        id: `${action.id}-detail-slot`,
+        label: "Focused slot",
+        value: slotEntry?.label ?? action.slotId ?? "No slot focus"
+      });
+    }
+
+    if (
+      activeActionDeckLane?.replayScenarioPack &&
+      action.deliveryChainStageId &&
+      (activeActionDeckLane.deliveryChainStageIds ?? []).includes(action.deliveryChainStageId)
+    ) {
+      lines.push({
+        id: `${action.id}-detail-pack`,
+        label: "Review pack",
+        value: `${activeActionDeckLane.replayScenarioPack.label} / ${activeActionDeckLane.replayScenarioPack.acceptancePosture}`
+      });
+    }
+
+    if ((action.reviewSurfaceKind || action.id === windowsObservabilityAction?.id) && activeCompanionRouteHistoryEntry?.reviewerSignoff) {
+      lines.push({
+        id: `${action.id}-detail-verdict`,
+        label: "Verdict",
+        value: `${activeReplayScenarioVerdict} / ${activeReplayVerdictStateLabel}`
+      });
+    }
+
+    if ((action.reviewSurfaceKind || action.id === windowsObservabilityAction?.id) && currentCloseoutWindow) {
+      lines.push({
+        id: `${action.id}-detail-closeout`,
+        label: "Closeout window",
+        value: `${currentCloseoutWindow.label} / ${currentCloseoutWindow.state}`
+      });
+    }
+
+    return lines.slice(0, 5);
+  };
+  const actionToPaletteEntry = (
+    action: StudioCommandAction,
+    options?: {
+      entryId?: string;
+      badge?: string;
+      description?: string;
+      meta?: string[];
+      detailLines?: CommandPaletteEntryDetailLine[];
+    }
+  ): CommandPaletteEntry => ({
+    id: options?.entryId ?? action.id,
+    actionId: action.id,
     label: action.label,
-    description: action.description,
+    description: options?.description ?? action.description,
     tone: action.tone,
-    badge,
-    meta: [action.scope, action.safety, action.hotkey ?? "No hotkey"]
+    badge: options?.badge,
+    meta: options?.meta ?? [action.scope, action.safety, action.hotkey ?? "No hotkey"],
+    detailLines: buildPaletteEntryDetailLines(action, options?.detailLines)
   });
-  const paletteSections: CommandPaletteSection[] = [
+  const paletteSectionsBase: CommandPaletteSection[] = [
     {
       id: "section-flow",
       label: activeContextualFlow?.label ?? "Recommended Flow",
       summary: activeSequence?.summary ?? "Context-aware orchestration for the current shell posture.",
-      entries: dedupeCommandActions([recommendedAction ?? undefined, ...followUpActions]).map((action) =>
-        actionToPaletteEntry(action, action.id === recommendedAction?.id ? "Recommended Next Action" : "Follow-up")
+      entries: dedupeCommandActions([recommendedAction ?? undefined, ...followUpActions]).map((action, index) =>
+        actionToPaletteEntry(action, {
+          entryId: `section-flow-${index}-${action.id}`,
+          badge: action.id === recommendedAction?.id ? "Recommended Next Action" : "Follow-up"
+        })
       )
     },
     {
       id: "section-next-step-board",
       label: activeNextStepBoard?.label ?? "Route-aware Next-step Board",
       summary: activeNextStepBoard?.summary ?? "Route-aware next steps stay linked to the current shell posture.",
-      entries: nextStepItems.flatMap((item) => (item.action ? [actionToPaletteEntry(item.action, "Next step")] : []))
+      entries: nextStepItems.flatMap((item) =>
+        item.action
+          ? [
+              actionToPaletteEntry(item.action, {
+                entryId: `section-next-step-${item.id}`,
+                badge: "Next step",
+                description: item.detail,
+                detailLines: [
+                  {
+                    id: `${item.id}-detail-board`,
+                    label: "Next-step board",
+                    value: activeNextStepBoard?.label ?? "Local orchestration board"
+                  }
+                ]
+              })
+            ]
+          : []
+      )
     },
     {
       id: "section-review-surfaces",
@@ -2629,10 +2890,10 @@ export function App() {
       summary:
         "Typed coverage actions now move the selected review surface and its delivery/window/lane/board/observability linkage together.",
       entries: surfacedReviewCoverageActions.map((action) =>
-        actionToPaletteEntry(
-          action,
-          action.id === resolvedReviewSurfaceAction?.id ? "Active review surface" : formatReviewSurfaceKind(action.reviewSurfaceKind)
-        )
+        actionToPaletteEntry(action, {
+          entryId: `section-review-surface-${action.id}`,
+          badge: action.id === resolvedReviewSurfaceAction?.id ? "Active review surface" : formatReviewSurfaceKind(action.reviewSurfaceKind)
+        })
       )
     },
     {
@@ -2649,14 +2910,15 @@ export function App() {
         );
         const sourceSwitch = sourceItem?.switchItems.find((switchItem) => switchItem.action?.id === action.id);
 
-        return actionToPaletteEntry(
-          action,
-          sourceSwitch
+        return actionToPaletteEntry(action, {
+          entryId: `section-companion-route-state-${sourceItem?.id ?? action.id}-${sourceSwitch?.id ?? action.id}`,
+          badge: sourceSwitch
             ? `${sourceItem?.label ?? "Companion route"} · ${sourceSwitch.postureLabel}`
             : sourceItem
               ? `${sourceItem.label} · ${sourceItem.postureLabel}`
-          : "Companion route"
-        );
+              : "Companion route",
+          description: sourceSwitch?.detail ?? sourceItem?.detail ?? action.description
+        });
       })
     },
     {
@@ -2668,7 +2930,19 @@ export function App() {
       entries: dedupeCommandActions(companionRouteHistoryItems.map((item) => item.action ?? undefined)).map((action) => {
         const sourceItem = companionRouteHistoryItems.find((item) => item.action?.id === action.id);
 
-        return actionToPaletteEntry(action, sourceItem ? sourceItem.transitionLabel : "Remembered handoff");
+        return actionToPaletteEntry(action, {
+          entryId: `section-companion-route-history-${sourceItem?.id ?? action.id}`,
+          badge: sourceItem ? sourceItem.transitionLabel : "Remembered handoff",
+          description: sourceItem?.detail ?? action.description,
+          meta: sourceItem ? [sourceItem.coverageLabel, sourceItem.pathLabel, sourceItem.timestamp] : undefined,
+          detailLines: sourceItem
+            ? [
+                { id: `${sourceItem.id}-route`, label: "Route replay", value: sourceItem.routeLabel },
+                { id: `${sourceItem.id}-coverage`, label: "Coverage", value: sourceItem.coverageLabel },
+                { id: `${sourceItem.id}-path`, label: "Window path", value: sourceItem.pathLabel }
+              ]
+            : undefined
+        });
       })
     },
     {
@@ -2680,10 +2954,12 @@ export function App() {
       entries: dedupeCommandActions(companionSequenceStepItems.map((item) => item.action ?? undefined)).map((action) => {
         const sourceItem = companionSequenceStepItems.find((item) => item.action?.id === action.id);
 
-        return actionToPaletteEntry(
-          action,
-          sourceItem ? `${sourceItem.stepLabel} · ${sourceItem.roleLabel}` : "Companion sequence"
-        );
+        return actionToPaletteEntry(action, {
+          entryId: `section-companion-sequence-${sourceItem?.id ?? action.id}`,
+          badge: sourceItem ? `${sourceItem.stepLabel} · ${sourceItem.roleLabel}` : "Companion sequence",
+          description: sourceItem?.detail ?? action.description,
+          meta: sourceItem ? [sourceItem.coverageLabel, sourceItem.pathLabel, sourceItem.stepLabel] : undefined
+        });
       })
     },
     {
@@ -2694,23 +2970,180 @@ export function App() {
       entries: dedupeCommandActions(companionReviewPathItems.map((item) => item.action ?? undefined)).map((action) => {
         const sourceItem = companionReviewPathItems.find((item) => item.action?.id === action.id);
 
-        return actionToPaletteEntry(action, sourceItem ? `${sourceItem.kindLabel} from ${sourceItem.sourceLabel}` : "Companion path");
+        return actionToPaletteEntry(action, {
+          entryId: `section-companion-review-path-${sourceItem?.id ?? action.id}`,
+          badge: sourceItem ? `${sourceItem.kindLabel} from ${sourceItem.sourceLabel}` : "Companion path",
+          description: sourceItem?.detail ?? action.description,
+          meta: sourceItem ? [sourceItem.coverageLabel, sourceItem.pathLabel, sourceItem.routeLabel] : undefined
+        });
       })
+    },
+    {
+      id: "section-multi-window-coverage",
+      label: activeActionDeckLane?.label ?? "Multi-window Review Coverage",
+      summary:
+        activeActionDeckLane && multiWindowCoverageItems.length
+          ? `${multiWindowCoverageItems.length} mapped windows, lanes, boards, and observability rows keep the same reviewer context readable across the active delivery lane.`
+          : "Mapped observability paths keep the same reviewer context visible across the local-only shell.",
+      entries: multiWindowCoverageItems.flatMap((item) =>
+        item.action
+          ? [
+              actionToPaletteEntry(item.action, {
+                entryId: `section-multi-window-${item.id}`,
+                badge: item.active ? "Active mapped path" : item.relationshipLabel,
+                description: item.detail,
+                meta: [item.coverageLabel, item.pathLabel, `${item.reviewSurfaceCount} linked surfaces`],
+                detailLines: [
+                  { id: `${item.id}-coverage`, label: "Coverage", value: item.coverageLabel },
+                  { id: `${item.id}-path`, label: "Window path", value: item.pathLabel },
+                  {
+                    id: `${item.id}-surfaces`,
+                    label: "Linked surfaces",
+                    value: item.reviewSurfaceLabels.join(" / ") || "No linked review surfaces"
+                  }
+                ]
+              })
+            ]
+          : []
+      )
+    },
+    {
+      id: "section-closeout-console",
+      label: activeReplayScenarioPack?.label ?? "Acceptance Closeout Console",
+      summary:
+        activeCompanionRouteHistoryEntry?.reviewerSignoff?.summary ??
+        "Verdict focus, acceptance closeout timing, and observability settlement stay grouped inside the same local-only command surface.",
+      entries: dedupeCommandActions([
+        activeCompanionRouteHistoryEntry ? actionById.get(activeCompanionRouteHistoryEntry.targetActionId) : undefined,
+        resolvedReviewSurfaceAction ?? undefined,
+        windowsObservabilityAction,
+        activeCompanionSequence?.steps.length
+          ? actionById.get(activeCompanionSequence.steps[activeCompanionSequence.steps.length - 1]?.actionId ?? "")
+          : undefined
+      ]).map((action, index) =>
+        actionToPaletteEntry(action, {
+          entryId: `section-closeout-console-${index}-${action.id}`,
+          badge:
+            action.id === activeCompanionRouteHistoryEntry?.targetActionId
+              ? "Verdict path"
+              : action.id === resolvedReviewSurfaceAction?.id
+                ? "Acceptance closeout"
+                : action.id === windowsObservabilityAction?.id
+                  ? "Observability closeout"
+                  : "Pack follow-up",
+          description:
+            action.id === windowsObservabilityAction?.id
+              ? "Keep the multi-window closeout board visible so verdict posture, closeout timing, and observability settlement stay aligned."
+              : action.description,
+          meta: [
+            activeReplayVerdictStateLabel,
+            `${activeReplayPackReadyCount} ready / ${activeReplayPackInReviewCount} in review`,
+            currentCloseoutWindow ? `${currentCloseoutWindow.label} / ${currentCloseoutWindow.state}` : "No closeout window"
+          ],
+          detailLines: [
+            { id: `${action.id}-closeout-verdict`, label: "Final verdict", value: `${activeReplayScenarioLabel} / ${activeReplayScenarioVerdict}` },
+            { id: `${action.id}-closeout-timeline`, label: "Closeout timeline", value: activeReplayCloseoutTimelineLabel },
+            {
+              id: `${action.id}-closeout-observability`,
+              label: "Observability closeout",
+              value: activeReplayObservabilityCloseoutLabel
+            }
+          ]
+        })
+      )
     },
     {
       id: "section-context",
       label: "Contextual Actions",
       summary: "Route, workflow lane, and focused-slot aware actions.",
-      entries: contextualActions.map((action) => actionToPaletteEntry(action, "Context"))
+      entries: contextualActions.map((action) =>
+        actionToPaletteEntry(action, {
+          entryId: `section-context-${action.id}`,
+          badge: "Context"
+        })
+      )
     },
     {
       id: "section-all",
       label: "All Actions",
       summary: "Full local-only command registry filtered by the current query.",
-      entries: paletteActions.map((action) => actionToPaletteEntry(action, "Registry"))
+      entries: paletteActions.map((action) =>
+        actionToPaletteEntry(action, {
+          entryId: `section-all-${action.id}`,
+          badge: "Registry"
+        })
+      )
     }
-  ].filter((section) => section.entries.length > 0);
+  ];
+  const matchesPaletteEntry = (entry: CommandPaletteEntry) => {
+    if (!normalizedCommandQuery.length) {
+      return true;
+    }
+
+    const haystack = [
+      entry.label,
+      entry.description,
+      entry.badge ?? "",
+      ...entry.meta,
+      ...(entry.detailLines ?? []).flatMap((line) => [line.label, line.value])
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    return haystack.includes(normalizedCommandQuery);
+  };
+  const paletteSections: CommandPaletteSection[] = paletteSectionsBase
+    .map((section) => ({
+      ...section,
+      entries: section.entries.filter(matchesPaletteEntry)
+    }))
+    .filter((section) => section.entries.length > 0);
+  const paletteEntryById = new Map(paletteSections.flatMap((section) => section.entries.map((entry) => [entry.id, entry] as const)));
   const paletteEntryIds = paletteSections.flatMap((section) => section.entries.map((entry) => entry.id));
+  const paletteContexts = dedupeById(
+    [
+      ...activeContexts.map((context) => ({
+        id: context.id,
+        label: context.label
+      })),
+      resolvedDeliveryCoverageStage
+        ? {
+            id: `palette-context-stage-${resolvedDeliveryCoverageStage.id}`,
+            label: `${resolvedDeliveryCoverageStage.label} / delivery stage`
+          }
+        : null,
+      resolvedReviewSurfaceAction
+        ? {
+            id: `palette-context-surface-${resolvedReviewSurfaceAction.id}`,
+            label: `${resolvedReviewSurfaceAction.label} / review surface`
+          }
+        : null,
+      activeCompanionRouteState
+        ? {
+            id: `palette-context-route-${activeCompanionRouteState.id}`,
+            label: `${activeCompanionRouteState.label} / companion route`
+          }
+        : null,
+      activeReplayScenarioPack
+        ? {
+            id: `palette-context-pack-${activeReplayScenarioPack.id}`,
+            label: `${activeReplayScenarioPack.label} / replay pack`
+          }
+        : null,
+      resolvedCoverageWindow && resolvedCoverageLane
+        ? {
+            id: `palette-context-window-${resolvedCoverageWindow.id}-${resolvedCoverageLane.id}`,
+            label: `${resolvedCoverageWindow.label} -> ${resolvedCoverageLane.label}`
+          }
+        : null,
+      resolvedCoverageMapping
+        ? {
+            id: `palette-context-mapping-${resolvedCoverageMapping.id}`,
+            label: `${resolvedCoverageMapping.label} / ${formatReviewPostureRelationship(resolvedCoverageMapping.relationship)}`
+          }
+        : null
+    ].filter((context): context is { id: string; label: string } => Boolean(context))
+  );
 
   const applyLayoutPatch = (patch: Partial<StudioShellLayoutState>) => {
     setLayoutState(resolvePersistedShellLayoutState(data, { ...resolvedLayoutState, ...patch }));
@@ -3409,8 +3842,14 @@ export function App() {
     setSelectedPaletteEntryId(paletteEntryIds[nextIndex] ?? null);
   };
 
+  const openCommandPalette = () => {
+    setPaletteReturnFocus(document.activeElement instanceof HTMLElement ? document.activeElement : null);
+    setCommandPaletteOpen(true);
+  };
+
   const executePaletteEntry = (entryId: string) => {
-    const entryAction = actionById.get(entryId);
+    const entryActionId = paletteEntryById.get(entryId)?.actionId;
+    const entryAction = entryActionId ? actionById.get(entryActionId) : undefined;
     if (entryAction) {
       executeCommand(entryAction);
     }
@@ -3433,8 +3872,7 @@ export function App() {
       event.preventDefault();
 
       if (matchedShortcut.target === "open-palette") {
-        setPaletteReturnFocus(document.activeElement instanceof HTMLElement ? document.activeElement : null);
-        setCommandPaletteOpen(true);
+        openCommandPalette();
         return;
       }
 
@@ -3492,10 +3930,7 @@ export function App() {
     <>
       <CommandPalette
         sections={paletteSections}
-        contexts={activeContexts.map((context) => ({
-          id: context.id,
-          label: context.label
-        }))}
+        contexts={paletteContexts}
         shortcuts={paletteShortcutHints}
         open={commandPaletteOpen}
         query={commandQuery}
@@ -3577,7 +4012,7 @@ export function App() {
                 type="button"
                 className="command-launcher__button"
                 onClick={() => {
-                  setCommandPaletteOpen(true);
+                  openCommandPalette();
                 }}
               >
                 <span>Command Palette</span>
@@ -3805,14 +4240,14 @@ export function App() {
                   <h2>Delivery-chain Workspace</h2>
                 </div>
                 <p>
-                  The alpha shell still does not build a real installer, but phase60 slice 23 now keeps the review-only delivery chain anchored in a
+                  The alpha shell still does not build a real installer, but phase60 slice 27 now keeps the review-only delivery chain anchored in a
                   usable stage explorer plus route replay board with a screenshot-driven acceptance review pack, explicit acceptance pass progression,
                   screenshot pass records, a Reviewer Flow Ladder, an Acceptance Reading Queue, a Reviewer Signoff Board, a Signoff Readiness Queue, a
-                  Final Review Closeout, a Final Review Settlement, a Pack Closeout Board, an Acceptance Storyboard, an Evidence Dossier,
-                  Acceptance Evidence Continuity, and an Evidence Trace Lens, so review-surface navigation, remembered handoff restore, active
-                  sequence replay, multi-window coverage, operator board ownership, reviewer queues, acknowledgement state, stage-level artifacts,
-                  promotion review flow, publish gating, rollback readiness, blockers, handoff posture, ordered companion steps, and explicit
-                  companion review paths stay visible as one local-only non-executing surface.
+                  Final Review Closeout, a Final Review Settlement, a Final Verdict Console, an Acceptance Closeout Timeline, a Pack Closeout Board, an
+                  Acceptance Storyboard, an Evidence Dossier, Acceptance Evidence Continuity, and an Evidence Trace Lens, so review-surface navigation,
+                  remembered handoff restore, active sequence replay, multi-window coverage, operator board ownership, reviewer queues,
+                  acknowledgement state, stage-level artifacts, promotion review flow, publish gating, rollback readiness, blockers, handoff posture,
+                  ordered companion steps, and explicit companion review paths stay visible as one local-only non-executing surface.
                 </p>
               </div>
               <div className="foundation-card__metrics">
@@ -3912,7 +4347,7 @@ export function App() {
             onRunCompanionRouteHistory={handleRunCompanionRouteHistory}
             eyebrow="Phase60"
             title="Delivery-chain Workspace"
-            summary="Phase60 slice 23 keeps coverage-driven review-surface navigation, multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, and companion route-history memory in place, then layers a Final Review Settlement on top of Final Review Closeout, Signoff Readiness Queue, the Reviewer Signoff Board, the Reviewer Flow Ladder, the Acceptance Reading Queue, the Evidence Trace Lens, the Acceptance Storyboard, the Evidence Dossier, Acceptance Evidence Continuity, and the Pack Closeout Board so route replay board, replay scenario packs, capture review, proof bundles, continuity handoffs, scenario-level signoff verdicts, verdict progression, and pack settlement posture stay readable as one ordered interface-review walkthrough along the same publish-gate, approval-queue, rollback-shadow, or handoff relay path while ownership, ordered companion steps, linked artifacts, blockers, handoff posture, route state, and observability mapping remain local-only."
+            summary="Phase60 slice 27 keeps coverage-driven review-surface navigation, multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, and companion route-history memory in place, then layers a Final Verdict Console and an Acceptance Closeout Timeline on top of Final Review Settlement, Final Review Closeout, Signoff Readiness Queue, the Reviewer Signoff Board, the Reviewer Flow Ladder, the Acceptance Reading Queue, the Evidence Trace Lens, the Acceptance Storyboard, the Evidence Dossier, Acceptance Evidence Continuity, and the Pack Closeout Board so route replay board, replay scenario packs, capture review, proof bundles, continuity handoffs, scenario-level signoff verdicts, closeout timing, verdict progression, and pack settlement posture stay readable as one ordered interface-review walkthrough along the same publish-gate, approval-queue, rollback-shadow, or handoff relay path while ownership, ordered companion steps, linked artifacts, blockers, handoff posture, route state, and observability mapping remain local-only."
           />
 
           <section className="surface card window-workbench">
@@ -4159,6 +4594,72 @@ export function App() {
                         <strong>{item.value}</strong>
                       </div>
                     ))}
+                  </div>
+                </article>
+                <article className="windowing-summary-card">
+                  <span>Inspector Review Navigation</span>
+                  <strong>{activeReplayScenarioLabel}</strong>
+                  <p>
+                    Inspector-side reviewer navigation now carries the same replay pack, verdict context, route anchor, evidence chain, and handoff focus
+                    as the delivery workspace and command palette.
+                  </p>
+                  <div className="windowing-preview-list">
+                    {inspectorReviewConsoleLines.map((item) => (
+                      <div key={item.id} className="windowing-preview-line windowing-preview-line--stacked">
+                        <span>{item.label}</span>
+                        <strong>{item.value}</strong>
+                        <p>{item.detail}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="windowing-card__actions">
+                    <button type="button" className="secondary-button" onClick={openCommandPalette}>
+                      Open Command Palette
+                    </button>
+                    {recommendedAction ? (
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={() => {
+                          executeCommand(recommendedAction);
+                        }}
+                      >
+                        Run Recommended Action
+                      </button>
+                    ) : null}
+                    {resolvedReviewSurfaceAction ? (
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={() => {
+                          handleRunReviewSurfaceAction(resolvedReviewSurfaceAction);
+                        }}
+                      >
+                        Focus Active Review Surface
+                      </button>
+                    ) : null}
+                    {latestReplayRestoreEntryId ? (
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={() => {
+                          handleRunCompanionRouteHistory(latestReplayRestoreEntryId);
+                        }}
+                      >
+                        Restore Latest Handoff
+                      </button>
+                    ) : null}
+                    {windowsObservabilityAction ? (
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={() => {
+                          executeCommand(windowsObservabilityAction);
+                        }}
+                      >
+                        Inspect Cross-window Observability
+                      </button>
+                    ) : null}
                   </div>
                 </article>
                 {data.inspector.drilldowns.map((drilldown) => (

@@ -1,12 +1,20 @@
 import type { StudioTone } from "@openclaw/shared";
 
+export interface CommandPaletteEntryDetailLine {
+  id: string;
+  label: string;
+  value: string;
+}
+
 export interface CommandPaletteEntry {
   id: string;
+  actionId: string;
   label: string;
   description: string;
   tone: StudioTone;
   meta: string[];
   badge?: string;
+  detailLines?: CommandPaletteEntryDetailLine[];
 }
 
 export interface CommandPaletteSection {
@@ -59,6 +67,14 @@ export function CommandPalette({
   }
 
   const hasEntries = sections.some((section) => section.entries.length > 0);
+  const selectedSection =
+    sections.find((section) => section.entries.some((entry) => entry.id === selectedEntryId)) ??
+    sections.find((section) => section.entries.length > 0) ??
+    null;
+  const selectedEntry =
+    selectedSection?.entries.find((entry) => entry.id === selectedEntryId) ??
+    selectedSection?.entries[0] ??
+    null;
 
   return (
     <div className="command-palette-backdrop" role="presentation" onClick={onClose}>
@@ -130,64 +146,101 @@ export function CommandPalette({
             ))}
           </div>
         ) : null}
-        <div className="command-palette__list">
-          {hasEntries ? (
-            sections.map((section) =>
-              section.entries.length ? (
-                <section key={section.id} className="command-palette__section">
-                  <div className="command-palette__section-header">
-                    <div>
-                      <strong>{section.label}</strong>
-                      <p>{section.summary}</p>
+        <div className="command-palette__body">
+          <div className="command-palette__list">
+            {hasEntries ? (
+              sections.map((section) =>
+                section.entries.length ? (
+                  <section key={section.id} className="command-palette__section">
+                    <div className="command-palette__section-header">
+                      <div>
+                        <strong>{section.label}</strong>
+                        <p>{section.summary}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="command-palette__section-list">
-                    {section.entries.map((entry) => {
-                      const active = entry.id === selectedEntryId;
+                    <div className="command-palette__section-list">
+                      {section.entries.map((entry) => {
+                        const active = entry.id === selectedEntryId;
 
-                      return (
-                        <button
-                          key={entry.id}
-                          type="button"
-                          className={`command-palette__item command-palette__item--${entry.tone}${
-                            active ? " command-palette__item--active" : ""
-                          }`}
-                          aria-selected={active}
-                          onMouseEnter={() => {
-                            onSelectEntry(entry.id);
-                          }}
-                          onFocus={() => {
-                            onSelectEntry(entry.id);
-                          }}
-                          onClick={() => {
-                            onExecuteEntry(entry.id);
-                          }}
-                        >
-                          <div>
-                            <div className="command-palette__item-header">
-                              <strong>{entry.label}</strong>
-                              {entry.badge ? <span className="command-palette__badge">{entry.badge}</span> : null}
+                        return (
+                          <button
+                            key={entry.id}
+                            type="button"
+                            className={`command-palette__item command-palette__item--${entry.tone}${
+                              active ? " command-palette__item--active" : ""
+                            }`}
+                            aria-selected={active}
+                            onMouseEnter={() => {
+                              onSelectEntry(entry.id);
+                            }}
+                            onFocus={() => {
+                              onSelectEntry(entry.id);
+                            }}
+                            onClick={() => {
+                              onExecuteEntry(entry.id);
+                            }}
+                          >
+                            <div>
+                              <div className="command-palette__item-header">
+                                <strong>{entry.label}</strong>
+                                {entry.badge ? <span className="command-palette__badge">{entry.badge}</span> : null}
+                              </div>
+                              <p>{entry.description}</p>
                             </div>
-                            <p>{entry.description}</p>
-                          </div>
-                          <div className="command-palette__meta">
-                            {entry.meta.map((value) => (
-                              <span key={`${entry.id}-${value}`}>{value}</span>
-                            ))}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </section>
-              ) : null
-            )
-          ) : (
-            <div className="command-palette__empty">
-              <strong>No local orchestration matches</strong>
-              <p>Try another route, workflow, slot, or keyboard shortcut label.</p>
-            </div>
-          )}
+                            <div className="command-palette__meta">
+                              {entry.meta.map((value) => (
+                                <span key={`${entry.id}-${value}`}>{value}</span>
+                              ))}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </section>
+                ) : null
+              )
+            ) : (
+              <div className="command-palette__empty">
+                <strong>No local orchestration matches</strong>
+                <p>Try another route, workflow, slot, or keyboard shortcut label.</p>
+              </div>
+            )}
+          </div>
+          {selectedEntry ? (
+            <aside className="command-palette__preview surface">
+              <div className="command-palette__section-header">
+                <div>
+                  <span>Command preview</span>
+                  <strong>{selectedEntry.label}</strong>
+                  <p>{selectedEntry.description}</p>
+                </div>
+              </div>
+              <div className="command-palette__contexts">
+                {selectedSection ? <span className="command-context-pill">{selectedSection.label}</span> : null}
+                {selectedEntry.badge ? <span className="command-context-pill">{selectedEntry.badge}</span> : null}
+              </div>
+              {selectedEntry.detailLines?.length ? (
+                <div className="windowing-preview-list">
+                  {selectedEntry.detailLines.map((line) => (
+                    <div key={line.id} className="windowing-preview-line">
+                      <span>{line.label}</span>
+                      <strong>{line.value}</strong>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+              <div className="command-palette__meta">
+                {selectedEntry.meta.map((value) => (
+                  <span key={`${selectedEntry.id}-preview-${value}`}>{value}</span>
+                ))}
+              </div>
+              <div className="windowing-preview-line windowing-preview-line--stacked">
+                <span>Execution hint</span>
+                <strong>Enter runs the active local-only action.</strong>
+                <p>Arrow keys change selection without leaving the current reviewer context.</p>
+              </div>
+            </aside>
+          ) : null}
         </div>
       </section>
     </div>
