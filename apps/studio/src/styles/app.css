@@ -1808,10 +1808,19 @@ button:disabled {
   border-bottom: 1px solid var(--divider-soft);
   border-radius: 0;
   background: transparent;
+  cursor: pointer;
 }
 
 .recent-session-row:last-child {
   border-bottom: none;
+}
+
+.recent-session-row--selected {
+  background: rgba(103, 184, 255, 0.08);
+  box-shadow: inset 3px 0 0 var(--accent-brand);
+  border-radius: var(--radius-control);
+  padding-left: var(--space-12);
+  padding-right: var(--space-12);
 }
 
 .recent-session-row:hover,

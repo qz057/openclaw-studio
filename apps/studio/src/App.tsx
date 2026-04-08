@@ -77,6 +77,11 @@ import {
   type CompanionRouteMemoryState,
   type ReviewCoverageSelectionMemory
 } from "./components/companion-route-history-persistence";
+import {
+  readPersistedWorkbenchState,
+  writePersistedWorkbenchState,
+  type WorkbenchSessionFilter
+} from "./components/workbench-persistence";
 import { resolveCompanionRouteContext, type ReviewCoverageAction } from "./reviewCoverageRouteState";
 
 const LazyHomePage = lazy(async () => {
@@ -600,7 +605,10 @@ interface AppWorkbenchProps {
   nextActionSecondary: AppWorkbenchAction[];
   nextActionSummary: string;
   quickLaunchActions: AppWorkbenchAction[];
+  selectedSessionId: string | null;
+  sessionFilter: WorkbenchSessionFilter;
   onSessionAction: (session: SessionSummary) => void;
+  onSessionFilterChange: (filter: WorkbenchSessionFilter) => void;
 }
 
 interface CommandContextState {
@@ -1066,7 +1074,10 @@ function renderPage(
           nextActionSecondary={workbench.nextActionSecondary}
           nextActionSummary={workbench.nextActionSummary}
           quickLaunchActions={workbench.quickLaunchActions}
+          selectedSessionId={workbench.selectedSessionId}
+          sessionFilter={workbench.sessionFilter}
           onSessionAction={workbench.onSessionAction}
+          onSessionFilterChange={workbench.onSessionFilterChange}
         />
       );
     case "agents":
@@ -1137,6 +1148,8 @@ export function App() {
   const [commandLog, setCommandLog] = useState<CommandLogEntry[]>([]);
   const [selectedPaletteEntryId, setSelectedPaletteEntryId] = useState<string | null>(null);
   const [showAllPages, setShowAllPages] = useState(false);
+  const [workbenchSessionFilter, setWorkbenchSessionFilter] = useState<WorkbenchSessionFilter>(() => readPersistedWorkbenchState().sessionFilter);
+  const [lastWorkbenchSessionId, setLastWorkbenchSessionId] = useState<string | null>(() => readPersistedWorkbenchState().lastSessionId);
   const [userVisibilityOverrides, setUserVisibilityOverrides] = useState<{
     rightRailVisible: boolean | null;
     bottomDockVisible: boolean | null;
@@ -4446,8 +4459,10 @@ export function App() {
     setSelectedPaletteEntryId(paletteEntryIds[nextIndex] ?? null);
   };
 
-  const openCommandPalette = () => {
+  const openCommandPalette = (nextQuery = "") => {
     setPaletteReturnFocus(document.activeElement instanceof HTMLElement ? document.activeElement : null);
+    setCommandQuery(nextQuery);
+    setSelectedPaletteEntryId(null);
     setCommandPaletteOpen(true);
   };
 
@@ -4487,6 +4502,8 @@ export function App() {
   const showTraceAction = toWorkbenchAction(actionById.get("command-show-trace"));
   const focusLaneApplyAction = toWorkbenchAction(actionById.get("command-focus-lane-apply"));
   const latestSession = data.sessions[0] ?? null;
+  const persistedResumeSession = lastWorkbenchSessionId ? data.sessions.find((session) => session.id === lastWorkbenchSessionId) ?? null : null;
+  const resumeSession = persistedResumeSession ?? latestSession;
   const pendingSessionCount = data.sessions.filter((session) => session.status !== "complete").length;
   const reviewPendingCount = data.sessions.filter((session) => session.status === "waiting").length;
   const openPaletteShortcut = data.commandSurface.keyboardRouting.shortcuts.find((shortcut) => shortcut.target === "open-palette");
@@ -4497,22 +4514,55 @@ export function App() {
     tone: "neutral",
     hotkey: openPaletteShortcut?.combo ?? "Ctrl/Cmd+K",
     onTrigger: () => {
-      openCommandPalette();
+      openCommandPalette("");
     }
   };
 
-  const handleSessionAction = (session: SessionSummary) => {
+  const persistWorkbenchState = (patch: Partial<ReturnType<typeof readPersistedWorkbenchState>>) => {
+    writePersistedWorkbenchState(patch);
+  };
+
+  const resolveSessionWorkbenchAction = (session: SessionSummary): AppWorkbenchAction => {
+    const haystack = `${session.title} ${session.workspace}`.toLowerCase();
+
+    if (haystack.includes("review") || haystack.includes("boundary") || haystack.includes("bridge")) {
+      return reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction;
+    }
+
+    if (haystack.includes("trace")) {
+      return showTraceAction ?? traceViewAction ?? workbenchCommandBarAction;
+    }
+
+    if (haystack.includes("layout") || haystack.includes("renderer") || haystack.includes("ui")) {
+      return operatorViewAction ?? openHomeAction ?? workbenchCommandBarAction;
+    }
+
+    if (haystack.includes("bootstrap") || haystack.includes("launch") || haystack.includes("start")) {
+      return openHomeAction ?? operatorViewAction ?? workbenchCommandBarAction;
+    }
+
     if (session.status === "active") {
-      (traceViewAction ?? operatorViewAction ?? openHomeAction ?? workbenchCommandBarAction).onTrigger();
-      return;
+      return traceViewAction ?? operatorViewAction ?? openHomeAction ?? workbenchCommandBarAction;
     }
 
     if (session.status === "waiting") {
-      (reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction).onTrigger();
-      return;
+      return reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction;
     }
 
-    (openHomeAction ?? operatorViewAction ?? workbenchCommandBarAction).onTrigger();
+    return openHomeAction ?? operatorViewAction ?? workbenchCommandBarAction;
+  };
+
+  const handleSessionAction = (session: SessionSummary) => {
+    const targetAction = resolveSessionWorkbenchAction(session);
+    setLastWorkbenchSessionId(session.id);
+    persistWorkbenchState({
+      lastSessionId: session.id,
+      lastActionId: targetAction.id,
+      lastPageId: activePage,
+      lastWorkspaceViewId: resolvedLayoutState.workspaceViewId,
+      lastFocusedSlotId: resolvedFocusSlotId
+    });
+    targetAction.onTrigger();
   };
 
   const workbenchPrimaryActions: AppWorkbenchAction[] = [
@@ -4523,21 +4573,27 @@ export function App() {
       tone: "positive",
       hotkey: openPaletteShortcut?.combo ?? "Ctrl/Cmd+K",
       onTrigger: () => {
-        openCommandPalette();
+        persistWorkbenchState({
+          lastActionId: "workbench-new-session",
+          lastPageId: activePage,
+          lastWorkspaceViewId: resolvedLayoutState.workspaceViewId,
+          lastFocusedSlotId: resolvedFocusSlotId
+        });
+        openCommandPalette("open ");
       }
     },
     {
       id: "workbench-resume-last",
       label: "恢复上次工作",
-      description: latestSession ? `${latestSession.title} · ${latestSession.updatedAt}` : "恢复最近一次工作轨迹。",
-      tone: latestSession?.status === "waiting" ? "warning" : "neutral",
+      description: resumeSession ? `${resumeSession.title} · ${resumeSession.updatedAt}` : "恢复最近一次工作轨迹。",
+      tone: resumeSession?.status === "waiting" ? "warning" : "neutral",
       onTrigger: () => {
-        if (latestSession) {
-          handleSessionAction(latestSession);
+        if (resumeSession) {
+          handleSessionAction(resumeSession);
           return;
         }
 
-        openCommandPalette();
+        openCommandPalette("");
       }
     }
   ];
@@ -4642,16 +4698,16 @@ export function App() {
     reviewViewAction,
     {
       id: "workbench-resume-shortcut",
-      label: "Resume Last Work",
-      description: latestSession ? `${latestSession.title} · ${latestSession.workspace}` : "恢复最近工作区入口。",
-      tone: latestSession?.status === "waiting" ? "warning" : "neutral",
+      label: "Resume Last Workspace",
+      description: resumeSession ? `${resumeSession.title} · ${resumeSession.workspace}` : "恢复最近工作区入口。",
+      tone: resumeSession?.status === "waiting" ? "warning" : "neutral",
       onTrigger: () => {
-        if (latestSession) {
-          handleSessionAction(latestSession);
+        if (resumeSession) {
+          handleSessionAction(resumeSession);
           return;
         }
 
-        openCommandPalette();
+        openCommandPalette("");
       }
     }
   ].filter((action): action is AppWorkbenchAction => Boolean(action));
@@ -4668,7 +4724,13 @@ export function App() {
       activeSequence?.summary ??
       "先继续当前流程；如果没有明确动作，就从命令面板或快速启动区进入。",
     quickLaunchActions: workbenchQuickLaunchActions,
-    onSessionAction: handleSessionAction
+    selectedSessionId: lastWorkbenchSessionId,
+    sessionFilter: workbenchSessionFilter,
+    onSessionAction: handleSessionAction,
+    onSessionFilterChange: (filter) => {
+      setWorkbenchSessionFilter(filter);
+      persistWorkbenchState({ sessionFilter: filter });
+    }
   };
 
   const centerFocusMode = activePage === "sessions";

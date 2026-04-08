@@ -1,8 +1,8 @@
-import { useState } from "react";
 import type { SessionSummary } from "@openclaw/shared";
+import type { WorkbenchSessionFilter } from "../components/workbench-persistence";
 
 type WorkbenchTone = "positive" | "warning" | "neutral";
-type SessionFilter = "all" | "active" | "waiting" | "complete";
+type SessionFilter = WorkbenchSessionFilter;
 
 interface WorkbenchAction {
   id: string;
@@ -41,7 +41,10 @@ interface SessionsPageProps {
   nextActionSecondary: WorkbenchAction[];
   nextActionSummary: string;
   quickLaunchActions: WorkbenchAction[];
+  selectedSessionId: string | null;
+  sessionFilter: SessionFilter;
   onSessionAction: (session: SessionSummary) => void;
+  onSessionFilterChange: (filter: SessionFilter) => void;
 }
 
 const FILTER_LABELS: Record<SessionFilter, string> = {
@@ -284,10 +287,21 @@ function QuickLaunchGrid({ actions }: { actions: WorkbenchAction[] }) {
   );
 }
 
-function RecentSessionsList({ sessions, onSessionAction }: { sessions: SessionSummary[]; onSessionAction: (session: SessionSummary) => void }) {
-  const [filter, setFilter] = useState<SessionFilter>("all");
-
-  const filteredSessions = filter === "all" ? sessions : sessions.filter((session: SessionSummary) => session.status === filter);
+function RecentSessionsList({
+  sessions,
+  selectedSessionId,
+  sessionFilter,
+  onSessionAction,
+  onSessionFilterChange
+}: {
+  sessions: SessionSummary[];
+  selectedSessionId: string | null;
+  sessionFilter: SessionFilter;
+  onSessionAction: (session: SessionSummary) => void;
+  onSessionFilterChange: (filter: SessionFilter) => void;
+}) {
+  const filteredSessions =
+    sessionFilter === "all" ? sessions : sessions.filter((session: SessionSummary) => session.status === sessionFilter);
 
   return (
     <article className="workbench-panel surface card">
@@ -301,9 +315,9 @@ function RecentSessionsList({ sessions, onSessionAction }: { sessions: SessionSu
             <button
               key={entry}
               type="button"
-              className={entry === filter ? "shell-tab shell-tab--active" : "shell-tab"}
+              className={entry === sessionFilter ? "shell-tab shell-tab--active" : "shell-tab"}
               onClick={() => {
-                setFilter(entry);
+                onSessionFilterChange(entry);
               }}
             >
               {FILTER_LABELS[entry]}
@@ -314,7 +328,20 @@ function RecentSessionsList({ sessions, onSessionAction }: { sessions: SessionSu
 
       <div className="recent-session-list">
         {filteredSessions.map((session) => (
-          <article key={session.id} className="recent-session-row" tabIndex={0}>
+          <article
+            key={session.id}
+            className={session.id === selectedSessionId ? "recent-session-row recent-session-row--selected" : "recent-session-row"}
+            tabIndex={0}
+            onClick={() => {
+              onSessionAction(session);
+            }}
+            onKeyDown={(event: KeyboardEvent) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onSessionAction(session);
+              }
+            }}
+          >
             <div className="recent-session-row__title">
               <strong>{session.title}</strong>
               <p>
@@ -330,7 +357,14 @@ function RecentSessionsList({ sessions, onSessionAction }: { sessions: SessionSu
               <p>{session.updatedAt}</p>
             </div>
             <div className="recent-session-row__actions">
-              <button type="button" className="secondary-button" onClick={() => onSessionAction(session)}>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation();
+                  onSessionAction(session);
+                }}
+              >
                 {getSessionPrimaryLabel(session.status)}
               </button>
             </div>
@@ -358,7 +392,10 @@ export function SessionsPage({
   nextActionSecondary,
   nextActionSummary,
   quickLaunchActions,
-  onSessionAction
+  selectedSessionId,
+  sessionFilter,
+  onSessionAction,
+  onSessionFilterChange
 }: SessionsPageProps) {
   return (
     <section className="page workbench-page">
@@ -392,7 +429,13 @@ export function SessionsPage({
       </div>
 
       <QuickLaunchGrid actions={quickLaunchActions} />
-      <RecentSessionsList sessions={sessions} onSessionAction={onSessionAction} />
+      <RecentSessionsList
+        sessions={sessions}
+        selectedSessionId={selectedSessionId}
+        sessionFilter={sessionFilter}
+        onSessionAction={onSessionAction}
+        onSessionFilterChange={onSessionFilterChange}
+      />
     </section>
   );
 }
