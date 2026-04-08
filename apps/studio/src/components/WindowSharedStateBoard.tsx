@@ -5,7 +5,7 @@ import {
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseEscalationWindow,
-  selectStudioReleasePackagedAppMaterializationContractArtifactCheckpointChain,
+  selectStudioReleasePackagedAppMaterializationContractArtifactCheckpointProgression,
   selectStudioReleasePackagedAppMaterializationContractFailureSurfaceMatch,
   selectStudioReleasePackagedAppMaterializationContractPlatform,
   selectStudioReleasePackagedAppMaterializationContractValidatorObservabilitySurfaceMatch,
@@ -57,6 +57,124 @@ function resolveSyncTone(health: StudioShellState["windowing"]["sharedState"]["l
     default:
       return "warning";
   }
+}
+
+type ArtifactCheckpointProgression = ReturnType<
+  typeof selectStudioReleasePackagedAppMaterializationContractArtifactCheckpointProgression
+>;
+type ArtifactCheckpointProgressionSurface = ArtifactCheckpointProgression["currentSurface"];
+
+function formatArtifactCheckpointProgressionPath(progression: ArtifactCheckpointProgression | null): string {
+  if (!progression) {
+    return "Unavailable";
+  }
+
+  const labels = [
+    progression.currentHandoff?.label ?? progression.currentSurface.artifactLedger?.label ?? null,
+    progression.currentSurface.bundleSealingCheckpoint?.label ?? progression.currentStagedOutputStep?.label ?? null,
+    progression.currentReviewPacketStep?.label ?? null,
+    progression.currentValidatorReadout?.label ?? null,
+    progression.currentFailureReadout?.label ?? null,
+    progression.currentSurface.stageCCheckpoint?.label ?? null
+  ].filter((label): label is string => Boolean(label));
+
+  return labels.join(" -> ") || "Unavailable";
+}
+
+function formatArtifactCurrentToNextLabel(currentLabel: string | null, nextLabel: string | null, terminalLabel: string): string {
+  if (currentLabel && nextLabel) {
+    return `${currentLabel} -> ${nextLabel}`;
+  }
+
+  if (currentLabel) {
+    return `${currentLabel} -> ${terminalLabel}`;
+  }
+
+  if (nextLabel) {
+    return `Up next ${nextLabel}`;
+  }
+
+  return terminalLabel;
+}
+
+function formatArtifactCurrentToNextSummary(progression: ArtifactCheckpointProgression | null): string {
+  if (!progression) {
+    return "No artifact checkpoint progression is available.";
+  }
+
+  const segments = [
+    progression.currentStagedOutputStep
+      ? `Staged output ${formatArtifactCurrentToNextLabel(
+          progression.currentStagedOutputStep.label,
+          progression.nextStagedOutputStep?.label ?? null,
+          "Final staged step"
+        )}`
+      : progression.nextStagedOutputStep
+        ? `Staged output up next ${progression.nextStagedOutputStep.label}`
+        : null,
+    progression.currentReviewPacketStep
+      ? `Review packet ${formatArtifactCurrentToNextLabel(
+          progression.currentReviewPacketStep.label,
+          progression.nextReviewPacketStep?.label ?? null,
+          "Final review handoff"
+        )}`
+      : progression.nextReviewPacketStep
+        ? `Review packet up next ${progression.nextReviewPacketStep.label}`
+        : null,
+    progression.currentValidatorReadout
+      ? `Validator ${formatArtifactCurrentToNextLabel(
+          progression.currentValidatorReadout.label,
+          progression.nextValidatorReadout?.label ?? null,
+          "Final validator checkpoint"
+        )}`
+      : progression.nextValidatorReadout
+        ? `Validator up next ${progression.nextValidatorReadout.label}`
+        : null,
+    progression.currentFailureReadout
+      ? `Failure ${formatArtifactCurrentToNextLabel(
+          progression.currentFailureReadout.label,
+          progression.nextFailureReadout?.label ?? null,
+          "Final failure branch"
+        )}`
+      : progression.nextFailureReadout
+        ? `Failure up next ${progression.nextFailureReadout.label}`
+        : null
+  ].filter((segment): segment is string => Boolean(segment));
+
+  return segments.join(" / ") || "No downstream current-to-next continuity is linked to the active handoff.";
+}
+
+function formatArtifactSurfaceDescriptor(surface: ArtifactCheckpointProgressionSurface | null): string {
+  if (!surface) {
+    return "No observability path";
+  }
+
+  return surface.observabilityMapping
+    ? `${surface.observabilityMapping.label} / ${formatReviewPostureRelationship(surface.observabilityMapping.relationship)}`
+    : surface.activeHandoff?.observabilityMappingId ?? "No observability path";
+}
+
+function formatArtifactSurfaceContinuity(surface: ArtifactCheckpointProgressionSurface | null): string {
+  if (!surface) {
+    return "No continuity surface";
+  }
+
+  return (
+    surface.reviewStateContinuityEntry?.label ??
+    (surface.activeHandoff
+      ? `${surface.window?.label ?? surface.activeHandoff.windowId} / ${surface.lane?.label ?? surface.activeHandoff.sharedStateLaneId}`
+      : "No continuity surface")
+  );
+}
+
+function formatArtifactSurfaceSpine(surface: ArtifactCheckpointProgressionSurface | null): string {
+  if (!surface?.activeHandoff) {
+    return "No window / lane / board";
+  }
+
+  return `${surface.window?.label ?? surface.activeHandoff.windowId} -> ${
+    surface.lane?.label ?? surface.activeHandoff.sharedStateLaneId
+  } -> ${surface.board?.label ?? surface.activeHandoff.orchestrationBoardId}`;
 }
 
 function resolveLaneTone(status: StudioShellState["windowing"]["sharedState"]["lanes"][number]["status"]): "positive" | "neutral" | "warning" {
@@ -479,8 +597,8 @@ export function WindowSharedStateBoard({
         activeMaterializationPlatform?.id
       )
     : null;
-  const activeMaterializationArtifactSurface = releaseApprovalPipeline
-    ? selectStudioReleasePackagedAppMaterializationContractArtifactCheckpointChain(
+  const activeMaterializationArtifactProgression = releaseApprovalPipeline
+    ? selectStudioReleasePackagedAppMaterializationContractArtifactCheckpointProgression(
         releaseApprovalPipeline.deliveryChain,
         windowing,
         reviewStateContinuity,
@@ -489,6 +607,33 @@ export function WindowSharedStateBoard({
         activeMaterializationPlatform?.id
       )
     : null;
+  const activeMaterializationArtifactSurface = activeMaterializationArtifactProgression?.currentSurface ?? null;
+  const nextMaterializationArtifactSurface = activeMaterializationArtifactProgression?.nextSurface ?? null;
+  const artifactCheckpointProgressionPath = formatArtifactCheckpointProgressionPath(activeMaterializationArtifactProgression);
+  const artifactCurrentToNextHandoffLabel = formatArtifactCurrentToNextLabel(
+    activeMaterializationArtifactProgression?.currentHandoff?.label ?? activeMaterializationArtifactSurface?.artifactLedger?.label ?? null,
+    activeMaterializationArtifactProgression?.nextHandoff?.label ?? null,
+    activeMaterializationArtifactSurface?.artifactLedger ? "Final artifact handoff" : "Unavailable"
+  );
+  const artifactCurrentToNextSummary = formatArtifactCurrentToNextSummary(activeMaterializationArtifactProgression);
+  const currentArtifactSurfaceDescriptor = formatArtifactSurfaceDescriptor(activeMaterializationArtifactSurface);
+  const currentArtifactSurfaceContinuity = formatArtifactSurfaceContinuity(activeMaterializationArtifactSurface);
+  const currentArtifactSurfaceSpine = formatArtifactSurfaceSpine(activeMaterializationArtifactSurface);
+  const nextArtifactSurfaceDescriptor = nextMaterializationArtifactSurface
+    ? formatArtifactSurfaceDescriptor(nextMaterializationArtifactSurface)
+    : activeMaterializationArtifactSurface?.artifactLedger
+      ? "Final artifact handoff"
+      : "Unavailable";
+  const nextArtifactSurfaceContinuity = nextMaterializationArtifactSurface
+    ? formatArtifactSurfaceContinuity(nextMaterializationArtifactSurface)
+    : activeMaterializationArtifactSurface?.artifactLedger
+      ? "No next surface continuity is linked because the active handoff is terminal."
+      : "Unavailable";
+  const nextArtifactSurfaceSpine = nextMaterializationArtifactSurface
+    ? formatArtifactSurfaceSpine(nextMaterializationArtifactSurface)
+    : activeMaterializationArtifactSurface?.artifactLedger
+      ? "Terminal handoff / no next window spine"
+      : "Unavailable";
   const activeMaterializationFailureSurface = releaseApprovalPipeline
     ? selectStudioReleasePackagedAppMaterializationContractFailureSurfaceMatch(
         releaseApprovalPipeline.deliveryChain,
@@ -1377,12 +1522,70 @@ export function WindowSharedStateBoard({
                     : "Unavailable"}
                 </strong>
               </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Artifact checkpoint progression</span>
+                <strong>{artifactCheckpointProgressionPath}</strong>
+              </div>
+              <div
+                className={`workflow-readiness-line workflow-readiness-line--${
+                  activeMaterializationArtifactProgression?.nextHandoff
+                    ? resolveMaterializationValidatorTone(activeMaterializationArtifactProgression.nextHandoff.status)
+                    : "neutral"
+                }`}
+              >
+                <span>Current vs next handoff</span>
+                <strong>{artifactCurrentToNextHandoffLabel}</strong>
+              </div>
+              <div
+                className={`workflow-readiness-line workflow-readiness-line--${
+                  activeMaterializationArtifactSurface?.reviewStateContinuityEntry?.tone ??
+                  activeMaterializationArtifactSurface?.observabilityMapping?.tone ??
+                  "warning"
+                }`}
+              >
+                <span>Current surface spine</span>
+                <strong>{currentArtifactSurfaceDescriptor}</strong>
+              </div>
+              <div
+                className={`workflow-readiness-line workflow-readiness-line--${
+                  nextMaterializationArtifactSurface?.reviewStateContinuityEntry?.tone ??
+                  nextMaterializationArtifactSurface?.observabilityMapping?.tone ??
+                  "neutral"
+                }`}
+              >
+                <span>Next surface spine</span>
+                <strong>{nextArtifactSurfaceDescriptor}</strong>
+              </div>
             </div>
             {activeMaterializationArtifactSurface?.activeHandoff ? (
               <div className="windowing-preview-list">
                 <div className="windowing-preview-line windowing-preview-line--stacked">
                   <span>Current handoff summary</span>
                   <strong>{activeMaterializationArtifactSurface.activeHandoff.summary}</strong>
+                </div>
+                <div className="windowing-preview-line windowing-preview-line--stacked">
+                  <span>Artifact checkpoint progression</span>
+                  <strong>{artifactCheckpointProgressionPath}</strong>
+                  <p>{artifactCurrentToNextSummary}</p>
+                </div>
+                <div className="windowing-preview-line windowing-preview-line--stacked">
+                  <span>Current vs next handoff</span>
+                  <strong>{artifactCurrentToNextHandoffLabel}</strong>
+                  <p>
+                    {currentArtifactSurfaceContinuity}
+                    {" / "}
+                    {nextArtifactSurfaceContinuity}
+                  </p>
+                </div>
+                <div className="windowing-preview-line windowing-preview-line--stacked">
+                  <span>Current surface spine</span>
+                  <strong>{currentArtifactSurfaceDescriptor}</strong>
+                  <p>{currentArtifactSurfaceSpine}</p>
+                </div>
+                <div className="windowing-preview-line windowing-preview-line--stacked">
+                  <span>Next surface spine</span>
+                  <strong>{nextArtifactSurfaceDescriptor}</strong>
+                  <p>{nextArtifactSurfaceSpine}</p>
                 </div>
                 <div className="windowing-preview-line windowing-preview-line--stacked">
                   <span>Window / lane / board</span>
