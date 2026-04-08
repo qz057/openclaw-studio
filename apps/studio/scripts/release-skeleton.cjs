@@ -1596,10 +1596,23 @@ function buildPackagedAppStagedOutputSkeleton({ generatedAt }) {
         bundleSealingId: "bundle-sealing-windows",
         integrityContractId: "integrity-contract-windows",
         localMaterializationContractId: "local-materialization-contract-windows",
+        artifactLedgerId: "local-materialization-artifact-ledger-windows",
         status: "planned",
         taskState: "review-ready",
         outputRoot: "future/staged-output/windows/OpenClaw Studio",
         manifests: ["future/staged-output/windows/output-manifest.json", "future/staged-output/windows/checksum-manifest.json"],
+        sourceArtifactIds: [
+          "local-materialization-artifact-ledger-windows-renderer-entry",
+          "local-materialization-artifact-ledger-windows-electron-main",
+          "local-materialization-artifact-ledger-windows-electron-preload",
+          "local-materialization-artifact-ledger-windows-directory-verification"
+        ],
+        resultArtifactIds: [
+          "local-materialization-artifact-ledger-windows-output-manifest",
+          "local-materialization-artifact-ledger-windows-checksum-manifest"
+        ],
+        activeArtifactHandoffId: "local-materialization-artifact-ledger-windows-output-to-checksum",
+        nextArtifactHandoffId: "local-materialization-artifact-ledger-windows-checksum-to-seal",
         taskDependencies: ["directory-materialization-windows", "materialize-windows-packaged-app"],
         reviewChecks: [
           "materialization manifest linked",
@@ -1649,10 +1662,23 @@ function buildPackagedAppStagedOutputSkeleton({ generatedAt }) {
         bundleSealingId: "bundle-sealing-macos",
         integrityContractId: "integrity-contract-macos",
         localMaterializationContractId: "local-materialization-contract-macos",
+        artifactLedgerId: "local-materialization-artifact-ledger-macos",
         status: "planned",
         taskState: "review-ready",
         outputRoot: "future/staged-output/macos/OpenClaw Studio.app",
         manifests: ["future/staged-output/macos/output-manifest.json", "future/staged-output/macos/checksum-manifest.json"],
+        sourceArtifactIds: [
+          "local-materialization-artifact-ledger-macos-renderer-entry",
+          "local-materialization-artifact-ledger-macos-electron-main",
+          "local-materialization-artifact-ledger-macos-electron-preload",
+          "local-materialization-artifact-ledger-macos-directory-verification"
+        ],
+        resultArtifactIds: [
+          "local-materialization-artifact-ledger-macos-output-manifest",
+          "local-materialization-artifact-ledger-macos-checksum-manifest"
+        ],
+        activeArtifactHandoffId: "local-materialization-artifact-ledger-macos-snapshot-to-directory",
+        nextArtifactHandoffId: "local-materialization-artifact-ledger-macos-directory-to-output",
         taskDependencies: ["directory-materialization-macos", "materialize-macos-packaged-app"],
         reviewChecks: [
           "materialization manifest linked",
@@ -1702,10 +1728,23 @@ function buildPackagedAppStagedOutputSkeleton({ generatedAt }) {
         bundleSealingId: "bundle-sealing-linux",
         integrityContractId: "integrity-contract-linux",
         localMaterializationContractId: "local-materialization-contract-linux",
+        artifactLedgerId: "local-materialization-artifact-ledger-linux",
         status: "planned",
         taskState: "review-ready",
         outputRoot: "future/staged-output/linux/openclaw-studio",
         manifests: ["future/staged-output/linux/output-manifest.json", "future/staged-output/linux/checksum-manifest.json"],
+        sourceArtifactIds: [
+          "local-materialization-artifact-ledger-linux-renderer-entry",
+          "local-materialization-artifact-ledger-linux-electron-main",
+          "local-materialization-artifact-ledger-linux-electron-preload",
+          "local-materialization-artifact-ledger-linux-directory-verification"
+        ],
+        resultArtifactIds: [
+          "local-materialization-artifact-ledger-linux-output-manifest",
+          "local-materialization-artifact-ledger-linux-checksum-manifest"
+        ],
+        activeArtifactHandoffId: "local-materialization-artifact-ledger-linux-snapshot-to-directory",
+        nextArtifactHandoffId: "local-materialization-artifact-ledger-linux-directory-to-output",
         taskDependencies: ["directory-materialization-linux", "materialize-linux-packaged-app"],
         reviewChecks: [
           "materialization manifest linked",
@@ -1765,12 +1804,22 @@ function buildPackagedAppBundleSealingSkeleton({ generatedAt }) {
         integrityContractId: "integrity-contract-windows",
         installerFlowId: "orchestrate-windows-builders",
         localMaterializationContractId: "local-materialization-contract-windows",
+        artifactLedgerId: "local-materialization-artifact-ledger-windows",
         status: "planned",
         taskState: "review-ready",
         sealedBundleRoot: "future/sealed-bundles/windows/OpenClaw Studio",
         sealManifestPath: "future/sealed-bundles/windows/bundle-seal-manifest.json",
         integrityManifestPath: "future/sealed-bundles/windows/bundle-integrity-manifest.json",
         rollbackCheckpointId: "sealed-bundle-checkpoint-windows",
+        sourceArtifactIds: [
+          "local-materialization-artifact-ledger-windows-output-manifest",
+          "local-materialization-artifact-ledger-windows-checksum-manifest"
+        ],
+        resultArtifactIds: [
+          "local-materialization-artifact-ledger-windows-seal-manifest",
+          "local-materialization-artifact-ledger-windows-integrity-manifest"
+        ],
+        activeArtifactHandoffId: "local-materialization-artifact-ledger-windows-checksum-to-seal",
         taskDependencies: ["staged-output-windows"],
         reviewEvidence: [
           "future/staged-output/windows/output-manifest.json",
@@ -1821,12 +1870,22 @@ function buildPackagedAppBundleSealingSkeleton({ generatedAt }) {
         integrityContractId: "integrity-contract-macos",
         installerFlowId: "orchestrate-macos-builders",
         localMaterializationContractId: "local-materialization-contract-macos",
+        artifactLedgerId: "local-materialization-artifact-ledger-macos",
         status: "planned",
         taskState: "review-ready",
         sealedBundleRoot: "future/sealed-bundles/macos/OpenClaw Studio.app",
         sealManifestPath: "future/sealed-bundles/macos/bundle-seal-manifest.json",
         integrityManifestPath: "future/sealed-bundles/macos/bundle-integrity-manifest.json",
         rollbackCheckpointId: "sealed-bundle-checkpoint-macos",
+        sourceArtifactIds: [
+          "local-materialization-artifact-ledger-macos-output-manifest",
+          "local-materialization-artifact-ledger-macos-checksum-manifest"
+        ],
+        resultArtifactIds: [
+          "local-materialization-artifact-ledger-macos-seal-manifest",
+          "local-materialization-artifact-ledger-macos-integrity-manifest"
+        ],
+        activeArtifactHandoffId: "local-materialization-artifact-ledger-macos-checksum-to-seal",
         taskDependencies: ["staged-output-macos"],
         reviewEvidence: [
           "future/staged-output/macos/output-manifest.json",
@@ -1877,12 +1936,22 @@ function buildPackagedAppBundleSealingSkeleton({ generatedAt }) {
         integrityContractId: "integrity-contract-linux",
         installerFlowId: "orchestrate-linux-builders",
         localMaterializationContractId: "local-materialization-contract-linux",
+        artifactLedgerId: "local-materialization-artifact-ledger-linux",
         status: "planned",
         taskState: "review-ready",
         sealedBundleRoot: "future/sealed-bundles/linux/openclaw-studio",
         sealManifestPath: "future/sealed-bundles/linux/bundle-seal-manifest.json",
         integrityManifestPath: "future/sealed-bundles/linux/bundle-integrity-manifest.json",
         rollbackCheckpointId: "sealed-bundle-checkpoint-linux",
+        sourceArtifactIds: [
+          "local-materialization-artifact-ledger-linux-output-manifest",
+          "local-materialization-artifact-ledger-linux-checksum-manifest"
+        ],
+        resultArtifactIds: [
+          "local-materialization-artifact-ledger-linux-seal-manifest",
+          "local-materialization-artifact-ledger-linux-integrity-manifest"
+        ],
+        activeArtifactHandoffId: "local-materialization-artifact-ledger-linux-checksum-to-seal",
         taskDependencies: ["staged-output-linux"],
         reviewEvidence: [
           "future/staged-output/linux/output-manifest.json",
@@ -2096,6 +2165,299 @@ function createPackagedAppLocalMaterializationSegments({
       linkedStepIds: []
     }
   ];
+}
+
+function createPackagedAppMaterializationArtifactLedger({
+  idPrefix,
+  platformLabel,
+  taskState,
+  summary,
+  activeHandoff,
+  nextHandoff,
+  directoryTaskId,
+  stagedOutputTaskId,
+  bundleSealTaskId,
+  materializationRoot,
+  verificationManifestPath,
+  outputManifestPath,
+  checksumManifestPath,
+  sealManifestPath,
+  integrityManifestPath,
+  directoryArtifactStatus,
+  outputArtifactStatus,
+  checksumArtifactStatus,
+  sealArtifactStatus,
+  integrityArtifactStatus,
+  snapshotHandoffStatus,
+  snapshotHandoffSummary,
+  directoryHandoffStatus,
+  directoryHandoffSummary,
+  outputHandoffStatus,
+  outputHandoffSummary,
+  sealHandoffStatus,
+  sealHandoffSummary
+}) {
+  const ledgerId = `local-materialization-artifact-ledger-${idPrefix}`;
+  const reviewPacketId = `packaged-app-review-packet-${idPrefix}`;
+  const validatorBridgeId = `packaged-app-materialization-validator-observability-${idPrefix}`;
+  const artifactIds = {
+    rendererEntry: `${ledgerId}-renderer-entry`,
+    electronMain: `${ledgerId}-electron-main`,
+    electronPreload: `${ledgerId}-electron-preload`,
+    directoryVerification: `${ledgerId}-directory-verification`,
+    outputManifest: `${ledgerId}-output-manifest`,
+    checksumManifest: `${ledgerId}-checksum-manifest`,
+    sealManifest: `${ledgerId}-seal-manifest`,
+    integrityManifest: `${ledgerId}-integrity-manifest`
+  };
+  const handoffIds = {
+    "snapshot-to-directory": `${ledgerId}-snapshot-to-directory`,
+    "directory-to-output": `${ledgerId}-directory-to-output`,
+    "output-to-checksum": `${ledgerId}-output-to-checksum`,
+    "checksum-to-seal": `${ledgerId}-checksum-to-seal`
+  };
+
+  const createHandoff = ({
+    key,
+    label,
+    status,
+    handoffSummary,
+    taskId,
+    reviewPacketStepId,
+    validatorReadoutId,
+    deliveryChainStageId,
+    windowId,
+    sharedStateLaneId,
+    orchestrationBoardId,
+    observabilityMappingId,
+    observabilitySignalIds,
+    commandActionIds,
+    fromArtifactIds,
+    toArtifactIds,
+    blockedBy
+  }) => ({
+    id: handoffIds[key],
+    label,
+    status,
+    summary: handoffSummary,
+    taskId,
+    reviewPacketStepId,
+    validatorReadoutId,
+    deliveryChainStageId,
+    windowId,
+    sharedStateLaneId,
+    orchestrationBoardId,
+    observabilityMappingId,
+    observabilitySignalIds,
+    commandDeckLaneId: "deck-lane-review-deck-materialization-failure",
+    commandActionIds,
+    fromArtifactIds,
+    toArtifactIds,
+    blockedBy
+  });
+
+  return {
+    id: ledgerId,
+    label: `${platformLabel} artifact handoff ledger`,
+    taskState,
+    summary,
+    activeHandoffId: handoffIds[activeHandoff],
+    nextHandoffId: nextHandoff ? handoffIds[nextHandoff] : null,
+    artifacts: [
+      {
+        id: artifactIds.rendererEntry,
+        label: "Renderer entry snapshot",
+        kind: "snapshot-input",
+        status: "ready",
+        path: "artifacts/renderer/index.html",
+        detail: "The built renderer entrypoint is frozen as a local snapshot input before any packaged-app directory handoff is reviewed.",
+        taskId: directoryTaskId,
+        deliveryChainStageId: "delivery-chain-attestation-intake"
+      },
+      {
+        id: artifactIds.electronMain,
+        label: "Electron main snapshot",
+        kind: "snapshot-input",
+        status: "ready",
+        path: "artifacts/electron/electron/main.js",
+        detail: "The built Electron main process stays pinned as a local snapshot input for packaged-app review without launching anything.",
+        taskId: directoryTaskId,
+        deliveryChainStageId: "delivery-chain-attestation-intake"
+      },
+      {
+        id: artifactIds.electronPreload,
+        label: "Electron preload snapshot",
+        kind: "snapshot-input",
+        status: "ready",
+        path: "artifacts/electron/electron/preload.js",
+        detail: "The built preload bundle stays attached to the same local snapshot input lane as the renderer and main process.",
+        taskId: directoryTaskId,
+        deliveryChainStageId: "delivery-chain-attestation-intake"
+      },
+      {
+        id: artifactIds.directoryVerification,
+        label: "Directory verification manifest",
+        kind: "directory-proof",
+        status: directoryArtifactStatus,
+        path: verificationManifestPath,
+        detail: `${platformLabel} verification metadata anchors the packaged-app root ${materializationRoot} before any staged-output proof is reviewed.`,
+        taskId: directoryTaskId,
+        deliveryChainStageId: "delivery-chain-attestation-intake"
+      },
+      {
+        id: artifactIds.outputManifest,
+        label: "Staged-output manifest",
+        kind: "staged-output-proof",
+        status: outputArtifactStatus,
+        path: outputManifestPath,
+        detail: `${platformLabel} staged-output layout stays declared as review-only metadata instead of materializing a real packaged artifact.`,
+        taskId: stagedOutputTaskId,
+        deliveryChainStageId: "delivery-chain-operator-review"
+      },
+      {
+        id: artifactIds.checksumManifest,
+        label: "Checksum manifest",
+        kind: "staged-output-proof",
+        status: checksumArtifactStatus,
+        path: checksumManifestPath,
+        detail: `${platformLabel} checksum proof stays chained to the same staged-output lane so digest posture can be reviewed locally.`,
+        taskId: stagedOutputTaskId,
+        deliveryChainStageId: "delivery-chain-operator-review"
+      },
+      {
+        id: artifactIds.sealManifest,
+        label: "Bundle-seal manifest",
+        kind: "seal-proof",
+        status: sealArtifactStatus,
+        path: sealManifestPath,
+        detail: `${platformLabel} seal metadata is declared for review pickup, but it still cannot freeze or sign any real bundle.`,
+        taskId: bundleSealTaskId,
+        deliveryChainStageId: "delivery-chain-promotion-readiness"
+      },
+      {
+        id: artifactIds.integrityManifest,
+        label: "Bundle-integrity manifest",
+        kind: "seal-proof",
+        status: integrityArtifactStatus,
+        path: integrityManifestPath,
+        detail: `${platformLabel} integrity metadata stays linked beside the same seal handoff without attesting anything for real.`,
+        taskId: bundleSealTaskId,
+        deliveryChainStageId: "delivery-chain-promotion-readiness"
+      }
+    ],
+    handoffs: [
+      createHandoff({
+        key: "snapshot-to-directory",
+        label: "Snapshot inputs -> directory verification",
+        status: snapshotHandoffStatus,
+        handoffSummary: snapshotHandoffSummary,
+        taskId: directoryTaskId,
+        reviewPacketStepId: `${reviewPacketId}-directory-to-output`,
+        validatorReadoutId: `${validatorBridgeId}-directory`,
+        deliveryChainStageId: "delivery-chain-attestation-intake",
+        windowId: "window-shell-main",
+        sharedStateLaneId: "shared-state-lane-boundary-review",
+        orchestrationBoardId: "orchestration-board-boundary-review",
+        observabilityMappingId: "observability-mapping-boundary-intake",
+        observabilitySignalIds: [
+          "observability-signal-owner",
+          "observability-signal-route-window",
+          "observability-signal-lane-board"
+        ],
+        commandActionIds: ["command-focus-materialization-validator-bridge"],
+        fromArtifactIds: [artifactIds.rendererEntry, artifactIds.electronMain, artifactIds.electronPreload],
+        toArtifactIds: [artifactIds.directoryVerification],
+        blockedBy: []
+      }),
+      createHandoff({
+        key: "directory-to-output",
+        label: "Directory verification -> output manifest",
+        status: directoryHandoffStatus,
+        handoffSummary: directoryHandoffSummary,
+        taskId: stagedOutputTaskId,
+        reviewPacketStepId: `${reviewPacketId}-directory-to-output`,
+        validatorReadoutId: `${validatorBridgeId}-staged-output`,
+        deliveryChainStageId: "delivery-chain-operator-review",
+        windowId: "window-trace-review",
+        sharedStateLaneId: "shared-state-lane-trace-review",
+        orchestrationBoardId: "orchestration-board-trace-review",
+        observabilityMappingId: "observability-mapping-approval-active",
+        observabilitySignalIds: [
+          "observability-signal-owner",
+          "observability-signal-queue",
+          "observability-signal-escalation-closeout"
+        ],
+        commandActionIds: ["command-focus-materialization-validator-bridge", "command-focus-lifecycle-review-packet"],
+        fromArtifactIds: [artifactIds.directoryVerification],
+        toArtifactIds: [artifactIds.outputManifest],
+        blockedBy: []
+      }),
+      createHandoff({
+        key: "output-to-checksum",
+        label: "Output manifest -> checksum proof",
+        status: outputHandoffStatus,
+        handoffSummary: outputHandoffSummary,
+        taskId: stagedOutputTaskId,
+        reviewPacketStepId: `${reviewPacketId}-output-to-checksum`,
+        validatorReadoutId: `${validatorBridgeId}-staged-output`,
+        deliveryChainStageId: "delivery-chain-operator-review",
+        windowId: "window-trace-review",
+        sharedStateLaneId: "shared-state-lane-trace-review",
+        orchestrationBoardId: "orchestration-board-trace-review",
+        observabilityMappingId: "observability-mapping-approval-active",
+        observabilitySignalIds: [
+          "observability-signal-owner",
+          "observability-signal-queue",
+          "observability-signal-escalation-closeout"
+        ],
+        commandActionIds: [
+          "command-focus-lifecycle-review-packet",
+          "command-focus-materialization-validator-bridge",
+          "command-focus-materialization-failure-path"
+        ],
+        fromArtifactIds: [artifactIds.outputManifest],
+        toArtifactIds: [artifactIds.checksumManifest],
+        blockedBy: outputHandoffStatus === "blocked" ? ["staged outputs remain metadata-only"] : []
+      }),
+      createHandoff({
+        key: "checksum-to-seal",
+        label: "Checksum proof -> seal and integrity manifests",
+        status: sealHandoffStatus,
+        handoffSummary: sealHandoffSummary,
+        taskId: bundleSealTaskId,
+        reviewPacketStepId: `${reviewPacketId}-checksum-to-seal`,
+        validatorReadoutId: `${validatorBridgeId}-bundle-sealing`,
+        deliveryChainStageId: "delivery-chain-promotion-readiness",
+        windowId: "window-review-board",
+        sharedStateLaneId: "shared-state-lane-preview-review",
+        orchestrationBoardId: "orchestration-board-preview-review",
+        observabilityMappingId: "observability-mapping-lifecycle-preview",
+        observabilitySignalIds: [
+          "observability-signal-owner",
+          "observability-signal-lane-board",
+          "observability-signal-mapped-windows"
+        ],
+        commandActionIds: [
+          "command-focus-lifecycle-review-packet",
+          "command-focus-materialization-validator-bridge",
+          "command-focus-materialization-failure-path",
+          "command-focus-publish-decision-gate"
+        ],
+        fromArtifactIds: [artifactIds.checksumManifest],
+        toArtifactIds: [artifactIds.sealManifest, artifactIds.integrityManifest],
+        blockedBy:
+          sealHandoffStatus === "blocked"
+            ? ["bundle sealing remains metadata-only", "host-side execution remains disabled"]
+            : []
+      })
+    ],
+    blockedBy: [
+      "artifact handoff ledger remains review-only",
+      "staged outputs remain metadata-only",
+      "bundle sealing remains metadata-only",
+      "host-side execution remains disabled"
+    ]
+  };
 }
 
 function createPackagedAppMaterializationValidatorReadout({
@@ -2475,6 +2837,41 @@ function buildPackagedAppLocalMaterializationContract({ generatedAt }) {
           bundleIntegrity: "future/sealed-bundles/windows/bundle-integrity-manifest.json",
           integrityContract: "future/sealed-bundles/windows/integrity-contract.json"
         },
+        artifactLedger: createPackagedAppMaterializationArtifactLedger({
+          idPrefix: "windows",
+          platformLabel: "Windows",
+          taskState: "reviewing",
+          summary:
+            "Windows keeps built renderer and Electron inputs, directory verification, staged-output manifests, and seal/integrity metadata in one local-only artifact ledger so the active checksum handoff can be traced back to concrete snapshot inputs.",
+          activeHandoff: "output-to-checksum",
+          nextHandoff: "checksum-to-seal",
+          directoryTaskId: "local-materialization-task-windows-directory",
+          stagedOutputTaskId: "local-materialization-task-windows-staged-output",
+          bundleSealTaskId: "local-materialization-task-windows-bundle-seal",
+          materializationRoot: "future/packaged-app/windows/OpenClaw Studio",
+          verificationManifestPath: "future/packaged-app/windows/materialization-manifest.json",
+          outputManifestPath: "future/staged-output/windows/output-manifest.json",
+          checksumManifestPath: "future/staged-output/windows/checksum-manifest.json",
+          sealManifestPath: "future/sealed-bundles/windows/bundle-seal-manifest.json",
+          integrityManifestPath: "future/sealed-bundles/windows/bundle-integrity-manifest.json",
+          directoryArtifactStatus: "ready",
+          outputArtifactStatus: "watch",
+          checksumArtifactStatus: "watch",
+          sealArtifactStatus: "ready",
+          integrityArtifactStatus: "ready",
+          snapshotHandoffStatus: "ready",
+          snapshotHandoffSummary:
+            "Renderer and Electron snapshot inputs are already frozen against the Windows package root, so directory verification can be re-read from concrete local build artifacts.",
+          directoryHandoffStatus: "ready",
+          directoryHandoffSummary:
+            "Windows directory verification has already handed off into the staged-output lane, so the output manifest can still be traced back to the same package-root proof.",
+          outputHandoffStatus: "watch",
+          outputHandoffSummary:
+            "Windows is actively comparing the output manifest and checksum proof so staged-output posture stays inspectable before any seal metadata can advance.",
+          sealHandoffStatus: "blocked",
+          sealHandoffSummary:
+            "The checksum-to-seal handoff is declared, but Windows still stops at metadata-only seal and integrity manifests while host-side execution stays disabled."
+        }),
         stagedOutputChain: {
           id: "local-materialization-staged-output-chain-windows",
           label: "Windows staged-output chain",
@@ -2749,6 +3146,41 @@ function buildPackagedAppLocalMaterializationContract({ generatedAt }) {
           bundleIntegrity: "future/sealed-bundles/macos/bundle-integrity-manifest.json",
           integrityContract: "future/sealed-bundles/macos/integrity-contract.json"
         },
+        artifactLedger: createPackagedAppMaterializationArtifactLedger({
+          idPrefix: "macos",
+          platformLabel: "macOS",
+          taskState: "review-ready",
+          summary:
+            "macOS keeps built renderer and Electron inputs, .app verification proof, staged-output manifests, and seal/integrity metadata in one local-only artifact ledger so the future staged-output lane already has a concrete source chain.",
+          activeHandoff: "snapshot-to-directory",
+          nextHandoff: "directory-to-output",
+          directoryTaskId: "local-materialization-task-macos-directory",
+          stagedOutputTaskId: "local-materialization-task-macos-staged-output",
+          bundleSealTaskId: "local-materialization-task-macos-bundle-seal",
+          materializationRoot: "future/packaged-app/macos/OpenClaw Studio.app",
+          verificationManifestPath: "future/packaged-app/macos/materialization-manifest.json",
+          outputManifestPath: "future/staged-output/macos/output-manifest.json",
+          checksumManifestPath: "future/staged-output/macos/checksum-manifest.json",
+          sealManifestPath: "future/sealed-bundles/macos/bundle-seal-manifest.json",
+          integrityManifestPath: "future/sealed-bundles/macos/bundle-integrity-manifest.json",
+          directoryArtifactStatus: "watch",
+          outputArtifactStatus: "ready",
+          checksumArtifactStatus: "ready",
+          sealArtifactStatus: "ready",
+          integrityArtifactStatus: "ready",
+          snapshotHandoffStatus: "watch",
+          snapshotHandoffSummary:
+            "Renderer and Electron snapshot inputs are ready, but macOS still keeps the .app verification handoff as the active local pickup surface before staged-output review begins.",
+          directoryHandoffStatus: "ready",
+          directoryHandoffSummary:
+            "Once the .app verification handoff closes, the same directory proof feeds the output manifest without requiring a real app bundle.",
+          outputHandoffStatus: "ready",
+          outputHandoffSummary:
+            "macOS already declares the output-to-checksum proof chain so staged-output continuity can be reviewed ahead of the active directory checkpoint.",
+          sealHandoffStatus: "blocked",
+          sealHandoffSummary:
+            "The checksum-to-seal handoff is declared, but the seal lane still stops at metadata while signing and notarization remain review-only."
+        }),
         stagedOutputChain: {
           id: "local-materialization-staged-output-chain-macos",
           label: "macOS staged-output chain",
@@ -3023,6 +3455,41 @@ function buildPackagedAppLocalMaterializationContract({ generatedAt }) {
           bundleIntegrity: "future/sealed-bundles/linux/bundle-integrity-manifest.json",
           integrityContract: "future/sealed-bundles/linux/integrity-contract.json"
         },
+        artifactLedger: createPackagedAppMaterializationArtifactLedger({
+          idPrefix: "linux",
+          platformLabel: "Linux",
+          taskState: "review-ready",
+          summary:
+            "Linux keeps built renderer and Electron inputs, package-root verification, staged-output manifests, and seal/integrity metadata in one local-only artifact ledger so the package-root checkpoint is already tied to concrete snapshot inputs.",
+          activeHandoff: "snapshot-to-directory",
+          nextHandoff: "directory-to-output",
+          directoryTaskId: "local-materialization-task-linux-directory",
+          stagedOutputTaskId: "local-materialization-task-linux-staged-output",
+          bundleSealTaskId: "local-materialization-task-linux-bundle-seal",
+          materializationRoot: "future/packaged-app/linux/openclaw-studio",
+          verificationManifestPath: "future/packaged-app/linux/materialization-manifest.json",
+          outputManifestPath: "future/staged-output/linux/output-manifest.json",
+          checksumManifestPath: "future/staged-output/linux/checksum-manifest.json",
+          sealManifestPath: "future/sealed-bundles/linux/bundle-seal-manifest.json",
+          integrityManifestPath: "future/sealed-bundles/linux/bundle-integrity-manifest.json",
+          directoryArtifactStatus: "watch",
+          outputArtifactStatus: "ready",
+          checksumArtifactStatus: "ready",
+          sealArtifactStatus: "ready",
+          integrityArtifactStatus: "ready",
+          snapshotHandoffStatus: "watch",
+          snapshotHandoffSummary:
+            "Renderer and Electron snapshot inputs are ready, but Linux still keeps the package-root verification handoff as the active local checkpoint before staged-output review begins.",
+          directoryHandoffStatus: "ready",
+          directoryHandoffSummary:
+            "Once the package-root verification handoff closes, the same directory proof feeds the output manifest without emitting any package target.",
+          outputHandoffStatus: "ready",
+          outputHandoffSummary:
+            "Linux already declares the output-to-checksum proof chain so staged-output continuity can be reviewed ahead of the active directory checkpoint.",
+          sealHandoffStatus: "blocked",
+          sealHandoffSummary:
+            "The checksum-to-seal handoff is declared, but the seal lane still stops at metadata while downstream package publication remains blocked."
+        }),
         stagedOutputChain: {
           id: "local-materialization-staged-output-chain-linux",
           label: "Linux staged-output chain",

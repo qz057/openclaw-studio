@@ -2519,9 +2519,9 @@ const mockCommandSurface: StudioCommandSurface = {
         },
         {
           id: "deck-lane-review-deck-materialization-failure",
-          label: "Materialization Failure Route",
+          label: "Materialization Review Route",
           summary:
-            "Keep validator bridge, failure path, publish gate, and rollback closeout visible together so promotion-readiness review can inspect failure posture without leaving the same local-only command lane.",
+            "Keep the review packet, validator bridge, failure path, publish gate, and rollback closeout visible together so materialization handoffs can be inspected from source snapshot through blocked seal posture without leaving the same local-only command lane.",
           tone: "warning",
           actionIds: [
             "command-stage-review-window",

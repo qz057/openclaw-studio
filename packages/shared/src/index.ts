@@ -952,6 +952,12 @@ export type StudioReleasePackagedAppLocalMaterializationSegmentKind = "directory
 export type StudioReleasePackagedAppLocalMaterializationSegmentStatus = "completed" | "active" | "up-next" | "blocked";
 export type StudioReleasePackagedAppBundleSealingCheckpointStatus = "ready" | "watch" | "blocked";
 export type StudioReleasePackagedAppMaterializationValidatorStatus = "ready" | "watch" | "blocked";
+export type StudioReleasePackagedAppMaterializationArtifactKind =
+  | "snapshot-input"
+  | "directory-proof"
+  | "staged-output-proof"
+  | "seal-proof";
+export type StudioReleasePackagedAppMaterializationArtifactStatus = "ready" | "watch" | "blocked";
 
 export interface StudioReleasePackagedAppMaterializationContractLocalRoots {
   materializationRoot: string;
@@ -965,6 +971,50 @@ export interface StudioReleasePackagedAppMaterializationContractManifests {
   bundleSeal: string;
   bundleIntegrity: string;
   integrityContract: string;
+}
+
+export interface StudioReleasePackagedAppMaterializationArtifactLedgerArtifact {
+  id: string;
+  label: string;
+  kind: StudioReleasePackagedAppMaterializationArtifactKind;
+  status: StudioReleasePackagedAppMaterializationArtifactStatus;
+  path: string;
+  detail: string;
+  taskId: string;
+  deliveryChainStageId: string;
+}
+
+export interface StudioReleasePackagedAppMaterializationArtifactLedgerHandoff {
+  id: string;
+  label: string;
+  status: StudioReleasePackagedAppMaterializationArtifactStatus;
+  summary: string;
+  taskId: string;
+  reviewPacketStepId: string;
+  validatorReadoutId: string;
+  deliveryChainStageId: string;
+  windowId: string;
+  sharedStateLaneId: string;
+  orchestrationBoardId: string;
+  observabilityMappingId: string;
+  observabilitySignalIds: string[];
+  commandDeckLaneId: string;
+  commandActionIds: string[];
+  fromArtifactIds: string[];
+  toArtifactIds: string[];
+  blockedBy: string[];
+}
+
+export interface StudioReleasePackagedAppMaterializationArtifactLedger {
+  id: string;
+  label: string;
+  taskState: StudioReleasePackagedAppMaterializationTaskState;
+  summary: string;
+  activeHandoffId: string;
+  nextHandoffId: string | null;
+  artifacts: StudioReleasePackagedAppMaterializationArtifactLedgerArtifact[];
+  handoffs: StudioReleasePackagedAppMaterializationArtifactLedgerHandoff[];
+  blockedBy: string[];
 }
 
 export interface StudioReleasePackagedAppMaterializationContractTask {
@@ -1153,6 +1203,7 @@ export interface StudioReleasePackagedAppMaterializationContractPlatform {
   reviewChecks: string[];
   localRoots: StudioReleasePackagedAppMaterializationContractLocalRoots;
   manifests: StudioReleasePackagedAppMaterializationContractManifests;
+  artifactLedger: StudioReleasePackagedAppMaterializationArtifactLedger;
   stagedOutputChain: StudioReleasePackagedAppStagedOutputChain;
   reviewPacket: StudioReleasePackagedAppMaterializationReviewPacket;
   bundleSealingReadiness: StudioReleasePackagedAppBundleSealingReadiness;
@@ -2343,6 +2394,10 @@ export {
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleasePackagedAppMaterializationContractPlatform,
   selectStudioReleasePackagedAppMaterializationContractTask,
+  selectStudioReleasePackagedAppMaterializationContractArtifactLedger,
+  selectStudioReleasePackagedAppMaterializationContractArtifactLedgerHandoff,
+  selectStudioReleasePackagedAppMaterializationContractNextArtifactLedgerHandoff,
+  selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch,
   selectStudioReleasePackagedAppMaterializationContractStagedOutputChain,
   selectStudioReleasePackagedAppMaterializationContractStagedOutputStep,
   selectStudioReleasePackagedAppMaterializationContractStagedOutputNextStep,

@@ -5,6 +5,7 @@ import {
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseEscalationWindow,
+  selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch,
   selectStudioReleasePackagedAppMaterializationContractFailureSurfaceMatch,
   selectStudioReleasePackagedAppMaterializationContractPlatform,
   selectStudioReleasePackagedAppMaterializationContractValidatorObservabilitySurfaceMatch,
@@ -217,6 +218,17 @@ function formatMaterializationValidatorStatus(status: "ready" | "watch" | "block
       return "Watch";
     default:
       return "Blocked";
+  }
+}
+
+function resolveMaterializationValidatorTone(status: "ready" | "watch" | "blocked"): "positive" | "neutral" | "warning" {
+  switch (status) {
+    case "ready":
+      return "positive";
+    case "watch":
+      return "neutral";
+    default:
+      return "warning";
   }
 }
 
@@ -464,6 +476,16 @@ export function WindowSharedStateBoard({
         releaseApprovalPipeline.deliveryChain,
         windowing,
         reviewStateContinuity,
+        activeMaterializationPlatform?.id
+      )
+    : null;
+  const activeMaterializationArtifactSurface = releaseApprovalPipeline
+    ? selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch(
+        releaseApprovalPipeline.deliveryChain,
+        windowing,
+        reviewStateContinuity,
+        actionDeck,
+        reviewSurfaceActions,
         activeMaterializationPlatform?.id
       )
     : null;
@@ -1229,6 +1251,113 @@ export function WindowSharedStateBoard({
                   <div key={check} className="windowing-preview-line windowing-preview-line--stacked">
                     <span>Validator check</span>
                     <strong>{check}</strong>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </article>
+        ) : null}
+
+        {releaseApprovalPipeline ? (
+          <article className="windowing-summary-card">
+            <span>Materialization Artifact Ledger</span>
+            <strong>
+              {activeMaterializationPlatform
+                ? `${formatPackagedAppPlatform(activeMaterializationPlatform.platform)} / ${
+                    activeMaterializationArtifactSurface?.activeHandoff?.label ??
+                    activeMaterializationArtifactSurface?.artifactLedger?.label ??
+                    "No artifact handoff"
+                  }`
+                : "No artifact ledger"}
+            </strong>
+            <p>
+              {activeMaterializationArtifactSurface?.artifactLedger?.summary ??
+                "Artifact-facing materialization continuity is unavailable, so this board cannot show how built local snapshot inputs feed directory verification, staged-output manifests, and seal metadata."}
+            </p>
+            <div className="workflow-readiness-list">
+              <div
+                className={`workflow-readiness-line workflow-readiness-line--${
+                  activeMaterializationArtifactSurface?.activeHandoff
+                    ? resolveMaterializationValidatorTone(activeMaterializationArtifactSurface.activeHandoff.status)
+                    : "warning"
+                }`}
+              >
+                <span>Current handoff</span>
+                <strong>
+                  {activeMaterializationArtifactSurface?.activeHandoff
+                    ? `${activeMaterializationArtifactSurface.activeHandoff.label} / ${formatMaterializationValidatorStatus(
+                        activeMaterializationArtifactSurface.activeHandoff.status
+                      )}`
+                    : "Unavailable"}
+                </strong>
+              </div>
+              <div
+                className={`workflow-readiness-line workflow-readiness-line--${
+                  activeMaterializationArtifactSurface?.nextHandoff
+                    ? resolveMaterializationValidatorTone(activeMaterializationArtifactSurface.nextHandoff.status)
+                    : "warning"
+                }`}
+              >
+                <span>Next handoff</span>
+                <strong>
+                  {activeMaterializationArtifactSurface?.nextHandoff
+                    ? `${activeMaterializationArtifactSurface.nextHandoff.label} / ${formatMaterializationValidatorStatus(
+                        activeMaterializationArtifactSurface.nextHandoff.status
+                      )}`
+                    : activeMaterializationArtifactSurface?.artifactLedger
+                      ? "Final artifact handoff"
+                      : "Unavailable"}
+                </strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Artifact counts</span>
+                <strong>
+                  {activeMaterializationArtifactSurface?.artifactLedger
+                    ? `${activeMaterializationArtifactSurface.sourceArtifacts.length} source / ${activeMaterializationArtifactSurface.targetArtifacts.length} target`
+                    : "Unavailable"}
+                </strong>
+              </div>
+              <div className="workflow-readiness-line workflow-readiness-line--neutral">
+                <span>Surface continuity</span>
+                <strong>
+                  {activeMaterializationArtifactSurface?.reviewStateContinuityEntry?.label ??
+                    (activeMaterializationArtifactSurface?.activeHandoff
+                      ? `${activeMaterializationArtifactSurface.window?.label ?? activeMaterializationArtifactSurface.activeHandoff.windowId} / ${
+                          activeMaterializationArtifactSurface.board?.label ??
+                          activeMaterializationArtifactSurface.activeHandoff.orchestrationBoardId
+                        }`
+                      : "Unavailable")}
+                </strong>
+              </div>
+            </div>
+            {activeMaterializationArtifactSurface?.activeHandoff ? (
+              <div className="windowing-preview-list">
+                <div className="windowing-preview-line windowing-preview-line--stacked">
+                  <span>Current handoff summary</span>
+                  <strong>{activeMaterializationArtifactSurface.activeHandoff.summary}</strong>
+                </div>
+                <div className="windowing-preview-line windowing-preview-line--stacked">
+                  <span>Window / lane / board</span>
+                  <strong>
+                    {activeMaterializationArtifactSurface.window?.label ?? activeMaterializationArtifactSurface.activeHandoff.windowId}
+                    {" -> "}
+                    {activeMaterializationArtifactSurface.lane?.label ?? activeMaterializationArtifactSurface.activeHandoff.sharedStateLaneId}
+                    {" -> "}
+                    {activeMaterializationArtifactSurface.board?.label ?? activeMaterializationArtifactSurface.activeHandoff.orchestrationBoardId}
+                  </strong>
+                </div>
+                {activeMaterializationArtifactSurface.sourceArtifacts.map((artifact) => (
+                  <div key={artifact.id} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Source artifact</span>
+                    <strong>{artifact.label}</strong>
+                    <p>{artifact.path}</p>
+                  </div>
+                ))}
+                {activeMaterializationArtifactSurface.targetArtifacts.map((artifact) => (
+                  <div key={artifact.id} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Target artifact</span>
+                    <strong>{artifact.label}</strong>
+                    <p>{artifact.path}</p>
                   </div>
                 ))}
               </div>

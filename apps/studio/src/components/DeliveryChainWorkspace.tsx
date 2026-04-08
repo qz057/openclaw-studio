@@ -6,6 +6,10 @@ import {
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseEscalationWindow,
+  selectStudioReleasePackagedAppMaterializationContractArtifactLedger,
+  selectStudioReleasePackagedAppMaterializationContractArtifactLedgerHandoff,
+  selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch,
+  selectStudioReleasePackagedAppMaterializationContractNextArtifactLedgerHandoff,
   selectStudioReleasePackagedAppMaterializationContractBundleSealingCheckpoint,
   selectStudioReleasePackagedAppMaterializationContractBundleSealingReadiness,
   selectStudioReleasePackagedAppMaterializationContractFailurePath,
@@ -1552,6 +1556,7 @@ export function DeliveryChainWorkspace({
   const [selectedArtifactGroupId, setSelectedArtifactGroupId] = useState<string | null>(null);
   const [selectedMaterializationPlatformId, setSelectedMaterializationPlatformId] = useState<string | null>(null);
   const [selectedMaterializationTaskId, setSelectedMaterializationTaskId] = useState<string | null>(null);
+  const [selectedArtifactHandoffId, setSelectedArtifactHandoffId] = useState<string | null>(null);
   const [selectedStagedOutputStepId, setSelectedStagedOutputStepId] = useState<string | null>(null);
   const [selectedReviewPacketStepId, setSelectedReviewPacketStepId] = useState<string | null>(null);
   const [selectedValidatorReadoutId, setSelectedValidatorReadoutId] = useState<string | null>(null);
@@ -1683,6 +1688,23 @@ export function DeliveryChainWorkspace({
   }, [selectedMaterializationPlatform, selectedMaterializationTaskId]);
 
   useEffect(() => {
+    if (!selectedMaterializationPlatform?.artifactLedger.handoffs.length) {
+      if (selectedArtifactHandoffId !== null) {
+        setSelectedArtifactHandoffId(null);
+      }
+
+      return;
+    }
+
+    if (
+      !selectedArtifactHandoffId ||
+      !selectedMaterializationPlatform.artifactLedger.handoffs.some((handoff) => handoff.id === selectedArtifactHandoffId)
+    ) {
+      setSelectedArtifactHandoffId(selectedMaterializationPlatform.artifactLedger.activeHandoffId);
+    }
+  }, [selectedArtifactHandoffId, selectedMaterializationPlatform]);
+
+  useEffect(() => {
     if (!selectedMaterializationPlatform?.stagedOutputChain.steps.length) {
       if (selectedStagedOutputStepId !== null) {
         setSelectedStagedOutputStepId(null);
@@ -1739,6 +1761,31 @@ export function DeliveryChainWorkspace({
       selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId,
       selectedMaterializationTaskId
     ) ?? null;
+  const selectedArtifactLedger =
+    selectStudioReleasePackagedAppMaterializationContractArtifactLedger(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
+    ) ?? null;
+  const selectedArtifactHandoff =
+    selectStudioReleasePackagedAppMaterializationContractArtifactLedgerHandoff(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId,
+      selectedArtifactHandoffId
+    ) ?? null;
+  const nextArtifactHandoff =
+    selectStudioReleasePackagedAppMaterializationContractNextArtifactLedgerHandoff(
+      pipeline.deliveryChain,
+      selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
+    ) ?? null;
+  const artifactLedgerSurfaceMatch = selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch(
+    pipeline.deliveryChain,
+    windowing,
+    reviewStateContinuity,
+    actionDeck,
+    reviewSurfaceActions,
+    selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId,
+    selectedArtifactHandoffId
+  );
   const selectedStagedOutputChain =
     selectStudioReleasePackagedAppMaterializationContractStagedOutputChain(
       pipeline.deliveryChain,
@@ -1864,6 +1911,15 @@ export function DeliveryChainWorkspace({
   const selectedFailureStage = selectedFailureReadout
     ? selectStudioReleaseDeliveryChainStage(pipeline, selectedFailureReadout.deliveryChainStageId) ?? null
     : null;
+  const selectedArtifactHandoffStage = selectedArtifactHandoff
+    ? selectStudioReleaseDeliveryChainStage(pipeline, selectedArtifactHandoff.deliveryChainStageId) ?? null
+    : null;
+  const artifactLedgerReadyCount =
+    selectedArtifactLedger?.artifacts.filter((artifact) => artifact.status === "ready").length ?? 0;
+  const artifactLedgerWatchCount =
+    selectedArtifactLedger?.artifacts.filter((artifact) => artifact.status === "watch").length ?? 0;
+  const artifactLedgerBlockedCount =
+    selectedArtifactLedger?.artifacts.filter((artifact) => artifact.status === "blocked").length ?? 0;
   const materializationReviewReadyCount =
     selectedMaterializationPlatform?.tasks.filter((task) => task.taskState === "review-ready").length ?? 0;
   const materializationBlockedCount =
@@ -1931,6 +1987,7 @@ export function DeliveryChainWorkspace({
           ? resolveStageTone(nearbyMaterializationRollbackContract.status)
           : "warning";
   const materializationStageCReadoutPath = [
+    selectedArtifactHandoff?.label ?? selectedArtifactLedger?.label ?? null,
     selectedReviewPacketStep?.label ?? selectedReviewPacket?.label ?? null,
     selectedValidatorReadout?.label ?? selectedValidatorBridge?.label ?? null,
     selectedFailureReadout?.label ?? selectedFailurePath?.label ?? null,
@@ -1941,6 +1998,32 @@ export function DeliveryChainWorkspace({
     .join(" -> ");
   const materializationStageCReadoutCards: MaterializationStageCReadoutCard[] = selectedMaterializationPlatform
     ? [
+        {
+          id: "artifact-ledger",
+          label: "Artifact ledger",
+          title: selectedArtifactHandoff?.label ?? selectedArtifactLedger?.label ?? "No artifact ledger",
+          status: selectedArtifactHandoff
+            ? formatValidatorReadoutStatus(selectedArtifactHandoff.status)
+            : selectedArtifactLedger
+              ? formatMaterializationTaskState(selectedArtifactLedger.taskState)
+              : "Unavailable",
+          detail: selectedArtifactHandoff
+            ? `${artifactLedgerSurfaceMatch.sourceArtifacts.length} source -> ${artifactLedgerSurfaceMatch.targetArtifacts.length} target / ${
+                selectedArtifactHandoff.summary
+              }`
+            : selectedArtifactLedger?.summary ?? "No source-to-seal artifact handoff ledger is available for the selected platform.",
+          tone: selectedArtifactHandoff
+            ? resolveValidatorReadoutTone(selectedArtifactHandoff.status)
+            : resolveMaterializationTaskTone(selectedArtifactLedger?.taskState ?? "blocked"),
+          stageLabel: selectedArtifactHandoffStage
+            ? `${selectedArtifactHandoffStage.label} / ${selectedArtifactHandoffStage.status}`
+            : "No linked stage",
+          badges: [
+            artifactLedgerSurfaceMatch.observabilityMapping?.label ?? null,
+            selectedArtifactHandoff ? `${artifactLedgerSurfaceMatch.artifacts.length} tracked artifacts` : null,
+            nextArtifactHandoff ? `Next ${nextArtifactHandoff.label}` : selectedArtifactLedger ? "Final artifact handoff" : null
+          ].filter((badge): badge is string => Boolean(badge))
+        },
         {
           id: "packet-handoff",
           label: "Packet handoff",
@@ -6561,6 +6644,69 @@ export function DeliveryChainWorkspace({
                       : "Final checkpoint"}
                   </strong>
                 </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveMaterializationTaskTone(selectedArtifactLedger?.taskState ?? "blocked")}`}>
+                  <span>Artifact handoff ledger</span>
+                  <strong>
+                    {selectedArtifactLedger
+                      ? `${formatMaterializationTaskState(selectedArtifactLedger.taskState)} / ${selectedArtifactLedger.artifacts.length} artifacts`
+                      : "Unavailable"}
+                  </strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveValidatorReadoutTone(selectedArtifactHandoff?.status ?? "blocked")}`}>
+                  <span>Current artifact handoff</span>
+                  <strong>
+                    {selectedArtifactHandoff
+                      ? `${selectedArtifactHandoff.label} / ${formatValidatorReadoutStatus(selectedArtifactHandoff.status)}`
+                      : "Unavailable"}
+                  </strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveValidatorReadoutTone(nextArtifactHandoff?.status ?? "blocked")}`}>
+                  <span>Next artifact handoff</span>
+                  <strong>
+                    {nextArtifactHandoff
+                      ? `${nextArtifactHandoff.label} / ${formatValidatorReadoutStatus(nextArtifactHandoff.status)}`
+                      : selectedArtifactLedger
+                        ? "Final artifact handoff"
+                        : "Unavailable"}
+                  </strong>
+                </div>
+                <div
+                  className={`workflow-readiness-line workflow-readiness-line--${
+                    artifactLedgerSurfaceMatch.reviewStateContinuityEntry?.tone ??
+                    artifactLedgerSurfaceMatch.observabilityMapping?.tone ??
+                    "warning"
+                  }`}
+                >
+                  <span>Artifact surface match</span>
+                  <strong>
+                    {artifactLedgerSurfaceMatch.observabilityMapping
+                      ? `${artifactLedgerSurfaceMatch.observabilityMapping.label} / ${formatReviewPostureRelationship(
+                          artifactLedgerSurfaceMatch.observabilityMapping.relationship
+                        )}`
+                      : selectedArtifactHandoff
+                        ? `${artifactLedgerSurfaceMatch.window?.label ?? selectedArtifactHandoff.windowId} / ${
+                            artifactLedgerSurfaceMatch.lane?.label ?? selectedArtifactHandoff.sharedStateLaneId
+                          }`
+                        : "Unavailable"}
+                  </strong>
+                </div>
+                <div
+                  className={`workflow-readiness-line workflow-readiness-line--${
+                    artifactLedgerSurfaceMatch.reviewStateContinuityEntry?.tone ??
+                    artifactLedgerSurfaceMatch.observabilityMapping?.tone ??
+                    "warning"
+                  }`}
+                >
+                  <span>Artifact continuity</span>
+                  <strong>
+                    {artifactLedgerSurfaceMatch.reviewStateContinuityEntry?.label ??
+                      (selectedArtifactHandoff
+                        ? `${artifactLedgerSurfaceMatch.window?.label ?? selectedArtifactHandoff.windowId} / ${
+                            artifactLedgerSurfaceMatch.board?.label ?? selectedArtifactHandoff.orchestrationBoardId
+                          }`
+                        : "Unavailable")}
+                  </strong>
+                </div>
                 <div className={`workflow-readiness-line workflow-readiness-line--${resolveMaterializationTaskTone(selectedStagedOutputStep?.taskState ?? "blocked")}`}>
                   <span>Staged-output posture</span>
                   <strong>
@@ -6832,6 +6978,74 @@ export function DeliveryChainWorkspace({
                   })}
                 </div>
               ) : null}
+              {selectedArtifactLedger ? (
+                <div className="delivery-chain-workspace__artifact-groups">
+                  {selectedArtifactLedger.handoffs.map((handoff) => {
+                    const linkedStage = selectStudioReleaseDeliveryChainStage(pipeline, handoff.deliveryChainStageId);
+                    const active = handoff.id === selectedArtifactHandoff?.id;
+                    const next = handoff.id === nextArtifactHandoff?.id && !active;
+
+                    return (
+                      <button
+                        key={handoff.id}
+                        type="button"
+                        className={active ? "windowing-card windowing-card--active" : "windowing-card"}
+                        onClick={() => {
+                          setSelectedArtifactHandoffId(handoff.id);
+                        }}
+                      >
+                        <span>{handoff.label}</span>
+                        <strong>{formatValidatorReadoutStatus(handoff.status)}</strong>
+                        <p>{handoff.summary}</p>
+                        <div className="windowing-card__meta">
+                          <span
+                            className={`windowing-badge${
+                              resolveValidatorReadoutTone(handoff.status) === "positive" || active ? " windowing-badge--active" : ""
+                            }`}
+                          >
+                            {linkedStage?.label ?? handoff.deliveryChainStageId}
+                          </span>
+                          <span className="windowing-badge">{handoff.fromArtifactIds.length} source</span>
+                          <span className="windowing-badge">{handoff.toArtifactIds.length} target</span>
+                          {next ? <span className="windowing-badge">Next handoff</span> : null}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
+              {selectedArtifactHandoff ? (
+                <div className="delivery-chain-workspace__artifact-groups">
+                  <div className="windowing-card">
+                    <span>Source artifacts</span>
+                    <strong>{artifactLedgerSurfaceMatch.sourceArtifacts.length} linked inputs</strong>
+                    <p>
+                      {artifactLedgerSurfaceMatch.sourceArtifacts.map((artifact) => artifact.label).join(" / ") || "No source artifacts"}
+                    </p>
+                  </div>
+                  <div className="windowing-card">
+                    <span>Target artifacts</span>
+                    <strong>{artifactLedgerSurfaceMatch.targetArtifacts.length} linked outputs</strong>
+                    <p>
+                      {artifactLedgerSurfaceMatch.targetArtifacts.map((artifact) => artifact.label).join(" / ") || "No target artifacts"}
+                    </p>
+                  </div>
+                  <div className="windowing-card">
+                    <span>Artifact continuity surface</span>
+                    <strong>
+                      {artifactLedgerSurfaceMatch.observabilityMapping
+                        ? `${artifactLedgerSurfaceMatch.observabilityMapping.label} / ${formatReviewPostureRelationship(
+                            artifactLedgerSurfaceMatch.observabilityMapping.relationship
+                          )}`
+                        : "No observability path"}
+                    </strong>
+                    <p>
+                      {artifactLedgerSurfaceMatch.reviewStateContinuityEntry?.summary ??
+                        selectedArtifactHandoff.summary}
+                    </p>
+                  </div>
+                </div>
+              ) : null}
               {selectedStagedOutputChain ? (
                 <div className="delivery-chain-workspace__artifact-groups">
                   {selectedStagedOutputChain.steps.map((step) => (
@@ -7047,6 +7261,71 @@ export function DeliveryChainWorkspace({
                     </div>
                   )
                 )}
+                {selectedArtifactLedger ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Artifact ledger summary</span>
+                    <strong>{selectedArtifactLedger.summary}</strong>
+                  </div>
+                ) : null}
+                {selectedArtifactHandoff ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Artifact handoff</span>
+                    <strong>{selectedArtifactHandoff.label} / {formatValidatorReadoutStatus(selectedArtifactHandoff.status)}</strong>
+                  </div>
+                ) : null}
+                {selectedArtifactHandoff ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Artifact handoff summary</span>
+                    <strong>{selectedArtifactHandoff.summary}</strong>
+                  </div>
+                ) : null}
+                {artifactLedgerSurfaceMatch.sourceArtifacts.map((artifact) => (
+                  <div key={artifact.id} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Source artifact</span>
+                    <strong>{artifact.label} / {artifact.path}</strong>
+                  </div>
+                ))}
+                {artifactLedgerSurfaceMatch.targetArtifacts.map((artifact) => (
+                  <div key={artifact.id} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Target artifact</span>
+                    <strong>{artifact.label} / {artifact.path}</strong>
+                  </div>
+                ))}
+                {selectedArtifactHandoff ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Artifact surface match</span>
+                    <strong>
+                      {artifactLedgerSurfaceMatch.observabilityMapping?.label ?? selectedArtifactHandoff.observabilityMappingId} /{" "}
+                      {artifactLedgerSurfaceMatch.window?.label ?? selectedArtifactHandoff.windowId} /{" "}
+                      {artifactLedgerSurfaceMatch.lane?.label ?? selectedArtifactHandoff.sharedStateLaneId}
+                    </strong>
+                  </div>
+                ) : null}
+                {artifactLedgerSurfaceMatch.reviewStateContinuityEntry ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Artifact continuity</span>
+                    <strong>
+                      {artifactLedgerSurfaceMatch.reviewStateContinuityEntry.label} /{" "}
+                      {artifactLedgerSurfaceMatch.reviewStateContinuityEntry.spine.windowId} /{" "}
+                      {artifactLedgerSurfaceMatch.reviewStateContinuityEntry.spine.sharedStateLaneId}
+                    </strong>
+                  </div>
+                ) : null}
+                {(compact
+                  ? artifactLedgerSurfaceMatch.observabilitySignals.slice(0, 2)
+                  : artifactLedgerSurfaceMatch.observabilitySignals
+                ).map((signal) => (
+                  <div key={signal.id} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Artifact observability signal</span>
+                    <strong>{signal.label} / {signal.value}</strong>
+                  </div>
+                ))}
+                {(compact ? selectedArtifactHandoff?.blockedBy.slice(0, 2) ?? [] : selectedArtifactHandoff?.blockedBy ?? []).map((blocker) => (
+                  <div key={blocker} className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Artifact handoff blocker</span>
+                    <strong>{blocker}</strong>
+                  </div>
+                ))}
                 {(compact ? selectedMaterializationTask?.evidence.slice(0, 2) ?? [] : selectedMaterializationTask?.evidence ?? []).map((artifact) => (
                   <div key={artifact} className="windowing-preview-line windowing-preview-line--stacked">
                     <span>Task evidence</span>

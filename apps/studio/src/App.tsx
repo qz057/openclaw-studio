@@ -3,6 +3,7 @@ import {
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseApprovalPipelineStage,
+  selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch,
   selectStudioReleasePackagedAppMaterializationContractBundleSealingReadiness,
   selectStudioReleasePackagedAppMaterializationContractPlatform,
   selectStudioReleasePackagedAppMaterializationContractProgress,
@@ -1187,6 +1188,15 @@ export function App() {
         return rightScore - leftScore;
       })[0] ?? null;
   const reviewCoverageActions: ReviewCoverageAction[] = data.commandSurface.actions.filter(isReviewCoverageAction);
+  const activeMaterializationArtifactSurface =
+    selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch(
+      releaseApprovalPipeline.deliveryChain,
+      data.windowing,
+      data.reviewStateContinuity,
+      activeActionDeck,
+      reviewCoverageActions,
+      activeMaterializationPlatform?.id
+    );
   const activeActionDeckActionIds = [...new Set(activeActionDeck?.lanes.flatMap((lane) => lane.actionIds) ?? [])];
   const activeActionDeckDeliveryStageIds = [
     ...new Set(activeActionDeck?.lanes.flatMap((lane) => lane.deliveryChainStageIds ?? []) ?? [])
@@ -2524,6 +2534,19 @@ export function App() {
         : "Unavailable",
       detail:
         "The packaged-app materialization contract now exposes per-platform staged-output chain steps, bundle-sealing readiness, local progression, and validator-linked observability alongside task evidence and delivery-stage linkage, so the review lane reads like one orchestrated local handoff spine instead of only flat path metadata."
+    },
+    {
+      id: "release-depth-materialization-artifact-ledger",
+      label: "Materialization Artifact Ledger",
+      value: activeMaterializationArtifactSurface.activeHandoff
+        ? `${activeMaterializationArtifactSurface.activeHandoff.label} / ${formatMaterializationValidatorStatus(
+            activeMaterializationArtifactSurface.activeHandoff.status
+          )} / ${activeMaterializationArtifactSurface.sourceArtifacts.length} -> ${
+            activeMaterializationArtifactSurface.targetArtifacts.length
+          } artifacts`
+        : "Unavailable",
+      detail:
+        "The local materialization contract now carries a source-to-seal artifact ledger that ties built renderer/Electron inputs to directory verification, staged-output manifests, and seal/integrity metadata, so the Stage Explorer, windows board, and inspector can read the same concrete handoff chain without implying execution."
     },
     {
       id: "release-depth-materialization-validator-bridge",
@@ -4511,7 +4534,7 @@ export function App() {
             onRunCompanionRouteHistory={handleRunCompanionRouteHistory}
             eyebrow="Phase60"
             title="Delivery-chain Workspace"
-            summary="Phase60 slice36 keeps the selector-backed review-state continuity contract and Stage C readiness chain in place, then deepens the same Stage Explorer with a materialization Stage C readout chain so the active local review packet handoff, validator surface match, continuity spine, and nearby QA / approval / entry / rollback posture can be re-read across the same local-only window/lane/board spine."
+            summary="Phase60 slice39 keeps the materialization packet, validator bridge, failure continuity, and Stage C linkage in place, then deepens the same Stage Explorer with a local materialization artifact ledger so built local snapshot inputs, staged-output proof, seal/integrity metadata, and matched continuity surfaces can be re-read across the same local-only window/lane/board spine."
           />
 
           <section className="surface card window-workbench">
@@ -4761,6 +4784,61 @@ export function App() {
                         <strong>{item.value}</strong>
                       </div>
                     ))}
+                  </div>
+                </article>
+                <article className="windowing-summary-card">
+                  <span>Inspector Materialization Ledger</span>
+                  <strong>
+                    {activeMaterializationArtifactSurface.activeHandoff?.label ??
+                      activeMaterializationArtifactSurface.artifactLedger?.label ??
+                      "No artifact handoff"}
+                  </strong>
+                  <p>
+                    Inspector-side materialization coverage now carries the same source-to-seal artifact handoff chain as the delivery workspace and
+                    windows board, so local snapshot inputs, staged-output proof, and blocked seal metadata stay readable from one review surface.
+                  </p>
+                  <div className="windowing-preview-list">
+                    <div className="windowing-preview-line windowing-preview-line--stacked">
+                      <span>Current handoff</span>
+                      <strong>
+                        {activeMaterializationArtifactSurface.activeHandoff
+                          ? `${activeMaterializationArtifactSurface.activeHandoff.label} / ${formatMaterializationValidatorStatus(
+                              activeMaterializationArtifactSurface.activeHandoff.status
+                            )}`
+                          : "Unavailable"}
+                      </strong>
+                      <p>{activeMaterializationArtifactSurface.activeHandoff?.summary ?? "No artifact handoff summary is available."}</p>
+                    </div>
+                    <div className="windowing-preview-line windowing-preview-line--stacked">
+                      <span>Source -> target</span>
+                      <strong>
+                        {activeMaterializationArtifactSurface.sourceArtifacts.length} source /{" "}
+                        {activeMaterializationArtifactSurface.targetArtifacts.length} target
+                      </strong>
+                      <p>
+                        {activeMaterializationArtifactSurface.sourceArtifacts
+                          .map((artifact) => artifact.label)
+                          .concat(activeMaterializationArtifactSurface.targetArtifacts.map((artifact) => artifact.label))
+                          .join(" / ") || "No artifact chain is available."}
+                      </p>
+                    </div>
+                    <div className="windowing-preview-line windowing-preview-line--stacked">
+                      <span>Continuity surface</span>
+                      <strong>
+                        {activeMaterializationArtifactSurface.observabilityMapping?.label ??
+                          activeMaterializationArtifactSurface.activeHandoff?.observabilityMappingId ??
+                          "No observability path"}
+                      </strong>
+                      <p>
+                        {activeMaterializationArtifactSurface.reviewStateContinuityEntry?.label ??
+                          (activeMaterializationArtifactSurface.activeHandoff
+                            ? `${activeMaterializationArtifactSurface.window?.label ?? activeMaterializationArtifactSurface.activeHandoff.windowId} / ${
+                                activeMaterializationArtifactSurface.lane?.label ??
+                                activeMaterializationArtifactSurface.activeHandoff.sharedStateLaneId
+                              }`
+                            : "No continuity match")}
+                      </p>
+                    </div>
                   </div>
                 </article>
                 <article className="windowing-summary-card">

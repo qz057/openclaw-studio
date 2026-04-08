@@ -5,6 +5,9 @@ import type {
   StudioReleaseApprovalPipeline,
   StudioReleaseApprovalWorkflowStage,
   StudioReleaseApprovalPipelineStage,
+  StudioReleasePackagedAppMaterializationArtifactLedger,
+  StudioReleasePackagedAppMaterializationArtifactLedgerArtifact,
+  StudioReleasePackagedAppMaterializationArtifactLedgerHandoff,
   StudioReleasePackagedAppBundleSealingCheckpoint,
   StudioReleasePackagedAppBundleSealingReadiness,
   StudioReleaseCloseoutWindow,
@@ -138,6 +141,226 @@ export function selectStudioReleasePackagedAppMaterializationContractTask(
   const taskId = typeof taskOrId === "string" ? taskOrId : taskOrId?.id ?? platform?.currentTaskId;
 
   return platform?.tasks.find((task) => task.id === taskId) ?? platform?.tasks[0];
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractArtifactLedger(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+): StudioReleasePackagedAppMaterializationArtifactLedger | undefined {
+  return selectStudioReleasePackagedAppMaterializationContractPlatform(deliveryChain, platformOrId)?.artifactLedger;
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractArtifactLedgerHandoff(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null,
+  handoffOrId?: Pick<StudioReleasePackagedAppMaterializationArtifactLedgerHandoff, "id"> | string | null
+): StudioReleasePackagedAppMaterializationArtifactLedgerHandoff | undefined {
+  const artifactLedger = selectStudioReleasePackagedAppMaterializationContractArtifactLedger(deliveryChain, platformOrId);
+  const handoffId = typeof handoffOrId === "string" ? handoffOrId : handoffOrId?.id ?? artifactLedger?.activeHandoffId;
+
+  return artifactLedger?.handoffs.find((handoff) => handoff.id === handoffId) ?? artifactLedger?.handoffs[0];
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractNextArtifactLedgerHandoff(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+): StudioReleasePackagedAppMaterializationArtifactLedgerHandoff | undefined {
+  const artifactLedger = selectStudioReleasePackagedAppMaterializationContractArtifactLedger(deliveryChain, platformOrId);
+
+  if (!artifactLedger?.nextHandoffId) {
+    return undefined;
+  }
+
+  return artifactLedger.handoffs.find((handoff) => handoff.id === artifactLedger.nextHandoffId);
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  windowing?: Pick<StudioWindowing, "observability" | "roster" | "sharedState" | "orchestration"> | null,
+  reviewStateContinuity?: Pick<StudioReviewStateContinuity, "entries" | "activeEntryId"> | null,
+  actionDeck?: Pick<StudioCommandActionDeck, "lanes"> | null,
+  reviewSurfaceActions?: StudioCommandAction[] | null,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null,
+  handoffOrId?: Pick<StudioReleasePackagedAppMaterializationArtifactLedgerHandoff, "id"> | string | null
+): {
+  artifactLedger: StudioReleasePackagedAppMaterializationArtifactLedger | null;
+  activeHandoff: StudioReleasePackagedAppMaterializationArtifactLedgerHandoff | null;
+  nextHandoff: StudioReleasePackagedAppMaterializationArtifactLedgerHandoff | null;
+  artifacts: StudioReleasePackagedAppMaterializationArtifactLedgerArtifact[];
+  sourceArtifacts: StudioReleasePackagedAppMaterializationArtifactLedgerArtifact[];
+  targetArtifacts: StudioReleasePackagedAppMaterializationArtifactLedgerArtifact[];
+  reviewPacketStep: StudioReleasePackagedAppMaterializationReviewPacketStep | null;
+  validatorReadout: StudioReleasePackagedAppMaterializationValidatorObservabilityReadout | null;
+  primaryAction: (StudioCommandAction &
+    {
+      kind: "focus-review-coverage";
+    } &
+    Required<
+      Pick<
+        StudioCommandAction,
+        "reviewSurfaceKind" | "deliveryChainStageId" | "windowId" | "sharedStateLaneId" | "orchestrationBoardId" | "observabilityMappingId"
+      >
+    >) | null;
+  commandPreviewActions: Array<
+    StudioCommandAction &
+      {
+        kind: "focus-review-coverage";
+      } &
+      Required<
+        Pick<
+          StudioCommandAction,
+          "reviewSurfaceKind" | "deliveryChainStageId" | "windowId" | "sharedStateLaneId" | "orchestrationBoardId" | "observabilityMappingId"
+        >
+      >
+  >;
+  commandDeckLane: StudioCommandActionDeck["lanes"][number] | null;
+  observabilityMapping: StudioWindowObservabilityMapping | null;
+  observabilitySignals: StudioWindowObservabilitySignal[];
+  window: StudioWindowRosterEntry | null;
+  lane: StudioWindowSharedStateLane | null;
+  board: StudioWindowOrchestrationBoard | null;
+  reviewStateContinuityEntry: StudioReviewStateContinuityEntry | null;
+} {
+  const artifactLedger = selectStudioReleasePackagedAppMaterializationContractArtifactLedger(deliveryChain, platformOrId) ?? null;
+  const activeHandoff =
+    selectStudioReleasePackagedAppMaterializationContractArtifactLedgerHandoff(deliveryChain, platformOrId, handoffOrId) ?? null;
+  const nextHandoff = selectStudioReleasePackagedAppMaterializationContractNextArtifactLedgerHandoff(deliveryChain, platformOrId) ?? null;
+  const artifacts = artifactLedger?.artifacts ?? [];
+  const sourceArtifacts = activeHandoff
+    ? activeHandoff.fromArtifactIds
+        .map((artifactId) => artifacts.find((artifact) => artifact.id === artifactId) ?? null)
+        .filter((artifact): artifact is StudioReleasePackagedAppMaterializationArtifactLedgerArtifact => Boolean(artifact))
+    : [];
+  const targetArtifacts = activeHandoff
+    ? activeHandoff.toArtifactIds
+        .map((artifactId) => artifacts.find((artifact) => artifact.id === artifactId) ?? null)
+        .filter((artifact): artifact is StudioReleasePackagedAppMaterializationArtifactLedgerArtifact => Boolean(artifact))
+    : [];
+
+  if (!activeHandoff) {
+    return {
+      artifactLedger,
+      activeHandoff,
+      nextHandoff,
+      artifacts,
+      sourceArtifacts,
+      targetArtifacts,
+      reviewPacketStep: null,
+      validatorReadout: null,
+      primaryAction: null,
+      commandPreviewActions: [],
+      commandDeckLane: null,
+      observabilityMapping: null,
+      observabilitySignals: [],
+      window: null,
+      lane: null,
+      board: null,
+      reviewStateContinuityEntry: null
+    };
+  }
+
+  const reviewPacketStep =
+    selectStudioReleasePackagedAppMaterializationContractReviewPacketStep(
+      deliveryChain,
+      platformOrId,
+      activeHandoff.reviewPacketStepId
+    ) ?? null;
+  const validatorReadout =
+    selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityReadout(
+      deliveryChain,
+      platformOrId,
+      activeHandoff.validatorReadoutId
+    ) ?? null;
+  const commandPreviewActions =
+    reviewSurfaceActions
+      ?.filter(isStudioReviewCoverageAction)
+      .filter((action) => activeHandoff.commandActionIds.includes(action.id)) ?? [];
+  const commandDeckLane =
+    actionDeck?.lanes.find((lane) => lane.id === activeHandoff.commandDeckLaneId) ??
+    actionDeck?.lanes.find((lane) => lane.actionIds.some((actionId) => activeHandoff.commandActionIds.includes(actionId))) ??
+    null;
+  const primaryAction =
+    commandPreviewActions.find(
+      (action) =>
+        action.windowId === activeHandoff.windowId &&
+        action.sharedStateLaneId === activeHandoff.sharedStateLaneId &&
+        action.orchestrationBoardId === activeHandoff.orchestrationBoardId &&
+        action.observabilityMappingId === activeHandoff.observabilityMappingId
+    ) ??
+    commandPreviewActions.find((action) => action.observabilityMappingId === activeHandoff.observabilityMappingId) ??
+    commandPreviewActions.find((action) => action.reviewSurfaceKind === "review-packet") ??
+    (commandDeckLane?.primaryActionId
+      ? commandPreviewActions.find((action) => action.id === commandDeckLane.primaryActionId) ?? null
+      : null) ??
+    commandPreviewActions[0] ??
+    null;
+
+  if (!windowing) {
+    return {
+      artifactLedger,
+      activeHandoff,
+      nextHandoff,
+      artifacts,
+      sourceArtifacts,
+      targetArtifacts,
+      reviewPacketStep,
+      validatorReadout,
+      primaryAction,
+      commandPreviewActions,
+      commandDeckLane,
+      observabilityMapping: null,
+      observabilitySignals: [],
+      window: null,
+      lane: null,
+      board: null,
+      reviewStateContinuityEntry: null
+    };
+  }
+
+  const observabilityMapping = selectStudioWindowObservabilityMapping(windowing, activeHandoff.observabilityMappingId) ?? null;
+  const observabilitySignals = activeHandoff.observabilitySignalIds
+    .map((signalId) => windowing.observability.signals.find((signal) => signal.id === signalId) ?? null)
+    .filter((signal): signal is StudioWindowObservabilitySignal => Boolean(signal));
+  const window = windowing.roster.windows.find((entry) => entry.id === activeHandoff.windowId) ?? null;
+  const lane = windowing.sharedState.lanes.find((entry) => entry.id === activeHandoff.sharedStateLaneId) ?? null;
+  const board = windowing.orchestration.boards.find((entry) => entry.id === activeHandoff.orchestrationBoardId) ?? null;
+  const continuityActionId =
+    primaryAction &&
+    primaryAction.windowId === activeHandoff.windowId &&
+    primaryAction.sharedStateLaneId === activeHandoff.sharedStateLaneId &&
+    primaryAction.orchestrationBoardId === activeHandoff.orchestrationBoardId &&
+    primaryAction.observabilityMappingId === activeHandoff.observabilityMappingId
+      ? primaryAction.id
+      : undefined;
+  const reviewStateContinuityEntry = reviewStateContinuity
+    ? selectStudioReviewStateContinuityEntry(reviewStateContinuity, {
+        reviewSurfaceActionId: continuityActionId,
+        observabilityMappingId: activeHandoff.observabilityMappingId,
+        sharedStateLaneId: activeHandoff.sharedStateLaneId,
+        orchestrationBoardId: activeHandoff.orchestrationBoardId,
+        windowId: activeHandoff.windowId
+      }) ?? null
+    : null;
+
+  return {
+    artifactLedger,
+    activeHandoff,
+    nextHandoff,
+    artifacts,
+    sourceArtifacts,
+    targetArtifacts,
+    reviewPacketStep,
+    validatorReadout,
+    primaryAction,
+    commandPreviewActions,
+    commandDeckLane,
+    observabilityMapping,
+    observabilitySignals,
+    window,
+    lane,
+    board,
+    reviewStateContinuityEntry
+  };
 }
 
 export function selectStudioReleasePackagedAppMaterializationContractStagedOutputChain(
