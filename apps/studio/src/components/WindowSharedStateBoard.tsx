@@ -5,7 +5,7 @@ import {
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseEscalationWindow,
-  selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch,
+  selectStudioReleasePackagedAppMaterializationContractArtifactCheckpointChain,
   selectStudioReleasePackagedAppMaterializationContractFailureSurfaceMatch,
   selectStudioReleasePackagedAppMaterializationContractPlatform,
   selectStudioReleasePackagedAppMaterializationContractValidatorObservabilitySurfaceMatch,
@@ -480,7 +480,7 @@ export function WindowSharedStateBoard({
       )
     : null;
   const activeMaterializationArtifactSurface = releaseApprovalPipeline
-    ? selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch(
+    ? selectStudioReleasePackagedAppMaterializationContractArtifactCheckpointChain(
         releaseApprovalPipeline.deliveryChain,
         windowing,
         reviewStateContinuity,

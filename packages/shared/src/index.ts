@@ -992,6 +992,9 @@ export interface StudioReleasePackagedAppMaterializationArtifactLedgerHandoff {
   taskId: string;
   reviewPacketStepId: string;
   validatorReadoutId: string;
+  bundleSealingCheckpointId: string;
+  failureReadoutId: string;
+  stageCCheckpointId: string;
   deliveryChainStageId: string;
   windowId: string;
   sharedStateLaneId: string;
@@ -2398,6 +2401,7 @@ export {
   selectStudioReleasePackagedAppMaterializationContractArtifactLedgerHandoff,
   selectStudioReleasePackagedAppMaterializationContractNextArtifactLedgerHandoff,
   selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch,
+  selectStudioReleasePackagedAppMaterializationContractArtifactCheckpointChain,
   selectStudioReleasePackagedAppMaterializationContractStagedOutputChain,
   selectStudioReleasePackagedAppMaterializationContractStagedOutputStep,
   selectStudioReleasePackagedAppMaterializationContractStagedOutputNextStep,

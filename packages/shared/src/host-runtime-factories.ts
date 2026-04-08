@@ -1547,6 +1547,21 @@ function createStudioPackagedAppMaterializationArtifactLedger({
     "output-to-checksum": `${ledgerId}-output-to-checksum`,
     "checksum-to-seal": `${ledgerId}-checksum-to-seal`
   } as const;
+  const bundleSealingCheckpointIds = {
+    sealManifest: `packaged-app-bundle-sealing-checkpoint-${idPrefix}-seal-manifest`,
+    integrityManifest: `packaged-app-bundle-sealing-checkpoint-${idPrefix}-integrity-manifest`,
+    gate: `packaged-app-bundle-sealing-checkpoint-${idPrefix}-gate`
+  } as const;
+  const failureReadoutIds = {
+    directory: `packaged-app-materialization-failure-path-${idPrefix}-directory`,
+    "staged-output": `packaged-app-materialization-failure-path-${idPrefix}-staged-output`,
+    "bundle-sealing": `packaged-app-materialization-failure-path-${idPrefix}-bundle-sealing`
+  } as const;
+  const stageCCheckpointIds = {
+    auditRetention: "entry-audit-retention",
+    approvalRouting: "entry-approval-routing",
+    rollbackLiveReadiness: "entry-rollback-live-readiness"
+  } as const;
 
   const createHandoff = ({
     key,
@@ -1556,6 +1571,9 @@ function createStudioPackagedAppMaterializationArtifactLedger({
     taskId,
     reviewPacketStepId,
     validatorReadoutId,
+    bundleSealingCheckpointId,
+    failureReadoutId,
+    stageCCheckpointId,
     deliveryChainStageId,
     windowId,
     sharedStateLaneId,
@@ -1574,6 +1592,9 @@ function createStudioPackagedAppMaterializationArtifactLedger({
     taskId: string;
     reviewPacketStepId: string;
     validatorReadoutId: string;
+    bundleSealingCheckpointId: string;
+    failureReadoutId: string;
+    stageCCheckpointId: string;
     deliveryChainStageId: string;
     windowId: string;
     sharedStateLaneId: string;
@@ -1592,6 +1613,9 @@ function createStudioPackagedAppMaterializationArtifactLedger({
     taskId,
     reviewPacketStepId,
     validatorReadoutId,
+    bundleSealingCheckpointId,
+    failureReadoutId,
+    stageCCheckpointId,
     deliveryChainStageId,
     windowId,
     sharedStateLaneId,
@@ -1703,6 +1727,9 @@ function createStudioPackagedAppMaterializationArtifactLedger({
         taskId: directoryTaskId,
         reviewPacketStepId: `${reviewPacketId}-directory-to-output`,
         validatorReadoutId: `${validatorBridgeId}-directory`,
+        bundleSealingCheckpointId: bundleSealingCheckpointIds.sealManifest,
+        failureReadoutId: failureReadoutIds.directory,
+        stageCCheckpointId: stageCCheckpointIds.auditRetention,
         deliveryChainStageId: "delivery-chain-attestation-intake",
         windowId: "window-shell-main",
         sharedStateLaneId: "shared-state-lane-boundary-review",
@@ -1726,6 +1753,9 @@ function createStudioPackagedAppMaterializationArtifactLedger({
         taskId: stagedOutputTaskId,
         reviewPacketStepId: `${reviewPacketId}-directory-to-output`,
         validatorReadoutId: `${validatorBridgeId}-staged-output`,
+        bundleSealingCheckpointId: bundleSealingCheckpointIds.sealManifest,
+        failureReadoutId: failureReadoutIds["staged-output"],
+        stageCCheckpointId: stageCCheckpointIds.approvalRouting,
         deliveryChainStageId: "delivery-chain-operator-review",
         windowId: "window-trace-review",
         sharedStateLaneId: "shared-state-lane-trace-review",
@@ -1749,6 +1779,9 @@ function createStudioPackagedAppMaterializationArtifactLedger({
         taskId: stagedOutputTaskId,
         reviewPacketStepId: `${reviewPacketId}-output-to-checksum`,
         validatorReadoutId: `${validatorBridgeId}-staged-output`,
+        bundleSealingCheckpointId: bundleSealingCheckpointIds.integrityManifest,
+        failureReadoutId: failureReadoutIds["staged-output"],
+        stageCCheckpointId: stageCCheckpointIds.approvalRouting,
         deliveryChainStageId: "delivery-chain-operator-review",
         windowId: "window-trace-review",
         sharedStateLaneId: "shared-state-lane-trace-review",
@@ -1776,6 +1809,9 @@ function createStudioPackagedAppMaterializationArtifactLedger({
         taskId: bundleSealTaskId,
         reviewPacketStepId: `${reviewPacketId}-checksum-to-seal`,
         validatorReadoutId: `${validatorBridgeId}-bundle-sealing`,
+        bundleSealingCheckpointId: bundleSealingCheckpointIds.gate,
+        failureReadoutId: failureReadoutIds["bundle-sealing"],
+        stageCCheckpointId: stageCCheckpointIds.rollbackLiveReadiness,
         deliveryChainStageId: "delivery-chain-promotion-readiness",
         windowId: "window-review-board",
         sharedStateLaneId: "shared-state-lane-preview-review",

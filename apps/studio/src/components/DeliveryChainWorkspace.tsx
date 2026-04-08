@@ -9,6 +9,7 @@ import {
   selectStudioReleasePackagedAppMaterializationContractArtifactLedger,
   selectStudioReleasePackagedAppMaterializationContractArtifactLedgerHandoff,
   selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch,
+  selectStudioReleasePackagedAppMaterializationContractArtifactCheckpointChain,
   selectStudioReleasePackagedAppMaterializationContractNextArtifactLedgerHandoff,
   selectStudioReleasePackagedAppMaterializationContractBundleSealingCheckpoint,
   selectStudioReleasePackagedAppMaterializationContractBundleSealingReadiness,
@@ -1777,7 +1778,7 @@ export function DeliveryChainWorkspace({
       pipeline.deliveryChain,
       selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId
     ) ?? null;
-  const artifactLedgerSurfaceMatch = selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch(
+  const artifactLedgerSurfaceMatch = selectStudioReleasePackagedAppMaterializationContractArtifactCheckpointChain(
     pipeline.deliveryChain,
     windowing,
     reviewStateContinuity,
@@ -1786,6 +1787,12 @@ export function DeliveryChainWorkspace({
     selectedMaterializationPlatform?.id ?? selectedMaterializationPlatformId,
     selectedArtifactHandoffId
   );
+  const selectedArtifactCheckpoint = artifactLedgerSurfaceMatch.bundleSealingCheckpoint;
+  const selectedArtifactFailureReadout = artifactLedgerSurfaceMatch.failureReadout;
+  const selectedArtifactStageCCheckpoint = artifactLedgerSurfaceMatch.stageCCheckpoint;
+  const selectedArtifactApprovalWorkflowStage = artifactLedgerSurfaceMatch.approvalWorkflowStage;
+  const selectedArtifactQaTrack = artifactLedgerSurfaceMatch.releaseQaTrack;
+  const selectedArtifactRollbackContract = artifactLedgerSurfaceMatch.rollbackContract;
   const selectedStagedOutputChain =
     selectStudioReleasePackagedAppMaterializationContractStagedOutputChain(
       pipeline.deliveryChain,
@@ -1914,6 +1921,9 @@ export function DeliveryChainWorkspace({
   const selectedArtifactHandoffStage = selectedArtifactHandoff
     ? selectStudioReleaseDeliveryChainStage(pipeline, selectedArtifactHandoff.deliveryChainStageId) ?? null
     : null;
+  const selectedArtifactStageCStage = selectedArtifactStageCCheckpoint
+    ? selectStudioReleaseDeliveryChainStage(pipeline, selectedArtifactStageCCheckpoint.deliveryChainStageId) ?? null
+    : null;
   const artifactLedgerReadyCount =
     selectedArtifactLedger?.artifacts.filter((artifact) => artifact.status === "ready").length ?? 0;
   const artifactLedgerWatchCount =
@@ -1988,6 +1998,7 @@ export function DeliveryChainWorkspace({
           : "warning";
   const materializationStageCReadoutPath = [
     selectedArtifactHandoff?.label ?? selectedArtifactLedger?.label ?? null,
+    selectedArtifactCheckpoint?.label ?? null,
     selectedReviewPacketStep?.label ?? selectedReviewPacket?.label ?? null,
     selectedValidatorReadout?.label ?? selectedValidatorBridge?.label ?? null,
     selectedFailureReadout?.label ?? selectedFailurePath?.label ?? null,
@@ -2022,6 +2033,47 @@ export function DeliveryChainWorkspace({
             artifactLedgerSurfaceMatch.observabilityMapping?.label ?? null,
             selectedArtifactHandoff ? `${artifactLedgerSurfaceMatch.artifacts.length} tracked artifacts` : null,
             nextArtifactHandoff ? `Next ${nextArtifactHandoff.label}` : selectedArtifactLedger ? "Final artifact handoff" : null
+          ].filter((badge): badge is string => Boolean(badge))
+        },
+        {
+          id: "artifact-checkpoint-chain",
+          label: "Artifact checkpoint chain",
+          title:
+            selectedArtifactHandoff && selectedArtifactCheckpoint
+              ? `${selectedArtifactHandoff.label} -> ${selectedArtifactCheckpoint.label}`
+              : selectedArtifactCheckpoint?.label ??
+                selectedArtifactFailureReadout?.label ??
+                selectedArtifactStageCCheckpoint?.label ??
+                "No artifact checkpoint chain",
+          status: selectedArtifactCheckpoint
+            ? formatBundleSealingCheckpointStatus(selectedArtifactCheckpoint.status)
+            : selectedArtifactStageCCheckpoint
+              ? formatStageReadinessStatus(selectedArtifactStageCCheckpoint.state)
+              : "Unavailable",
+          detail: selectedArtifactCheckpoint
+            ? `${selectedArtifactCheckpoint.artifactPath} / ${selectedArtifactCheckpoint.detail}`
+            : selectedArtifactFailureReadout
+              ? `${selectedArtifactFailureReadout.label} / ${selectedArtifactFailureReadout.summary}`
+              : "The selected artifact handoff does not currently resolve to a seal checkpoint, failure branch, and Stage C entry checkpoint.",
+          tone: selectedArtifactCheckpoint
+            ? resolveBundleSealingCheckpointTone(selectedArtifactCheckpoint.status)
+            : selectedArtifactStageCCheckpoint
+              ? resolveStageTone(selectedArtifactStageCCheckpoint.state)
+              : "warning",
+          stageLabel: bundleSealingStage
+            ? `${bundleSealingStage.label} / ${bundleSealingStage.status}`
+            : selectedArtifactStageCStage
+              ? `${selectedArtifactStageCStage.label} / ${selectedArtifactStageCStage.status}`
+              : "No linked stage",
+          badges: [
+            selectedArtifactFailureReadout
+              ? `Failure ${selectedArtifactFailureReadout.label}`
+              : null,
+            selectedArtifactQaTrack ? `QA ${selectedArtifactQaTrack.label}` : null,
+            selectedArtifactApprovalWorkflowStage ? `Workflow ${selectedArtifactApprovalWorkflowStage.label}` : null,
+            selectedArtifactRollbackContract
+              ? `Rollback ${selectedArtifactRollbackContract.from} -> ${selectedArtifactRollbackContract.to}`
+              : null
           ].filter((badge): badge is string => Boolean(badge))
         },
         {
@@ -6707,6 +6759,34 @@ export function DeliveryChainWorkspace({
                         : "Unavailable")}
                   </strong>
                 </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveBundleSealingCheckpointTone(selectedArtifactCheckpoint?.status ?? "blocked")}`}>
+                  <span>Artifact checkpoint chain</span>
+                  <strong>
+                    {selectedArtifactCheckpoint
+                      ? `${selectedArtifactCheckpoint.label} / ${formatBundleSealingCheckpointStatus(selectedArtifactCheckpoint.status)}`
+                      : "Unavailable"}
+                  </strong>
+                </div>
+                <div
+                  className={`workflow-readiness-line workflow-readiness-line--${
+                    selectedArtifactFailureReadout ? resolveFailureDispositionTone(selectedArtifactFailureReadout.failureDisposition) : "warning"
+                  }`}
+                >
+                  <span>Artifact failure link</span>
+                  <strong>
+                    {selectedArtifactFailureReadout
+                      ? `${selectedArtifactFailureReadout.label} / ${formatFailureDisposition(selectedArtifactFailureReadout.failureDisposition)}`
+                      : "Unavailable"}
+                  </strong>
+                </div>
+                <div className={`workflow-readiness-line workflow-readiness-line--${resolveStageTone(selectedArtifactStageCCheckpoint?.state ?? "blocked")}`}>
+                  <span>Artifact Stage C link</span>
+                  <strong>
+                    {selectedArtifactStageCCheckpoint
+                      ? `${selectedArtifactStageCCheckpoint.label} / ${formatStageReadinessStatus(selectedArtifactStageCCheckpoint.state)}`
+                      : "Unavailable"}
+                  </strong>
+                </div>
                 <div className={`workflow-readiness-line workflow-readiness-line--${resolveMaterializationTaskTone(selectedStagedOutputStep?.taskState ?? "blocked")}`}>
                   <span>Staged-output posture</span>
                   <strong>
@@ -7309,6 +7389,35 @@ export function DeliveryChainWorkspace({
                       {artifactLedgerSurfaceMatch.reviewStateContinuityEntry.spine.windowId} /{" "}
                       {artifactLedgerSurfaceMatch.reviewStateContinuityEntry.spine.sharedStateLaneId}
                     </strong>
+                  </div>
+                ) : null}
+                {selectedArtifactCheckpoint ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Artifact checkpoint chain</span>
+                    <strong>{selectedArtifactCheckpoint.label} / {selectedArtifactCheckpoint.artifactPath}</strong>
+                    <p>{selectedArtifactCheckpoint.detail}</p>
+                  </div>
+                ) : null}
+                {selectedArtifactFailureReadout ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Artifact failure link</span>
+                    <strong>
+                      {selectedArtifactFailureReadout.label} /{" "}
+                      {formatFailureDisposition(selectedArtifactFailureReadout.failureDisposition)}
+                    </strong>
+                    <p>{selectedArtifactFailureReadout.summary}</p>
+                  </div>
+                ) : null}
+                {selectedArtifactStageCCheckpoint ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Artifact Stage C link</span>
+                    <strong>
+                      {selectedArtifactStageCCheckpoint.label} / {formatStageReadinessStatus(selectedArtifactStageCCheckpoint.state)}
+                    </strong>
+                    <p>
+                      {selectedArtifactApprovalWorkflowStage?.label ?? "No workflow stage"} /{" "}
+                      {selectedArtifactQaTrack?.label ?? "No QA track"}
+                    </p>
                   </div>
                 ) : null}
                 {(compact

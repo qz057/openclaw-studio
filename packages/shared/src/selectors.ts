@@ -363,6 +363,88 @@ export function selectStudioReleasePackagedAppMaterializationContractArtifactLed
   };
 }
 
+export function selectStudioReleasePackagedAppMaterializationContractArtifactCheckpointChain(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract" | "stageCReadiness">,
+  windowing?: Pick<StudioWindowing, "observability" | "roster" | "sharedState" | "orchestration"> | null,
+  reviewStateContinuity?: Pick<StudioReviewStateContinuity, "entries" | "activeEntryId"> | null,
+  actionDeck?: Pick<StudioCommandActionDeck, "lanes"> | null,
+  reviewSurfaceActions?: StudioCommandAction[] | null,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null,
+  handoffOrId?: Pick<StudioReleasePackagedAppMaterializationArtifactLedgerHandoff, "id"> | string | null
+): ReturnType<typeof selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch> & {
+  bundleSealingReadiness: StudioReleasePackagedAppBundleSealingReadiness | null;
+  bundleSealingCheckpoint: StudioReleasePackagedAppBundleSealingCheckpoint | null;
+  failureReadout: StudioReleasePackagedAppMaterializationFailureReadout | null;
+  rollbackContract: StudioReleaseRollbackLiveReadinessContract | null;
+  stageCCheckpoint: StudioReleaseApprovalAuditRollbackEntryCheckpoint | null;
+  approvalWorkflowStage: StudioReleaseApprovalWorkflowStage | null;
+  releaseQaTrack: StudioReleaseQaCloseoutReadinessTrack | null;
+} {
+  const surfaceMatch = selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch(
+    deliveryChain,
+    windowing,
+    reviewStateContinuity,
+    actionDeck,
+    reviewSurfaceActions,
+    platformOrId,
+    handoffOrId
+  );
+  const bundleSealingReadiness =
+    selectStudioReleasePackagedAppMaterializationContractBundleSealingReadiness(deliveryChain, platformOrId) ?? null;
+
+  if (!surfaceMatch.activeHandoff) {
+    return {
+      ...surfaceMatch,
+      bundleSealingReadiness,
+      bundleSealingCheckpoint: null,
+      failureReadout: null,
+      rollbackContract: null,
+      stageCCheckpoint: null,
+      approvalWorkflowStage: null,
+      releaseQaTrack: null
+    };
+  }
+
+  const bundleSealingCheckpoint =
+    selectStudioReleasePackagedAppMaterializationContractBundleSealingCheckpoint(
+      deliveryChain,
+      platformOrId,
+      surfaceMatch.activeHandoff.bundleSealingCheckpointId
+    ) ?? null;
+  const failureReadout =
+    selectStudioReleasePackagedAppMaterializationContractFailureReadout(
+      deliveryChain,
+      platformOrId,
+      surfaceMatch.activeHandoff.failureReadoutId
+    ) ?? null;
+  const rollbackContract = failureReadout
+    ? selectStudioReleaseRollbackLiveReadinessContract(deliveryChain, failureReadout.rollbackContractId) ?? null
+    : null;
+  const stageCCheckpoint =
+    selectStudioReleaseApprovalAuditRollbackEntryCheckpoint(deliveryChain, surfaceMatch.activeHandoff.stageCCheckpointId) ?? null;
+  const approvalWorkflowStage =
+    stageCCheckpoint?.workflowStageIds
+      .map((stageId) => selectStudioReleaseApprovalWorkflowStage(deliveryChain, stageId) ?? null)
+      .find((stage): stage is StudioReleaseApprovalWorkflowStage => Boolean(stage)) ?? null;
+  const releaseQaTrack =
+    deliveryChain.stageCReadiness.releaseQaCloseoutReadiness.tracks.find(
+      (track) =>
+        (stageCCheckpoint ? track.checkpointIds.includes(stageCCheckpoint.id) : false) ||
+        track.deliveryChainStageId === stageCCheckpoint?.deliveryChainStageId
+    ) ?? null;
+
+  return {
+    ...surfaceMatch,
+    bundleSealingReadiness,
+    bundleSealingCheckpoint,
+    failureReadout,
+    rollbackContract,
+    stageCCheckpoint,
+    approvalWorkflowStage,
+    releaseQaTrack
+  };
+}
+
 export function selectStudioReleasePackagedAppMaterializationContractStagedOutputChain(
   deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
   platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
