@@ -337,8 +337,9 @@
 - phase60 slice39 继续把 failure-path continuity surface match / packaged-app materialization contract 推进成更明确的 source-to-seal artifact handoff ledger，让 source artifacts、directory verification、staged-output manifests、seal / integrity metadata、matched window / lane / board / observability row、以及 review-state continuity entry 在同一条 Stage Explorer / windows / inspector 审阅链里保持只读可见，并继续保持 local-only / review-only posture
 - phase60 slice40 继续把 source-to-seal artifact handoff ledger / packaged-app materialization contract 推进成更明确的 artifact checkpoint continuity chain，让 current handoff、linked seal checkpoint、failure readout、Stage C checkpoint、以及 matched workflow / QA / continuity posture 在同一条 Stage Explorer / windows / inspector 审阅链里保持只读可见，并继续保持 local-only / review-only posture
 - phase60 slice42 继续把 artifact checkpoint progression handoff continuity 推进成更明确的 materialization artifact progression review surface，让 current-vs-next handoff 现在可以作为显式 command / windows / inspector review surface 被直接聚焦，且会带着 source artifact、Stage C linkage、validator / failure follow-up 与同一条 local-only review spine 一起切换，从而把当前边界内的 Stage C materialization closeout 收成一个明确终点
-- typecheck / build / smoke / start:smoke / package / release-plan 已在这轮 slice42 上重新通过，验证该刀没有把现有 review-only / local-only materialization contract 打断
-- README / HANDOFF / package snapshot 已同步反映 phase60 slice42 reality 与 materialization artifact progression review surface / Stage C local-only closeout reality
+- phase60 slice43 继续从 Stage C closeout 基线推进 execution-surface readiness：补齐 connector lifecycle runner 的 typed intent / slot / validator / handler / simulated outcome / focus command 与 runtime probe contract，让 lifecycle runner 从 missing 升级到 partial（default-disabled），并把 smoke 的 host executor readout 提升到 slots=5 / handlers=5
+- typecheck / build / smoke / start:smoke / package / release-plan 已在这轮 slice43 上重新通过，验证该刀没有把现有 local-only / preview-host 边界打断
+- README / HANDOFF / package snapshot 已同步反映 phase60 slice43 reality 与 connector lifecycle runner readiness baseline
 
 ## 当前明确边界
 

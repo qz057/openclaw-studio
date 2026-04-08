@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-release-manifest/v1",
-  "generatedAt": "2026-04-08T06:25:51.824Z",
+  "generatedAt": "2026-04-08T06:55:21.443Z",
   "packageId": "openclaw-studio-alpha-shell",
   "packageName": "OpenClaw Studio Alpha Shell",
   "packageKind": "alpha-shell-release-skeleton",
@@ -498,7 +498,7 @@
       "label": "Renderer bundle",
       "outputRoot": "artifacts/renderer",
       "fileCount": 11,
-      "totalBytes": 1147566,
+      "totalBytes": 1152917,
       "entrypoints": [
         "artifacts/renderer/index.html"
       ]
@@ -508,7 +508,7 @@
       "label": "Electron bundle",
       "outputRoot": "artifacts/electron",
       "fileCount": 15,
-      "totalBytes": 395621,
+      "totalBytes": 398874,
       "entrypoints": [
         "artifacts/electron/electron/main.js",
         "artifacts/electron/electron/preload.js",
@@ -536,22 +536,22 @@
       "sha256": "cb7ae03992daad83f5279a53c1754c93a60195f17c7d3ee587eb908c0138bd55"
     },
     {
-      "id": "renderer:assets/fallback-BtCM-13_.js",
+      "id": "renderer:assets/fallback-2Z4pzwao.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/fallback-BtCM-13_.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/fallback-BtCM-13_.js",
-      "sizeBytes": 422683,
-      "sha256": "011f895dd2b7ae9220e718b31206140f6fea277b72a42d8f3bbd690f0e86e4b9"
+      "path": "artifacts/renderer/assets/fallback-2Z4pzwao.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/fallback-2Z4pzwao.js",
+      "sizeBytes": 427913,
+      "sha256": "35759b44946eb2cad02ad994897815b8c84c402a960adfe7104e9f2a3be1948d"
     },
     {
-      "id": "renderer:assets/HomePage-BXSQI2lk.js",
+      "id": "renderer:assets/HomePage-BcBeoLR8.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/HomePage-BXSQI2lk.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/HomePage-BXSQI2lk.js",
+      "path": "artifacts/renderer/assets/HomePage-BcBeoLR8.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/HomePage-BcBeoLR8.js",
       "sizeBytes": 3031,
-      "sha256": "4e3f42c529edba51ae6da4a66aafc7f10efef6cf501de12aa38fce2210ecd621"
+      "sha256": "633cefe1ee366ff19448b7d3f47e71da1cbfcfc9ca2372c7b8859d1b1852fc4a"
     },
     {
       "id": "renderer:assets/index-B_qerrmh.css",
@@ -563,13 +563,13 @@
       "sha256": "5487a33344a92a01cb2506ade3a2b786cd93a07993767ebc867ee379c08e6618"
     },
     {
-      "id": "renderer:assets/index-B8B1JDYM.js",
+      "id": "renderer:assets/index-D5r0Al4J.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/index-B8B1JDYM.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-B8B1JDYM.js",
-      "sizeBytes": 528074,
-      "sha256": "c8781723f2f1c6f089d8d4a1b0065eacbd37ae196ea56fdc50213671536e00d1"
+      "path": "artifacts/renderer/assets/index-D5r0Al4J.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-D5r0Al4J.js",
+      "sizeBytes": 528195,
+      "sha256": "3c4b4b5ee6b720cbeee41175553d9774ceb4246fee8a9cf49a7378ea51ff5f2c"
     },
     {
       "id": "renderer:assets/SessionsPage-CeRZOu_6.js",
@@ -581,22 +581,22 @@
       "sha256": "54e5f8966e3a61a332401dc09750246fa9ca2aea2468085b38fcbb5f11184452"
     },
     {
-      "id": "renderer:assets/SettingsPage-CeC8sJsj.js",
+      "id": "renderer:assets/SettingsPage-xty5fRke.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/SettingsPage-CeC8sJsj.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/SettingsPage-CeC8sJsj.js",
+      "path": "artifacts/renderer/assets/SettingsPage-xty5fRke.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/SettingsPage-xty5fRke.js",
       "sizeBytes": 1687,
-      "sha256": "9b9061b04b0e068c253da4f07524ab17b08ea7ff11786e7166fc1a06c00fac59"
+      "sha256": "be1de0a150f310e8531cf98584595907d91704afb4954d39c8adacdaeecaa9b0"
     },
     {
-      "id": "renderer:assets/SkillsPage-hKhM4ySY.js",
+      "id": "renderer:assets/SkillsPage-D3jaeiH9.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/SkillsPage-hKhM4ySY.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/SkillsPage-hKhM4ySY.js",
+      "path": "artifacts/renderer/assets/SkillsPage-D3jaeiH9.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/SkillsPage-D3jaeiH9.js",
       "sizeBytes": 9335,
-      "sha256": "0e57a9af1c2787c6fa07745c06b51be4e2446461c3adeb3cc28edf2b5ac3cedd"
+      "sha256": "0338fdd5cb2b329d4edb98c52644a01aadd6e993c9d8c80bd32c0ee6d072209a"
     },
     {
       "id": "renderer:assets/vendor-D7f9BLy3.js",
@@ -614,7 +614,7 @@
       "path": "artifacts/renderer/index.html",
       "sourceRelativePath": "apps/studio/dist-renderer/index.html",
       "sizeBytes": 496,
-      "sha256": "eb31abfaea50bf2f125dfe39a3cc83703b733cc286a18533447cca0c2d8756b8"
+      "sha256": "bd5d8229c24e7cba27d12aab63dfe05177a0724d200788f4f5a98e7843055702"
     },
     {
       "id": "electron:electron/main.js",
@@ -739,8 +739,8 @@
       "role": "asset",
       "path": "artifacts/electron/electron/runtime/probes/tools-mcp.js",
       "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/probes/tools-mcp.js",
-      "sizeBytes": 229227,
-      "sha256": "323766b03c75e0b64dd358f0adbc805a8412f84d990a02ecc3d06bc005eed207"
+      "sizeBytes": 232480,
+      "sha256": "a50df2294284359e6181b5cb00ce9984df64916219295cd39624870ecd913969"
     },
     {
       "id": "electron:electron/runtime/studio-runtime.js",
