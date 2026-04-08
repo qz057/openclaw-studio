@@ -698,6 +698,19 @@ function formatMaterializationValidatorStatus(status: "ready" | "watch" | "block
   }
 }
 
+function formatFailureDisposition(disposition: "blocked" | "abort" | "partial-apply" | "rollback"): string {
+  switch (disposition) {
+    case "blocked":
+      return "Blocked";
+    case "abort":
+      return "Abort";
+    case "partial-apply":
+      return "Partial apply";
+    default:
+      return "Rollback";
+  }
+}
+
 function formatReviewPostureRelationship(
   relationship: StudioShellState["windowing"]["observability"]["mappings"][number]["relationship"]
 ): string {
