@@ -2707,15 +2707,17 @@ export function App() {
         "The local materialization contract now carries a source-to-seal artifact ledger that ties built renderer/Electron inputs to directory verification, staged-output manifests, and seal/integrity metadata, so the Stage Explorer, windows board, and inspector can read the same concrete handoff chain without implying execution."
     },
     {
-      id: "release-depth-materialization-artifact-checkpoint-chain",
-      label: "Materialization Artifact Checkpoint Chain",
-      value: activeMaterializationArtifactSurface.bundleSealingCheckpoint
-        ? `${activeMaterializationArtifactSurface.bundleSealingCheckpoint.label} / ${formatMaterializationValidatorStatus(
-            activeMaterializationArtifactSurface.bundleSealingCheckpoint.status
-          )} / ${activeMaterializationArtifactSurface.stageCCheckpoint?.label ?? "No Stage C link"}`
+      id: "release-depth-materialization-artifact-checkpoint-progression",
+      label: "Materialization Artifact Checkpoint Progression",
+      value: activeMaterializationArtifactProgression.currentHandoff
+        ? `${artifactCurrentToNextHandoffLabel} / ${
+            activeMaterializationArtifactSurface.stageCCheckpoint?.label ??
+            activeMaterializationArtifactSurface.bundleSealingCheckpoint?.label ??
+            "No Stage C link"
+          }`
         : "Unavailable",
       detail:
-        "The artifact ledger now resolves each active handoff into a linked seal checkpoint, failure readout, and Stage C checkpoint, so source-to-seal continuity reads back as one stronger local-only checkpoint chain instead of a loose set of adjacent review panels."
+        "The artifact ledger now keeps the active handoff, next handoff, and their linked seal / failure / Stage C surfaces readable as one current-to-next local-only progression instead of a loose set of adjacent checkpoint cards."
     },
     {
       id: "release-depth-materialization-validator-bridge",
@@ -4703,7 +4705,7 @@ export function App() {
             onRunCompanionRouteHistory={handleRunCompanionRouteHistory}
             eyebrow="Phase60"
             title="Delivery-chain Workspace"
-            summary="Phase60 slice40 keeps the artifact ledger, validator bridge, failure continuity, and Stage C linkage in place, then deepens the same Stage Explorer with an artifact checkpoint chain so each source-to-seal handoff resolves into the linked seal checkpoint, failure branch, and Stage C checkpoint across the same local-only window/lane/board spine."
+            summary="Phase60 slice41 keeps the artifact checkpoint chain in place, then deepens the same Stage Explorer with current-vs-next handoff continuity so each source-to-seal handoff carries its downstream staged-output, review-packet, validator, failure, and next-surface posture across the same local-only window/lane/board spine."
           />
 
           <section className="surface card window-workbench">
@@ -4956,15 +4958,16 @@ export function App() {
                   </div>
                 </article>
                 <article className="windowing-summary-card">
-                  <span>Inspector Materialization Checkpoint Chain</span>
+                  <span>Inspector Materialization Checkpoint Progression</span>
                   <strong>
                     {activeMaterializationArtifactSurface.activeHandoff?.label ??
                       activeMaterializationArtifactSurface.artifactLedger?.label ??
                       "No artifact handoff"}
                   </strong>
                   <p>
-                    Inspector-side materialization coverage now carries the same source-to-seal artifact handoff chain as the delivery workspace and
-                    windows board, then resolves it into the linked seal checkpoint, failure branch, and Stage C checkpoint without implying execution.
+                    Inspector-side materialization coverage now carries the same current-vs-next artifact handoff progression as the delivery
+                    workspace and windows board, then resolves the active surface into linked seal, failure, Stage C, and next-surface continuity
+                    without implying execution.
                   </p>
                   <div className="windowing-preview-list">
                     <div className="windowing-preview-line windowing-preview-line--stacked">

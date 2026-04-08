@@ -1405,7 +1405,7 @@ export function WindowSharedStateBoard({
 
         {releaseApprovalPipeline ? (
           <article className="windowing-summary-card">
-            <span>Materialization Artifact Checkpoint Chain</span>
+            <span>Materialization Artifact Checkpoint Progression</span>
             <strong>
               {activeMaterializationPlatform
                 ? `${formatPackagedAppPlatform(activeMaterializationPlatform.platform)} / ${
@@ -1417,7 +1417,7 @@ export function WindowSharedStateBoard({
             </strong>
             <p>
               {activeMaterializationArtifactSurface?.artifactLedger?.summary ??
-                "Artifact-facing materialization continuity is unavailable, so this board cannot show how built local snapshot inputs feed directory verification, staged-output manifests, seal checkpoints, and Stage C entry posture."}
+                "Artifact-facing materialization continuity is unavailable, so this board cannot show how built local snapshot inputs feed current-vs-next handoffs, directory verification, staged-output manifests, seal checkpoints, and Stage C entry posture."}
             </p>
             <div className="workflow-readiness-list">
               <div
