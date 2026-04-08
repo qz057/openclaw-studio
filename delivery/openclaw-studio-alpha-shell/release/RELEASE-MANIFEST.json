@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-release-manifest/v1",
-  "generatedAt": "2026-04-08T00:09:02.759Z",
+  "generatedAt": "2026-04-08T00:09:57.340Z",
   "packageId": "openclaw-studio-alpha-shell",
   "packageName": "OpenClaw Studio Alpha Shell",
   "packageKind": "alpha-shell-release-skeleton",
@@ -498,7 +498,7 @@
       "label": "Renderer bundle",
       "outputRoot": "artifacts/renderer",
       "fileCount": 11,
-      "totalBytes": 1121520,
+      "totalBytes": 1121511,
       "entrypoints": [
         "artifacts/renderer/index.html"
       ]
@@ -536,22 +536,22 @@
       "sha256": "cb7ae03992daad83f5279a53c1754c93a60195f17c7d3ee587eb908c0138bd55"
     },
     {
-      "id": "renderer:assets/fallback-PTsAeCUz.js",
+      "id": "renderer:assets/fallback-Dxo_3Zkw.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/fallback-PTsAeCUz.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/fallback-PTsAeCUz.js",
+      "path": "artifacts/renderer/assets/fallback-Dxo_3Zkw.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/fallback-Dxo_3Zkw.js",
       "sizeBytes": 419569,
-      "sha256": "6de7e1ffdc607e34ff847d59795fecb14f2c97522c02ad0b4cb4b98cccbd3473"
+      "sha256": "45561bbbc4159e3eda694c304c49e64de0ae022c0afe5ca250c6b94af803d27c"
     },
     {
-      "id": "renderer:assets/HomePage-BzYYfDaU.js",
+      "id": "renderer:assets/HomePage-CHMztt2e.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/HomePage-BzYYfDaU.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/HomePage-BzYYfDaU.js",
+      "path": "artifacts/renderer/assets/HomePage-CHMztt2e.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/HomePage-CHMztt2e.js",
       "sizeBytes": 3031,
-      "sha256": "14f89faa7fc279a0c3e5390350476100c04f53f21d36d00cf180ad3d2750b698"
+      "sha256": "d1ce94912f0dc3811a368c670975eb73348a67fa018964460fbba1cf4050d7c2"
     },
     {
       "id": "renderer:assets/index-B_qerrmh.css",
@@ -563,13 +563,13 @@
       "sha256": "5487a33344a92a01cb2506ade3a2b786cd93a07993767ebc867ee379c08e6618"
     },
     {
-      "id": "renderer:assets/index-DhJ8dN0_.js",
+      "id": "renderer:assets/index-Bf1nzLpD.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/index-DhJ8dN0_.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-DhJ8dN0_.js",
-      "sizeBytes": 505142,
-      "sha256": "cdbe788b956fe8629bc44ef75b38ba73468aa3f1d6ecb901032cc2e6b17ba6bd"
+      "path": "artifacts/renderer/assets/index-Bf1nzLpD.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/index-Bf1nzLpD.js",
+      "sizeBytes": 505133,
+      "sha256": "0678226fbd477f45108976df722cf4a4fa24a153a7db9553ee3fa2512372da79"
     },
     {
       "id": "renderer:assets/SessionsPage-CeRZOu_6.js",
@@ -581,22 +581,22 @@
       "sha256": "54e5f8966e3a61a332401dc09750246fa9ca2aea2468085b38fcbb5f11184452"
     },
     {
-      "id": "renderer:assets/SettingsPage-DM6zBAmp.js",
+      "id": "renderer:assets/SettingsPage-CDO5BhwZ.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/SettingsPage-DM6zBAmp.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/SettingsPage-DM6zBAmp.js",
+      "path": "artifacts/renderer/assets/SettingsPage-CDO5BhwZ.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/SettingsPage-CDO5BhwZ.js",
       "sizeBytes": 1687,
-      "sha256": "496ddca672cf76764943048be55453afa07cbee03e00d67ee2bf061715e1819d"
+      "sha256": "7dd89ebb59ef165f2633114da3cce3f342df73290a26aaeb09a399ef03025f50"
     },
     {
-      "id": "renderer:assets/SkillsPage-40K0aMJv.js",
+      "id": "renderer:assets/SkillsPage-Dbq6yo6u.js",
       "groupId": "renderer",
       "role": "asset",
-      "path": "artifacts/renderer/assets/SkillsPage-40K0aMJv.js",
-      "sourceRelativePath": "apps/studio/dist-renderer/assets/SkillsPage-40K0aMJv.js",
+      "path": "artifacts/renderer/assets/SkillsPage-Dbq6yo6u.js",
+      "sourceRelativePath": "apps/studio/dist-renderer/assets/SkillsPage-Dbq6yo6u.js",
       "sizeBytes": 9335,
-      "sha256": "ae1c083c61b50255231f32b21c741031b3fbba8836aab92d75c68b594ca69338"
+      "sha256": "237d4e165f5760f197bf7c19173079d60e1bf005ca3eee7c94880c7728209270"
     },
     {
       "id": "renderer:assets/vendor-D7f9BLy3.js",
@@ -614,7 +614,7 @@
       "path": "artifacts/renderer/index.html",
       "sourceRelativePath": "apps/studio/dist-renderer/index.html",
       "sizeBytes": 496,
-      "sha256": "5983bd1683592033160117a08677f69f1a2ef43dcb68af747b98047f59346b71"
+      "sha256": "5fdf68283f818849e4962f468ec5e8a6e5559a62d499a233f4ded75821d0acc2"
     },
     {
       "id": "electron:electron/main.js",
