@@ -2602,14 +2602,14 @@ function buildShellBoundarySummary(
       {
         code: "lifecycle-runner-missing",
         layer: "future-executor" as const,
-        label: "Lifecycle runner is not implemented",
-        detail: `Activation target ${activationTarget.label} (${activationTarget.mode}) cannot be started, stopped, or reconciled on the host.`
+        label: "Lifecycle / rollback preview remains non-executable",
+        detail: `Activation target ${activationTarget.label} (${activationTarget.mode}) can now be previewed through lifecycle and rollback contracts, but it still cannot be started, stopped, reconciled, or settled on the host.`
       },
       {
         code: "rollback-missing",
         layer: "future-executor" as const,
-        label: "Rollback-aware apply path is still missing",
-        detail: `A failed host apply for ${rootOverlay ? shortenHomePath(rootOverlay) : "the unresolved lane"} could not yet be unwound safely.`
+        label: "Rollback settlement / apply coupling is still missing",
+        detail: `A failed host apply for ${rootOverlay ? shortenHomePath(rootOverlay) : "the unresolved lane"} still lacks live settlement across bridge, lifecycle, and runtime state.`
       }
     ],
     requiredPreconditions: [
@@ -2643,8 +2643,8 @@ function buildShellBoundarySummary(
       {
         id: "precondition-shell-lifecycle",
         label: "Lifecycle and rollback semantics",
-        state: "missing",
-        detail: "A future executor still needs activate/deactivate logic plus rollback across bridge and lane state."
+        state: "partial",
+        detail: "Default-disabled lifecycle and rollback preview contracts now exist, but a future executor still needs live activate/deactivate logic plus rollback settlement across bridge and lane state."
       }
     ],
     withheldExecutionPlan: [
@@ -2700,6 +2700,12 @@ function buildShellBoundarySummary(
         label: "Lane apply coordinator",
         state: "planned",
         detail: "Future slot for rollback-aware apply across bridge state, runtime state, and lifecycle."
+      },
+      {
+        id: "slot-shell-rollback-settlement",
+        label: "Rollback settlement coordinator",
+        state: "planned",
+        detail: "Future slot for apply-coupled rollback settlement across bridge detach, lifecycle unwind, and runtime/config restore sequencing."
       }
     ],
     hostExecutor: buildToolsMcpHostExecutorState(probe, controlSession)
@@ -3047,8 +3053,8 @@ function buildConnectorBoundarySummary(
       {
         code: "rollback-missing",
         layer: "future-executor" as const,
-        label: "Rollback-aware apply path is missing",
-        detail: "A future apply path still needs coordinated rollback across bridge state, activation state, and runtime configuration."
+        label: "Rollback settlement / apply coupling is still disabled",
+        detail: "Rollback preview contracts now exist, but a future apply path still needs coordinated settlement across bridge state, lifecycle state, and runtime configuration."
       }
     ],
     requiredPreconditions: [
@@ -3091,8 +3097,8 @@ function buildConnectorBoundarySummary(
       {
         id: "precondition-connector-smoke",
         label: "Host-side smoke coverage",
-        state: "missing",
-        detail: "Host apply paths need dedicated smoke and failure-path coverage before enablement."
+        state: "partial",
+        detail: "Preview-host smoke now exercises activate / lifecycle / rollback / apply boundary actions, but dedicated host-side failure-path smoke is still missing."
       }
     ],
     withheldExecutionPlan: [
