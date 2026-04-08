@@ -2364,6 +2364,7 @@ async function verifyHostBoundaryActions() {
     "preview-host-bridge-attach",
     "preview-host-connector-activate",
     "preview-host-connector-lifecycle",
+    "preview-host-lifecycle-rollback",
     "preview-host-lane-apply"
   ];
 

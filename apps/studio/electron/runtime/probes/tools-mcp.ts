@@ -1733,6 +1733,39 @@ function resolveHostPreviewForAction(
         handoff
       };
     }
+    case "mcp-adjacent-runtime:preview-host-lifecycle-rollback": {
+      const preferredRootTarget = getPreferredRootTarget(probe);
+      const rootOverlay = controlSession.rootSelection.path ?? preferredRootTarget.path;
+      const requestedTarget = rootOverlay ? shortenHomePath(rootOverlay) : "no rollback checkpoint target";
+      const preview = createHostMutationPreview(
+        hostExecutor,
+        "lane-apply",
+        "Host lifecycle rollback preview",
+        "Maps lifecycle-rollback coordination into the disabled lane-apply slot so rollback checkpoints and failure dispositions stay inspectable without touching host runtime.",
+        requestedTarget,
+        "rollback-host"
+      );
+      const handoff = createHostPreviewHandoff(preview, hostExecutor, {
+        validationMissingFieldIds: [],
+        approvalDecision: "approved",
+        auditStatus: "rollback-linked",
+        rollbackDisposition: "incomplete",
+        slotStatus: "rollback-required",
+        failureCode: "rollback-incomplete",
+        stage: "rollback-host",
+        scope: "lifecycle-rollback placeholder scope",
+        rollbackCheckpoint: rootOverlay ? `checkpoint:rollback:${requestedTarget}` : "checkpoint:rollback-unresolved"
+      });
+
+      return {
+        hostExecutor,
+        preview: {
+          ...preview,
+          handoff
+        },
+        handoff
+      };
+    }
     case "mcp-adjacent-runtime:preview-host-lane-apply": {
       const stagedSourceOrder =
         controlSession.laneApply.sourceOrder.length > 0
@@ -3052,8 +3085,8 @@ function buildConnectorBoundarySummary(
       {
         id: "precondition-connector-rollback",
         label: "Rollback-aware lane apply",
-        state: "missing",
-        detail: "A failed host apply still lacks coordinated rollback across bridge, config, and process lifecycle."
+        state: "partial",
+        detail: "Rollback coordination is now previewable via lifecycle-rollback handoff, but live rollback/apply coupling is still disabled."
       },
       {
         id: "precondition-connector-smoke",
@@ -3118,6 +3151,12 @@ function buildConnectorBoundarySummary(
         label: "Lane apply coordinator",
         state: "planned",
         detail: "Future slot for rollback-aware lane apply across bridge, runtime state, and lifecycle."
+      },
+      {
+        id: "slot-connector-rollback",
+        label: "Lifecycle rollback coordinator",
+        state: "planned",
+        detail: "Future slot for coordinated rollback settlement across lane apply, lifecycle transitions, and bridge detach sequencing."
       }
     ],
     hostExecutor: buildToolsMcpHostExecutorState(probe, controlSession)
@@ -5098,6 +5137,76 @@ async function runToolsMcpActionInternal(
         enablementLines: buildHostEnablementLines([
           "Add activate/deactivate/restart/reconcile executor semantics on top of the default-disabled lifecycle slot.",
           "Prove rollback coordination for partially completed lifecycle transitions before allowing live host control."
+        ])
+      });
+    }
+    case "mcp-adjacent-runtime:preview-host-lifecycle-rollback": {
+      const stagedSourceOrder =
+        controlSession.laneApply.sourceOrder.length > 0
+          ? controlSession.laneApply.sourceOrder
+          : controlSession.bridgeStage.sourceOrder.length > 0
+            ? controlSession.bridgeStage.sourceOrder
+            : buildAttachSourceOrder(probe, cachedCuratedPlugins);
+      const preferredRootTarget = getPreferredRootTarget(probe);
+      const rootOverlay = controlSession.rootSelection.path ?? preferredRootTarget.path;
+      const activationReady =
+        controlSession.connectorActivation.status === "active" || controlSession.connectorActivation.status === "prepared";
+      const rollbackReady = Boolean(rootOverlay) && stagedSourceOrder.length >= 2 && activationReady;
+      const hostPreviewResolution = finalizeHostPreviewResolution(
+        resolveHostPreviewForAction(itemId, actionId, probe, controlSession, cachedCuratedPlugins)
+      );
+      const rollbackBoundary = buildConnectorBoundarySummary(probe, controlSession, cachedCuratedPlugins, {
+        id: "boundary-connector-preview-rollback",
+        title: "Lifecycle rollback preview boundary",
+        summary:
+          "Preview-host describes rollback coordination across lifecycle and lane apply, but live rollback settlement remains withheld until approval, apply coupling, and executor wiring exist.",
+        currentLayer: "preview-host",
+        nextLayer: "future-executor",
+        tone: rollbackReady ? "neutral" : "warning"
+      });
+
+      return createHostBoundaryResult(itemId, actionId, {
+        title: "Host lifecycle rollback preview",
+        summary:
+          "Shows the withheld lifecycle-rollback coordination path, the current permission boundary, and what would be required before rollback-aware apply can be safely enabled.",
+        tone: rollbackReady ? "neutral" : "warning",
+        boundary: rollbackBoundary,
+        hostPreview: hostPreviewResolution?.preview,
+        hostHandoff: hostPreviewResolution?.handoff,
+        actionLines: [
+          "operation · host/runtime lifecycle rollback coordination",
+          `root overlay · ${rootOverlay ? shortenHomePath(rootOverlay) : "none"}`,
+          `source order · ${formatSourceOrder(stagedSourceOrder)}`,
+          `activation state · ${formatLocalOnlyStatus(controlSession.connectorActivation.status)}`
+        ],
+        readinessLines: [
+          `Studio-local bridge stage · ${formatLocalOnlyStatus(controlSession.bridgeStage.status)}`,
+          `Studio-local lane apply state · ${formatLocalOnlyStatus(controlSession.laneApply.status)}`,
+          `Studio-local activation state · ${formatLocalOnlyStatus(controlSession.connectorActivation.status)}`,
+          `current readiness · ${
+            rollbackReady
+              ? "rollback settlement is structurally previewable, but live rollback/apply coupling remains boundary-blocked"
+              : "rollback coordination remains boundary-blocked and still lacks one or more technical prerequisites"
+          }`
+        ],
+        blockerLines: [
+          ...(!rootOverlay ? ["No root overlay is currently available for rollback checkpoint settlement."] : []),
+          ...(stagedSourceOrder.length === 0 ? ["No staged bridge source order exists for lifecycle rollback settlement."] : []),
+          ...(!activationReady ? ["Connector lifecycle is not yet in a prepared or active local state for rollback settlement preview."] : [])
+        ],
+        permissionLines: buildHostPermissionBoundaryLines("host/runtime lifecycle rollback coordination", [
+          "rollback settlement ledger",
+          "connector lifecycle registry",
+          "runtime/config overlay",
+          "external connector processes"
+        ]),
+        capabilityLines: buildBoundaryCapabilityLines(rollbackBoundary),
+        preconditionLines: buildBoundaryPreconditionLines(rollbackBoundary),
+        planLines: buildBoundaryPlanLines(rollbackBoundary),
+        executorSlotLines: buildBoundaryExecutorSlotLines(rollbackBoundary),
+        enablementLines: buildHostEnablementLines([
+          "Couple lane apply and lifecycle rollback into one idempotent settlement contract before any live apply path is exposed.",
+          "Prove rollback settlement with dedicated failure-path smoke so partial apply and rollback-incomplete outcomes can be recovered safely."
         ])
       });
     }

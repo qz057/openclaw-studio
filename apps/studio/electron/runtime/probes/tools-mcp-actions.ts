@@ -309,6 +309,14 @@ const toolsMcpActionRegistry: Record<string, StudioRuntimeAction[]> = {
       refreshDetailOnSuccess: false
     },
     {
+      id: "preview-host-lifecycle-rollback",
+      label: "Preview host lifecycle rollback",
+      description: "Show the blocked lifecycle-rollback coordination path and what would be required before rollback-aware apply can be safely enabled.",
+      kind: "preview-host",
+      safety: "preview-host",
+      refreshDetailOnSuccess: false
+    },
+    {
       id: "preview-host-lane-apply",
       label: "Preview host apply",
       description: "Show the blocked host/runtime lane apply path, why it is withheld, and what would be required before enabling it.",
