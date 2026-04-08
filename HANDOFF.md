@@ -77,7 +77,7 @@
   - phase60 slice38 已继续把 failure-path / command-preview coverage 推进成更明确的 failure-path continuity surface match，让 active failure readout、matched window / lane / board / observability row、review-state continuity entry、以及 command-lane follow-up 在同一条 Stage Explorer / windows / inspector 审阅链里保持只读可见，并继续保持 local-only / review-only posture
   - phase60 slice39 已继续把 failure-path continuity surface match / packaged-app materialization contract 推进成更明确的 source-to-seal artifact handoff ledger，让 source artifacts、directory verification、staged-output manifests、seal / integrity metadata、matched window / lane / board / observability row、以及 review-state continuity entry 在同一条 Stage Explorer / windows / inspector 审阅链里保持只读可见，并继续保持 local-only / review-only posture
   - phase60 slice40 已继续把 source-to-seal artifact handoff ledger / packaged-app materialization contract 推进成更明确的 artifact checkpoint continuity chain，让 current handoff、linked seal checkpoint、failure readout、Stage C checkpoint、以及 matched workflow / QA / continuity posture 在同一条 Stage Explorer / windows / inspector 审阅链里保持只读可见，并继续保持 local-only / review-only posture
-  - phase60 slice41 已继续把 artifact checkpoint continuity chain / inspector materialization readout 推进成更明确的 artifact checkpoint progression handoff continuity，让 current vs next handoff、current / next surface spine、以及 staged-output / review-packet / validator / failure downstream progression 在同一条 Stage Explorer / windows / inspector 审阅链里保持只读可见，并继续保持 local-only / review-only posture
+  - phase60 slice42 已继续把 artifact checkpoint progression handoff continuity 推进成更明确的 materialization artifact progression review surface，让 current-vs-next handoff 现在可以作为显式 command / windows / inspector review surface 被直接聚焦，且会带着 source artifact、Stage C linkage、validator / failure follow-up 与同一条 local-only review spine 一起切换，从而把当前边界内的 Stage C materialization closeout 收成一个明确终点
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline
@@ -370,8 +370,10 @@ Tools / MCP 当前深度：
 
 ## Recommended Next Step
 
-更自然的后续方向是：
+当前 **Stage C 在既有 local-only / review-only 边界内已经完成收口**。
 
-1. 在保持 disabled 的前提下继续提升 validator / observability / command-surface / multi-window coverage
-2. 只有在 approval / lifecycle / rollback 真实闭环成型后，才评估任何 live host execution
-3. 把 phase57 shell foundations 继续推进成更真实的多窗口编排、跨窗口共享状态，以及 operator review board / decision handoff / evidence closeout 的更完整审阅闭环
+更自然的后续方向已经不再是继续补同类只读 surface，而是二选一：
+
+1. 保持当前边界，把它作为已完成的 Stage C local-only baseline，转去做文档整理 / 提交拆分 / 交付收口
+2. 若要继续推进“整个项目完成度”，下一阶段应明确切换到真实交付层：installer / signing / publish / rollback / host-side execution 的可执行闭环
+3. 在没有新的执行边界授权前，不再继续发散同类 metadata-only Stage C surface

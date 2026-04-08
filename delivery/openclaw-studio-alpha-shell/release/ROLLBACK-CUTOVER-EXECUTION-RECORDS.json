@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-rollback-cutover-execution-records/v1",
-  "generatedAt": "2026-04-08T02:58:39.932Z",
+  "generatedAt": "2026-04-08T06:25:51.824Z",
   "phase": "phase60",
   "mode": "local-only-review",
   "records": [

@@ -336,9 +336,9 @@
 - phase60 slice38 继续把 failure-path / command-preview coverage 推进成更明确的 failure-path continuity surface match，让 active failure readout、matched window / lane / board / observability row、review-state continuity entry、以及 command-lane follow-up 在同一条 Stage Explorer / windows / inspector 审阅链里保持只读可见，并继续保持 local-only / review-only posture
 - phase60 slice39 继续把 failure-path continuity surface match / packaged-app materialization contract 推进成更明确的 source-to-seal artifact handoff ledger，让 source artifacts、directory verification、staged-output manifests、seal / integrity metadata、matched window / lane / board / observability row、以及 review-state continuity entry 在同一条 Stage Explorer / windows / inspector 审阅链里保持只读可见，并继续保持 local-only / review-only posture
 - phase60 slice40 继续把 source-to-seal artifact handoff ledger / packaged-app materialization contract 推进成更明确的 artifact checkpoint continuity chain，让 current handoff、linked seal checkpoint、failure readout、Stage C checkpoint、以及 matched workflow / QA / continuity posture 在同一条 Stage Explorer / windows / inspector 审阅链里保持只读可见，并继续保持 local-only / review-only posture
-- phase60 slice41 继续把 artifact checkpoint continuity chain / inspector materialization readout 推进成更明确的 artifact checkpoint progression handoff continuity，让 current vs next handoff、current / next surface spine、以及 staged-output / review-packet / validator / failure downstream progression 在同一条 Stage Explorer / windows / inspector 审阅链里保持只读可见，并继续保持 local-only / review-only posture
-- smoke / build / package / release-plan 已在这轮 slice41 上重新通过，验证该刀没有把现有 review-only / local-only materialization contract 打断
-- README / HANDOFF / package snapshot 已同步反映 phase60 slice41 reality 与 deeper artifact checkpoint progression handoff continuity / source-to-seal artifact handoff / Stage C boundary linkage reality
+- phase60 slice42 继续把 artifact checkpoint progression handoff continuity 推进成更明确的 materialization artifact progression review surface，让 current-vs-next handoff 现在可以作为显式 command / windows / inspector review surface 被直接聚焦，且会带着 source artifact、Stage C linkage、validator / failure follow-up 与同一条 local-only review spine 一起切换，从而把当前边界内的 Stage C materialization closeout 收成一个明确终点
+- typecheck / build / smoke / start:smoke / package / release-plan 已在这轮 slice42 上重新通过，验证该刀没有把现有 review-only / local-only materialization contract 打断
+- README / HANDOFF / package snapshot 已同步反映 phase60 slice42 reality 与 materialization artifact progression review surface / Stage C local-only closeout reality
 
 ## 当前明确边界
 
