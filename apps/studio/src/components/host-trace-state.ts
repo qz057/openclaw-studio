@@ -73,6 +73,8 @@ export function formatHostTraceIntent(intent: StudioHostMutationIntent): string 
       return "Connector activate";
     case "connector-lifecycle":
       return "Connector lifecycle";
+    case "rollback-settlement":
+      return "Rollback settlement";
     default:
       return "Lane apply";
   }

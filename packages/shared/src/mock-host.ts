@@ -94,6 +94,29 @@ function createMockSimulatedOutcomes(slotId: string): StudioHostBridgeSimulatedO
           summary: "Rollback stays placeholder-only, so the follow-up simulated outcome remains rollback-incomplete."
         }
       ];
+    case "slot-rollback-settlement":
+      return [
+        {
+          id: "outcome-rollback-settlement-required",
+          label: "Rollback settlement required placeholder",
+          status: "rollback-required",
+          stage: "rollback-host",
+          failureCode: "rollback-required",
+          failureDisposition: "rollback",
+          rollbackDisposition: "required",
+          summary: "The disabled rollback-settlement handler keeps rollback settlement explicitly required whenever apply/lifecycle coupling is still incomplete."
+        },
+        {
+          id: "outcome-rollback-settlement-incomplete",
+          label: "Rollback settlement incomplete placeholder",
+          status: "rollback-incomplete",
+          stage: "rollback-host",
+          failureCode: "rollback-incomplete",
+          failureDisposition: "rollback",
+          rollbackDisposition: "incomplete",
+          summary: "Settlement remains placeholder-only, so the follow-up simulated outcome stays rollback-incomplete until a future executor can complete recovery."
+        }
+      ];
     default:
       return [];
   }
@@ -160,6 +183,15 @@ export const mockHostBridgeState: StudioHostBridgeState = {
       detail: "Validates apply payload linkage across root overlay, approval, audit correlation, and rollback disposition placeholders.",
       requiredPayloadFieldIds: ["payload-preview-id", "payload-request-id", "payload-root-overlay", "payload-source-order", "payload-approval", "payload-audit-seed", "payload-rollback"],
       requiredResultFieldIds: ["result-preview-id", "result-request-id", "result-status", "result-stage", "result-audit-id", "result-failure-code", "result-rollback-disposition"]
+    },
+    {
+      id: "validator-rollback-settlement",
+      slotId: "slot-rollback-settlement",
+      label: "Rollback settlement validator",
+      state: "registered",
+      detail: "Validates rollback settlement payload linkage across lane apply, lifecycle rollback, approval, audit correlation, and settlement disposition placeholders.",
+      requiredPayloadFieldIds: ["payload-preview-id", "payload-request-id", "payload-root-overlay", "payload-source-order", "payload-approval", "payload-audit-seed", "payload-rollback"],
+      requiredResultFieldIds: ["result-preview-id", "result-request-id", "result-status", "result-stage", "result-audit-id", "result-failure-code", "result-rollback-disposition"]
     }
   ],
   slotHandlers: [
@@ -212,6 +244,16 @@ export const mockHostBridgeState: StudioHostBridgeState = {
       defaultEnabled: false,
       detail: "Electron bridge registers a default-disabled placeholder handler for rollback-aware lane apply.",
       simulatedOutcomes: createMockSimulatedOutcomes("slot-lane-apply")
+    },
+    {
+      id: "handler-rollback-settlement",
+      slotId: "slot-rollback-settlement",
+      label: "Rollback settlement placeholder handler",
+      channel: studioHostBridgeSlotChannels.rollbackSettlement,
+      state: "registered",
+      defaultEnabled: false,
+      detail: "Electron bridge registers a default-disabled placeholder handler for rollback settlement and apply-coupling recovery review.",
+      simulatedOutcomes: createMockSimulatedOutcomes("slot-rollback-settlement")
     }
   ],
   trace: {
@@ -266,6 +308,13 @@ export const mockHostExecutorState: StudioHostExecutorState = {
       label: "Lane apply",
       detail: "Future handoff for rollback-aware lane apply across config, runtime state, and lifecycle.",
       protectedSurfaces: ["~/.openclaw config and runtime state", "service lifecycle"]
+    },
+    {
+      id: "intent-rollback-settlement",
+      intent: "rollback-settlement",
+      label: "Rollback settlement",
+      detail: "Future handoff for apply-coupled rollback settlement across bridge detach, lifecycle unwind, and runtime/config restore sequencing.",
+      protectedSurfaces: ["~/.openclaw config and runtime state", "connector lifecycle registry", "service lifecycle"]
     }
   ],
   lifecycle: [
@@ -327,7 +376,7 @@ export const mockHostExecutorState: StudioHostExecutorState = {
       title: "Approval request",
       summary: "The request shape captures why a mutation is needed, which surfaces are protected, and which rollback path would be used.",
       fields: [
-        { id: "approval-intent", label: "Intent", required: true, detail: "One of root-connect, bridge-attach, connector-activate, connector-lifecycle, or lane-apply." },
+        { id: "approval-intent", label: "Intent", required: true, detail: "One of root-connect, bridge-attach, connector-activate, connector-lifecycle, lane-apply, or rollback-settlement." },
         { id: "approval-target", label: "Target", required: true, detail: "The resolved root, bridge, connector, or lane target that would be mutated." },
         { id: "approval-risk", label: "Risk summary", required: true, detail: "Human-readable reason, protected surfaces, and mutation scope." },
         { id: "approval-rollback", label: "Rollback plan id", required: true, detail: "Rollback plan reference proving how partial state would be unwound." },
@@ -857,6 +906,47 @@ export const mockHostExecutorState: StudioHostExecutorState = {
           ]
         }
       }
+    },
+    {
+      id: "slot-rollback-settlement",
+      intent: "rollback-settlement",
+      label: "Rollback settlement IPC slot",
+      channel: studioHostBridgeSlotChannels.rollbackSettlement,
+      state: "withheld",
+      defaultEnabled: false,
+      detail: "Reserved IPC slot for apply-coupled rollback settlement and recovery verification.",
+      handoff: {
+        version: "phase29-windowing-v8",
+        payloadType: "StudioHostRollbackSettlementPayload",
+        resultType: "StudioHostRollbackSettlementResult",
+        payload: {
+          title: "Rollback settlement payload",
+          summary: "Carries preview mapping, root overlay, bridge order, approval, audit seed, and rollback settlement metadata for the disabled settlement stub.",
+          fields: [
+            { id: "payload-preview-id", label: "Preview id", required: true, detail: "Host preview identifier mapped into the slot handoff." },
+            { id: "payload-request-id", label: "Request id", required: true, detail: "Stable host mutation request identifier." },
+            { id: "payload-root-overlay", label: "Root overlay", required: true, detail: "Resolved root overlay whose apply/lifecycle state would be settled." },
+            { id: "payload-source-order", label: "Source order", required: true, detail: "Ordered bridge/lane inputs whose partial state would be unwound." },
+            { id: "payload-approval", label: "Approval token", required: true, detail: "Typed approval result required before mutation." },
+            { id: "payload-audit-seed", label: "Audit seed", required: true, detail: "Pre-execution audit metadata for the rollback settlement handoff." },
+            { id: "payload-rollback", label: "Rollback context", required: true, detail: "Settlement checkpoint/restore plan spanning bridge detach, lifecycle unwind, and runtime restore." }
+          ]
+        },
+        result: {
+          title: "Rollback settlement result",
+          summary: "Reports preview mapping, settlement outcome, audit correlation, failure taxonomy, and rollback disposition.",
+          fields: [
+            { id: "result-preview-id", label: "Preview id", required: true, detail: "Preview identifier echoed by the disabled slot stub." },
+            { id: "result-request-id", label: "Request id", required: true, detail: "Mutation request identifier echoed by the slot." },
+            { id: "result-status", label: "Status", required: true, detail: "Blocked, aborted, partial-apply, failed, or rolled-back." },
+            { id: "result-stage", label: "Lifecycle stage", required: true, detail: "Final lifecycle stage reached by the slot." },
+            { id: "result-audit-id", label: "Audit event id", required: true, detail: "Audit correlation id emitted by the executor." },
+            { id: "result-failure-code", label: "Failure code", required: false, detail: "Structured failure taxonomy code when not successful." },
+            { id: "result-failure-disposition", label: "Failure disposition", required: false, detail: "Blocked, abort, partial-apply, or rollback linkage for the placeholder outcome." },
+            { id: "result-rollback-disposition", label: "Rollback disposition", required: false, detail: "Whether rollback stayed unnecessary, available, required, or incomplete." }
+          ]
+        }
+      }
     }
   ]
 };
@@ -974,8 +1064,8 @@ export const mockBoundarySummary: StudioBoundarySummary = {
     {
       code: "rollback-missing",
       layer: "future-executor",
-      label: "Rollback-aware lifecycle handling is not defined in code",
-      detail: "A future executor would need attach/deactivate/apply rollback semantics before any live enablement."
+      label: "Rollback settlement / apply coupling is still disabled",
+      detail: "Default-disabled rollback settlement contracts now exist, but a future executor would still need live attach/deactivate/apply settlement before any enablement."
     }
   ],
   requiredPreconditions: [
@@ -1000,8 +1090,8 @@ export const mockBoundarySummary: StudioBoundarySummary = {
     {
       id: "precondition-rollback",
       label: "Rollback-aware apply semantics",
-      state: "missing",
-      detail: "A failed live apply would need coordinated unwind across bridge state, config, and lifecycle."
+      state: "partial",
+      detail: "Default-disabled rollback settlement slots now exist, but a failed live apply would still need executable unwind across bridge state, config, and lifecycle."
     }
   ],
   withheldExecutionPlan: [
@@ -1054,6 +1144,12 @@ export const mockBoundarySummary: StudioBoundarySummary = {
       label: "Lane apply coordinator",
       state: "planned",
       detail: "Future slot for config-aware apply plus rollback across runtime state and lifecycle."
+    },
+    {
+      id: "slot-rollback-settlement",
+      label: "Rollback settlement coordinator",
+      state: "planned",
+      detail: "Future slot for apply-coupled rollback settlement across bridge detach, lifecycle unwind, and runtime/config restore sequencing."
     }
   ],
   hostExecutor: mockHostExecutorState

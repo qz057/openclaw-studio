@@ -79,6 +79,17 @@ function createStudioWindowCrossLinks(intent: StudioHostMutationIntent): StudioC
           target: "orchestration-board-preview-review"
         }
       ];
+    case "rollback-settlement":
+      return [
+        { id: "window-link-trace-window", label: "Trace Review Window", kind: "window-roster", target: "window-trace-review" },
+        { id: "window-link-trace-lane", label: "Trace Review Lane", kind: "shared-state-lane", target: "shared-state-lane-trace-review" },
+        {
+          id: "window-link-trace-board",
+          label: "Trace Review Orchestration",
+          kind: "orchestration-board",
+          target: "orchestration-board-trace-review"
+        }
+      ];
     default:
       return [
         { id: "window-link-trace-window", label: "Trace Review Window", kind: "window-roster", target: "window-trace-review" },
@@ -783,7 +794,7 @@ function createStudioReleaseApprovalAuditRollbackEntryContract(): StudioReleaseA
         blockedBy: ["rollback remains non-executing", "cutover remains review-only"],
         workflowStageIds: ["approval-promotion-apply", "approval-stage-c-entry", "approval-publish-promotion", "approval-host-safety"],
         boundaryStepIds: ["withheld-plan-execute"],
-        futureExecutorSlotIds: ["slot-lifecycle", "slot-lane-apply"]
+        futureExecutorSlotIds: ["slot-lifecycle", "slot-lane-apply", "slot-rollback-settlement"]
       },
       {
         id: "entry-receipt-settlement",
@@ -804,7 +815,7 @@ function createStudioReleaseApprovalAuditRollbackEntryContract(): StudioReleaseA
         blockedBy: ["publication receipt closeout remains metadata-only", "no executable rollback settlement yet"],
         workflowStageIds: ["approval-qa-closeout", "approval-stage-c-entry", "approval-decision-receipts", "approval-publish-promotion"],
         boundaryStepIds: ["withheld-plan-approval", "withheld-plan-execute"],
-        futureExecutorSlotIds: ["slot-lane-apply"]
+        futureExecutorSlotIds: ["slot-lane-apply", "slot-rollback-settlement"]
       }
     ],
     blockedBy: [
@@ -858,7 +869,7 @@ function createStudioReleaseRollbackLiveReadiness(): StudioReleaseRollbackLiveRe
         deliveryChainStageId: "delivery-chain-rollback-readiness",
         checkpointId: "entry-rollback-live-readiness",
         boundaryStepIds: ["withheld-plan-execute"],
-        futureExecutorSlotIds: ["slot-lifecycle", "slot-lane-apply"]
+        futureExecutorSlotIds: ["slot-lifecycle", "slot-lane-apply", "slot-rollback-settlement"]
       },
       {
         id: "rollback-readiness-beta-to-stable",
@@ -894,7 +905,7 @@ function createStudioReleaseRollbackLiveReadiness(): StudioReleaseRollbackLiveRe
         deliveryChainStageId: "delivery-chain-rollback-readiness",
         checkpointId: "entry-rollback-live-readiness",
         boundaryStepIds: ["withheld-plan-execute"],
-        futureExecutorSlotIds: ["slot-lifecycle", "slot-lane-apply"]
+        futureExecutorSlotIds: ["slot-lifecycle", "slot-lane-apply", "slot-rollback-settlement"]
       }
     ],
     blockedBy: [
@@ -922,7 +933,7 @@ function createStudioReleaseStageCBoundaryLinkage(): StudioReleaseStageCBoundary
     workflowStageIds: ["approval-stage-c-entry", "approval-publish-promotion", "approval-host-safety"],
     releaseQaTrackIds: ["release-qa-proof-bundle", "release-qa-delivery-closeout"],
     withheldPlanStepIds: ["withheld-plan-root", "withheld-plan-bridge", "withheld-plan-approval", "withheld-plan-execute"],
-    futureExecutorSlotIds: ["slot-root-connect", "slot-bridge-attach", "slot-lifecycle", "slot-lane-apply"],
+    futureExecutorSlotIds: ["slot-root-connect", "slot-bridge-attach", "slot-lifecycle", "slot-lane-apply", "slot-rollback-settlement"],
     blockedBy: [
       "approval handshake remains withheld",
       "host mutation bridge remains disabled",
@@ -3660,7 +3671,7 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
         "release/APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT.json"
       ],
       linkedLifecycleStages: ["rollback-host", "verify-host"],
-      linkedSlotIds: [focusSlotId, "slot-lane-apply"],
+      linkedSlotIds: [focusSlotId, "slot-lane-apply", "slot-rollback-settlement"],
       reviewerQueueId: "reviewer-queue-rollback-settlement",
       escalationWindowId: "escalation-window-rollback-settlement",
       closeoutWindowId: "closeout-window-rollback-settlement",

@@ -834,6 +834,37 @@ function createHostMutationSlots(
         { id: "payload-rollback", label: "Rollback context", required: true, detail: "Checkpoint/restore context for partial apply." }
       ],
       commonResultFields
+    ),
+    createSlot(
+      "slot-rollback-settlement",
+      "rollback-settlement",
+      "Rollback settlement IPC slot",
+      studioHostBridgeSlotChannels.rollbackSettlement,
+      rootOverlay
+        ? `Reserved for rollback settlement using root overlay ${shortenHomePath(rootOverlay)}.`
+        : "Reserved for rollback settlement, but no root overlay is currently resolved.",
+      "StudioHostRollbackSettlementPayload",
+      "StudioHostRollbackSettlementResult",
+      [
+        { id: "payload-preview-id", label: "Preview id", required: true, detail: "Host preview identifier mapped into the slot handoff." },
+        { id: "payload-request-id", label: "Request id", required: true, detail: "Stable host mutation request identifier." },
+        {
+          id: "payload-root-overlay",
+          label: "Root overlay",
+          required: true,
+          detail: rootOverlay ? shortenHomePath(rootOverlay) : "No root overlay is currently resolved."
+        },
+        {
+          id: "payload-source-order",
+          label: "Source order",
+          required: true,
+          detail: attachSourceOrder.length > 0 ? attachSourceOrder.join(" -> ") : "No attach source order is currently resolved."
+        },
+        { id: "payload-approval", label: "Approval token", required: true, detail: "Typed approval result required before mutation." },
+        { id: "payload-audit-seed", label: "Audit seed", required: true, detail: "Pre-execution audit metadata attached to the handoff." },
+        { id: "payload-rollback", label: "Rollback context", required: true, detail: "Settlement checkpoint/restore context for partial rollback recovery." }
+      ],
+      commonResultFields
     )
   ];
 }
@@ -923,6 +954,29 @@ function createHostBridgeSimulatedOutcomes(slot: StudioHostMutationSlot): Studio
           failureDisposition: "rollback",
           rollbackDisposition: "incomplete",
           summary: "Rollback remains simulated only, so the follow-up placeholder outcome stays rollback-incomplete."
+        }
+      ];
+    case "slot-rollback-settlement":
+      return [
+        {
+          id: "outcome-rollback-settlement-required",
+          label: "Rollback settlement required placeholder",
+          status: "rollback-required",
+          stage: "rollback-host",
+          failureCode: "rollback-required",
+          failureDisposition: "rollback",
+          rollbackDisposition: "required",
+          summary: "The disabled rollback-settlement slot keeps settlement explicitly required while apply/lifecycle coupling remains withheld."
+        },
+        {
+          id: "outcome-rollback-settlement-incomplete",
+          label: "Rollback settlement incomplete placeholder",
+          status: "rollback-incomplete",
+          stage: "rollback-host",
+          failureCode: "rollback-incomplete",
+          failureDisposition: "rollback",
+          rollbackDisposition: "incomplete",
+          summary: "Settlement remains simulated only, so the follow-up placeholder outcome stays rollback-incomplete."
         }
       ];
     default:
@@ -1046,6 +1100,15 @@ export function buildToolsMcpHostExecutorState(
           ? `Would apply a host/runtime lane using root overlay ${shortenHomePath(rootOverlay)}.`
           : "Would require a resolved root overlay and staged bridge/lifecycle context before apply.",
         protectedSurfaces: ["~/.openclaw config and runtime state", "service lifecycle"]
+      },
+      {
+        id: "intent-rollback-settlement",
+        intent: "rollback-settlement",
+        label: "Rollback settlement",
+        detail: rootOverlay
+          ? `Would settle rollback/apply recovery for root overlay ${shortenHomePath(rootOverlay)} once lifecycle/apply coupling is enabled.`
+          : "Would require a resolved root overlay plus staged lifecycle/apply context before settlement.",
+        protectedSurfaces: ["~/.openclaw config and runtime state", "connector lifecycle registry", "service lifecycle"]
       }
     ],
     lifecycle,
@@ -1054,7 +1117,7 @@ export function buildToolsMcpHostExecutorState(
       mode: "Explicit operator approval required",
       summary: "Host mutation cannot progress until a typed approval request and typed approval result exist.",
       request: createHandoffShape("Approval request", "The request envelope defines the minimum approval metadata needed before handoff.", [
-        { id: "approval-intent", label: "Intent", required: true, detail: "One of root-connect, bridge-attach, connector-activate, connector-lifecycle, or lane-apply." },
+        { id: "approval-intent", label: "Intent", required: true, detail: "One of root-connect, bridge-attach, connector-activate, connector-lifecycle, lane-apply, or rollback-settlement." },
         { id: "approval-target", label: "Target", required: true, detail: "The resolved host target that would be mutated." },
         { id: "approval-risk", label: "Risk summary", required: true, detail: "Human-readable mutation scope and protected surfaces." },
         { id: "approval-rollback", label: "Rollback plan id", required: true, detail: "Rollback plan proving how partial host state would be unwound." },
@@ -1739,9 +1802,9 @@ function resolveHostPreviewForAction(
       const requestedTarget = rootOverlay ? shortenHomePath(rootOverlay) : "no rollback checkpoint target";
       const preview = createHostMutationPreview(
         hostExecutor,
-        "lane-apply",
-        "Host lifecycle rollback preview",
-        "Maps lifecycle-rollback coordination into the disabled lane-apply slot so rollback checkpoints and failure dispositions stay inspectable without touching host runtime.",
+        "rollback-settlement",
+        "Host rollback settlement preview",
+        "Maps lifecycle-rollback coordination into the disabled rollback-settlement slot so settlement checkpoints and failure dispositions stay inspectable without touching host runtime.",
         requestedTarget,
         "rollback-host"
       );
@@ -3159,8 +3222,8 @@ function buildConnectorBoundarySummary(
         detail: "Future slot for rollback-aware lane apply across bridge, runtime state, and lifecycle."
       },
       {
-        id: "slot-connector-rollback",
-        label: "Lifecycle rollback coordinator",
+        id: "slot-rollback-settlement",
+        label: "Rollback settlement coordinator",
         state: "planned",
         detail: "Future slot for coordinated rollback settlement across lane apply, lifecycle transitions, and bridge detach sequencing."
       }
@@ -5172,15 +5235,15 @@ async function runToolsMcpActionInternal(
       });
 
       return createHostBoundaryResult(itemId, actionId, {
-        title: "Host lifecycle rollback preview",
+        title: "Host rollback settlement preview",
         summary:
-          "Shows the withheld lifecycle-rollback coordination path, the current permission boundary, and what would be required before rollback-aware apply can be safely enabled.",
+          "Shows the withheld lifecycle-rollback settlement path, the current permission boundary, and what would be required before rollback-aware apply can be safely enabled.",
         tone: rollbackReady ? "neutral" : "warning",
         boundary: rollbackBoundary,
         hostPreview: hostPreviewResolution?.preview,
         hostHandoff: hostPreviewResolution?.handoff,
         actionLines: [
-          "operation · host/runtime lifecycle rollback coordination",
+          "operation · host/runtime rollback settlement coordination",
           `root overlay · ${rootOverlay ? shortenHomePath(rootOverlay) : "none"}`,
           `source order · ${formatSourceOrder(stagedSourceOrder)}`,
           `activation state · ${formatLocalOnlyStatus(controlSession.connectorActivation.status)}`

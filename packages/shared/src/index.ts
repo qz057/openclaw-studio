@@ -12,7 +12,7 @@ export type StudioBoundaryExecutorSlotState = "planned" | "future";
 export type StudioHostExecutorMode = "disabled" | "withheld";
 export type StudioHostBridgeHandlerState = "registered" | "disabled";
 export type StudioHostBridgeValidatorState = "registered";
-export type StudioHostMutationIntent = "root-connect" | "bridge-attach" | "connector-activate" | "connector-lifecycle" | "lane-apply";
+export type StudioHostMutationIntent = "root-connect" | "bridge-attach" | "connector-activate" | "connector-lifecycle" | "lane-apply" | "rollback-settlement";
 export type StudioHostLifecycleStageId =
   | "collect-context"
   | "request-approval"
@@ -110,7 +110,8 @@ export const studioHostBridgeSlotChannels = {
   bridgeAttach: "studio:host-executor-slot:bridge-attach",
   connectorActivate: "studio:host-executor-slot:connector-activate",
   connectorLifecycle: "studio:host-executor-slot:connector-lifecycle",
-  laneApply: "studio:host-executor-slot:lane-apply"
+  laneApply: "studio:host-executor-slot:lane-apply",
+  rollbackSettlement: "studio:host-executor-slot:rollback-settlement"
 } as const;
 
 export type StudioHostBridgeSlotChannel = (typeof studioHostBridgeSlotChannels)[keyof typeof studioHostBridgeSlotChannels];
