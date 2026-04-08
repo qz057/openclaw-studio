@@ -4810,7 +4810,7 @@ export function App() {
                       <p>{activeMaterializationArtifactSurface.activeHandoff?.summary ?? "No artifact handoff summary is available."}</p>
                     </div>
                     <div className="windowing-preview-line windowing-preview-line--stacked">
-                      <span>Source -> target</span>
+                      <span>Source to Target</span>
                       <strong>
                         {activeMaterializationArtifactSurface.sourceArtifacts.length} source /{" "}
                         {activeMaterializationArtifactSurface.targetArtifacts.length} target

@@ -188,6 +188,13 @@ async function verifyRendererFocusedSlotUi() {
     "Withheld / Future-executor Bridge",
     "Verification manifest",
     "Staged output root",
+    "Artifact handoff ledger",
+    "Current artifact handoff",
+    "Next artifact handoff",
+    "Artifact surface match",
+    "Artifact continuity",
+    "Source artifacts",
+    "Target artifacts",
     "Local review packet",
     "Validator / Observability Bridge",
     "Current validator readout",
@@ -344,6 +351,7 @@ async function verifyElectronRuntime() {
   assertCommandSurfaceContract(shellState.commandSurface, shellState);
   assertLayoutContract(shellState.layout, shellState.windowing);
   assertWindowingContract(shellState.windowing, shellState.layout, shellState.boundary.hostExecutor.bridge);
+  assertMaterializationArtifactLedgerContract(shellState, sharedModule);
   assertMaterializationFailureContinuityContract(shellState, sharedModule);
   assertCodexLoopContract(shellState.codex, codexTasks);
   assertCodexContextContract(shellState.codex);
@@ -420,6 +428,62 @@ function assertMaterializationFailureContinuityContract(shellState, sharedModule
 
   if (!failureSurfaceMatch.commandPreviewActions.some((action) => action.id === failureSurfaceMatch.primaryAction.id)) {
     throw new Error("Materialization failure continuity lost the active failure action from its command preview lane.");
+  }
+}
+
+function assertMaterializationArtifactLedgerContract(shellState, sharedModule) {
+  const selectArtifactLedgerSurfaceMatch = sharedModule.selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch;
+
+  if (typeof selectArtifactLedgerSurfaceMatch !== "function") {
+    throw new Error("Shared package is missing the materialization artifact-ledger selector export.");
+  }
+
+  const contract = shellState.boundary?.hostExecutor?.releaseApprovalPipeline?.deliveryChain?.packagedAppMaterializationContract;
+  const activePlatform =
+    contract?.platforms.find((platform) => platform.id === contract.activePlatformId) ?? contract?.platforms[0] ?? null;
+  const activeHandoff =
+    activePlatform?.artifactLedger?.handoffs.find((handoff) => handoff.id === activePlatform.artifactLedger.activeHandoffId) ??
+    activePlatform?.artifactLedger?.handoffs[0] ??
+    null;
+  const actionDeck =
+    shellState.commandSurface.actionDecks.find((deck) => deck.lanes.some((lane) => lane.id === activeHandoff?.commandDeckLaneId)) ??
+    shellState.commandSurface.actionDecks[0] ??
+    null;
+  const artifactLedgerSurface = selectArtifactLedgerSurfaceMatch(
+    shellState.boundary.hostExecutor.releaseApprovalPipeline.deliveryChain,
+    shellState.windowing,
+    shellState.reviewStateContinuity,
+    actionDeck,
+    shellState.commandSurface.actions,
+    activePlatform?.id
+  );
+
+  if (
+    !artifactLedgerSurface?.artifactLedger ||
+    !artifactLedgerSurface?.activeHandoff ||
+    artifactLedgerSurface.sourceArtifacts.length === 0 ||
+    artifactLedgerSurface.targetArtifacts.length === 0 ||
+    !artifactLedgerSurface?.reviewPacketStep ||
+    !artifactLedgerSurface?.validatorReadout ||
+    !artifactLedgerSurface?.commandDeckLane ||
+    !artifactLedgerSurface?.observabilityMapping ||
+    !artifactLedgerSurface?.window ||
+    !artifactLedgerSurface?.lane ||
+    !artifactLedgerSurface?.board ||
+    !artifactLedgerSurface?.reviewStateContinuityEntry
+  ) {
+    throw new Error("Built shell state is missing the phase60 materialization artifact ledger surface match.");
+  }
+
+  if (!artifactLedgerSurface.commandPreviewActions.length) {
+    throw new Error("Materialization artifact ledger lost its command-preview linkage.");
+  }
+
+  if (
+    !artifactLedgerSurface.artifacts.some((artifact) => artifact.id === artifactLedgerSurface.sourceArtifacts[0].id) ||
+    !artifactLedgerSurface.artifacts.some((artifact) => artifact.id === artifactLedgerSurface.targetArtifacts[0].id)
+  ) {
+    throw new Error("Materialization artifact ledger lost its source/target artifact coverage.");
   }
 }
 
@@ -2852,6 +2916,12 @@ function verifyReleaseSkeletonContract() {
       (entry) =>
         entry.taskState === "review-ready" &&
         typeof entry.localMaterializationContractId === "string" &&
+        typeof entry.artifactLedgerId === "string" &&
+        Array.isArray(entry.sourceArtifactIds) &&
+        entry.sourceArtifactIds.length > 0 &&
+        Array.isArray(entry.resultArtifactIds) &&
+        entry.resultArtifactIds.length > 0 &&
+        typeof entry.activeArtifactHandoffId === "string" &&
         Array.isArray(entry.taskDependencies)
     )
   ) {
@@ -2865,6 +2935,12 @@ function verifyReleaseSkeletonContract() {
       (entry) =>
         entry.taskState === "review-ready" &&
         typeof entry.localMaterializationContractId === "string" &&
+        typeof entry.artifactLedgerId === "string" &&
+        Array.isArray(entry.sourceArtifactIds) &&
+        entry.sourceArtifactIds.length > 0 &&
+        Array.isArray(entry.resultArtifactIds) &&
+        entry.resultArtifactIds.length > 0 &&
+        typeof entry.activeArtifactHandoffId === "string" &&
         Array.isArray(entry.taskDependencies)
     )
   ) {
@@ -2888,6 +2964,39 @@ function verifyReleaseSkeletonContract() {
         Array.isArray(contract.tasks) &&
         contract.tasks.length === 3 &&
         contract.tasks.some((task) => task.id === contract.currentTaskId) &&
+        typeof contract.artifactLedger?.activeHandoffId === "string" &&
+        Array.isArray(contract.artifactLedger?.artifacts) &&
+        contract.artifactLedger.artifacts.length >= 6 &&
+        Array.isArray(contract.artifactLedger?.handoffs) &&
+        contract.artifactLedger.handoffs.length >= 4 &&
+        contract.artifactLedger.handoffs.some((handoff) => handoff.id === contract.artifactLedger.activeHandoffId) &&
+        (!contract.artifactLedger.nextHandoffId ||
+          contract.artifactLedger.handoffs.some((handoff) => handoff.id === contract.artifactLedger.nextHandoffId)) &&
+        contract.artifactLedger.artifacts.every(
+          (artifact) =>
+            typeof artifact.path === "string" &&
+            artifact.path.length > 0 &&
+            typeof artifact.taskId === "string" &&
+            typeof artifact.deliveryChainStageId === "string"
+        ) &&
+        contract.artifactLedger.handoffs.every(
+          (handoff) =>
+            typeof handoff.taskId === "string" &&
+            typeof handoff.reviewPacketStepId === "string" &&
+            typeof handoff.validatorReadoutId === "string" &&
+            typeof handoff.windowId === "string" &&
+            typeof handoff.sharedStateLaneId === "string" &&
+            typeof handoff.orchestrationBoardId === "string" &&
+            typeof handoff.observabilityMappingId === "string" &&
+            Array.isArray(handoff.observabilitySignalIds) &&
+            handoff.observabilitySignalIds.length > 0 &&
+            Array.isArray(handoff.commandActionIds) &&
+            handoff.commandActionIds.length > 0 &&
+            Array.isArray(handoff.fromArtifactIds) &&
+            handoff.fromArtifactIds.length > 0 &&
+            Array.isArray(handoff.toArtifactIds) &&
+            handoff.toArtifactIds.length > 0
+        ) &&
         typeof contract.validatorObservabilityBridge?.activeReadoutId === "string" &&
         Array.isArray(contract.validatorObservabilityBridge?.readouts) &&
         contract.validatorObservabilityBridge.readouts.length === 3 &&

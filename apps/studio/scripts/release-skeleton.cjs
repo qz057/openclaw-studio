@@ -7,7 +7,7 @@ const APP_NAME = "OpenClaw Studio";
 const PHASE_ID = "phase60";
 const PHASE_TITLE = "Phase60";
 const PHASE_MILESTONE =
-  "phase60 delivery-chain workspace / stage explorer / review flow ladder / acceptance reading queue / reviewer signoff board / signoff readiness queue / final review closeout / final verdict console / acceptance closeout timeline / final review settlement / pack closeout board / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass progression / screenshot pass records / capture review flow / proof-linked evidence bundle / acceptance evidence continuity / reviewer brief / proof bundle / product-review console polish / acceptance storyboard / evidence dossier / evidence trace lens / acceptance scoreboard / replay acceptance checklist / command-surface observability linkage / inspector-command linkage / review state continuity / observability closeout / linked review artifacts / blockers / handoff posture / observability mapping / packaged-app materialization contract / packaged-app task-state linkage / typed Stage C readiness / withheld-future boundary bridge / staged-output review readout / bundle-sealing review readout / local materialization review packet / validator continuity surface match / materialization Stage C readout chain / materialization failure-path readout / failure command preview / failure-path continuity surface match / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout";
+  "phase60 delivery-chain workspace / stage explorer / review flow ladder / acceptance reading queue / reviewer signoff board / signoff readiness queue / final review closeout / final verdict console / acceptance closeout timeline / final review settlement / pack closeout board / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass progression / screenshot pass records / capture review flow / proof-linked evidence bundle / acceptance evidence continuity / reviewer brief / proof bundle / product-review console polish / acceptance storyboard / evidence dossier / evidence trace lens / acceptance scoreboard / replay acceptance checklist / command-surface observability linkage / inspector-command linkage / review state continuity / observability closeout / linked review artifacts / blockers / handoff posture / observability mapping / packaged-app materialization contract / packaged-app task-state linkage / typed Stage C readiness / withheld-future boundary bridge / staged-output review readout / bundle-sealing review readout / local materialization review packet / local materialization artifact ledger / validator continuity surface match / materialization Stage C readout chain / materialization failure-path readout / failure command preview / failure-path continuity surface match / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout";
 const RELEASE_CHANNEL = "alpha";
 const PACKAGE_ID = "openclaw-studio-alpha-shell";
 const PACKAGE_KIND = "alpha-shell-release-skeleton";
@@ -25,7 +25,7 @@ const CURRENT_DELIVERY_SURFACES = [
   "built renderer bundle copied into artifacts/renderer",
   "built Electron bundle copied into artifacts/electron",
   "review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase60 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything",
-  "delivery-chain workspace, stage explorer, a packaged-app materialization contract, staged-output review readouts, bundle-sealing review readouts, local materialization review packets, validator continuity surface matches, a materialization Stage C readout chain, materialization failure-path readouts, failure command previews, failure-path continuity surface matches, review flow ladder, an acceptance reading queue, a reviewer signoff board, a signoff readiness queue, a final review closeout, a final verdict console, an acceptance closeout timeline, a final review settlement, a pack closeout board, delivery coverage matrix, review-deck coverage routing, review-surface coverage actions, command-surface multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, companion route-history memory, a route replay board, replay scenario packs, a screenshot-driven acceptance review pack, acceptance pass progression, screenshot pass records, capture review flows, a proof-linked evidence bundle, acceptance evidence continuity, reviewer briefs, proof bundles, product-review console polish, an acceptance storyboard, an evidence dossier, an evidence trace lens, an acceptance scoreboard, a replay acceptance checklist, and a review-state continuity contract, and the review-deck orchestration action deck linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, observability mapping, command-surface review posture, multi-window coverage, cross-window shared-state continuity readouts, packaged-app materialization roots, validator-facing observability rows, failure-path command previews, failure-surface continuity readouts, and packet-level handoff continuity into one staged local-only workflow without executing anything",
+  "delivery-chain workspace, stage explorer, a packaged-app materialization contract, staged-output review readouts, bundle-sealing review readouts, local materialization review packets, local materialization artifact ledgers, validator continuity surface matches, a materialization Stage C readout chain, materialization failure-path readouts, failure command previews, failure-path continuity surface matches, review flow ladder, an acceptance reading queue, a reviewer signoff board, a signoff readiness queue, a final review closeout, a final verdict console, an acceptance closeout timeline, a final review settlement, a pack closeout board, delivery coverage matrix, review-deck coverage routing, review-surface coverage actions, command-surface multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, companion route-history memory, a route replay board, replay scenario packs, a screenshot-driven acceptance review pack, acceptance pass progression, screenshot pass records, capture review flows, a proof-linked evidence bundle, acceptance evidence continuity, reviewer briefs, proof bundles, product-review console polish, an acceptance storyboard, an evidence dossier, an evidence trace lens, an acceptance scoreboard, a replay acceptance checklist, and a review-state continuity contract, and the review-deck orchestration action deck linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, observability mapping, command-surface review posture, multi-window coverage, cross-window shared-state continuity readouts, packaged-app materialization roots, source-to-seal artifact handoffs, validator-facing observability rows, failure-path command previews, failure-surface continuity readouts, and packet-level handoff continuity into one staged local-only workflow without executing anything",
   "deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references",
   "deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, review-posture ownership, inspector-command linkage, reviewer navigation, and verdict-aware inspector context",
   "persisted shell layout foundation backed by localStorage",
@@ -12843,6 +12843,12 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
       (entry) =>
         entry.taskState === "review-ready" &&
         typeof entry.localMaterializationContractId === "string" &&
+        typeof entry.artifactLedgerId === "string" &&
+        Array.isArray(entry.sourceArtifactIds) &&
+        entry.sourceArtifactIds.length > 0 &&
+        Array.isArray(entry.resultArtifactIds) &&
+        entry.resultArtifactIds.length > 0 &&
+        typeof entry.activeArtifactHandoffId === "string" &&
         Array.isArray(entry.taskDependencies)
     )
   ) {
@@ -12858,6 +12864,12 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
       (entry) =>
         entry.taskState === "review-ready" &&
         typeof entry.localMaterializationContractId === "string" &&
+        typeof entry.artifactLedgerId === "string" &&
+        Array.isArray(entry.sourceArtifactIds) &&
+        entry.sourceArtifactIds.length > 0 &&
+        Array.isArray(entry.resultArtifactIds) &&
+        entry.resultArtifactIds.length > 0 &&
+        typeof entry.activeArtifactHandoffId === "string" &&
         Array.isArray(entry.taskDependencies)
     )
   ) {
@@ -12881,6 +12893,39 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
         Array.isArray(contract.tasks) &&
         contract.tasks.length === 3 &&
         contract.tasks.some((task) => task.id === contract.currentTaskId) &&
+        typeof contract.artifactLedger?.activeHandoffId === "string" &&
+        Array.isArray(contract.artifactLedger?.artifacts) &&
+        contract.artifactLedger.artifacts.length >= 6 &&
+        Array.isArray(contract.artifactLedger?.handoffs) &&
+        contract.artifactLedger.handoffs.length >= 4 &&
+        contract.artifactLedger.handoffs.some((handoff) => handoff.id === contract.artifactLedger.activeHandoffId) &&
+        (!contract.artifactLedger.nextHandoffId ||
+          contract.artifactLedger.handoffs.some((handoff) => handoff.id === contract.artifactLedger.nextHandoffId)) &&
+        contract.artifactLedger.artifacts.every(
+          (artifact) =>
+            typeof artifact.path === "string" &&
+            artifact.path.length > 0 &&
+            typeof artifact.taskId === "string" &&
+            typeof artifact.deliveryChainStageId === "string"
+        ) &&
+        contract.artifactLedger.handoffs.every(
+          (handoff) =>
+            typeof handoff.taskId === "string" &&
+            typeof handoff.reviewPacketStepId === "string" &&
+            typeof handoff.validatorReadoutId === "string" &&
+            typeof handoff.windowId === "string" &&
+            typeof handoff.sharedStateLaneId === "string" &&
+            typeof handoff.orchestrationBoardId === "string" &&
+            typeof handoff.observabilityMappingId === "string" &&
+            Array.isArray(handoff.observabilitySignalIds) &&
+            handoff.observabilitySignalIds.length > 0 &&
+            Array.isArray(handoff.commandActionIds) &&
+            handoff.commandActionIds.length > 0 &&
+            Array.isArray(handoff.fromArtifactIds) &&
+            handoff.fromArtifactIds.length > 0 &&
+            Array.isArray(handoff.toArtifactIds) &&
+            handoff.toArtifactIds.length > 0
+        ) &&
         typeof contract.reviewPacket?.currentStepId === "string" &&
         Array.isArray(contract.reviewPacket?.steps) &&
         contract.reviewPacket.steps.length >= 3 &&
