@@ -1030,6 +1030,26 @@ function createHostMutationPreview(hostExecutor, intent, title, summary, request
         failureTaxonomy: hostExecutor.failureTaxonomy
     };
 }
+function getHostApprovalRouteArtifactPaths(intent) {
+    return [
+        "release/RELEASE-APPROVAL-WORKFLOW.json",
+        "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json",
+        "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json",
+        intent === "rollback-settlement"
+            ? "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json"
+            : "release/RELEASE-DECISION-HANDOFF.json"
+    ];
+}
+function getHostExecutorRouteArtifactPaths(intent) {
+    return [
+        "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
+        "release/OPERATOR-REVIEW-BOARD.json",
+        "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+        intent === "lane-apply" || intent === "rollback-settlement"
+            ? "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json"
+            : "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json"
+    ];
+}
 function createHostPreviewHandoff(preview, hostExecutor, simulation) {
     const slot = preview.slot;
     const requiredPayloadFieldIds = slot.handoff.payload.fields.filter((field) => field.required).map((field) => field.id);
@@ -1040,6 +1060,8 @@ function createHostPreviewHandoff(preview, hostExecutor, simulation) {
     const auditEventId = `audit-${slot.id}`;
     const auditCorrelationId = `${auditEventId}:${simulation.slotStatus}`;
     const rollbackPlanId = `rollback-${slot.id}`;
+    const approvalRouteArtifactPaths = getHostApprovalRouteArtifactPaths(preview.intent);
+    const executorRouteArtifactPaths = getHostExecutorRouteArtifactPaths(preview.intent);
     return {
         id: `handoff-${slot.id}`,
         previewId: preview.id,
@@ -1071,6 +1093,14 @@ function createHostPreviewHandoff(preview, hostExecutor, simulation) {
                 ? `Placeholder approval ${approvalId} is scoped to ${simulation.scope}.`
                 : `Placeholder approval ${approvalId} remains ${simulation.approvalDecision} for ${simulation.scope}.`
         },
+        approvalPacket: {
+            packetId: `approval-packet-${slot.id}`,
+            slotId: slot.id,
+            intent: preview.intent,
+            decision: simulation.approvalDecision,
+            routeArtifactPaths: approvalRouteArtifactPaths,
+            summary: `Slot-scoped approval packet for ${slot.label} stays routed through review-only approval artifacts before any host execution could begin.`
+        },
         audit: {
             eventId: auditEventId,
             correlationId: auditCorrelationId,
@@ -1085,6 +1115,14 @@ function createHostPreviewHandoff(preview, hostExecutor, simulation) {
             summary: simulation.rollbackDisposition === "not-needed"
                 ? `Rollback remains unnecessary; checkpoint stays ${simulation.rollbackCheckpoint}.`
                 : `Rollback disposition is ${simulation.rollbackDisposition}; checkpoint ${simulation.rollbackCheckpoint} stays attached to the placeholder result.`
+        },
+        executorPacket: {
+            packetId: `executor-packet-${slot.id}`,
+            slotId: slot.id,
+            channel: slot.channel,
+            readiness: validationStatus,
+            routeArtifactPaths: executorRouteArtifactPaths,
+            summary: `Executor handoff packet for ${slot.label} remains slot-scoped, route-linked, and default-disabled while host mutation stays withheld.`
         },
         slotResult: {
             slotId: slot.id,
@@ -1512,6 +1550,17 @@ function createHostBridgeHandoffSections(hostExecutor, hostPreview, hostHandoff)
             ]
         },
         {
+            id: "host-bridge-approval-packet",
+            title: "Approval packet",
+            lines: [
+                `packet id · ${hostHandoff.approvalPacket.packetId}`,
+                `slot scope · ${hostHandoff.approvalPacket.slotId} · ${hostHandoff.approvalPacket.intent}`,
+                `decision · ${hostHandoff.approvalPacket.decision}`,
+                `route artifacts · ${hostHandoff.approvalPacket.routeArtifactPaths.join(" · ")}`,
+                `packet summary · ${hostHandoff.approvalPacket.summary}`
+            ]
+        },
+        {
             id: "host-bridge-audit",
             title: "Audit placeholder",
             lines: [
@@ -1530,6 +1579,27 @@ function createHostBridgeHandoffSections(hostExecutor, hostPreview, hostHandoff)
                 `disposition · ${hostHandoff.rollback.disposition}`,
                 `checkpoint · ${hostHandoff.rollback.checkpoint}`,
                 `rollback summary · ${hostHandoff.rollback.summary}`
+            ]
+        },
+        {
+            id: "host-bridge-executor-packet",
+            title: "Executor packet",
+            lines: [
+                `packet id · ${hostHandoff.executorPacket.packetId}`,
+                `slot scope · ${hostHandoff.executorPacket.slotId} · ${hostHandoff.executorPacket.channel}`,
+                `handoff readiness · ${hostHandoff.executorPacket.readiness}`,
+                `route artifacts · ${hostHandoff.executorPacket.routeArtifactPaths.join(" · ")}`,
+                `packet summary · ${hostHandoff.executorPacket.summary}`
+            ]
+        },
+        {
+            id: "host-bridge-recovery-drilldown",
+            title: "Recovery drilldown",
+            lines: [
+                `pre-coupling gate · validation ${hostHandoff.validation.status} · approval ${hostHandoff.approval.decision}`,
+                `primary outcome · ${hostHandoff.slotResult.status} · ${hostHandoff.slotResult.failureCode}`,
+                `rollback path · ${hostHandoff.rollback.disposition} · ${hostHandoff.rollback.checkpoint}`,
+                `route handoff · ${hostHandoff.approvalPacket.routeArtifactPaths[hostHandoff.approvalPacket.routeArtifactPaths.length - 1] ?? "none"} · ${hostHandoff.executorPacket.routeArtifactPaths[hostHandoff.executorPacket.routeArtifactPaths.length - 1] ?? "none"}`
             ]
         },
         {

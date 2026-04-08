@@ -84,6 +84,7 @@
   - phase60 slice47 已继续把 rollback settlement / apply-coupling preview contract 推进成更明确的 rollback settlement preview contract：新增 typed `rollback-settlement` intent / bridge slot channel / validator / placeholder handler / simulated outcomes，并把 approval-audit-rollback entry、rollback live-readiness、Stage C boundary linkage 一起显式连到 `slot-rollback-settlement`，让 shared/runtime/release contract 围绕同一条 rollback settlement 预览链保持一致，同时仍旧禁止真实 host mutation
   - phase60 slice48 已继续把 rollback settlement / apply-coupling readiness 从“只有 preview-host contract”推进到更明确的 Studio-local execution ladder：新增 `execute-local-lifecycle-stage` / `execute-local-rollback-settlement`，让 connector local control session 现在显式暴露 lifecycle stage / rollback settlement checkpoint，并由 smoke 真正验证 5 条 connector local actions、`executions=6`、以及 lifecycle/rollback line 会随本地执行链一起推进，同时仍旧严格停留在 local-only / default-disabled 边界内
   - phase60 slice49 已继续把“更接近真实连接”的缺口推进到 explicit host approval / executor handoff contract：host boundary 结果现在显式暴露 approval contract / executor handoff contract，两条最关键的 preview-host apply/rollback 路径会把 Studio-local lifecycle stage / rollback settlement 作为 apply-coupling readout 一起展示，并且 smoke 现在会额外验证这些 contract section 以及“在本地 lifecycle/apply coupling 尚未 staged 前，handoff 必须保持 `validation=invalid` + `approval=withheld`”的失败链，从而把 host contract 继续收紧到更真实但仍 default-disabled 的边界里
+  - phase60 slice50 已把这条 host contract 再收成更接近真实连接的 slot-scoped handoff state-machine：新增 slot-scoped `approval packet` / `executor packet` / `recovery drilldown`，让 handoff 现在不仅有 section-level contract，还显式带出按 slot 绑定的 routing artifact path、executor route linkage、以及 apply/lifecycle recovery drilldown；smoke 也同步要求这些 packet / recovery section 必须存在，从而把 C 任务在当前 review-only / default-disabled 边界内推进到一个可直接收口的最终基线
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline
@@ -380,10 +381,9 @@ Tools / MCP 当前深度：
 
 ## Recommended Next Step
 
-当前 **Stage C 在既有 local-only / review-only 边界内已经完成收口**，并已进入 post-Stage-C 的 execution-surface readiness（当前已推进到 slice49）。
+当前 **Stage C 在既有 local-only / review-only 边界内已经完成收口**，并且这条 C 任务的 post-Stage-C execution-surface readiness 也已经在当前允许边界内推进到 slice50 终点。
 
-更自然的后续方向是：
+更自然的后续方向现在只剩两类：
 
-1. 继续在 default-disabled 边界内推进下一刀（优先把 approval decision / executor packet 从当前 section-level contract 继续推进成更具体的 slot-scoped handoff packet + release review routing linkage，并把 apply/lifecycle recovery matrix 再扩成更细的 preview-host failure drilldown / smoke），把 execution readiness 从当前 host contract baseline 再推进到更接近真实连接的 handoff state-machine 层
-2. 若要直接推进“整个项目完成度”，则明确切换到真实交付层：installer / signing / publish / rollback / host-side execution 的可执行闭环
-3. 若暂不继续实现，可在当前 clean baseline 做提交整理 / 推送 / 交付收口
+1. **跨边界进入真实执行层**：明确切换到真实交付层：installer / signing / publish / rollback / host-side execution 的可执行闭环
+2. **停在当前最终安全基线**：把当前 clean baseline 作为 C 任务最终收口结果，后续只在用户明确允许跨出 review-only / default-disabled 边界时再继续
