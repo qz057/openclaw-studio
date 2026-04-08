@@ -1066,9 +1066,9 @@ export function App() {
     }
 
     const applyResponsiveLayout = () => {
-      const shouldCompact = window.innerWidth < 1580;
-      const shouldHideRightRail = window.innerWidth < 1700;
-      const shouldHideBottomDock = window.innerWidth < 1500 || window.innerHeight < 920;
+      const shouldCompact = window.innerWidth < 1720;
+      const shouldHideRightRail = window.innerWidth < 2300;
+      const shouldHideBottomDock = window.innerWidth < 2300 || window.innerHeight < 1060;
 
       setLayoutState((currentState) => {
         const baseState = resolvePersistedShellLayoutState(data, currentState);
@@ -3600,8 +3600,8 @@ export function App() {
     navigateToPage(options?.pageId ?? view.defaultPageId);
     applyLayoutPatch({
       workspaceViewId: view.id,
-      rightRailVisible: true,
-      bottomDockVisible: true,
+      rightRailVisible: resolvedLayoutState.rightRailVisible,
+      bottomDockVisible: resolvedLayoutState.bottomDockVisible,
       rightRailTabId: options?.rightRailTabId ?? view.rightRailTabId,
       bottomDockTabId: options?.bottomDockTabId ?? view.bottomDockTabId
     });
@@ -3670,8 +3670,8 @@ export function App() {
     } else {
       navigateToPage(intent.shellLink.pageId);
       applyLayoutPatch({
-        rightRailVisible: true,
-        bottomDockVisible: true,
+        rightRailVisible: resolvedLayoutState.rightRailVisible,
+        bottomDockVisible: resolvedLayoutState.bottomDockVisible,
         rightRailTabId: intent.shellLink.rightRailTabId,
         bottomDockTabId: intent.shellLink.bottomDockTabId
       });
@@ -3996,8 +3996,8 @@ export function App() {
     }
 
     applyLayoutPatch({
-      rightRailVisible: true,
-      bottomDockVisible: true,
+      rightRailVisible: resolvedLayoutState.rightRailVisible,
+      bottomDockVisible: resolvedLayoutState.bottomDockVisible,
       rightRailTabId: action.rightRailTabId ?? "windows",
       bottomDockTabId: action.bottomDockTabId ?? "windows"
     });
@@ -4889,6 +4889,7 @@ export function App() {
               ))}
             </div>
 
+            <div className="inspector-content-scroll">
             {resolvedLayoutState.rightRailTabId === "inspector" ? (
               <>
                 <BoundarySummaryCard boundary={data.inspector.boundary} compact nested eyebrow="Inspector" />
@@ -5107,7 +5108,7 @@ export function App() {
                     ) : null}
                   </div>
                 </article>
-                {data.inspector.drilldowns.map((drilldown) => (
+                {data.inspector.drilldowns.slice(0, 2).map((drilldown) => (
                   <article key={drilldown.id} className="windowing-summary-card">
                     <span>{drilldown.label}</span>
                     <strong>{drilldown.summary}</strong>
@@ -5372,6 +5373,7 @@ export function App() {
                 </div>
               </div>
             ) : null}
+            </div>
           </aside>
         ) : null}
 
@@ -5404,6 +5406,7 @@ export function App() {
               ))}
             </div>
 
+            <div className="bottom-dock-content-scroll">
             {resolvedLayoutState.bottomDockTabId === "focus" ? (
               <>
                 <div className="trace-slot-roster trace-slot-roster--compact">
@@ -5427,7 +5430,7 @@ export function App() {
                   })}
                 </div>
                 <div className="dock-list">
-                  {dockItems.map((item) => (
+                  {dockItems.slice(0, 4).map((item) => (
                     <article key={item.id} className={`dock-card dock-card--${item.tone}`}>
                       <span>{item.label}</span>
                       <strong>{item.value}</strong>
@@ -5445,7 +5448,7 @@ export function App() {
                   <strong>{data.layout.persistence.version}</strong>
                   <p>{data.layout.persistence.persistedFields.join(" · ")}</p>
                 </article>
-                {commandLog.map((entry) => (
+                {commandLog.slice(0, 4).map((entry) => (
                   <article key={entry.id} className="dock-card dock-card--neutral">
                     <span>{entry.timestamp} · {entry.safety}</span>
                     <strong>{entry.label}</strong>
@@ -5485,7 +5488,7 @@ export function App() {
                   <strong>{workflowIntent?.handoff.label ?? "Unavailable"}</strong>
                   <p>{workflowIntent?.handoff.destination ?? "No handoff destination"} · {workflowIntent?.handoff.safeMode ?? "local-only"}</p>
                 </article>
-                {windowIntents.map((intent) => (
+                {windowIntents.slice(0, 3).map((intent) => (
                   <article key={intent.id} className={intent.id === selectedWindowIntent?.id ? "dock-card dock-card--warning" : "dock-card dock-card--neutral"}>
                     <span>{formatIntentStatus(intent.localStatus)} · {formatIntentFocus(intent.focus)}</span>
                     <strong>{intent.label}</strong>
@@ -5494,6 +5497,7 @@ export function App() {
                 ))}
               </div>
             ) : null}
+            </div>
           </section>
         ) : null}
       </div>

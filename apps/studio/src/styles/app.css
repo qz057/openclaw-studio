@@ -47,7 +47,9 @@ button:disabled {
 .studio-shell {
   display: grid;
   min-height: 100vh;
+  height: 100vh;
   min-width: 0;
+  overflow: hidden;
   grid-template-columns: 248px minmax(0, 1fr) 320px;
   grid-template-rows: auto minmax(0, 1fr) 220px;
   gap: 16px;
@@ -79,8 +81,10 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  min-height: 0;
   padding: 20px;
   border-radius: 26px;
+  overflow: auto;
 }
 
 .brand-block {
@@ -219,8 +223,11 @@ button:disabled {
 
 .main-panel {
   min-width: 0;
+  min-height: 0;
   display: grid;
   gap: 16px;
+  overflow: auto;
+  padding-right: 4px;
 }
 
 .top-bar__summary,
@@ -960,6 +967,7 @@ button:disabled {
 
 .windowing-summary-card strong {
   display: block;
+  overflow-wrap: anywhere;
 }
 
 .windowing-card p {
@@ -969,6 +977,7 @@ button:disabled {
 .windowing-summary-card p {
   margin: 0;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .windowing-card__meta,
@@ -1209,6 +1218,7 @@ button:disabled {
   margin: 14px 0 0;
   color: #8fa3ba;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .page-summary--tight {
@@ -1421,7 +1431,20 @@ button:disabled {
 }
 
 .inspector {
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.inspector-content-scroll {
+  margin-top: 14px;
+  min-height: 0;
+  overflow: auto;
+  display: grid;
+  gap: 12px;
+  padding-right: 4px;
 }
 
 .inspector-card,
@@ -1449,11 +1472,34 @@ button:disabled {
 .placeholder-block strong {
   display: block;
   margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+
+.dock-card p,
+.inspector-card p {
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .bottom-dock {
   grid-column: 2 / span 2;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.bottom-dock-content-scroll {
+  margin-top: 14px;
+  min-height: 0;
+  overflow: auto;
+  display: grid;
+  gap: 12px;
+  padding-right: 4px;
 }
 
 .studio-shell--no-right-rail .bottom-dock {
@@ -1463,6 +1509,8 @@ button:disabled {
 .dock-list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-height: 100%;
+  overflow: auto;
 }
 
 .dock-card--positive {
