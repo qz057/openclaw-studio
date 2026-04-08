@@ -1846,15 +1846,20 @@ function resolveHostPreviewForAction(
         requestedTarget,
         "rollback-host"
       );
+      const localRollbackCouplingReady =
+        controlSession.lifecycleStage.status === "armed" &&
+        (controlSession.laneApply.status === "applied" || controlSession.rollbackSettlement.status === "settled");
       const handoff = createHostPreviewHandoff(preview, hostExecutor, {
-        validationMissingFieldIds: [],
-        approvalDecision: "approved",
-        auditStatus: "rollback-linked",
+        validationMissingFieldIds: localRollbackCouplingReady ? [] : ["payload-approval", "payload-rollback"],
+        approvalDecision: localRollbackCouplingReady ? "approved" : "withheld",
+        auditStatus: localRollbackCouplingReady ? "rollback-linked" : "seeded",
         rollbackDisposition: "incomplete",
         slotStatus: "rollback-required",
         failureCode: "rollback-incomplete",
         stage: "rollback-host",
-        scope: "lifecycle-rollback placeholder scope",
+        scope: localRollbackCouplingReady
+          ? "lifecycle-rollback placeholder scope"
+          : "lifecycle-rollback placeholder scope / apply-coupling unresolved",
         rollbackCheckpoint: rootOverlay ? `checkpoint:rollback:${requestedTarget}` : "checkpoint:rollback-unresolved"
       });
 
@@ -1885,15 +1890,17 @@ function resolveHostPreviewForAction(
         requestedTarget,
         "rollback-host"
       );
+      const localApplyCouplingReady =
+        controlSession.lifecycleStage.status === "armed" && controlSession.rollbackSettlement.status === "settled";
       const handoff = createHostPreviewHandoff(preview, hostExecutor, {
-        validationMissingFieldIds: [],
-        approvalDecision: "approved",
-        auditStatus: "rollback-linked",
+        validationMissingFieldIds: localApplyCouplingReady ? [] : ["payload-approval", "payload-rollback"],
+        approvalDecision: localApplyCouplingReady ? "approved" : "withheld",
+        auditStatus: localApplyCouplingReady ? "rollback-linked" : "seeded",
         rollbackDisposition: "required",
         slotStatus: "rollback-required",
         failureCode: "rollback-required",
         stage: "rollback-host",
-        scope: "lane-apply placeholder scope",
+        scope: localApplyCouplingReady ? "lane-apply placeholder scope" : "lane-apply placeholder scope / apply-coupling unresolved",
         rollbackCheckpoint: rootOverlay ? `checkpoint:apply:${requestedTarget}` : "checkpoint:apply-unresolved"
       });
 
@@ -3496,6 +3503,38 @@ function buildBoundaryExecutorSlotLines(boundary: StudioBoundarySummary): string
   return boundary.futureExecutorSlots.map((slot) => `${slot.label} · ${slot.state} · ${slot.detail}`);
 }
 
+function buildHostApprovalContractLines(
+  hostExecutor: StudioHostExecutorState,
+  hostHandoff: StudioHostPreviewHandoff
+): string[] {
+  const requestFieldIds = hostExecutor.approval.request.fields.map((field) => `${field.id}${field.required ? "*" : ""}`);
+  const resultFieldIds = hostExecutor.approval.result.fields.map((field) => `${field.id}${field.required ? "*" : ""}`);
+
+  return [
+    `approval mode · ${hostExecutor.approval.mode}`,
+    `approval status · ${hostExecutor.approval.status}`,
+    `request shape · ${requestFieldIds.join(" · ")}`,
+    `result shape · ${resultFieldIds.join(" · ")}`,
+    `current decision · ${hostHandoff.approval.decision} · ${hostHandoff.approval.approvalId}`,
+    `approval scope · ${hostHandoff.approval.scope}`
+  ];
+}
+
+function buildHostExecutorHandoffLines(
+  hostExecutor: StudioHostExecutorState,
+  hostPreview: StudioHostMutationPreview,
+  hostHandoff: StudioHostPreviewHandoff
+): string[] {
+  return [
+    `contract version · ${hostExecutor.handoffContractVersion}`,
+    `executor mode · ${hostExecutor.mode} · ${hostExecutor.transport}`,
+    `slot mapping · ${hostHandoff.mapping.slotId} · ${hostHandoff.mapping.channel}`,
+    `handoff readiness · ${hostHandoff.validation.status} · approval ${hostHandoff.approval.decision}`,
+    `current lifecycle stage · ${hostPreview.currentLifecycleStage}`,
+    `audit/rollback linkage · ${hostHandoff.audit.eventId} · ${hostHandoff.rollback.planId} · ${hostHandoff.rollback.checkpoint}`
+  ];
+}
+
 interface HostBoundarySpec {
   title: string;
   summary: string;
@@ -3581,6 +3620,20 @@ function createHostBoundaryResult(itemId: string, actionId: string, spec: HostBo
         title: "Required before enabling",
         lines: spec.enablementLines
       },
+      ...(spec.hostPreview && spec.hostHandoff
+        ? [
+            {
+              id: "host-boundary-approval-contract",
+              title: "Approval contract",
+              lines: buildHostApprovalContractLines(spec.boundary.hostExecutor, spec.hostHandoff)
+            },
+            {
+              id: "host-boundary-handoff-contract",
+              title: "Executor handoff contract",
+              lines: buildHostExecutorHandoffLines(spec.boundary.hostExecutor, spec.hostPreview, spec.hostHandoff)
+            }
+          ]
+        : []),
       ...bridgeSections
     ]
   };
@@ -5504,11 +5557,14 @@ async function runToolsMcpActionInternal(
           "operation · host/runtime rollback settlement coordination",
           `root overlay · ${rootOverlay ? shortenHomePath(rootOverlay) : "none"}`,
           `source order · ${formatSourceOrder(stagedSourceOrder)}`,
-          `activation state · ${formatLocalOnlyStatus(controlSession.connectorActivation.status)}`
+          `activation state · ${formatLocalOnlyStatus(controlSession.connectorActivation.status)}`,
+          `apply coupling · lifecycle ${formatLocalOnlyStatus(controlSession.lifecycleStage.status)} · rollback ${formatLocalOnlyStatus(controlSession.rollbackSettlement.status)}`
         ],
         readinessLines: [
           `Studio-local bridge stage · ${formatLocalOnlyStatus(controlSession.bridgeStage.status)}`,
           `Studio-local lane apply state · ${formatLocalOnlyStatus(controlSession.laneApply.status)}`,
+          `Studio-local lifecycle stage · ${formatLocalOnlyStatus(controlSession.lifecycleStage.status)}`,
+          `Studio-local rollback settlement · ${formatLocalOnlyStatus(controlSession.rollbackSettlement.status)}`,
           `Studio-local activation state · ${formatLocalOnlyStatus(controlSession.connectorActivation.status)}`,
           `current readiness · ${
             rollbackReady
@@ -5519,7 +5575,13 @@ async function runToolsMcpActionInternal(
         blockerLines: [
           ...(!rootOverlay ? ["No root overlay is currently available for rollback checkpoint settlement."] : []),
           ...(stagedSourceOrder.length === 0 ? ["No staged bridge source order exists for lifecycle rollback settlement."] : []),
-          ...(!activationReady ? ["Connector lifecycle is not yet in a prepared or active local state for rollback settlement preview."] : [])
+          ...(!activationReady ? ["Connector lifecycle is not yet in a prepared or active local state for rollback settlement preview."] : []),
+          ...(controlSession.lifecycleStage.status !== "armed"
+            ? ["Studio-local lifecycle staging is not yet armed, so rollback settlement cannot prove apply-coupled handoff readiness."]
+            : []),
+          ...(controlSession.rollbackSettlement.status !== "settled"
+            ? ["Studio-local rollback settlement checkpoint is not yet settled, so apply-coupling remains unresolved at the host handoff boundary."]
+            : [])
         ],
         permissionLines: buildHostPermissionBoundaryLines("host/runtime lifecycle rollback coordination", [
           "rollback settlement ledger",
@@ -5576,11 +5638,14 @@ async function runToolsMcpActionInternal(
           "operation · host/runtime lane apply",
           "apply scope · connector-adjacent runtime lane",
           `root overlay · ${rootOverlay ? shortenHomePath(rootOverlay) : "none"}`,
-          `planned lane verdict · ${laneVerdict}`
+          `planned lane verdict · ${laneVerdict}`,
+          `apply coupling · lifecycle ${formatLocalOnlyStatus(controlSession.lifecycleStage.status)} · rollback ${formatLocalOnlyStatus(controlSession.rollbackSettlement.status)}`
         ],
         readinessLines: [
           `Studio-local bridge stage · ${formatLocalOnlyStatus(controlSession.bridgeStage.status)}`,
           `Studio-local activation state · ${formatLocalOnlyStatus(controlSession.connectorActivation.status)}`,
+          `Studio-local lifecycle stage · ${formatLocalOnlyStatus(controlSession.lifecycleStage.status)}`,
+          `Studio-local rollback settlement · ${formatLocalOnlyStatus(controlSession.rollbackSettlement.status)}`,
           `source order · ${formatSourceOrder(stagedSourceOrder)}`,
           `current readiness · ${
             applyReady
@@ -5592,6 +5657,12 @@ async function runToolsMcpActionInternal(
           ...(!rootOverlay ? ["No root overlay is currently available for a live lane apply."] : []),
           ...(stagedSourceOrder.length === 0 ? ["No staged bridge source order exists for a live lane apply."] : []),
           ...(!activationReady ? ["Connector activation is not yet in a prepared or active local state."] : []),
+          ...(controlSession.lifecycleStage.status !== "armed"
+            ? ["Studio-local lifecycle staging is not yet armed, so the apply handoff still lacks an executor-ready lifecycle contract."]
+            : []),
+          ...(controlSession.rollbackSettlement.status !== "settled"
+            ? ["Studio-local rollback settlement is not yet settled, so apply-coupling failure recovery remains unresolved."]
+            : []),
           ...(!probe.codexPluginCachePresent ? ["Curated Codex cache is absent, so the lane cannot start from the expected seeded bridge surface."] : [])
         ],
         permissionLines: buildHostPermissionBoundaryLines("host/runtime lane apply", [

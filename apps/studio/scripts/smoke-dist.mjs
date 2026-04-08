@@ -2258,6 +2258,8 @@ function assertHostBoundaryResult(result, itemId, actionId) {
     "host-boundary-plan",
     "host-boundary-executor-slots",
     "host-boundary-enablement",
+    "host-boundary-approval-contract",
+    "host-boundary-handoff-contract",
     "host-bridge-preview-map",
     "host-bridge-focus",
     "host-bridge-slot-state",
@@ -2292,6 +2294,8 @@ function assertHostBoundaryResult(result, itemId, actionId) {
   const focusSection = result.sections.find((section) => section.id === "host-bridge-focus");
   const slotStateSection = result.sections.find((section) => section.id === "host-bridge-slot-state");
   const dispositionSection = result.sections.find((section) => section.id === "host-bridge-dispositions");
+  const approvalContractSection = result.sections.find((section) => section.id === "host-boundary-approval-contract");
+  const handoffContractSection = result.sections.find((section) => section.id === "host-boundary-handoff-contract");
   const slotRosterSection = result.sections.find((section) => section.id === "host-bridge-slot-roster");
   const requiredTracePrefixes = ["preview · ", "slot · ", "result · ", "rollback · "];
 
@@ -2321,6 +2325,18 @@ function assertHostBoundaryResult(result, itemId, actionId) {
 
   if (!slotRosterSection?.lines.some((line) => line.includes("outcomes "))) {
     throw new Error(`Host boundary action ${itemId}:${actionId} is missing slot roster outcome visibility.`);
+  }
+
+  for (const prefix of ["approval mode · ", "request shape · ", "result shape · ", "current decision · "]) {
+    if (!approvalContractSection?.lines.some((line) => line.startsWith(prefix))) {
+      throw new Error(`Host boundary action ${itemId}:${actionId} is missing approval contract line ${prefix.trim()}.`);
+    }
+  }
+
+  for (const prefix of ["contract version · ", "slot mapping · ", "handoff readiness · ", "audit/rollback linkage · "]) {
+    if (!handoffContractSection?.lines.some((line) => line.startsWith(prefix))) {
+      throw new Error(`Host boundary action ${itemId}:${actionId} is missing handoff contract line ${prefix.trim()}.`);
+    }
   }
 
   if (!slotRosterSection?.lines.some((line) => line.startsWith("focus active · yes"))) {
@@ -2401,6 +2417,29 @@ async function verifyHostBoundaryActions() {
 
     if (resultOutcomeChain !== directOutcomeChain) {
       throw new Error(`Host boundary action ${itemId}:${actionId} returned a different outcome chain than the direct handoff.`);
+    }
+
+    if (actionId === "preview-host-lifecycle-rollback" || actionId === "preview-host-lane-apply") {
+      const readinessSection = result.sections.find((section) => section.id === "host-boundary-readiness");
+      const actionSection = result.sections.find((section) => section.id === "host-boundary-action");
+
+      for (const prefix of ["Studio-local lifecycle stage · ", "Studio-local rollback settlement · "]) {
+        if (!readinessSection?.lines.some((line) => line.startsWith(prefix))) {
+          throw new Error(`Host boundary action ${itemId}:${actionId} is missing apply-coupling readiness line ${prefix.trim()}.`);
+        }
+      }
+
+      if (!actionSection?.lines.some((line) => line.startsWith("apply coupling · "))) {
+        throw new Error(`Host boundary action ${itemId}:${actionId} is missing apply-coupling action visibility.`);
+      }
+
+      if (handoff.validation.status !== "invalid") {
+        throw new Error(`Host boundary action ${itemId}:${actionId} should stay validation-invalid before local lifecycle/apply coupling is staged.`);
+      }
+
+      if (handoff.approval.decision !== "withheld") {
+        throw new Error(`Host boundary action ${itemId}:${actionId} should keep approval withheld before local lifecycle/apply coupling is staged.`);
+      }
     }
 
     for (const outcome of handoff.simulatedOutcomes) {
