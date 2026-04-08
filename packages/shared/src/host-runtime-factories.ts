@@ -1740,7 +1740,7 @@ function createStudioPackagedAppMaterializationArtifactLedger({
           "observability-signal-route-window",
           "observability-signal-lane-board"
         ],
-        commandActionIds: ["command-focus-materialization-validator-bridge"],
+        commandActionIds: ["command-focus-materialization-artifact-progression", "command-focus-materialization-validator-bridge"],
         fromArtifactIds: [artifactIds.rendererEntry, artifactIds.electronMain, artifactIds.electronPreload],
         toArtifactIds: [artifactIds.directoryVerification],
         blockedBy: []
@@ -1766,7 +1766,11 @@ function createStudioPackagedAppMaterializationArtifactLedger({
           "observability-signal-queue",
           "observability-signal-escalation-closeout"
         ],
-        commandActionIds: ["command-focus-materialization-validator-bridge", "command-focus-lifecycle-review-packet"],
+        commandActionIds: [
+          "command-focus-materialization-artifact-progression",
+          "command-focus-materialization-validator-bridge",
+          "command-focus-lifecycle-review-packet"
+        ],
         fromArtifactIds: [artifactIds.directoryVerification],
         toArtifactIds: [artifactIds.outputManifest],
         blockedBy: []
@@ -1793,6 +1797,7 @@ function createStudioPackagedAppMaterializationArtifactLedger({
           "observability-signal-escalation-closeout"
         ],
         commandActionIds: [
+          "command-focus-materialization-artifact-progression",
           "command-focus-lifecycle-review-packet",
           "command-focus-materialization-validator-bridge",
           "command-focus-materialization-failure-path"
@@ -1823,6 +1828,7 @@ function createStudioPackagedAppMaterializationArtifactLedger({
           "observability-signal-mapped-windows"
         ],
         commandActionIds: [
+          "command-focus-materialization-artifact-progression",
           "command-focus-lifecycle-review-packet",
           "command-focus-materialization-validator-bridge",
           "command-focus-materialization-failure-path",
@@ -2087,14 +2093,20 @@ function createStudioPackagedAppMaterializationFailureReadout({
         : "delivery-chain-promotion-readiness";
   const commandActionIds =
     key === "directory"
-      ? ["command-focus-materialization-validator-bridge", "command-focus-materialization-failure-path"]
+      ? [
+          "command-focus-materialization-artifact-progression",
+          "command-focus-materialization-validator-bridge",
+          "command-focus-materialization-failure-path"
+        ]
       : key === "staged-output"
         ? [
+            "command-focus-materialization-artifact-progression",
             "command-focus-materialization-failure-path",
             "command-focus-publish-decision-gate",
             "command-focus-rollback-closeout-window"
           ]
         : [
+            "command-focus-materialization-artifact-progression",
             "command-focus-materialization-validator-bridge",
             "command-focus-materialization-failure-path",
             "command-focus-publish-decision-gate"

@@ -1335,6 +1335,7 @@ export type StudioCommandActionSafety = "local-only" | "preview-host";
 export type StudioCommandFlowSurface = "shell" | StudioPageId;
 export type StudioCommandReviewSurfaceKind =
   | "review-packet"
+  | "artifact-progression"
   | "validator-bridge"
   | "failure-path"
   | "reviewer-queue"

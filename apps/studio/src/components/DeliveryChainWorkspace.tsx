@@ -592,6 +592,8 @@ function formatReviewSurfaceKind(kind: StudioCommandAction["reviewSurfaceKind"])
   switch (kind) {
     case "review-packet":
       return "Review packet";
+    case "artifact-progression":
+      return "Artifact progression";
     case "validator-bridge":
       return "Validator bridge";
     case "failure-path":

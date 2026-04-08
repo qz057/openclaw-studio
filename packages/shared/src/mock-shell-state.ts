@@ -328,6 +328,26 @@ const mockCommandSurface: StudioCommandSurface = {
       observabilityMappingId: "observability-mapping-lifecycle-preview"
     },
     {
+      id: "command-focus-materialization-artifact-progression",
+      label: "Focus Materialization Artifact Progression",
+      description:
+        "Center the current-vs-next artifact handoff so source artifacts, staged-output proof, seal checkpoints, and the same review spine stay readable together.",
+      kind: "focus-review-coverage",
+      scope: "window",
+      safety: "local-only",
+      tone: "warning",
+      keywords: ["materialization", "artifact", "progression", "handoff", "stage c", "seal", "review-deck"],
+      rightRailTabId: "windows",
+      bottomDockTabId: "windows",
+      windowIntentId: "window-intent-trace-workspace",
+      reviewSurfaceKind: "artifact-progression",
+      deliveryChainStageId: "delivery-chain-promotion-readiness",
+      windowId: "window-trace-review",
+      sharedStateLaneId: "shared-state-lane-trace-review",
+      orchestrationBoardId: "orchestration-board-trace-review",
+      observabilityMappingId: "observability-mapping-approval-active"
+    },
+    {
       id: "command-focus-materialization-validator-bridge",
       label: "Focus Materialization Validator Bridge",
       description:
@@ -967,6 +987,14 @@ const mockCommandSurface: StudioCommandSurface = {
       actionId: "command-focus-lifecycle-review-packet"
     },
     {
+      id: "next-step-settings-artifact-progression",
+      label: "Inspect artifact progression",
+      detail: "Center the current-vs-next artifact handoff so source proof, Stage C linkage, and downstream seal posture stay on the same review spine.",
+      tone: "warning",
+      kind: "window",
+      actionId: "command-focus-materialization-artifact-progression"
+    },
+    {
       id: "next-step-settings-validator-bridge",
       label: "Inspect validator bridge",
       detail: "Bring the materialization validator bridge into scope so the current packet handoff and observability row stay aligned.",
@@ -1029,13 +1057,14 @@ const mockCommandSurface: StudioCommandSurface = {
       id: "board-settings-review-deck",
       label: "Settings Route-aware Next-step Board",
       summary:
-        "Settings groups review-deck entry, review-workspace intent, lifecycle packet coverage, validator/failure readouts, windows observability, and lane advance into one coordination board.",
+        "Settings groups review-deck entry, review-workspace intent, lifecycle packet coverage, artifact progression, validator/failure readouts, windows observability, and lane advance into one coordination board.",
       flowId: "flow-settings-review-deck",
       sequenceId: "sequence-settings-review-deck",
       stepIds: [
         "next-step-settings-review",
         "next-step-settings-intent",
         "next-step-settings-review-surface",
+        "next-step-settings-artifact-progression",
         "next-step-settings-validator-bridge",
         "next-step-settings-failure-path",
         "next-step-settings-observability",
@@ -1049,12 +1078,13 @@ const mockCommandSurface: StudioCommandSurface = {
       id: "board-review-deck-coverage",
       label: "Review Deck Coverage Board",
       summary:
-        "When Review Deck is active, keep review intent, validator/failure readouts, windows observability, and lane advance grouped as one local-only coverage board.",
+        "When Review Deck is active, keep review intent, artifact progression, validator/failure readouts, windows observability, and lane advance grouped as one local-only coverage board.",
       flowId: "flow-review-deck-coverage",
       sequenceId: "sequence-review-coverage-flow",
       stepIds: [
         "next-step-settings-intent",
         "next-step-settings-review-surface",
+        "next-step-settings-artifact-progression",
         "next-step-settings-validator-bridge",
         "next-step-settings-failure-path",
         "next-step-settings-observability",
@@ -2521,20 +2551,22 @@ const mockCommandSurface: StudioCommandSurface = {
           id: "deck-lane-review-deck-materialization-failure",
           label: "Materialization Review Route",
           summary:
-            "Keep the review packet, validator bridge, failure path, publish gate, and rollback closeout visible together so materialization handoffs can be inspected from source snapshot through blocked seal posture without leaving the same local-only command lane.",
+            "Keep the artifact progression, review packet, validator bridge, failure path, publish gate, and rollback closeout visible together so materialization handoffs can be inspected from source snapshot through blocked seal posture without leaving the same local-only command lane.",
           tone: "warning",
           actionIds: [
             "command-stage-review-window",
             "command-open-windows-observability",
             "command-focus-lifecycle-review-packet",
+            "command-focus-materialization-artifact-progression",
             "command-focus-materialization-validator-bridge",
             "command-focus-materialization-failure-path",
             "command-focus-publish-decision-gate",
             "command-focus-rollback-closeout-window"
           ],
-          primaryActionId: "command-focus-materialization-failure-path",
+          primaryActionId: "command-focus-materialization-artifact-progression",
           followUpActionIds: [
             "command-focus-materialization-validator-bridge",
+            "command-focus-materialization-failure-path",
             "command-focus-publish-decision-gate",
             "command-focus-rollback-closeout-window"
           ],
@@ -3455,6 +3487,8 @@ function formatReviewSurfaceKind(kind: NonNullable<StudioCommandSurface["actions
   switch (kind) {
     case "review-packet":
       return "Review packet";
+    case "artifact-progression":
+      return "Artifact progression";
     case "validator-bridge":
       return "Validator bridge";
     case "failure-path":

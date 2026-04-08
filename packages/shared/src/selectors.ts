@@ -310,6 +310,7 @@ export function selectStudioReleasePackagedAppMaterializationContractArtifactLed
         action.observabilityMappingId === activeHandoff.observabilityMappingId
     ) ??
     commandPreviewActions.find((action) => action.observabilityMappingId === activeHandoff.observabilityMappingId) ??
+    commandPreviewActions.find((action) => action.reviewSurfaceKind === "artifact-progression") ??
     commandPreviewActions.find((action) => action.reviewSurfaceKind === "review-packet") ??
     (commandDeckLane?.primaryActionId
       ? commandPreviewActions.find((action) => action.id === commandDeckLane.primaryActionId) ?? null
