@@ -1260,7 +1260,7 @@ export function WindowSharedStateBoard({
 
         {releaseApprovalPipeline ? (
           <article className="windowing-summary-card">
-            <span>Materialization Artifact Ledger</span>
+            <span>Materialization Artifact Checkpoint Chain</span>
             <strong>
               {activeMaterializationPlatform
                 ? `${formatPackagedAppPlatform(activeMaterializationPlatform.platform)} / ${
@@ -1272,7 +1272,7 @@ export function WindowSharedStateBoard({
             </strong>
             <p>
               {activeMaterializationArtifactSurface?.artifactLedger?.summary ??
-                "Artifact-facing materialization continuity is unavailable, so this board cannot show how built local snapshot inputs feed directory verification, staged-output manifests, and seal metadata."}
+                "Artifact-facing materialization continuity is unavailable, so this board cannot show how built local snapshot inputs feed directory verification, staged-output manifests, seal checkpoints, and Stage C entry posture."}
             </p>
             <div className="workflow-readiness-list">
               <div
@@ -1329,6 +1329,54 @@ export function WindowSharedStateBoard({
                       : "Unavailable")}
                 </strong>
               </div>
+              <div
+                className={`workflow-readiness-line workflow-readiness-line--${
+                  activeMaterializationArtifactSurface?.bundleSealingCheckpoint
+                    ? resolveMaterializationValidatorTone(activeMaterializationArtifactSurface.bundleSealingCheckpoint.status)
+                    : "warning"
+                }`}
+              >
+                <span>Checkpoint bridge</span>
+                <strong>
+                  {activeMaterializationArtifactSurface?.bundleSealingCheckpoint
+                    ? `${activeMaterializationArtifactSurface.bundleSealingCheckpoint.label} / ${formatMaterializationValidatorStatus(
+                        activeMaterializationArtifactSurface.bundleSealingCheckpoint.status
+                      )}`
+                    : "Unavailable"}
+                </strong>
+              </div>
+              <div
+                className={`workflow-readiness-line workflow-readiness-line--${
+                  activeMaterializationArtifactSurface?.failureReadout
+                    ? resolveFailureDispositionTone(activeMaterializationArtifactSurface.failureReadout.failureDisposition)
+                    : "warning"
+                }`}
+              >
+                <span>Failure link</span>
+                <strong>
+                  {activeMaterializationArtifactSurface?.failureReadout
+                    ? `${activeMaterializationArtifactSurface.failureReadout.label} / ${formatFailureDisposition(
+                        activeMaterializationArtifactSurface.failureReadout.failureDisposition
+                      )}`
+                    : "Unavailable"}
+                </strong>
+              </div>
+              <div
+                className={`workflow-readiness-line workflow-readiness-line--${
+                  activeMaterializationArtifactSurface?.stageCCheckpoint
+                    ? resolveStageTone(activeMaterializationArtifactSurface.stageCCheckpoint.state)
+                    : "warning"
+                }`}
+              >
+                <span>Stage C link</span>
+                <strong>
+                  {activeMaterializationArtifactSurface?.stageCCheckpoint
+                    ? `${activeMaterializationArtifactSurface.stageCCheckpoint.label} / ${formatStageReadinessStatus(
+                        activeMaterializationArtifactSurface.stageCCheckpoint.state
+                      )}`
+                    : "Unavailable"}
+                </strong>
+              </div>
             </div>
             {activeMaterializationArtifactSurface?.activeHandoff ? (
               <div className="windowing-preview-list">
@@ -1346,6 +1394,39 @@ export function WindowSharedStateBoard({
                     {activeMaterializationArtifactSurface.board?.label ?? activeMaterializationArtifactSurface.activeHandoff.orchestrationBoardId}
                   </strong>
                 </div>
+                {activeMaterializationArtifactSurface.bundleSealingCheckpoint ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Artifact checkpoint chain</span>
+                    <strong>
+                      {activeMaterializationArtifactSurface.bundleSealingCheckpoint.label}
+                      {" -> "}
+                      {activeMaterializationArtifactSurface.bundleSealingCheckpoint.artifactPath}
+                    </strong>
+                    <p>{activeMaterializationArtifactSurface.bundleSealingCheckpoint.detail}</p>
+                  </div>
+                ) : null}
+                {activeMaterializationArtifactSurface.failureReadout ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Artifact failure link</span>
+                    <strong>
+                      {activeMaterializationArtifactSurface.failureReadout.label}
+                      {" / "}
+                      {formatFailureDisposition(activeMaterializationArtifactSurface.failureReadout.failureDisposition)}
+                    </strong>
+                    <p>{activeMaterializationArtifactSurface.failureReadout.summary}</p>
+                  </div>
+                ) : null}
+                {activeMaterializationArtifactSurface.stageCCheckpoint ? (
+                  <div className="windowing-preview-line windowing-preview-line--stacked">
+                    <span>Artifact Stage C link</span>
+                    <strong>
+                      {activeMaterializationArtifactSurface.stageCCheckpoint.label}
+                      {" / "}
+                      {activeMaterializationArtifactSurface.approvalWorkflowStage?.label ?? "No workflow stage"}
+                    </strong>
+                    <p>{activeMaterializationArtifactSurface.releaseQaTrack?.label ?? "No QA track linked."}</p>
+                  </div>
+                ) : null}
                 {activeMaterializationArtifactSurface.sourceArtifacts.map((artifact) => (
                   <div key={artifact.id} className="windowing-preview-line windowing-preview-line--stacked">
                     <span>Source artifact</span>

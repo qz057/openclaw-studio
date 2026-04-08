@@ -3,7 +3,7 @@ import {
   selectStudioReleaseCloseoutWindow,
   selectStudioReleaseDeliveryChainStage,
   selectStudioReleaseApprovalPipelineStage,
-  selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch,
+  selectStudioReleasePackagedAppMaterializationContractArtifactCheckpointChain,
   selectStudioReleasePackagedAppMaterializationContractBundleSealingReadiness,
   selectStudioReleasePackagedAppMaterializationContractPlatform,
   selectStudioReleasePackagedAppMaterializationContractProgress,
@@ -1189,7 +1189,7 @@ export function App() {
       })[0] ?? null;
   const reviewCoverageActions: ReviewCoverageAction[] = data.commandSurface.actions.filter(isReviewCoverageAction);
   const activeMaterializationArtifactSurface =
-    selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch(
+    selectStudioReleasePackagedAppMaterializationContractArtifactCheckpointChain(
       releaseApprovalPipeline.deliveryChain,
       data.windowing,
       data.reviewStateContinuity,
@@ -2547,6 +2547,17 @@ export function App() {
         : "Unavailable",
       detail:
         "The local materialization contract now carries a source-to-seal artifact ledger that ties built renderer/Electron inputs to directory verification, staged-output manifests, and seal/integrity metadata, so the Stage Explorer, windows board, and inspector can read the same concrete handoff chain without implying execution."
+    },
+    {
+      id: "release-depth-materialization-artifact-checkpoint-chain",
+      label: "Materialization Artifact Checkpoint Chain",
+      value: activeMaterializationArtifactSurface.bundleSealingCheckpoint
+        ? `${activeMaterializationArtifactSurface.bundleSealingCheckpoint.label} / ${formatMaterializationValidatorStatus(
+            activeMaterializationArtifactSurface.bundleSealingCheckpoint.status
+          )} / ${activeMaterializationArtifactSurface.stageCCheckpoint?.label ?? "No Stage C link"}`
+        : "Unavailable",
+      detail:
+        "The artifact ledger now resolves each active handoff into a linked seal checkpoint, failure readout, and Stage C checkpoint, so source-to-seal continuity reads back as one stronger local-only checkpoint chain instead of a loose set of adjacent review panels."
     },
     {
       id: "release-depth-materialization-validator-bridge",
@@ -4787,7 +4798,7 @@ export function App() {
                   </div>
                 </article>
                 <article className="windowing-summary-card">
-                  <span>Inspector Materialization Ledger</span>
+                  <span>Inspector Materialization Checkpoint Chain</span>
                   <strong>
                     {activeMaterializationArtifactSurface.activeHandoff?.label ??
                       activeMaterializationArtifactSurface.artifactLedger?.label ??
@@ -4795,7 +4806,7 @@ export function App() {
                   </strong>
                   <p>
                     Inspector-side materialization coverage now carries the same source-to-seal artifact handoff chain as the delivery workspace and
-                    windows board, so local snapshot inputs, staged-output proof, and blocked seal metadata stay readable from one review surface.
+                    windows board, then resolves it into the linked seal checkpoint, failure branch, and Stage C checkpoint without implying execution.
                   </p>
                   <div className="windowing-preview-list">
                     <div className="windowing-preview-line windowing-preview-line--stacked">
@@ -4837,6 +4848,51 @@ export function App() {
                                 activeMaterializationArtifactSurface.activeHandoff.sharedStateLaneId
                               }`
                             : "No continuity match")}
+                      </p>
+                    </div>
+                    <div className="windowing-preview-line windowing-preview-line--stacked">
+                      <span>Artifact checkpoint chain</span>
+                      <strong>
+                        {activeMaterializationArtifactSurface.bundleSealingCheckpoint
+                          ? `${activeMaterializationArtifactSurface.bundleSealingCheckpoint.label} / ${formatMaterializationValidatorStatus(
+                              activeMaterializationArtifactSurface.bundleSealingCheckpoint.status
+                            )}`
+                          : "Unavailable"}
+                      </strong>
+                      <p>
+                        {activeMaterializationArtifactSurface.bundleSealingCheckpoint
+                          ? `${activeMaterializationArtifactSurface.bundleSealingCheckpoint.artifactPath} / ${
+                              activeMaterializationArtifactSurface.bundleSealingCheckpoint.detail
+                            }`
+                          : "No seal checkpoint is linked to the active artifact handoff."}
+                      </p>
+                    </div>
+                    <div className="windowing-preview-line windowing-preview-line--stacked">
+                      <span>Artifact failure link</span>
+                      <strong>
+                        {activeMaterializationArtifactSurface.failureReadout
+                          ? `${activeMaterializationArtifactSurface.failureReadout.label} / ${formatFailureDisposition(
+                              activeMaterializationArtifactSurface.failureReadout.failureDisposition
+                            )}`
+                          : "Unavailable"}
+                      </strong>
+                      <p>
+                        {activeMaterializationArtifactSurface.failureReadout?.summary ??
+                          "No failure readout is linked to the active artifact handoff."}
+                      </p>
+                    </div>
+                    <div className="windowing-preview-line windowing-preview-line--stacked">
+                      <span>Artifact Stage C link</span>
+                      <strong>
+                        {activeMaterializationArtifactSurface.stageCCheckpoint
+                          ? `${activeMaterializationArtifactSurface.stageCCheckpoint.label} / ${
+                              activeMaterializationArtifactSurface.approvalWorkflowStage?.label ?? "No workflow stage"
+                            }`
+                          : "Unavailable"}
+                      </strong>
+                      <p>
+                        {activeMaterializationArtifactSurface.releaseQaTrack?.label ??
+                          "No Stage C QA track is linked to the active artifact handoff."}
                       </p>
                     </div>
                   </div>
