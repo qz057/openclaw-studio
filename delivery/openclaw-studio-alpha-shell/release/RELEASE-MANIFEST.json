@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-release-manifest/v1",
-  "generatedAt": "2026-04-08T06:55:21.443Z",
+  "generatedAt": "2026-04-08T07:04:58.053Z",
   "packageId": "openclaw-studio-alpha-shell",
   "packageName": "OpenClaw Studio Alpha Shell",
   "packageKind": "alpha-shell-release-skeleton",
@@ -508,7 +508,7 @@
       "label": "Electron bundle",
       "outputRoot": "artifacts/electron",
       "fileCount": 15,
-      "totalBytes": 398874,
+      "totalBytes": 405717,
       "entrypoints": [
         "artifacts/electron/electron/main.js",
         "artifacts/electron/electron/preload.js",
@@ -730,8 +730,8 @@
       "role": "asset",
       "path": "artifacts/electron/electron/runtime/probes/tools-mcp-actions.js",
       "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/probes/tools-mcp-actions.js",
-      "sizeBytes": 12416,
-      "sha256": "37c20fc6b79efb12c7dd55a06c1d8861725a9e89cdf2cfef5c7c9d10dd263515"
+      "sizeBytes": 12834,
+      "sha256": "e77566ca00f1521a41adfa73cc5ac78498c0747bf99bb12872bc4ea345567ee8"
     },
     {
       "id": "electron:electron/runtime/probes/tools-mcp.js",
@@ -739,8 +739,8 @@
       "role": "asset",
       "path": "artifacts/electron/electron/runtime/probes/tools-mcp.js",
       "sourceRelativePath": "apps/studio/dist-electron/electron/runtime/probes/tools-mcp.js",
-      "sizeBytes": 232480,
-      "sha256": "a50df2294284359e6181b5cb00ce9984df64916219295cd39624870ecd913969"
+      "sizeBytes": 238905,
+      "sha256": "0869129a1e915712882817fdfed2485ed7ff2cdef08abcc549ffeb82dc21691f"
     },
     {
       "id": "electron:electron/runtime/studio-runtime.js",

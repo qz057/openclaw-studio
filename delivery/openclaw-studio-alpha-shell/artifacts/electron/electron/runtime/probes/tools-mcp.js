@@ -1266,6 +1266,34 @@ function resolveHostPreviewForAction(itemId, actionId, probe, controlSession, ca
                 handoff
             };
         }
+        case "mcp-adjacent-runtime:preview-host-connector-lifecycle": {
+            const activationTarget = controlSession.rootSelection.status === "selected" && controlSession.rootSelection.path
+                ? {
+                    label: shortenHomePath(controlSession.rootSelection.path),
+                    mode: "Studio-local selected root"
+                }
+                : getConnectorActivationTarget(probe, cachedCuratedPlugins);
+            const preview = createHostMutationPreview(hostExecutor, "connector-lifecycle", "Host connector lifecycle preview", "Maps the withheld connector-lifecycle preview into the disabled lifecycle slot handoff path and simulated lifecycle outcome matrix without touching the host runtime.", activationTarget.label, "handoff-slot");
+            const handoff = createHostPreviewHandoff(preview, hostExecutor, {
+                validationMissingFieldIds: [],
+                approvalDecision: "approved",
+                auditStatus: "linked",
+                rollbackDisposition: "required",
+                slotStatus: "abort",
+                failureCode: "handoff-invalid",
+                stage: "handoff-slot",
+                scope: "connector-lifecycle placeholder scope",
+                rollbackCheckpoint: activationTarget.mode !== "unresolved" ? `checkpoint:lifecycle:${activationTarget.label}` : "checkpoint:lifecycle-unresolved"
+            });
+            return {
+                hostExecutor,
+                preview: {
+                    ...preview,
+                    handoff
+                },
+                handoff
+            };
+        }
         case "mcp-adjacent-runtime:preview-host-lane-apply": {
             const stagedSourceOrder = controlSession.laneApply.sourceOrder.length > 0
                 ? controlSession.laneApply.sourceOrder
@@ -4188,6 +4216,66 @@ async function runToolsMcpActionInternal(itemId, actionId, controlSession) {
                 enablementLines: buildHostEnablementLines([
                     "Add a lifecycle runner that can activate and deactivate connectors without leaving partial host state behind.",
                     "Validate activation-target resolution and readiness checks before allowing a live host activation."
+                ])
+            });
+        }
+        case "mcp-adjacent-runtime:preview-host-connector-lifecycle": {
+            const stagedSourceOrder = controlSession.bridgeStage.sourceOrder.length > 0 ? controlSession.bridgeStage.sourceOrder : buildAttachSourceOrder(probe, cachedCuratedPlugins);
+            const activationTarget = controlSession.rootSelection.status === "selected" && controlSession.rootSelection.path
+                ? {
+                    label: shortenHomePath(controlSession.rootSelection.path),
+                    mode: "Studio-local selected root"
+                }
+                : getConnectorActivationTarget(probe, cachedCuratedPlugins);
+            const hasAttachablePath = controlSession.rootSelection.path !== null || probe.discoveredMcpRoots.length > 0 || probe.pluginLoadPaths.length > 0;
+            const lifecycleReady = stagedSourceOrder.length >= 2 && activationTarget.mode !== "unresolved" && hasAttachablePath;
+            const hostPreviewResolution = finalizeHostPreviewResolution(resolveHostPreviewForAction(itemId, actionId, probe, controlSession, cachedCuratedPlugins));
+            const connectorLifecycleBoundary = buildConnectorBoundarySummary(probe, controlSession, cachedCuratedPlugins, {
+                id: "boundary-connector-preview-lifecycle",
+                title: "Connector lifecycle preview boundary",
+                summary: "Preview-host describes the future connector lifecycle contract, but live activate/deactivate/restart/reconcile control remains withheld until approval, rollback coordination, and executor wiring exist.",
+                currentLayer: "preview-host",
+                nextLayer: "future-executor",
+                tone: lifecycleReady ? "neutral" : "warning"
+            });
+            return createHostBoundaryResult(itemId, actionId, {
+                title: "Host connector lifecycle preview",
+                summary: "Shows the withheld host/runtime connector lifecycle path, the current permission boundary, and what would be required before enabling activate/deactivate/restart/reconcile control.",
+                tone: lifecycleReady ? "neutral" : "warning",
+                boundary: connectorLifecycleBoundary,
+                hostPreview: hostPreviewResolution?.preview,
+                hostHandoff: hostPreviewResolution?.handoff,
+                actionLines: [
+                    "operation · host/runtime connector lifecycle",
+                    `lifecycle target · ${activationTarget.label}`,
+                    `target basis · ${activationTarget.mode}`,
+                    `bridge source order · ${formatSourceOrder(stagedSourceOrder)}`
+                ],
+                readinessLines: [
+                    `Studio-local bridge stage · ${formatLocalOnlyStatus(controlSession.bridgeStage.status)}`,
+                    `Studio-local activation state · ${formatLocalOnlyStatus(controlSession.connectorActivation.status)}`,
+                    `attachable path available · ${hasAttachablePath ? "yes" : "no"}`,
+                    `current readiness · ${lifecycleReady
+                        ? "typed lifecycle slot exists, but live lifecycle control remains boundary-blocked"
+                        : "lifecycle control remains boundary-blocked and still lacks one or more technical prerequisites"}`
+                ],
+                blockerLines: [
+                    ...(activationTarget.mode === "unresolved" ? ["No lifecycle target could be resolved from roots, installs, cache, or load-path fallback."] : []),
+                    ...(stagedSourceOrder.length === 0 ? ["No staged bridge source order exists for a live lifecycle handoff."] : []),
+                    ...(!hasAttachablePath ? ["No attachable root or load path is available, so lifecycle control would have nowhere safe to bind."] : [])
+                ],
+                permissionLines: buildHostPermissionBoundaryLines("host/runtime connector lifecycle", [
+                    "connector lifecycle registry",
+                    "external connector processes",
+                    "plugin lifecycle state"
+                ]),
+                capabilityLines: buildBoundaryCapabilityLines(connectorLifecycleBoundary),
+                preconditionLines: buildBoundaryPreconditionLines(connectorLifecycleBoundary),
+                planLines: buildBoundaryPlanLines(connectorLifecycleBoundary),
+                executorSlotLines: buildBoundaryExecutorSlotLines(connectorLifecycleBoundary),
+                enablementLines: buildHostEnablementLines([
+                    "Add activate/deactivate/restart/reconcile executor semantics on top of the default-disabled lifecycle slot.",
+                    "Prove rollback coordination for partially completed lifecycle transitions before allowing live host control."
                 ])
             });
         }

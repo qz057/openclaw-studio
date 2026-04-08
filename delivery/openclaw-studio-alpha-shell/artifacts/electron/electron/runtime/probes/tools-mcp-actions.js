@@ -303,6 +303,14 @@ const toolsMcpActionRegistry = {
             refreshDetailOnSuccess: false
         },
         {
+            id: "preview-host-connector-lifecycle",
+            label: "Preview host lifecycle",
+            description: "Show the blocked host/runtime connector lifecycle path and the conditions that would be required before enabling activate/deactivate/restart/reconcile control.",
+            kind: "preview-host",
+            safety: "preview-host",
+            refreshDetailOnSuccess: false
+        },
+        {
             id: "preview-host-lane-apply",
             label: "Preview host apply",
             description: "Show the blocked host/runtime lane apply path, why it is withheld, and what would be required before enabling it.",

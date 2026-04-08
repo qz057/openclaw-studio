@@ -79,6 +79,7 @@
   - phase60 slice40 已继续把 source-to-seal artifact handoff ledger / packaged-app materialization contract 推进成更明确的 artifact checkpoint continuity chain，让 current handoff、linked seal checkpoint、failure readout、Stage C checkpoint、以及 matched workflow / QA / continuity posture 在同一条 Stage Explorer / windows / inspector 审阅链里保持只读可见，并继续保持 local-only / review-only posture
   - phase60 slice42 已继续把 artifact checkpoint progression handoff continuity 推进成更明确的 materialization artifact progression review surface，让 current-vs-next handoff 现在可以作为显式 command / windows / inspector review surface 被直接聚焦，且会带着 source artifact、Stage C linkage、validator / failure follow-up 与同一条 local-only review spine 一起切换，从而把当前边界内的 Stage C materialization closeout 收成一个明确终点
   - phase60 slice43 已从 Stage C closeout 基线继续进入 execution-surface readiness：补齐 connector lifecycle runner 的 typed intent / slot / validator / handler / simulated outcome / focus command 与 runtime probe contract，让 lifecycle runner 从“missing”升级为“partial（default-disabled）”，并在 smoke 里把 host executor readout 提升到 `slots=5 / handlers=5`，同时仍保持 local-only / preview-host posture，不触发真实 host-side mutation
+  - phase60 slice44 已继续把 connector lifecycle runner readiness 从内部建模推进到 host preview action：新增 `preview-host-connector-lifecycle`，让 lifecycle handoff / boundary result / direct host preview handoff / smoke 验证链保持一致；现在 host boundary actions 已提升为 5 条（含 lifecycle preview），但仍完全停留在 preview-host / default-disabled 边界内
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline
@@ -371,10 +372,10 @@ Tools / MCP 当前深度：
 
 ## Recommended Next Step
 
-当前 **Stage C 在既有 local-only / review-only 边界内已经完成收口**，并已进入 post-Stage-C 的 execution-surface readiness（slice43）。
+当前 **Stage C 在既有 local-only / review-only 边界内已经完成收口**，并已进入 post-Stage-C 的 execution-surface readiness（当前已推进到 slice44）。
 
 更自然的后续方向是：
 
-1. 继续在 default-disabled 边界内推进下一刀（优先 rollback-aware apply / lifecycle-rollback 协同 contract），把 execution readiness 从 `partial` 再推进到可验证的更高阶段
+1. 继续在 default-disabled 边界内推进下一刀（优先 rollback-aware apply / lifecycle-rollback 协同 contract），把 execution readiness 从当前 lifecycle preview baseline 再推进到更强的 rollback/apply 联动阶段
 2. 若要直接推进“整个项目完成度”，则明确切换到真实交付层：installer / signing / publish / rollback / host-side execution 的可执行闭环
 3. 若暂不继续实现，可在当前 clean baseline 做提交整理 / 推送 / 交付收口
