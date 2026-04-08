@@ -555,6 +555,24 @@ export interface StudioHostPreviewSlotResult {
   summary: string;
 }
 
+export interface StudioHostPreviewApprovalPacket {
+  packetId: string;
+  slotId: string;
+  intent: StudioHostMutationIntent;
+  decision: StudioHostPlaceholderApprovalDecision;
+  routeArtifactPaths: string[];
+  summary: string;
+}
+
+export interface StudioHostPreviewExecutorPacket {
+  packetId: string;
+  slotId: string;
+  channel: StudioHostBridgeSlotChannel;
+  readiness: StudioHostPreviewValidationStatus;
+  routeArtifactPaths: string[];
+  summary: string;
+}
+
 export interface StudioHostPreviewTraceStep {
   id: string;
   phase: StudioHostPreviewTracePhase;
@@ -573,8 +591,10 @@ export interface StudioHostPreviewHandoff {
   mapping: StudioHostPreviewSlotMapping;
   validation: StudioHostPreviewValidation;
   approval: StudioHostPreviewApprovalState;
+  approvalPacket: StudioHostPreviewApprovalPacket;
   audit: StudioHostPreviewAuditState;
   rollback: StudioHostPreviewRollbackState;
+  executorPacket: StudioHostPreviewExecutorPacket;
   slotResult: StudioHostPreviewSlotResult;
   simulatedOutcomes: StudioHostBridgeSimulatedOutcome[];
   trace: StudioHostPreviewTraceStep[];

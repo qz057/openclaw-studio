@@ -1974,8 +1974,10 @@ function assertHostPreviewHandoff(handoff, label) {
     ["mapping", handoff.mapping],
     ["validation", handoff.validation],
     ["approval", handoff.approval],
+    ["approvalPacket", handoff.approvalPacket],
     ["audit", handoff.audit],
     ["rollback", handoff.rollback],
+    ["executorPacket", handoff.executorPacket],
     ["slotResult", handoff.slotResult]
   ];
 
@@ -2265,8 +2267,11 @@ function assertHostBoundaryResult(result, itemId, actionId) {
     "host-bridge-slot-state",
     "host-bridge-validation",
     "host-bridge-approval",
+    "host-bridge-approval-packet",
     "host-bridge-audit",
     "host-bridge-rollback",
+    "host-bridge-executor-packet",
+    "host-bridge-recovery-drilldown",
     "host-bridge-dispositions",
     "host-bridge-result",
     "host-bridge-simulated-outcomes",
@@ -2296,6 +2301,9 @@ function assertHostBoundaryResult(result, itemId, actionId) {
   const dispositionSection = result.sections.find((section) => section.id === "host-bridge-dispositions");
   const approvalContractSection = result.sections.find((section) => section.id === "host-boundary-approval-contract");
   const handoffContractSection = result.sections.find((section) => section.id === "host-boundary-handoff-contract");
+  const approvalPacketSection = result.sections.find((section) => section.id === "host-bridge-approval-packet");
+  const executorPacketSection = result.sections.find((section) => section.id === "host-bridge-executor-packet");
+  const recoveryDrilldownSection = result.sections.find((section) => section.id === "host-bridge-recovery-drilldown");
   const slotRosterSection = result.sections.find((section) => section.id === "host-bridge-slot-roster");
   const requiredTracePrefixes = ["preview · ", "slot · ", "result · ", "rollback · "];
 
@@ -2336,6 +2344,21 @@ function assertHostBoundaryResult(result, itemId, actionId) {
   for (const prefix of ["contract version · ", "slot mapping · ", "handoff readiness · ", "audit/rollback linkage · "]) {
     if (!handoffContractSection?.lines.some((line) => line.startsWith(prefix))) {
       throw new Error(`Host boundary action ${itemId}:${actionId} is missing handoff contract line ${prefix.trim()}.`);
+    }
+  }
+
+  for (const prefix of ["packet id · ", "slot scope · ", "route artifacts · "]) {
+    if (!approvalPacketSection?.lines.some((line) => line.startsWith(prefix))) {
+      throw new Error(`Host boundary action ${itemId}:${actionId} is missing approval packet line ${prefix.trim()}.`);
+    }
+    if (!executorPacketSection?.lines.some((line) => line.startsWith(prefix))) {
+      throw new Error(`Host boundary action ${itemId}:${actionId} is missing executor packet line ${prefix.trim()}.`);
+    }
+  }
+
+  for (const prefix of ["pre-coupling gate · ", "primary outcome · ", "rollback path · ", "route handoff · "]) {
+    if (!recoveryDrilldownSection?.lines.some((line) => line.startsWith(prefix))) {
+      throw new Error(`Host boundary action ${itemId}:${actionId} is missing recovery drilldown line ${prefix.trim()}.`);
     }
   }
 
