@@ -9,16 +9,16 @@ export function SessionsPage({ sessions }: SessionsPageProps) {
     <section className="page">
       <div className="page-header">
         <div>
-          <p className="eyebrow">Operations</p>
-          <h1>Sessions</h1>
+          <p className="eyebrow">会话中心</p>
+          <h1>会话</h1>
         </div>
-        <p className="page-summary">Usable Phase 1 list skeleton for active and recent session work.</p>
+        <p className="page-summary">这里展示当前与最近会话，作为中间主工作区的核心视图。</p>
       </div>
 
       <article className="surface card">
         <div className="table-header">
-          <h2>Session Queue</h2>
-          <span>{sessions.length} entries</span>
+          <h2>会话队列</h2>
+          <span>{sessions.length} 条</span>
         </div>
         <div className="session-list">
           {sessions.map((session) => (
@@ -29,7 +29,9 @@ export function SessionsPage({ sessions }: SessionsPageProps) {
                   {session.id} · {session.workspace}
                 </p>
               </div>
-              <span className={`status-chip status-chip--${session.status}`}>{session.status}</span>
+              <span className={`status-chip status-chip--${session.status}`}>
+                {session.status === "active" ? "进行中" : session.status === "waiting" ? "等待中" : session.status === "complete" ? "已完成" : session.status}
+              </span>
               <div className="row-meta">
                 <span>{session.owner}</span>
                 <span>{session.updatedAt}</span>

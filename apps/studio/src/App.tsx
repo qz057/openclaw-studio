@@ -115,7 +115,7 @@ function resolvePage(): StudioPageId {
     return route as StudioPageId;
   }
 
-  return "dashboard";
+  return "sessions";
 }
 
 function navigateToPage(pageId: StudioPageId) {
@@ -157,11 +157,30 @@ function getZhStatusValue(value: string): string {
     disabled: "禁用",
     hybrid: "混合",
     unavailable: "不可用",
+    hidden: "隐藏",
     "no intent": "无意图",
     "no workflow lane": "无流程通道",
     "local-only": "仅本地"
   };
   return map[normalized] ?? value;
+}
+
+function getZhRightRailTabLabel(tabId: StudioShellLayoutState["rightRailTabId"], fallbackLabel: string): string {
+  const map: Record<StudioShellLayoutState["rightRailTabId"], string> = {
+    inspector: "检查",
+    trace: "追踪",
+    windows: "窗口"
+  };
+  return map[tabId] ?? fallbackLabel;
+}
+
+function getZhBottomDockTabLabel(tabId: StudioShellLayoutState["bottomDockTabId"], fallbackLabel: string): string {
+  const map: Record<StudioShellLayoutState["bottomDockTabId"], string> = {
+    focus: "焦点",
+    activity: "活动",
+    windows: "窗口"
+  };
+  return map[tabId] ?? fallbackLabel;
 }
 
 function dedupeCommandActions(actions: Array<StudioCommandAction | undefined>): StudioCommandAction[] {
@@ -671,37 +690,37 @@ function areWindowIntentStateMapsEqual(left: WindowIntentStateMap, right: Window
 function formatDetachState(state: StudioShellState["windowing"]["views"][number]["detachState"]): string {
   switch (state) {
     case "anchored":
-      return "Anchored";
+      return "锚定";
     case "candidate":
-      return "Candidate";
+      return "候选";
     default:
-      return "Detached Local";
+      return "本地分离";
   }
 }
 
 function formatIntentStatus(status: StudioWindowIntentStatus): string {
   switch (status) {
     case "ready":
-      return "Ready";
+      return "就绪";
     case "staged":
-      return "Staged";
+      return "已暂存";
     default:
-      return "Focused";
+      return "已聚焦";
   }
 }
 
 function formatIntentFocus(focus: StudioShellState["windowing"]["windowIntents"][number]["focus"]): string {
-  return focus === "primary" ? "Primary focus" : "Secondary focus";
+  return focus === "primary" ? "主焦点" : "次焦点";
 }
 
 function formatWorkflowPosture(posture: StudioShellState["windowing"]["workflow"]["lanes"][number]["posture"]): string {
   switch (posture) {
     case "review":
-      return "Review";
+      return "审查";
     case "trace":
-      return "Trace";
+      return "追踪";
     default:
-      return "Preview";
+      return "预览";
   }
 }
 
@@ -723,35 +742,35 @@ function formatMaterializationTaskState(
 ): string {
   switch (state) {
     case "review-ready":
-      return "Review-ready";
+      return "待审";
     case "reviewing":
-      return "Reviewing";
+      return "审查中";
     default:
-      return "Blocked";
+      return "阻塞";
   }
 }
 
 function formatMaterializationValidatorStatus(status: "ready" | "watch" | "blocked"): string {
   switch (status) {
     case "ready":
-      return "Ready";
+      return "就绪";
     case "watch":
-      return "Watch";
+      return "观察";
     default:
-      return "Blocked";
+      return "阻塞";
   }
 }
 
 function formatFailureDisposition(disposition: "blocked" | "abort" | "partial-apply" | "rollback"): string {
   switch (disposition) {
     case "blocked":
-      return "Blocked";
+      return "阻塞";
     case "abort":
-      return "Abort";
+      return "中止";
     case "partial-apply":
-      return "Partial apply";
+      return "部分应用";
     default:
-      return "Rollback";
+      return "回滚";
   }
 }
 
@@ -760,17 +779,17 @@ function formatReviewPostureRelationship(
 ): string {
   switch (relationship) {
     case "owns-current-posture":
-      return "Owns current posture";
+      return "当前姿态主控";
     case "mirrors-current-posture":
-      return "Mirrors current posture";
+      return "当前姿态镜像";
     case "staged-for-handoff":
-      return "Staged for handoff";
+      return "待交接";
     case "blocked-upstream":
-      return "Blocked upstream";
+      return "上游阻塞";
     case "escalation-shadow":
-      return "Escalation shadow";
+      return "升级影子链";
     default:
-      return "Blocked decision gate";
+      return "决策门阻塞";
   }
 }
 
@@ -4279,11 +4298,13 @@ export function App() {
     }
   };
 
+  const centerFocusMode = activePage === "sessions";
   const shellClassNames = [
     "studio-shell",
     resolvedLayoutState.compactMode ? "studio-shell--compact" : "",
     !resolvedLayoutState.rightRailVisible ? "studio-shell--no-right-rail" : "",
-    !resolvedLayoutState.bottomDockVisible ? "studio-shell--no-bottom-dock" : ""
+    !resolvedLayoutState.bottomDockVisible ? "studio-shell--no-bottom-dock" : "",
+    centerFocusMode ? "studio-shell--center-focus" : ""
   ]
     .filter(Boolean)
     .join(" ");
@@ -4517,20 +4538,28 @@ export function App() {
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
-                  <span>Right rail</span>
-                  <strong>{resolvedLayoutState.rightRailVisible ? rightRailTab?.label : "Hidden"}</strong>
+                  <span>右侧栏</span>
+                  <strong>
+                    {resolvedLayoutState.rightRailVisible
+                      ? getZhRightRailTabLabel(resolvedLayoutState.rightRailTabId, rightRailTab?.label ?? "检查")
+                      : "隐藏"}
+                  </strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Bottom dock</span>
-                  <strong>{resolvedLayoutState.bottomDockVisible ? bottomDockTab?.label : "Hidden"}</strong>
+                  <span>底栏</span>
+                  <strong>
+                    {resolvedLayoutState.bottomDockVisible
+                      ? getZhBottomDockTabLabel(resolvedLayoutState.bottomDockTabId, bottomDockTab?.label ?? "活动")
+                      : "隐藏"}
+                  </strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Workspace</span>
-                  <strong>{workspaceView?.label ?? "Unavailable"}</strong>
+                  <span>工作区</span>
+                  <strong>{workspaceView?.label ?? "不可用"}</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Mode</span>
-                  <strong>{resolvedLayoutState.compactMode ? "Compact" : "Standard"}</strong>
+                  <span>模式</span>
+                  <strong>{resolvedLayoutState.compactMode ? "紧凑" : "标准"}</strong>
                 </div>
               </div>
               <div className="foundation-card__actions">
@@ -4909,10 +4938,10 @@ export function App() {
         {resolvedLayoutState.rightRailVisible ? (
           <aside className="inspector surface">
             <div className="panel-title-row">
-              <h2>{rightRailTab?.label ?? data.inspector.title}</h2>
-              <span>{workspaceView?.label ?? "Shell"}</span>
+              <h2>{getZhRightRailTabLabel(resolvedLayoutState.rightRailTabId, rightRailTab?.label ?? data.inspector.title)}</h2>
+              <span>{workspaceView?.label ?? "工作台"}</span>
             </div>
-            <p className="panel-summary">{rightRailTab?.summary ?? data.inspector.summary}</p>
+            <p className="panel-summary">{resolvedLayoutState.rightRailTabId === "inspector" ? "检查面板：显示当前上下文与关键状态。" : resolvedLayoutState.rightRailTabId === "trace" ? "追踪面板：查看焦点槽位与运行轨迹。" : "窗口面板：查看窗口协同与姿态。"}</p>
             <div className="shell-tab-strip">
               {data.layout.rightRailTabs.map((tab) => (
                 <button
@@ -4926,7 +4955,7 @@ export function App() {
                     });
                   }}
                 >
-                  {tab.label}
+                  {getZhRightRailTabLabel(tab.id, tab.label)}
                 </button>
               ))}
             </div>

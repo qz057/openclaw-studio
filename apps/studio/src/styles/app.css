@@ -59,14 +59,14 @@ button:disabled {
   height: 100vh;
   min-width: 0;
   overflow: hidden;
-  grid-template-columns: 248px minmax(0, 1fr) 320px;
+  grid-template-columns: 216px minmax(0, 1fr) 272px;
   grid-template-rows: auto minmax(0, 1fr) 220px;
   gap: 16px;
   padding: 16px;
 }
 
 .studio-shell--no-right-rail {
-  grid-template-columns: 248px minmax(0, 1fr);
+  grid-template-columns: 216px minmax(0, 1fr);
 }
 
 .studio-shell--no-bottom-dock {
@@ -76,6 +76,20 @@ button:disabled {
 .studio-shell--compact {
   gap: 12px;
   padding: 12px;
+}
+
+.studio-shell--center-focus {
+  grid-template-columns: 200px minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.studio-shell--center-focus .inspector,
+.studio-shell--center-focus .bottom-dock,
+.studio-shell--center-focus .foundation-strip,
+.studio-shell--center-focus .operator-review-board,
+.studio-shell--center-focus .delivery-chain-workspace,
+.studio-shell--center-focus .window-workbench {
+  display: none !important;
 }
 
 .surface {
