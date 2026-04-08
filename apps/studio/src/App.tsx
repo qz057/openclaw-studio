@@ -158,6 +158,37 @@ function getZhStatusValue(value: string): string {
     hybrid: "混合",
     unavailable: "不可用",
     hidden: "隐藏",
+    configured: "已配置",
+    observed: "已发现",
+    sparse: "稀疏",
+    detected: "已检测",
+    planned: "计划中",
+    fallback: "回退",
+    operational: "可用",
+    indexed: "已索引",
+    installed: "已安装",
+    system: "系统",
+    extension: "扩展",
+    placeholder: "占位",
+    active: "活动",
+    available: "可用",
+    blocked: "阻塞",
+    completed: "已完成",
+    mapped: "已映射",
+    accepted: "已接受",
+    watch: "观察",
+    idle: "空闲",
+    applied: "已应用",
+    settled: "已结算",
+    armed: "已就位",
+    future: "未来",
+    "anchored shell": "锚定主壳",
+    "detached local": "本地分离",
+    "detached candidate": "分离候选",
+    "intent focused": "意图聚焦",
+    "focused locally": "本地聚焦",
+    "staged locally": "本地暂存",
+    "ready for staging": "可暂存",
     "no intent": "无意图",
     "no workflow lane": "无流程通道",
     "local-only": "仅本地"
@@ -1012,10 +1043,10 @@ function PageLoadingState() {
       <article className="surface card">
         <div className="card-header card-header--stack">
           <div>
-            <p className="eyebrow">Route Transition</p>
-            <h2>Loading page</h2>
+            <p className="eyebrow">页面切换</p>
+            <h2>页面加载中</h2>
           </div>
-          <p>Studio is loading the selected route into the current local-only shell.</p>
+          <p>正在把所选页面载入当前本地预览工作台。</p>
         </div>
       </article>
     </section>
@@ -1036,6 +1067,13 @@ export function App() {
   const [commandLog, setCommandLog] = useState<CommandLogEntry[]>([]);
   const [selectedPaletteEntryId, setSelectedPaletteEntryId] = useState<string | null>(null);
   const [showAllPages, setShowAllPages] = useState(false);
+  const [userVisibilityOverrides, setUserVisibilityOverrides] = useState<{
+    rightRailVisible: boolean | null;
+    bottomDockVisible: boolean | null;
+  }>({
+    rightRailVisible: null,
+    bottomDockVisible: null
+  });
   const [companionRouteMemory, setCompanionRouteMemory] = useState<CompanionRouteMemoryState>(createInitialCompanionRouteMemory);
   const reviewCoverageSelection = companionRouteMemory.selection;
   const companionRouteHistory = companionRouteMemory.entries;
@@ -1126,16 +1164,20 @@ export function App() {
 
     const applyResponsiveLayout = () => {
       const shouldCompact = window.innerWidth < 1720;
-      const shouldHideRightRail = window.innerWidth < 2300;
-      const shouldHideBottomDock = window.innerWidth < 2300 || window.innerHeight < 1060;
+      const shouldHideRightRail = window.innerWidth < 1700;
+      const shouldHideBottomDock = window.innerWidth < 1500 || window.innerHeight < 920;
 
       setLayoutState((currentState) => {
         const baseState = resolvePersistedShellLayoutState(data, currentState);
         const nextState: StudioShellLayoutState = {
           ...baseState,
           compactMode: shouldCompact ? true : baseState.compactMode,
-          rightRailVisible: shouldHideRightRail ? false : baseState.rightRailVisible,
-          bottomDockVisible: shouldHideBottomDock ? false : baseState.bottomDockVisible
+          rightRailVisible: shouldHideRightRail
+            ? (userVisibilityOverrides.rightRailVisible ?? false)
+            : (userVisibilityOverrides.rightRailVisible ?? baseState.rightRailVisible),
+          bottomDockVisible: shouldHideBottomDock
+            ? (userVisibilityOverrides.bottomDockVisible ?? false)
+            : (userVisibilityOverrides.bottomDockVisible ?? baseState.bottomDockVisible)
         };
 
         if (areShellLayoutStatesEqual(baseState, nextState)) {
@@ -1152,14 +1194,55 @@ export function App() {
     return () => {
       window.removeEventListener("resize", applyResponsiveLayout);
     };
-  }, [data]);
+  }, [data, userVisibilityOverrides]);
+
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+
+    const openPaletteShortcut =
+      data.commandSurface.keyboardRouting.shortcuts.find((shortcut) => shortcut.target === "open-palette") ?? null;
+    const closePaletteShortcut =
+      data.commandSurface.keyboardRouting.shortcuts.find((shortcut) => shortcut.closePalette || shortcut.target === "close-palette") ?? null;
+
+    if (!openPaletteShortcut && !closePaletteShortcut) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (openPaletteShortcut && matchesKeyboardShortcut(openPaletteShortcut, event)) {
+        if (isTypingTarget(event.target) && !openPaletteShortcut.preserveFocus) {
+          return;
+        }
+
+        event.preventDefault();
+        setPaletteReturnFocus(document.activeElement instanceof HTMLElement ? document.activeElement : null);
+        setCommandPaletteOpen(true);
+        return;
+      }
+
+      if (commandPaletteOpen && closePaletteShortcut && matchesKeyboardShortcut(closePaletteShortcut, event)) {
+        event.preventDefault();
+        setCommandPaletteOpen(false);
+        setCommandQuery("");
+        paletteReturnFocus?.focus?.();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [data, commandPaletteOpen, paletteReturnFocus]);
 
   if (error) {
-    return <div className="state-screen">Failed to load OpenClaw Studio data: {error}</div>;
+    return <div className="state-screen">OpenClaw Studio 数据加载失败：{error}</div>;
   }
 
   if (!data) {
-    return <div className="state-screen">Loading OpenClaw Studio...</div>;
+    return <div className="state-screen">OpenClaw Studio 加载中…</div>;
   }
 
   const resolvedLayoutState = layoutState ?? resolvePersistedShellLayoutState(data);
@@ -3604,6 +3687,13 @@ export function App() {
   );
 
   const applyLayoutPatch = (patch: Partial<StudioShellLayoutState>) => {
+    if (typeof patch.rightRailVisible === "boolean" || typeof patch.bottomDockVisible === "boolean") {
+      setUserVisibilityOverrides((current) => ({
+        rightRailVisible: typeof patch.rightRailVisible === "boolean" ? patch.rightRailVisible : current.rightRailVisible,
+        bottomDockVisible: typeof patch.bottomDockVisible === "boolean" ? patch.bottomDockVisible : current.bottomDockVisible
+      }));
+    }
+
     setLayoutState(resolvePersistedShellLayoutState(data, { ...resolvedLayoutState, ...patch }));
   };
 
@@ -4464,27 +4554,27 @@ export function App() {
             <article className="surface card foundation-card">
               <div className="card-header card-header--stack">
                 <div>
-                  <p className="eyebrow">Command Surface</p>
-                  <h2>{data.commandSurface.title}</h2>
+                  <p className="eyebrow">命令面板</p>
+                  <h2>当前命令面板</h2>
                 </div>
-                <p>命令区：集中处理导航、检查与本地安全操作。</p>
+                <p>集中处理导航、检查与本地安全操作。</p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
-                  <span>Contexts</span>
+                  <span>上下文</span>
                   <strong>{activeContexts.length}</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Quick actions</span>
+                  <span>快捷操作</span>
                   <strong>{quickActions.length}</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Window-aware</span>
+                  <span>窗口联动</span>
                   <strong>{windowIntents.filter((intent) => intent.localStatus !== "ready").length}</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Last action</span>
-                  <strong>{commandLog[0]?.label ?? "None yet"}</strong>
+                  <span>最近操作</span>
+                  <strong>{commandLog[0]?.label ?? "暂无"}</strong>
                 </div>
               </div>
             </article>
@@ -4493,26 +4583,26 @@ export function App() {
               <article className="surface card foundation-card">
                 <div className="card-header card-header--stack">
                   <div>
-                    <p className="eyebrow">Phase60</p>
+                    <p className="eyebrow">当前阶段</p>
                     <h2>{activeActionDeck.label}</h2>
                   </div>
                   <p>{activeActionDeck.summary}</p>
                 </div>
                 <div className="foundation-card__metrics">
                   <div className="foundation-pill">
-                    <span>Deck lanes</span>
+                    <span>流程通道</span>
                     <strong>{activeActionDeck.lanes.length}</strong>
                   </div>
                   <div className="foundation-pill">
-                    <span>Actions</span>
+                    <span>动作数</span>
                     <strong>{activeActionDeckActionIds.length}</strong>
                   </div>
                   <div className="foundation-pill">
-                    <span>Delivery stages</span>
+                    <span>交付阶段</span>
                     <strong>{activeActionDeckDeliveryStageIds.length}</strong>
                   </div>
                   <div className="foundation-pill">
-                    <span>Window surfaces</span>
+                    <span>窗口面</span>
                     <strong>{activeActionDeckWindowIds.length}</strong>
                   </div>
                 </div>
@@ -4521,7 +4611,7 @@ export function App() {
                     <div key={lane.id} className={`workflow-readiness-line workflow-readiness-line--${lane.tone}`}>
                       <span>{lane.label}</span>
                       <strong>
-                        {lane.actionIds.length} actions / {(lane.deliveryChainStageIds ?? []).length} stages / {(lane.windowIds ?? []).length} windows
+                        {lane.actionIds.length} 个动作 / {(lane.deliveryChainStageIds ?? []).length} 个阶段 / {(lane.windowIds ?? []).length} 个窗口
                       </strong>
                     </div>
                   ))}
@@ -4532,10 +4622,10 @@ export function App() {
             <article className="surface card foundation-card">
               <div className="card-header card-header--stack">
                 <div>
-                  <p className="eyebrow">Layout Persistence</p>
-                  <h2>{data.layout.title}</h2>
+                  <p className="eyebrow">布局状态</p>
+                  <h2>布局记忆</h2>
                 </div>
-                <p>{data.layout.summary}</p>
+                <p>记录右侧栏、底栏、紧凑模式与当前工作区的本地布局状态。</p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
@@ -4571,36 +4661,36 @@ export function App() {
                     applyLayoutPatch(data.layout.defaultState);
                   }}
                 >
-                  Reset layout
+                  重置布局
                 </button>
-                <span>{data.layout.persistence.strategy} · {data.layout.persistence.storageKey}</span>
+                <span>本地存储 · {data.layout.persistence.storageKey}</span>
               </div>
             </article>
 
             <article className="surface card foundation-card">
               <div className="card-header card-header--stack">
                 <div>
-                  <p className="eyebrow">Window Posture</p>
-                  <h2>{data.windowing.title}</h2>
+                  <p className="eyebrow">窗口姿态</p>
+                  <h2>窗口协同</h2>
                 </div>
-                <p>{data.windowing.summary}</p>
+                <p>查看当前工作区、流程通道、就绪度与交接状态。</p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
-                  <span>Current posture</span>
-                  <strong>{resolvedWindowPosture.label}</strong>
+                  <span>当前姿态</span>
+                  <strong>{getZhStatusValue(resolvedWindowPosture.label)}</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Workflow lane</span>
-                  <strong>{selectedWorkflowLane?.label ?? "Unavailable"}</strong>
+                  <span>流程通道</span>
+                  <strong>{selectedWorkflowLane?.label ?? "不可用"}</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Readiness</span>
-                  <strong>{workflowReadinessLabel}</strong>
+                  <span>就绪度</span>
+                  <strong>{getZhStatusValue(workflowReadinessLabel)}</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Handoff</span>
-                  <strong>{workflowIntent?.handoff.label ?? "Unavailable"}</strong>
+                  <span>交接状态</span>
+                  <strong>{workflowIntent?.handoff.label ? getZhStatusValue(workflowIntent.handoff.label) : "不可用"}</strong>
                 </div>
               </div>
               <div className="foundation-card__actions">
@@ -4611,90 +4701,78 @@ export function App() {
                     advanceWorkflowLane();
                   }}
                 >
-                  Advance workflow
+                  推进一步
                 </button>
-                <span>{workflowIntent?.preview.title ?? "No staged intent"}</span>
+                <span>{workflowIntent?.preview.title ?? "暂无已暂存意图"}</span>
               </div>
             </article>
 
             <article className="surface card foundation-card">
               <div className="card-header card-header--stack">
                 <div>
-                  <p className="eyebrow">Release Pipeline Depth</p>
-                  <h2>Delivery-chain Workspace</h2>
+                  <p className="eyebrow">交付链深度</p>
+                  <h2>交付链工作区</h2>
                 </div>
-                <p>
-                  The alpha shell still does not build a real installer, but phase60 slice 36 now keeps the review-only delivery chain anchored in a
-                  usable stage explorer plus route replay board, screenshot-driven acceptance review pack, explicit acceptance pass progression,
-                  screenshot pass records, a Reviewer Flow Ladder, an Acceptance Reading Queue, a Reviewer Signoff Board, a Signoff Readiness Queue, a
-                  Final Review Closeout, a Final Review Settlement, a Final Verdict Console, an Acceptance Closeout Timeline, a Pack Closeout Board, an
-                  Acceptance Storyboard, an Evidence Dossier, Acceptance Evidence Continuity, an Evidence Trace Lens, a Review State Continuity
-                  contract, a packaged-app materialization contract with current task evidence, a materialization Stage C readout chain, and a typed
-                  Stage C readiness spine, so
-                  review-surface navigation, remembered handoff restore, active sequence replay, multi-window coverage, operator board ownership,
-                  reviewer queues, acknowledgement state, stage-level artifacts, QA tracks, approval workflow stages, rollback readiness, boundary
-                  handoff posture, blockers, ordered companion steps, explicit companion review paths, and cross-window shared-state continuity readouts
-                  stay visible as one local-only non-executing surface.
-                </p>
+                <p>这里集中展示当前评审链路的阶段、审核队列、发布门与回滚准备度，保持只读、本地、安全边界。</p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
-                  <span>Phase</span>
+                  <span>阶段</span>
                   <strong>Phase60</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Delivery stage</span>
-                  <strong>{currentDeliveryStage?.label ?? "Unavailable"}</strong>
+                  <span>当前交付阶段</span>
+                  <strong>{currentDeliveryStage?.label ?? "不可用"}</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Delivery phase</span>
-                  <strong>{currentDeliveryStage?.phase ?? "Unavailable"}</strong>
+                  <span>交付相位</span>
+                  <strong>{currentDeliveryStage?.phase ?? "不可用"}</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Reviewer queue</span>
-                  <strong>{currentReviewerQueue?.label ?? "Unavailable"}</strong>
+                  <span>审核队列</span>
+                  <strong>{currentReviewerQueue?.label ?? "不可用"}</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Acknowledgement</span>
-                  <strong>{currentReviewerQueue?.acknowledgementState ?? "Unavailable"}</strong>
+                  <span>确认状态</span>
+                  <strong>{currentReviewerQueue?.acknowledgementState ? getZhStatusValue(currentReviewerQueue.acknowledgementState) : "不可用"}</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Publish gate</span>
-                  <strong>{publishDeliveryStage?.status ?? "Unavailable"}</strong>
+                  <span>发布门</span>
+                  <strong>{publishDeliveryStage?.status ? getZhStatusValue(publishDeliveryStage.status) : "不可用"}</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Rollback stage</span>
-                  <strong>{rollbackDeliveryStage?.status ?? "Unavailable"}</strong>
+                  <span>回滚阶段</span>
+                  <strong>{rollbackDeliveryStage?.status ? getZhStatusValue(rollbackDeliveryStage.status) : "不可用"}</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Decision handoff</span>
-                  <strong>{currentDecisionHandoff.batonState}</strong>
+                  <span>决策交接</span>
+                  <strong>{getZhStatusValue(currentDecisionHandoff.batonState)}</strong>
                 </div>
                 <div className="foundation-pill">
-                  <span>Evidence closeout</span>
-                  <strong>{currentEvidenceCloseout.sealingState}</strong>
+                  <span>证据收口</span>
+                  <strong>{getZhStatusValue(currentEvidenceCloseout.sealingState)}</strong>
                 </div>
               </div>
               <div className="workflow-readiness-list">
                 <div className="workflow-readiness-line workflow-readiness-line--neutral">
-                  <span>Current board</span>
-                  <strong>{currentReleaseStage?.label ?? "Unavailable"}</strong>
+                  <span>当前看板</span>
+                  <strong>{currentReleaseStage?.label ?? "不可用"}</strong>
                 </div>
                 <div className="workflow-readiness-line workflow-readiness-line--neutral">
-                  <span>Queue ownership</span>
-                  <strong>{currentReviewerQueue ? `${currentReviewerQueue.owner} / ${currentReviewerQueue.status}` : "Unavailable"}</strong>
+                  <span>队列归属</span>
+                  <strong>{currentReviewerQueue ? `${currentReviewerQueue.owner} / ${getZhStatusValue(currentReviewerQueue.status)}` : "不可用"}</strong>
                 </div>
                 <div className="workflow-readiness-line workflow-readiness-line--neutral">
-                  <span>Promotion path</span>
-                  <strong>{releaseApprovalPipeline.deliveryChain.promotionStageIds.length} linked stage</strong>
+                  <span>推进路径</span>
+                  <strong>{releaseApprovalPipeline.deliveryChain.promotionStageIds.length} 个关联阶段</strong>
                 </div>
                 <div className="workflow-readiness-line workflow-readiness-line--warning">
-                  <span>Publish / rollback</span>
-                  <strong>{publishDeliveryStage?.label ?? "Unavailable"} / {rollbackDeliveryStage?.label ?? "Unavailable"}</strong>
+                  <span>发布 / 回滚</span>
+                  <strong>{publishDeliveryStage?.label ?? "不可用"} / {rollbackDeliveryStage?.label ?? "不可用"}</strong>
                 </div>
                 <div className="workflow-readiness-line workflow-readiness-line--warning">
-                  <span>Blocked by</span>
-                  <strong>{releaseApprovalPipeline.deliveryChain.blockedBy.length} chain blockers</strong>
+                  <span>阻塞项</span>
+                  <strong>{releaseApprovalPipeline.deliveryChain.blockedBy.length} 个链路阻塞</strong>
                 </div>
               </div>
               <div className="workflow-readiness-list">
@@ -4712,8 +4790,8 @@ export function App() {
             pipeline={releaseApprovalPipeline}
             windowing={data.windowing}
             eyebrow="Phase60"
-            title="Operator Review Board"
-            summary="The same review-only release pipeline now reads like an operator board inside a fuller delivery chain, with explicit stage ownership, review packets, reviewer queues, acknowledgement state, delivery-stage posture, escalation windows, closeout windows, evidence sealing, reviewer notes, review posture ownership, and direct handoff into the stage explorer."
+            title="操作审查面板"
+            summary="把当前只读评审链路按操作面板方式展示，方便查看阶段归属、审核队列、确认状态与交接关系。"
           />
 
           <DeliveryChainWorkspace

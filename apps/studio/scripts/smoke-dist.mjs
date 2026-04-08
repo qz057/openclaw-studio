@@ -82,11 +82,11 @@ async function verifyRendererFocusedSlotUi() {
     "Recovery / Stop",
     "Route-aware Next-step Board",
     "Keyboard Routing",
-    "Layout Persistence",
+    ["Layout Persistence", "布局状态", "布局记忆"],
     "Multi-window Coordination",
     "Detached Workspace Candidates",
     "Windowing Workbench",
-    "Window Posture",
+    ["Window Posture", "窗口姿态"],
     "Intent Focus",
     "Workflow Timeline",
     "Workflow Lane",
@@ -108,8 +108,8 @@ async function verifyRendererFocusedSlotUi() {
     "Focus Review Workspace Intent",
     "Inspect Cross-window Observability",
     "Inspector-Command Linkage",
-    "Release Pipeline Depth",
-    "Operator Review Board",
+    ["Release Pipeline Depth", "交付链深度"],
+    ["Operator Review Board", "操作审查面板"],
     "Active Review Packet",
     "Reviewer Queue",
     "Acknowledgement",
@@ -307,8 +307,10 @@ async function verifyRendererFocusedSlotUi() {
   ];
 
   for (const marker of requiredMarkers) {
-    if (!bundle.includes(marker)) {
-      throw new Error(`Renderer build is missing ${PHASE_ID} shell UI marker: ${marker}.`);
+    const markerOptions = Array.isArray(marker) ? marker : [marker];
+
+    if (!markerOptions.some((entry) => bundle.includes(entry))) {
+      throw new Error(`Renderer build is missing ${PHASE_ID} shell UI marker: ${markerOptions.join(" | ")}.`);
     }
   }
 

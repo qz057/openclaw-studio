@@ -1429,7 +1429,7 @@ button:disabled {
   padding: 8px 12px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .tone-chip {
@@ -1440,7 +1440,7 @@ button:disabled {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
   color: #d8e5f2;
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .tone-chip--positive {
@@ -1942,7 +1942,7 @@ button:disabled {
   margin-bottom: 10px;
   color: #8fa3ba;
   font-size: 0.82rem;
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .trace-step-card strong {
