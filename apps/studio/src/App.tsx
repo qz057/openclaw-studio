@@ -4173,20 +4173,6 @@ export function App() {
     paletteReturnFocus?.focus?.();
   };
 
-  useEffect(() => {
-    if (!commandPaletteOpen) {
-      if (selectedPaletteEntryId !== null) {
-        setSelectedPaletteEntryId(null);
-      }
-      return;
-    }
-
-    const nextSelectedEntryId = paletteEntryIds[0] ?? null;
-    if (!selectedPaletteEntryId || !paletteEntryIds.includes(selectedPaletteEntryId)) {
-      setSelectedPaletteEntryId(nextSelectedEntryId);
-    }
-  }, [commandPaletteOpen, paletteEntryIds, selectedPaletteEntryId]);
-
   const movePaletteSelection = (direction: -1 | 1) => {
     if (!paletteEntryIds.length) {
       return;
@@ -4209,68 +4195,6 @@ export function App() {
       executeCommand(entryAction);
     }
   };
-
-  useEffect(() => {
-    const shortcuts = data.commandSurface.keyboardRouting.shortcuts;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const matchedShortcut = shortcuts.find((shortcut) => matchesKeyboardShortcut(shortcut, event));
-
-      if (!matchedShortcut) {
-        return;
-      }
-
-      if (isTypingTarget(event.target) && matchedShortcut.target !== "open-palette" && matchedShortcut.target !== "close-palette") {
-        return;
-      }
-
-      event.preventDefault();
-
-      if (matchedShortcut.target === "open-palette") {
-        openCommandPalette();
-        return;
-      }
-
-      if (matchedShortcut.target === "close-palette") {
-        setCommandPaletteOpen(false);
-        setCommandQuery("");
-        paletteReturnFocus?.focus?.();
-        return;
-      }
-
-      if (matchedShortcut.target === "active-flow") {
-        if (recommendedAction) {
-          executeCommand(recommendedAction);
-        }
-        return;
-      }
-
-      if (matchedShortcut.target === "action" && matchedShortcut.actionId) {
-        const shortcutAction = actionById.get(matchedShortcut.actionId);
-        if (shortcutAction) {
-          executeCommand(shortcutAction);
-        }
-        return;
-      }
-
-      if (matchedShortcut.target === "sequence" && matchedShortcut.sequenceId) {
-        const shortcutSequence = data.commandSurface.sequences.find((sequence) => sequence.id === matchedShortcut.sequenceId);
-        const shortcutAction = shortcutSequence?.recommendedActionId
-          ? actionById.get(shortcutSequence.recommendedActionId)
-          : shortcutSequence?.actionIds[0]
-            ? actionById.get(shortcutSequence.actionIds[0])
-            : undefined;
-        if (shortcutAction) {
-          executeCommand(shortcutAction);
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [actionById, data.commandSurface.keyboardRouting.shortcuts, data.commandSurface.sequences, paletteReturnFocus, recommendedAction, selectedWorkflowLane]);
 
   const shellClassNames = [
     "studio-shell",
@@ -4313,14 +4237,18 @@ export function App() {
           </div>
           <nav className="nav-list">
             {data.pages.map((page) => (
-              <a
+              <button
                 key={page.id}
+                type="button"
                 className={page.id === activePage ? "nav-item nav-item--active" : "nav-item"}
-                href={`#${page.id}`}
+                onClick={() => {
+                  setActivePage(page.id);
+                  navigateToPage(page.id);
+                }}
               >
                 <strong>{page.label}</strong>
                 <span>{page.hint}</span>
-              </a>
+              </button>
             ))}
           </nav>
         </aside>
