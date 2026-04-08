@@ -122,6 +122,8 @@ function navigateToPage(pageId: StudioPageId) {
   window.location.hash = `#${pageId}`;
 }
 
+const PRIMARY_PAGE_IDS = new Set<StudioPageId>(["dashboard", "home", "sessions", "settings"]);
+
 function dedupeCommandActions(actions: Array<StudioCommandAction | undefined>): StudioCommandAction[] {
   const seenIds = new Set<string>();
   const resolved: StudioCommandAction[] = [];
@@ -974,6 +976,7 @@ export function App() {
   const [windowIntentStates, setWindowIntentStates] = useState<WindowIntentStateMap>({});
   const [commandLog, setCommandLog] = useState<CommandLogEntry[]>([]);
   const [selectedPaletteEntryId, setSelectedPaletteEntryId] = useState<string | null>(null);
+  const [showAllPages, setShowAllPages] = useState(false);
   const [companionRouteMemory, setCompanionRouteMemory] = useState<CompanionRouteMemoryState>(createInitialCompanionRouteMemory);
   const reviewCoverageSelection = companionRouteMemory.selection;
   const companionRouteHistory = companionRouteMemory.entries;
@@ -1057,6 +1060,41 @@ export function App() {
     }
   }, [data, selectedWindowIntentId]);
 
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+
+    const applyResponsiveLayout = () => {
+      const shouldCompact = window.innerWidth < 1580;
+      const shouldHideRightRail = window.innerWidth < 1700;
+      const shouldHideBottomDock = window.innerWidth < 1500 || window.innerHeight < 920;
+
+      setLayoutState((currentState) => {
+        const baseState = resolvePersistedShellLayoutState(data, currentState);
+        const nextState: StudioShellLayoutState = {
+          ...baseState,
+          compactMode: shouldCompact ? true : baseState.compactMode,
+          rightRailVisible: shouldHideRightRail ? false : baseState.rightRailVisible,
+          bottomDockVisible: shouldHideBottomDock ? false : baseState.bottomDockVisible
+        };
+
+        if (areShellLayoutStatesEqual(baseState, nextState)) {
+          return currentState ?? baseState;
+        }
+
+        return nextState;
+      });
+    };
+
+    applyResponsiveLayout();
+    window.addEventListener("resize", applyResponsiveLayout);
+
+    return () => {
+      window.removeEventListener("resize", applyResponsiveLayout);
+    };
+  }, [data]);
+
   if (error) {
     return <div className="state-screen">Failed to load OpenClaw Studio data: {error}</div>;
   }
@@ -1112,6 +1150,9 @@ export function App() {
     label: "Studio",
     hint: "Workspace shell"
   };
+  const primaryPages = data.pages.filter((page) => PRIMARY_PAGE_IDS.has(page.id));
+  const secondaryPages = data.pages.filter((page) => !PRIMARY_PAGE_IDS.has(page.id));
+  const visiblePages = showAllPages ? data.pages : primaryPages;
   const rightRailTab = data.layout.rightRailTabs.find((tab) => tab.id === resolvedLayoutState.rightRailTabId) ?? data.layout.rightRailTabs[0];
   const bottomDockTab = data.layout.bottomDockTabs.find((tab) => tab.id === resolvedLayoutState.bottomDockTabId) ?? data.layout.bottomDockTabs[0];
   const workspaceView =
@@ -4236,7 +4277,7 @@ export function App() {
             </div>
           </div>
           <nav className="nav-list">
-            {data.pages.map((page) => (
+            {visiblePages.map((page) => (
               <button
                 key={page.id}
                 type="button"
@@ -4250,6 +4291,17 @@ export function App() {
                 <span>{page.hint}</span>
               </button>
             ))}
+            {secondaryPages.length ? (
+              <button
+                type="button"
+                className="secondary-button nav-more-toggle"
+                onClick={() => {
+                  setShowAllPages((current) => !current);
+                }}
+              >
+                {showAllPages ? "收起次级页面" : `展开次级页面（+${secondaryPages.length}）`}
+              </button>
+            ) : null}
           </nav>
         </aside>
 
@@ -4313,40 +4365,17 @@ export function App() {
                 <strong>{data.status.runtime}</strong>
               </div>
               <div className="status-badge">
-                <span>Window Posture</span>
-                <strong>{resolvedWindowPosture.label}</strong>
-              </div>
-              <div className="status-badge">
-                <span>Workflow Lane</span>
-                <strong>{selectedWorkflowLane?.label ?? "Unavailable"}</strong>
-              </div>
-              <div className="status-badge">
                 <span>Workspace</span>
                 <strong>{workspaceView?.label ?? "Unavailable"}</strong>
-              </div>
-              <div className="status-badge">
-                <span>Detached Candidate</span>
-                <strong>{selectedDetachedPanel?.label ?? "Unavailable"}</strong>
-              </div>
-              <div className="status-badge">
-                <span>Intent Focus</span>
-                <strong>{selectedWindowIntent ? `${formatIntentStatus(selectedWindowIntent.localStatus)} / ${formatIntentFocus(selectedWindowIntent.focus)}` : "None"}</strong>
               </div>
               <div className="status-badge">
                 <span>Readiness</span>
                 <strong>{workflowReadinessLabel}</strong>
               </div>
-              <div className="status-badge">
-                <span>Focus Slot</span>
-                <strong>{hostTraceFocus?.slot.label ?? "Unavailable"}</strong>
-              </div>
             </div>
             <div className="workflow-chip-strip">
-              <span className="workflow-chip workflow-chip--active">Workflow Timeline</span>
               <span className={`workflow-chip workflow-chip--${workflowReadinessTone}`}>{selectedWorkflowLane?.label ?? "No workflow lane"}</span>
               <span className={`workflow-chip workflow-chip--${workflowReadinessTone}`}>{workflowReadinessLabel}</span>
-              <span className="workflow-chip">{workflowIntent?.handoff.label ?? "No handoff posture"}</span>
-              <span className="workflow-chip">{selectedWorkflowLane ? `${formatWorkflowPosture(selectedWorkflowLane.posture)} posture` : "No posture"}</span>
             </div>
           </div>
           <div className="quick-actions-bar">
