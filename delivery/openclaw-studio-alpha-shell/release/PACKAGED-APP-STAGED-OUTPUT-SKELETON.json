@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-packaged-app-staged-output-skeleton/v1",
-  "generatedAt": "2026-04-07T21:23:11.801Z",
+  "generatedAt": "2026-04-08T00:01:27.703Z",
   "phase": "phase60",
   "outputs": [
     {
@@ -11,6 +11,7 @@
       "bundleSealingId": "bundle-sealing-windows",
       "integrityContractId": "integrity-contract-windows",
       "localMaterializationContractId": "local-materialization-contract-windows",
+      "artifactLedgerId": "local-materialization-artifact-ledger-windows",
       "status": "planned",
       "taskState": "review-ready",
       "outputRoot": "future/staged-output/windows/OpenClaw Studio",
@@ -18,6 +19,18 @@
         "future/staged-output/windows/output-manifest.json",
         "future/staged-output/windows/checksum-manifest.json"
       ],
+      "sourceArtifactIds": [
+        "local-materialization-artifact-ledger-windows-renderer-entry",
+        "local-materialization-artifact-ledger-windows-electron-main",
+        "local-materialization-artifact-ledger-windows-electron-preload",
+        "local-materialization-artifact-ledger-windows-directory-verification"
+      ],
+      "resultArtifactIds": [
+        "local-materialization-artifact-ledger-windows-output-manifest",
+        "local-materialization-artifact-ledger-windows-checksum-manifest"
+      ],
+      "activeArtifactHandoffId": "local-materialization-artifact-ledger-windows-output-to-checksum",
+      "nextArtifactHandoffId": "local-materialization-artifact-ledger-windows-checksum-to-seal",
       "taskDependencies": [
         "directory-materialization-windows",
         "materialize-windows-packaged-app"
@@ -83,6 +96,7 @@
       "bundleSealingId": "bundle-sealing-macos",
       "integrityContractId": "integrity-contract-macos",
       "localMaterializationContractId": "local-materialization-contract-macos",
+      "artifactLedgerId": "local-materialization-artifact-ledger-macos",
       "status": "planned",
       "taskState": "review-ready",
       "outputRoot": "future/staged-output/macos/OpenClaw Studio.app",
@@ -90,6 +104,18 @@
         "future/staged-output/macos/output-manifest.json",
         "future/staged-output/macos/checksum-manifest.json"
       ],
+      "sourceArtifactIds": [
+        "local-materialization-artifact-ledger-macos-renderer-entry",
+        "local-materialization-artifact-ledger-macos-electron-main",
+        "local-materialization-artifact-ledger-macos-electron-preload",
+        "local-materialization-artifact-ledger-macos-directory-verification"
+      ],
+      "resultArtifactIds": [
+        "local-materialization-artifact-ledger-macos-output-manifest",
+        "local-materialization-artifact-ledger-macos-checksum-manifest"
+      ],
+      "activeArtifactHandoffId": "local-materialization-artifact-ledger-macos-snapshot-to-directory",
+      "nextArtifactHandoffId": "local-materialization-artifact-ledger-macos-directory-to-output",
       "taskDependencies": [
         "directory-materialization-macos",
         "materialize-macos-packaged-app"
@@ -153,6 +179,7 @@
       "bundleSealingId": "bundle-sealing-linux",
       "integrityContractId": "integrity-contract-linux",
       "localMaterializationContractId": "local-materialization-contract-linux",
+      "artifactLedgerId": "local-materialization-artifact-ledger-linux",
       "status": "planned",
       "taskState": "review-ready",
       "outputRoot": "future/staged-output/linux/openclaw-studio",
@@ -160,6 +187,18 @@
         "future/staged-output/linux/output-manifest.json",
         "future/staged-output/linux/checksum-manifest.json"
       ],
+      "sourceArtifactIds": [
+        "local-materialization-artifact-ledger-linux-renderer-entry",
+        "local-materialization-artifact-ledger-linux-electron-main",
+        "local-materialization-artifact-ledger-linux-electron-preload",
+        "local-materialization-artifact-ledger-linux-directory-verification"
+      ],
+      "resultArtifactIds": [
+        "local-materialization-artifact-ledger-linux-output-manifest",
+        "local-materialization-artifact-ledger-linux-checksum-manifest"
+      ],
+      "activeArtifactHandoffId": "local-materialization-artifact-ledger-linux-snapshot-to-directory",
+      "nextArtifactHandoffId": "local-materialization-artifact-ledger-linux-directory-to-output",
       "taskDependencies": [
         "directory-materialization-linux",
         "materialize-linux-packaged-app"

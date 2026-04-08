@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-packaged-app-bundle-sealing-skeleton/v1",
-  "generatedAt": "2026-04-07T21:23:11.801Z",
+  "generatedAt": "2026-04-08T00:01:27.703Z",
   "phase": "phase60",
   "mode": "review-only",
   "bundles": [
@@ -11,12 +11,22 @@
       "integrityContractId": "integrity-contract-windows",
       "installerFlowId": "orchestrate-windows-builders",
       "localMaterializationContractId": "local-materialization-contract-windows",
+      "artifactLedgerId": "local-materialization-artifact-ledger-windows",
       "status": "planned",
       "taskState": "review-ready",
       "sealedBundleRoot": "future/sealed-bundles/windows/OpenClaw Studio",
       "sealManifestPath": "future/sealed-bundles/windows/bundle-seal-manifest.json",
       "integrityManifestPath": "future/sealed-bundles/windows/bundle-integrity-manifest.json",
       "rollbackCheckpointId": "sealed-bundle-checkpoint-windows",
+      "sourceArtifactIds": [
+        "local-materialization-artifact-ledger-windows-output-manifest",
+        "local-materialization-artifact-ledger-windows-checksum-manifest"
+      ],
+      "resultArtifactIds": [
+        "local-materialization-artifact-ledger-windows-seal-manifest",
+        "local-materialization-artifact-ledger-windows-integrity-manifest"
+      ],
+      "activeArtifactHandoffId": "local-materialization-artifact-ledger-windows-checksum-to-seal",
       "taskDependencies": [
         "staged-output-windows"
       ],
@@ -90,12 +100,22 @@
       "integrityContractId": "integrity-contract-macos",
       "installerFlowId": "orchestrate-macos-builders",
       "localMaterializationContractId": "local-materialization-contract-macos",
+      "artifactLedgerId": "local-materialization-artifact-ledger-macos",
       "status": "planned",
       "taskState": "review-ready",
       "sealedBundleRoot": "future/sealed-bundles/macos/OpenClaw Studio.app",
       "sealManifestPath": "future/sealed-bundles/macos/bundle-seal-manifest.json",
       "integrityManifestPath": "future/sealed-bundles/macos/bundle-integrity-manifest.json",
       "rollbackCheckpointId": "sealed-bundle-checkpoint-macos",
+      "sourceArtifactIds": [
+        "local-materialization-artifact-ledger-macos-output-manifest",
+        "local-materialization-artifact-ledger-macos-checksum-manifest"
+      ],
+      "resultArtifactIds": [
+        "local-materialization-artifact-ledger-macos-seal-manifest",
+        "local-materialization-artifact-ledger-macos-integrity-manifest"
+      ],
+      "activeArtifactHandoffId": "local-materialization-artifact-ledger-macos-checksum-to-seal",
       "taskDependencies": [
         "staged-output-macos"
       ],
@@ -169,12 +189,22 @@
       "integrityContractId": "integrity-contract-linux",
       "installerFlowId": "orchestrate-linux-builders",
       "localMaterializationContractId": "local-materialization-contract-linux",
+      "artifactLedgerId": "local-materialization-artifact-ledger-linux",
       "status": "planned",
       "taskState": "review-ready",
       "sealedBundleRoot": "future/sealed-bundles/linux/openclaw-studio",
       "sealManifestPath": "future/sealed-bundles/linux/bundle-seal-manifest.json",
       "integrityManifestPath": "future/sealed-bundles/linux/bundle-integrity-manifest.json",
       "rollbackCheckpointId": "sealed-bundle-checkpoint-linux",
+      "sourceArtifactIds": [
+        "local-materialization-artifact-ledger-linux-output-manifest",
+        "local-materialization-artifact-ledger-linux-checksum-manifest"
+      ],
+      "resultArtifactIds": [
+        "local-materialization-artifact-ledger-linux-seal-manifest",
+        "local-materialization-artifact-ledger-linux-integrity-manifest"
+      ],
+      "activeArtifactHandoffId": "local-materialization-artifact-ledger-linux-checksum-to-seal",
       "taskDependencies": [
         "staged-output-linux"
       ],
