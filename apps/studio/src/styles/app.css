@@ -1,6 +1,13 @@
 :root {
   color-scheme: dark;
-  font-family: "Segoe UI", "SF Pro Display", sans-serif;
+  font-family:
+    "PingFang SC",
+    "Microsoft YaHei",
+    "Noto Sans CJK SC",
+    "WenQuanYi Micro Hei",
+    "Segoe UI",
+    "SF Pro Display",
+    sans-serif;
   background:
     radial-gradient(circle at top left, rgba(65, 138, 255, 0.16), transparent 32%),
     radial-gradient(circle at top right, rgba(0, 203, 169, 0.12), transparent 26%),
@@ -17,6 +24,8 @@ body {
   min-width: 0;
   min-height: 100vh;
   background: transparent;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 a {
@@ -341,6 +350,8 @@ button:disabled {
 }
 
 .quick-actions-bar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: stretch;
 }
 
@@ -376,7 +387,7 @@ button:disabled {
 }
 
 .quick-action-button {
-  min-width: 160px;
+  min-width: 0;
   display: grid;
   gap: 6px;
   text-align: left;
@@ -1971,6 +1982,9 @@ button:disabled {
 }
 
 @media (max-width: 1120px) {
+  .quick-actions-bar {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .page-header,
   .top-bar,
   .top-bar__summary,

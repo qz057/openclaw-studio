@@ -4315,7 +4315,7 @@ export function App() {
             <span className="brand-mark">OC</span>
             <div>
               <strong>{data.appName}</strong>
-              <p>{data.status.mode}</p>
+              <p>预览模式</p>
             </div>
           </div>
           <nav className="nav-list">
@@ -4374,7 +4374,7 @@ export function App() {
                     }}
                   >
                     <strong>{view.label}</strong>
-                    <span>{view.summary}</span>
+                    <span>本地预览工作区</span>
                     <em className="workspace-view-chip__meta">
                       {formatDetachState(view.detachState)} · {linkedIntent ? formatIntentStatus(linkedIntent.localStatus) : "无意图"}
                     </em>
@@ -4395,7 +4395,7 @@ export function App() {
                 <span>命令面板</span>
                 <strong>Ctrl/Cmd K</strong>
               </button>
-              <p>{data.commandSurface.summary}</p>
+              <p>快捷入口：打开命令面板并执行常用操作。</p>
             </div>
             <div className="top-bar-status">
               <div className="status-badge">
@@ -4421,7 +4421,7 @@ export function App() {
             </div>
           </div>
           <div className="quick-actions-bar">
-            {quickActions.map((action) => (
+            {quickActions.slice(0, 4).map((action) => (
               <button
                 key={action.id}
                 type="button"
@@ -4431,7 +4431,7 @@ export function App() {
                 }}
               >
                 <strong>{action.label}</strong>
-                <span>{action.safety}</span>
+                <span>{getZhStatusValue(action.safety)}</span>
               </button>
             ))}
           </div>
@@ -4445,7 +4445,7 @@ export function App() {
                   <p className="eyebrow">Command Surface</p>
                   <h2>{data.commandSurface.title}</h2>
                 </div>
-                <p>{data.commandSurface.summary}</p>
+                <p>命令区：集中处理导航、检查与本地安全操作。</p>
               </div>
               <div className="foundation-card__metrics">
                 <div className="foundation-pill">
