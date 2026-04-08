@@ -341,8 +341,9 @@
 - phase60 slice44 继续把 connector lifecycle runner readiness 从内部建模推进到 host preview action：新增 `preview-host-connector-lifecycle`，让 lifecycle handoff / boundary result / direct host preview handoff / smoke 验证链保持一致，并把 host boundary action 集合提升到 5 条
 - phase60 slice45 继续把 rollback-aware apply / lifecycle-rollback coordination 从“仅缺口描述”推进到可验证 preview contract：新增 `preview-host-lifecycle-rollback`，补齐对应 handoff / boundary result / smoke required action，并把 connector rollback precondition 从 missing 提升到 partial（仍 default-disabled）
 - phase60 slice47 继续把 rollback settlement / apply-coupling preview contract 从“只在 blocked reason / precondition 里描述”推进成更完整的 shared/runtime/release contract：新增 typed `rollback-settlement` intent / bridge slot channel / validator / placeholder handler / simulated outcomes，并把 approval-audit-rollback entry、rollback live-readiness、Stage C boundary linkage 一起显式连到 `slot-rollback-settlement`
-- typecheck / build / smoke / start:smoke / package / release-plan 已在这轮 slice47 上重新通过，确认 rollback settlement preview contract 与当前 host boundary / Stage C readiness / delivery snapshot 保持一致
-- README / HANDOFF / package snapshot 已同步反映 phase60 slice47 reality 与 rollback settlement preview baseline
+- phase60 slice48 继续把 rollback settlement / apply-coupling readiness 从“只有 preview-host contract”推进成更明确的 Studio-local execution ladder：新增 `execute-local-lifecycle-stage` / `execute-local-rollback-settlement`，让 connector local control session 显式暴露 lifecycle stage / rollback settlement checkpoint，并把 smoke 的 local control 验证链提升到 5 条 connector actions + `executions=6`
+- typecheck / build / smoke / start:smoke / package / release-plan 已在这轮 slice48 上重新通过，确认 local lifecycle / rollback settlement ladder 与当前 host boundary / Stage C readiness / runtime detail 保持一致
+- README / HANDOFF / package snapshot 已同步反映 phase60 slice48 reality
 
 ## 当前明确边界
 
@@ -350,7 +351,7 @@
 
 - runtime-backed read-only inspection
 - dry-run / preview / simulate
-- Studio-local execute（只改应用内 in-memory state/history）
+- Studio-local execute（只改应用内 in-memory state/history，当前已覆盖 root select / bridge stage / connector activate / lane apply / lifecycle stage / rollback settlement）
 - phase27 command surface / layout persistence / window intent staging
 - phase60 delivery-chain workspace / stage explorer / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass progression / screenshot pass records / capture review flow / proof-linked evidence bundle / reviewer signoff board / signoff readiness queue / final review closeout / final verdict console / acceptance closeout timeline / final review settlement / pack closeout board / acceptance scoreboard / replay acceptance checklist / review state continuity / packaged-app materialization contract / packaged-app task-state linkage / local materialization review packet / validator continuity surface match / materialization Stage C readout chain / materialization failure-path readout / failure command preview / failure-path continuity surface match / source-to-seal artifact handoff ledger / artifact checkpoint continuity chain / artifact checkpoint progression handoff continuity / artifact continuity surface match / release QA closeout readiness / approval-audit-rollback Stage C entry / typed Stage C readiness / withheld-future boundary bridge / linked review artifacts / blockers / handoff posture / observability mapping / observability closeout / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface
 - phase26/27/28 release skeleton / artifact review / handoff docs / package metadata

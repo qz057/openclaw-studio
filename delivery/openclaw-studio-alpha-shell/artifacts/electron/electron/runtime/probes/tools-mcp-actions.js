@@ -287,6 +287,22 @@ const toolsMcpActionRegistry = {
             refreshDetailOnSuccess: true
         },
         {
+            id: "execute-local-lifecycle-stage",
+            label: "Execute local lifecycle",
+            description: "Arm the connector lifecycle runner inside Studio-local control state only, without starting, stopping, or reconciling anything externally.",
+            kind: "execute-local",
+            safety: "local-only",
+            refreshDetailOnSuccess: true
+        },
+        {
+            id: "execute-local-rollback-settlement",
+            label: "Execute local rollback settlement",
+            description: "Settle rollback/apply coupling inside Studio-local control state only, without mutating host runtime, services, or external processes.",
+            kind: "execute-local",
+            safety: "local-only",
+            refreshDetailOnSuccess: true
+        },
+        {
             id: "preview-host-bridge-attach",
             label: "Preview host attach",
             description: "Show the blocked host/runtime bridge attach path, the permission boundary, and required enablement conditions.",

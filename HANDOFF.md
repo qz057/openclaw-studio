@@ -82,6 +82,7 @@
   - phase60 slice44 已继续把 connector lifecycle runner readiness 从内部建模推进到 host preview action：新增 `preview-host-connector-lifecycle`，让 lifecycle handoff / boundary result / direct host preview handoff / smoke 验证链保持一致；现在 host boundary actions 已提升为 5 条（含 lifecycle preview），但仍完全停留在 preview-host / default-disabled 边界内
   - phase60 slice45 已继续把 rollback-aware apply / lifecycle-rollback coordination 从“仅缺口描述”推进到可验证 preview contract：新增 `preview-host-lifecycle-rollback`，补齐对应 handoff / boundary result / smoke required action，并把 connector rollback precondition 从 `missing` 提升到 `partial`（仍 default-disabled）；当前 host boundary actions 已提升为 6 条，且继续保持 local-only / preview-host posture
   - phase60 slice47 已继续把 rollback settlement / apply-coupling preview contract 推进成更明确的 rollback settlement preview contract：新增 typed `rollback-settlement` intent / bridge slot channel / validator / placeholder handler / simulated outcomes，并把 approval-audit-rollback entry、rollback live-readiness、Stage C boundary linkage 一起显式连到 `slot-rollback-settlement`，让 shared/runtime/release contract 围绕同一条 rollback settlement 预览链保持一致，同时仍旧禁止真实 host mutation
+  - phase60 slice48 已继续把 rollback settlement / apply-coupling readiness 从“只有 preview-host contract”推进到更明确的 Studio-local execution ladder：新增 `execute-local-lifecycle-stage` / `execute-local-rollback-settlement`，让 connector local control session 现在显式暴露 lifecycle stage / rollback settlement checkpoint，并由 smoke 真正验证 5 条 connector local actions、`executions=6`、以及 lifecycle/rollback line 会随本地执行链一起推进，同时仍旧严格停留在 local-only / default-disabled 边界内
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline
@@ -192,15 +193,19 @@ npm run release:plan
    - 允许 `execute-local-bridge-stage`
    - 允许 `execute-local-connector-activate`
    - 允许 `execute-local-lane-apply`
+   - 允许 `execute-local-lifecycle-stage`
+   - 允许 `execute-local-rollback-settlement`
    - 所有动作只影响 Studio 内存态与执行历史
 2. `preview-host`
    - 允许 `preview-host-root-connect`
    - 允许 `preview-host-bridge-attach`
    - 允许 `preview-host-connector-activate`
+   - 允许 `preview-host-connector-lifecycle`
+   - 允许 `preview-host-lifecycle-rollback`
    - 允许 `preview-host-lane-apply`
    - 只返回 boundary / blockers / preconditions / future slots，不执行
 3. `withheld`
-   - 真实 host-side attach / activate / apply 仍被阻断
+   - 真实 host-side attach / activate / lifecycle / rollback-settlement / apply 仍被阻断
 4. `future-executor`
    - executor slots 已命名，但未接线
 
@@ -374,10 +379,10 @@ Tools / MCP 当前深度：
 
 ## Recommended Next Step
 
-当前 **Stage C 在既有 local-only / review-only 边界内已经完成收口**，并已进入 post-Stage-C 的 execution-surface readiness（当前已推进到 slice47）。
+当前 **Stage C 在既有 local-only / review-only 边界内已经完成收口**，并已进入 post-Stage-C 的 execution-surface readiness（当前已推进到 slice48）。
 
 更自然的后续方向是：
 
-1. 继续在 default-disabled 边界内推进下一刀（优先把 rollback settlement preview contract 从 slot / validator / handler linkage 再推进到 explicit host preview action + apply-coupling smoke linkage），把 execution readiness 从当前 rollback-settlement preview baseline 再推进到更完整的 rollback/apply 协调层
+1. 继续在 default-disabled 边界内推进下一刀（优先把 Studio-local lifecycle / rollback settlement ladder 再推进到 explicit host approval / executor handoff contract + apply-coupling failure smoke linkage），把 execution readiness 从当前 local ladder baseline 再推进到更接近真实连接的 host contract 层
 2. 若要直接推进“整个项目完成度”，则明确切换到真实交付层：installer / signing / publish / rollback / host-side execution 的可执行闭环
 3. 若暂不继续实现，可在当前 clean baseline 做提交整理 / 推送 / 交付收口
