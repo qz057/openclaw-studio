@@ -342,8 +342,9 @@
 - phase60 slice45 继续把 rollback-aware apply / lifecycle-rollback coordination 从“仅缺口描述”推进到可验证 preview contract：新增 `preview-host-lifecycle-rollback`，补齐对应 handoff / boundary result / smoke required action，并把 connector rollback precondition 从 missing 提升到 partial（仍 default-disabled）
 - phase60 slice47 继续把 rollback settlement / apply-coupling preview contract 从“只在 blocked reason / precondition 里描述”推进成更完整的 shared/runtime/release contract：新增 typed `rollback-settlement` intent / bridge slot channel / validator / placeholder handler / simulated outcomes，并把 approval-audit-rollback entry、rollback live-readiness、Stage C boundary linkage 一起显式连到 `slot-rollback-settlement`
 - phase60 slice48 继续把 rollback settlement / apply-coupling readiness 从“只有 preview-host contract”推进成更明确的 Studio-local execution ladder：新增 `execute-local-lifecycle-stage` / `execute-local-rollback-settlement`，让 connector local control session 显式暴露 lifecycle stage / rollback settlement checkpoint，并把 smoke 的 local control 验证链提升到 5 条 connector actions + `executions=6`
-- typecheck / build / smoke / start:smoke / package / release-plan 已在这轮 slice48 上重新通过，确认 local lifecycle / rollback settlement ladder 与当前 host boundary / Stage C readiness / runtime detail 保持一致
-- README / HANDOFF / package snapshot 已同步反映 phase60 slice48 reality
+- phase60 slice49 继续把 host contract 从“有 preview / handoff / slot trace”推进到更明确的 approval / executor handoff contract：host boundary 结果现在显式暴露 approval contract / executor handoff contract，两条关键 apply/rollback preview 路径会带出 Studio-local lifecycle stage / rollback settlement apply-coupling readout，且 smoke 会明确卡住 `validation=invalid` + `approval=withheld` 直到本地 lifecycle/apply coupling 真正 staged
+- typecheck / build / smoke / start:smoke / package / release-plan 已在这轮 slice49 上重新通过，确认 approval / handoff contract 与 apply-coupling failure smoke linkage 已和当前 host boundary / Stage C readiness / runtime detail 保持一致
+- README / HANDOFF / package snapshot 已同步反映 phase60 slice49 reality
 
 ## 当前明确边界
 
