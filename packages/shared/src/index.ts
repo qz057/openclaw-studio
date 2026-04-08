@@ -12,7 +12,7 @@ export type StudioBoundaryExecutorSlotState = "planned" | "future";
 export type StudioHostExecutorMode = "disabled" | "withheld";
 export type StudioHostBridgeHandlerState = "registered" | "disabled";
 export type StudioHostBridgeValidatorState = "registered";
-export type StudioHostMutationIntent = "root-connect" | "bridge-attach" | "connector-activate" | "lane-apply";
+export type StudioHostMutationIntent = "root-connect" | "bridge-attach" | "connector-activate" | "connector-lifecycle" | "lane-apply";
 export type StudioHostLifecycleStageId =
   | "collect-context"
   | "request-approval"
@@ -109,6 +109,7 @@ export const studioHostBridgeSlotChannels = {
   rootConnect: "studio:host-executor-slot:root-connect",
   bridgeAttach: "studio:host-executor-slot:bridge-attach",
   connectorActivate: "studio:host-executor-slot:connector-activate",
+  connectorLifecycle: "studio:host-executor-slot:connector-lifecycle",
   laneApply: "studio:host-executor-slot:lane-apply"
 } as const;
 

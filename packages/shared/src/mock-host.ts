@@ -48,6 +48,29 @@ function createMockSimulatedOutcomes(slotId: string): StudioHostBridgeSimulatedO
           summary: "The disabled connector-activate handler simulates a partial apply so rollback requirements stay explicit."
         }
       ];
+    case "slot-lifecycle":
+      return [
+        {
+          id: "outcome-connector-lifecycle-abort",
+          label: "Lifecycle abort placeholder",
+          status: "abort",
+          stage: "handoff-slot",
+          failureCode: "handoff-invalid",
+          failureDisposition: "abort",
+          rollbackDisposition: "available",
+          summary: "The disabled connector-lifecycle handler simulates an activate/deactivate handoff abort before any host process mutation can begin."
+        },
+        {
+          id: "outcome-connector-lifecycle-rollback-required",
+          label: "Lifecycle rollback-required placeholder",
+          status: "rollback-required",
+          stage: "rollback-host",
+          failureCode: "rollback-required",
+          failureDisposition: "rollback",
+          rollbackDisposition: "required",
+          summary: "Lifecycle runner placeholders keep restart/reconcile rollback requirements explicit without enabling live connector control."
+        }
+      ];
     case "slot-lane-apply":
       return [
         {
@@ -113,6 +136,23 @@ export const mockHostBridgeState: StudioHostBridgeState = {
       requiredResultFieldIds: ["result-preview-id", "result-request-id", "result-status", "result-stage", "result-audit-id", "result-failure-code", "result-rollback-disposition"]
     },
     {
+      id: "validator-connector-lifecycle",
+      slotId: "slot-lifecycle",
+      label: "Connector lifecycle validator",
+      state: "registered",
+      detail: "Validates activate/deactivate/restart lifecycle intent, audit correlation, and rollback-aware handoff semantics for the disabled lifecycle runner.",
+      requiredPayloadFieldIds: [
+        "payload-preview-id",
+        "payload-request-id",
+        "payload-target",
+        "payload-lifecycle-action",
+        "payload-approval",
+        "payload-audit-seed",
+        "payload-rollback"
+      ],
+      requiredResultFieldIds: ["result-preview-id", "result-request-id", "result-status", "result-stage", "result-audit-id", "result-failure-code", "result-rollback-disposition"]
+    },
+    {
       id: "validator-lane-apply",
       slotId: "slot-lane-apply",
       label: "Lane apply validator",
@@ -152,6 +192,16 @@ export const mockHostBridgeState: StudioHostBridgeState = {
       defaultEnabled: false,
       detail: "Electron bridge registers a default-disabled placeholder handler for connector lifecycle activation.",
       simulatedOutcomes: createMockSimulatedOutcomes("slot-connector-activate")
+    },
+    {
+      id: "handler-connector-lifecycle",
+      slotId: "slot-lifecycle",
+      label: "Connector lifecycle placeholder handler",
+      channel: studioHostBridgeSlotChannels.connectorLifecycle,
+      state: "registered",
+      defaultEnabled: false,
+      detail: "Electron bridge registers a default-disabled placeholder handler for activate/deactivate/restart lifecycle control.",
+      simulatedOutcomes: createMockSimulatedOutcomes("slot-lifecycle")
     },
     {
       id: "handler-lane-apply",
@@ -202,6 +252,13 @@ export const mockHostExecutorState: StudioHostExecutorState = {
       label: "Connector activate",
       detail: "Future handoff for connector lifecycle start/stop/reconcile on the host.",
       protectedSurfaces: ["external connector processes", "connector activation registry"]
+    },
+    {
+      id: "intent-connector-lifecycle",
+      intent: "connector-lifecycle",
+      label: "Connector lifecycle runner",
+      detail: "Future handoff for activate / deactivate / restart / reconcile semantics across external connector processes.",
+      protectedSurfaces: ["external connector processes", "connector lifecycle registry"]
     },
     {
       id: "intent-lane-apply",
@@ -270,7 +327,7 @@ export const mockHostExecutorState: StudioHostExecutorState = {
       title: "Approval request",
       summary: "The request shape captures why a mutation is needed, which surfaces are protected, and which rollback path would be used.",
       fields: [
-        { id: "approval-intent", label: "Intent", required: true, detail: "One of root-connect, bridge-attach, connector-activate, or lane-apply." },
+        { id: "approval-intent", label: "Intent", required: true, detail: "One of root-connect, bridge-attach, connector-activate, connector-lifecycle, or lane-apply." },
         { id: "approval-target", label: "Target", required: true, detail: "The resolved root, bridge, connector, or lane target that would be mutated." },
         { id: "approval-risk", label: "Risk summary", required: true, detail: "Human-readable reason, protected surfaces, and mutation scope." },
         { id: "approval-rollback", label: "Rollback plan id", required: true, detail: "Rollback plan reference proving how partial state would be unwound." },
@@ -720,6 +777,47 @@ export const mockHostExecutorState: StudioHostExecutorState = {
       }
     },
     {
+      id: "slot-lifecycle",
+      intent: "connector-lifecycle",
+      label: "Connector lifecycle IPC slot",
+      channel: studioHostBridgeSlotChannels.connectorLifecycle,
+      state: "withheld",
+      defaultEnabled: false,
+      detail: "Reserved IPC slot for activate / deactivate / restart lifecycle control with typed rollback checkpoints.",
+      handoff: {
+        version: "phase29-windowing-v8",
+        payloadType: "StudioHostConnectorLifecyclePayload",
+        resultType: "StudioHostConnectorLifecycleResult",
+        payload: {
+          title: "Connector lifecycle payload",
+          summary: "Carries preview mapping, lifecycle action, approval, audit seed, and rollback context for the disabled lifecycle runner stub.",
+          fields: [
+            { id: "payload-preview-id", label: "Preview id", required: true, detail: "Host preview identifier mapped into the slot handoff." },
+            { id: "payload-request-id", label: "Request id", required: true, detail: "Stable host mutation request identifier." },
+            { id: "payload-target", label: "Lifecycle target", required: true, detail: "Connector target or process identity whose lifecycle would be changed." },
+            { id: "payload-lifecycle-action", label: "Lifecycle action", required: true, detail: "Activate, deactivate, restart, or reconcile lifecycle action requested by the shell." },
+            { id: "payload-approval", label: "Approval token", required: true, detail: "Typed approval result required before mutation." },
+            { id: "payload-audit-seed", label: "Audit seed", required: true, detail: "Pre-execution audit metadata for the lifecycle handoff." },
+            { id: "payload-rollback", label: "Rollback context", required: true, detail: "Checkpoint and reconcile plan if lifecycle control partially succeeds." }
+          ]
+        },
+        result: {
+          title: "Connector lifecycle result",
+          summary: "Reports preview mapping, lifecycle outcome, audit correlation, failure taxonomy, and rollback disposition.",
+          fields: [
+            { id: "result-preview-id", label: "Preview id", required: true, detail: "Preview identifier echoed by the disabled slot stub." },
+            { id: "result-request-id", label: "Request id", required: true, detail: "Mutation request identifier echoed by the slot." },
+            { id: "result-status", label: "Status", required: true, detail: "Blocked, aborted, partial-apply, failed, or rolled-back." },
+            { id: "result-stage", label: "Lifecycle stage", required: true, detail: "Final lifecycle stage reached by the slot." },
+            { id: "result-audit-id", label: "Audit event id", required: true, detail: "Audit correlation id emitted by the executor." },
+            { id: "result-failure-code", label: "Failure code", required: false, detail: "Structured failure taxonomy code when not successful." },
+            { id: "result-failure-disposition", label: "Failure disposition", required: false, detail: "Blocked, abort, partial-apply, or rollback linkage for the placeholder outcome." },
+            { id: "result-rollback-disposition", label: "Rollback disposition", required: false, detail: "Whether rollback stayed unnecessary, available, required, or incomplete." }
+          ]
+        }
+      }
+    },
+    {
       id: "slot-lane-apply",
       intent: "lane-apply",
       label: "Lane apply IPC slot",
@@ -896,8 +994,8 @@ export const mockBoundarySummary: StudioBoundarySummary = {
     {
       id: "precondition-lifecycle",
       label: "Lifecycle runner",
-      state: "missing",
-      detail: "The shell still lacks activate/deactivate/restart semantics for connector processes."
+      state: "partial",
+      detail: "A default-disabled lifecycle runner slot now exists, but no live activate/deactivate/restart executor is enabled."
     },
     {
       id: "precondition-rollback",
@@ -949,7 +1047,7 @@ export const mockBoundarySummary: StudioBoundarySummary = {
       id: "slot-lifecycle",
       label: "Connector lifecycle runner",
       state: "planned",
-      detail: "Future slot for activate/deactivate semantics around external connector processes."
+      detail: "A default-disabled lifecycle slot is now modeled end-to-end, but live activate/deactivate/restart execution remains withheld."
     },
     {
       id: "slot-lane-apply",

@@ -71,6 +71,8 @@ export function formatHostTraceIntent(intent: StudioHostMutationIntent): string 
       return "Bridge attach";
     case "connector-activate":
       return "Connector activate";
+    case "connector-lifecycle":
+      return "Connector lifecycle";
     default:
       return "Lane apply";
   }

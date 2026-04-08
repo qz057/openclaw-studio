@@ -68,6 +68,7 @@ function createStudioWindowCrossLinks(intent: StudioHostMutationIntent): StudioC
         }
       ];
     case "connector-activate":
+    case "connector-lifecycle":
       return [
         { id: "window-link-review-board", label: "Review Deck Window", kind: "window-roster", target: "window-review-board" },
         { id: "window-link-preview-lane", label: "Preview Review Lane", kind: "shared-state-lane", target: "shared-state-lane-preview-review" },
@@ -3547,7 +3548,7 @@ export function createStudioReleaseApprovalPipeline(hostExecutor: {
         "release/RELEASE-QA-CLOSEOUT-READINESS.json"
       ],
       linkedLifecycleStages: ["write-audit", "verify-host"],
-      linkedSlotIds: [focusSlotId, "slot-connector-activate"],
+      linkedSlotIds: [focusSlotId, "slot-connector-activate", "slot-lifecycle"],
       reviewerQueueId: "reviewer-queue-lifecycle-enforcement",
       escalationWindowId: "escalation-window-lifecycle-enforcement",
       closeoutWindowId: "closeout-window-lifecycle-enforcement",

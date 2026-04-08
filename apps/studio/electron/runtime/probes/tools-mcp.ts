@@ -781,6 +781,30 @@ function createHostMutationSlots(
       commonResultFields
     ),
     createSlot(
+      "slot-lifecycle",
+      "connector-lifecycle",
+      "Connector lifecycle IPC slot",
+      studioHostBridgeSlotChannels.connectorLifecycle,
+      `Reserved for activate/deactivate/restart lifecycle control of ${activationTarget.label} (${activationTarget.mode}).`,
+      "StudioHostConnectorLifecyclePayload",
+      "StudioHostConnectorLifecycleResult",
+      [
+        { id: "payload-preview-id", label: "Preview id", required: true, detail: "Host preview identifier mapped into the slot handoff." },
+        { id: "payload-request-id", label: "Request id", required: true, detail: "Stable host mutation request identifier." },
+        { id: "payload-target", label: "Lifecycle target", required: true, detail: `${activationTarget.label} (${activationTarget.mode})` },
+        {
+          id: "payload-lifecycle-action",
+          label: "Lifecycle action",
+          required: true,
+          detail: "Activate, deactivate, restart, or reconcile action requested by the shell."
+        },
+        { id: "payload-approval", label: "Approval token", required: true, detail: "Typed approval result required before mutation." },
+        { id: "payload-audit-seed", label: "Audit seed", required: true, detail: "Pre-execution audit metadata attached to the handoff." },
+        { id: "payload-rollback", label: "Rollback context", required: true, detail: "Lifecycle runner rollback context for partial process control." }
+      ],
+      commonResultFields
+    ),
+    createSlot(
       "slot-lane-apply",
       "lane-apply",
       "Lane apply IPC slot",
@@ -853,6 +877,29 @@ function createHostBridgeSimulatedOutcomes(slot: StudioHostMutationSlot): Studio
           failureDisposition: "partial-apply",
           rollbackDisposition: "required",
           summary: "The disabled connector-activate slot simulates a partial apply so rollback expectations stay explicit."
+        }
+      ];
+    case "slot-lifecycle":
+      return [
+        {
+          id: "outcome-connector-lifecycle-abort",
+          label: "Lifecycle abort placeholder",
+          status: "abort",
+          stage: "handoff-slot",
+          failureCode: "handoff-invalid",
+          failureDisposition: "abort",
+          rollbackDisposition: "available",
+          summary: "The disabled connector-lifecycle slot simulates an activate/deactivate handoff abort before host mutation begins."
+        },
+        {
+          id: "outcome-connector-lifecycle-rollback-required",
+          label: "Lifecycle rollback-required placeholder",
+          status: "rollback-required",
+          stage: "rollback-host",
+          failureCode: "rollback-required",
+          failureDisposition: "rollback",
+          rollbackDisposition: "required",
+          summary: "Lifecycle runner placeholders keep restart/reconcile rollback requirements explicit without enabling live connector control."
         }
       ];
     case "slot-lane-apply":
@@ -985,6 +1032,13 @@ export function buildToolsMcpHostExecutorState(
         protectedSurfaces: ["external connector processes", "connector activation registry"]
       },
       {
+        id: "intent-connector-lifecycle",
+        intent: "connector-lifecycle",
+        label: "Connector lifecycle runner",
+        detail: `Would run activate/deactivate/restart/reconcile lifecycle control for ${activationTarget.label} (${activationTarget.mode}) once enabled.`,
+        protectedSurfaces: ["external connector processes", "connector lifecycle registry"]
+      },
+      {
         id: "intent-lane-apply",
         intent: "lane-apply",
         label: "Lane apply",
@@ -1000,7 +1054,7 @@ export function buildToolsMcpHostExecutorState(
       mode: "Explicit operator approval required",
       summary: "Host mutation cannot progress until a typed approval request and typed approval result exist.",
       request: createHandoffShape("Approval request", "The request envelope defines the minimum approval metadata needed before handoff.", [
-        { id: "approval-intent", label: "Intent", required: true, detail: "One of root-connect, bridge-attach, connector-activate, or lane-apply." },
+        { id: "approval-intent", label: "Intent", required: true, detail: "One of root-connect, bridge-attach, connector-activate, connector-lifecycle, or lane-apply." },
         { id: "approval-target", label: "Target", required: true, detail: "The resolved host target that would be mutated." },
         { id: "approval-risk", label: "Risk summary", required: true, detail: "Human-readable mutation scope and protected surfaces." },
         { id: "approval-rollback", label: "Rollback plan id", required: true, detail: "Rollback plan proving how partial host state would be unwound." },
@@ -2916,8 +2970,8 @@ function buildConnectorBoundarySummary(
       {
         code: "lifecycle-runner-missing",
         layer: "future-executor" as const,
-        label: "Lifecycle runner is missing",
-        detail: `Target ${activationTarget.label} (${activationTarget.mode}) cannot be started, stopped, or reconciled on the host.`
+        label: "Lifecycle runner is still disabled",
+        detail: `Target ${activationTarget.label} (${activationTarget.mode}) now maps into a typed lifecycle slot, but activate/deactivate/restart/reconcile remains disabled on the host.`
       },
       {
         code: "rollback-missing",
@@ -2954,8 +3008,8 @@ function buildConnectorBoundarySummary(
       {
         id: "precondition-connector-lifecycle",
         label: "Lifecycle runner",
-        state: "missing",
-        detail: "A future executor needs activate/deactivate/reconcile semantics for host connector state."
+        state: "partial",
+        detail: "A default-disabled lifecycle runner slot is now modeled, but live activate/deactivate/restart/reconcile semantics are still withheld."
       },
       {
         id: "precondition-connector-rollback",

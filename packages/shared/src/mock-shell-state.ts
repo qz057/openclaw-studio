@@ -208,6 +208,17 @@ const mockCommandSurface: StudioCommandSurface = {
       slotId: "slot-connector-activate"
     },
     {
+      id: "command-focus-connector-lifecycle",
+      label: "Focus Connector Lifecycle Runner",
+      description: "Scope page summaries, inspector, and dock to the connector lifecycle runner placeholder slot.",
+      kind: "focus-slot",
+      scope: "focus",
+      safety: "local-only",
+      tone: "warning",
+      keywords: ["focus", "connector", "lifecycle", "restart", "slot"],
+      slotId: "slot-lifecycle"
+    },
+    {
       id: "command-focus-lane-apply",
       label: "Focus Lane Apply Slot",
       description: "Scope the shell to the highest-risk rollback-aware placeholder slot.",
@@ -617,7 +628,8 @@ const mockCommandSurface: StudioCommandSurface = {
         "command-advance-workflow",
         "command-preview-lane-apply",
         "command-stage-trace-window",
-        "command-focus-connector-activate"
+        "command-focus-connector-activate",
+        "command-focus-connector-lifecycle"
       ]
     },
     {
@@ -655,6 +667,7 @@ const mockCommandSurface: StudioCommandSurface = {
       actionIds: [
         "command-focus-lane-apply",
         "command-focus-connector-activate",
+        "command-focus-connector-lifecycle",
         "command-inspect-boundary",
         "command-show-trace",
         "command-preview-lane-apply"
