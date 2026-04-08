@@ -7,7 +7,7 @@ const APP_NAME = "OpenClaw Studio";
 const PHASE_ID = "phase60";
 const PHASE_TITLE = "Phase60";
 const PHASE_MILESTONE =
-  "phase60 delivery-chain workspace / stage explorer / review flow ladder / acceptance reading queue / reviewer signoff board / signoff readiness queue / final review closeout / final verdict console / acceptance closeout timeline / final review settlement / pack closeout board / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass progression / screenshot pass records / capture review flow / proof-linked evidence bundle / acceptance evidence continuity / reviewer brief / proof bundle / product-review console polish / acceptance storyboard / evidence dossier / evidence trace lens / acceptance scoreboard / replay acceptance checklist / command-surface observability linkage / inspector-command linkage / review state continuity / observability closeout / linked review artifacts / blockers / handoff posture / observability mapping / packaged-app materialization contract / packaged-app task-state linkage / typed Stage C readiness / withheld-future boundary bridge / staged-output review readout / bundle-sealing review readout / local materialization review packet / local materialization artifact ledger / validator continuity surface match / materialization Stage C readout chain / materialization failure-path readout / failure command preview / failure-path continuity surface match / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout";
+  "phase60 delivery-chain workspace / stage explorer / review flow ladder / acceptance reading queue / reviewer signoff board / signoff readiness queue / final review closeout / final verdict console / acceptance closeout timeline / final review settlement / pack closeout board / delivery coverage matrix / review-deck coverage routing / review-deck orchestration deck / command-surface action-deck coverage / review-surface coverage actions / review-surface navigator / review-surface multi-window coverage / typed companion review-path orchestration / sequence-aware companion review navigation / delivery-gate companion sequence switching / companion route-history memory / route replay board / replay scenario packs / screenshot-driven acceptance review pack / acceptance pass progression / screenshot pass records / capture review flow / proof-linked evidence bundle / acceptance evidence continuity / reviewer brief / proof bundle / product-review console polish / acceptance storyboard / evidence dossier / evidence trace lens / acceptance scoreboard / replay acceptance checklist / command-surface observability linkage / inspector-command linkage / review state continuity / observability closeout / linked review artifacts / blockers / handoff posture / observability mapping / packaged-app materialization contract / packaged-app task-state linkage / typed Stage C readiness / withheld-future boundary bridge / staged-output review readout / bundle-sealing review readout / local materialization review packet / local materialization artifact ledger / artifact checkpoint continuity chain / validator continuity surface match / materialization Stage C readout chain / materialization failure-path readout / failure command preview / failure-path continuity surface match / review-only delivery chain / operator review loop / local-only multi-window shared-state review surface / docs / smoke / package / release-plan / UI / shared data closeout";
 const RELEASE_CHANNEL = "alpha";
 const PACKAGE_ID = "openclaw-studio-alpha-shell";
 const PACKAGE_KIND = "alpha-shell-release-skeleton";
@@ -25,7 +25,7 @@ const CURRENT_DELIVERY_SURFACES = [
   "built renderer bundle copied into artifacts/renderer",
   "built Electron bundle copied into artifacts/electron",
   "review-only release approval pipeline linking attestation intake, approval orchestration, lifecycle enforcement, rollback settlement closeout, the final release-decision gate, and explicit phase60 operator review loop / reviewer queue / acknowledgement / escalation / closeout artifacts without executing anything",
-  "delivery-chain workspace, stage explorer, a packaged-app materialization contract, staged-output review readouts, bundle-sealing review readouts, local materialization review packets, local materialization artifact ledgers, validator continuity surface matches, a materialization Stage C readout chain, materialization failure-path readouts, failure command previews, failure-path continuity surface matches, review flow ladder, an acceptance reading queue, a reviewer signoff board, a signoff readiness queue, a final review closeout, a final verdict console, an acceptance closeout timeline, a final review settlement, a pack closeout board, delivery coverage matrix, review-deck coverage routing, review-surface coverage actions, command-surface multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, companion route-history memory, a route replay board, replay scenario packs, a screenshot-driven acceptance review pack, acceptance pass progression, screenshot pass records, capture review flows, a proof-linked evidence bundle, acceptance evidence continuity, reviewer briefs, proof bundles, product-review console polish, an acceptance storyboard, an evidence dossier, an evidence trace lens, an acceptance scoreboard, a replay acceptance checklist, and a review-state continuity contract, and the review-deck orchestration action deck linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, observability mapping, command-surface review posture, multi-window coverage, cross-window shared-state continuity readouts, packaged-app materialization roots, source-to-seal artifact handoffs, validator-facing observability rows, failure-path command previews, failure-surface continuity readouts, and packet-level handoff continuity into one staged local-only workflow without executing anything",
+  "delivery-chain workspace, stage explorer, a packaged-app materialization contract, staged-output review readouts, bundle-sealing review readouts, local materialization review packets, local materialization artifact ledgers, artifact checkpoint continuity chains, validator continuity surface matches, a materialization Stage C readout chain, materialization failure-path readouts, failure command previews, failure-path continuity surface matches, review flow ladder, an acceptance reading queue, a reviewer signoff board, a signoff readiness queue, a final review closeout, a final verdict console, an acceptance closeout timeline, a final review settlement, a pack closeout board, delivery coverage matrix, review-deck coverage routing, review-surface coverage actions, command-surface multi-window review coverage, typed companion review-path orchestration, sequence-aware companion review navigation, delivery-gate companion sequence switching, companion route-history memory, a route replay board, replay scenario packs, a screenshot-driven acceptance review pack, acceptance pass progression, screenshot pass records, capture review flows, a proof-linked evidence bundle, acceptance evidence continuity, reviewer briefs, proof bundles, product-review console polish, an acceptance storyboard, an evidence dossier, an evidence trace lens, an acceptance scoreboard, a replay acceptance checklist, and a review-state continuity contract, and the review-deck orchestration action deck linking the operator review board, decision handoff, evidence closeout, promotion readiness, publish decision gates, rollback readiness, blockers, artifact coverage, observability mapping, command-surface review posture, multi-window coverage, cross-window shared-state continuity readouts, packaged-app materialization roots, source-to-seal artifact handoffs, seal checkpoints, validator-facing observability rows, failure-path command previews, failure-surface continuity readouts, Stage C checkpoint posture, and packet-level handoff continuity into one staged local-only workflow without executing anything",
   "deeper per-slot trace drill-down with phase stage metadata, linked notes, and cross-linked approval / lifecycle / rollback / release-artifact references",
   "deeper inspector drilldowns, active flow state, route-aware next-step boards, release-pipeline surfacing, review-posture ownership, inspector-command linkage, reviewer navigation, and verdict-aware inspector context",
   "persisted shell layout foundation backed by localStorage",
@@ -946,7 +946,7 @@ function renderPackageReadme({ generatedAt, artifactGroups, allDocs }) {
   return [
     `# OpenClaw Studio ${PHASE_TITLE} Package Snapshot`,
     "",
-    `这是一个 **${PHASE_ID} alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47/48/49/50/51/52/53/54/55/56/57/58 packaging 与 shell foundations 的基础上，把 local-only multi-window orchestration、cross-window shared-state review surface、以及 review-only release approval pipeline 继续推进成更明确的 Delivery-chain Workspace / Stage Explorer / artifact coverage / blockers / handoff posture / observability mapping / packaged-app task-state linkage / local materialization artifact ledger / materialization Stage C readout chain / materialization failure-path readout / failure command preview / typed Stage C readiness / withheld-future boundary bridge 审阅壳，但它依然 **不是 installer**。`,
+    `这是一个 **${PHASE_ID} alpha-shell release skeleton**，在 phase26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/42/43/44/45/46/47/48/49/50/51/52/53/54/55/56/57/58 packaging 与 shell foundations 的基础上，把 local-only multi-window orchestration、cross-window shared-state review surface、以及 review-only release approval pipeline 继续推进成更明确的 Delivery-chain Workspace / Stage Explorer / artifact coverage / blockers / handoff posture / observability mapping / packaged-app task-state linkage / local materialization artifact ledger / artifact checkpoint continuity chain / materialization Stage C readout chain / materialization failure-path readout / failure command preview / typed Stage C readiness / withheld-future boundary bridge 审阅壳，但它依然 **不是 installer**。`,
     "",
     `当前已验证里程碑：${PHASE_MILESTONE}。`,
     "",
@@ -1208,9 +1208,9 @@ function renderReleaseNotes({ generatedAt }) {
     "- operator review board now sits inside that workspace with explicit stage ownership, reviewer queues, acknowledgement state, and direct cross-links back into trace, window review, and artifact groups",
     "- release decision handoff now keeps the reviewer baton explicit between approval, lifecycle, rollback, and final decision stages while also holding the selected delivery stage and downstream posture in view without enabling any live signing, publish, or host-side execution",
     "- review evidence closeout now exposes sealing state, sealed evidence, pending evidence, closeout windows, reviewer notes, and linked stage artifacts as first-class local-only review metadata instead of burying closeout posture inside larger release files",
-    "- packaged-app local materialization contract now threads directory materialization, staged-output, and bundle-sealing task states into one per-platform review-only handoff spine with explicit current task, task evidence, delivery-stage linkage, local review packet handoffs, and a source-to-seal artifact ledger, so future local materialization work can deepen without building or sealing anything for real",
-    "- local materialization artifact ledgers now tie built renderer/Electron inputs to directory verification, staged-output manifests, and seal/integrity metadata, while matched observability rows and review continuity keep that handoff visible across the Stage Explorer, windows board, and inspector without enabling execution",
-    "- materialization Stage C readout chain now threads the current local review packet handoff, matched validator / observability surface, continuity spine, nearby failure-path readout, failure command preview, and nearby Stage C QA / approval / entry / rollback posture into one reviewer-facing readout without building, signing, publishing, or executing anything",
+    "- packaged-app local materialization contract now threads directory materialization, staged-output, and bundle-sealing task states into one per-platform review-only handoff spine with explicit current task, task evidence, delivery-stage linkage, local review packet handoffs, a source-to-seal artifact ledger, and an artifact checkpoint continuity chain, so future local materialization work can deepen without building or sealing anything for real",
+    "- local materialization artifact ledgers now tie built renderer/Electron inputs to directory verification, staged-output manifests, and seal/integrity metadata, while the linked artifact checkpoint chain resolves each handoff into its seal checkpoint, failure branch, and Stage C checkpoint across the Stage Explorer, windows board, and inspector without enabling execution",
+    "- materialization Stage C readout chain now threads the current local review packet handoff, linked artifact checkpoint chain, matched validator / observability surface, nearby failure-path readout, failure command preview, and nearby Stage C QA / approval / entry / rollback posture into one reviewer-facing readout without building, signing, publishing, or executing anything",
     "- materialization failure paths now resolve through explicit failure-surface continuity matches, rollback anchors, and command lanes so checksum/package-root/notarization gate posture stays readable across Stage Explorer, windows, and inspector surfaces without enabling execution",
     "- release QA closeout readiness now pulls packaged-app materialization continuity, local review packets, installer/signing/notarization handshake checks, release checklist proof, and delivery closeout posture into one review-only QA surface without building or publishing anything",
     "- approval / audit / rollback entry contract now marks the first safe Stage C entry by tying approval workflow, audit retention posture, rollback live-readiness, and receipt settlement closeout into one non-executing operator-facing contract",
@@ -1251,7 +1251,7 @@ function buildReviewManifest({ generatedAt, artifactGroups, allDocs }) {
         { id: "pipeline-directory-materialization", label: "Packaged-app directory materialization", status: "ready", detail: "Per-platform directory staging roots, launcher paths, verification manifests, task states, and review checkpoints are now formalized as metadata." },
         { id: "pipeline-staged-output", label: "Packaged-app staged output skeleton", status: "ready", detail: "Directory materialization now feeds explicit staged outputs, manifests, task dependencies, and local-only review checks without creating any real packaged artifact." },
         { id: "pipeline-bundle-sealing", label: "Packaged-app bundle sealing skeleton", status: "ready", detail: "Staged outputs now feed review-only sealing manifests, task dependencies, and integrity checkpoints without freezing any real packaged bundle." },
-        { id: "pipeline-local-materialization-contract", label: "Packaged-app local materialization contract", status: "ready", detail: "Directory materialization, staged outputs, and bundle sealing now share one per-platform local-only task-state contract with current-task focus, review evidence, review-packet handoffs, a source-to-seal artifact ledger, delivery-stage linkage, and integrity links without materializing any real host-side bundle." },
+        { id: "pipeline-local-materialization-contract", label: "Packaged-app local materialization contract", status: "ready", detail: "Directory materialization, staged outputs, and bundle sealing now share one per-platform local-only task-state contract with current-task focus, review evidence, review-packet handoffs, a source-to-seal artifact ledger, an artifact checkpoint chain, delivery-stage linkage, and integrity links without materializing any real host-side bundle." },
         { id: "pipeline-bundle-integrity", label: "Sealed-bundle integrity contract", status: "ready", detail: "Bundle sealing metadata now feeds explicit integrity, digest, and audit checkpoints without attesting any real packaged bundle." },
         { id: "pipeline-integrity-attestation", label: "Integrity attestation evidence", status: "ready", detail: "Sealed-bundle integrity contracts now feed explicit attestation packets, verifier inputs, and audit receipts without attesting any live release for real." },
         { id: "pipeline-attestation-verification-packs", label: "Attestation verification packs", status: "ready", detail: "Integrity attestation evidence now feeds verifier-ready packs, checklists, and audit handoff bundles without executing any live verification for real." },
@@ -1265,7 +1265,7 @@ function buildReviewManifest({ generatedAt, artifactGroups, allDocs }) {
         { id: "pipeline-attestation-operator-settlement-packs", label: "Attestation operator settlement packs", status: "ready", detail: "Reconciliation ledgers now feed operator clearance packets, escalation disposition bundles, and approval attachments without routing any live operator settlement for real." },
         { id: "pipeline-attestation-operator-approval-routing-contracts", label: "Attestation operator approval routing contracts", status: "ready", detail: "Settlement packs now feed reviewer-ready routing tables, approval windows, and approval handoff routes without dispatching any live approval or execution for real." },
         { id: "pipeline-attestation-operator-approval-orchestration", label: "Attestation operator approval orchestration", status: "ready", detail: "Approval routing contracts now feed reviewer baton sequencing, quorum timing, and orchestration closeout paths without dispatching any live approval or execution for real." },
-        { id: "pipeline-review-only-delivery-chain", label: "Delivery-chain workspace", status: "ready", detail: "Operator review board, decision handoff, evidence closeout, promotion readiness, publish gating, rollback readiness, packaged-app materialization roots, source-to-seal artifact handoffs, review-packet handoffs, validator readouts, failure-path command previews, the materialization Stage C readout chain, stage-level artifacts, blockers, and observability mapping now read like one staged delivery workflow without executing anything." },
+        { id: "pipeline-review-only-delivery-chain", label: "Delivery-chain workspace", status: "ready", detail: "Operator review board, decision handoff, evidence closeout, promotion readiness, publish gating, rollback readiness, packaged-app materialization roots, source-to-seal artifact handoffs, artifact checkpoint chains, review-packet handoffs, validator readouts, failure-path command previews, the materialization Stage C readout chain, stage-level artifacts, blockers, and observability mapping now read like one staged delivery workflow without executing anything." },
         { id: "pipeline-release-qa-closeout-readiness", label: "Release QA closeout readiness", status: "ready", detail: "Packaged-app materialization continuity, local review packets, installer/signing/notarization handshake verification, release checklist proof, and delivery closeout posture now stay grouped as one review-only QA board." },
         { id: "pipeline-approval-audit-rollback-entry-contract", label: "Approval / audit / rollback entry contract", status: "ready", detail: "The first safe Stage C entry now ties approval workflow, audit retention posture, rollback live-readiness, receipt settlement closeout, and delivery QA proof into one non-executing contract." },
         { id: "pipeline-installer-builders", label: "Installer-target builder skeleton", status: "ready", detail: "Installer targets still map cleanly to per-platform builder identities without invoking a real builder." },
@@ -10029,6 +10029,41 @@ function buildReviewOnlyDeliveryChain({ generatedAt }) {
           "seal manifest declared",
           "integrity manifest path declared"
         ],
+        artifactLedger: createPackagedAppMaterializationArtifactLedger({
+          idPrefix: "windows",
+          platformLabel: "Windows",
+          taskState: "reviewing",
+          summary:
+            "Windows keeps built renderer and Electron inputs, directory verification, staged-output manifests, and seal/integrity metadata in one local-only artifact ledger so the active checksum handoff can be traced back to concrete snapshot inputs.",
+          activeHandoff: "output-to-checksum",
+          nextHandoff: "checksum-to-seal",
+          directoryTaskId: "packaged-app-materialization-task-windows-directory",
+          stagedOutputTaskId: "packaged-app-materialization-task-windows-staged-output",
+          bundleSealTaskId: "packaged-app-materialization-task-windows-bundle-seal",
+          materializationRoot: "future/packaged-app/windows/OpenClaw Studio",
+          verificationManifestPath: "future/packaged-app/windows/materialization-manifest.json",
+          outputManifestPath: "future/staged-output/windows/output-manifest.json",
+          checksumManifestPath: "future/staged-output/windows/checksum-manifest.json",
+          sealManifestPath: "future/sealed-bundles/windows/bundle-seal-manifest.json",
+          integrityManifestPath: "future/sealed-bundles/windows/bundle-integrity-manifest.json",
+          directoryArtifactStatus: "ready",
+          outputArtifactStatus: "watch",
+          checksumArtifactStatus: "watch",
+          sealArtifactStatus: "ready",
+          integrityArtifactStatus: "ready",
+          snapshotHandoffStatus: "ready",
+          snapshotHandoffSummary:
+            "Renderer and Electron snapshot inputs are already frozen against the Windows package root, so directory verification can be re-read from concrete local build artifacts.",
+          directoryHandoffStatus: "ready",
+          directoryHandoffSummary:
+            "Windows directory verification has already handed off into the staged-output lane, so the output manifest can still be traced back to the same package-root proof.",
+          outputHandoffStatus: "watch",
+          outputHandoffSummary:
+            "Windows is actively comparing the output manifest and checksum proof so staged-output posture stays inspectable before any seal metadata can advance.",
+          sealHandoffStatus: "blocked",
+          sealHandoffSummary:
+            "The checksum-to-seal handoff is declared, but Windows still stops at metadata-only seal and integrity manifests while host-side execution stays disabled."
+        }),
         reviewPacket: createPackagedAppMaterializationReviewPacket({
           idPrefix: "windows",
           label: "Windows",
@@ -10043,6 +10078,39 @@ function buildReviewOnlyDeliveryChain({ generatedAt }) {
           sealManifestPath: "future/sealed-bundles/windows/bundle-seal-manifest.json",
           rollbackCheckpointId: "sealed-bundle-checkpoint-windows"
         }),
+        bundleSealingReadiness: {
+          id: "packaged-app-materialization-bundle-sealing-readiness-windows",
+          label: "Windows bundle-sealing readiness",
+          taskState: "blocked",
+          summary:
+            "Seal and integrity manifests are declared, but the Windows seal handoff remains blocked until the staged-output chain stops being metadata-only and the publish gate remains review-only.",
+          currentCheckpoint: "seal manifest declared / staged-output review still active",
+          activeCheckpointId: "packaged-app-bundle-sealing-checkpoint-windows-gate",
+          deliveryChainStageId: "delivery-chain-promotion-readiness",
+          downstreamGateStageId: "delivery-chain-publish-decision",
+          dependsOnTaskId: "packaged-app-materialization-task-windows-staged-output",
+          sealManifestPath: "future/sealed-bundles/windows/bundle-seal-manifest.json",
+          integrityManifestPath: "future/sealed-bundles/windows/bundle-integrity-manifest.json",
+          checkpoints: createPackagedAppBundleSealingCheckpoints({
+            idPrefix: "windows",
+            sealManifestPath: "future/sealed-bundles/windows/bundle-seal-manifest.json",
+            integrityManifestPath: "future/sealed-bundles/windows/bundle-integrity-manifest.json",
+            gateLabel: "Staged-output review still active",
+            gateDetail: "Windows bundle sealing stays behind the current staged-output review slice until the output and checksum handoff stop being metadata-only.",
+            gateArtifactPath: "future/staged-output/windows/output-manifest.json",
+            gateStatus: "watch"
+          }),
+          reviewChecks: [
+            "seal manifest declared",
+            "integrity manifest declared",
+            "publish gate remains review-only"
+          ],
+          blockedBy: [
+            "staged outputs remain metadata-only",
+            "bundle sealing remains metadata-only",
+            "host-side execution remains disabled"
+          ]
+        },
         validatorObservabilityBridge: createPackagedAppMaterializationValidatorObservabilityBridge({
           idPrefix: "windows",
           platformLabel: "Windows",
@@ -10146,6 +10214,41 @@ function buildReviewOnlyDeliveryChain({ generatedAt }) {
           "seal manifest declared",
           "integrity manifest path declared"
         ],
+        artifactLedger: createPackagedAppMaterializationArtifactLedger({
+          idPrefix: "macos",
+          platformLabel: "macOS",
+          taskState: "review-ready",
+          summary:
+            "macOS keeps built renderer and Electron inputs, .app verification proof, staged-output manifests, and seal/integrity metadata in one local-only artifact ledger so the future staged-output lane already has a concrete source chain.",
+          activeHandoff: "snapshot-to-directory",
+          nextHandoff: "directory-to-output",
+          directoryTaskId: "packaged-app-materialization-task-macos-directory",
+          stagedOutputTaskId: "packaged-app-materialization-task-macos-staged-output",
+          bundleSealTaskId: "packaged-app-materialization-task-macos-bundle-seal",
+          materializationRoot: "future/packaged-app/macos/OpenClaw Studio.app",
+          verificationManifestPath: "future/packaged-app/macos/materialization-manifest.json",
+          outputManifestPath: "future/staged-output/macos/output-manifest.json",
+          checksumManifestPath: "future/staged-output/macos/checksum-manifest.json",
+          sealManifestPath: "future/sealed-bundles/macos/bundle-seal-manifest.json",
+          integrityManifestPath: "future/sealed-bundles/macos/bundle-integrity-manifest.json",
+          directoryArtifactStatus: "watch",
+          outputArtifactStatus: "ready",
+          checksumArtifactStatus: "ready",
+          sealArtifactStatus: "ready",
+          integrityArtifactStatus: "ready",
+          snapshotHandoffStatus: "watch",
+          snapshotHandoffSummary:
+            "Renderer and Electron snapshot inputs are ready, but macOS still keeps the .app verification handoff as the active local pickup surface before staged-output review begins.",
+          directoryHandoffStatus: "ready",
+          directoryHandoffSummary:
+            "Once the .app verification handoff closes, the same directory proof feeds the output manifest without requiring a real app bundle.",
+          outputHandoffStatus: "ready",
+          outputHandoffSummary:
+            "macOS already declares the output-to-checksum proof chain so staged-output continuity can be reviewed ahead of the active directory checkpoint.",
+          sealHandoffStatus: "blocked",
+          sealHandoffSummary:
+            "The checksum-to-seal handoff is declared, but the seal lane still stops at metadata while signing and notarization remain review-only."
+        }),
         reviewPacket: createPackagedAppMaterializationReviewPacket({
           idPrefix: "macos",
           label: "macOS",
@@ -10160,6 +10263,39 @@ function buildReviewOnlyDeliveryChain({ generatedAt }) {
           sealManifestPath: "future/sealed-bundles/macos/bundle-seal-manifest.json",
           rollbackCheckpointId: "sealed-bundle-checkpoint-macos"
         }),
+        bundleSealingReadiness: {
+          id: "packaged-app-materialization-bundle-sealing-readiness-macos",
+          label: "macOS bundle-sealing readiness",
+          taskState: "blocked",
+          summary:
+            "Seal and integrity manifests are declared, but the macOS seal handoff remains blocked while staged-output review, signing, and notarization all stay metadata-only.",
+          currentCheckpoint: "seal manifest declared / notarization path still blocked",
+          activeCheckpointId: "packaged-app-bundle-sealing-checkpoint-macos-gate",
+          deliveryChainStageId: "delivery-chain-promotion-readiness",
+          downstreamGateStageId: "delivery-chain-publish-decision",
+          dependsOnTaskId: "packaged-app-materialization-task-macos-staged-output",
+          sealManifestPath: "future/sealed-bundles/macos/bundle-seal-manifest.json",
+          integrityManifestPath: "future/sealed-bundles/macos/bundle-integrity-manifest.json",
+          checkpoints: createPackagedAppBundleSealingCheckpoints({
+            idPrefix: "macos",
+            sealManifestPath: "future/sealed-bundles/macos/bundle-seal-manifest.json",
+            integrityManifestPath: "future/sealed-bundles/macos/bundle-integrity-manifest.json",
+            gateLabel: "Notarization path still blocked",
+            gateDetail: "macOS bundle sealing stays blocked until the staged-output lane is reviewed end-to-end and later signing/notarization posture stops being metadata-only.",
+            gateArtifactPath: "release/NOTARIZATION-PLAN.json",
+            gateStatus: "blocked"
+          }),
+          reviewChecks: [
+            "seal manifest declared",
+            "integrity manifest declared",
+            "notarization path remains review-only"
+          ],
+          blockedBy: [
+            "staged outputs remain metadata-only",
+            "bundle sealing remains metadata-only",
+            "host-side execution remains disabled"
+          ]
+        },
         validatorObservabilityBridge: createPackagedAppMaterializationValidatorObservabilityBridge({
           idPrefix: "macos",
           platformLabel: "macOS",
@@ -10263,6 +10399,41 @@ function buildReviewOnlyDeliveryChain({ generatedAt }) {
           "seal manifest declared",
           "integrity manifest path declared"
         ],
+        artifactLedger: createPackagedAppMaterializationArtifactLedger({
+          idPrefix: "linux",
+          platformLabel: "Linux",
+          taskState: "review-ready",
+          summary:
+            "Linux keeps built renderer and Electron inputs, package-root verification, staged-output manifests, and seal/integrity metadata in one local-only artifact ledger so the package-root checkpoint is already tied to concrete snapshot inputs.",
+          activeHandoff: "snapshot-to-directory",
+          nextHandoff: "directory-to-output",
+          directoryTaskId: "packaged-app-materialization-task-linux-directory",
+          stagedOutputTaskId: "packaged-app-materialization-task-linux-staged-output",
+          bundleSealTaskId: "packaged-app-materialization-task-linux-bundle-seal",
+          materializationRoot: "future/packaged-app/linux/openclaw-studio",
+          verificationManifestPath: "future/packaged-app/linux/materialization-manifest.json",
+          outputManifestPath: "future/staged-output/linux/output-manifest.json",
+          checksumManifestPath: "future/staged-output/linux/checksum-manifest.json",
+          sealManifestPath: "future/sealed-bundles/linux/bundle-seal-manifest.json",
+          integrityManifestPath: "future/sealed-bundles/linux/bundle-integrity-manifest.json",
+          directoryArtifactStatus: "watch",
+          outputArtifactStatus: "ready",
+          checksumArtifactStatus: "ready",
+          sealArtifactStatus: "ready",
+          integrityArtifactStatus: "ready",
+          snapshotHandoffStatus: "watch",
+          snapshotHandoffSummary:
+            "Renderer and Electron snapshot inputs are ready, but Linux still keeps the package-root verification handoff as the active local checkpoint before staged-output review begins.",
+          directoryHandoffStatus: "ready",
+          directoryHandoffSummary:
+            "Once the package-root verification handoff closes, the same directory proof feeds the output manifest without emitting any package target.",
+          outputHandoffStatus: "ready",
+          outputHandoffSummary:
+            "Linux already declares the output-to-checksum proof chain so staged-output continuity can be reviewed ahead of the active directory checkpoint.",
+          sealHandoffStatus: "blocked",
+          sealHandoffSummary:
+            "The checksum-to-seal handoff is declared, but the seal lane still stops at metadata while downstream package publication remains blocked."
+        }),
         reviewPacket: createPackagedAppMaterializationReviewPacket({
           idPrefix: "linux",
           label: "Linux",
@@ -10277,6 +10448,39 @@ function buildReviewOnlyDeliveryChain({ generatedAt }) {
           sealManifestPath: "future/sealed-bundles/linux/bundle-seal-manifest.json",
           rollbackCheckpointId: "sealed-bundle-checkpoint-linux"
         }),
+        bundleSealingReadiness: {
+          id: "packaged-app-materialization-bundle-sealing-readiness-linux",
+          label: "Linux bundle-sealing readiness",
+          taskState: "blocked",
+          summary:
+            "Seal and integrity manifests are declared, but the Linux seal handoff remains blocked while staged-output review and later package publication stay metadata-only.",
+          currentCheckpoint: "seal manifest declared / publish path still blocked",
+          activeCheckpointId: "packaged-app-bundle-sealing-checkpoint-linux-gate",
+          deliveryChainStageId: "delivery-chain-promotion-readiness",
+          downstreamGateStageId: "delivery-chain-publish-decision",
+          dependsOnTaskId: "packaged-app-materialization-task-linux-staged-output",
+          sealManifestPath: "future/sealed-bundles/linux/bundle-seal-manifest.json",
+          integrityManifestPath: "future/sealed-bundles/linux/bundle-integrity-manifest.json",
+          checkpoints: createPackagedAppBundleSealingCheckpoints({
+            idPrefix: "linux",
+            sealManifestPath: "future/sealed-bundles/linux/bundle-seal-manifest.json",
+            integrityManifestPath: "future/sealed-bundles/linux/bundle-integrity-manifest.json",
+            gateLabel: "Package publication path still blocked",
+            gateDetail: "Linux bundle sealing stays blocked until the staged-output lane settles and the downstream package publication gate stops being metadata-only.",
+            gateArtifactPath: "release/PUBLISH-GATES.json",
+            gateStatus: "blocked"
+          }),
+          reviewChecks: [
+            "seal manifest declared",
+            "integrity manifest declared",
+            "package publication remains review-only"
+          ],
+          blockedBy: [
+            "staged outputs remain metadata-only",
+            "bundle sealing remains metadata-only",
+            "host-side execution remains disabled"
+          ]
+        },
         validatorObservabilityBridge: createPackagedAppMaterializationValidatorObservabilityBridge({
           idPrefix: "linux",
           platformLabel: "Linux",
@@ -12759,6 +12963,28 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
     writtenReviewOnlyDeliveryChain.packagedAppMaterializationContract.platforms.length < 3 ||
     !writtenReviewOnlyDeliveryChain.packagedAppMaterializationContract.platforms.every(
       (platform) =>
+        typeof platform.artifactLedger?.activeHandoffId === "string" &&
+        Array.isArray(platform.artifactLedger?.artifacts) &&
+        platform.artifactLedger.artifacts.length >= 6 &&
+        Array.isArray(platform.artifactLedger?.handoffs) &&
+        platform.artifactLedger.handoffs.length >= 4 &&
+        platform.artifactLedger.handoffs.some((handoff) => handoff.id === platform.artifactLedger.activeHandoffId) &&
+        (!platform.artifactLedger.nextHandoffId ||
+          platform.artifactLedger.handoffs.some((handoff) => handoff.id === platform.artifactLedger.nextHandoffId)) &&
+        platform.artifactLedger.handoffs.every(
+          (handoff) =>
+            typeof handoff.bundleSealingCheckpointId === "string" &&
+            platform.bundleSealingReadiness?.checkpoints.some((checkpoint) => checkpoint.id === handoff.bundleSealingCheckpointId) &&
+            typeof handoff.failureReadoutId === "string" &&
+            platform.failurePath?.readouts.some((readout) => readout.id === handoff.failureReadoutId) &&
+            typeof handoff.stageCCheckpointId === "string" &&
+            [
+              "entry-approval-routing",
+              "entry-audit-retention",
+              "entry-rollback-live-readiness",
+              "entry-receipt-settlement"
+            ].includes(handoff.stageCCheckpointId)
+        ) &&
         typeof platform.reviewPacket?.currentStepId === "string" &&
         Array.isArray(platform.reviewPacket?.steps) &&
         platform.reviewPacket.steps.length >= 3 &&
@@ -12947,6 +13173,19 @@ function verifyReleaseSkeletonOutput(destinationRoot, skeleton) {
             typeof handoff.taskId === "string" &&
             typeof handoff.reviewPacketStepId === "string" &&
             typeof handoff.validatorReadoutId === "string" &&
+            typeof handoff.bundleSealingCheckpointId === "string" &&
+            contract.bundleSealingReadiness?.checkpoints.some(
+              (checkpoint) => checkpoint.id === handoff.bundleSealingCheckpointId
+            ) &&
+            typeof handoff.failureReadoutId === "string" &&
+            contract.failurePath?.readouts.some((readout) => readout.id === handoff.failureReadoutId) &&
+            typeof handoff.stageCCheckpointId === "string" &&
+            [
+              "entry-approval-routing",
+              "entry-audit-retention",
+              "entry-rollback-live-readiness",
+              "entry-receipt-settlement"
+            ].includes(handoff.stageCCheckpointId) &&
             typeof handoff.windowId === "string" &&
             typeof handoff.sharedStateLaneId === "string" &&
             typeof handoff.orchestrationBoardId === "string" &&

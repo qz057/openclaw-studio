@@ -62,6 +62,30 @@ function isStudioReviewCoverageAction(
   );
 }
 
+function selectNextSequentialEntry<T extends { id: string }>(
+  entries: T[] | undefined,
+  currentId?: string | null,
+  fallbackId?: string | null
+): T | undefined {
+  if (!entries?.length) {
+    return undefined;
+  }
+
+  if (currentId) {
+    const currentIndex = entries.findIndex((entry) => entry.id === currentId);
+
+    if (currentIndex >= 0) {
+      return entries[currentIndex + 1];
+    }
+  }
+
+  if (!fallbackId) {
+    return undefined;
+  }
+
+  return entries.find((entry) => entry.id === fallbackId);
+}
+
 export function selectStudioReleaseApprovalPipelineStage(
   pipeline: Pick<StudioReleaseApprovalPipeline, "stages" | "currentStageId">
 ): StudioReleaseApprovalPipelineStage | undefined {
@@ -163,15 +187,13 @@ export function selectStudioReleasePackagedAppMaterializationContractArtifactLed
 
 export function selectStudioReleasePackagedAppMaterializationContractNextArtifactLedgerHandoff(
   deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
-  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null,
+  handoffOrId?: Pick<StudioReleasePackagedAppMaterializationArtifactLedgerHandoff, "id"> | string | null
 ): StudioReleasePackagedAppMaterializationArtifactLedgerHandoff | undefined {
   const artifactLedger = selectStudioReleasePackagedAppMaterializationContractArtifactLedger(deliveryChain, platformOrId);
+  const handoffId = typeof handoffOrId === "string" ? handoffOrId : handoffOrId?.id ?? null;
 
-  if (!artifactLedger?.nextHandoffId) {
-    return undefined;
-  }
-
-  return artifactLedger.handoffs.find((handoff) => handoff.id === artifactLedger.nextHandoffId);
+  return selectNextSequentialEntry(artifactLedger?.handoffs, handoffId, artifactLedger?.nextHandoffId ?? null);
 }
 
 export function selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch(
@@ -445,6 +467,9 @@ export function selectStudioReleasePackagedAppMaterializationContractArtifactChe
   };
 }
 
+type StudioReleasePackagedAppMaterializationArtifactCheckpointChainSelection =
+  ReturnType<typeof selectStudioReleasePackagedAppMaterializationContractArtifactCheckpointChain>;
+
 export function selectStudioReleasePackagedAppMaterializationContractStagedOutputChain(
   deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
   platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
@@ -465,15 +490,13 @@ export function selectStudioReleasePackagedAppMaterializationContractStagedOutpu
 
 export function selectStudioReleasePackagedAppMaterializationContractStagedOutputNextStep(
   deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
-  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null,
+  stepOrId?: Pick<StudioReleasePackagedAppStagedOutputChainStep, "id"> | string | null
 ): StudioReleasePackagedAppStagedOutputChainStep | undefined {
   const chain = selectStudioReleasePackagedAppMaterializationContractStagedOutputChain(deliveryChain, platformOrId);
+  const stepId = typeof stepOrId === "string" ? stepOrId : stepOrId?.id ?? null;
 
-  if (!chain?.nextStepId) {
-    return undefined;
-  }
-
-  return chain.steps.find((step) => step.id === chain.nextStepId);
+  return selectNextSequentialEntry(chain?.steps, stepId, chain?.nextStepId ?? null);
 }
 
 export function selectStudioReleasePackagedAppMaterializationContractReviewPacket(
@@ -492,6 +515,17 @@ export function selectStudioReleasePackagedAppMaterializationContractReviewPacke
   const stepId = typeof stepOrId === "string" ? stepOrId : stepOrId?.id ?? reviewPacket?.currentStepId;
 
   return reviewPacket?.steps.find((step) => step.id === stepId) ?? reviewPacket?.steps[0];
+}
+
+export function selectStudioReleasePackagedAppMaterializationContractNextReviewPacketStep(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null,
+  stepOrId?: Pick<StudioReleasePackagedAppMaterializationReviewPacketStep, "id"> | string | null
+): StudioReleasePackagedAppMaterializationReviewPacketStep | undefined {
+  const reviewPacket = selectStudioReleasePackagedAppMaterializationContractReviewPacket(deliveryChain, platformOrId);
+  const stepId = typeof stepOrId === "string" ? stepOrId : stepOrId?.id ?? null;
+
+  return selectNextSequentialEntry(reviewPacket?.steps, stepId, reviewPacket?.nextStepId ?? null);
 }
 
 export function selectStudioReleasePackagedAppMaterializationContractBundleSealingReadiness(
@@ -569,15 +603,13 @@ export function selectStudioReleasePackagedAppMaterializationContractValidatorOb
 
 export function selectStudioReleasePackagedAppMaterializationContractNextValidatorObservabilityReadout(
   deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
-  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null,
+  readoutOrId?: Pick<StudioReleasePackagedAppMaterializationValidatorObservabilityReadout, "id"> | string | null
 ): StudioReleasePackagedAppMaterializationValidatorObservabilityReadout | undefined {
   const bridge = selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityBridge(deliveryChain, platformOrId);
+  const readoutId = typeof readoutOrId === "string" ? readoutOrId : readoutOrId?.id ?? null;
 
-  if (!bridge?.nextReadoutId) {
-    return undefined;
-  }
-
-  return bridge.readouts.find((readout) => readout.id === bridge.nextReadoutId);
+  return selectNextSequentialEntry(bridge?.readouts, readoutId, bridge?.nextReadoutId ?? null);
 }
 
 export function selectStudioReleasePackagedAppMaterializationContractFailurePath(
@@ -600,15 +632,113 @@ export function selectStudioReleasePackagedAppMaterializationContractFailureRead
 
 export function selectStudioReleasePackagedAppMaterializationContractNextFailureReadout(
   deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract">,
-  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null,
+  readoutOrId?: Pick<StudioReleasePackagedAppMaterializationFailureReadout, "id"> | string | null
 ): StudioReleasePackagedAppMaterializationFailureReadout | undefined {
   const failurePath = selectStudioReleasePackagedAppMaterializationContractFailurePath(deliveryChain, platformOrId);
+  const readoutId = typeof readoutOrId === "string" ? readoutOrId : readoutOrId?.id ?? null;
 
-  if (!failurePath?.nextReadoutId) {
-    return undefined;
-  }
+  return selectNextSequentialEntry(failurePath?.readouts, readoutId, failurePath?.nextReadoutId ?? null);
+}
 
-  return failurePath.readouts.find((readout) => readout.id === failurePath.nextReadoutId);
+export function selectStudioReleasePackagedAppMaterializationContractArtifactCheckpointProgression(
+  deliveryChain: Pick<StudioReleaseApprovalPipeline["deliveryChain"], "packagedAppMaterializationContract" | "stageCReadiness">,
+  windowing?: Pick<StudioWindowing, "observability" | "roster" | "sharedState" | "orchestration"> | null,
+  reviewStateContinuity?: Pick<StudioReviewStateContinuity, "entries" | "activeEntryId"> | null,
+  actionDeck?: Pick<StudioCommandActionDeck, "lanes"> | null,
+  reviewSurfaceActions?: StudioCommandAction[] | null,
+  platformOrId?: Pick<StudioReleasePackagedAppMaterializationContractPlatform, "id"> | string | null,
+  handoffOrId?: Pick<StudioReleasePackagedAppMaterializationArtifactLedgerHandoff, "id"> | string | null
+): {
+  currentSurface: StudioReleasePackagedAppMaterializationArtifactCheckpointChainSelection;
+  nextSurface: StudioReleasePackagedAppMaterializationArtifactCheckpointChainSelection | null;
+  currentHandoff: StudioReleasePackagedAppMaterializationArtifactLedgerHandoff | null;
+  nextHandoff: StudioReleasePackagedAppMaterializationArtifactLedgerHandoff | null;
+  currentStagedOutputStep: StudioReleasePackagedAppStagedOutputChainStep | null;
+  nextStagedOutputStep: StudioReleasePackagedAppStagedOutputChainStep | null;
+  currentReviewPacketStep: StudioReleasePackagedAppMaterializationReviewPacketStep | null;
+  nextReviewPacketStep: StudioReleasePackagedAppMaterializationReviewPacketStep | null;
+  currentValidatorReadout: StudioReleasePackagedAppMaterializationValidatorObservabilityReadout | null;
+  nextValidatorReadout: StudioReleasePackagedAppMaterializationValidatorObservabilityReadout | null;
+  currentFailureReadout: StudioReleasePackagedAppMaterializationFailureReadout | null;
+  nextFailureReadout: StudioReleasePackagedAppMaterializationFailureReadout | null;
+} {
+  const currentSurface = selectStudioReleasePackagedAppMaterializationContractArtifactCheckpointChain(
+    deliveryChain,
+    windowing,
+    reviewStateContinuity,
+    actionDeck,
+    reviewSurfaceActions,
+    platformOrId,
+    handoffOrId
+  );
+  const currentHandoff = currentSurface.activeHandoff;
+  const nextHandoff =
+    selectStudioReleasePackagedAppMaterializationContractNextArtifactLedgerHandoff(
+      deliveryChain,
+      platformOrId,
+      currentHandoff ?? handoffOrId ?? null
+    ) ?? null;
+  const nextSurface = nextHandoff
+    ? selectStudioReleasePackagedAppMaterializationContractArtifactCheckpointChain(
+        deliveryChain,
+        windowing,
+        reviewStateContinuity,
+        actionDeck,
+        reviewSurfaceActions,
+        platformOrId,
+        nextHandoff.id
+      )
+    : null;
+  const currentStagedOutputStep =
+    selectStudioReleasePackagedAppMaterializationContractStagedOutputStep(deliveryChain, platformOrId) ?? null;
+  const nextStagedOutputStep =
+    selectStudioReleasePackagedAppMaterializationContractStagedOutputNextStep(
+      deliveryChain,
+      platformOrId,
+      currentStagedOutputStep
+    ) ?? null;
+  const currentReviewPacketStep =
+    currentSurface.reviewPacketStep ?? selectStudioReleasePackagedAppMaterializationContractReviewPacketStep(deliveryChain, platformOrId) ?? null;
+  const nextReviewPacketStep =
+    selectStudioReleasePackagedAppMaterializationContractNextReviewPacketStep(
+      deliveryChain,
+      platformOrId,
+      currentReviewPacketStep
+    ) ?? null;
+  const currentValidatorReadout =
+    currentSurface.validatorReadout ??
+    selectStudioReleasePackagedAppMaterializationContractValidatorObservabilityReadout(deliveryChain, platformOrId) ??
+    null;
+  const nextValidatorReadout =
+    selectStudioReleasePackagedAppMaterializationContractNextValidatorObservabilityReadout(
+      deliveryChain,
+      platformOrId,
+      currentValidatorReadout
+    ) ?? null;
+  const currentFailureReadout =
+    currentSurface.failureReadout ?? selectStudioReleasePackagedAppMaterializationContractFailureReadout(deliveryChain, platformOrId) ?? null;
+  const nextFailureReadout =
+    selectStudioReleasePackagedAppMaterializationContractNextFailureReadout(
+      deliveryChain,
+      platformOrId,
+      currentFailureReadout
+    ) ?? null;
+
+  return {
+    currentSurface,
+    nextSurface,
+    currentHandoff,
+    nextHandoff,
+    currentStagedOutputStep,
+    nextStagedOutputStep,
+    currentReviewPacketStep,
+    nextReviewPacketStep,
+    currentValidatorReadout,
+    nextValidatorReadout,
+    currentFailureReadout,
+    nextFailureReadout
+  };
 }
 
 export function selectStudioReleasePackagedAppMaterializationContractFailureSurfaceMatch(

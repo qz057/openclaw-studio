@@ -4558,7 +4558,7 @@ export function App() {
             onRunCompanionRouteHistory={handleRunCompanionRouteHistory}
             eyebrow="Phase60"
             title="Delivery-chain Workspace"
-            summary="Phase60 slice39 keeps the materialization packet, validator bridge, failure continuity, and Stage C linkage in place, then deepens the same Stage Explorer with a local materialization artifact ledger so built local snapshot inputs, staged-output proof, seal/integrity metadata, and matched continuity surfaces can be re-read across the same local-only window/lane/board spine."
+            summary="Phase60 slice40 keeps the artifact ledger, validator bridge, failure continuity, and Stage C linkage in place, then deepens the same Stage Explorer with an artifact checkpoint chain so each source-to-seal handoff resolves into the linked seal checkpoint, failure branch, and Stage C checkpoint across the same local-only window/lane/board spine."
           />
 
           <section className="surface card window-workbench">

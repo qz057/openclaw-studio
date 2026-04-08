@@ -191,8 +191,13 @@ async function verifyRendererFocusedSlotUi() {
     "Artifact handoff ledger",
     "Current artifact handoff",
     "Next artifact handoff",
+    "Artifact checkpoint chain",
+    "Artifact failure link",
+    "Artifact Stage C link",
     "Artifact surface match",
     "Artifact continuity",
+    "Materialization Artifact Checkpoint Chain",
+    "Inspector Materialization Checkpoint Chain",
     "Source artifacts",
     "Target artifacts",
     "Local review packet",
@@ -2984,6 +2989,19 @@ function verifyReleaseSkeletonContract() {
             typeof handoff.taskId === "string" &&
             typeof handoff.reviewPacketStepId === "string" &&
             typeof handoff.validatorReadoutId === "string" &&
+            typeof handoff.bundleSealingCheckpointId === "string" &&
+            contract.bundleSealingReadiness?.checkpoints.some(
+              (checkpoint) => checkpoint.id === handoff.bundleSealingCheckpointId
+            ) &&
+            typeof handoff.failureReadoutId === "string" &&
+            contract.failurePath?.readouts.some((readout) => readout.id === handoff.failureReadoutId) &&
+            typeof handoff.stageCCheckpointId === "string" &&
+            [
+              "entry-approval-routing",
+              "entry-audit-retention",
+              "entry-rollback-live-readiness",
+              "entry-receipt-settlement"
+            ].includes(handoff.stageCCheckpointId) &&
             typeof handoff.windowId === "string" &&
             typeof handoff.sharedStateLaneId === "string" &&
             typeof handoff.orchestrationBoardId === "string" &&
@@ -3123,6 +3141,28 @@ function verifyReleaseSkeletonContract() {
     skeleton.reviewOnlyDeliveryChain.packagedAppMaterializationContract.platforms.length < 3 ||
     !skeleton.reviewOnlyDeliveryChain.packagedAppMaterializationContract.platforms.every(
       (platform) =>
+        typeof platform.artifactLedger?.activeHandoffId === "string" &&
+        Array.isArray(platform.artifactLedger?.artifacts) &&
+        platform.artifactLedger.artifacts.length >= 6 &&
+        Array.isArray(platform.artifactLedger?.handoffs) &&
+        platform.artifactLedger.handoffs.length >= 4 &&
+        platform.artifactLedger.handoffs.some((handoff) => handoff.id === platform.artifactLedger.activeHandoffId) &&
+        (!platform.artifactLedger.nextHandoffId ||
+          platform.artifactLedger.handoffs.some((handoff) => handoff.id === platform.artifactLedger.nextHandoffId)) &&
+        platform.artifactLedger.handoffs.every(
+          (handoff) =>
+            typeof handoff.bundleSealingCheckpointId === "string" &&
+            platform.bundleSealingReadiness?.checkpoints.some((checkpoint) => checkpoint.id === handoff.bundleSealingCheckpointId) &&
+            typeof handoff.failureReadoutId === "string" &&
+            platform.failurePath?.readouts.some((readout) => readout.id === handoff.failureReadoutId) &&
+            typeof handoff.stageCCheckpointId === "string" &&
+            [
+              "entry-approval-routing",
+              "entry-audit-retention",
+              "entry-rollback-live-readiness",
+              "entry-receipt-settlement"
+            ].includes(handoff.stageCCheckpointId)
+        ) &&
         typeof platform.validatorObservabilityBridge?.activeReadoutId === "string" &&
         Array.isArray(platform.validatorObservabilityBridge?.readouts) &&
         platform.validatorObservabilityBridge.readouts.length === 3 &&

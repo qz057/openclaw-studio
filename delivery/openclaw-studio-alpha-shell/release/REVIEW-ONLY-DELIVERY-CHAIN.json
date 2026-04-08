@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-review-only-delivery-chain/v1",
-  "generatedAt": "2026-04-08T02:03:26.422Z",
+  "generatedAt": "2026-04-08T02:18:19.436Z",
   "phase": "phase60",
   "mode": "local-only-review",
   "title": "Delivery-chain Workspace",
@@ -57,6 +57,248 @@
           "seal manifest declared",
           "integrity manifest path declared"
         ],
+        "artifactLedger": {
+          "id": "local-materialization-artifact-ledger-windows",
+          "label": "Windows artifact handoff ledger",
+          "taskState": "reviewing",
+          "summary": "Windows keeps built renderer and Electron inputs, directory verification, staged-output manifests, and seal/integrity metadata in one local-only artifact ledger so the active checksum handoff can be traced back to concrete snapshot inputs.",
+          "activeHandoffId": "local-materialization-artifact-ledger-windows-output-to-checksum",
+          "nextHandoffId": "local-materialization-artifact-ledger-windows-checksum-to-seal",
+          "artifacts": [
+            {
+              "id": "local-materialization-artifact-ledger-windows-renderer-entry",
+              "label": "Renderer entry snapshot",
+              "kind": "snapshot-input",
+              "status": "ready",
+              "path": "artifacts/renderer/index.html",
+              "detail": "The built renderer entrypoint is frozen as a local snapshot input before any packaged-app directory handoff is reviewed.",
+              "taskId": "packaged-app-materialization-task-windows-directory",
+              "deliveryChainStageId": "delivery-chain-attestation-intake"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-windows-electron-main",
+              "label": "Electron main snapshot",
+              "kind": "snapshot-input",
+              "status": "ready",
+              "path": "artifacts/electron/electron/main.js",
+              "detail": "The built Electron main process stays pinned as a local snapshot input for packaged-app review without launching anything.",
+              "taskId": "packaged-app-materialization-task-windows-directory",
+              "deliveryChainStageId": "delivery-chain-attestation-intake"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-windows-electron-preload",
+              "label": "Electron preload snapshot",
+              "kind": "snapshot-input",
+              "status": "ready",
+              "path": "artifacts/electron/electron/preload.js",
+              "detail": "The built preload bundle stays attached to the same local snapshot input lane as the renderer and main process.",
+              "taskId": "packaged-app-materialization-task-windows-directory",
+              "deliveryChainStageId": "delivery-chain-attestation-intake"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-windows-directory-verification",
+              "label": "Directory verification manifest",
+              "kind": "directory-proof",
+              "status": "ready",
+              "path": "future/packaged-app/windows/materialization-manifest.json",
+              "detail": "Windows verification metadata anchors the packaged-app root future/packaged-app/windows/OpenClaw Studio before any staged-output proof is reviewed.",
+              "taskId": "packaged-app-materialization-task-windows-directory",
+              "deliveryChainStageId": "delivery-chain-attestation-intake"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-windows-output-manifest",
+              "label": "Staged-output manifest",
+              "kind": "staged-output-proof",
+              "status": "watch",
+              "path": "future/staged-output/windows/output-manifest.json",
+              "detail": "Windows staged-output layout stays declared as review-only metadata instead of materializing a real packaged artifact.",
+              "taskId": "packaged-app-materialization-task-windows-staged-output",
+              "deliveryChainStageId": "delivery-chain-operator-review"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-windows-checksum-manifest",
+              "label": "Checksum manifest",
+              "kind": "staged-output-proof",
+              "status": "watch",
+              "path": "future/staged-output/windows/checksum-manifest.json",
+              "detail": "Windows checksum proof stays chained to the same staged-output lane so digest posture can be reviewed locally.",
+              "taskId": "packaged-app-materialization-task-windows-staged-output",
+              "deliveryChainStageId": "delivery-chain-operator-review"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-windows-seal-manifest",
+              "label": "Bundle-seal manifest",
+              "kind": "seal-proof",
+              "status": "ready",
+              "path": "future/sealed-bundles/windows/bundle-seal-manifest.json",
+              "detail": "Windows seal metadata is declared for review pickup, but it still cannot freeze or sign any real bundle.",
+              "taskId": "packaged-app-materialization-task-windows-bundle-seal",
+              "deliveryChainStageId": "delivery-chain-promotion-readiness"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-windows-integrity-manifest",
+              "label": "Bundle-integrity manifest",
+              "kind": "seal-proof",
+              "status": "ready",
+              "path": "future/sealed-bundles/windows/bundle-integrity-manifest.json",
+              "detail": "Windows integrity metadata stays linked beside the same seal handoff without attesting anything for real.",
+              "taskId": "packaged-app-materialization-task-windows-bundle-seal",
+              "deliveryChainStageId": "delivery-chain-promotion-readiness"
+            }
+          ],
+          "handoffs": [
+            {
+              "id": "local-materialization-artifact-ledger-windows-snapshot-to-directory",
+              "label": "Snapshot inputs -> directory verification",
+              "status": "ready",
+              "summary": "Renderer and Electron snapshot inputs are already frozen against the Windows package root, so directory verification can be re-read from concrete local build artifacts.",
+              "taskId": "packaged-app-materialization-task-windows-directory",
+              "reviewPacketStepId": "packaged-app-review-packet-windows-directory-to-output",
+              "validatorReadoutId": "packaged-app-materialization-validator-observability-windows-directory",
+              "bundleSealingCheckpointId": "packaged-app-bundle-sealing-checkpoint-windows-seal-manifest",
+              "failureReadoutId": "packaged-app-materialization-failure-path-windows-directory",
+              "stageCCheckpointId": "entry-audit-retention",
+              "deliveryChainStageId": "delivery-chain-attestation-intake",
+              "windowId": "window-shell-main",
+              "sharedStateLaneId": "shared-state-lane-boundary-review",
+              "orchestrationBoardId": "orchestration-board-boundary-review",
+              "observabilityMappingId": "observability-mapping-boundary-intake",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-route-window",
+                "observability-signal-lane-board"
+              ],
+              "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+              "commandActionIds": [
+                "command-focus-materialization-validator-bridge"
+              ],
+              "fromArtifactIds": [
+                "local-materialization-artifact-ledger-windows-renderer-entry",
+                "local-materialization-artifact-ledger-windows-electron-main",
+                "local-materialization-artifact-ledger-windows-electron-preload"
+              ],
+              "toArtifactIds": [
+                "local-materialization-artifact-ledger-windows-directory-verification"
+              ],
+              "blockedBy": []
+            },
+            {
+              "id": "local-materialization-artifact-ledger-windows-directory-to-output",
+              "label": "Directory verification -> output manifest",
+              "status": "ready",
+              "summary": "Windows directory verification has already handed off into the staged-output lane, so the output manifest can still be traced back to the same package-root proof.",
+              "taskId": "packaged-app-materialization-task-windows-staged-output",
+              "reviewPacketStepId": "packaged-app-review-packet-windows-directory-to-output",
+              "validatorReadoutId": "packaged-app-materialization-validator-observability-windows-staged-output",
+              "bundleSealingCheckpointId": "packaged-app-bundle-sealing-checkpoint-windows-seal-manifest",
+              "failureReadoutId": "packaged-app-materialization-failure-path-windows-staged-output",
+              "stageCCheckpointId": "entry-approval-routing",
+              "deliveryChainStageId": "delivery-chain-operator-review",
+              "windowId": "window-trace-review",
+              "sharedStateLaneId": "shared-state-lane-trace-review",
+              "orchestrationBoardId": "orchestration-board-trace-review",
+              "observabilityMappingId": "observability-mapping-approval-active",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-queue",
+                "observability-signal-escalation-closeout"
+              ],
+              "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+              "commandActionIds": [
+                "command-focus-materialization-validator-bridge",
+                "command-focus-lifecycle-review-packet"
+              ],
+              "fromArtifactIds": [
+                "local-materialization-artifact-ledger-windows-directory-verification"
+              ],
+              "toArtifactIds": [
+                "local-materialization-artifact-ledger-windows-output-manifest"
+              ],
+              "blockedBy": []
+            },
+            {
+              "id": "local-materialization-artifact-ledger-windows-output-to-checksum",
+              "label": "Output manifest -> checksum proof",
+              "status": "watch",
+              "summary": "Windows is actively comparing the output manifest and checksum proof so staged-output posture stays inspectable before any seal metadata can advance.",
+              "taskId": "packaged-app-materialization-task-windows-staged-output",
+              "reviewPacketStepId": "packaged-app-review-packet-windows-output-to-checksum",
+              "validatorReadoutId": "packaged-app-materialization-validator-observability-windows-staged-output",
+              "bundleSealingCheckpointId": "packaged-app-bundle-sealing-checkpoint-windows-integrity-manifest",
+              "failureReadoutId": "packaged-app-materialization-failure-path-windows-staged-output",
+              "stageCCheckpointId": "entry-approval-routing",
+              "deliveryChainStageId": "delivery-chain-operator-review",
+              "windowId": "window-trace-review",
+              "sharedStateLaneId": "shared-state-lane-trace-review",
+              "orchestrationBoardId": "orchestration-board-trace-review",
+              "observabilityMappingId": "observability-mapping-approval-active",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-queue",
+                "observability-signal-escalation-closeout"
+              ],
+              "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+              "commandActionIds": [
+                "command-focus-lifecycle-review-packet",
+                "command-focus-materialization-validator-bridge",
+                "command-focus-materialization-failure-path"
+              ],
+              "fromArtifactIds": [
+                "local-materialization-artifact-ledger-windows-output-manifest"
+              ],
+              "toArtifactIds": [
+                "local-materialization-artifact-ledger-windows-checksum-manifest"
+              ],
+              "blockedBy": []
+            },
+            {
+              "id": "local-materialization-artifact-ledger-windows-checksum-to-seal",
+              "label": "Checksum proof -> seal and integrity manifests",
+              "status": "blocked",
+              "summary": "The checksum-to-seal handoff is declared, but Windows still stops at metadata-only seal and integrity manifests while host-side execution stays disabled.",
+              "taskId": "packaged-app-materialization-task-windows-bundle-seal",
+              "reviewPacketStepId": "packaged-app-review-packet-windows-checksum-to-seal",
+              "validatorReadoutId": "packaged-app-materialization-validator-observability-windows-bundle-sealing",
+              "bundleSealingCheckpointId": "packaged-app-bundle-sealing-checkpoint-windows-gate",
+              "failureReadoutId": "packaged-app-materialization-failure-path-windows-bundle-sealing",
+              "stageCCheckpointId": "entry-rollback-live-readiness",
+              "deliveryChainStageId": "delivery-chain-promotion-readiness",
+              "windowId": "window-review-board",
+              "sharedStateLaneId": "shared-state-lane-preview-review",
+              "orchestrationBoardId": "orchestration-board-preview-review",
+              "observabilityMappingId": "observability-mapping-lifecycle-preview",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-lane-board",
+                "observability-signal-mapped-windows"
+              ],
+              "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+              "commandActionIds": [
+                "command-focus-lifecycle-review-packet",
+                "command-focus-materialization-validator-bridge",
+                "command-focus-materialization-failure-path",
+                "command-focus-publish-decision-gate"
+              ],
+              "fromArtifactIds": [
+                "local-materialization-artifact-ledger-windows-checksum-manifest"
+              ],
+              "toArtifactIds": [
+                "local-materialization-artifact-ledger-windows-seal-manifest",
+                "local-materialization-artifact-ledger-windows-integrity-manifest"
+              ],
+              "blockedBy": [
+                "bundle sealing remains metadata-only",
+                "host-side execution remains disabled"
+              ]
+            }
+          ],
+          "blockedBy": [
+            "artifact handoff ledger remains review-only",
+            "staged outputs remain metadata-only",
+            "bundle sealing remains metadata-only",
+            "host-side execution remains disabled"
+          ]
+        },
         "reviewPacket": {
           "id": "packaged-app-review-packet-windows",
           "label": "Windows local review packet",
@@ -118,6 +360,52 @@
                 "future/sealed-bundles/windows/bundle-seal-manifest.json"
               ]
             }
+          ],
+          "blockedBy": [
+            "staged outputs remain metadata-only",
+            "bundle sealing remains metadata-only",
+            "host-side execution remains disabled"
+          ]
+        },
+        "bundleSealingReadiness": {
+          "id": "packaged-app-materialization-bundle-sealing-readiness-windows",
+          "label": "Windows bundle-sealing readiness",
+          "taskState": "blocked",
+          "summary": "Seal and integrity manifests are declared, but the Windows seal handoff remains blocked until the staged-output chain stops being metadata-only and the publish gate remains review-only.",
+          "currentCheckpoint": "seal manifest declared / staged-output review still active",
+          "activeCheckpointId": "packaged-app-bundle-sealing-checkpoint-windows-gate",
+          "deliveryChainStageId": "delivery-chain-promotion-readiness",
+          "downstreamGateStageId": "delivery-chain-publish-decision",
+          "dependsOnTaskId": "packaged-app-materialization-task-windows-staged-output",
+          "sealManifestPath": "future/sealed-bundles/windows/bundle-seal-manifest.json",
+          "integrityManifestPath": "future/sealed-bundles/windows/bundle-integrity-manifest.json",
+          "checkpoints": [
+            {
+              "id": "packaged-app-bundle-sealing-checkpoint-windows-seal-manifest",
+              "label": "Seal manifest declared",
+              "status": "ready",
+              "detail": "Bundle sealing stays local-only, but the seal manifest path is already explicit for review pickup.",
+              "artifactPath": "future/sealed-bundles/windows/bundle-seal-manifest.json"
+            },
+            {
+              "id": "packaged-app-bundle-sealing-checkpoint-windows-integrity-manifest",
+              "label": "Integrity manifest declared",
+              "status": "ready",
+              "detail": "Integrity posture stays visible beside the same seal handoff without digest publication or attestation execution.",
+              "artifactPath": "future/sealed-bundles/windows/bundle-integrity-manifest.json"
+            },
+            {
+              "id": "packaged-app-bundle-sealing-checkpoint-windows-gate",
+              "label": "Staged-output review still active",
+              "status": "watch",
+              "detail": "Windows bundle sealing stays behind the current staged-output review slice until the output and checksum handoff stop being metadata-only.",
+              "artifactPath": "future/staged-output/windows/output-manifest.json"
+            }
+          ],
+          "reviewChecks": [
+            "seal manifest declared",
+            "integrity manifest declared",
+            "publish gate remains review-only"
           ],
           "blockedBy": [
             "staged outputs remain metadata-only",
@@ -348,6 +636,248 @@
           "seal manifest declared",
           "integrity manifest path declared"
         ],
+        "artifactLedger": {
+          "id": "local-materialization-artifact-ledger-macos",
+          "label": "macOS artifact handoff ledger",
+          "taskState": "review-ready",
+          "summary": "macOS keeps built renderer and Electron inputs, .app verification proof, staged-output manifests, and seal/integrity metadata in one local-only artifact ledger so the future staged-output lane already has a concrete source chain.",
+          "activeHandoffId": "local-materialization-artifact-ledger-macos-snapshot-to-directory",
+          "nextHandoffId": "local-materialization-artifact-ledger-macos-directory-to-output",
+          "artifacts": [
+            {
+              "id": "local-materialization-artifact-ledger-macos-renderer-entry",
+              "label": "Renderer entry snapshot",
+              "kind": "snapshot-input",
+              "status": "ready",
+              "path": "artifacts/renderer/index.html",
+              "detail": "The built renderer entrypoint is frozen as a local snapshot input before any packaged-app directory handoff is reviewed.",
+              "taskId": "packaged-app-materialization-task-macos-directory",
+              "deliveryChainStageId": "delivery-chain-attestation-intake"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-macos-electron-main",
+              "label": "Electron main snapshot",
+              "kind": "snapshot-input",
+              "status": "ready",
+              "path": "artifacts/electron/electron/main.js",
+              "detail": "The built Electron main process stays pinned as a local snapshot input for packaged-app review without launching anything.",
+              "taskId": "packaged-app-materialization-task-macos-directory",
+              "deliveryChainStageId": "delivery-chain-attestation-intake"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-macos-electron-preload",
+              "label": "Electron preload snapshot",
+              "kind": "snapshot-input",
+              "status": "ready",
+              "path": "artifacts/electron/electron/preload.js",
+              "detail": "The built preload bundle stays attached to the same local snapshot input lane as the renderer and main process.",
+              "taskId": "packaged-app-materialization-task-macos-directory",
+              "deliveryChainStageId": "delivery-chain-attestation-intake"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-macos-directory-verification",
+              "label": "Directory verification manifest",
+              "kind": "directory-proof",
+              "status": "watch",
+              "path": "future/packaged-app/macos/materialization-manifest.json",
+              "detail": "macOS verification metadata anchors the packaged-app root future/packaged-app/macos/OpenClaw Studio.app before any staged-output proof is reviewed.",
+              "taskId": "packaged-app-materialization-task-macos-directory",
+              "deliveryChainStageId": "delivery-chain-attestation-intake"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-macos-output-manifest",
+              "label": "Staged-output manifest",
+              "kind": "staged-output-proof",
+              "status": "ready",
+              "path": "future/staged-output/macos/output-manifest.json",
+              "detail": "macOS staged-output layout stays declared as review-only metadata instead of materializing a real packaged artifact.",
+              "taskId": "packaged-app-materialization-task-macos-staged-output",
+              "deliveryChainStageId": "delivery-chain-operator-review"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-macos-checksum-manifest",
+              "label": "Checksum manifest",
+              "kind": "staged-output-proof",
+              "status": "ready",
+              "path": "future/staged-output/macos/checksum-manifest.json",
+              "detail": "macOS checksum proof stays chained to the same staged-output lane so digest posture can be reviewed locally.",
+              "taskId": "packaged-app-materialization-task-macos-staged-output",
+              "deliveryChainStageId": "delivery-chain-operator-review"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-macos-seal-manifest",
+              "label": "Bundle-seal manifest",
+              "kind": "seal-proof",
+              "status": "ready",
+              "path": "future/sealed-bundles/macos/bundle-seal-manifest.json",
+              "detail": "macOS seal metadata is declared for review pickup, but it still cannot freeze or sign any real bundle.",
+              "taskId": "packaged-app-materialization-task-macos-bundle-seal",
+              "deliveryChainStageId": "delivery-chain-promotion-readiness"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-macos-integrity-manifest",
+              "label": "Bundle-integrity manifest",
+              "kind": "seal-proof",
+              "status": "ready",
+              "path": "future/sealed-bundles/macos/bundle-integrity-manifest.json",
+              "detail": "macOS integrity metadata stays linked beside the same seal handoff without attesting anything for real.",
+              "taskId": "packaged-app-materialization-task-macos-bundle-seal",
+              "deliveryChainStageId": "delivery-chain-promotion-readiness"
+            }
+          ],
+          "handoffs": [
+            {
+              "id": "local-materialization-artifact-ledger-macos-snapshot-to-directory",
+              "label": "Snapshot inputs -> directory verification",
+              "status": "watch",
+              "summary": "Renderer and Electron snapshot inputs are ready, but macOS still keeps the .app verification handoff as the active local pickup surface before staged-output review begins.",
+              "taskId": "packaged-app-materialization-task-macos-directory",
+              "reviewPacketStepId": "packaged-app-review-packet-macos-directory-to-output",
+              "validatorReadoutId": "packaged-app-materialization-validator-observability-macos-directory",
+              "bundleSealingCheckpointId": "packaged-app-bundle-sealing-checkpoint-macos-seal-manifest",
+              "failureReadoutId": "packaged-app-materialization-failure-path-macos-directory",
+              "stageCCheckpointId": "entry-audit-retention",
+              "deliveryChainStageId": "delivery-chain-attestation-intake",
+              "windowId": "window-shell-main",
+              "sharedStateLaneId": "shared-state-lane-boundary-review",
+              "orchestrationBoardId": "orchestration-board-boundary-review",
+              "observabilityMappingId": "observability-mapping-boundary-intake",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-route-window",
+                "observability-signal-lane-board"
+              ],
+              "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+              "commandActionIds": [
+                "command-focus-materialization-validator-bridge"
+              ],
+              "fromArtifactIds": [
+                "local-materialization-artifact-ledger-macos-renderer-entry",
+                "local-materialization-artifact-ledger-macos-electron-main",
+                "local-materialization-artifact-ledger-macos-electron-preload"
+              ],
+              "toArtifactIds": [
+                "local-materialization-artifact-ledger-macos-directory-verification"
+              ],
+              "blockedBy": []
+            },
+            {
+              "id": "local-materialization-artifact-ledger-macos-directory-to-output",
+              "label": "Directory verification -> output manifest",
+              "status": "ready",
+              "summary": "Once the .app verification handoff closes, the same directory proof feeds the output manifest without requiring a real app bundle.",
+              "taskId": "packaged-app-materialization-task-macos-staged-output",
+              "reviewPacketStepId": "packaged-app-review-packet-macos-directory-to-output",
+              "validatorReadoutId": "packaged-app-materialization-validator-observability-macos-staged-output",
+              "bundleSealingCheckpointId": "packaged-app-bundle-sealing-checkpoint-macos-seal-manifest",
+              "failureReadoutId": "packaged-app-materialization-failure-path-macos-staged-output",
+              "stageCCheckpointId": "entry-approval-routing",
+              "deliveryChainStageId": "delivery-chain-operator-review",
+              "windowId": "window-trace-review",
+              "sharedStateLaneId": "shared-state-lane-trace-review",
+              "orchestrationBoardId": "orchestration-board-trace-review",
+              "observabilityMappingId": "observability-mapping-approval-active",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-queue",
+                "observability-signal-escalation-closeout"
+              ],
+              "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+              "commandActionIds": [
+                "command-focus-materialization-validator-bridge",
+                "command-focus-lifecycle-review-packet"
+              ],
+              "fromArtifactIds": [
+                "local-materialization-artifact-ledger-macos-directory-verification"
+              ],
+              "toArtifactIds": [
+                "local-materialization-artifact-ledger-macos-output-manifest"
+              ],
+              "blockedBy": []
+            },
+            {
+              "id": "local-materialization-artifact-ledger-macos-output-to-checksum",
+              "label": "Output manifest -> checksum proof",
+              "status": "ready",
+              "summary": "macOS already declares the output-to-checksum proof chain so staged-output continuity can be reviewed ahead of the active directory checkpoint.",
+              "taskId": "packaged-app-materialization-task-macos-staged-output",
+              "reviewPacketStepId": "packaged-app-review-packet-macos-output-to-checksum",
+              "validatorReadoutId": "packaged-app-materialization-validator-observability-macos-staged-output",
+              "bundleSealingCheckpointId": "packaged-app-bundle-sealing-checkpoint-macos-integrity-manifest",
+              "failureReadoutId": "packaged-app-materialization-failure-path-macos-staged-output",
+              "stageCCheckpointId": "entry-approval-routing",
+              "deliveryChainStageId": "delivery-chain-operator-review",
+              "windowId": "window-trace-review",
+              "sharedStateLaneId": "shared-state-lane-trace-review",
+              "orchestrationBoardId": "orchestration-board-trace-review",
+              "observabilityMappingId": "observability-mapping-approval-active",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-queue",
+                "observability-signal-escalation-closeout"
+              ],
+              "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+              "commandActionIds": [
+                "command-focus-lifecycle-review-packet",
+                "command-focus-materialization-validator-bridge",
+                "command-focus-materialization-failure-path"
+              ],
+              "fromArtifactIds": [
+                "local-materialization-artifact-ledger-macos-output-manifest"
+              ],
+              "toArtifactIds": [
+                "local-materialization-artifact-ledger-macos-checksum-manifest"
+              ],
+              "blockedBy": []
+            },
+            {
+              "id": "local-materialization-artifact-ledger-macos-checksum-to-seal",
+              "label": "Checksum proof -> seal and integrity manifests",
+              "status": "blocked",
+              "summary": "The checksum-to-seal handoff is declared, but the seal lane still stops at metadata while signing and notarization remain review-only.",
+              "taskId": "packaged-app-materialization-task-macos-bundle-seal",
+              "reviewPacketStepId": "packaged-app-review-packet-macos-checksum-to-seal",
+              "validatorReadoutId": "packaged-app-materialization-validator-observability-macos-bundle-sealing",
+              "bundleSealingCheckpointId": "packaged-app-bundle-sealing-checkpoint-macos-gate",
+              "failureReadoutId": "packaged-app-materialization-failure-path-macos-bundle-sealing",
+              "stageCCheckpointId": "entry-rollback-live-readiness",
+              "deliveryChainStageId": "delivery-chain-promotion-readiness",
+              "windowId": "window-review-board",
+              "sharedStateLaneId": "shared-state-lane-preview-review",
+              "orchestrationBoardId": "orchestration-board-preview-review",
+              "observabilityMappingId": "observability-mapping-lifecycle-preview",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-lane-board",
+                "observability-signal-mapped-windows"
+              ],
+              "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+              "commandActionIds": [
+                "command-focus-lifecycle-review-packet",
+                "command-focus-materialization-validator-bridge",
+                "command-focus-materialization-failure-path",
+                "command-focus-publish-decision-gate"
+              ],
+              "fromArtifactIds": [
+                "local-materialization-artifact-ledger-macos-checksum-manifest"
+              ],
+              "toArtifactIds": [
+                "local-materialization-artifact-ledger-macos-seal-manifest",
+                "local-materialization-artifact-ledger-macos-integrity-manifest"
+              ],
+              "blockedBy": [
+                "bundle sealing remains metadata-only",
+                "host-side execution remains disabled"
+              ]
+            }
+          ],
+          "blockedBy": [
+            "artifact handoff ledger remains review-only",
+            "staged outputs remain metadata-only",
+            "bundle sealing remains metadata-only",
+            "host-side execution remains disabled"
+          ]
+        },
         "reviewPacket": {
           "id": "packaged-app-review-packet-macos",
           "label": "macOS local review packet",
@@ -409,6 +939,52 @@
                 "future/sealed-bundles/macos/bundle-seal-manifest.json"
               ]
             }
+          ],
+          "blockedBy": [
+            "staged outputs remain metadata-only",
+            "bundle sealing remains metadata-only",
+            "host-side execution remains disabled"
+          ]
+        },
+        "bundleSealingReadiness": {
+          "id": "packaged-app-materialization-bundle-sealing-readiness-macos",
+          "label": "macOS bundle-sealing readiness",
+          "taskState": "blocked",
+          "summary": "Seal and integrity manifests are declared, but the macOS seal handoff remains blocked while staged-output review, signing, and notarization all stay metadata-only.",
+          "currentCheckpoint": "seal manifest declared / notarization path still blocked",
+          "activeCheckpointId": "packaged-app-bundle-sealing-checkpoint-macos-gate",
+          "deliveryChainStageId": "delivery-chain-promotion-readiness",
+          "downstreamGateStageId": "delivery-chain-publish-decision",
+          "dependsOnTaskId": "packaged-app-materialization-task-macos-staged-output",
+          "sealManifestPath": "future/sealed-bundles/macos/bundle-seal-manifest.json",
+          "integrityManifestPath": "future/sealed-bundles/macos/bundle-integrity-manifest.json",
+          "checkpoints": [
+            {
+              "id": "packaged-app-bundle-sealing-checkpoint-macos-seal-manifest",
+              "label": "Seal manifest declared",
+              "status": "ready",
+              "detail": "Bundle sealing stays local-only, but the seal manifest path is already explicit for review pickup.",
+              "artifactPath": "future/sealed-bundles/macos/bundle-seal-manifest.json"
+            },
+            {
+              "id": "packaged-app-bundle-sealing-checkpoint-macos-integrity-manifest",
+              "label": "Integrity manifest declared",
+              "status": "ready",
+              "detail": "Integrity posture stays visible beside the same seal handoff without digest publication or attestation execution.",
+              "artifactPath": "future/sealed-bundles/macos/bundle-integrity-manifest.json"
+            },
+            {
+              "id": "packaged-app-bundle-sealing-checkpoint-macos-gate",
+              "label": "Notarization path still blocked",
+              "status": "blocked",
+              "detail": "macOS bundle sealing stays blocked until the staged-output lane is reviewed end-to-end and later signing/notarization posture stops being metadata-only.",
+              "artifactPath": "release/NOTARIZATION-PLAN.json"
+            }
+          ],
+          "reviewChecks": [
+            "seal manifest declared",
+            "integrity manifest declared",
+            "notarization path remains review-only"
           ],
           "blockedBy": [
             "staged outputs remain metadata-only",
@@ -639,6 +1215,248 @@
           "seal manifest declared",
           "integrity manifest path declared"
         ],
+        "artifactLedger": {
+          "id": "local-materialization-artifact-ledger-linux",
+          "label": "Linux artifact handoff ledger",
+          "taskState": "review-ready",
+          "summary": "Linux keeps built renderer and Electron inputs, package-root verification, staged-output manifests, and seal/integrity metadata in one local-only artifact ledger so the package-root checkpoint is already tied to concrete snapshot inputs.",
+          "activeHandoffId": "local-materialization-artifact-ledger-linux-snapshot-to-directory",
+          "nextHandoffId": "local-materialization-artifact-ledger-linux-directory-to-output",
+          "artifacts": [
+            {
+              "id": "local-materialization-artifact-ledger-linux-renderer-entry",
+              "label": "Renderer entry snapshot",
+              "kind": "snapshot-input",
+              "status": "ready",
+              "path": "artifacts/renderer/index.html",
+              "detail": "The built renderer entrypoint is frozen as a local snapshot input before any packaged-app directory handoff is reviewed.",
+              "taskId": "packaged-app-materialization-task-linux-directory",
+              "deliveryChainStageId": "delivery-chain-attestation-intake"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-linux-electron-main",
+              "label": "Electron main snapshot",
+              "kind": "snapshot-input",
+              "status": "ready",
+              "path": "artifacts/electron/electron/main.js",
+              "detail": "The built Electron main process stays pinned as a local snapshot input for packaged-app review without launching anything.",
+              "taskId": "packaged-app-materialization-task-linux-directory",
+              "deliveryChainStageId": "delivery-chain-attestation-intake"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-linux-electron-preload",
+              "label": "Electron preload snapshot",
+              "kind": "snapshot-input",
+              "status": "ready",
+              "path": "artifacts/electron/electron/preload.js",
+              "detail": "The built preload bundle stays attached to the same local snapshot input lane as the renderer and main process.",
+              "taskId": "packaged-app-materialization-task-linux-directory",
+              "deliveryChainStageId": "delivery-chain-attestation-intake"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-linux-directory-verification",
+              "label": "Directory verification manifest",
+              "kind": "directory-proof",
+              "status": "watch",
+              "path": "future/packaged-app/linux/materialization-manifest.json",
+              "detail": "Linux verification metadata anchors the packaged-app root future/packaged-app/linux/openclaw-studio before any staged-output proof is reviewed.",
+              "taskId": "packaged-app-materialization-task-linux-directory",
+              "deliveryChainStageId": "delivery-chain-attestation-intake"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-linux-output-manifest",
+              "label": "Staged-output manifest",
+              "kind": "staged-output-proof",
+              "status": "ready",
+              "path": "future/staged-output/linux/output-manifest.json",
+              "detail": "Linux staged-output layout stays declared as review-only metadata instead of materializing a real packaged artifact.",
+              "taskId": "packaged-app-materialization-task-linux-staged-output",
+              "deliveryChainStageId": "delivery-chain-operator-review"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-linux-checksum-manifest",
+              "label": "Checksum manifest",
+              "kind": "staged-output-proof",
+              "status": "ready",
+              "path": "future/staged-output/linux/checksum-manifest.json",
+              "detail": "Linux checksum proof stays chained to the same staged-output lane so digest posture can be reviewed locally.",
+              "taskId": "packaged-app-materialization-task-linux-staged-output",
+              "deliveryChainStageId": "delivery-chain-operator-review"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-linux-seal-manifest",
+              "label": "Bundle-seal manifest",
+              "kind": "seal-proof",
+              "status": "ready",
+              "path": "future/sealed-bundles/linux/bundle-seal-manifest.json",
+              "detail": "Linux seal metadata is declared for review pickup, but it still cannot freeze or sign any real bundle.",
+              "taskId": "packaged-app-materialization-task-linux-bundle-seal",
+              "deliveryChainStageId": "delivery-chain-promotion-readiness"
+            },
+            {
+              "id": "local-materialization-artifact-ledger-linux-integrity-manifest",
+              "label": "Bundle-integrity manifest",
+              "kind": "seal-proof",
+              "status": "ready",
+              "path": "future/sealed-bundles/linux/bundle-integrity-manifest.json",
+              "detail": "Linux integrity metadata stays linked beside the same seal handoff without attesting anything for real.",
+              "taskId": "packaged-app-materialization-task-linux-bundle-seal",
+              "deliveryChainStageId": "delivery-chain-promotion-readiness"
+            }
+          ],
+          "handoffs": [
+            {
+              "id": "local-materialization-artifact-ledger-linux-snapshot-to-directory",
+              "label": "Snapshot inputs -> directory verification",
+              "status": "watch",
+              "summary": "Renderer and Electron snapshot inputs are ready, but Linux still keeps the package-root verification handoff as the active local checkpoint before staged-output review begins.",
+              "taskId": "packaged-app-materialization-task-linux-directory",
+              "reviewPacketStepId": "packaged-app-review-packet-linux-directory-to-output",
+              "validatorReadoutId": "packaged-app-materialization-validator-observability-linux-directory",
+              "bundleSealingCheckpointId": "packaged-app-bundle-sealing-checkpoint-linux-seal-manifest",
+              "failureReadoutId": "packaged-app-materialization-failure-path-linux-directory",
+              "stageCCheckpointId": "entry-audit-retention",
+              "deliveryChainStageId": "delivery-chain-attestation-intake",
+              "windowId": "window-shell-main",
+              "sharedStateLaneId": "shared-state-lane-boundary-review",
+              "orchestrationBoardId": "orchestration-board-boundary-review",
+              "observabilityMappingId": "observability-mapping-boundary-intake",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-route-window",
+                "observability-signal-lane-board"
+              ],
+              "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+              "commandActionIds": [
+                "command-focus-materialization-validator-bridge"
+              ],
+              "fromArtifactIds": [
+                "local-materialization-artifact-ledger-linux-renderer-entry",
+                "local-materialization-artifact-ledger-linux-electron-main",
+                "local-materialization-artifact-ledger-linux-electron-preload"
+              ],
+              "toArtifactIds": [
+                "local-materialization-artifact-ledger-linux-directory-verification"
+              ],
+              "blockedBy": []
+            },
+            {
+              "id": "local-materialization-artifact-ledger-linux-directory-to-output",
+              "label": "Directory verification -> output manifest",
+              "status": "ready",
+              "summary": "Once the package-root verification handoff closes, the same directory proof feeds the output manifest without emitting any package target.",
+              "taskId": "packaged-app-materialization-task-linux-staged-output",
+              "reviewPacketStepId": "packaged-app-review-packet-linux-directory-to-output",
+              "validatorReadoutId": "packaged-app-materialization-validator-observability-linux-staged-output",
+              "bundleSealingCheckpointId": "packaged-app-bundle-sealing-checkpoint-linux-seal-manifest",
+              "failureReadoutId": "packaged-app-materialization-failure-path-linux-staged-output",
+              "stageCCheckpointId": "entry-approval-routing",
+              "deliveryChainStageId": "delivery-chain-operator-review",
+              "windowId": "window-trace-review",
+              "sharedStateLaneId": "shared-state-lane-trace-review",
+              "orchestrationBoardId": "orchestration-board-trace-review",
+              "observabilityMappingId": "observability-mapping-approval-active",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-queue",
+                "observability-signal-escalation-closeout"
+              ],
+              "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+              "commandActionIds": [
+                "command-focus-materialization-validator-bridge",
+                "command-focus-lifecycle-review-packet"
+              ],
+              "fromArtifactIds": [
+                "local-materialization-artifact-ledger-linux-directory-verification"
+              ],
+              "toArtifactIds": [
+                "local-materialization-artifact-ledger-linux-output-manifest"
+              ],
+              "blockedBy": []
+            },
+            {
+              "id": "local-materialization-artifact-ledger-linux-output-to-checksum",
+              "label": "Output manifest -> checksum proof",
+              "status": "ready",
+              "summary": "Linux already declares the output-to-checksum proof chain so staged-output continuity can be reviewed ahead of the active directory checkpoint.",
+              "taskId": "packaged-app-materialization-task-linux-staged-output",
+              "reviewPacketStepId": "packaged-app-review-packet-linux-output-to-checksum",
+              "validatorReadoutId": "packaged-app-materialization-validator-observability-linux-staged-output",
+              "bundleSealingCheckpointId": "packaged-app-bundle-sealing-checkpoint-linux-integrity-manifest",
+              "failureReadoutId": "packaged-app-materialization-failure-path-linux-staged-output",
+              "stageCCheckpointId": "entry-approval-routing",
+              "deliveryChainStageId": "delivery-chain-operator-review",
+              "windowId": "window-trace-review",
+              "sharedStateLaneId": "shared-state-lane-trace-review",
+              "orchestrationBoardId": "orchestration-board-trace-review",
+              "observabilityMappingId": "observability-mapping-approval-active",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-queue",
+                "observability-signal-escalation-closeout"
+              ],
+              "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+              "commandActionIds": [
+                "command-focus-lifecycle-review-packet",
+                "command-focus-materialization-validator-bridge",
+                "command-focus-materialization-failure-path"
+              ],
+              "fromArtifactIds": [
+                "local-materialization-artifact-ledger-linux-output-manifest"
+              ],
+              "toArtifactIds": [
+                "local-materialization-artifact-ledger-linux-checksum-manifest"
+              ],
+              "blockedBy": []
+            },
+            {
+              "id": "local-materialization-artifact-ledger-linux-checksum-to-seal",
+              "label": "Checksum proof -> seal and integrity manifests",
+              "status": "blocked",
+              "summary": "The checksum-to-seal handoff is declared, but the seal lane still stops at metadata while downstream package publication remains blocked.",
+              "taskId": "packaged-app-materialization-task-linux-bundle-seal",
+              "reviewPacketStepId": "packaged-app-review-packet-linux-checksum-to-seal",
+              "validatorReadoutId": "packaged-app-materialization-validator-observability-linux-bundle-sealing",
+              "bundleSealingCheckpointId": "packaged-app-bundle-sealing-checkpoint-linux-gate",
+              "failureReadoutId": "packaged-app-materialization-failure-path-linux-bundle-sealing",
+              "stageCCheckpointId": "entry-rollback-live-readiness",
+              "deliveryChainStageId": "delivery-chain-promotion-readiness",
+              "windowId": "window-review-board",
+              "sharedStateLaneId": "shared-state-lane-preview-review",
+              "orchestrationBoardId": "orchestration-board-preview-review",
+              "observabilityMappingId": "observability-mapping-lifecycle-preview",
+              "observabilitySignalIds": [
+                "observability-signal-owner",
+                "observability-signal-lane-board",
+                "observability-signal-mapped-windows"
+              ],
+              "commandDeckLaneId": "deck-lane-review-deck-materialization-failure",
+              "commandActionIds": [
+                "command-focus-lifecycle-review-packet",
+                "command-focus-materialization-validator-bridge",
+                "command-focus-materialization-failure-path",
+                "command-focus-publish-decision-gate"
+              ],
+              "fromArtifactIds": [
+                "local-materialization-artifact-ledger-linux-checksum-manifest"
+              ],
+              "toArtifactIds": [
+                "local-materialization-artifact-ledger-linux-seal-manifest",
+                "local-materialization-artifact-ledger-linux-integrity-manifest"
+              ],
+              "blockedBy": [
+                "bundle sealing remains metadata-only",
+                "host-side execution remains disabled"
+              ]
+            }
+          ],
+          "blockedBy": [
+            "artifact handoff ledger remains review-only",
+            "staged outputs remain metadata-only",
+            "bundle sealing remains metadata-only",
+            "host-side execution remains disabled"
+          ]
+        },
         "reviewPacket": {
           "id": "packaged-app-review-packet-linux",
           "label": "Linux local review packet",
@@ -700,6 +1518,52 @@
                 "future/sealed-bundles/linux/bundle-seal-manifest.json"
               ]
             }
+          ],
+          "blockedBy": [
+            "staged outputs remain metadata-only",
+            "bundle sealing remains metadata-only",
+            "host-side execution remains disabled"
+          ]
+        },
+        "bundleSealingReadiness": {
+          "id": "packaged-app-materialization-bundle-sealing-readiness-linux",
+          "label": "Linux bundle-sealing readiness",
+          "taskState": "blocked",
+          "summary": "Seal and integrity manifests are declared, but the Linux seal handoff remains blocked while staged-output review and later package publication stay metadata-only.",
+          "currentCheckpoint": "seal manifest declared / publish path still blocked",
+          "activeCheckpointId": "packaged-app-bundle-sealing-checkpoint-linux-gate",
+          "deliveryChainStageId": "delivery-chain-promotion-readiness",
+          "downstreamGateStageId": "delivery-chain-publish-decision",
+          "dependsOnTaskId": "packaged-app-materialization-task-linux-staged-output",
+          "sealManifestPath": "future/sealed-bundles/linux/bundle-seal-manifest.json",
+          "integrityManifestPath": "future/sealed-bundles/linux/bundle-integrity-manifest.json",
+          "checkpoints": [
+            {
+              "id": "packaged-app-bundle-sealing-checkpoint-linux-seal-manifest",
+              "label": "Seal manifest declared",
+              "status": "ready",
+              "detail": "Bundle sealing stays local-only, but the seal manifest path is already explicit for review pickup.",
+              "artifactPath": "future/sealed-bundles/linux/bundle-seal-manifest.json"
+            },
+            {
+              "id": "packaged-app-bundle-sealing-checkpoint-linux-integrity-manifest",
+              "label": "Integrity manifest declared",
+              "status": "ready",
+              "detail": "Integrity posture stays visible beside the same seal handoff without digest publication or attestation execution.",
+              "artifactPath": "future/sealed-bundles/linux/bundle-integrity-manifest.json"
+            },
+            {
+              "id": "packaged-app-bundle-sealing-checkpoint-linux-gate",
+              "label": "Package publication path still blocked",
+              "status": "blocked",
+              "detail": "Linux bundle sealing stays blocked until the staged-output lane settles and the downstream package publication gate stops being metadata-only.",
+              "artifactPath": "release/PUBLISH-GATES.json"
+            }
+          ],
+          "reviewChecks": [
+            "seal manifest declared",
+            "integrity manifest declared",
+            "package publication remains review-only"
           ],
           "blockedBy": [
             "staged outputs remain metadata-only",
