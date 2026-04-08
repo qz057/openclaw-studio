@@ -2467,7 +2467,9 @@ async function verifyLocalConnectorControls() {
   const requiredConnectorActions = [
     "execute-local-bridge-stage",
     "execute-local-connector-activate",
-    "execute-local-lane-apply"
+    "execute-local-lane-apply",
+    "execute-local-lifecycle-stage",
+    "execute-local-rollback-settlement"
   ];
 
   if (!rootActionIds.has(requiredRootAction)) {
@@ -2512,14 +2514,24 @@ async function verifyLocalConnectorControls() {
 
   const executionLine = localSessionSection.lines.find((line) => line.startsWith("executions · "));
   const laneLine = localSessionSection.lines.find((line) => line.startsWith("lane apply · "));
+  const lifecycleLine = localSessionSection.lines.find((line) => line.startsWith("lifecycle stage · "));
+  const rollbackLine = localSessionSection.lines.find((line) => line.startsWith("rollback settlement · "));
 
-  if (executionLine !== "executions · 4") {
+  if (executionLine !== "executions · 6") {
     throw new Error(`Unexpected Studio-local execution count after smoke run: ${executionLine ?? "missing"}.`);
+  }
+
+  if (!lifecycleLine || lifecycleLine === "lifecycle stage · idle") {
+    throw new Error(`Lifecycle local control line did not advance after smoke run: ${lifecycleLine ?? "missing"}.`);
+  }
+
+  if (!rollbackLine || rollbackLine === "rollback settlement · idle") {
+    throw new Error(`Rollback settlement line did not advance after smoke run: ${rollbackLine ?? "missing"}.`);
   }
 
   return {
     status: "verified",
-    detail: laneLine ?? "lane apply · unknown",
+    detail: `${laneLine ?? "lane apply · unknown"} | ${lifecycleLine} | ${rollbackLine}`,
     historyCount: localHistorySection.lines.length
   };
 }

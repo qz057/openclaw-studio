@@ -143,6 +143,8 @@ type LocalRootSelectionStatus = "idle" | "selected" | "blocked";
 type LocalBridgeStageStatus = "idle" | "staged" | "partial" | "blocked";
 type LocalConnectorActivationStatus = "idle" | "active" | "prepared" | "blocked";
 type LocalLaneApplyStatus = "idle" | "applied" | "partial" | "blocked";
+type LocalLifecycleStageStatus = "idle" | "armed" | "partial" | "blocked";
+type LocalRollbackSettlementStatus = "idle" | "settled" | "partial" | "blocked";
 
 interface LocalRootSelectionState {
   status: LocalRootSelectionStatus;
@@ -172,6 +174,20 @@ interface LocalLaneApplyState {
   executedAt: string | null;
 }
 
+interface LocalLifecycleStageState {
+  status: LocalLifecycleStageStatus;
+  target: string | null;
+  stagePlan: string[];
+  executedAt: string | null;
+}
+
+interface LocalRollbackSettlementState {
+  status: LocalRollbackSettlementStatus;
+  target: string | null;
+  checkpoint: string | null;
+  executedAt: string | null;
+}
+
 interface LocalControlHistoryEntry {
   id: string;
   itemId: string;
@@ -191,6 +207,8 @@ export interface ToolsMcpLocalControlSession {
   bridgeStage: LocalBridgeStageState;
   connectorActivation: LocalConnectorActivationState;
   laneApply: LocalLaneApplyState;
+  lifecycleStage: LocalLifecycleStageState;
+  rollbackSettlement: LocalRollbackSettlementState;
   history: LocalControlHistoryEntry[];
 }
 
@@ -230,6 +248,24 @@ function createIdleLaneApplyState(): LocalLaneApplyState {
   };
 }
 
+function createIdleLifecycleStageState(): LocalLifecycleStageState {
+  return {
+    status: "idle",
+    target: null,
+    stagePlan: [],
+    executedAt: null
+  };
+}
+
+function createIdleRollbackSettlementState(): LocalRollbackSettlementState {
+  return {
+    status: "idle",
+    target: null,
+    checkpoint: null,
+    executedAt: null
+  };
+}
+
 export function createToolsMcpLocalControlSession(): ToolsMcpLocalControlSession {
   const createdAt = new Date().toISOString();
 
@@ -241,6 +277,8 @@ export function createToolsMcpLocalControlSession(): ToolsMcpLocalControlSession
     bridgeStage: createIdleBridgeStageState(),
     connectorActivation: createIdleConnectorActivationState(),
     laneApply: createIdleLaneApplyState(),
+    lifecycleStage: createIdleLifecycleStageState(),
+    rollbackSettlement: createIdleRollbackSettlementState(),
     history: []
   };
 }
@@ -2052,6 +2090,10 @@ function formatLocalOnlyStatus(status: string): string {
       return "partial";
     case "prepared":
       return "prepared";
+    case "armed":
+      return "armed";
+    case "settled":
+      return "settled";
     case "blocked":
       return "blocked";
     default:
@@ -2086,15 +2128,30 @@ function resetFromRootSelection(controlSession: ToolsMcpLocalControlSession): vo
   controlSession.bridgeStage = createIdleBridgeStageState();
   controlSession.connectorActivation = createIdleConnectorActivationState();
   controlSession.laneApply = createIdleLaneApplyState();
+  controlSession.lifecycleStage = createIdleLifecycleStageState();
+  controlSession.rollbackSettlement = createIdleRollbackSettlementState();
 }
 
 function resetFromBridgeStage(controlSession: ToolsMcpLocalControlSession): void {
   controlSession.connectorActivation = createIdleConnectorActivationState();
   controlSession.laneApply = createIdleLaneApplyState();
+  controlSession.lifecycleStage = createIdleLifecycleStageState();
+  controlSession.rollbackSettlement = createIdleRollbackSettlementState();
 }
 
 function resetFromConnectorActivation(controlSession: ToolsMcpLocalControlSession): void {
   controlSession.laneApply = createIdleLaneApplyState();
+  controlSession.lifecycleStage = createIdleLifecycleStageState();
+  controlSession.rollbackSettlement = createIdleRollbackSettlementState();
+}
+
+function resetFromLaneApply(controlSession: ToolsMcpLocalControlSession): void {
+  controlSession.lifecycleStage = createIdleLifecycleStageState();
+  controlSession.rollbackSettlement = createIdleRollbackSettlementState();
+}
+
+function resetFromLifecycleStage(controlSession: ToolsMcpLocalControlSession): void {
+  controlSession.rollbackSettlement = createIdleRollbackSettlementState();
 }
 
 function buildLocalOnlyBoundaryLines(): string[] {
@@ -2128,7 +2185,9 @@ function getRootSessionLines(controlSession: ToolsMcpLocalControlSession): strin
     `executed at · ${controlSession.rootSelection.executedAt ?? "never"}`,
     `downstream connector state · bridge ${formatLocalOnlyStatus(controlSession.bridgeStage.status)} · activation ${formatLocalOnlyStatus(
       controlSession.connectorActivation.status
-    )} · lane ${formatLocalOnlyStatus(controlSession.laneApply.status)}`
+    )} · lane ${formatLocalOnlyStatus(controlSession.laneApply.status)} · lifecycle ${formatLocalOnlyStatus(
+      controlSession.lifecycleStage.status
+    )} · rollback ${formatLocalOnlyStatus(controlSession.rollbackSettlement.status)}`
   ];
 }
 
@@ -2153,6 +2212,16 @@ function getConnectorSessionLines(controlSession: ToolsMcpLocalControlSession): 
         ? `${controlSession.laneApply.verdict} (${formatLocalOnlyStatus(controlSession.laneApply.status)})`
         : formatLocalOnlyStatus(controlSession.laneApply.status)
     }`,
+    `lifecycle stage · ${
+      controlSession.lifecycleStage.target
+        ? `${controlSession.lifecycleStage.target} (${formatLocalOnlyStatus(controlSession.lifecycleStage.status)})`
+        : formatLocalOnlyStatus(controlSession.lifecycleStage.status)
+    }${controlSession.lifecycleStage.stagePlan.length > 0 ? ` · ${controlSession.lifecycleStage.stagePlan.join(" -> ")}` : ""}`,
+    `rollback settlement · ${
+      controlSession.rollbackSettlement.target
+        ? `${controlSession.rollbackSettlement.target} (${formatLocalOnlyStatus(controlSession.rollbackSettlement.status)})`
+        : formatLocalOnlyStatus(controlSession.rollbackSettlement.status)
+    }${controlSession.rollbackSettlement.checkpoint ? ` · checkpoint ${controlSession.rollbackSettlement.checkpoint}` : ""}`,
     `session updated · ${controlSession.updatedAt}`
   ];
 }
@@ -2206,11 +2275,18 @@ function getConnectorDetailTone(
   controlSession: ToolsMcpLocalControlSession,
   fallbackTone: StudioRuntimeDetail["tone"]
 ): StudioRuntimeDetail["tone"] {
-  if (controlSession.laneApply.status === "applied" || controlSession.connectorActivation.status === "active") {
+  if (
+    controlSession.rollbackSettlement.status === "settled" ||
+    controlSession.laneApply.status === "applied" ||
+    controlSession.connectorActivation.status === "active" ||
+    controlSession.lifecycleStage.status === "armed"
+  ) {
     return "positive";
   }
 
   if (
+    controlSession.rollbackSettlement.status === "partial" ||
+    controlSession.lifecycleStage.status === "partial" ||
     controlSession.laneApply.status === "partial" ||
     controlSession.connectorActivation.status === "prepared" ||
     controlSession.bridgeStage.status === "partial" ||
@@ -2220,6 +2296,8 @@ function getConnectorDetailTone(
   }
 
   if (
+    controlSession.rollbackSettlement.status === "blocked" ||
+    controlSession.lifecycleStage.status === "blocked" ||
     controlSession.laneApply.status === "blocked" ||
     controlSession.connectorActivation.status === "blocked" ||
     controlSession.bridgeStage.status === "blocked"
@@ -3003,9 +3081,14 @@ function buildConnectorBoundarySummary(
   const preferredRootTarget = getPreferredRootTarget(probe);
   const rootOverlay = controlSession.rootSelection.path ?? preferredRootTarget.path;
   const localConnectorCapability: StudioBoundarySummary["capabilities"][number]["state"] =
-    controlSession.laneApply.status === "applied" || controlSession.connectorActivation.status === "active"
+    controlSession.rollbackSettlement.status === "settled" ||
+    controlSession.lifecycleStage.status === "armed" ||
+    controlSession.laneApply.status === "applied" ||
+    controlSession.connectorActivation.status === "active"
       ? "ready"
-      : controlSession.bridgeStage.status === "staged" ||
+      : controlSession.rollbackSettlement.status === "partial" ||
+          controlSession.lifecycleStage.status === "partial" ||
+          controlSession.bridgeStage.status === "staged" ||
           controlSession.bridgeStage.status === "partial" ||
           controlSession.connectorActivation.status === "prepared" ||
           attachSourceOrder.length > 0
@@ -3019,14 +3102,14 @@ function buildConnectorBoundarySummary(
       posture: spec.currentLayer === "preview-host" ? "Preview-host / withheld" : "Alpha local-only",
       approvalMode: "Explicit host approval required",
       detail:
-        "Connector bridge attach, activation, and lane apply can be inspected, dry-run staged, and replayed only inside Studio-local control state. Host-side lifecycle and apply remain blocked.",
+        "Connector bridge attach, activation, lane apply, lifecycle staging, and rollback settlement can be inspected, dry-run staged, and replayed only inside Studio-local control state. Host-side lifecycle and apply remain blocked.",
       protectedSurfaces: ["~/.openclaw runtime state", "plugin installs/load paths", "service lifecycle", "external connector processes"]
     },
     progressionDetails: {
-      localOnly: "Studio-local bridge stage, activate, and apply can mutate only in-app control state and history.",
-      previewHost: "Preview-host surfaces the contract for attach, activate, and apply and now maps each path into disabled slot, approval, audit, and rollback placeholders.",
-      withheld: "Host attach, activation, and apply remain blocked until approval, lifecycle runner, and rollback-aware apply exist even though the disabled bridge skeleton now exists.",
-      futureExecutor: "Phase 25 wires disabled slot placeholders for attach, lifecycle, apply, rollback coordination, page-level focus controls, and dedicated trace surfacing while keeping the real executor out of scope."
+      localOnly: "Studio-local bridge stage, activate, apply, lifecycle staging, and rollback settlement can mutate only in-app control state and history.",
+      previewHost: "Preview-host surfaces the contract for attach, activate, lifecycle, rollback settlement, and apply and now maps each path into disabled slot, approval, audit, and rollback placeholders.",
+      withheld: "Host attach, activation, lifecycle, rollback settlement, and apply remain blocked until approval, lifecycle runner, and rollback-aware apply exist even though the disabled bridge skeleton now exists.",
+      futureExecutor: "Phase 25 wires disabled slot placeholders for attach, lifecycle, rollback settlement, apply, page-level focus controls, and dedicated trace surfacing while keeping the real executor out of scope."
     },
     capabilities: [
       {
@@ -3047,10 +3130,10 @@ function buildConnectorBoundarySummary(
         state: localConnectorCapability,
         detail:
           localConnectorCapability === "ready"
-            ? "Connector local control state is staged or active inside Studio."
+            ? "Connector local control state is now staged, lifecycle-armed, or settled inside Studio."
             : localConnectorCapability === "partial"
-              ? "Connector local control surfaces exist, but current attach/activation inputs remain partial."
-              : "No staged connector source order or activation target is currently available."
+              ? "Connector local control surfaces exist, but current attach/activation/apply/lifecycle inputs remain partial."
+              : "No staged connector source order, activation target, or apply-coupled lifecycle state is currently available."
       },
       {
         id: "cap-connector-preview",
@@ -4944,6 +5027,7 @@ async function runToolsMcpActionInternal(
             ? `local-only lane partial · ${laneVerdict}`
             : `local-only lane blocked · ${laneVerdict}`;
 
+      resetFromLaneApply(controlSession);
       controlSession.laneApply = {
         status: laneStatus,
         verdict: localVerdict,
@@ -5001,6 +5085,180 @@ async function runToolsMcpActionInternal(
         stateLines: [
           ...getConnectorSessionLines(controlSession),
           `activation dependency · ${formatLocalOnlyStatus(controlSession.connectorActivation.status)}`
+        ],
+        historyScope: "connector"
+      });
+    }
+    case "mcp-adjacent-runtime:execute-local-lifecycle-stage": {
+      const stagedSourceOrder =
+        controlSession.laneApply.sourceOrder.length > 0
+          ? controlSession.laneApply.sourceOrder
+          : controlSession.bridgeStage.sourceOrder.length > 0
+            ? controlSession.bridgeStage.sourceOrder
+            : buildAttachSourceOrder(probe, cachedCuratedPlugins);
+      const stagedTarget =
+        controlSession.rootSelection.status === "selected" && controlSession.rootSelection.path
+          ? {
+              label: shortenHomePath(controlSession.rootSelection.path),
+              mode: "Studio-local selected root"
+            }
+          : getConnectorActivationTarget(probe, cachedCuratedPlugins);
+      const lifecycleStatus: LocalLifecycleStageStatus =
+        stagedTarget.mode === "unresolved"
+          ? "blocked"
+          : controlSession.laneApply.status === "applied" && controlSession.connectorActivation.status === "active"
+            ? "armed"
+            : controlSession.connectorActivation.status === "prepared" ||
+                controlSession.connectorActivation.status === "active" ||
+                stagedSourceOrder.length > 0 ||
+                controlSession.laneApply.status === "partial"
+              ? "partial"
+              : "blocked";
+      const stagePlan = lifecycleStatus === "blocked" ? [] : ["activate", "verify", "reconcile", "rollback-ready"];
+
+      resetFromLifecycleStage(controlSession);
+      controlSession.lifecycleStage = {
+        status: lifecycleStatus,
+        target: stagedTarget.label,
+        stagePlan,
+        executedAt: null
+      };
+
+      const execution = recordLocalControlExecution(controlSession, {
+        itemId,
+        actionId,
+        label: "Execute local lifecycle stage",
+        status: lifecycleStatus,
+        target: stagedTarget.label,
+        summary:
+          lifecycleStatus === "armed"
+            ? "Connector lifecycle is now armed inside the Studio-local control session."
+            : lifecycleStatus === "partial"
+              ? "Studio staged a partial local lifecycle plan but kept it short of a fully armed runner."
+              : "Studio recorded a blocked local lifecycle stage because no viable local target or apply-coupled state was available."
+      });
+
+      controlSession.lifecycleStage.executedAt = execution.executedAt;
+      const lifecycleBoundary = buildConnectorBoundarySummary(probe, controlSession, cachedCuratedPlugins, {
+        id: "boundary-connector-local-lifecycle",
+        title: "Local lifecycle stage boundary",
+        summary:
+          lifecycleStatus === "armed"
+            ? "Lifecycle staging is armed only inside the Studio-local layer. Host lifecycle control remains preview-only and withheld."
+            : lifecycleStatus === "partial"
+              ? "Lifecycle staging is partially prepared inside Studio-local control state, but host lifecycle control remains withheld."
+              : "Lifecycle staging is blocked locally and remains withheld on the host path.",
+        currentLayer: "local-only",
+        nextLayer: "preview-host",
+        tone: lifecycleStatus === "armed" ? "positive" : lifecycleStatus === "partial" ? "neutral" : "warning"
+      });
+
+      return createLocalExecutionResult(itemId, actionId, controlSession, {
+        title: "Local lifecycle stage executed",
+        summary:
+          lifecycleStatus === "armed"
+            ? "The connector lifecycle runner is now armed locally inside Studio."
+            : lifecycleStatus === "partial"
+              ? "Studio staged a partial local lifecycle runner and kept it inside the app."
+              : "Studio recorded a blocked local lifecycle stage because the local session lacked enough staged state.",
+        tone: lifecycleStatus === "armed" ? "positive" : lifecycleStatus === "partial" ? "neutral" : "warning",
+        boundary: lifecycleBoundary,
+        executionLines: [
+          "operation · local lifecycle stage",
+          `lifecycle target · ${stagedTarget.label}`,
+          `target basis · ${stagedTarget.mode}`,
+          `stage plan · ${stagePlan.length > 0 ? stagePlan.join(" -> ") : "none"}`,
+          `source order · ${formatSourceOrder(stagedSourceOrder)}`,
+          `executed at · ${execution.executedAt}`
+        ],
+        stateLines: [
+          ...getConnectorSessionLines(controlSession),
+          `lifecycle dependency · lane ${formatLocalOnlyStatus(controlSession.laneApply.status)} · activation ${formatLocalOnlyStatus(controlSession.connectorActivation.status)}`
+        ],
+        historyScope: "connector"
+      });
+    }
+    case "mcp-adjacent-runtime:execute-local-rollback-settlement": {
+      const stagedSourceOrder =
+        controlSession.laneApply.sourceOrder.length > 0
+          ? controlSession.laneApply.sourceOrder
+          : controlSession.bridgeStage.sourceOrder.length > 0
+            ? controlSession.bridgeStage.sourceOrder
+            : buildAttachSourceOrder(probe, cachedCuratedPlugins);
+      const preferredRootTarget = getPreferredRootTarget(probe);
+      const rootOverlay = controlSession.laneApply.rootOverlay ?? controlSession.rootSelection.path ?? preferredRootTarget.path;
+      const settlementStatus: LocalRollbackSettlementStatus =
+        Boolean(rootOverlay) &&
+        stagedSourceOrder.length > 0 &&
+        controlSession.laneApply.status === "applied" &&
+        controlSession.lifecycleStage.status === "armed"
+          ? "settled"
+          : Boolean(rootOverlay) ||
+              stagedSourceOrder.length > 0 ||
+              controlSession.laneApply.status === "partial" ||
+              controlSession.laneApply.status === "applied" ||
+              controlSession.lifecycleStage.status === "partial" ||
+              controlSession.lifecycleStage.status === "armed"
+            ? "partial"
+            : "blocked";
+      const checkpoint = settlementStatus === "blocked" ? null : `local-settlement-${controlSession.executionCount + 1}`;
+
+      controlSession.rollbackSettlement = {
+        status: settlementStatus,
+        target: rootOverlay ? shortenHomePath(rootOverlay) : null,
+        checkpoint,
+        executedAt: null
+      };
+
+      const execution = recordLocalControlExecution(controlSession, {
+        itemId,
+        actionId,
+        label: "Execute local rollback settlement",
+        status: settlementStatus,
+        target: rootOverlay ? shortenHomePath(rootOverlay) : "no root overlay",
+        summary:
+          settlementStatus === "settled"
+            ? "Rollback settlement is now linked to the current Studio-local apply/lifecycle state."
+            : settlementStatus === "partial"
+              ? "Studio staged a partial local rollback settlement checkpoint but kept the settlement contract incomplete."
+              : "Studio recorded a blocked local rollback settlement because no apply-coupled local state was available."
+      });
+
+      controlSession.rollbackSettlement.executedAt = execution.executedAt;
+      const rollbackSettlementBoundary = buildConnectorBoundarySummary(probe, controlSession, cachedCuratedPlugins, {
+        id: "boundary-connector-local-rollback-settlement",
+        title: "Local rollback settlement boundary",
+        summary:
+          settlementStatus === "settled"
+            ? "Rollback settlement is linked only inside the Studio-local layer. Host rollback/apply settlement remains preview-only and withheld."
+            : settlementStatus === "partial"
+              ? "Rollback settlement is partially staged inside Studio-local control state, but host rollback settlement remains withheld."
+              : "Rollback settlement is blocked locally and remains withheld on the host path.",
+        currentLayer: "local-only",
+        nextLayer: "preview-host",
+        tone: settlementStatus === "settled" ? "positive" : settlementStatus === "partial" ? "neutral" : "warning"
+      });
+
+      return createLocalExecutionResult(itemId, actionId, controlSession, {
+        title: "Local rollback settlement executed",
+        summary:
+          settlementStatus === "settled"
+            ? "The rollback settlement checkpoint is now linked locally inside Studio."
+            : settlementStatus === "partial"
+              ? "Studio staged a partial local rollback settlement and kept it inside the app."
+              : "Studio recorded a blocked local rollback settlement because the local session lacked enough staged state.",
+        tone: settlementStatus === "settled" ? "positive" : settlementStatus === "partial" ? "neutral" : "warning",
+        boundary: rollbackSettlementBoundary,
+        executionLines: [
+          "operation · local rollback settlement",
+          `root overlay · ${rootOverlay ? shortenHomePath(rootOverlay) : "none"}`,
+          `checkpoint · ${checkpoint ?? "none"}`,
+          `source order · ${formatSourceOrder(stagedSourceOrder)}`,
+          `executed at · ${execution.executedAt}`
+        ],
+        stateLines: [
+          ...getConnectorSessionLines(controlSession),
+          `settlement dependency · lifecycle ${formatLocalOnlyStatus(controlSession.lifecycleStage.status)} · lane ${formatLocalOnlyStatus(controlSession.laneApply.status)}`
         ],
         historyScope: "connector"
       });
