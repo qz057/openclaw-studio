@@ -340,9 +340,9 @@
 - phase60 slice43 继续从 Stage C closeout 基线推进 execution-surface readiness：补齐 connector lifecycle runner 的 typed intent / slot / validator / handler / simulated outcome / focus command 与 runtime probe contract，让 lifecycle runner 从 missing 升级到 partial（default-disabled），并把 smoke 的 host executor readout 提升到 slots=5 / handlers=5
 - phase60 slice44 继续把 connector lifecycle runner readiness 从内部建模推进到 host preview action：新增 `preview-host-connector-lifecycle`，让 lifecycle handoff / boundary result / direct host preview handoff / smoke 验证链保持一致，并把 host boundary action 集合提升到 5 条
 - phase60 slice45 继续把 rollback-aware apply / lifecycle-rollback coordination 从“仅缺口描述”推进到可验证 preview contract：新增 `preview-host-lifecycle-rollback`，补齐对应 handoff / boundary result / smoke required action，并把 connector rollback precondition 从 missing 提升到 partial（仍 default-disabled）
-- phase60 slice46 继续把 rollback settlement / apply-coupling contract向 failure-path smoke 链路延展：blocked reason、connector precondition、future slots 都调整为“rollback settlement/apply coupling disabled”态，新增 `slot-shell-rollback-settlement` 和关于 rollback settlement 的 failure-path smoke action/preview，以便在不执行 host mutation的情况下验证 rollback 失败恢复逻辑
-- typecheck / build / smoke / start:smoke / package / release-plan 已在这轮 slice46 上重新通过，确认 rollback settlement preview 衔接 smoke + boundary contract
-- README / HANDOFF / package snapshot 已同步反映 phase60 slice46 reality 与 rollback settlement preview baseline
+- phase60 slice47 继续把 rollback settlement / apply-coupling preview contract 从“只在 blocked reason / precondition 里描述”推进成更完整的 shared/runtime/release contract：新增 typed `rollback-settlement` intent / bridge slot channel / validator / placeholder handler / simulated outcomes，并把 approval-audit-rollback entry、rollback live-readiness、Stage C boundary linkage 一起显式连到 `slot-rollback-settlement`
+- typecheck / build / smoke / start:smoke / package / release-plan 已在这轮 slice47 上重新通过，确认 rollback settlement preview contract 与当前 host boundary / Stage C readiness / delivery snapshot 保持一致
+- README / HANDOFF / package snapshot 已同步反映 phase60 slice47 reality 与 rollback settlement preview baseline
 
 ## 当前明确边界
 

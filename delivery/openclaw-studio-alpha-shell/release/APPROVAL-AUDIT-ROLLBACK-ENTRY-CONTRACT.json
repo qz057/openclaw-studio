@@ -1,6 +1,6 @@
 {
   "schemaVersion": "openclaw-studio-approval-audit-rollback-entry-contract/v1",
-  "generatedAt": "2026-04-08T07:23:28.163Z",
+  "generatedAt": "2026-04-08T08:11:07.083Z",
   "phase": "phase60",
   "mode": "local-only-review",
   "canEnterExecutableApproval": false,

@@ -81,7 +81,7 @@
   - phase60 slice43 已从 Stage C closeout 基线继续进入 execution-surface readiness：补齐 connector lifecycle runner 的 typed intent / slot / validator / handler / simulated outcome / focus command 与 runtime probe contract，让 lifecycle runner 从“missing”升级为“partial（default-disabled）”，并在 smoke 里把 host executor readout 提升到 `slots=5 / handlers=5`，同时仍保持 local-only / preview-host posture，不触发真实 host-side mutation
   - phase60 slice44 已继续把 connector lifecycle runner readiness 从内部建模推进到 host preview action：新增 `preview-host-connector-lifecycle`，让 lifecycle handoff / boundary result / direct host preview handoff / smoke 验证链保持一致；现在 host boundary actions 已提升为 5 条（含 lifecycle preview），但仍完全停留在 preview-host / default-disabled 边界内
   - phase60 slice45 已继续把 rollback-aware apply / lifecycle-rollback coordination 从“仅缺口描述”推进到可验证 preview contract：新增 `preview-host-lifecycle-rollback`，补齐对应 handoff / boundary result / smoke required action，并把 connector rollback precondition 从 `missing` 提升到 `partial`（仍 default-disabled）；当前 host boundary actions 已提升为 6 条，且继续保持 local-only / preview-host posture
-  - phase60 slice46 继续把 rollback settlement / apply-coupling contract向 failure-path smoke 链路推进：host blocked reason 与 connector预条件都重写为“rollback settlement/apply coupling disabled”，shell boundary / future slots新增 rollback settlement slot/handler，同时 failure-path smoke action/preview coverage保持 local-only / preview-host posture下的 rollback settlement contract 可被验证
+  - phase60 slice47 已继续把 rollback settlement / apply-coupling preview contract 推进成更明确的 rollback settlement preview contract：新增 typed `rollback-settlement` intent / bridge slot channel / validator / placeholder handler / simulated outcomes，并把 approval-audit-rollback entry、rollback live-readiness、Stage C boundary linkage 一起显式连到 `slot-rollback-settlement`，让 shared/runtime/release contract 围绕同一条 rollback settlement 预览链保持一致，同时仍旧禁止真实 host mutation
   - 真实 host-side execution 仍被策略明确阻断
 
 ## Validation Baseline
@@ -374,10 +374,10 @@ Tools / MCP 当前深度：
 
 ## Recommended Next Step
 
-当前 **Stage C 在既有 local-only / review-only 边界内已经完成收口**，并已进入 post-Stage-C 的 execution-surface readiness（当前已推进到 slice45）。
+当前 **Stage C 在既有 local-only / review-only 边界内已经完成收口**，并已进入 post-Stage-C 的 execution-surface readiness（当前已推进到 slice47）。
 
 更自然的后续方向是：
 
-1. 继续在 default-disabled 边界内推进下一刀（优先 rollback settlement / apply-coupling contract + failure-path smoke 联动），把 execution readiness 从当前 rollback-preview baseline 再推进到可验证的 rollback/apply 协调层
+1. 继续在 default-disabled 边界内推进下一刀（优先把 rollback settlement preview contract 从 slot / validator / handler linkage 再推进到 explicit host preview action + apply-coupling smoke linkage），把 execution readiness 从当前 rollback-settlement preview baseline 再推进到更完整的 rollback/apply 协调层
 2. 若要直接推进“整个项目完成度”，则明确切换到真实交付层：installer / signing / publish / rollback / host-side execution 的可执行闭环
 3. 若暂不继续实现，可在当前 clean baseline 做提交整理 / 推送 / 交付收口
