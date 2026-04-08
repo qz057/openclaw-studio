@@ -2363,6 +2363,7 @@ async function verifyHostBoundaryActions() {
   const requiredConnectorActions = [
     "preview-host-bridge-attach",
     "preview-host-connector-activate",
+    "preview-host-connector-lifecycle",
     "preview-host-lane-apply"
   ];
 
