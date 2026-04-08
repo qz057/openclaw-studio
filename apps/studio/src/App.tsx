@@ -123,6 +123,46 @@ function navigateToPage(pageId: StudioPageId) {
 }
 
 const PRIMARY_PAGE_IDS = new Set<StudioPageId>(["dashboard", "home", "sessions", "settings"]);
+const PAGE_LABEL_ZH: Partial<Record<StudioPageId, string>> = {
+  dashboard: "总览",
+  home: "主页",
+  sessions: "会话",
+  agents: "代理",
+  codex: "Codex",
+  skills: "技能",
+  settings: "设置"
+};
+const PAGE_HINT_ZH: Partial<Record<StudioPageId, string>> = {
+  dashboard: "关键状态与摘要",
+  home: "核心工作入口",
+  sessions: "会话与任务进展",
+  agents: "代理与能力",
+  codex: "Codex 执行与日志",
+  skills: "技能管理",
+  settings: "偏好与配置"
+};
+
+function getZhPageLabel(pageId: StudioPageId, fallbackLabel: string): string {
+  return PAGE_LABEL_ZH[pageId] ?? fallbackLabel;
+}
+
+function getZhPageHint(pageId: StudioPageId, fallbackHint: string): string {
+  return PAGE_HINT_ZH[pageId] ?? fallbackHint;
+}
+
+function getZhStatusValue(value: string): string {
+  const normalized = value.trim().toLowerCase();
+  const map: Record<string, string> = {
+    ready: "就绪",
+    disabled: "禁用",
+    hybrid: "混合",
+    unavailable: "不可用",
+    "no intent": "无意图",
+    "no workflow lane": "无流程通道",
+    "local-only": "仅本地"
+  };
+  return map[normalized] ?? value;
+}
 
 function dedupeCommandActions(actions: Array<StudioCommandAction | undefined>): StudioCommandAction[] {
   const seenIds = new Set<string>();
@@ -1150,6 +1190,8 @@ export function App() {
     label: "Studio",
     hint: "Workspace shell"
   };
+  const activePageLabel = getZhPageLabel(activePageMeta.id, activePageMeta.label);
+  const activePageHint = getZhPageHint(activePageMeta.id, activePageMeta.hint);
   const primaryPages = data.pages.filter((page) => PRIMARY_PAGE_IDS.has(page.id));
   const secondaryPages = data.pages.filter((page) => !PRIMARY_PAGE_IDS.has(page.id));
   const visiblePages = showAllPages ? data.pages : primaryPages;
@@ -4287,8 +4329,8 @@ export function App() {
                   navigateToPage(page.id);
                 }}
               >
-                <strong>{page.label}</strong>
-                <span>{page.hint}</span>
+                <strong>{getZhPageLabel(page.id, page.label)}</strong>
+                <span>{getZhPageHint(page.id, page.hint)}</span>
               </button>
             ))}
             {secondaryPages.length ? (
@@ -4308,9 +4350,9 @@ export function App() {
         <header className="top-bar surface">
           <div className="top-bar__summary">
             <div>
-              <p className="eyebrow">Desktop Shell</p>
-              <h2>{activePageMeta.label}</h2>
-              <p className="page-summary page-summary--tight">{activePageMeta.hint}</p>
+              <p className="eyebrow">桌面工作台</p>
+              <h2>{activePageLabel}</h2>
+              <p className="page-summary page-summary--tight">{activePageHint}</p>
             </div>
             <div className="workspace-view-strip">
               {data.windowing.views.map((view) => {
@@ -4334,7 +4376,7 @@ export function App() {
                     <strong>{view.label}</strong>
                     <span>{view.summary}</span>
                     <em className="workspace-view-chip__meta">
-                      {formatDetachState(view.detachState)} · {linkedIntent ? formatIntentStatus(linkedIntent.localStatus) : "No intent"}
+                      {formatDetachState(view.detachState)} · {linkedIntent ? formatIntentStatus(linkedIntent.localStatus) : "无意图"}
                     </em>
                   </button>
                 );
@@ -4350,31 +4392,31 @@ export function App() {
                   openCommandPalette();
                 }}
               >
-                <span>Command Palette</span>
+                <span>命令面板</span>
                 <strong>Ctrl/Cmd K</strong>
               </button>
               <p>{data.commandSurface.summary}</p>
             </div>
             <div className="top-bar-status">
               <div className="status-badge">
-                <span>Bridge</span>
-                <strong>{data.status.bridge}</strong>
+                <span>桥接</span>
+                <strong>{getZhStatusValue(data.status.bridge)}</strong>
               </div>
               <div className="status-badge">
-                <span>Runtime</span>
-                <strong>{data.status.runtime}</strong>
+                <span>运行态</span>
+                <strong>{getZhStatusValue(data.status.runtime)}</strong>
               </div>
               <div className="status-badge">
-                <span>Workspace</span>
-                <strong>{workspaceView?.label ?? "Unavailable"}</strong>
+                <span>工作区</span>
+                <strong>{workspaceView?.label ?? "不可用"}</strong>
               </div>
               <div className="status-badge">
-                <span>Readiness</span>
+                <span>就绪度</span>
                 <strong>{workflowReadinessLabel}</strong>
               </div>
             </div>
             <div className="workflow-chip-strip">
-              <span className={`workflow-chip workflow-chip--${workflowReadinessTone}`}>{selectedWorkflowLane?.label ?? "No workflow lane"}</span>
+              <span className={`workflow-chip workflow-chip--${workflowReadinessTone}`}>{selectedWorkflowLane?.label ?? "无流程通道"}</span>
               <span className={`workflow-chip workflow-chip--${workflowReadinessTone}`}>{workflowReadinessLabel}</span>
             </div>
           </div>
@@ -5380,123 +5422,50 @@ export function App() {
         {resolvedLayoutState.bottomDockVisible ? (
           <section className="bottom-dock surface">
             <div className="panel-title-row">
-              <h2>{bottomDockTab?.label ?? "Bottom Dock"}</h2>
-              <span>{resolvedLayoutState.bottomDockTabId === "windows" ? resolvedWindowPosture.label : hostTraceFocus?.slot.label ?? "No focused slot"}</span>
+              <h2>活动摘要</h2>
+              <span>仅保留核心信息</span>
             </div>
-            <p className="panel-summary">
-              {resolvedLayoutState.bottomDockTabId === "windows"
-                ? "Window posture, detached workspace candidates, and intent focus stay synchronized with the top bar and right rail."
-                : bottomDockTab?.summary ?? "The dock follows the current focused slot and stays local-only."}
-            </p>
+            <p className="panel-summary">底栏已精简为“最近操作 + 状态摘要”，避免信息过载与滚动过深。</p>
             <div className="shell-tab-strip">
-              {data.layout.bottomDockTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  className={tab.id === resolvedLayoutState.bottomDockTabId ? "shell-tab shell-tab--active" : "shell-tab"}
-                  onClick={() => {
-                    applyLayoutPatch({
-                      bottomDockTabId: tab.id,
-                      bottomDockVisible: true
-                    });
-                  }}
-                >
-                  {tab.label}
-                </button>
-              ))}
+              <button
+                type="button"
+                className="shell-tab shell-tab--active"
+                onClick={() => {
+                  applyLayoutPatch({
+                    bottomDockTabId: "activity",
+                    bottomDockVisible: true
+                  });
+                }}
+              >
+                活动
+              </button>
             </div>
 
             <div className="bottom-dock-content-scroll">
-            {resolvedLayoutState.bottomDockTabId === "focus" ? (
-              <>
-                <div className="trace-slot-roster trace-slot-roster--compact">
-                  {data.boundary.hostExecutor.bridge.trace.slotRoster.map((entry) => {
-                    const active = entry.slotId === hostTraceFocus?.slot.slotId;
-
-                    return (
-                      <button
-                        key={entry.slotId}
-                        type="button"
-                        className={active ? "trace-slot-card trace-slot-button trace-slot-button--active" : "trace-slot-card trace-slot-button"}
-                        onClick={() => {
-                          setFocusedSlotId(entry.slotId);
-                        }}
-                      >
-                        <span>{entry.intent}</span>
-                        <strong>{entry.label}</strong>
-                        <p>{entry.summary}</p>
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="dock-list">
-                  {dockItems.slice(0, 4).map((item) => (
-                    <article key={item.id} className={`dock-card dock-card--${item.tone}`}>
-                      <span>{item.label}</span>
-                      <strong>{item.value}</strong>
-                      <p>{item.detail}</p>
-                    </article>
-                  ))}
-                </div>
-              </>
-            ) : null}
-
-            {resolvedLayoutState.bottomDockTabId === "activity" ? (
               <div className="dock-list">
                 <article className="dock-card dock-card--neutral">
-                  <span>Persistence</span>
+                  <span>布局持久化</span>
                   <strong>{data.layout.persistence.version}</strong>
                   <p>{data.layout.persistence.persistedFields.join(" · ")}</p>
                 </article>
-                {commandLog.slice(0, 4).map((entry) => (
+                <article className="dock-card dock-card--neutral">
+                  <span>当前页面</span>
+                  <strong>{activePageLabel}</strong>
+                  <p>{activePageHint}</p>
+                </article>
+                <article className="dock-card dock-card--neutral">
+                  <span>工作区</span>
+                  <strong>{workspaceView?.label ?? "不可用"}</strong>
+                  <p>就绪度：{workflowReadinessLabel}</p>
+                </article>
+                {commandLog.slice(0, 3).map((entry) => (
                   <article key={entry.id} className="dock-card dock-card--neutral">
-                    <span>{entry.timestamp} · {entry.safety}</span>
+                    <span>{entry.timestamp} · {getZhStatusValue(entry.safety)}</span>
                     <strong>{entry.label}</strong>
                     <p>{entry.detail}</p>
                   </article>
                 ))}
               </div>
-            ) : null}
-
-            {resolvedLayoutState.bottomDockTabId === "windows" ? (
-              <div className="dock-list">
-                <article className="dock-card dock-card--warning">
-                  <span>Review Posture Ownership</span>
-                  <strong>
-                    {activeObservabilityMapping
-                      ? `${activeObservabilityMapping.owner} / ${activeObservabilityMapping.reviewPosture.stageLabel}`
-                      : "Unavailable"}
-                  </strong>
-                  <p>
-                    {activeObservabilityMapping
-                      ? `${activeObservabilityMapping.label} · ${formatReviewPostureRelationship(activeObservabilityMapping.relationship)} · ${activeObservabilityMapping.windowId} -> ${activeObservabilityMapping.sharedStateLaneId}`
-                      : "No active cross-window ownership map is available."}
-                  </p>
-                </article>
-                <article className="dock-card dock-card--neutral">
-                  <span>Workflow Timeline</span>
-                  <strong>{selectedWorkflowLane?.label ?? resolvedWindowPosture.label}</strong>
-                  <p>{selectedWorkflowLane?.summary ?? resolvedWindowPosture.summary}</p>
-                </article>
-                <article className="dock-card dock-card--neutral">
-                  <span>Readiness Board</span>
-                  <strong>{workflowReadinessLabel}</strong>
-                  <p>{workflowIntent?.readiness.summary ?? "No workflow readiness is active."}</p>
-                </article>
-                <article className="dock-card dock-card--neutral">
-                  <span>Handoff Posture</span>
-                  <strong>{workflowIntent?.handoff.label ?? "Unavailable"}</strong>
-                  <p>{workflowIntent?.handoff.destination ?? "No handoff destination"} · {workflowIntent?.handoff.safeMode ?? "local-only"}</p>
-                </article>
-                {windowIntents.slice(0, 3).map((intent) => (
-                  <article key={intent.id} className={intent.id === selectedWindowIntent?.id ? "dock-card dock-card--warning" : "dock-card dock-card--neutral"}>
-                    <span>{formatIntentStatus(intent.localStatus)} · {formatIntentFocus(intent.focus)}</span>
-                    <strong>{intent.label}</strong>
-                    <p>{intent.preview.lines.map((line) => `${line.label}: ${line.value}`).join(" · ")}</p>
-                  </article>
-                ))}
-              </div>
-            ) : null}
             </div>
           </section>
         ) : null}
