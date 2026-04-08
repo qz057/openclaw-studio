@@ -339,8 +339,9 @@
 - phase60 slice42 继续把 artifact checkpoint progression handoff continuity 推进成更明确的 materialization artifact progression review surface，让 current-vs-next handoff 现在可以作为显式 command / windows / inspector review surface 被直接聚焦，且会带着 source artifact、Stage C linkage、validator / failure follow-up 与同一条 local-only review spine 一起切换，从而把当前边界内的 Stage C materialization closeout 收成一个明确终点
 - phase60 slice43 继续从 Stage C closeout 基线推进 execution-surface readiness：补齐 connector lifecycle runner 的 typed intent / slot / validator / handler / simulated outcome / focus command 与 runtime probe contract，让 lifecycle runner 从 missing 升级到 partial（default-disabled），并把 smoke 的 host executor readout 提升到 slots=5 / handlers=5
 - phase60 slice44 继续把 connector lifecycle runner readiness 从内部建模推进到 host preview action：新增 `preview-host-connector-lifecycle`，让 lifecycle handoff / boundary result / direct host preview handoff / smoke 验证链保持一致，并把 host boundary action 集合提升到 5 条
-- build / smoke 已在这轮 slice44 上重新通过，确认 lifecycle preview action 已真正进入运行时而不是只停留在源码
-- README / HANDOFF / package snapshot 已同步反映 phase60 slice44 reality 与 connector lifecycle preview baseline
+- phase60 slice45 继续把 rollback-aware apply / lifecycle-rollback coordination 从“仅缺口描述”推进到可验证 preview contract：新增 `preview-host-lifecycle-rollback`，补齐对应 handoff / boundary result / smoke required action，并把 connector rollback precondition 从 missing 提升到 partial（仍 default-disabled）
+- typecheck / build / smoke / start:smoke / package / release-plan 已在这轮 slice45 上重新通过，确认 rollback preview action 已真正进入运行时链路
+- README / HANDOFF / package snapshot 已同步反映 phase60 slice45 reality 与 rollback-preview baseline
 
 ## 当前明确边界
 
