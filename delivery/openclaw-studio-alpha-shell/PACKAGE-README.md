@@ -163,7 +163,7 @@ openclaw-studio-alpha-shell/
 
 ## 已复制的 artifact 组
 
-- Renderer bundle: 11 files, 1.11 MiB, output=artifacts/renderer
+- Renderer bundle: 11 files, 1.13 MiB, output=artifacts/renderer
 - Electron bundle: 15 files, 429.7 KiB, output=artifacts/electron
 
 ## 已包含的文档
@@ -327,4 +327,4 @@ openclaw-studio-alpha-shell/
 - `scripts/install-placeholder.cjs` 只解释当前 installer 仍缺什么，不执行安装
 - 如需重新生成整个 snapshot，请回到 repo root 运行 `npm run package:alpha`
 
-Generated: 2026-04-08T14:00:06.502Z
+Generated: 2026-04-08T14:22:05.568Z

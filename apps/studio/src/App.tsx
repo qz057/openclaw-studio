@@ -27,7 +27,8 @@ import {
   type StudioShellLayoutState,
   type StudioShellState,
   type StudioTone,
-  type StudioWindowIntentStatus
+  type StudioWindowIntentStatus,
+  type SessionSummary
 } from "@openclaw/shared";
 import { useStudioData } from "./hooks/useStudioData";
 import { DashboardPage } from "./pages/DashboardPage";
@@ -126,7 +127,7 @@ const PRIMARY_PAGE_IDS = new Set<StudioPageId>(["dashboard", "home", "sessions",
 const PAGE_LABEL_ZH: Partial<Record<StudioPageId, string>> = {
   dashboard: "总览",
   home: "主页",
-  sessions: "会话",
+  sessions: "工作台",
   agents: "代理",
   codex: "Codex",
   skills: "技能",
@@ -135,7 +136,7 @@ const PAGE_LABEL_ZH: Partial<Record<StudioPageId, string>> = {
 const PAGE_HINT_ZH: Partial<Record<StudioPageId, string>> = {
   dashboard: "关键状态与摘要",
   home: "核心工作入口",
-  sessions: "会话与任务进展",
+  sessions: "当前流程与最近工作",
   agents: "代理与能力",
   codex: "Codex 执行与日志",
   skills: "技能管理",
@@ -155,6 +156,7 @@ function getZhStatusValue(value: string): string {
   const map: Record<string, string> = {
     ready: "就绪",
     disabled: "禁用",
+    mock: "模拟",
     hybrid: "混合",
     unavailable: "不可用",
     hidden: "隐藏",
@@ -163,6 +165,7 @@ function getZhStatusValue(value: string): string {
     sparse: "稀疏",
     detected: "已检测",
     planned: "计划中",
+    pending: "待处理",
     fallback: "回退",
     operational: "可用",
     indexed: "已索引",
@@ -170,13 +173,27 @@ function getZhStatusValue(value: string): string {
     system: "系统",
     extension: "扩展",
     placeholder: "占位",
-    active: "活动",
+    active: "进行中",
     available: "可用",
     blocked: "阻塞",
     completed: "已完成",
     mapped: "已映射",
     accepted: "已接受",
     watch: "观察",
+    "in-review": "复核中",
+    "handoff-ready": "待交接",
+    acknowledged: "已确认",
+    overdue: "已逾期",
+    escalated: "已升级",
+    closed: "已关闭",
+    open: "开启",
+    scheduled: "已排程",
+    "ready-to-seal": "待封存",
+    held: "已持有",
+    "awaiting-ack": "待确认",
+    sealed: "已封存",
+    drafted: "草稿",
+    "pending-seal": "待封存",
     idle: "空闲",
     applied: "已应用",
     settled: "已结算",
@@ -545,6 +562,45 @@ interface AppWindowingSurfaceProps {
   activeLaneId: string | null;
   activeBoardId: string | null;
   activeMappingId: string | null;
+}
+
+interface AppWorkbenchAction {
+  id: string;
+  label: string;
+  description: string;
+  tone: "positive" | "warning" | "neutral";
+  hotkey?: string;
+  onTrigger: () => void;
+}
+
+interface AppWorkbenchStatusItem {
+  id: string;
+  label: string;
+  value: string;
+  meta?: string;
+  tone: "positive" | "warning" | "neutral";
+}
+
+interface AppWorkbenchWorkflowNode {
+  id: string;
+  title: string;
+  summary: string;
+  status: string;
+  tone: "positive" | "warning" | "neutral";
+  active: boolean;
+  onEnter: () => void;
+}
+
+interface AppWorkbenchProps {
+  commandBarAction: AppWorkbenchAction;
+  primaryActions: AppWorkbenchAction[];
+  statusItems: AppWorkbenchStatusItem[];
+  workflowNodes: AppWorkbenchWorkflowNode[];
+  nextActionPrimary: AppWorkbenchAction | null;
+  nextActionSecondary: AppWorkbenchAction[];
+  nextActionSummary: string;
+  quickLaunchActions: AppWorkbenchAction[];
+  onSessionAction: (session: SessionSummary) => void;
 }
 
 interface CommandContextState {
@@ -971,7 +1027,8 @@ function renderPage(
   data: StudioShellState,
   focusedSlot: AppFocusedSlotProps,
   commandPanel: ContextualCommandPanelProps,
-  windowingSurface: AppWindowingSurfaceProps
+  windowingSurface: AppWindowingSurfaceProps,
+  workbench: AppWorkbenchProps
 ) {
   switch (activePage) {
     case "dashboard":
@@ -998,7 +1055,20 @@ function renderPage(
         />
       );
     case "sessions":
-      return <LazySessionsPage sessions={data.sessions} />;
+      return (
+        <LazySessionsPage
+          sessions={data.sessions}
+          commandBarAction={workbench.commandBarAction}
+          primaryActions={workbench.primaryActions}
+          statusItems={workbench.statusItems}
+          workflowNodes={workbench.workflowNodes}
+          nextActionPrimary={workbench.nextActionPrimary}
+          nextActionSecondary={workbench.nextActionSecondary}
+          nextActionSummary={workbench.nextActionSummary}
+          quickLaunchActions={workbench.quickLaunchActions}
+          onSessionAction={workbench.onSessionAction}
+        />
+      );
     case "agents":
       return <LazyAgentsPage agents={data.agents} />;
     case "codex":
@@ -4389,6 +4459,218 @@ export function App() {
     }
   };
 
+  const toWorkbenchAction = (
+    action: StudioCommandAction | undefined,
+    overrides?: Partial<Pick<AppWorkbenchAction, "label" | "description" | "hotkey" | "tone">>
+  ): AppWorkbenchAction | null => {
+    if (!action) {
+      return null;
+    }
+
+    return {
+      id: action.id,
+      label: overrides?.label ?? action.label,
+      description: overrides?.description ?? action.description,
+      tone: overrides?.tone ?? action.tone,
+      hotkey: overrides?.hotkey ?? action.hotkey,
+      onTrigger: () => {
+        executeCommand(action);
+      }
+    };
+  };
+
+  const operatorViewAction = toWorkbenchAction(actionById.get("command-open-operator-view"));
+  const traceViewAction = toWorkbenchAction(actionById.get("command-open-trace-view"));
+  const reviewViewAction = toWorkbenchAction(actionById.get("command-open-review-view"));
+  const openHomeAction = toWorkbenchAction(actionById.get("command-open-home"));
+  const inspectBoundaryAction = toWorkbenchAction(actionById.get("command-inspect-boundary"));
+  const showTraceAction = toWorkbenchAction(actionById.get("command-show-trace"));
+  const focusLaneApplyAction = toWorkbenchAction(actionById.get("command-focus-lane-apply"));
+  const latestSession = data.sessions[0] ?? null;
+  const pendingSessionCount = data.sessions.filter((session) => session.status !== "complete").length;
+  const reviewPendingCount = data.sessions.filter((session) => session.status === "waiting").length;
+  const openPaletteShortcut = data.commandSurface.keyboardRouting.shortcuts.find((shortcut) => shortcut.target === "open-palette");
+  const workbenchCommandBarAction: AppWorkbenchAction = {
+    id: "workbench-open-command-palette",
+    label: "Open Command Palette",
+    description: "搜索命令、流程、工作区与最近入口。",
+    tone: "neutral",
+    hotkey: openPaletteShortcut?.combo ?? "Ctrl/Cmd+K",
+    onTrigger: () => {
+      openCommandPalette();
+    }
+  };
+
+  const handleSessionAction = (session: SessionSummary) => {
+    if (session.status === "active") {
+      (traceViewAction ?? operatorViewAction ?? openHomeAction ?? workbenchCommandBarAction).onTrigger();
+      return;
+    }
+
+    if (session.status === "waiting") {
+      (reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction).onTrigger();
+      return;
+    }
+
+    (openHomeAction ?? operatorViewAction ?? workbenchCommandBarAction).onTrigger();
+  };
+
+  const workbenchPrimaryActions: AppWorkbenchAction[] = [
+    {
+      id: "workbench-new-session",
+      label: "新建会话",
+      description: "通过命令面板启动新的流程或任务。",
+      tone: "positive",
+      hotkey: openPaletteShortcut?.combo ?? "Ctrl/Cmd+K",
+      onTrigger: () => {
+        openCommandPalette();
+      }
+    },
+    {
+      id: "workbench-resume-last",
+      label: "恢复上次工作",
+      description: latestSession ? `${latestSession.title} · ${latestSession.updatedAt}` : "恢复最近一次工作轨迹。",
+      tone: latestSession?.status === "waiting" ? "warning" : "neutral",
+      onTrigger: () => {
+        if (latestSession) {
+          handleSessionAction(latestSession);
+          return;
+        }
+
+        openCommandPalette();
+      }
+    }
+  ];
+
+  const workbenchStatusItems: AppWorkbenchStatusItem[] = [
+    {
+      id: "status-bridge",
+      label: "Bridge",
+      value: getZhStatusValue(data.status.bridge),
+      meta: data.status.mode,
+      tone: data.status.bridge === "live" ? "positive" : data.status.bridge === "hybrid" ? "warning" : "neutral"
+    },
+    {
+      id: "status-runtime",
+      label: "Runtime",
+      value: getZhStatusValue(data.status.runtime),
+      meta: `${data.version}`,
+      tone: data.status.runtime === "ready" ? "positive" : "warning"
+    },
+    {
+      id: "status-workspace",
+      label: "Workspace",
+      value: workspaceView?.label ?? "Operator Shell",
+      meta: getZhStatusValue(resolvedWindowPosture.label),
+      tone: "neutral"
+    },
+    {
+      id: "status-focus",
+      label: "Focus",
+      value: hostTraceFocus?.slot.label ?? resolvedFocusSlotId ?? "未聚焦",
+      meta: getZhStatusValue(workflowReadinessLabel),
+      tone: workflowReadinessTone
+    },
+    {
+      id: "status-sync",
+      label: "最近同步",
+      value: commandLog[0]?.timestamp ?? data.sessions[0]?.updatedAt ?? "本地预览",
+      meta: commandLog[0]?.label ?? "暂无最近操作",
+      tone: "neutral"
+    },
+    {
+      id: "status-pending",
+      label: "待处理",
+      value: `${pendingSessionCount} 项`,
+      meta: reviewPendingCount ? `${reviewPendingCount} 项待复核` : "当前无待复核",
+      tone: reviewPendingCount ? "warning" : "positive"
+    }
+  ];
+
+  const workbenchWorkflowNodes: AppWorkbenchWorkflowNode[] = [
+    {
+      id: "operator-shell",
+      title: "Operator Shell",
+      summary: "保持导航锚点和边界检查入口，作为当前工作流的起点。",
+      status: "已锚定",
+      tone: "positive",
+      active: workspaceView?.id === "operator-shell",
+      onEnter: () => {
+        (operatorViewAction ?? openHomeAction ?? workbenchCommandBarAction).onTrigger();
+      }
+    },
+    {
+      id: "trace-deck",
+      title: "Trace Deck",
+      summary: "聚焦 Focused Slot 与追踪链路，适合继续当前执行细节。",
+      status: workspaceView?.id === "trace-deck" ? "已聚焦" : "就绪",
+      tone: workspaceView?.id === "trace-deck" ? "positive" : "neutral",
+      active: workspaceView?.id === "trace-deck",
+      onEnter: () => {
+        (traceViewAction ?? showTraceAction ?? workbenchCommandBarAction).onTrigger();
+      }
+    },
+    {
+      id: "review-deck",
+      title: "Review Deck",
+      summary: "集中处理边界复核、回滚准备和下一步交接判断。",
+      status: workspaceView?.id === "review-deck" || reviewPendingCount ? "待复核" : "就绪",
+      tone: workspaceView?.id === "review-deck" || reviewPendingCount ? "warning" : "neutral",
+      active: workspaceView?.id === "review-deck",
+      onEnter: () => {
+        (reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction).onTrigger();
+      }
+    }
+  ];
+
+  const workbenchNextActionPrimary =
+    toWorkbenchAction(recommendedAction ?? undefined) ??
+    (reviewViewAction ?? traceViewAction ?? openHomeAction ?? workbenchCommandBarAction);
+
+  const workbenchNextActionSecondary = [
+    inspectBoundaryAction,
+    showTraceAction,
+    reviewViewAction,
+    focusLaneApplyAction
+  ].filter((action): action is AppWorkbenchAction => Boolean(action));
+
+  const workbenchQuickLaunchActions = [
+    openHomeAction,
+    inspectBoundaryAction,
+    showTraceAction,
+    focusLaneApplyAction,
+    reviewViewAction,
+    {
+      id: "workbench-resume-shortcut",
+      label: "Resume Last Work",
+      description: latestSession ? `${latestSession.title} · ${latestSession.workspace}` : "恢复最近工作区入口。",
+      tone: latestSession?.status === "waiting" ? "warning" : "neutral",
+      onTrigger: () => {
+        if (latestSession) {
+          handleSessionAction(latestSession);
+          return;
+        }
+
+        openCommandPalette();
+      }
+    }
+  ].filter((action): action is AppWorkbenchAction => Boolean(action));
+
+  const workbenchProps: AppWorkbenchProps = {
+    commandBarAction: workbenchCommandBarAction,
+    primaryActions: workbenchPrimaryActions,
+    statusItems: workbenchStatusItems,
+    workflowNodes: workbenchWorkflowNodes,
+    nextActionPrimary: workbenchNextActionPrimary,
+    nextActionSecondary: workbenchNextActionSecondary,
+    nextActionSummary:
+      activeContextualFlow?.summary ??
+      activeSequence?.summary ??
+      "先继续当前流程；如果没有明确动作，就从命令面板或快速启动区进入。",
+    quickLaunchActions: workbenchQuickLaunchActions,
+    onSessionAction: handleSessionAction
+  };
+
   const centerFocusMode = activePage === "sessions";
   const shellClassNames = [
     "studio-shell",
@@ -5009,7 +5291,8 @@ export function App() {
                 onFocusedSlotChange: setFocusedSlotId
               },
               commandPanel,
-              windowingSurface
+              windowingSurface,
+              workbenchProps
             )}
           </Suspense>
         </main>
