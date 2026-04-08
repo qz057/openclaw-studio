@@ -1519,12 +1519,16 @@ button:disabled {
 }
 
 .bottom-dock-content-scroll {
-  margin-top: 14px;
+  margin-top: 10px;
   min-height: 0;
   overflow: auto;
   display: grid;
-  gap: 12px;
+  gap: 10px;
   padding-right: 4px;
+}
+
+.bottom-dock__collapse {
+  padding: 8px 12px;
 }
 
 .studio-shell--no-right-rail .bottom-dock {
@@ -1536,6 +1540,23 @@ button:disabled {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   max-height: 100%;
   overflow: auto;
+}
+
+.dock-list--summary {
+  gap: 10px;
+  overflow: visible;
+}
+
+.dock-list--summary .dock-card {
+  padding: 12px 14px;
+}
+
+.dock-list--summary .dock-card strong {
+  font-size: 1rem;
+}
+
+.dock-list--summary .dock-card p {
+  -webkit-line-clamp: 2;
 }
 
 .dock-card--positive {

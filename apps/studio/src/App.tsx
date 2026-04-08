@@ -1211,6 +1211,7 @@ export function App() {
   };
   const activePageLabel = getZhPageLabel(activePageMeta.id, activePageMeta.label);
   const activePageHint = getZhPageHint(activePageMeta.id, activePageMeta.hint);
+  const latestCommandEntry = commandLog[0] ?? null;
   const primaryPages = data.pages.filter((page) => PRIMARY_PAGE_IDS.has(page.id));
   const secondaryPages = data.pages.filter((page) => !PRIMARY_PAGE_IDS.has(page.id));
   const visiblePages = showAllPages ? data.pages : primaryPages;
@@ -5451,49 +5452,44 @@ export function App() {
         {resolvedLayoutState.bottomDockVisible ? (
           <section className="bottom-dock surface">
             <div className="panel-title-row">
-              <h2>活动摘要</h2>
-              <span>仅保留核心信息</span>
-            </div>
-            <p className="panel-summary">底栏已精简为“最近操作 + 状态摘要”，避免信息过载与滚动过深。</p>
-            <div className="shell-tab-strip">
+              <h2>底部摘要</h2>
               <button
                 type="button"
-                className="shell-tab shell-tab--active"
+                className="secondary-button bottom-dock__collapse"
                 onClick={() => {
                   applyLayoutPatch({
-                    bottomDockTabId: "activity",
-                    bottomDockVisible: true
+                    bottomDockVisible: false
                   });
                 }}
               >
-                活动
+                收起底栏
               </button>
             </div>
+            <p className="panel-summary">只保留页面、工作区和最近操作，避免底栏过长过杂。</p>
 
             <div className="bottom-dock-content-scroll">
-              <div className="dock-list">
-                <article className="dock-card dock-card--neutral">
-                  <span>布局持久化</span>
-                  <strong>{data.layout.persistence.version}</strong>
-                  <p>{data.layout.persistence.persistedFields.join(" · ")}</p>
-                </article>
+              <div className="dock-list dock-list--summary">
                 <article className="dock-card dock-card--neutral">
                   <span>当前页面</span>
                   <strong>{activePageLabel}</strong>
                   <p>{activePageHint}</p>
                 </article>
                 <article className="dock-card dock-card--neutral">
-                  <span>工作区</span>
+                  <span>工作区状态</span>
                   <strong>{workspaceView?.label ?? "不可用"}</strong>
-                  <p>就绪度：{workflowReadinessLabel}</p>
+                  <p>
+                    就绪度：{workflowReadinessLabel} · 模式：{resolvedLayoutState.compactMode ? "紧凑" : "标准"}
+                  </p>
                 </article>
-                {commandLog.slice(0, 3).map((entry) => (
-                  <article key={entry.id} className="dock-card dock-card--neutral">
-                    <span>{entry.timestamp} · {getZhStatusValue(entry.safety)}</span>
-                    <strong>{entry.label}</strong>
-                    <p>{entry.detail}</p>
-                  </article>
-                ))}
+                <article className="dock-card dock-card--neutral">
+                  <span>最近操作</span>
+                  <strong>{latestCommandEntry?.timestamp ?? "暂无记录"}</strong>
+                  <p>
+                    {latestCommandEntry
+                      ? `${getZhStatusValue(latestCommandEntry.safety)} · 已记录最近一次交互`
+                      : "当前还没有最近操作记录"}
+                  </p>
+                </article>
               </div>
             </div>
           </section>
