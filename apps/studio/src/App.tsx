@@ -586,6 +586,24 @@ interface AppWorkbenchStatusItem {
   tone: "positive" | "warning" | "neutral";
 }
 
+interface AppWorkbenchReadinessMetric {
+  id: string;
+  label: string;
+  value: string;
+  meta?: string;
+}
+
+interface AppWorkbenchReadinessCard {
+  id: string;
+  title: string;
+  headline: string;
+  summary: string;
+  tone: "positive" | "warning" | "neutral";
+  metrics: AppWorkbenchReadinessMetric[];
+  actionLabel?: string;
+  onOpen?: () => void;
+}
+
 interface AppWorkbenchWorkflowNode {
   id: string;
   title: string;
@@ -600,6 +618,7 @@ interface AppWorkbenchProps {
   commandBarAction: AppWorkbenchAction;
   primaryActions: AppWorkbenchAction[];
   statusItems: AppWorkbenchStatusItem[];
+  readinessCards: AppWorkbenchReadinessCard[];
   workflowNodes: AppWorkbenchWorkflowNode[];
   nextActionPrimary: AppWorkbenchAction | null;
   nextActionSecondary: AppWorkbenchAction[];
@@ -1069,6 +1088,7 @@ function renderPage(
           commandBarAction={workbench.commandBarAction}
           primaryActions={workbench.primaryActions}
           statusItems={workbench.statusItems}
+          readinessCards={workbench.readinessCards}
           workflowNodes={workbench.workflowNodes}
           nextActionPrimary={workbench.nextActionPrimary}
           nextActionSecondary={workbench.nextActionSecondary}
@@ -4565,6 +4585,18 @@ export function App() {
     targetAction.onTrigger();
   };
 
+  const persistedWorkbenchState = readPersistedWorkbenchState();
+  const persistedResumeAction = persistedWorkbenchState.lastActionId ? actionById.get(persistedWorkbenchState.lastActionId) : null;
+  const persistedResumePage = persistedWorkbenchState.lastPageId
+    ? data.pages.find((page) => page.id === persistedWorkbenchState.lastPageId) ?? null
+    : null;
+  const persistedResumeWorkspace = persistedWorkbenchState.lastWorkspaceViewId
+    ? data.windowing.views.find((view) => view.id === persistedWorkbenchState.lastWorkspaceViewId) ?? null
+    : null;
+  const persistedResumeSlot = persistedWorkbenchState.lastFocusedSlotId
+    ? data.boundary.hostExecutor.bridge.trace.slotRoster.find((slot) => slot.slotId === persistedWorkbenchState.lastFocusedSlotId) ?? null
+    : null;
+
   const workbenchPrimaryActions: AppWorkbenchAction[] = [
     {
       id: "workbench-new-session",
@@ -4643,6 +4675,147 @@ export function App() {
     }
   ];
 
+  const workbenchReadinessCards: AppWorkbenchReadinessCard[] = [
+    {
+      id: "readiness-focused-slot",
+      title: "Focused Slot Handoff",
+      headline: hostTraceFocus?.slot.label ?? "No focused slot",
+      summary: hostTraceFocus
+        ? `${hostTraceFocus.previewSummary} 当前工作台会把 validator、result 与 rollback / audit 一起保留在同一张卡里，方便继续顺着当前 slot 往下看。`
+        : "当前还没有聚焦 slot；先从命令面板或 Trace Deck 进入一个明确的执行链。",
+      tone: hostTraceFocus ? (hostTraceFocus.usesHandoff ? "positive" : "neutral") : "warning",
+      metrics: [
+        {
+          id: "focused-slot-validation",
+          label: "Validator",
+          value: hostTraceFocus?.validationValue ?? "Unavailable",
+          meta: hostTraceFocus?.validationDetail
+        },
+        {
+          id: "focused-slot-result",
+          label: "Result",
+          value: hostTraceFocus?.resultValue ?? "Unavailable",
+          meta: hostTraceFocus?.resultDetail
+        },
+        {
+          id: "focused-slot-rollback",
+          label: "Rollback / Audit",
+          value: hostTraceFocus?.rollbackAuditValue ?? "Unavailable",
+          meta: hostTraceFocus?.rollbackAuditDetail
+        }
+      ],
+      actionLabel: "打开 Trace Deck",
+      onOpen: () => {
+        (showTraceAction ?? traceViewAction ?? workbenchCommandBarAction).onTrigger();
+      }
+    },
+    {
+      id: "readiness-delivery-anchor",
+      title: "Delivery Chain Anchor",
+      headline: currentReleaseStage?.label ?? "Operator review board",
+      summary: `${currentDecisionHandoff.sourceOwner} -> ${currentDecisionHandoff.targetOwner} 这条交接链仍停留在 review-only / local-only 边界内，但当前 stage、queue 与 baton posture 已能在工作台首页直接看到。`,
+      tone: currentReleaseStage?.status === "ready" ? "positive" : currentReleaseStage?.status === "blocked" ? "warning" : "neutral",
+      metrics: [
+        {
+          id: "delivery-anchor-stage",
+          label: "Delivery stage",
+          value: currentDeliveryStage?.label ?? "Unavailable",
+          meta: currentDecisionHandoff.posture
+        },
+        {
+          id: "delivery-anchor-queue",
+          label: "Reviewer queue",
+          value: currentReviewerQueue?.label ?? "Unavailable",
+          meta: currentReviewerQueue?.acknowledgementState ?? "No acknowledgement"
+        },
+        {
+          id: "delivery-anchor-baton",
+          label: "Decision baton",
+          value: currentDecisionHandoff.batonState,
+          meta: `${currentDecisionHandoff.sourceOwner} -> ${currentDecisionHandoff.targetOwner}`
+        }
+      ],
+      actionLabel: "打开 Review Deck",
+      onOpen: () => {
+        (reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction).onTrigger();
+      }
+    },
+    {
+      id: "readiness-review-closeout",
+      title: "Review Closeout",
+      headline: currentCloseoutWindow?.deadlineLabel ?? "Local-only closeout",
+      summary: `当前 evidence sealing 与 closeout window 仍保持 review-only；publish / rollback 不会被误读成真实执行入口，但 pending / sealed posture 已经可以直接在工作台首页对齐。`,
+      tone:
+        currentEvidenceCloseout.pendingEvidence.length > 0
+          ? "warning"
+          : currentEvidenceCloseout.sealedEvidence.length > 0
+            ? "positive"
+            : "neutral",
+      metrics: [
+        {
+          id: "review-closeout-seal",
+          label: "Evidence seal",
+          value: currentEvidenceCloseout.sealingState,
+          meta: `${currentEvidenceCloseout.sealedEvidence.length} sealed / ${currentEvidenceCloseout.pendingEvidence.length} pending`
+        },
+        {
+          id: "review-closeout-window",
+          label: "Closeout window",
+          value: currentCloseoutWindow?.state ?? "Unavailable",
+          meta: currentCloseoutWindow?.deadlineLabel ?? "No deadline"
+        },
+        {
+          id: "review-closeout-reviewers",
+          label: "Queue posture",
+          value: currentReviewerQueue?.acknowledgementState ?? "Unavailable",
+          meta: currentReviewerQueue?.label ?? "No active reviewer queue"
+        }
+      ],
+      actionLabel: "查看收口状态",
+      onOpen: () => {
+        (reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction).onTrigger();
+      }
+    },
+    {
+      id: "readiness-resume-anchor",
+      title: "Resume Anchor",
+      headline: resumeSession?.title ?? "No remembered workspace",
+      summary: resumeSession
+        ? `工作台现在会把上一次恢复链路直接露出来：最近会话、最近动作、上次页面、工作区视图和 focused slot 会一起作为恢复锚点显示出来。`
+        : "当前还没有可恢复的持久化工作锚点；先从上方动作或命令面板进入一条新流程。",
+      tone: resumeSession ? (resumeSession.status === "waiting" ? "warning" : "positive") : "neutral",
+      metrics: [
+        {
+          id: "resume-anchor-session",
+          label: "Last session",
+          value: resumeSession?.title ?? "Unavailable",
+          meta: resumeSession ? `${resumeSession.workspace} · ${resumeSession.updatedAt}` : "No stored session"
+        },
+        {
+          id: "resume-anchor-action",
+          label: "Last action",
+          value: persistedResumeAction?.label ?? "Unavailable",
+          meta: persistedResumePage ? `${persistedResumePage.label} / ${persistedResumeWorkspace?.label ?? "No workspace"}` : "No stored page"
+        },
+        {
+          id: "resume-anchor-slot",
+          label: "Last focused slot",
+          value: persistedResumeSlot?.label ?? persistedWorkbenchState.lastFocusedSlotId ?? "Unavailable",
+          meta: persistedResumeSlot?.summary ?? "No stored focused slot"
+        }
+      ],
+      actionLabel: "恢复上次工作",
+      onOpen: () => {
+        if (resumeSession) {
+          handleSessionAction(resumeSession);
+          return;
+        }
+
+        openCommandPalette("");
+      }
+    }
+  ];
+
   const workbenchWorkflowNodes: AppWorkbenchWorkflowNode[] = [
     {
       id: "operator-shell",
@@ -4716,6 +4889,7 @@ export function App() {
     commandBarAction: workbenchCommandBarAction,
     primaryActions: workbenchPrimaryActions,
     statusItems: workbenchStatusItems,
+    readinessCards: workbenchReadinessCards,
     workflowNodes: workbenchWorkflowNodes,
     nextActionPrimary: workbenchNextActionPrimary,
     nextActionSecondary: workbenchNextActionSecondary,

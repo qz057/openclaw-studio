@@ -21,6 +21,24 @@ interface WorkbenchStatusItem {
   tone: WorkbenchTone;
 }
 
+interface WorkbenchReadinessMetric {
+  id: string;
+  label: string;
+  value: string;
+  meta?: string;
+}
+
+interface WorkbenchReadinessCard {
+  id: string;
+  title: string;
+  headline: string;
+  summary: string;
+  tone: WorkbenchTone;
+  metrics: WorkbenchReadinessMetric[];
+  actionLabel?: string;
+  onOpen?: () => void;
+}
+
 interface WorkflowNode {
   id: string;
   title: string;
@@ -36,6 +54,7 @@ interface SessionsPageProps {
   commandBarAction: WorkbenchAction;
   primaryActions: WorkbenchAction[];
   statusItems: WorkbenchStatusItem[];
+  readinessCards: WorkbenchReadinessCard[];
   workflowNodes: WorkflowNode[];
   nextActionPrimary: WorkbenchAction | null;
   nextActionSecondary: WorkbenchAction[];
@@ -261,6 +280,51 @@ function NextActionPanel({
   );
 }
 
+function ExecutionReadinessSnapshot({ cards }: { cards: WorkbenchReadinessCard[] }) {
+  return (
+    <article className="workbench-panel surface card">
+      <div className="card-header card-header--stack workbench-section-header">
+        <div>
+          <p className="eyebrow">Execution Readiness Snapshot</p>
+          <h2>当前执行就绪快照</h2>
+        </div>
+        <p>把 focused slot handoff、delivery anchor、review closeout 放进同一眼可读的工作台首页。</p>
+      </div>
+
+      <div className="workbench-readiness-grid">
+        {cards.map((card) => (
+          <article key={card.id} className={`workbench-readiness-card workbench-readiness-card--${card.tone}`}>
+            <div className="workbench-readiness-card__header">
+              <div>
+                <span className="workbench-readiness-card__eyebrow">{card.title}</span>
+                <strong>{card.headline}</strong>
+              </div>
+              <span className={`status-chip status-chip--${card.tone === "positive" ? "complete" : card.tone === "warning" ? "waiting" : "recent"}`}>
+                {card.tone === "positive" ? "已就绪" : card.tone === "warning" ? "需复核" : "观察中"}
+              </span>
+            </div>
+            <p>{card.summary}</p>
+            <div className="workbench-readiness-card__metrics">
+              {card.metrics.map((metric) => (
+                <article key={metric.id} className="workbench-readiness-card__metric">
+                  <span>{metric.label}</span>
+                  <strong>{metric.value}</strong>
+                  {metric.meta ? <p>{metric.meta}</p> : null}
+                </article>
+              ))}
+            </div>
+            {card.onOpen ? (
+              <button type="button" className="secondary-button workbench-inline-action" onClick={card.onOpen}>
+                {card.actionLabel ?? "查看详情"}
+              </button>
+            ) : null}
+          </article>
+        ))}
+      </div>
+    </article>
+  );
+}
+
 function QuickLaunchGrid({ actions }: { actions: WorkbenchAction[] }) {
   return (
     <article className="workbench-panel surface card">
@@ -387,6 +451,7 @@ export function SessionsPage({
   commandBarAction,
   primaryActions,
   statusItems,
+  readinessCards,
   workflowNodes,
   nextActionPrimary,
   nextActionSecondary,
@@ -428,6 +493,7 @@ export function SessionsPage({
         <NextActionPanel primaryAction={nextActionPrimary} secondaryActions={nextActionSecondary} summary={nextActionSummary} />
       </div>
 
+      <ExecutionReadinessSnapshot cards={readinessCards} />
       <QuickLaunchGrid actions={quickLaunchActions} />
       <RecentSessionsList
         sessions={sessions}
