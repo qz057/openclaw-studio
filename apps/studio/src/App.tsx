@@ -4598,6 +4598,99 @@ export function App() {
     ? data.boundary.hostExecutor.bridge.trace.slotRoster.find((slot) => slot.slotId === persistedWorkbenchState.lastFocusedSlotId) ?? null
     : null;
 
+  const resolveRememberedWorkbenchSurfacePatch = (
+    actionId: string | null | undefined
+  ): Pick<StudioShellLayoutState, "rightRailTabId" | "bottomDockTabId"> => {
+    switch (actionId) {
+      case "command-open-trace-view":
+      case "command-show-trace":
+      case "workbench-restore-last-slot":
+        return {
+          rightRailTabId: "trace",
+          bottomDockTabId: "focus"
+        };
+      case "command-inspect-boundary":
+      case "workbench-restore-last-page":
+        return {
+          rightRailTabId: "inspector",
+          bottomDockTabId: "focus"
+        };
+      case "command-open-review-view":
+      case "command-open-windows-observability":
+      case "workbench-resume-last-workspace":
+        return {
+          rightRailTabId: "windows",
+          bottomDockTabId: "windows"
+        };
+      default:
+        return {
+          rightRailTabId: resolvedLayoutState.rightRailTabId,
+          bottomDockTabId: resolvedLayoutState.bottomDockTabId
+        };
+    }
+  };
+
+  const restorePersistedWorkbenchAnchor = (mode: "workspace" | "page" | "slot") => {
+    const rememberedWorkspaceViewId = persistedResumeWorkspace?.id ?? persistedWorkbenchState.lastWorkspaceViewId ?? null;
+    const rememberedPageId = persistedResumePage?.id ?? persistedWorkbenchState.lastPageId ?? null;
+    const rememberedSlotId = persistedResumeSlot?.slotId ?? persistedWorkbenchState.lastFocusedSlotId ?? null;
+    const rememberedSurfacePatch = resolveRememberedWorkbenchSurfacePatch(persistedResumeAction?.id ?? null);
+
+    if (!rememberedWorkspaceViewId && !rememberedPageId && !(mode === "slot" && rememberedSlotId)) {
+      openCommandPalette("");
+      return;
+    }
+
+    if (rememberedWorkspaceViewId) {
+      activateWorkspaceView(rememberedWorkspaceViewId, {
+        intentStatus: mode === "workspace" ? "focused" : "staged"
+      });
+    }
+
+    if (rememberedPageId) {
+      navigateToPage(rememberedPageId);
+    }
+
+    if (mode === "slot" && rememberedSlotId) {
+      setFocusedSlotId(rememberedSlotId);
+    }
+
+    applyLayoutPatch({
+      rightRailVisible: mode === "slot" ? true : resolvedLayoutState.rightRailVisible,
+      bottomDockVisible: mode === "slot" ? true : resolvedLayoutState.bottomDockVisible,
+      rightRailTabId: mode === "slot" ? "trace" : rememberedSurfacePatch.rightRailTabId,
+      bottomDockTabId: mode === "slot" ? "focus" : rememberedSurfacePatch.bottomDockTabId
+    });
+
+    persistWorkbenchState({
+      lastActionId:
+        mode === "slot"
+          ? "workbench-restore-last-slot"
+          : mode === "page"
+            ? "workbench-restore-last-page"
+            : "workbench-resume-last-workspace",
+      lastPageId: rememberedPageId,
+      lastWorkspaceViewId: rememberedWorkspaceViewId,
+      lastFocusedSlotId: rememberedSlotId
+    });
+
+    recordActivity({
+      label:
+        mode === "slot"
+          ? "Focus Last Focused Slot"
+          : mode === "page"
+            ? "Restore Remembered Page"
+            : "Resume Last Workspace",
+      detail:
+        mode === "slot"
+          ? `${persistedResumeSlot?.label ?? rememberedSlotId ?? "Remembered slot"} restored with trace posture.`
+          : mode === "page"
+            ? `${persistedResumePage?.label ?? rememberedPageId ?? "Remembered page"} restored inside ${persistedResumeWorkspace?.label ?? rememberedWorkspaceViewId ?? "the stored workspace"}.`
+            : `${persistedResumeWorkspace?.label ?? rememberedWorkspaceViewId ?? "Stored workspace"} restored with ${persistedResumePage?.label ?? rememberedPageId ?? "its remembered page"}.`,
+      safety: "local-only"
+    });
+  };
+
   const workbenchPrimaryActions: AppWorkbenchAction[] = [
     {
       id: "workbench-new-session",
@@ -4782,7 +4875,7 @@ export function App() {
       title: "Resume Anchor",
       headline: resumeSession?.title ?? "No remembered workspace",
       summary: resumeSession
-        ? `工作台现在不只显示恢复锚点，还把 resume / trace / review 三条继续路径并排露出来：你可以直接回到上次会话，也可以按上次 focused slot 去 Trace Deck，或按上次审查姿态回到 Review Deck。`
+        ? `工作台现在会按记忆状态更精确恢复：不仅能继续上次工作区，还能单独恢复 remembered page，或者带着上次 focused slot 直接回到 trace posture。`
         : "当前还没有可恢复的持久化工作锚点；先从上方动作或命令面板进入一条新流程。",
       tone: resumeSession ? (resumeSession.status === "waiting" ? "warning" : "positive") : "neutral",
       metrics: [
@@ -4794,9 +4887,9 @@ export function App() {
         },
         {
           id: "resume-anchor-action",
-          label: "Last action",
-          value: persistedResumeAction?.label ?? "Unavailable",
-          meta: persistedResumePage ? `${persistedResumePage.label} / ${persistedResumeWorkspace?.label ?? "No workspace"}` : "No stored page"
+          label: "Remembered route",
+          value: persistedResumePage?.label ?? persistedWorkbenchState.lastPageId ?? "Unavailable",
+          meta: `${persistedResumeWorkspace?.label ?? "No workspace"} / ${persistedResumeAction?.label ?? "No stored action"}`
         },
         {
           id: "resume-anchor-slot",
@@ -4812,44 +4905,31 @@ export function App() {
           description: resumeSession ? `${resumeSession.title} · ${resumeSession.workspace}` : "恢复最近工作区入口。",
           tone: resumeSession?.status === "waiting" ? "warning" : "positive",
           onTrigger: () => {
-            if (resumeSession) {
-              handleSessionAction(resumeSession);
-              return;
-            }
-
-            openCommandPalette("");
+            restorePersistedWorkbenchAnchor("workspace");
           }
         },
         {
-          id: "resume-anchor-trace",
-          label: "Activate Trace Deck View",
-          description: persistedResumeSlot?.label ?? "按上次 focused slot 进入 Trace Deck。",
+          id: "resume-anchor-page",
+          label: "Restore Remembered Page",
+          description: persistedResumePage?.label ?? "按记忆页面回到上次 route / workspace。",
+          tone: persistedResumePage ? "positive" : "neutral",
+          onTrigger: () => {
+            restorePersistedWorkbenchAnchor("page");
+          }
+        },
+        {
+          id: "resume-anchor-slot",
+          label: "Focus Last Focused Slot",
+          description: persistedResumeSlot?.label ?? "按上次 focused slot 回到 trace posture。",
           tone: persistedResumeSlot ? "positive" : "neutral",
           onTrigger: () => {
-            (traceViewAction ?? showTraceAction ?? workbenchCommandBarAction).onTrigger();
-          }
-        },
-        {
-          id: "resume-anchor-review",
-          label: "Activate Review Deck View",
-          description: currentReviewerQueue?.label ?? "回到当前 review posture。",
-          tone:
-            currentReviewerQueue?.acknowledgementState === "pending" || currentReviewerQueue?.acknowledgementState === "overdue"
-              ? "warning"
-              : "neutral",
-          onTrigger: () => {
-            (reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction).onTrigger();
+            restorePersistedWorkbenchAnchor("slot");
           }
         }
       ],
       actionLabel: "恢复上次工作",
       onOpen: () => {
-        if (resumeSession) {
-          handleSessionAction(resumeSession);
-          return;
-        }
-
-        openCommandPalette("");
+        restorePersistedWorkbenchAnchor("workspace");
       }
     }
   ];

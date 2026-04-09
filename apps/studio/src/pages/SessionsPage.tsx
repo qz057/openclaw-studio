@@ -87,7 +87,9 @@ function translateActionLabel(label: string): string {
     "Open Command Palette": "打开命令面板",
     "Resume Last Work": "恢复上次工作",
     "Open Sessions": "打开工作台",
-    "Resume Last Workspace": "恢复上次工作区"
+    "Resume Last Workspace": "恢复上次工作区",
+    "Restore Remembered Page": "恢复记忆页面",
+    "Focus Last Focused Slot": "聚焦上次槽位"
   };
 
   return map[label] ?? label;
