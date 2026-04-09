@@ -1171,6 +1171,7 @@ export function App() {
   const [showAllPages, setShowAllPages] = useState(false);
   const [workbenchSessionFilter, setWorkbenchSessionFilter] = useState<WorkbenchSessionFilter>(() => readPersistedWorkbenchState().sessionFilter);
   const [lastWorkbenchSessionId, setLastWorkbenchSessionId] = useState<string | null>(() => readPersistedWorkbenchState().lastSessionId);
+  const [lastWorkbenchActionId, setLastWorkbenchActionId] = useState<string | null>(() => readPersistedWorkbenchState().lastActionId);
   const [userVisibilityOverrides, setUserVisibilityOverrides] = useState<{
     rightRailVisible: boolean | null;
     bottomDockVisible: boolean | null;
@@ -2689,6 +2690,118 @@ export function App() {
       });
     }
   }
+  const reanchorWorkbenchAfterReviewAction = (
+    activity: ActivityInput,
+    surfacePatch?: Partial<Pick<StudioShellLayoutState, "rightRailTabId" | "bottomDockTabId">>,
+    persistencePatch?: Partial<ReturnType<typeof readPersistedWorkbenchState>>
+  ) => {
+    navigateToPage("sessions");
+    applyLayoutPatch({
+      rightRailVisible: true,
+      bottomDockVisible: true,
+      rightRailTabId: surfacePatch?.rightRailTabId ?? resolvedLayoutState.rightRailTabId,
+      bottomDockTabId: surfacePatch?.bottomDockTabId ?? resolvedLayoutState.bottomDockTabId
+    });
+    if (persistencePatch) {
+      const nextPersistenceState: Partial<ReturnType<typeof readPersistedWorkbenchState>> = {
+        lastPageId: "sessions",
+        lastWorkspaceViewId: resolvedLayoutState.workspaceViewId,
+        lastFocusedSlotId: resolvedFocusSlotId,
+        ...persistencePatch
+      };
+      if (Object.prototype.hasOwnProperty.call(nextPersistenceState, "lastActionId")) {
+        setLastWorkbenchActionId(nextPersistenceState.lastActionId ?? null);
+      }
+
+      persistWorkbenchState(nextPersistenceState);
+      setTimeout(() => {
+        writePersistedWorkbenchState(nextPersistenceState);
+      }, 0);
+    }
+    recordActivity(activity);
+  };
+  const handleRunWorkbenchReviewSurfaceAction = (action: StudioCommandAction | null | undefined) => {
+    if (!action || !isReviewCoverageAction(action)) {
+      (reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction).onTrigger();
+      reanchorWorkbenchAfterReviewAction({
+        label: "Focus Active Review Surface",
+        detail: "Review Deck posture was restored on the workbench, but no typed review surface was available.",
+        safety: "local-only"
+      }, {
+        rightRailTabId: "windows",
+        bottomDockTabId: "windows"
+      }, {
+        lastActionId: reviewViewAction?.id ?? inspectBoundaryAction?.id ?? workbenchCommandBarAction.id,
+        lastWorkspaceViewId: "review-deck"
+      });
+      return;
+    }
+
+    applyReviewCoverageAction(action, {
+      record: false
+    });
+    reanchorWorkbenchAfterReviewAction({
+      label: "Focus Active Review Surface",
+        detail: `${action.label} was restored on the workbench without dropping the current review-deck posture.`,
+        safety: "local-only"
+      }, {
+        rightRailTabId: action.rightRailTabId ?? "windows",
+        bottomDockTabId: action.bottomDockTabId ?? "windows"
+      }, {
+        lastActionId: reviewViewAction?.id ?? action.id,
+        lastWorkspaceViewId: action.workspaceViewId ?? "review-deck"
+      });
+  };
+  const handleRunWorkbenchCompanionRouteHistory = (entryId: string | null | undefined) => {
+    if (!entryId) {
+      handleRunWorkbenchReviewSurfaceAction(resolvedReviewSurfaceAction);
+      return;
+    }
+
+    handleRunCompanionRouteHistory(entryId);
+    const historyEntry: CompanionRouteHistoryMemoryEntry | null = companionRouteHistory.find((entry) => entry.id === entryId) ?? null;
+    reanchorWorkbenchAfterReviewAction({
+      label: "Restore Latest Handoff",
+      detail: "The latest remembered review handoff was restored onto the workbench.",
+      safety: "local-only"
+    }, {
+      rightRailTabId: "windows",
+      bottomDockTabId: "windows"
+    }, {
+      lastActionId: reviewViewAction?.id ?? historyEntry?.nextSelection.reviewSurfaceActionId ?? resolvedReviewSurfaceAction?.id ?? null,
+      lastWorkspaceViewId: "review-deck"
+    });
+  };
+  const handleRunWorkbenchObservabilityAction = () => {
+    if (windowsObservabilityAction) {
+      executeCommand(windowsObservabilityAction);
+      reanchorWorkbenchAfterReviewAction({
+        label: "Inspect Cross-window Observability",
+        detail: `${resolvedCoverageMapping?.label ?? "Cross-window observability"} was surfaced while keeping the workbench anchored.`,
+        safety: "local-only"
+      }, {
+        rightRailTabId: windowsObservabilityAction.rightRailTabId ?? "windows",
+        bottomDockTabId: windowsObservabilityAction.bottomDockTabId ?? "windows"
+      }, {
+        lastActionId: windowsObservabilityAction.id,
+        lastWorkspaceViewId: "review-deck"
+      });
+      return;
+    }
+
+    (reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction).onTrigger();
+    reanchorWorkbenchAfterReviewAction({
+      label: "Inspect Cross-window Observability",
+        detail: "Review Deck observability posture was restored on the workbench.",
+        safety: "local-only"
+      }, {
+        rightRailTabId: "windows",
+        bottomDockTabId: "windows"
+      }, {
+        lastActionId: reviewViewAction?.id ?? inspectBoundaryAction?.id ?? workbenchCommandBarAction.id,
+        lastWorkspaceViewId: "review-deck"
+      });
+  };
   function handleSelectDeliveryStage(stageId: string) {
     const matchingAction =
       activeActionDeckReviewSurfaceActions.find((action) => action.deliveryChainStageId === stageId) ??
@@ -4540,6 +4653,9 @@ export function App() {
   };
 
   const persistWorkbenchState = (patch: Partial<ReturnType<typeof readPersistedWorkbenchState>>) => {
+    if (Object.prototype.hasOwnProperty.call(patch, "lastActionId")) {
+      setLastWorkbenchActionId(patch.lastActionId ?? null);
+    }
     writePersistedWorkbenchState(patch);
   };
 
@@ -4587,7 +4703,7 @@ export function App() {
   };
 
   const persistedWorkbenchState = readPersistedWorkbenchState();
-  const persistedResumeAction = persistedWorkbenchState.lastActionId ? actionById.get(persistedWorkbenchState.lastActionId) : null;
+  const persistedResumeAction = lastWorkbenchActionId ? actionById.get(lastWorkbenchActionId) : null;
   const persistedResumePage = persistedWorkbenchState.lastPageId
     ? data.pages.find((page) => page.id === persistedWorkbenchState.lastPageId) ?? null
     : null;
@@ -4875,7 +4991,7 @@ export function App() {
       title: "Resume Anchor",
       headline: resumeSession?.title ?? "No remembered workspace",
       summary: resumeSession
-        ? `工作台现在会按记忆状态更精确恢复：不仅能继续上次工作区，还能单独恢复 remembered page，或者带着上次 focused slot 直接回到 trace posture。`
+        ? `工作台现在会按记忆状态更精确恢复：不仅能继续上次工作区、记忆页面、或带着上次 focused slot 直接回到 trace posture，还能在同一张卡片里再运行上次的命令动作。`
         : "当前还没有可恢复的持久化工作锚点；先从上方动作或命令面板进入一条新流程。",
       tone: resumeSession ? (resumeSession.status === "waiting" ? "warning" : "positive") : "neutral",
       metrics: [
@@ -4925,6 +5041,20 @@ export function App() {
           onTrigger: () => {
             restorePersistedWorkbenchAnchor("slot");
           }
+        },
+        {
+          id: "resume-anchor-remembered-action",
+          label: persistedResumeAction?.label ?? "Run remembered action",
+          description: persistedResumeAction?.description ?? "重新运行上一条命令动作或打开命令面板以选一个动作。",
+          tone: persistedResumeAction?.tone ?? "neutral",
+          onTrigger: () => {
+            if (persistedResumeAction) {
+              executeCommand(persistedResumeAction);
+              return;
+            }
+
+            openCommandPalette("");
+          }
         }
       ],
       actionLabel: "恢复上次工作",
@@ -4937,7 +5067,9 @@ export function App() {
       title: "Review Surface Resume",
       headline: resolvedReviewSurfaceAction?.label ?? "No active review surface",
       summary: resolvedReviewSurfaceAction
-        ? `当前工作台首页现在也会把 review-surface 恢复提到前面：可以直接聚焦当前审查面、恢复最近交接，或跳到 cross-window observability 继续看同一条 review posture。`
+        ? latestReplayRestoreEntryId
+          ? `当前工作台首页现在也会把 review-surface 恢复提到前面：可以直接在工作台里聚焦当前审查面、恢复最近交接，或跳到 cross-window observability 继续看同一条 review posture。`
+          : `当前工作台首页现在也会把 review-surface 恢复提到前面：可以直接在工作台里聚焦当前审查面，或跳到 cross-window observability 继续看同一条 review posture。`
         : "当前还没有明确的 review surface；先进入 Review Deck 或从命令面板选择一个审查面。",
       tone: latestReplayRestoreEntryId ? "positive" : resolvedReviewSurfaceAction ? "neutral" : "warning",
       metrics: [
@@ -4973,45 +5105,29 @@ export function App() {
           description: resolvedReviewSurfaceAction?.label ?? "聚焦当前审查面。",
           tone: resolvedReviewSurfaceAction?.tone ?? "neutral",
           onTrigger: () => {
-            if (resolvedReviewSurfaceAction) {
-              handleRunReviewSurfaceAction(resolvedReviewSurfaceAction);
-              return;
-            }
-
-            (reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction).onTrigger();
+            handleRunWorkbenchReviewSurfaceAction(resolvedReviewSurfaceAction);
           }
         },
-        {
-          id: "review-surface-resume-handoff-action",
-          label: "Restore Latest Handoff",
-          description: activeCompanionRouteHistoryEntry?.label ?? activeCompanionPathHandoff?.label ?? "恢复最近交接。",
-          tone: latestReplayRestoreEntryId ? "positive" : "neutral",
-          onTrigger: () => {
-            if (latestReplayRestoreEntryId) {
-              handleRunCompanionRouteHistory(latestReplayRestoreEntryId);
-              return;
-            }
-
-            if (resolvedReviewSurfaceAction) {
-              handleRunReviewSurfaceAction(resolvedReviewSurfaceAction);
-              return;
-            }
-
-            (reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction).onTrigger();
-          }
-        },
+        ...(latestReplayRestoreEntryId
+          ? [
+              {
+                id: "review-surface-resume-handoff-action",
+                label: "Restore Latest Handoff",
+                description: activeCompanionRouteHistoryEntry?.label ?? activeCompanionPathHandoff?.label ?? "恢复最近交接。",
+                tone: "positive" as const,
+                onTrigger: () => {
+                  handleRunWorkbenchCompanionRouteHistory(latestReplayRestoreEntryId);
+                }
+              }
+            ]
+          : []),
         {
           id: "review-surface-resume-observability-action",
           label: "Inspect Cross-window Observability",
           description: resolvedCoverageMapping?.label ?? "检查当前 cross-window observability。",
           tone: resolvedCoverageMapping ? resolvedCoverageMapping.tone : "neutral",
           onTrigger: () => {
-            if (windowsObservabilityAction) {
-              executeCommand(windowsObservabilityAction);
-              return;
-            }
-
-            (reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction).onTrigger();
+            handleRunWorkbenchObservabilityAction();
           }
         }
       ]
@@ -5058,34 +5174,74 @@ export function App() {
     toWorkbenchAction(recommendedAction ?? undefined) ??
     (reviewViewAction ?? traceViewAction ?? openHomeAction ?? workbenchCommandBarAction);
 
-  const workbenchNextActionSecondary = [
-    inspectBoundaryAction,
-    showTraceAction,
-    reviewViewAction,
-    focusLaneApplyAction
-  ].filter((action): action is AppWorkbenchAction => Boolean(action));
-
-  const workbenchQuickLaunchActions = [
-    openHomeAction,
-    inspectBoundaryAction,
-    showTraceAction,
-    focusLaneApplyAction,
-    reviewViewAction,
-    {
-      id: "workbench-resume-shortcut",
-      label: "Resume Last Workspace",
-      description: resumeSession ? `${resumeSession.title} · ${resumeSession.workspace}` : "恢复最近工作区入口。",
-      tone: resumeSession?.status === "waiting" ? "warning" : "neutral",
-      onTrigger: () => {
-        if (resumeSession) {
-          handleSessionAction(resumeSession);
-          return;
+  const reviewSurfaceWorkbenchActions: AppWorkbenchAction[] = [
+    resolvedReviewSurfaceAction
+      ? {
+          id: "workbench-review-surface-focus",
+          label: "Focus Active Review Surface",
+          description: `${resolvedReviewSurfaceAction.label} / keep workbench anchored`,
+          tone: resolvedReviewSurfaceAction.tone,
+          onTrigger: () => {
+            handleRunWorkbenchReviewSurfaceAction(resolvedReviewSurfaceAction);
+          }
         }
-
-        openCommandPalette("");
+      : null,
+    latestReplayRestoreEntryId
+      ? {
+          id: "workbench-review-surface-handoff",
+          label: "Restore Latest Handoff",
+          description: activeCompanionRouteHistoryEntry?.label ?? activeCompanionPathHandoff?.label ?? "恢复最近交接。",
+          tone: "positive",
+          onTrigger: () => {
+            handleRunWorkbenchCompanionRouteHistory(latestReplayRestoreEntryId);
+          }
+        }
+      : null,
+    {
+      id: "workbench-review-surface-observability",
+      label: "Inspect Cross-window Observability",
+      description: resolvedCoverageMapping?.label ?? windowsObservabilityAction?.description ?? "检查当前 cross-window observability。",
+      tone: resolvedCoverageMapping?.tone ?? windowsObservabilityAction?.tone ?? "neutral",
+      onTrigger: () => {
+        handleRunWorkbenchObservabilityAction();
       }
     }
   ].filter((action): action is AppWorkbenchAction => Boolean(action));
+
+  const workbenchNextActionSecondary = dedupeById(
+    [
+      ...reviewSurfaceWorkbenchActions,
+      inspectBoundaryAction,
+      showTraceAction,
+      reviewViewAction,
+      focusLaneApplyAction
+    ].filter((action): action is AppWorkbenchAction => Boolean(action))
+  );
+
+  const workbenchQuickLaunchActions = dedupeById(
+    [
+      openHomeAction,
+      inspectBoundaryAction,
+      showTraceAction,
+      focusLaneApplyAction,
+      reviewViewAction,
+      ...reviewSurfaceWorkbenchActions,
+      {
+        id: "workbench-resume-shortcut",
+        label: "Resume Last Workspace",
+        description: resumeSession ? `${resumeSession.title} · ${resumeSession.workspace}` : "恢复最近工作区入口。",
+        tone: resumeSession?.status === "waiting" ? "warning" : "neutral",
+        onTrigger: () => {
+          if (resumeSession) {
+            handleSessionAction(resumeSession);
+            return;
+          }
+
+          openCommandPalette("");
+        }
+      }
+    ].filter((action): action is AppWorkbenchAction => Boolean(action))
+  );
 
   const workbenchProps: AppWorkbenchProps = {
     commandBarAction: workbenchCommandBarAction,
