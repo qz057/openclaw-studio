@@ -602,6 +602,7 @@ interface AppWorkbenchReadinessCard {
   metrics: AppWorkbenchReadinessMetric[];
   actionLabel?: string;
   onOpen?: () => void;
+  actions?: AppWorkbenchAction[];
 }
 
 interface AppWorkbenchWorkflowNode {
@@ -4781,7 +4782,7 @@ export function App() {
       title: "Resume Anchor",
       headline: resumeSession?.title ?? "No remembered workspace",
       summary: resumeSession
-        ? `工作台现在会把上一次恢复链路直接露出来：最近会话、最近动作、上次页面、工作区视图和 focused slot 会一起作为恢复锚点显示出来。`
+        ? `工作台现在不只显示恢复锚点，还把 resume / trace / review 三条继续路径并排露出来：你可以直接回到上次会话，也可以按上次 focused slot 去 Trace Deck，或按上次审查姿态回到 Review Deck。`
         : "当前还没有可恢复的持久化工作锚点；先从上方动作或命令面板进入一条新流程。",
       tone: resumeSession ? (resumeSession.status === "waiting" ? "warning" : "positive") : "neutral",
       metrics: [
@@ -4802,6 +4803,40 @@ export function App() {
           label: "Last focused slot",
           value: persistedResumeSlot?.label ?? persistedWorkbenchState.lastFocusedSlotId ?? "Unavailable",
           meta: persistedResumeSlot?.summary ?? "No stored focused slot"
+        }
+      ],
+      actions: [
+        {
+          id: "resume-anchor-primary",
+          label: "Resume Last Workspace",
+          description: resumeSession ? `${resumeSession.title} · ${resumeSession.workspace}` : "恢复最近工作区入口。",
+          tone: resumeSession?.status === "waiting" ? "warning" : "positive",
+          onTrigger: () => {
+            if (resumeSession) {
+              handleSessionAction(resumeSession);
+              return;
+            }
+
+            openCommandPalette("");
+          }
+        },
+        {
+          id: "resume-anchor-trace",
+          label: "Activate Trace Deck View",
+          description: persistedResumeSlot?.label ?? "按上次 focused slot 进入 Trace Deck。",
+          tone: persistedResumeSlot ? "positive" : "neutral",
+          onTrigger: () => {
+            (traceViewAction ?? showTraceAction ?? workbenchCommandBarAction).onTrigger();
+          }
+        },
+        {
+          id: "resume-anchor-review",
+          label: "Activate Review Deck View",
+          description: currentReviewerQueue?.label ?? "回到当前 review posture。",
+          tone: currentReviewerQueue?.acknowledgementState === "awaiting-ack" ? "warning" : "neutral",
+          onTrigger: () => {
+            (reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction).onTrigger();
+          }
         }
       ],
       actionLabel: "恢复上次工作",

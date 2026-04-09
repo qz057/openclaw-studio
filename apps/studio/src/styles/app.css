@@ -2828,6 +2828,17 @@ button:disabled {
   font-size: 0.82rem;
 }
 
+.workbench-readiness-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.workbench-readiness-card__actions .quick-action-button,
+.workbench-readiness-card__actions .secondary-button {
+  min-width: 0;
+}
+
 @media (max-width: 980px) {
   .studio-shell,
   .studio-shell--no-right-rail {

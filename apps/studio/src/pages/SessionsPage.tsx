@@ -37,6 +37,7 @@ interface WorkbenchReadinessCard {
   metrics: WorkbenchReadinessMetric[];
   actionLabel?: string;
   onOpen?: () => void;
+  actions?: WorkbenchAction[];
 }
 
 interface WorkflowNode {
@@ -288,7 +289,7 @@ function ExecutionReadinessSnapshot({ cards }: { cards: WorkbenchReadinessCard[]
           <p className="eyebrow">Execution Readiness Snapshot</p>
           <h2>当前执行就绪快照</h2>
         </div>
-        <p>把 focused slot handoff、delivery anchor、review closeout 放进同一眼可读的工作台首页。</p>
+        <p>把 focused slot handoff、delivery anchor、review closeout、resume anchor 放进同一眼可读的工作台首页。</p>
       </div>
 
       <div className="workbench-readiness-grid">
@@ -313,7 +314,20 @@ function ExecutionReadinessSnapshot({ cards }: { cards: WorkbenchReadinessCard[]
                 </article>
               ))}
             </div>
-            {card.onOpen ? (
+            {card.actions?.length ? (
+              <div className="workbench-readiness-card__actions">
+                {card.actions.map((action, index) => (
+                  <button
+                    key={action.id}
+                    type="button"
+                    className={index === 0 ? "quick-action-button quick-action-button--primary" : "secondary-button"}
+                    onClick={action.onTrigger}
+                  >
+                    {translateActionLabel(action.label)}
+                  </button>
+                ))}
+              </div>
+            ) : card.onOpen ? (
               <button type="button" className="secondary-button workbench-inline-action" onClick={card.onOpen}>
                 {card.actionLabel ?? "查看详情"}
               </button>
