@@ -4931,6 +4931,90 @@ export function App() {
       onOpen: () => {
         restorePersistedWorkbenchAnchor("workspace");
       }
+    },
+    {
+      id: "readiness-review-surface-resume",
+      title: "Review Surface Resume",
+      headline: resolvedReviewSurfaceAction?.label ?? "No active review surface",
+      summary: resolvedReviewSurfaceAction
+        ? `当前工作台首页现在也会把 review-surface 恢复提到前面：可以直接聚焦当前审查面、恢复最近交接，或跳到 cross-window observability 继续看同一条 review posture。`
+        : "当前还没有明确的 review surface；先进入 Review Deck 或从命令面板选择一个审查面。",
+      tone: latestReplayRestoreEntryId ? "positive" : resolvedReviewSurfaceAction ? "neutral" : "warning",
+      metrics: [
+        {
+          id: "review-surface-resume-surface",
+          label: "Active review surface",
+          value: resolvedReviewSurfaceAction?.label ?? "Unavailable",
+          meta: resolvedReviewSurfaceAction ? formatReviewSurfaceKind(resolvedReviewSurfaceAction.reviewSurfaceKind) : "No review surface"
+        },
+        {
+          id: "review-surface-resume-handoff",
+          label: "Latest handoff",
+          value: activeCompanionRouteHistoryEntry?.label ?? activeCompanionPathHandoff?.label ?? "Unavailable",
+          meta:
+            activeCompanionRouteHistoryEntry?.transitionKind
+              ? formatCompanionRouteTransitionKind(activeCompanionRouteHistoryEntry.transitionKind)
+              : activeCompanionPathHandoff?.summary ?? "No remembered handoff"
+        },
+        {
+          id: "review-surface-resume-observability",
+          label: "Observability path",
+          value: resolvedCoverageMapping?.label ?? "Unavailable",
+          meta:
+            resolvedCoverageMapping
+              ? formatReviewPostureRelationship(resolvedCoverageMapping.relationship)
+              : "No observability path"
+        }
+      ],
+      actions: [
+        {
+          id: "review-surface-resume-focus",
+          label: "Focus Active Review Surface",
+          description: resolvedReviewSurfaceAction?.label ?? "聚焦当前审查面。",
+          tone: resolvedReviewSurfaceAction?.tone ?? "neutral",
+          onTrigger: () => {
+            if (resolvedReviewSurfaceAction) {
+              handleRunReviewSurfaceAction(resolvedReviewSurfaceAction);
+              return;
+            }
+
+            (reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction).onTrigger();
+          }
+        },
+        {
+          id: "review-surface-resume-handoff-action",
+          label: "Restore Latest Handoff",
+          description: activeCompanionRouteHistoryEntry?.label ?? activeCompanionPathHandoff?.label ?? "恢复最近交接。",
+          tone: latestReplayRestoreEntryId ? "positive" : "neutral",
+          onTrigger: () => {
+            if (latestReplayRestoreEntryId) {
+              handleRunCompanionRouteHistory(latestReplayRestoreEntryId);
+              return;
+            }
+
+            if (resolvedReviewSurfaceAction) {
+              handleRunReviewSurfaceAction(resolvedReviewSurfaceAction);
+              return;
+            }
+
+            (reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction).onTrigger();
+          }
+        },
+        {
+          id: "review-surface-resume-observability-action",
+          label: "Inspect Cross-window Observability",
+          description: resolvedCoverageMapping?.label ?? "检查当前 cross-window observability。",
+          tone: resolvedCoverageMapping ? resolvedCoverageMapping.tone : "neutral",
+          onTrigger: () => {
+            if (windowsObservabilityAction) {
+              executeCommand(windowsObservabilityAction);
+              return;
+            }
+
+            (reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction).onTrigger();
+          }
+        }
+      ]
     }
   ];
 

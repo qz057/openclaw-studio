@@ -89,7 +89,10 @@ function translateActionLabel(label: string): string {
     "Open Sessions": "打开工作台",
     "Resume Last Workspace": "恢复上次工作区",
     "Restore Remembered Page": "恢复记忆页面",
-    "Focus Last Focused Slot": "聚焦上次槽位"
+    "Focus Last Focused Slot": "聚焦上次槽位",
+    "Focus Active Review Surface": "聚焦当前审查面",
+    "Restore Latest Handoff": "恢复最近交接",
+    "Inspect Cross-window Observability": "检查跨窗口可观测链"
   };
 
   return map[label] ?? label;
