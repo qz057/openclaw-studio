@@ -166,11 +166,15 @@ interface LocalConnectorActivationState {
   executedAt: string | null;
 }
 
+type LocalApplyCouplingStatus = "missing" | "partial" | "ready";
+type LocalRecoveryReadiness = "blocked" | "recovery-drilldown" | "rollback-ready";
+
 interface LocalLaneApplyState {
   status: LocalLaneApplyStatus;
   verdict: string | null;
   rootOverlay: string | null;
   sourceOrder: string[];
+  executionId: string | null;
   executedAt: string | null;
 }
 
@@ -178,6 +182,9 @@ interface LocalLifecycleStageState {
   status: LocalLifecycleStageStatus;
   target: string | null;
   stagePlan: string[];
+  applyExecutionId: string | null;
+  couplingState: LocalApplyCouplingStatus;
+  recoveryReadiness: LocalRecoveryReadiness;
   executedAt: string | null;
 }
 
@@ -185,6 +192,9 @@ interface LocalRollbackSettlementState {
   status: LocalRollbackSettlementStatus;
   target: string | null;
   checkpoint: string | null;
+  applyExecutionId: string | null;
+  couplingState: LocalApplyCouplingStatus;
+  recoveryReadiness: LocalRecoveryReadiness;
   executedAt: string | null;
 }
 
@@ -244,6 +254,7 @@ function createIdleLaneApplyState(): LocalLaneApplyState {
     verdict: null,
     rootOverlay: null,
     sourceOrder: [],
+    executionId: null,
     executedAt: null
   };
 }
@@ -253,6 +264,9 @@ function createIdleLifecycleStageState(): LocalLifecycleStageState {
     status: "idle",
     target: null,
     stagePlan: [],
+    applyExecutionId: null,
+    couplingState: "missing",
+    recoveryReadiness: "blocked",
     executedAt: null
   };
 }
@@ -262,6 +276,9 @@ function createIdleRollbackSettlementState(): LocalRollbackSettlementState {
     status: "idle",
     target: null,
     checkpoint: null,
+    applyExecutionId: null,
+    couplingState: "missing",
+    recoveryReadiness: "blocked",
     executedAt: null
   };
 }
@@ -1485,7 +1502,10 @@ function createHostPreviewHandoff(
       intent: preview.intent,
       decision: simulation.approvalDecision,
       routeArtifactPaths: approvalRouteArtifactPaths,
-      summary: `Slot-scoped approval packet for ${slot.label} stays routed through review-only approval artifacts before any host execution could begin.`
+      summary:
+        validationStatus === "valid" && simulation.approvalDecision === "approved"
+          ? `Slot-scoped approval packet for ${slot.label} is rollback-ready in review-only mode and stays routed through approval artifacts before any host execution could begin.`
+          : `Slot-scoped approval packet for ${slot.label} stays ${simulation.approvalDecision} because typed validation or approval prerequisites remain unresolved in the review-only boundary.`
     },
     audit: {
       eventId: auditEventId,
@@ -1509,7 +1529,10 @@ function createHostPreviewHandoff(
       channel: slot.channel,
       readiness: validationStatus,
       routeArtifactPaths: executorRouteArtifactPaths,
-      summary: `Executor handoff packet for ${slot.label} remains slot-scoped, route-linked, and default-disabled while host mutation stays withheld.`
+      summary:
+        validationStatus === "valid"
+          ? `Executor handoff packet for ${slot.label} is route-linked and rollback-ready, but the slot remains default-disabled while host mutation stays withheld.`
+          : `Executor handoff packet for ${slot.label} stays ${validationStatus} until typed approval and recovery prerequisites are resolved.`
     },
     slotResult: {
       slotId: slot.id,
@@ -1700,7 +1723,7 @@ export function simulateToolsMcpHostPreviewHandoff(
       ...handoff.audit,
       correlationId: auditCorrelationId,
       stage: terminalOutcome.stage,
-      status: terminalOutcome.rollbackDisposition === "incomplete" ? "rollback-linked" : handoff.audit.status,
+      status: handoff.audit.status,
       summary: `Audit placeholder ${handoff.audit.eventId} now traces ${outcomeChain} through ${slotHandler.label}.`
     },
     rollback: {
@@ -1878,28 +1901,27 @@ function resolveHostPreviewForAction(
       const preferredRootTarget = getPreferredRootTarget(probe);
       const rootOverlay = controlSession.rootSelection.path ?? preferredRootTarget.path;
       const requestedTarget = rootOverlay ? shortenHomePath(rootOverlay) : "no rollback checkpoint target";
+      const applyCoupling = resolveLocalApplyCouplingReadiness(controlSession);
       const preview = createHostMutationPreview(
         hostExecutor,
         "rollback-settlement",
         "Host rollback settlement preview",
         "Maps lifecycle-rollback coordination into the disabled rollback-settlement slot so settlement checkpoints and failure dispositions stay inspectable without touching host runtime.",
         requestedTarget,
-        "rollback-host"
+        applyCoupling.status === "ready" ? "rollback-host" : applyCoupling.status === "partial" ? "request-approval" : "collect-context"
       );
-      const localRollbackCouplingReady =
-        controlSession.lifecycleStage.status === "armed" &&
-        (controlSession.laneApply.status === "applied" || controlSession.rollbackSettlement.status === "settled");
       const handoff = createHostPreviewHandoff(preview, hostExecutor, {
-        validationMissingFieldIds: localRollbackCouplingReady ? [] : ["payload-approval", "payload-rollback"],
-        approvalDecision: localRollbackCouplingReady ? "approved" : "withheld",
-        auditStatus: localRollbackCouplingReady ? "rollback-linked" : "seeded",
+        validationMissingFieldIds: applyCoupling.status === "ready" ? [] : ["payload-approval", "payload-rollback"],
+        approvalDecision: applyCoupling.status === "ready" ? "approved" : "withheld",
+        auditStatus: applyCoupling.status === "ready" ? "rollback-linked" : "seeded",
         rollbackDisposition: "incomplete",
         slotStatus: "rollback-required",
         failureCode: "rollback-incomplete",
         stage: "rollback-host",
-        scope: localRollbackCouplingReady
-          ? "lifecycle-rollback placeholder scope"
-          : "lifecycle-rollback placeholder scope / apply-coupling unresolved",
+        scope:
+          applyCoupling.status === "ready"
+            ? "lifecycle-rollback placeholder scope / rollback-ready"
+            : "lifecycle-rollback placeholder scope / apply-coupling unresolved",
         rollbackCheckpoint: rootOverlay ? `checkpoint:rollback:${requestedTarget}` : "checkpoint:rollback-unresolved"
       });
 
@@ -1922,25 +1944,27 @@ function resolveHostPreviewForAction(
       const preferredRootTarget = getPreferredRootTarget(probe);
       const rootOverlay = controlSession.rootSelection.path ?? preferredRootTarget.path;
       const requestedTarget = rootOverlay ? shortenHomePath(rootOverlay) : "no root overlay";
+      const applyCoupling = resolveLocalApplyCouplingReadiness(controlSession);
       const preview = createHostMutationPreview(
         hostExecutor,
         "lane-apply",
         "Host lane apply preview",
         "Maps the withheld lane-apply preview into the disabled phase25 slot handoff path and simulated placeholder outcome matrix without touching the host runtime.",
         requestedTarget,
-        "rollback-host"
+        applyCoupling.status === "ready" ? "rollback-host" : applyCoupling.status === "partial" ? "request-approval" : "collect-context"
       );
-      const localApplyCouplingReady =
-        controlSession.lifecycleStage.status === "armed" && controlSession.rollbackSettlement.status === "settled";
       const handoff = createHostPreviewHandoff(preview, hostExecutor, {
-        validationMissingFieldIds: localApplyCouplingReady ? [] : ["payload-approval", "payload-rollback"],
-        approvalDecision: localApplyCouplingReady ? "approved" : "withheld",
-        auditStatus: localApplyCouplingReady ? "rollback-linked" : "seeded",
+        validationMissingFieldIds: applyCoupling.status === "ready" ? [] : ["payload-approval", "payload-rollback"],
+        approvalDecision: applyCoupling.status === "ready" ? "approved" : "withheld",
+        auditStatus: applyCoupling.status === "ready" ? "rollback-linked" : "seeded",
         rollbackDisposition: "required",
         slotStatus: "rollback-required",
         failureCode: "rollback-required",
         stage: "rollback-host",
-        scope: localApplyCouplingReady ? "lane-apply placeholder scope" : "lane-apply placeholder scope / apply-coupling unresolved",
+        scope:
+          applyCoupling.status === "ready"
+            ? "lane-apply placeholder scope / rollback-ready"
+            : "lane-apply placeholder scope / apply-coupling unresolved",
         rollbackCheckpoint: rootOverlay ? `checkpoint:apply:${requestedTarget}` : "checkpoint:apply-unresolved"
       });
 
@@ -1996,6 +2020,8 @@ function createHostBridgeHandoffSections(
       " -> "
     )}`;
   });
+
+  const applyCoupling = describeHostApplyCoupling(hostHandoff);
 
   return [
     {
@@ -2104,8 +2130,10 @@ function createHostBridgeHandoffSections(
       title: "Recovery drilldown",
       lines: [
         `pre-coupling gate · validation ${hostHandoff.validation.status} · approval ${hostHandoff.approval.decision}`,
+        `apply coupling · ${applyCoupling.status} · ${applyCoupling.recoveryReadiness}`,
         `primary outcome · ${hostHandoff.slotResult.status} · ${hostHandoff.slotResult.failureCode}`,
         `rollback path · ${hostHandoff.rollback.disposition} · ${hostHandoff.rollback.checkpoint}`,
+        `recovery readiness · ${applyCoupling.recoveryReadiness} · audit ${hostHandoff.audit.status}`,
         `route handoff · ${hostHandoff.approvalPacket.routeArtifactPaths[hostHandoff.approvalPacket.routeArtifactPaths.length - 1] ?? "none"} · ${hostHandoff.executorPacket.routeArtifactPaths[hostHandoff.executorPacket.routeArtifactPaths.length - 1] ?? "none"}`
       ]
     },
@@ -2233,6 +2261,79 @@ function resetFromLifecycleStage(controlSession: ToolsMcpLocalControlSession): v
   controlSession.rollbackSettlement = createIdleRollbackSettlementState();
 }
 
+function resolveLocalApplyCouplingReadiness(controlSession: ToolsMcpLocalControlSession): {
+  status: LocalApplyCouplingStatus;
+  recoveryReadiness: LocalRecoveryReadiness;
+  laneApplyExecutionId: string | null;
+} {
+  const laneApplyExecutionId = controlSession.laneApply.executionId;
+  const lifecycleAligned =
+    laneApplyExecutionId !== null &&
+    controlSession.lifecycleStage.status === "armed" &&
+    controlSession.lifecycleStage.applyExecutionId === laneApplyExecutionId;
+  const rollbackAligned =
+    laneApplyExecutionId !== null &&
+    controlSession.rollbackSettlement.status === "settled" &&
+    controlSession.rollbackSettlement.applyExecutionId === laneApplyExecutionId;
+  const hasAnyCouplingSignal =
+    controlSession.laneApply.status !== "idle" ||
+    controlSession.lifecycleStage.status !== "idle" ||
+    controlSession.rollbackSettlement.status !== "idle";
+
+  if (controlSession.laneApply.status === "applied" && lifecycleAligned && rollbackAligned) {
+    return {
+      status: "ready",
+      recoveryReadiness: "rollback-ready",
+      laneApplyExecutionId
+    };
+  }
+
+  if (hasAnyCouplingSignal) {
+    return {
+      status: "partial",
+      recoveryReadiness: "recovery-drilldown",
+      laneApplyExecutionId
+    };
+  }
+
+  return {
+    status: "missing",
+    recoveryReadiness: "blocked",
+    laneApplyExecutionId
+  };
+}
+
+function describeHostApplyCoupling(handoff: StudioHostPreviewHandoff): {
+  status: "not-applicable" | "unresolved" | "partial" | "ready";
+  recoveryReadiness: "not-needed" | LocalRecoveryReadiness;
+} {
+  if (handoff.intent !== "lane-apply" && handoff.intent !== "rollback-settlement") {
+    return {
+      status: "not-applicable",
+      recoveryReadiness: handoff.rollback.disposition === "not-needed" ? "not-needed" : "recovery-drilldown"
+    };
+  }
+
+  if (handoff.validation.status === "valid" && handoff.approval.decision === "approved") {
+    return {
+      status: "ready",
+      recoveryReadiness: "rollback-ready"
+    };
+  }
+
+  if (handoff.validation.status === "invalid" || handoff.approval.decision === "withheld") {
+    return {
+      status: "unresolved",
+      recoveryReadiness: "recovery-drilldown"
+    };
+  }
+
+  return {
+    status: "partial",
+    recoveryReadiness: "recovery-drilldown"
+  };
+}
+
 function buildLocalOnlyBoundaryLines(): string[] {
   return [
     "mutation scope · Studio-local in-memory control session and execution history only",
@@ -2295,12 +2396,16 @@ function getConnectorSessionLines(controlSession: ToolsMcpLocalControlSession): 
       controlSession.lifecycleStage.target
         ? `${controlSession.lifecycleStage.target} (${formatLocalOnlyStatus(controlSession.lifecycleStage.status)})`
         : formatLocalOnlyStatus(controlSession.lifecycleStage.status)
-    }${controlSession.lifecycleStage.stagePlan.length > 0 ? ` · ${controlSession.lifecycleStage.stagePlan.join(" -> ")}` : ""}`,
+    }${controlSession.lifecycleStage.stagePlan.length > 0 ? ` · ${controlSession.lifecycleStage.stagePlan.join(" -> ")}` : ""} · coupling ${
+      controlSession.lifecycleStage.couplingState
+    } · recovery ${controlSession.lifecycleStage.recoveryReadiness}`,
     `rollback settlement · ${
       controlSession.rollbackSettlement.target
         ? `${controlSession.rollbackSettlement.target} (${formatLocalOnlyStatus(controlSession.rollbackSettlement.status)})`
         : formatLocalOnlyStatus(controlSession.rollbackSettlement.status)
-    }${controlSession.rollbackSettlement.checkpoint ? ` · checkpoint ${controlSession.rollbackSettlement.checkpoint}` : ""}`,
+    }${controlSession.rollbackSettlement.checkpoint ? ` · checkpoint ${controlSession.rollbackSettlement.checkpoint}` : ""} · coupling ${
+      controlSession.rollbackSettlement.couplingState
+    } · recovery ${controlSession.rollbackSettlement.recoveryReadiness}`,
     `session updated · ${controlSession.updatedAt}`
   ];
 }
@@ -5158,6 +5263,7 @@ async function runToolsMcpActionInternal(
         verdict: localVerdict,
         rootOverlay,
         sourceOrder: stagedSourceOrder,
+        executionId: null,
         executedAt: null
       };
 
@@ -5175,6 +5281,7 @@ async function runToolsMcpActionInternal(
               : "Studio recorded a blocked local lane apply because no staged local connector state was available."
       });
 
+      controlSession.laneApply.executionId = execution.id;
       controlSession.laneApply.executedAt = execution.executedAt;
       const connectorApplyBoundary = buildConnectorBoundarySummary(probe, controlSession, cachedCuratedPlugins, {
         id: "boundary-connector-local-apply",
@@ -5240,12 +5347,27 @@ async function runToolsMcpActionInternal(
               ? "partial"
               : "blocked";
       const stagePlan = lifecycleStatus === "blocked" ? [] : ["activate", "verify", "reconcile", "rollback-ready"];
+      const lifecycleCouplingState: LocalApplyCouplingStatus =
+        lifecycleStatus === "armed" && controlSession.laneApply.executionId !== null && controlSession.laneApply.status === "applied"
+          ? "partial"
+          : lifecycleStatus === "partial"
+            ? "partial"
+            : "missing";
+      const lifecycleRecoveryReadiness: LocalRecoveryReadiness =
+        lifecycleStatus === "armed" && controlSession.laneApply.status === "applied"
+          ? "rollback-ready"
+          : lifecycleStatus === "partial"
+            ? "recovery-drilldown"
+            : "blocked";
 
       resetFromLifecycleStage(controlSession);
       controlSession.lifecycleStage = {
         status: lifecycleStatus,
         target: stagedTarget.label,
         stagePlan,
+        applyExecutionId: lifecycleStatus === "blocked" ? null : controlSession.laneApply.executionId,
+        couplingState: lifecycleCouplingState,
+        recoveryReadiness: lifecycleRecoveryReadiness,
         executedAt: null
       };
 
@@ -5316,7 +5438,9 @@ async function runToolsMcpActionInternal(
         Boolean(rootOverlay) &&
         stagedSourceOrder.length > 0 &&
         controlSession.laneApply.status === "applied" &&
-        controlSession.lifecycleStage.status === "armed"
+        controlSession.lifecycleStage.status === "armed" &&
+        controlSession.lifecycleStage.applyExecutionId !== null &&
+        controlSession.lifecycleStage.applyExecutionId === controlSession.laneApply.executionId
           ? "settled"
           : Boolean(rootOverlay) ||
               stagedSourceOrder.length > 0 ||
@@ -5327,11 +5451,18 @@ async function runToolsMcpActionInternal(
             ? "partial"
             : "blocked";
       const checkpoint = settlementStatus === "blocked" ? null : `local-settlement-${controlSession.executionCount + 1}`;
+      const rollbackCouplingState: LocalApplyCouplingStatus =
+        settlementStatus === "settled" ? "ready" : settlementStatus === "partial" ? "partial" : "missing";
+      const rollbackRecoveryReadiness: LocalRecoveryReadiness =
+        settlementStatus === "settled" ? "rollback-ready" : settlementStatus === "partial" ? "recovery-drilldown" : "blocked";
 
       controlSession.rollbackSettlement = {
         status: settlementStatus,
         target: rootOverlay ? shortenHomePath(rootOverlay) : null,
         checkpoint,
+        applyExecutionId: settlementStatus === "blocked" ? null : controlSession.laneApply.executionId,
+        couplingState: rollbackCouplingState,
+        recoveryReadiness: rollbackRecoveryReadiness,
         executedAt: null
       };
 
@@ -5603,7 +5734,8 @@ async function runToolsMcpActionInternal(
       const rootOverlay = controlSession.rootSelection.path ?? preferredRootTarget.path;
       const activationReady =
         controlSession.connectorActivation.status === "active" || controlSession.connectorActivation.status === "prepared";
-      const rollbackReady = Boolean(rootOverlay) && stagedSourceOrder.length >= 2 && activationReady;
+      const applyCoupling = resolveLocalApplyCouplingReadiness(controlSession);
+      const rollbackReady = Boolean(rootOverlay) && stagedSourceOrder.length >= 2 && activationReady && applyCoupling.status === "ready";
       const hostPreviewResolution = finalizeHostPreviewResolution(
         resolveHostPreviewForAction(itemId, actionId, probe, controlSession, cachedCuratedPlugins)
       );
@@ -5641,7 +5773,7 @@ async function runToolsMcpActionInternal(
           `current readiness · ${
             rollbackReady
               ? "rollback settlement is structurally previewable, but live rollback/apply coupling remains boundary-blocked"
-              : "rollback coordination remains boundary-blocked and still lacks one or more technical prerequisites"
+              : `rollback coordination remains boundary-blocked and apply-coupling is ${applyCoupling.status}`
           }`
         ],
         blockerLines: [
@@ -5684,7 +5816,8 @@ async function runToolsMcpActionInternal(
       const laneVerdict = laneLines[laneLines.length - 1]?.replace("lane verdict · ", "") ?? "unknown";
       const activationReady =
         controlSession.connectorActivation.status === "active" || controlSession.connectorActivation.status === "prepared";
-      const applyReady = Boolean(rootOverlay) && stagedSourceOrder.length >= 2 && activationReady && probe.codexPluginCachePresent;
+      const applyCoupling = resolveLocalApplyCouplingReadiness(controlSession);
+      const applyReady = Boolean(rootOverlay) && stagedSourceOrder.length >= 2 && activationReady && probe.codexPluginCachePresent && applyCoupling.status === "ready";
       const hostPreviewResolution = finalizeHostPreviewResolution(
         resolveHostPreviewForAction(itemId, actionId, probe, controlSession, cachedCuratedPlugins)
       );
@@ -5722,7 +5855,7 @@ async function runToolsMcpActionInternal(
           `current readiness · ${
             applyReady
               ? "lane inputs are largely staged, but host apply remains boundary-blocked"
-              : "host apply remains boundary-blocked and still lacks one or more technical prerequisites"
+              : `host apply remains boundary-blocked and apply-coupling is ${applyCoupling.status}`
           }`
         ],
         blockerLines: [

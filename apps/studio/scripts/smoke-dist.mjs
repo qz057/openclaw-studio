@@ -2358,7 +2358,14 @@ function assertHostBoundaryResult(result, itemId, actionId) {
     }
   }
 
-  for (const prefix of ["pre-coupling gate · ", "primary outcome · ", "rollback path · ", "route handoff · "]) {
+  for (const prefix of [
+    "pre-coupling gate · ",
+    "apply coupling · ",
+    "primary outcome · ",
+    "rollback path · ",
+    "recovery readiness · ",
+    "route handoff · "
+  ]) {
     if (!recoveryDrilldownSection?.lines.some((line) => line.startsWith(prefix))) {
       throw new Error(`Host boundary action ${itemId}:${actionId} is missing recovery drilldown line ${prefix.trim()}.`);
     }
@@ -2447,6 +2454,7 @@ async function verifyHostBoundaryActions() {
     if (actionId === "preview-host-lifecycle-rollback" || actionId === "preview-host-lane-apply") {
       const readinessSection = result.sections.find((section) => section.id === "host-boundary-readiness");
       const actionSection = result.sections.find((section) => section.id === "host-boundary-action");
+      const recoveryDrilldownSection = result.sections.find((section) => section.id === "host-bridge-recovery-drilldown");
 
       for (const prefix of ["Studio-local lifecycle stage · ", "Studio-local rollback settlement · "]) {
         if (!readinessSection?.lines.some((line) => line.startsWith(prefix))) {
@@ -2456,6 +2464,14 @@ async function verifyHostBoundaryActions() {
 
       if (!actionSection?.lines.some((line) => line.startsWith("apply coupling · "))) {
         throw new Error(`Host boundary action ${itemId}:${actionId} is missing apply-coupling action visibility.`);
+      }
+
+      if (!recoveryDrilldownSection?.lines.some((line) => line === "apply coupling · unresolved · recovery-drilldown")) {
+        throw new Error(`Host boundary action ${itemId}:${actionId} did not expose the unresolved recovery drilldown state.`);
+      }
+
+      if (!recoveryDrilldownSection?.lines.some((line) => line === "recovery readiness · recovery-drilldown · audit seeded")) {
+        throw new Error(`Host boundary action ${itemId}:${actionId} did not expose the seeded recovery-readiness drilldown.`);
       }
 
       if (handoff.validation.status !== "invalid") {
@@ -2589,14 +2605,92 @@ async function verifyLocalConnectorControls() {
     throw new Error(`Lifecycle local control line did not advance after smoke run: ${lifecycleLine ?? "missing"}.`);
   }
 
+  if (!lifecycleLine.includes("coupling partial") || !lifecycleLine.includes("recovery rollback-ready")) {
+    throw new Error(`Lifecycle local control line lost apply-coupling or rollback-ready visibility: ${lifecycleLine ?? "missing"}.`);
+  }
+
   if (!rollbackLine || rollbackLine === "rollback settlement · idle") {
     throw new Error(`Rollback settlement line did not advance after smoke run: ${rollbackLine ?? "missing"}.`);
+  }
+
+  if (!rollbackLine.includes("coupling ready") || !rollbackLine.includes("recovery rollback-ready")) {
+    throw new Error(`Rollback settlement line lost coupled recovery visibility: ${rollbackLine ?? "missing"}.`);
   }
 
   return {
     status: "verified",
     detail: `${laneLine ?? "lane apply · unknown"} | ${lifecycleLine} | ${rollbackLine}`,
     historyCount: localHistorySection.lines.length
+  };
+}
+
+async function verifyLocalApplyCouplingPreviewReadiness() {
+  await ensureFile(electronRuntimePath);
+
+  const { createStudioRuntime } = require(electronRuntimePath);
+  const runtime = createStudioRuntime();
+  const localActionPlan = [
+    ["mcp-root-scan", "execute-local-root-select"],
+    ["mcp-adjacent-runtime", "execute-local-bridge-stage"],
+    ["mcp-adjacent-runtime", "execute-local-connector-activate"],
+    ["mcp-adjacent-runtime", "execute-local-lane-apply"],
+    ["mcp-adjacent-runtime", "execute-local-lifecycle-stage"],
+    ["mcp-adjacent-runtime", "execute-local-rollback-settlement"]
+  ];
+
+  for (const [itemId, actionId] of localActionPlan) {
+    const result = await runtime.runRuntimeItemAction(itemId, actionId);
+
+    if (!result) {
+      throw new Error(`Local apply-coupling smoke could not execute ${itemId}:${actionId}.`);
+    }
+  }
+
+  const previewActionIds = ["preview-host-lifecycle-rollback", "preview-host-lane-apply"];
+
+  for (const actionId of previewActionIds) {
+    const result = await runtime.runRuntimeItemAction("mcp-adjacent-runtime", actionId);
+
+    assertHostBoundaryResult(result, "mcp-adjacent-runtime", actionId);
+
+    if (result.hostPreview.currentLifecycleStage !== "rollback-host") {
+      throw new Error(`Host boundary action mcp-adjacent-runtime:${actionId} did not advance to rollback-host after local coupling was staged.`);
+    }
+
+    if (result.hostHandoff.validation.status !== "valid") {
+      throw new Error(`Host boundary action mcp-adjacent-runtime:${actionId} did not become validation-valid after local coupling was staged.`);
+    }
+
+    if (result.hostHandoff.approval.decision !== "approved") {
+      throw new Error(`Host boundary action mcp-adjacent-runtime:${actionId} did not become approval-approved after local coupling was staged.`);
+    }
+
+    if (result.hostHandoff.audit.status !== "rollback-linked") {
+      throw new Error(`Host boundary action mcp-adjacent-runtime:${actionId} did not become rollback-linked after local coupling was staged.`);
+    }
+
+    const recoveryDrilldownSection = result.sections.find((section) => section.id === "host-bridge-recovery-drilldown");
+
+    if (!recoveryDrilldownSection?.lines.some((line) => line === "apply coupling · ready · rollback-ready")) {
+      throw new Error(`Host boundary action mcp-adjacent-runtime:${actionId} did not expose rollback-ready apply coupling after local staging.`);
+    }
+
+    if (!recoveryDrilldownSection?.lines.some((line) => line === "recovery readiness · rollback-ready · audit rollback-linked")) {
+      throw new Error(`Host boundary action mcp-adjacent-runtime:${actionId} did not expose rollback-linked recovery readiness after local staging.`);
+    }
+
+    const directHandoff = await runtime.handoffHostPreview("mcp-adjacent-runtime", actionId);
+
+    assertHostPreviewHandoff(directHandoff, `post-local host preview handoff mcp-adjacent-runtime:${actionId}`);
+
+    if (directHandoff.validation.status !== "valid" || directHandoff.approval.decision !== "approved") {
+      throw new Error(`Direct host preview handoff mcp-adjacent-runtime:${actionId} did not stay valid/approved after local coupling was staged.`);
+    }
+  }
+
+  return {
+    status: "verified",
+    detail: `${previewActionIds.join(", ")} => valid/approved/rollback-ready`
   };
 }
 
@@ -3867,6 +3961,7 @@ async function main() {
   const runtimeActions = await verifyRuntimeActionContracts();
   const hostBoundary = await verifyHostBoundaryActions();
   const localControls = await verifyLocalConnectorControls();
+  const coupledHostPreview = await verifyLocalApplyCouplingPreviewReadiness();
   const releaseSkeleton = verifyReleaseSkeletonContract();
   const preflight = getPreflightSummary();
 
@@ -3885,6 +3980,7 @@ async function main() {
       typeof localControls.historyCount === "number" ? `, history=${localControls.historyCount}` : ""
     }`
   );
+  console.log(`Coupled host preview readiness: ${coupledHostPreview.status}${coupledHostPreview.detail ? ` (${coupledHostPreview.detail})` : ""}`);
   console.log(
     `Release skeleton: phase=${releaseSkeleton.phase}, groups=${releaseSkeleton.artifactGroups}, artifacts=${releaseSkeleton.artifactCount}, installer=${releaseSkeleton.installerStatus}`
   );

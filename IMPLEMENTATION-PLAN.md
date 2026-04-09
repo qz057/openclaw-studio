@@ -24,6 +24,12 @@
 4. host/runtime 边界必须先清晰表达，再考虑任何真实执行能力。
 5. 在 approval / rollback / lifecycle 未成型前，不开启真实 host-side execution。
 
+## 最新收口（phase60 slice51）
+
+- `execute-local-lifecycle-stage` / `execute-local-rollback-settlement` 现在会显式记录 apply-coupling / recovery-readiness，而不是只停留在单点 status。
+- `preview-host-lifecycle-rollback` / `preview-host-lane-apply` 现在会按本地 coupling readiness 在 `invalid + withheld + recovery-drilldown` 与 `valid + approved + rollback-ready` 之间切换。
+- smoke 需要同时覆盖未耦合失败链与已耦合就绪链，但仍严格保持 review-only / local-only，不允许真实 host execution、`~/.openclaw` 写入、connector 运行或发布动作。
+
 ## 已完成阶段
 
 ### Phase 1
