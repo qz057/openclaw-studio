@@ -53,16 +53,27 @@ export function readPersistedWorkbenchState(): PersistedWorkbenchState {
   }
 }
 
+export function createPersistedWorkbenchState(
+  currentState: PersistedWorkbenchState,
+  nextState: Partial<PersistedWorkbenchState>
+): PersistedWorkbenchState {
+  return {
+    ...currentState,
+    ...nextState
+  };
+}
+
+export function replacePersistedWorkbenchState(nextState: PersistedWorkbenchState) {
+  try {
+    window.localStorage.setItem(WORKBENCH_STORAGE_KEY, JSON.stringify(nextState));
+  } catch {
+    // Ignore persistence errors so the shell stays usable in restricted environments.
+  }
+}
+
 export function writePersistedWorkbenchState(nextState: Partial<PersistedWorkbenchState>) {
   try {
-    const currentState = readPersistedWorkbenchState();
-    window.localStorage.setItem(
-      WORKBENCH_STORAGE_KEY,
-      JSON.stringify({
-        ...currentState,
-        ...nextState
-      })
-    );
+    replacePersistedWorkbenchState(createPersistedWorkbenchState(readPersistedWorkbenchState(), nextState));
   } catch {
     // Ignore persistence errors so the shell stays usable in restricted environments.
   }

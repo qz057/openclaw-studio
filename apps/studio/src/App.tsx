@@ -78,10 +78,17 @@ import {
   type ReviewCoverageSelectionMemory
 } from "./components/companion-route-history-persistence";
 import {
+  createPersistedWorkbenchState,
+  replacePersistedWorkbenchState,
   readPersistedWorkbenchState,
-  writePersistedWorkbenchState,
+  type PersistedWorkbenchState,
   type WorkbenchSessionFilter
 } from "./components/workbench-persistence";
+import {
+  resolveWorkbenchResumeActionDescriptor,
+  resolveWorkbenchResumeSurfacePatch,
+  type WorkbenchResumeActionDescriptor
+} from "./components/workbench-resume-action";
 import { resolveCompanionRouteContext, type ReviewCoverageAction } from "./reviewCoverageRouteState";
 
 const LazyHomePage = lazy(async () => {
@@ -1169,9 +1176,7 @@ export function App() {
   const [commandLog, setCommandLog] = useState<CommandLogEntry[]>([]);
   const [selectedPaletteEntryId, setSelectedPaletteEntryId] = useState<string | null>(null);
   const [showAllPages, setShowAllPages] = useState(false);
-  const [workbenchSessionFilter, setWorkbenchSessionFilter] = useState<WorkbenchSessionFilter>(() => readPersistedWorkbenchState().sessionFilter);
-  const [lastWorkbenchSessionId, setLastWorkbenchSessionId] = useState<string | null>(() => readPersistedWorkbenchState().lastSessionId);
-  const [lastWorkbenchActionId, setLastWorkbenchActionId] = useState<string | null>(() => readPersistedWorkbenchState().lastActionId);
+  const [workbenchState, setWorkbenchState] = useState<PersistedWorkbenchState>(readPersistedWorkbenchState);
   const [userVisibilityOverrides, setUserVisibilityOverrides] = useState<{
     rightRailVisible: boolean | null;
     bottomDockVisible: boolean | null;
@@ -1182,6 +1187,9 @@ export function App() {
   const [companionRouteMemory, setCompanionRouteMemory] = useState<CompanionRouteMemoryState>(createInitialCompanionRouteMemory);
   const reviewCoverageSelection = companionRouteMemory.selection;
   const companionRouteHistory = companionRouteMemory.entries;
+  const workbenchSessionFilter = workbenchState.sessionFilter;
+  const lastWorkbenchSessionId = workbenchState.lastSessionId;
+  const lastWorkbenchActionId = workbenchState.lastActionId;
 
   useEffect(() => {
     const syncRoute = () => {
@@ -2693,7 +2701,7 @@ export function App() {
   const reanchorWorkbenchAfterReviewAction = (
     activity: ActivityInput,
     surfacePatch?: Partial<Pick<StudioShellLayoutState, "rightRailTabId" | "bottomDockTabId">>,
-    persistencePatch?: Partial<ReturnType<typeof readPersistedWorkbenchState>>
+    persistencePatch?: Partial<PersistedWorkbenchState>
   ) => {
     navigateToPage("sessions");
     applyLayoutPatch({
@@ -2703,20 +2711,12 @@ export function App() {
       bottomDockTabId: surfacePatch?.bottomDockTabId ?? resolvedLayoutState.bottomDockTabId
     });
     if (persistencePatch) {
-      const nextPersistenceState: Partial<ReturnType<typeof readPersistedWorkbenchState>> = {
+      persistWorkbenchState({
         lastPageId: "sessions",
         lastWorkspaceViewId: resolvedLayoutState.workspaceViewId,
         lastFocusedSlotId: resolvedFocusSlotId,
         ...persistencePatch
-      };
-      if (Object.prototype.hasOwnProperty.call(nextPersistenceState, "lastActionId")) {
-        setLastWorkbenchActionId(nextPersistenceState.lastActionId ?? null);
-      }
-
-      persistWorkbenchState(nextPersistenceState);
-      setTimeout(() => {
-        writePersistedWorkbenchState(nextPersistenceState);
-      }, 0);
+      });
     }
     recordActivity(activity);
   };
@@ -2731,7 +2731,7 @@ export function App() {
         rightRailTabId: "windows",
         bottomDockTabId: "windows"
       }, {
-        lastActionId: reviewViewAction?.id ?? inspectBoundaryAction?.id ?? workbenchCommandBarAction.id,
+        lastActionId: "workbench-review-surface-focus",
         lastWorkspaceViewId: "review-deck"
       });
       return;
@@ -2748,7 +2748,7 @@ export function App() {
         rightRailTabId: action.rightRailTabId ?? "windows",
         bottomDockTabId: action.bottomDockTabId ?? "windows"
       }, {
-        lastActionId: reviewViewAction?.id ?? action.id,
+        lastActionId: "workbench-review-surface-focus",
         lastWorkspaceViewId: action.workspaceViewId ?? "review-deck"
       });
   };
@@ -2768,7 +2768,7 @@ export function App() {
       rightRailTabId: "windows",
       bottomDockTabId: "windows"
     }, {
-      lastActionId: reviewViewAction?.id ?? historyEntry?.nextSelection.reviewSurfaceActionId ?? resolvedReviewSurfaceAction?.id ?? null,
+      lastActionId: "workbench-review-surface-handoff",
       lastWorkspaceViewId: "review-deck"
     });
   };
@@ -2783,7 +2783,7 @@ export function App() {
         rightRailTabId: windowsObservabilityAction.rightRailTabId ?? "windows",
         bottomDockTabId: windowsObservabilityAction.bottomDockTabId ?? "windows"
       }, {
-        lastActionId: windowsObservabilityAction.id,
+        lastActionId: "workbench-review-surface-observability",
         lastWorkspaceViewId: "review-deck"
       });
       return;
@@ -2798,7 +2798,7 @@ export function App() {
         rightRailTabId: "windows",
         bottomDockTabId: "windows"
       }, {
-        lastActionId: reviewViewAction?.id ?? inspectBoundaryAction?.id ?? workbenchCommandBarAction.id,
+        lastActionId: "workbench-review-surface-observability",
         lastWorkspaceViewId: "review-deck"
       });
   };
@@ -4652,11 +4652,12 @@ export function App() {
     }
   };
 
-  const persistWorkbenchState = (patch: Partial<ReturnType<typeof readPersistedWorkbenchState>>) => {
-    if (Object.prototype.hasOwnProperty.call(patch, "lastActionId")) {
-      setLastWorkbenchActionId(patch.lastActionId ?? null);
-    }
-    writePersistedWorkbenchState(patch);
+  const persistWorkbenchState = (patch: Partial<PersistedWorkbenchState>) => {
+    setWorkbenchState((currentState) => {
+      const nextState = createPersistedWorkbenchState(currentState, patch);
+      replacePersistedWorkbenchState(nextState);
+      return nextState;
+    });
   };
 
   const resolveSessionWorkbenchAction = (session: SessionSummary): AppWorkbenchAction => {
@@ -4691,7 +4692,6 @@ export function App() {
 
   const handleSessionAction = (session: SessionSummary) => {
     const targetAction = resolveSessionWorkbenchAction(session);
-    setLastWorkbenchSessionId(session.id);
     persistWorkbenchState({
       lastSessionId: session.id,
       lastActionId: targetAction.id,
@@ -4702,8 +4702,8 @@ export function App() {
     targetAction.onTrigger();
   };
 
-  const persistedWorkbenchState = readPersistedWorkbenchState();
-  const persistedResumeAction = lastWorkbenchActionId ? actionById.get(lastWorkbenchActionId) : null;
+  const persistedWorkbenchState = workbenchState;
+  const persistedResumeCommandAction = lastWorkbenchActionId ? actionById.get(lastWorkbenchActionId) ?? null : null;
   const persistedResumePage = persistedWorkbenchState.lastPageId
     ? data.pages.find((page) => page.id === persistedWorkbenchState.lastPageId) ?? null
     : null;
@@ -4713,44 +4713,35 @@ export function App() {
   const persistedResumeSlot = persistedWorkbenchState.lastFocusedSlotId
     ? data.boundary.hostExecutor.bridge.trace.slotRoster.find((slot) => slot.slotId === persistedWorkbenchState.lastFocusedSlotId) ?? null
     : null;
-
-  const resolveRememberedWorkbenchSurfacePatch = (
-    actionId: string | null | undefined
-  ): Pick<StudioShellLayoutState, "rightRailTabId" | "bottomDockTabId"> => {
-    switch (actionId) {
-      case "command-open-trace-view":
-      case "command-show-trace":
-      case "workbench-restore-last-slot":
-        return {
-          rightRailTabId: "trace",
-          bottomDockTabId: "focus"
-        };
-      case "command-inspect-boundary":
-      case "workbench-restore-last-page":
-        return {
-          rightRailTabId: "inspector",
-          bottomDockTabId: "focus"
-        };
-      case "command-open-review-view":
-      case "command-open-windows-observability":
-      case "workbench-resume-last-workspace":
-        return {
-          rightRailTabId: "windows",
-          bottomDockTabId: "windows"
-        };
-      default:
-        return {
-          rightRailTabId: resolvedLayoutState.rightRailTabId,
-          bottomDockTabId: resolvedLayoutState.bottomDockTabId
-        };
-    }
-  };
+  const rememberedResumeAction = resolveWorkbenchResumeActionDescriptor({
+    actionId: lastWorkbenchActionId,
+    commandAction: persistedResumeCommandAction
+      ? {
+          id: persistedResumeCommandAction.id,
+          label: persistedResumeCommandAction.label,
+          description: persistedResumeCommandAction.description,
+          tone: persistedResumeCommandAction.tone
+        }
+      : null,
+    lastPageId: persistedWorkbenchState.lastPageId,
+    sessionTitle: resumeSession?.title ?? null,
+    workspaceLabel: persistedResumeWorkspace?.label ?? null,
+    pageLabel: persistedResumePage?.label ?? persistedWorkbenchState.lastPageId ?? null,
+    slotLabel: persistedResumeSlot?.label ?? persistedWorkbenchState.lastFocusedSlotId ?? null,
+    reviewSurfaceLabel: resolvedReviewSurfaceAction?.label ?? null,
+    latestHandoffLabel: activeCompanionRouteHistoryEntry?.label ?? activeCompanionPathHandoff?.label ?? null,
+    observabilityLabel: resolvedCoverageMapping?.label ?? windowsObservabilityAction?.description ?? null
+  });
+  const persistedResumeAction = rememberedResumeAction;
 
   const restorePersistedWorkbenchAnchor = (mode: "workspace" | "page" | "slot") => {
     const rememberedWorkspaceViewId = persistedResumeWorkspace?.id ?? persistedWorkbenchState.lastWorkspaceViewId ?? null;
     const rememberedPageId = persistedResumePage?.id ?? persistedWorkbenchState.lastPageId ?? null;
     const rememberedSlotId = persistedResumeSlot?.slotId ?? persistedWorkbenchState.lastFocusedSlotId ?? null;
-    const rememberedSurfacePatch = resolveRememberedWorkbenchSurfacePatch(persistedResumeAction?.id ?? null);
+    const rememberedSurfacePatch = resolveWorkbenchResumeSurfacePatch(rememberedResumeAction?.id ?? null, {
+      rightRailTabId: resolvedLayoutState.rightRailTabId,
+      bottomDockTabId: resolvedLayoutState.bottomDockTabId
+    });
 
     if (!rememberedWorkspaceViewId && !rememberedPageId && !(mode === "slot" && rememberedSlotId)) {
       openCommandPalette("");
@@ -4803,8 +4794,46 @@ export function App() {
           : mode === "page"
             ? `${persistedResumePage?.label ?? rememberedPageId ?? "Remembered page"} restored inside ${persistedResumeWorkspace?.label ?? rememberedWorkspaceViewId ?? "the stored workspace"}.`
             : `${persistedResumeWorkspace?.label ?? rememberedWorkspaceViewId ?? "Stored workspace"} restored with ${persistedResumePage?.label ?? rememberedPageId ?? "its remembered page"}.`,
-      safety: "local-only"
+        safety: "local-only"
     });
+  };
+  const runRememberedWorkbenchAction = (descriptor: WorkbenchResumeActionDescriptor | null) => {
+    if (!descriptor) {
+      openCommandPalette("");
+      return;
+    }
+
+    switch (descriptor.kind) {
+      case "command-palette":
+        persistWorkbenchState({
+          lastActionId: descriptor.id,
+          lastPageId: activePage,
+          lastWorkspaceViewId: resolvedLayoutState.workspaceViewId,
+          lastFocusedSlotId: resolvedFocusSlotId
+        });
+        openCommandPalette("open ");
+        return;
+      case "restore-anchor":
+        restorePersistedWorkbenchAnchor(descriptor.anchorMode ?? "workspace");
+        return;
+      case "review-surface-focus":
+        handleRunWorkbenchReviewSurfaceAction(resolvedReviewSurfaceAction);
+        return;
+      case "review-surface-handoff":
+        handleRunWorkbenchCompanionRouteHistory(latestReplayRestoreEntryId);
+        return;
+      case "review-surface-observability":
+        handleRunWorkbenchObservabilityAction();
+        return;
+      case "command-action":
+        if (persistedResumeCommandAction) {
+          executeCommand(persistedResumeCommandAction);
+          return;
+        }
+
+        openCommandPalette("");
+        return;
+    }
   };
 
   const workbenchPrimaryActions: AppWorkbenchAction[] = [
@@ -5005,7 +5034,7 @@ export function App() {
           id: "resume-anchor-action",
           label: "Remembered route",
           value: persistedResumePage?.label ?? persistedWorkbenchState.lastPageId ?? "Unavailable",
-          meta: `${persistedResumeWorkspace?.label ?? "No workspace"} / ${persistedResumeAction?.label ?? "No stored action"}`
+          meta: `${persistedResumeWorkspace?.label ?? "No workspace"} / ${rememberedResumeAction?.label ?? "No stored action"}`
         },
         {
           id: "resume-anchor-slot",
@@ -5044,16 +5073,11 @@ export function App() {
         },
         {
           id: "resume-anchor-remembered-action",
-          label: persistedResumeAction?.label ?? "Run remembered action",
+          label: rememberedResumeAction?.label ?? "Run remembered action",
           description: persistedResumeAction?.description ?? "重新运行上一条命令动作或打开命令面板以选一个动作。",
           tone: persistedResumeAction?.tone ?? "neutral",
           onTrigger: () => {
-            if (persistedResumeAction) {
-              executeCommand(persistedResumeAction);
-              return;
-            }
-
-            openCommandPalette("");
+            runRememberedWorkbenchAction(rememberedResumeAction);
           }
         }
       ],
@@ -5260,7 +5284,6 @@ export function App() {
     sessionFilter: workbenchSessionFilter,
     onSessionAction: handleSessionAction,
     onSessionFilterChange: (filter) => {
-      setWorkbenchSessionFilter(filter);
       persistWorkbenchState({ sessionFilter: filter });
     }
   };
