@@ -4833,7 +4833,10 @@ export function App() {
           id: "resume-anchor-review",
           label: "Activate Review Deck View",
           description: currentReviewerQueue?.label ?? "回到当前 review posture。",
-          tone: currentReviewerQueue?.acknowledgementState === "awaiting-ack" ? "warning" : "neutral",
+          tone:
+            currentReviewerQueue?.acknowledgementState === "pending" || currentReviewerQueue?.acknowledgementState === "overdue"
+              ? "warning"
+              : "neutral",
           onTrigger: () => {
             (reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction).onTrigger();
           }
