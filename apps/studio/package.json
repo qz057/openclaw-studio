@@ -11,9 +11,9 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@esbuild/linux-x64": "https://cdn.npmmirror.com/packages/%40esbuild/linux-x64/0.21.5/linux-x64-0.21.5.tgz",
     "@types/node": "22.19.15",
-    "@rollup/rollup-linux-x64-gnu": "https://cdn.npmmirror.com/packages/%40rollup/rollup-linux-x64-gnu/4.59.0/rollup-linux-x64-gnu-4.59.0.tgz",
+    "electron-builder": "^24.13.3",
+    "esbuild": "0.21.5",
     "rollup": "https://cdn.npmmirror.com/packages/rollup/4.59.0/rollup-4.59.0.tgz",
     "typescript": "5.9.3",
     "vite": "5.4.21"
@@ -28,6 +28,9 @@
     "build:electron": "tsc -p tsconfig.electron.json",
     "doctor": "node ./scripts/doctor-studio.cjs",
     "package:alpha": "node ./scripts/package-alpha.cjs",
+    "package:smoke": "node ./scripts/package-smoke.cjs",
+    "package:windows:local": "node ./scripts/package-windows-local.cjs --dir",
+    "package:windows:portable": "node ./scripts/package-windows-local.cjs --portable",
     "release:plan": "node ./scripts/release-plan.cjs",
     "smoke": "node ./scripts/smoke-dist.mjs",
     "start:smoke": "node ./scripts/start-smoke.cjs",

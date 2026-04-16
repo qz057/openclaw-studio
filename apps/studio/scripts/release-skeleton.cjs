@@ -12332,12 +12332,24 @@ function writeJsonFile(filePath, content) {
 }
 
 function copyIntoPackage(sourcePath, destinationPath) {
+  const stats = fs.statSync(sourcePath);
+
+  if (stats.isDirectory()) {
+    fs.mkdirSync(destinationPath, {
+      recursive: true
+    });
+
+    for (const entry of fs.readdirSync(sourcePath, { withFileTypes: true })) {
+      copyIntoPackage(path.join(sourcePath, entry.name), path.join(destinationPath, entry.name));
+    }
+
+    return;
+  }
+
   fs.mkdirSync(path.dirname(destinationPath), {
     recursive: true
   });
-  fs.cpSync(sourcePath, destinationPath, {
-    recursive: true
-  });
+  fs.copyFileSync(sourcePath, destinationPath);
 }
 
 function writeReleaseSkeleton(destinationRoot, skeleton) {

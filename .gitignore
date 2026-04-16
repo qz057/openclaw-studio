@@ -1,4 +1,5 @@
 node_modules
+apps/studio/.packaging
 dist
 dist-renderer
 dist-electron
