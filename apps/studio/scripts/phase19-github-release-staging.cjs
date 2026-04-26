@@ -4,7 +4,7 @@ const crypto = require("node:crypto");
 const { spawnSync } = require("node:child_process");
 
 const DATE = "20260426";
-const VERSION = "v0.1.0-preview";
+const VERSION = "v0.1.0-preview.1";
 const TWO_GIB = 2 * 1024 * 1024 * 1024;
 
 function readJson(filePath) {
@@ -171,7 +171,7 @@ function main() {
     "gh auth status",
     "git push origin main",
     "git push origin $Tag",
-    "gh release create $Tag --repo \"$Owner/$Repo\" --title 'OpenClaw Studio v0.1.0 Preview' --notes-file $Notes --prerelease @Assets",
+    "gh release create $Tag --repo \"$Owner/$Repo\" --title 'OpenClaw Studio v0.1.0 Preview 1' --notes-file $Notes --prerelease @Assets",
     ""
   ].join("\n");
   writeFile(path.join(uploadRoot, "PUBLISH_WITH_GH.ps1"), uploadCommand);
@@ -180,11 +180,11 @@ function main() {
     "# Browser Release Upload Steps",
     "",
     "1. Create a public GitHub repository.",
-    "2. Push `main` and `v0.1.0-preview` from this local repository.",
+    "2. Push `main` and `v0.1.0-preview.1` from this local repository.",
     "3. Open the GitHub repository page.",
     "4. Go to Releases -> Draft a new release.",
-    "5. Select or type tag `v0.1.0-preview`.",
-    "6. Title: `OpenClaw Studio v0.1.0 Preview`.",
+    "5. Select or type tag `v0.1.0-preview.1`.",
+    "6. Title: `OpenClaw Studio v0.1.0 Preview 1`.",
     `7. Paste release notes from \`${releaseNotesCopy}\`.`,
     `8. Upload all files from \`${assetsRoot}\`.`,
     "9. Mark the release as pre-release.",

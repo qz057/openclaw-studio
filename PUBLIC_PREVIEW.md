@@ -5,7 +5,7 @@ This repository can be published as a GitHub public preview without code signing
 ## Current Release Mode
 
 - Channel: unsigned public preview
-- Version tag: `v0.1.0-preview`
+- Version tag: `v0.1.0-preview.1`
 - Binary delivery: GitHub Release assets
 - Source delivery: Git repository
 - Latest runtime closeout: `delivery/phase20-runtime-release-closeout-20260426.md`
@@ -42,7 +42,7 @@ npm run phase18:github-public-preview-pack
 
 Output:
 
-- `delivery/github-public-preview-20260426/RELEASE_NOTES_v0.1.0-preview.md`
+- `delivery/github-public-preview-20260426/RELEASE_NOTES_v0.1.0-preview.1.md`
 - `delivery/github-public-preview-20260426/GITHUB_RELEASE_ASSETS.json`
 - `delivery/github-public-preview-20260426/GITHUB_RELEASE_COMMANDS.ps1`
 - `delivery/github-public-preview-20260426/README-PUBLIC-PREVIEW.md`
@@ -56,7 +56,7 @@ npm run phase19:github-release-staging
 
 Output:
 
-- `delivery/github-release-upload-20260426/RELEASE_NOTES_v0.1.0-preview.md`
+- `delivery/github-release-upload-20260426/RELEASE_NOTES_v0.1.0-preview.1.md`
 - `delivery/github-release-upload-20260426/assets/SHA256SUMS.txt`
 - `delivery/github-release-upload-20260426/BROWSER_UPLOAD_STEPS.md`
 - `delivery/github-release-upload-20260426/PUBLISH_WITH_GH.ps1`

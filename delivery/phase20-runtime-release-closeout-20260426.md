@@ -33,7 +33,7 @@ release-candidate-ready-for-github-preview
 - Phase 18 public preview pack: `github-public-preview-pack-ready`
 - Phase 19 GitHub upload staging: `github-release-upload-staged`
 - Upload root: `delivery/github-release-upload-20260426`
-- Release notes: `delivery/github-release-upload-20260426/RELEASE_NOTES_v0.1.0-preview.md`
+- Release notes: `delivery/github-release-upload-20260426/RELEASE_NOTES_v0.1.0-preview.1.md`
 - Asset checksums: `delivery/github-release-upload-20260426/assets/SHA256SUMS.txt`
 
 ## Fixed In This Closeout

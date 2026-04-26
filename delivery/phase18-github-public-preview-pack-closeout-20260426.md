@@ -7,7 +7,7 @@ github-public-preview-pack-ready
 ## Generated Pack
 
 - root: `E:\claucd\界面控制台程序\delivery\github-public-preview-20260426`
-- release notes: `delivery/github-public-preview-20260426/RELEASE_NOTES_v0.1.0-preview.md`
+- release notes: `delivery/github-public-preview-20260426/RELEASE_NOTES_v0.1.0-preview.1.md`
 - release asset manifest: `delivery/github-public-preview-20260426/GITHUB_RELEASE_ASSETS.json`
 - release commands: `delivery/github-public-preview-20260426/GITHUB_RELEASE_COMMANDS.ps1`
 - public preview README: `delivery/github-public-preview-20260426/README-PUBLIC-PREVIEW.md`
@@ -24,7 +24,7 @@ github-public-preview-pack-ready
 | RC manifest | yes | 10980 | `6314F97822A75E4AA8242328FEC49B565A4003DD91810030C645BCC72AE3DF83` |
 | Public release handoff | yes | 4619 | `3543B2F7A7B9E8B49B28D286EE378684742A02D326397F68E2BEF571434B5356` |
 | Signing handoff audit | yes | 1146 | `86B83F9B7054827E7AEAE49BDD30378E184686173920E5ADFB80C93E78CB16FA` |
-| Runtime release closeout | yes | 3142 | `4995CC5A7F43AC34E8AC8BE706F32597E3DFC19C7F13A5CB0C86473F477B9FA0` |
+| Runtime release closeout | yes | 3144 | `8A0DBA6BB0B35B7EB0A454442284DC2E0D6BA92702047DBB2C3FCFC9C85B4DBB` |
 
 ## Public Source Scan
 
