@@ -2,6 +2,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
+const DEFAULT_TIMESTAMP_URL = "http://timestamp.digicert.com";
+
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, ""));
 }
@@ -82,11 +84,39 @@ function findWindowsKitSigntool() {
   return found.sort().reverse();
 }
 
-function collectSigntoolCandidates() {
-  return [...new Set([...findWithWhere("signtool.exe"), ...findWindowsKitSigntool()])];
+function findBundledSigntool(repoRoot) {
+  const toolsRoot = path.join(repoRoot, ".tools", "windows-sdk-buildtools");
+  const found = [];
+
+  if (!fs.existsSync(toolsRoot)) {
+    return found;
+  }
+
+  const stack = [toolsRoot];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const entryPath = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(entryPath);
+      } else if (entry.name.toLowerCase() === "signtool.exe") {
+        found.push(entryPath);
+      }
+    }
+  }
+
+  return found.sort((left, right) => {
+    const score = (candidate) => (candidate.includes(`${path.sep}x64${path.sep}`) ? 0 : 1);
+    return score(left) - score(right) || right.localeCompare(left);
+  });
+}
+
+function collectSigntoolCandidates(repoRoot) {
+  return [...new Set([...findWithWhere("signtool.exe"), ...findWindowsKitSigntool(), ...findBundledSigntool(repoRoot)])];
 }
 
 function collectSigningEnv() {
+  const timestampUrl = process.env.WINDOWS_CODESIGN_TIMESTAMP_URL || DEFAULT_TIMESTAMP_URL;
   const candidates = {
     CSC_LINK: hasEnv("CSC_LINK"),
     CSC_KEY_PASSWORD: hasEnv("CSC_KEY_PASSWORD"),
@@ -113,7 +143,9 @@ function collectSigningEnv() {
       candidates.WINDOWS_CODESIGN_CERT_PASSWORD ||
       candidates.WINDOWS_CODESIGN_CERT_THUMBPRINT ||
       candidates.WINDOWS_CODESIGN_CERT_SUBJECT,
-    hasTimestampInput: candidates.WINDOWS_CODESIGN_TIMESTAMP_URL
+    hasTimestampInput: Boolean(timestampUrl),
+    timestampUrl,
+    timestampUrlSource: candidates.WINDOWS_CODESIGN_TIMESTAMP_URL ? "env" : "default"
   };
 }
 
@@ -155,7 +187,7 @@ function main() {
     });
   }
 
-  const signtoolCandidates = process.platform === "win32" ? collectSigntoolCandidates() : [];
+  const signtoolCandidates = process.platform === "win32" ? collectSigntoolCandidates(repoRoot) : [];
   const powershellAuthenticode = hasPowerShellAuthenticode();
 
   if (signtoolCandidates.length === 0 && !powershellAuthenticode) {

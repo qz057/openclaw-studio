@@ -25,11 +25,11 @@ Public release remains blocked by signing prerequisites. Local QA and artifact U
 
 ## Signing Inputs
 
-- signtool: missing
+- signtool: E:\claucd\界面控制台程序\.tools\windows-sdk-buildtools\10.0.26100.7705\bin\10.0.26100.0\x64\signtool.exe
 - PowerShell Authenticode: available
 - certificate input: missing
 - password input: missing
-- timestamp URL: missing
+- timestamp URL: present (default: http://timestamp.digicert.com)
 - installer signature: NotSigned
 - signing bridge: dev-signed-untrusted / UnknownError
 - signing bridge target: `E:\claucd\界面控制台程序\apps\studio\.packaging\windows-signed-dev\out\OpenClaw-Studio-0.1.0-win-x64-setup.dev-signed.exe`
@@ -37,7 +37,7 @@ Public release remains blocked by signing prerequisites. Local QA and artifact U
 - signing env template: `E:\claucd\界面控制台程序\delivery\phase15-signing-env.template.ps1`
 - signing materials pack: materials-pack-ready-external-inputs-required
 - signing materials root: `E:\claucd\界面控制台程序\delivery\signing-materials-20260426`
-- signing external materials tracked: 5
+- signing external materials tracked: 4
 - signing handoff audit: external-signing-handoff-ready
 - signing handoff secret findings: 0
 - signing gate fail-fast probe: passed
@@ -47,10 +47,8 @@ Public release remains blocked by signing prerequisites. Local QA and artifact U
 - phase9:windows-installer-not-signed - NSIS installer signature status is NotSigned.
 - phase9:signing-certificate-input-missing - No signing certificate input env var is present.
 - phase9:signing-password-input-missing - No signing password env var is present.
-- phase9:timestamp-url-missing - No timestamp authority URL env var is present.
 - phase10:signing-certificate-input-missing - Set CSC_LINK, WIN_CSC_LINK, or WINDOWS_CODESIGN_CERT_FILE before signing.
 - phase10:signing-password-input-missing - Set CSC_KEY_PASSWORD, WIN_CSC_KEY_PASSWORD, or WINDOWS_CODESIGN_CERT_PASSWORD before signing.
-- phase10:timestamp-url-missing - Set WINDOWS_CODESIGN_TIMESTAMP_URL before signing.
 
 ## Command Plan
 
@@ -63,7 +61,7 @@ Install Windows SDK / App Certification Kit so signtool.exe is available on PATH
 - set-signing-env: signing inputs are missing
 
 ```powershell
-Set CSC_LINK or WINDOWS_CODESIGN_CERT_FILE, CSC_KEY_PASSWORD or WINDOWS_CODESIGN_CERT_PASSWORD, and WINDOWS_CODESIGN_TIMESTAMP_URL in the signing environment.
+Set CSC_LINK or WINDOWS_CODESIGN_CERT_FILE plus CSC_KEY_PASSWORD or WINDOWS_CODESIGN_CERT_PASSWORD; the default timestamp URL is http://timestamp.digicert.com unless the CA requires another TSA.
 ```
 
 - rebuild-installer: signing inputs are present

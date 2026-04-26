@@ -7,6 +7,7 @@ apps/studio/output/
 apps/studio/NVIDIA Corporation
 apps/studio/vite.config.mts.timestamp-*.mjs
 .tmp
+.tools
 dist
 dist-renderer
 dist-electron

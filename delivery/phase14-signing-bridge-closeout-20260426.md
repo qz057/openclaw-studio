@@ -8,14 +8,14 @@ dev-signed-untrusted
 
 | Artifact | Path | Size | SHA256 |
 |---|---|---:|---|
-| Development signed installer copy | `E:\claucd\界面控制台程序\apps\studio\.packaging\windows-signed-dev\out\OpenClaw-Studio-0.1.0-win-x64-setup.dev-signed.exe` | 102279392 bytes | `A30A803CD7092708B88799CD97D2D3FC72504848427DF99D5FB5EED49DF872E2` |
+| Development signed installer copy | `E:\claucd\界面控制台程序\apps\studio\.packaging\windows-signed-dev\out\OpenClaw-Studio-0.1.0-win-x64-setup.dev-signed.exe` | 102285120 bytes | `15958BC9F7090AA26C4001361F603B7CD29F6046ABE877026658CA56A31BA235` |
 
 ## Signature
 
 - Verification status: UnknownError
 - Signer: CN=OpenClaw Studio Development Code Signing
 - Thumbprint: B0E327B31516453070D8583420201F7FEEBF44DE
-- Timestamp attached: no
+- Timestamp attached: yes
 
 ## Boundaries
 

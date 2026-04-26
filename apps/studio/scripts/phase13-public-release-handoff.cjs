@@ -63,7 +63,7 @@ function main() {
       id: "set-signing-env",
       requiredWhen: "signing inputs are missing",
       command:
-        "Set CSC_LINK or WINDOWS_CODESIGN_CERT_FILE, CSC_KEY_PASSWORD or WINDOWS_CODESIGN_CERT_PASSWORD, and WINDOWS_CODESIGN_TIMESTAMP_URL in the signing environment."
+        "Set CSC_LINK or WINDOWS_CODESIGN_CERT_FILE plus CSC_KEY_PASSWORD or WINDOWS_CODESIGN_CERT_PASSWORD; the default timestamp URL is http://timestamp.digicert.com unless the CA requires another TSA."
     },
     {
       id: "rebuild-installer",
@@ -118,6 +118,8 @@ function main() {
       certificateInput: signingEnv?.hasCertificateInput ?? false,
       passwordInput: signingEnv?.hasPasswordInput ?? false,
       timestampInput: signingEnv?.hasTimestampInput ?? false,
+      timestampUrl: signingEnv?.timestampUrl ?? null,
+      timestampUrlSource: signingEnv?.timestampUrlSource ?? null,
       installerSignatureStatus: phase8.signature?.status ?? "unknown",
       bridgeStatus: phase14?.status ?? "not-run",
       bridgeTarget: phase14?.targetInstaller ?? null,
@@ -128,7 +130,7 @@ function main() {
         : null,
       materialsPackStatus: phase16?.status ?? "not-run",
       materialsRoot: phase16?.materialsRoot ?? null,
-      materialsRequiredExternalCount: phase16?.requiredExternalMaterials?.length ?? null,
+      materialsRequiredExternalCount: phase16?.blockers?.length ?? null,
       handoffAuditStatus: phase17?.status ?? "not-run",
       handoffAuditSecretFindings: phase17?.secretScan?.findings?.length ?? null,
       handoffAuditGateFailFast: phase17?.gateProbe?.expectedFailureConfirmed ?? null
@@ -174,7 +176,7 @@ function main() {
     `- PowerShell Authenticode: ${report.signing.powershellAuthenticodeFound ? "available" : "missing"}`,
     `- certificate input: ${bool(report.signing.certificateInput)}`,
     `- password input: ${bool(report.signing.passwordInput)}`,
-    `- timestamp URL: ${bool(report.signing.timestampInput)}`,
+    `- timestamp URL: ${bool(report.signing.timestampInput)}${report.signing.timestampUrl ? ` (${report.signing.timestampUrlSource}: ${report.signing.timestampUrl})` : ""}`,
     `- installer signature: ${report.signing.installerSignatureStatus}`,
     `- signing bridge: ${report.signing.bridgeStatus}${report.signing.bridgeVerificationStatus ? ` / ${report.signing.bridgeVerificationStatus}` : ""}`,
     report.signing.bridgeTarget ? `- signing bridge target: \`${report.signing.bridgeTarget}\`` : "- signing bridge target: not generated",

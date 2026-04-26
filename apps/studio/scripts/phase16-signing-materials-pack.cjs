@@ -55,8 +55,8 @@ function main() {
     {
       id: "timestamp-authority-url",
       owner: "publisher-release",
-      status: "external-required",
-      detail: "Trusted timestamp URL such as the timestamp service provided by the selected CA."
+      status: "ready-default",
+      detail: "Default trusted timestamp URL is http://timestamp.digicert.com; replace it only if the selected CA requires a different TSA."
     }
   ];
 
@@ -72,7 +72,9 @@ function main() {
     "PUBLIC-RELEASE-GATE-COMMANDS.ps1"
   ];
 
-  const status = requiredExternalMaterials.every((item) => item.status === "ready")
+  const openExternalMaterials = requiredExternalMaterials.filter((item) => !item.status.startsWith("ready"));
+
+  const status = openExternalMaterials.length === 0
     ? "materials-ready"
     : "materials-pack-ready-external-inputs-required";
 
@@ -173,7 +175,7 @@ function main() {
       "# $env:WINDOWS_CODESIGN_CERT_SUBJECT = '<publisher subject fragment>'",
       "",
       "# Timestamp authority. Prefer the TSA documented by the selected CA.",
-      "$env:WINDOWS_CODESIGN_TIMESTAMP_URL = 'https://timestamp.digicert.com'",
+      "$env:WINDOWS_CODESIGN_TIMESTAMP_URL = 'http://timestamp.digicert.com'",
       "",
       "# Save a filled private copy as SIGNING-ENV.private.ps1 beside this template.",
       "# Run PUBLIC-RELEASE-GATE-COMMANDS.ps1 after the private copy is complete.",
@@ -267,7 +269,7 @@ function main() {
   writeJson(path.join(materialsRoot, "TIMESTAMP-POLICY.json"), {
     required: true,
     envVar: "WINDOWS_CODESIGN_TIMESTAMP_URL",
-    defaultCandidate: "https://timestamp.digicert.com",
+    defaultCandidate: "http://timestamp.digicert.com",
     notes: [
       "Use the timestamp authority documented by the selected CA whenever possible.",
       "Public release should not proceed without timestamped Authenticode verification."
@@ -304,7 +306,7 @@ function main() {
       phase14Status: phase14?.status ?? "missing",
       phase15Status: phase15?.status ?? "missing"
     },
-    blockers: requiredExternalMaterials
+    blockers: openExternalMaterials
   };
 
   writeJson(path.join(deliveryRoot, "phase16-signing-materials-pack-20260426.json"), report);
@@ -328,7 +330,13 @@ function main() {
       "",
       "## External Materials Still Required",
       "",
-      ...requiredExternalMaterials.map((item) => `- ${item.id}: ${item.detail}`),
+      ...openExternalMaterials.map((item) => `- ${item.id}: ${item.detail}`),
+      "",
+      "## Ready Defaults",
+      "",
+      ...requiredExternalMaterials
+        .filter((item) => item.status.startsWith("ready"))
+        .map((item) => `- ${item.id}: ${item.detail}`),
       "",
       "## Notes",
       "",

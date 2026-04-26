@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-04-26T16:24:36.439Z",
+  "generatedAt": "2026-04-26T17:00:49.610Z",
   "status": "dev-signed-untrusted",
   "mode": "dev-self-signed-copy",
   "sourceInstaller": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-installer\\out\\OpenClaw-Studio-0.1.0-win-x64-setup.exe",
   "targetInstaller": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-signed-dev\\out\\OpenClaw-Studio-0.1.0-win-x64-setup.dev-signed.exe",
-  "size": 102279392,
-  "sha256": "A30A803CD7092708B88799CD97D2D3FC72504848427DF99D5FB5EED49DF872E2",
+  "size": 102285120,
+  "sha256": "15958BC9F7090AA26C4001361F603B7CD29F6046ABE877026658CA56A31BA235",
   "signature": {
     "target": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-signed-dev\\out\\OpenClaw-Studio-0.1.0-win-x64-setup.dev-signed.exe",
     "setStatus": "UnknownError",
@@ -14,18 +14,21 @@
     "signerThumbprint": "B0E327B31516453070D8583420201F7FEEBF44DE",
     "signerIssuer": "CN=OpenClaw Studio Development Code Signing",
     "signerNotAfter": "2028-04-26T13:00:09.0000000+08:00",
-    "hasTimestamp": false,
-    "timestampSubject": null
+    "hasTimestamp": true,
+    "timestampSubject": "CN=DigiCert SHA256 RSA4096 Timestamp Responder 2025 1, O=\"DigiCert, Inc.\", C=US"
+  },
+  "timestampEvidence": {
+    "requestedUrl": "http://timestamp.digicert.com",
+    "tool": null,
+    "applied": false,
+    "alreadyPresent": true,
+    "attempts": []
   },
   "publicReady": false,
   "blockers": [
     {
       "id": "dev-self-signed-not-public",
       "detail": "The generated signature proves the local signing path but is not trusted for public distribution."
-    },
-    {
-      "id": "timestamp-missing",
-      "detail": "No timestamp certificate was attached to the signature."
     }
   ]
 }

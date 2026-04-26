@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-26T16:29:22.317Z",
+  "generatedAt": "2026-04-26T17:02:05.392Z",
   "status": "release-candidate-ready-for-github-preview",
   "version": "v0.1.0-preview.4",
   "appRoot": "E:\\claucd\\界面控制台程序\\apps\\studio",
@@ -134,11 +134,6 @@
         "id": "signing-password-input-missing",
         "severity": "release-blocker",
         "detail": "No signing password env var is present."
-      },
-      {
-        "id": "timestamp-url-missing",
-        "severity": "release-blocker",
-        "detail": "No timestamp authority URL env var is present."
       }
     ],
     "signingReadinessBlockers": [
@@ -149,10 +144,6 @@
       {
         "id": "signing-password-input-missing",
         "detail": "Set CSC_KEY_PASSWORD, WIN_CSC_KEY_PASSWORD, or WINDOWS_CODESIGN_CERT_PASSWORD before signing."
-      },
-      {
-        "id": "timestamp-url-missing",
-        "detail": "Set WINDOWS_CODESIGN_TIMESTAMP_URL before signing."
       }
     ]
   },
@@ -196,20 +187,20 @@
       {
         "label": "Runtime release closeout",
         "role": "release-note-evidence",
-        "size": 3016
+        "size": 2923
       }
     ]
   },
   "git": {
-    "head": "18bedbbb972a8745b61d49a57021f2268abfdb0e",
+    "head": "f7e38f051ebe8dc182bdab96cf7992fd9fb1a973",
     "tag": "v0.1.0-preview.4",
     "tagCommit": "18bedbbb972a8745b61d49a57021f2268abfdb0e",
-    "tagAlignedWithHead": true,
+    "tagAlignedWithHead": false,
     "remotes": "origin\thttps://github.com/qz057/openclaw-studio.git (fetch)\norigin\thttps://github.com/qz057/openclaw-studio.git (push)",
-    "dirtyFiles": 8
+    "dirtyFiles": 22
   },
   "githubCli": {
-    "loggedIn": true
+    "loggedIn": false
   },
   "boundaries": [
     "Windows preview artifacts remain unsigned until trusted code-signing material is supplied.",

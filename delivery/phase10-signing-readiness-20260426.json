@@ -1,12 +1,16 @@
 {
-  "generatedAt": "2026-04-26T16:24:44.166Z",
+  "generatedAt": "2026-04-26T17:00:44.469Z",
   "status": "blocked",
   "mode": "readiness",
   "installerPath": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-installer\\out\\OpenClaw-Studio-0.1.0-win-x64-setup.exe",
   "signtool": {
-    "found": false,
-    "selected": null,
-    "candidates": []
+    "found": true,
+    "selected": "E:\\claucd\\界面控制台程序\\.tools\\windows-sdk-buildtools\\10.0.26100.7705\\bin\\10.0.26100.0\\x64\\signtool.exe",
+    "candidates": [
+      "E:\\claucd\\界面控制台程序\\.tools\\windows-sdk-buildtools\\10.0.26100.7705\\bin\\10.0.26100.0\\x64\\signtool.exe",
+      "E:\\claucd\\界面控制台程序\\.tools\\windows-sdk-buildtools\\10.0.26100.7705\\bin\\10.0.26100.0\\x86\\signtool.exe",
+      "E:\\claucd\\界面控制台程序\\.tools\\windows-sdk-buildtools\\10.0.26100.7705\\bin\\10.0.26100.0\\arm64\\signtool.exe"
+    ]
   },
   "powershellAuthenticode": {
     "found": true
@@ -25,7 +29,9 @@
     },
     "hasCertificateInput": false,
     "hasPasswordInput": false,
-    "hasTimestampInput": false
+    "hasTimestampInput": true,
+    "timestampUrl": "http://timestamp.digicert.com",
+    "timestampUrlSource": "default"
   },
   "upstream": {
     "releaseGatePath": "E:\\claucd\\界面控制台程序\\delivery\\phase9-release-gate-20260426.json",
@@ -33,9 +39,7 @@
     "installerCloseoutPath": "E:\\claucd\\界面控制台程序\\delivery\\phase8-installer-closeout-20260426.json",
     "installerSignatureStatus": "NotSigned"
   },
-  "warnings": [
-    "signtool.exe is missing; PowerShell Authenticode signing is available as the local signing bridge."
-  ],
+  "warnings": [],
   "blockers": [
     {
       "id": "signing-certificate-input-missing",
@@ -44,10 +48,6 @@
     {
       "id": "signing-password-input-missing",
       "detail": "Set CSC_KEY_PASSWORD, WIN_CSC_KEY_PASSWORD, or WINDOWS_CODESIGN_CERT_PASSWORD before signing."
-    },
-    {
-      "id": "timestamp-url-missing",
-      "detail": "Set WINDOWS_CODESIGN_TIMESTAMP_URL before signing."
     }
   ]
 }

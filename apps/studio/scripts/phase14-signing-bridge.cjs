@@ -3,6 +3,8 @@ const crypto = require("node:crypto");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
+const DEFAULT_TIMESTAMP_URL = "http://timestamp.digicert.com";
+
 function resolvePowerShell() {
   const candidates = ["pwsh.exe", "powershell.exe"];
 
@@ -67,6 +69,145 @@ function psSingle(value) {
   return String(value).replace(/'/g, "''");
 }
 
+function findWithWhere(command) {
+  const result = spawnSync("where.exe", [command], {
+    encoding: "utf8",
+    shell: false
+  });
+
+  if ((result.status ?? 1) !== 0) {
+    return [];
+  }
+
+  return result.stdout.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+}
+
+function findBundledSigntool(repoRoot) {
+  const toolsRoot = path.join(repoRoot, ".tools", "windows-sdk-buildtools");
+  const found = [];
+
+  if (!fs.existsSync(toolsRoot)) {
+    return found;
+  }
+
+  const stack = [toolsRoot];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const entryPath = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(entryPath);
+      } else if (entry.name.toLowerCase() === "signtool.exe") {
+        found.push(entryPath);
+      }
+    }
+  }
+
+  return found.sort((left, right) => {
+    const score = (candidate) => (candidate.includes(`${path.sep}x64${path.sep}`) ? 0 : 1);
+    return score(left) - score(right) || right.localeCompare(left);
+  });
+}
+
+function collectSigntoolCandidates(repoRoot) {
+  return [...new Set([...findWithWhere("signtool.exe"), ...findBundledSigntool(repoRoot)])];
+}
+
+function summarizeProcessOutput(result) {
+  return [result.stdout, result.stderr]
+    .filter(Boolean)
+    .join("\n")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 4)
+    .join(" | ");
+}
+
+function runSigntool(signtoolPath, args) {
+  const result = spawnSync(signtoolPath, args, {
+    encoding: "utf8",
+    shell: false
+  });
+
+  return {
+    status: result.status ?? null,
+    error: result.error ? String(result.error.message || result.error) : null,
+    message: summarizeProcessOutput(result)
+  };
+}
+
+function timestampUrlCandidates(timestampUrl) {
+  const candidates = [timestampUrl].filter(Boolean);
+  if (timestampUrl === "https://timestamp.digicert.com") {
+    candidates.push("http://timestamp.digicert.com");
+  }
+
+  return [...new Set(candidates)];
+}
+
+function timestampWithSigntool(repoRoot, targetInstaller, timestampUrl) {
+  const candidates = collectSigntoolCandidates(repoRoot);
+  const evidence = {
+    requestedUrl: timestampUrl || null,
+    tool: candidates[0] ?? null,
+    applied: false,
+    attempts: []
+  };
+
+  if (!timestampUrl || candidates.length === 0) {
+    return evidence;
+  }
+
+  for (const url of timestampUrlCandidates(timestampUrl)) {
+    const attempts = [
+      { mode: "rfc3161", args: ["timestamp", "/tr", url, "/td", "SHA256", targetInstaller] },
+      { mode: "authenticode", args: ["timestamp", "/t", url, targetInstaller] }
+    ];
+
+    for (const attempt of attempts) {
+      const result = runSigntool(candidates[0], attempt.args);
+      evidence.attempts.push({
+        mode: attempt.mode,
+        url,
+        status: result.status,
+        error: result.error,
+        message: result.message
+      });
+
+      if (result.status === 0) {
+        evidence.applied = true;
+        evidence.appliedUrl = url;
+        evidence.appliedMode = attempt.mode;
+        return evidence;
+      }
+    }
+  }
+
+  return evidence;
+}
+
+function readSignatureInfo(targetInstaller) {
+  const ps = `
+$ErrorActionPreference = 'Stop'
+$target = '${psSingle(targetInstaller)}'
+$verification = Get-AuthenticodeSignature -FilePath $target
+$signer = $verification.SignerCertificate
+$timestamp = $verification.TimeStamperCertificate
+[pscustomobject]@{
+  verifyStatus = [string]$verification.Status
+  signerSubject = if ($signer) { $signer.Subject } else { $null }
+  signerThumbprint = if ($signer) { $signer.Thumbprint } else { $null }
+  signerIssuer = if ($signer) { $signer.Issuer } else { $null }
+  signerNotAfter = if ($signer) { $signer.NotAfter.ToString('o') } else { $null }
+  hasTimestamp = [bool]$timestamp
+  timestampSubject = if ($timestamp) { $timestamp.Subject } else { $null }
+} | ConvertTo-Json -Depth 4
+`;
+
+  return JSON.parse(runPowerShell(ps));
+}
+
 function parseArgs(argv) {
   return {
     devSelfSigned: argv.includes("--dev-self-signed") || process.env.OPENCLAW_DEV_SELF_SIGN === "1",
@@ -113,11 +254,17 @@ function main() {
     fs.copyFileSync(sourceInstaller, targetInstaller);
   }
 
-  const timestampUrl = process.env.WINDOWS_CODESIGN_TIMESTAMP_URL || "";
+  const timestampUrl = process.env.WINDOWS_CODESIGN_TIMESTAMP_URL || DEFAULT_TIMESTAMP_URL;
   const certThumbprint = process.env.WINDOWS_CODESIGN_CERT_THUMBPRINT || "";
   const certSubject = process.env.WINDOWS_CODESIGN_CERT_SUBJECT || "";
   const certFile = process.env.WINDOWS_CODESIGN_CERT_FILE || process.env.WIN_CSC_LINK || process.env.CSC_LINK || "";
   const certPassword = process.env.WINDOWS_CODESIGN_CERT_PASSWORD || process.env.WIN_CSC_KEY_PASSWORD || process.env.CSC_KEY_PASSWORD || "";
+
+  if (!args.devSelfSigned && !certThumbprint && !certSubject && !certFile) {
+    console.error("Phase 14 public signing blocked.");
+    console.error("- signing-certificate-input-missing: Set WINDOWS_CODESIGN_CERT_FILE, WIN_CSC_LINK, CSC_LINK, WINDOWS_CODESIGN_CERT_THUMBPRINT, or WINDOWS_CODESIGN_CERT_SUBJECT.");
+    process.exit(1);
+  }
 
   const ps = `
 $ErrorActionPreference = 'Stop'
@@ -197,7 +344,21 @@ $verification = Get-AuthenticodeSignature -FilePath $target
 `;
 
   const output = runPowerShell(ps);
-  const signature = JSON.parse(output);
+  let signature = JSON.parse(output);
+  const timestampEvidence = !signature.hasTimestamp
+    ? timestampWithSigntool(repoRoot, targetInstaller, timestampUrl)
+    : {
+        requestedUrl: timestampUrl || null,
+        tool: null,
+        applied: false,
+        alreadyPresent: true,
+        attempts: []
+      };
+
+  if (timestampEvidence.applied) {
+    signature = readSignatureInfo(targetInstaller);
+  }
+
   const stats = fs.statSync(targetInstaller);
   const report = {
     generatedAt: new Date().toISOString(),
@@ -214,6 +375,7 @@ $verification = Get-AuthenticodeSignature -FilePath $target
     size: stats.size,
     sha256: hashFile(targetInstaller),
     signature,
+    timestampEvidence,
     publicReady: !args.devSelfSigned && signature.verifyStatus === "Valid" && signature.hasTimestamp,
     blockers: []
   };

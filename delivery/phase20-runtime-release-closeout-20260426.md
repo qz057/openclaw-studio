@@ -44,8 +44,8 @@ release-candidate-ready-for-github-preview
 - Public preview root: `E:\claucd\界面控制台程序\delivery\github-public-preview-20260426`
 - Upload root: `E:\claucd\界面控制台程序\delivery\github-release-upload-20260426`
 - Release notes: `E:\claucd\界面控制台程序\delivery\github-release-upload-20260426\RELEASE_NOTES_v0.1.0-preview.4.md`
-- Git tag v0.1.0-preview.4 aligned with HEAD: yes
-- GitHub CLI logged in: yes
+- Git tag v0.1.0-preview.4 aligned with HEAD: no
+- GitHub CLI logged in: no
 
 ## Blockers
 

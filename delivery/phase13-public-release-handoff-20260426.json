@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-26T16:24:50.668Z",
+  "generatedAt": "2026-04-26T17:02:04.587Z",
   "status": "handoff-blocked",
   "appRoot": "E:\\claucd\\界面控制台程序\\apps\\studio",
   "artifacts": {
@@ -64,12 +64,14 @@
     }
   },
   "signing": {
-    "signtoolFound": false,
-    "signtoolSelected": null,
+    "signtoolFound": true,
+    "signtoolSelected": "E:\\claucd\\界面控制台程序\\.tools\\windows-sdk-buildtools\\10.0.26100.7705\\bin\\10.0.26100.0\\x64\\signtool.exe",
     "powershellAuthenticodeFound": true,
     "certificateInput": false,
     "passwordInput": false,
-    "timestampInput": false,
+    "timestampInput": true,
+    "timestampUrl": "http://timestamp.digicert.com",
+    "timestampUrlSource": "default",
     "installerSignatureStatus": "NotSigned",
     "bridgeStatus": "dev-signed-untrusted",
     "bridgeTarget": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-signed-dev\\out\\OpenClaw-Studio-0.1.0-win-x64-setup.dev-signed.exe",
@@ -78,7 +80,7 @@
     "trustedSigningTemplate": "E:\\claucd\\界面控制台程序\\delivery\\phase15-signing-env.template.ps1",
     "materialsPackStatus": "materials-pack-ready-external-inputs-required",
     "materialsRoot": "E:\\claucd\\界面控制台程序\\delivery\\signing-materials-20260426",
-    "materialsRequiredExternalCount": 5,
+    "materialsRequiredExternalCount": 4,
     "handoffAuditStatus": "external-signing-handoff-ready",
     "handoffAuditSecretFindings": 0,
     "handoffAuditGateFailFast": true
@@ -103,12 +105,6 @@
       "detail": "No signing password env var is present."
     },
     {
-      "source": "phase9",
-      "id": "timestamp-url-missing",
-      "severity": "release-blocker",
-      "detail": "No timestamp authority URL env var is present."
-    },
-    {
       "source": "phase10",
       "severity": "release-blocker",
       "id": "signing-certificate-input-missing",
@@ -119,12 +115,6 @@
       "severity": "release-blocker",
       "id": "signing-password-input-missing",
       "detail": "Set CSC_KEY_PASSWORD, WIN_CSC_KEY_PASSWORD, or WINDOWS_CODESIGN_CERT_PASSWORD before signing."
-    },
-    {
-      "source": "phase10",
-      "severity": "release-blocker",
-      "id": "timestamp-url-missing",
-      "detail": "Set WINDOWS_CODESIGN_TIMESTAMP_URL before signing."
     }
   ],
   "commandPlan": [
@@ -136,7 +126,7 @@
     {
       "id": "set-signing-env",
       "requiredWhen": "signing inputs are missing",
-      "command": "Set CSC_LINK or WINDOWS_CODESIGN_CERT_FILE, CSC_KEY_PASSWORD or WINDOWS_CODESIGN_CERT_PASSWORD, and WINDOWS_CODESIGN_TIMESTAMP_URL in the signing environment."
+      "command": "Set CSC_LINK or WINDOWS_CODESIGN_CERT_FILE plus CSC_KEY_PASSWORD or WINDOWS_CODESIGN_CERT_PASSWORD; the default timestamp URL is http://timestamp.digicert.com unless the CA requires another TSA."
     },
     {
       "id": "rebuild-installer",

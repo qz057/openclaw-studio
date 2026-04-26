@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-26T16:24:50.976Z",
+  "generatedAt": "2026-04-26T17:01:17.704Z",
   "status": "external-signing-handoff-ready",
   "appRoot": "E:\\claucd\\界面控制台程序\\apps\\studio",
   "materialsRoot": "E:\\claucd\\界面控制台程序\\delivery\\signing-materials-20260426",
@@ -22,7 +22,7 @@
     {
       "path": "E:\\claucd\\界面控制台程序\\delivery\\signing-materials-20260426\\SIGNING-ENV.private.template.ps1",
       "exists": true,
-      "size": 697
+      "size": 696
     },
     {
       "path": "E:\\claucd\\界面控制台程序\\delivery\\signing-materials-20260426\\SIGNING-RUNBOOK.md",
@@ -42,7 +42,7 @@
     {
       "path": "E:\\claucd\\界面控制台程序\\delivery\\signing-materials-20260426\\TIMESTAMP-POLICY.json",
       "exists": true,
-      "size": 314
+      "size": 313
     },
     {
       "path": "E:\\claucd\\界面控制台程序\\delivery\\signing-materials-20260426\\PUBLIC-RELEASE-GATE-COMMANDS.ps1",
@@ -100,8 +100,8 @@
     {
       "id": "timestamp-authority-url",
       "owner": "publisher-release",
-      "status": "external-required",
-      "detail": "Trusted timestamp URL such as the timestamp service provided by the selected CA."
+      "status": "ready-default",
+      "detail": "Default trusted timestamp URL is http://timestamp.digicert.com; replace it only if the selected CA requires a different TSA."
     }
   ],
   "warnings": [],

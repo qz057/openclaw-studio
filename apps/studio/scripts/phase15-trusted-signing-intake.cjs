@@ -2,6 +2,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
+const DEFAULT_TIMESTAMP_URL = "http://timestamp.digicert.com";
+
 function resolvePowerShell() {
   for (const candidate of ["pwsh.exe", "powershell.exe"]) {
     const result = spawnSync("where.exe", [candidate], { encoding: "utf8", shell: false });
@@ -57,7 +59,7 @@ function main() {
   const certFile = process.env.WINDOWS_CODESIGN_CERT_FILE || process.env.WIN_CSC_LINK || process.env.CSC_LINK || "";
   const certThumbprint = process.env.WINDOWS_CODESIGN_CERT_THUMBPRINT || "";
   const certSubject = process.env.WINDOWS_CODESIGN_CERT_SUBJECT || "";
-  const timestampUrl = process.env.WINDOWS_CODESIGN_TIMESTAMP_URL || "";
+  const timestampUrl = process.env.WINDOWS_CODESIGN_TIMESTAMP_URL || DEFAULT_TIMESTAMP_URL;
   const hasPasswordInput =
     hasEnv("WINDOWS_CODESIGN_CERT_PASSWORD") ||
     hasEnv("WIN_CSC_KEY_PASSWORD") ||
@@ -168,13 +170,6 @@ if ($certFileExists) {
     });
   }
 
-  if (!timestampUrl) {
-    blockers.push({
-      id: "timestamp-url-missing",
-      detail: "Set WINDOWS_CODESIGN_TIMESTAMP_URL before public signing."
-    });
-  }
-
   if (probe.certFile && !probe.certFile.readableWithoutPassword) {
     warnings.push("Certificate file could not be inspected without a password. This is expected for password-protected PFX files.");
   }
@@ -187,7 +182,8 @@ if ($certFileExists) {
       certThumbprintPresent: Boolean(certThumbprint),
       certSubjectPresent: Boolean(certSubject),
       passwordInputPresent: hasPasswordInput,
-      timestampUrlPresent: Boolean(timestampUrl)
+      timestampUrlPresent: Boolean(timestampUrl),
+      timestampUrlSource: hasEnv("WINDOWS_CODESIGN_TIMESTAMP_URL") ? "env" : "default"
     },
     probe,
     warnings,
@@ -211,7 +207,7 @@ if ($certFileExists) {
       "# $env:WINDOWS_CODESIGN_CERT_THUMBPRINT = '<thumbprint-from-Cert:\\\\CurrentUser\\\\My>'",
       "# $env:WINDOWS_CODESIGN_CERT_SUBJECT = '<subject-fragment>'",
       "",
-      "$env:WINDOWS_CODESIGN_TIMESTAMP_URL = 'https://timestamp.digicert.com'",
+      "$env:WINDOWS_CODESIGN_TIMESTAMP_URL = 'http://timestamp.digicert.com'",
       "",
       `npm run -C "${appRoot}" phase15:trusted-signing-intake`,
       `npm run -C "${appRoot}" phase14:signing-bridge -- --require-public`,

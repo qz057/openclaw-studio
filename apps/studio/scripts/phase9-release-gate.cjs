@@ -2,6 +2,8 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 
+const DEFAULT_TIMESTAMP_URL = "http://timestamp.digicert.com";
+
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, ""));
 }
@@ -88,6 +90,7 @@ function hasEnv(name) {
 }
 
 function collectSigningEnv() {
+  const timestampUrl = process.env.WINDOWS_CODESIGN_TIMESTAMP_URL || DEFAULT_TIMESTAMP_URL;
   const candidates = {
     CSC_LINK: hasEnv("CSC_LINK"),
     CSC_KEY_PASSWORD: hasEnv("CSC_KEY_PASSWORD"),
@@ -114,7 +117,9 @@ function collectSigningEnv() {
       candidates.WINDOWS_CODESIGN_CERT_PASSWORD ||
       candidates.WINDOWS_CODESIGN_CERT_THUMBPRINT ||
       candidates.WINDOWS_CODESIGN_CERT_SUBJECT,
-    hasTimestampInput: candidates.WINDOWS_CODESIGN_TIMESTAMP_URL
+    hasTimestampInput: Boolean(timestampUrl),
+    timestampUrl,
+    timestampUrlSource: candidates.WINDOWS_CODESIGN_TIMESTAMP_URL ? "env" : "default"
   };
 }
 

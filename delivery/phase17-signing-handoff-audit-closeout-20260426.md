@@ -18,7 +18,7 @@ external-signing-handoff-ready
 - organization-validation-record: CA organization or individual validation record, including verified address, phone, and requester contact.
 - trusted-code-signing-certificate: OV/EV code-signing certificate provisioned on compliant hardware token, HSM, cloud key storage, or installed certificate store.
 - private-key-access: Token PIN, HSM credential, cloud signing credential, PFX password, or certificate-store private-key access. Do not store this in repo.
-- timestamp-authority-url: Trusted timestamp URL such as the timestamp service provided by the selected CA.
+- timestamp-authority-url: Default trusted timestamp URL is http://timestamp.digicert.com; replace it only if the selected CA requires a different TSA.
 
 ## Blockers
 

@@ -9,7 +9,7 @@ $env:WINDOWS_CODESIGN_CERT_PASSWORD = '<private-password>'
 # $env:WINDOWS_CODESIGN_CERT_SUBJECT = '<publisher subject fragment>'
 
 # Timestamp authority. Prefer the TSA documented by the selected CA.
-$env:WINDOWS_CODESIGN_TIMESTAMP_URL = 'https://timestamp.digicert.com'
+$env:WINDOWS_CODESIGN_TIMESTAMP_URL = 'http://timestamp.digicert.com'
 
 # Save a filled private copy as SIGNING-ENV.private.ps1 beside this template.
 # Run PUBLIC-RELEASE-GATE-COMMANDS.ps1 after the private copy is complete.

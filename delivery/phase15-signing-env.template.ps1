@@ -7,7 +7,7 @@ $env:WINDOWS_CODESIGN_CERT_PASSWORD = '<certificate-password>'
 # $env:WINDOWS_CODESIGN_CERT_THUMBPRINT = '<thumbprint-from-Cert:\\CurrentUser\\My>'
 # $env:WINDOWS_CODESIGN_CERT_SUBJECT = '<subject-fragment>'
 
-$env:WINDOWS_CODESIGN_TIMESTAMP_URL = 'https://timestamp.digicert.com'
+$env:WINDOWS_CODESIGN_TIMESTAMP_URL = 'http://timestamp.digicert.com'
 
 npm run -C "E:\claucd\界面控制台程序\apps\studio" phase15:trusted-signing-intake
 npm run -C "E:\claucd\界面控制台程序\apps\studio" phase14:signing-bridge -- --require-public

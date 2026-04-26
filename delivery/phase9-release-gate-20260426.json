@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-26T15:14:48.414Z",
+  "generatedAt": "2026-04-26T17:02:04.376Z",
   "mode": "local-qa",
   "status": "local-qa-passed-public-blocked",
   "localQa": {
@@ -35,11 +35,6 @@
         "id": "signing-password-input-missing",
         "severity": "release-blocker",
         "detail": "No signing password env var is present."
-      },
-      {
-        "id": "timestamp-url-missing",
-        "severity": "release-blocker",
-        "detail": "No timestamp authority URL env var is present."
       }
     ]
   },
@@ -57,7 +52,9 @@
     },
     "hasCertificateInput": false,
     "hasPasswordInput": false,
-    "hasTimestampInput": false
+    "hasTimestampInput": true,
+    "timestampUrl": "http://timestamp.digicert.com",
+    "timestampUrlSource": "default"
   },
   "artifacts": {
     "rcZip": {

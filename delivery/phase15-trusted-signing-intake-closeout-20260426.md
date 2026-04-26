@@ -10,14 +10,13 @@ trusted-signing-input-blocked
 - certificate thumbprint input: missing
 - certificate subject input: missing
 - password/store selector input: missing
-- timestamp URL: missing
+- timestamp URL: present
 - store code-signing certificates detected: 1
 
 ## Blockers
 
 - trusted-certificate-input-missing: Set WINDOWS_CODESIGN_CERT_FILE, WIN_CSC_LINK, CSC_LINK, WINDOWS_CODESIGN_CERT_THUMBPRINT, or WINDOWS_CODESIGN_CERT_SUBJECT.
 - certificate-password-or-store-selector-missing: Set certificate password env var for PFX input, or select an installed certificate by thumbprint/subject.
-- timestamp-url-missing: Set WINDOWS_CODESIGN_TIMESTAMP_URL before public signing.
 
 ## Template
 
