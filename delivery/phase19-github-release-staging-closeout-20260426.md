@@ -17,7 +17,7 @@ github-release-upload-staged
 | openclaw-studio-rc-manifest-20260426.md | 10980 | `6314F97822A75E4AA8242328FEC49B565A4003DD91810030C645BCC72AE3DF83` |
 | phase13-public-release-handoff-20260426.md | 4619 | `E8EAC6CCD557434165A80B223541C7D883C61391AC912A9662077404E1AABA55` |
 | phase17-signing-handoff-audit-closeout-20260426.md | 1146 | `86B83F9B7054827E7AEAE49BDD30378E184686173920E5ADFB80C93E78CB16FA` |
-| phase20-runtime-release-closeout-20260426.md | 2922 | `EF8B80D1C1BD26F3723247921FEBD3BD8BE23DBB10F216EB806BCC603B7A71C3` |
+| phase20-runtime-release-closeout-20260426.md | 2922 | `309FB46A5346031CC0BD3622F176C8F17E7D30D1B11B2F6630595446819B7525` |
 | SHA256SUMS.txt | | |
 
 ## Commands
@@ -32,7 +32,6 @@ github-release-upload-staged
 ## Warnings
 
 - Optional asset not staged by default: RC Windows zip (E:\claucd\界面控制台程序\apps\studio\release\OpenClaw Studio-0.1.0-win-x64.zip)
-- GitHub CLI is not logged in. Use browser upload or run gh auth login before CLI publishing.
 
 ## Verification
 

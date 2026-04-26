@@ -1,0 +1,84 @@
+{
+  "generatedAt": "2026-04-26T16:07:24.086Z",
+  "status": "github-prerelease-published",
+  "version": "v0.1.0-preview.3",
+  "repo": "qz057/openclaw-studio",
+  "release": {
+    "tagName": "v0.1.0-preview.3",
+    "name": "OpenClaw Studio v0.1.0 Preview 3",
+    "isPrerelease": true,
+    "url": "https://github.com/qz057/openclaw-studio/releases/tag/v0.1.0-preview.3",
+    "assetCount": 7
+  },
+  "upstream": {
+    "phase19Status": "github-release-upload-staged",
+    "phase20Status": "release-candidate-ready-for-github-preview"
+  },
+  "assetChecks": [
+    {
+      "name": "OpenClaw-Studio-0.1.0-win-x64-setup.exe",
+      "role": "release-asset",
+      "expectedSize": 102277901,
+      "releaseSize": 102277901,
+      "existsOnRelease": true,
+      "sizeMatches": true,
+      "sha256": "C65BB0165286D2F6103A973A4D4CAB0E8612B00A27B9D53929E521C7A880A0AF"
+    },
+    {
+      "name": "OpenClaw-Studio-0.1.0-alpha-x64-portable.zip",
+      "role": "release-asset",
+      "expectedSize": 142897544,
+      "releaseSize": 142897544,
+      "existsOnRelease": true,
+      "sizeMatches": true,
+      "sha256": "5F7F1D34CED6CA5315ACF921E07F815C52A4174C7B81ACF9BF95BFA4629C6493"
+    },
+    {
+      "name": "openclaw-studio-rc-manifest-20260426.md",
+      "role": "release-note-evidence",
+      "expectedSize": 10980,
+      "releaseSize": 10980,
+      "existsOnRelease": true,
+      "sizeMatches": true,
+      "sha256": "6314F97822A75E4AA8242328FEC49B565A4003DD91810030C645BCC72AE3DF83"
+    },
+    {
+      "name": "phase13-public-release-handoff-20260426.md",
+      "role": "release-note-evidence",
+      "expectedSize": 4619,
+      "releaseSize": 4619,
+      "existsOnRelease": true,
+      "sizeMatches": true,
+      "sha256": "E8EAC6CCD557434165A80B223541C7D883C61391AC912A9662077404E1AABA55"
+    },
+    {
+      "name": "phase17-signing-handoff-audit-closeout-20260426.md",
+      "role": "release-note-evidence",
+      "expectedSize": 1146,
+      "releaseSize": 1146,
+      "existsOnRelease": true,
+      "sizeMatches": true,
+      "sha256": "86B83F9B7054827E7AEAE49BDD30378E184686173920E5ADFB80C93E78CB16FA"
+    },
+    {
+      "name": "phase20-runtime-release-closeout-20260426.md",
+      "role": "release-note-evidence",
+      "expectedSize": 2922,
+      "releaseSize": 2922,
+      "existsOnRelease": true,
+      "sizeMatches": true,
+      "sha256": "309FB46A5346031CC0BD3622F176C8F17E7D30D1B11B2F6630595446819B7525"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "role": "checksum-manifest",
+      "expectedSize": 660,
+      "releaseSize": 660,
+      "existsOnRelease": true,
+      "sizeMatches": true,
+      "sha256": null
+    }
+  ],
+  "warnings": [],
+  "blockers": []
+}

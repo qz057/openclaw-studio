@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-04-26T15:41:58.512Z",
+  "generatedAt": "2026-04-26T16:06:27.725Z",
   "status": "release-candidate-ready-for-github-preview",
-  "version": "v0.1.0-preview.2",
+  "version": "v0.1.0-preview.3",
   "appRoot": "E:\\claucd\\界面控制台程序\\apps\\studio",
   "deliveryRoot": "E:\\claucd\\界面控制台程序\\delivery",
   "artifacts": [
@@ -165,7 +165,7 @@
     "publicPreviewRoot": "E:\\claucd\\界面控制台程序\\delivery\\github-public-preview-20260426",
     "uploadStagingStatus": "github-release-upload-staged",
     "uploadRoot": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426",
-    "releaseNotes": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\RELEASE_NOTES_v0.1.0-preview.2.md",
+    "releaseNotes": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\RELEASE_NOTES_v0.1.0-preview.3.md",
     "stagedAssetCount": 6,
     "stagedAssetLabels": [
       {
@@ -201,15 +201,15 @@
     ]
   },
   "git": {
-    "head": "f90136442f5622f34c26c9d8836b65a88b8c7f84",
-    "tag": "v0.1.0-preview.2",
-    "tagCommit": "f90136442f5622f34c26c9d8836b65a88b8c7f84",
+    "head": "6703a171fe5c127a80a65b4e87d070bbbb3ac2ab",
+    "tag": "v0.1.0-preview.3",
+    "tagCommit": "6703a171fe5c127a80a65b4e87d070bbbb3ac2ab",
     "tagAlignedWithHead": true,
     "remotes": "origin\thttps://github.com/qz057/openclaw-studio.git (fetch)\norigin\thttps://github.com/qz057/openclaw-studio.git (push)",
-    "dirtyFiles": 26
+    "dirtyFiles": 11
   },
   "githubCli": {
-    "loggedIn": false
+    "loggedIn": true
   },
   "boundaries": [
     "Windows preview artifacts remain unsigned until trusted code-signing material is supplied.",

@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-04-26T15:43:19.710Z",
+  "generatedAt": "2026-04-26T16:06:20.040Z",
   "status": "github-release-upload-staged",
-  "version": "v0.1.0-preview.2",
+  "version": "v0.1.0-preview.3",
   "uploadRoot": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426",
   "assetsRoot": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\assets",
-  "releaseNotes": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\RELEASE_NOTES_v0.1.0-preview.2.md",
+  "releaseNotes": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\RELEASE_NOTES_v0.1.0-preview.3.md",
   "stagedAssets": [
     {
       "label": "Windows NSIS installer",
@@ -58,7 +58,7 @@
       "source": "E:\\claucd\\界面控制台程序\\delivery\\phase20-runtime-release-closeout-20260426.md",
       "target": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\assets\\phase20-runtime-release-closeout-20260426.md",
       "size": 2922,
-      "sha256": "EF8B80D1C1BD26F3723247921FEBD3BD8BE23DBB10F216EB806BCC603B7A71C3"
+      "sha256": "309FB46A5346031CC0BD3622F176C8F17E7D30D1B11B2F6630595446819B7525"
     }
   ],
   "sha256Sums": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\assets\\SHA256SUMS.txt",
@@ -67,20 +67,19 @@
     "ghPublish": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\PUBLISH_WITH_GH.ps1"
   },
   "git": {
-    "head": "f90136442f5622f34c26c9d8836b65a88b8c7f84",
-    "tagCommit": "f90136442f5622f34c26c9d8836b65a88b8c7f84",
+    "head": "6703a171fe5c127a80a65b4e87d070bbbb3ac2ab",
+    "tagCommit": "6703a171fe5c127a80a65b4e87d070bbbb3ac2ab",
     "tagAlignedWithHead": true,
     "remotes": "origin\thttps://github.com/qz057/openclaw-studio.git (fetch)\norigin\thttps://github.com/qz057/openclaw-studio.git (push)"
   },
   "githubCli": {
-    "loggedIn": false
+    "loggedIn": true
   },
   "upstream": {
     "phase18Status": "github-public-preview-pack-ready"
   },
   "warnings": [
-    "Optional asset not staged by default: RC Windows zip (E:\\claucd\\界面控制台程序\\apps\\studio\\release\\OpenClaw Studio-0.1.0-win-x64.zip)",
-    "GitHub CLI is not logged in. Use browser upload or run gh auth login before CLI publishing."
+    "Optional asset not staged by default: RC Windows zip (E:\\claucd\\界面控制台程序\\apps\\studio\\release\\OpenClaw Studio-0.1.0-win-x64.zip)"
   ],
   "blockers": []
 }

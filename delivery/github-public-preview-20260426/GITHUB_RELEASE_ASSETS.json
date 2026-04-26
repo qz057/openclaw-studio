@@ -67,7 +67,7 @@
       "path": "E:\\claucd\\界面控制台程序\\delivery\\phase20-runtime-release-closeout-20260426.md",
       "exists": true,
       "size": 2922,
-      "sha256": "EF8B80D1C1BD26F3723247921FEBD3BD8BE23DBB10F216EB806BCC603B7A71C3",
+      "sha256": "309FB46A5346031CC0BD3622F176C8F17E7D30D1B11B2F6630595446819B7525",
       "releaseAssetEligible": true,
       "publicWarning": "Shows final runtime UI, session stream, GPU sampling, and release staging evidence."
     }
