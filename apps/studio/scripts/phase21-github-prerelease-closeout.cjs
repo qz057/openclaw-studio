@@ -4,7 +4,7 @@ const { spawnSync } = require("node:child_process");
 
 const DELIVERY_DATE = "20260427";
 const UPSTREAM_DATE = "20260426";
-const VERSION = process.env.OPENCLAW_RELEASE_VERSION || "v0.1.0-preview.3";
+const VERSION = process.env.OPENCLAW_RELEASE_VERSION || "v0.1.0-preview.4";
 const REPO = process.env.OPENCLAW_GITHUB_REPO || "qz057/openclaw-studio";
 
 function readJson(filePath) {

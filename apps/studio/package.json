@@ -66,6 +66,7 @@
     "phase19:github-release-staging": "node ./scripts/phase19-github-release-staging.cjs",
     "phase20:runtime-release-closeout": "node ./scripts/phase20-runtime-release-closeout.cjs",
     "phase21:github-prerelease-closeout": "node ./scripts/phase21-github-prerelease-closeout.cjs",
+    "phase22:github-release-retention": "node ./scripts/phase22-github-release-retention.cjs",
     "release:plan": "node ./scripts/release-plan.cjs",
     "smoke": "node ./scripts/smoke-dist.mjs",
     "start:smoke": "node ./scripts/start-smoke.cjs",

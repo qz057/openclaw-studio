@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-04-26T16:06:11.892Z",
+  "generatedAt": "2026-04-26T16:26:02.764Z",
   "status": "github-public-preview-pack-ready",
-  "version": "v0.1.0-preview.3",
+  "version": "v0.1.0-preview.4",
   "appRoot": "E:\\claucd\\界面控制台程序\\apps\\studio",
   "publicRoot": "E:\\claucd\\界面控制台程序\\delivery\\github-public-preview-20260426",
   "git": {
@@ -78,14 +78,14 @@
       "path": "E:\\claucd\\界面控制台程序\\delivery\\phase20-runtime-release-closeout-20260426.md",
       "exists": true,
       "size": 2922,
-      "sha256": "309FB46A5346031CC0BD3622F176C8F17E7D30D1B11B2F6630595446819B7525",
+      "sha256": "D1FCE238D60D73BD7E8054C7EC7A6F5959F4AAACB74B4A46FC8D39FACC0D0856",
       "releaseAssetEligible": true,
       "publicWarning": "Shows final runtime UI, session stream, GPU sampling, and release staging evidence."
     }
   ],
   "publicSourceScan": {
-    "candidateFiles": 600,
-    "scannedTextFiles": 543,
+    "candidateFiles": 606,
+    "scannedTextFiles": 549,
     "largeFiles": [],
     "secretFindings": []
   },

@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-04-26T05:03:40.081Z",
+  "generatedAt": "2026-04-26T16:24:36.439Z",
   "status": "dev-signed-untrusted",
   "mode": "dev-self-signed-copy",
   "sourceInstaller": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-installer\\out\\OpenClaw-Studio-0.1.0-win-x64-setup.exe",
   "targetInstaller": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-signed-dev\\out\\OpenClaw-Studio-0.1.0-win-x64-setup.dev-signed.exe",
-  "size": 102269848,
-  "sha256": "F639F734C34B827804135EB6D5E4455B8FF9AEA185893A341B4C0590A1F63CF0",
+  "size": 102279392,
+  "sha256": "A30A803CD7092708B88799CD97D2D3FC72504848427DF99D5FB5EED49DF872E2",
   "signature": {
     "target": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-signed-dev\\out\\OpenClaw-Studio-0.1.0-win-x64-setup.dev-signed.exe",
     "setStatus": "UnknownError",

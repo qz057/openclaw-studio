@@ -1,4 +1,4 @@
-# OpenClaw Studio v0.1.0-preview.3
+# OpenClaw Studio v0.1.0-preview.4
 
 ## Preview Status
 

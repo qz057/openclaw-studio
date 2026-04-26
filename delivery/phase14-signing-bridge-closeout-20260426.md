@@ -8,7 +8,7 @@ dev-signed-untrusted
 
 | Artifact | Path | Size | SHA256 |
 |---|---|---:|---|
-| Development signed installer copy | `E:\claucd\界面控制台程序\apps\studio\.packaging\windows-signed-dev\out\OpenClaw-Studio-0.1.0-win-x64-setup.dev-signed.exe` | 102269848 bytes | `F639F734C34B827804135EB6D5E4455B8FF9AEA185893A341B4C0590A1F63CF0` |
+| Development signed installer copy | `E:\claucd\界面控制台程序\apps\studio\.packaging\windows-signed-dev\out\OpenClaw-Studio-0.1.0-win-x64-setup.dev-signed.exe` | 102279392 bytes | `A30A803CD7092708B88799CD97D2D3FC72504848427DF99D5FB5EED49DF872E2` |
 
 ## Signature
 
@@ -21,14 +21,6 @@ dev-signed-untrusted
 
 - This is a development self-signed signature that proves the local signing path. It is not trusted for public distribution.
 - Public release requires a trusted code-signing certificate and a timestamped `Valid` Authenticode signature.
-
-## Installed UI Check
-
-The development-signed installer copy was also installed into a temporary directory and validated with the same 7-page UI parity checker:
-
-| Report | Pages | Console Errors | Page Errors | Failures |
-|---|---:|---:|---:|---:|
-| `delivery/phase14-dev-signed-installed-ui-full-check-20260426.json` | 7 | 0 | 0 | 0 |
 
 ## Verification
 
