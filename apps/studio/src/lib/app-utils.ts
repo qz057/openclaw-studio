@@ -1,15 +1,47 @@
 import { studioPageIds, type StudioPageId, type StudioCommandAction } from "@openclaw/shared";
 
-export const visibleStudioPageIds = ["dashboard", "chat", "hermes", "sessions", "agents", "skills", "settings"] as const satisfies ReadonlyArray<StudioPageId>;
+export const visibleStudioPageIds = ["dashboard", "chat", "sessions", "skills", "settings", "agents"] as const satisfies ReadonlyArray<StudioPageId>;
 
 const visibleStudioPageIdSet = new Set<StudioPageId>(visibleStudioPageIds);
 
+const routeAliases: Record<string, StudioPageId> = {
+  session: "chat",
+  conversations: "chat",
+  hermes: "chat",
+  claude: "chat",
+  history: "sessions",
+  capabilities: "skills",
+  capability: "skills",
+  configuration: "settings",
+  config: "settings",
+  diagnostics: "agents",
+  home: "dashboard",
+  codex: "dashboard"
+};
+
+const routeHashByPageId: Partial<Record<StudioPageId, string>> = {
+  dashboard: "dashboard",
+  chat: "session",
+  sessions: "history",
+  skills: "capabilities",
+  settings: "settings",
+  agents: "diagnostics"
+};
+
 export function normalizePageId(pageId: string | null | undefined): StudioPageId {
-  if (studioPageIds.includes(pageId as StudioPageId) && visibleStudioPageIdSet.has(pageId as StudioPageId)) {
-    return pageId as StudioPageId;
+  const routeId = pageId?.trim().toLowerCase();
+  const candidate = routeId ? routeAliases[routeId] ?? routeId : null;
+
+  if (studioPageIds.includes(candidate as StudioPageId) && visibleStudioPageIdSet.has(candidate as StudioPageId)) {
+    return candidate as StudioPageId;
   }
 
   return "dashboard";
+}
+
+export function getRouteHashForPageId(pageId: StudioPageId): string {
+  const normalizedPageId = normalizePageId(pageId);
+  return routeHashByPageId[normalizedPageId] ?? normalizedPageId;
 }
 
 export function resolvePage(): StudioPageId {

@@ -8,10 +8,10 @@ interface CollectorDiagnosticsPanelProps {
 
 function formatSource(source: DashboardDataSource): string {
   const map: Record<DashboardDataSource, string> = {
-    snapshot: "snapshot",
-    "runtime-metric": "metric",
-    "runtime-service": "service",
-    "rolling-buffer": "rolling",
+    snapshot: "快照",
+    "runtime-metric": "指标",
+    "runtime-service": "服务",
+    "rolling-buffer": "滚动",
     "collector-missing": "未采集"
   };
 
@@ -47,7 +47,7 @@ export function CollectorDiagnosticsPanel({ items, syncError }: CollectorDiagnos
     <article className="dashboard-panel dashboard-collector-panel">
       <div className="dashboard-panel__header">
         <div>
-          <p className="eyebrow">COLLECTORS</p>
+          <p className="eyebrow">采集器</p>
           <h2>采集诊断</h2>
         </div>
         <span className="dashboard-source-chip">

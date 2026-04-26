@@ -445,7 +445,7 @@ function createClaudeStream(snapshot: StudioClaudeSnapshot | null, messages: Stu
       detail: message.text || "空消息",
       meta: normalizeModel(message.model),
       timestamp: message.timestamp ?? "未知时间",
-      status: message.role,
+      status: message.role === "assistant" ? "助手" : message.role === "user" ? "用户" : message.role === "tool" ? "工具" : message.role,
       source: "runtime-service"
     }));
   }
@@ -475,7 +475,7 @@ function createServiceStatus(
       id: "openclaw",
       label: "OpenClaw Gateway",
       value: compactServiceValue(openclaw?.statusLabel ?? formatStatusValue(snapshot.status.bridge)),
-      detail: openclaw?.detail ?? "来自 5 秒 shell snapshot 的桥接状态",
+      detail: openclaw?.detail ?? "来自 5 秒 shell 快照的桥接状态",
       tone: getServiceTone(openclaw?.statusLabel ?? snapshot.status.bridge, openclaw?.running),
       source: openclaw ? "runtime-service" : "snapshot",
       lastCheckedAt: openclaw?.lastCheckedAt ?? null
@@ -484,7 +484,7 @@ function createServiceStatus(
       id: "hermes",
       label: "Hermes Gateway",
       value: compactServiceValue(hermes?.statusLabel ?? sidecar.hermesState?.readinessLabel ?? "状态加载中"),
-      detail: hermes?.detail ?? sidecar.hermesState?.disabledReason ?? "Hermes 状态来自 runtime 只读探针",
+      detail: hermes?.detail ?? sidecar.hermesState?.disabledReason ?? "Hermes 状态来自运行态只读探针",
       tone: getServiceTone(hermes?.statusLabel ?? sidecar.hermesState?.readinessLabel ?? "", hermes?.running),
       source: hermes || sidecar.hermesState ? "runtime-service" : "collector-missing",
       lastCheckedAt: hermes?.lastCheckedAt ?? sidecar.hermesState?.updatedAt ?? null
@@ -523,7 +523,7 @@ function createRouteMap(
       model: openclawModel,
       load: taskCounts.running + taskCounts.queued,
       loadPercent: null,
-      detail: sidecar.openclawChat?.provider ? `provider: ${sidecar.openclawChat.provider}` : "聊天链路只读状态",
+      detail: sidecar.openclawChat?.provider ? `提供方：${sidecar.openclawChat.provider}` : "聊天链路只读状态",
       source: sidecar.openclawChat ? "runtime-service" : "snapshot"
     },
     {
@@ -532,7 +532,7 @@ function createRouteMap(
       model: codexModel,
       load: taskCounts.total,
       loadPercent: null,
-      detail: codexSource === "runtime-service" ? "任务数来自本机 Codex 会话日志" : "任务数来自 shell snapshot/fallback",
+      detail: codexSource === "runtime-service" ? "任务数来自本机 Codex 会话日志" : "任务数来自 shell 快照/回退",
       source: codexSource
     },
     {
@@ -541,7 +541,7 @@ function createRouteMap(
       model: normalizeModel(sidecar.claudeSnapshot?.settings.model),
       load: claudeSessionCount,
       loadPercent: null,
-      detail: sidecar.claudeSnapshot ? "会话数来自 Claude snapshot" : "未采样",
+      detail: sidecar.claudeSnapshot ? "会话数来自 Claude 快照" : "未采样",
       source: sidecar.claudeSnapshot ? "runtime-service" : "collector-missing"
     },
     {
@@ -580,12 +580,12 @@ function createTaskTrend(samples: DashboardResourceSample[], currentTotal: numbe
   const delta = currentTotal - baseline;
 
   if (delta === 0) {
-    return { trendDirection: "flat", trendLabel: "rolling 0" };
+    return { trendDirection: "flat", trendLabel: "滚动持平" };
   }
 
   return {
     trendDirection: delta > 0 ? "up" : "down",
-    trendLabel: `${delta > 0 ? "+" : ""}${delta} rolling`
+    trendLabel: `滚动 ${delta > 0 ? "+" : ""}${delta}`
   };
 }
 
@@ -626,12 +626,12 @@ function createKpis(
       value: runtimeSampleRate == null ? "未采样" : `${runtimeSampleRate}%`,
       detail:
         sidecar.lastRuntimeRequestCount > 0
-          ? `${sidecar.lastRuntimeSuccessCount}/${sidecar.lastRuntimeRequestCount} runtime 调用成功 · 会话 ${sessionCounts.active}/${sessionCounts.total}`
-          : `会话 ${sessionCounts.active}/${sessionCounts.total} · 等待首个 runtime 批次`,
+          ? `${sidecar.lastRuntimeSuccessCount}/${sidecar.lastRuntimeRequestCount} 运行态调用成功 · 会话 ${sessionCounts.active}/${sessionCounts.total}`
+          : `会话 ${sessionCounts.active}/${sessionCounts.total} · 等待首个运行态批次`,
       tone: runtimeSampleRate == null ? "neutral" : runtimeSampleRate >= 80 ? "positive" : "warning",
       source: runtimeSampleRate == null ? "collector-missing" : "runtime-service",
       progress: runtimeSampleRate,
-      trendLabel: runtimeSampleRate == null ? "等待采样" : "runtime sampled",
+      trendLabel: runtimeSampleRate == null ? "等待采样" : "运行态已采样",
       trendDirection: runtimeSampleRate == null ? "unknown" : "up",
       accent: "cyan"
     },
@@ -639,7 +639,7 @@ function createKpis(
       id: "latency",
       label: "采样耗时",
       value: formatDurationMs(sidecar.lastRuntimeDurationMs ?? sidecar.lastMetricDurationMs),
-      detail: `runtime ${formatDurationMs(sidecar.lastRuntimeDurationMs)} · metric ${formatDurationMs(sidecar.lastMetricDurationMs)} · gateway ${gatewayRuntimeCount}/2`,
+      detail: `运行态 ${formatDurationMs(sidecar.lastRuntimeDurationMs)} · 指标 ${formatDurationMs(sidecar.lastMetricDurationMs)} · 网关 ${gatewayRuntimeCount}/2`,
       tone:
         sidecar.lastRuntimeDurationMs == null
           ? "neutral"
@@ -651,7 +651,7 @@ function createKpis(
         sidecar.lastRuntimeDurationMs == null
           ? null
           : Math.max(0, Math.min(100, 100 - Math.round(sidecar.lastRuntimeDurationMs / 100))),
-      trendLabel: sidecar.lastRuntimeDurationMs == null ? "等待采样" : "latest batch",
+      trendLabel: sidecar.lastRuntimeDurationMs == null ? "等待采样" : "最新批次",
       trendDirection: sidecar.lastRuntimeDurationMs == null ? "unknown" : "flat",
       accent: "purple"
     },
@@ -663,7 +663,7 @@ function createKpis(
       tone: healthScore >= 80 ? "positive" : healthScore >= 50 ? "warning" : "neutral",
       source: sidecar.performance || gatewayRail.some((item) => item.source === "runtime-service") ? "runtime-service" : "snapshot",
       progress: healthScore,
-      trendLabel: sidecar.performance ? "runtime connected" : "metric 未采样",
+      trendLabel: sidecar.performance ? "运行态已连接" : "指标未采样",
       trendDirection: sidecar.performance ? "up" : "unknown",
       accent: "green"
     }
@@ -773,7 +773,7 @@ function createCollectorStatuses(
       id: "openclaw-gateway",
       label: "OpenClaw Gateway",
       value: openclawError ? "采集失败" : sidecar.openclawGateway ? compactServiceValue(sidecar.openclawGateway.statusLabel) : "未采集",
-      detail: openclawError ?? sidecar.openclawGateway?.detail ?? "等待 Gateway runtime service 探针",
+      detail: openclawError ?? sidecar.openclawGateway?.detail ?? "等待网关运行服务探针",
       tone: openclawError ? "warning" : getServiceTone(sidecar.openclawGateway?.statusLabel ?? "", sidecar.openclawGateway?.running),
       source: sidecar.openclawGateway ? "runtime-service" : "collector-missing",
       lastCheckedAt: sidecar.openclawGateway?.lastCheckedAt ?? lastCheckedAt
@@ -782,7 +782,7 @@ function createCollectorStatuses(
       id: "hermes-gateway",
       label: "Hermes Gateway",
       value: hermesError ? "采集失败" : sidecar.hermesGateway ? compactServiceValue(sidecar.hermesGateway.statusLabel) : sidecar.hermesState?.readinessLabel ?? "未采集",
-      detail: hermesError ?? sidecar.hermesGateway?.detail ?? sidecar.hermesState?.disabledReason ?? "等待 Hermes runtime service 探针",
+      detail: hermesError ?? sidecar.hermesGateway?.detail ?? sidecar.hermesState?.disabledReason ?? "等待 Hermes 运行服务探针",
       tone: hermesError ? "warning" : getServiceTone(sidecar.hermesGateway?.statusLabel ?? sidecar.hermesState?.readinessLabel ?? "", sidecar.hermesGateway?.running),
       source: sidecar.hermesGateway || sidecar.hermesState ? "runtime-service" : "collector-missing",
       lastCheckedAt: sidecar.hermesGateway?.lastCheckedAt ?? sidecar.hermesState?.updatedAt ?? lastCheckedAt
@@ -1048,23 +1048,23 @@ export function useDashboardRealtimeData(snapshot: StudioShellState | null, last
       periodLabel: "近 24 小时",
       refreshLabel: "数据每 5 秒刷新",
       sourceLines: [
-        { label: "Shell snapshot", value: "5s refresh", source: "snapshot" },
+        { label: "Shell 快照", value: "5 秒刷新", source: "snapshot" },
         {
-          label: "Runtime metric",
-          value: sidecar.performance ? `connected · ${formatDurationMs(sidecar.lastMetricDurationMs)}` : "未采样",
+          label: "运行指标",
+          value: sidecar.performance ? `已连接 · ${formatDurationMs(sidecar.lastMetricDurationMs)}` : "未采样",
           source: sidecar.performance ? "runtime-metric" : "collector-missing"
         },
         {
-          label: "Gateway/Hermes",
+          label: "网关/Hermes",
           value:
             sidecar.lastRuntimeRequestCount > 0
-              ? `${sidecar.lastRuntimeSuccessCount}/${sidecar.lastRuntimeRequestCount} ok · ${formatDurationMs(sidecar.lastRuntimeDurationMs)}`
+              ? `${sidecar.lastRuntimeSuccessCount}/${sidecar.lastRuntimeRequestCount} 正常 · ${formatDurationMs(sidecar.lastRuntimeDurationMs)}`
               : hasGatewayServiceSample
-                ? "runtime service"
+                ? "运行服务"
                 : "未采样",
           source: hasGatewayServiceSample || sidecar.lastRuntimeRequestCount > 0 ? "runtime-service" : "collector-missing"
         },
-        { label: "Rolling buffer", value: `${samples.length} samples`, source: "rolling-buffer" }
+        { label: "滚动缓存", value: `${samples.length} 个样本`, source: "rolling-buffer" }
       ],
       gatewayRail,
       kpis: createKpis(snapshot, sidecar, taskCounts, sessionCounts, gatewayRail, samples, codexSource),

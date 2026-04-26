@@ -1,5 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import type { DashboardStreamItem } from "../../hooks/useDashboardRealtimeData";
+import { formatProductText } from "../../lib/product-text";
 
 interface LiveSessionStreamProps {
   title: string;
@@ -25,10 +26,10 @@ export function LiveSessionStream({ title, eyebrow, items, emptyText }: LiveSess
         {items.length > 0 ? (
           items.map((item) => (
             <div key={item.id} className="live-session-line" title={`${item.title} · ${item.meta}`}>
-              <span className="live-session-line__time">{item.timestamp}</span>
+              <span className="live-session-line__time">{formatProductText(item.timestamp)}</span>
               <span className="live-session-line__actor">{item.actor.toUpperCase()}</span>
-              <span className="live-session-line__text">{item.detail || item.title}</span>
-              <span className="live-session-line__status">{item.status}</span>
+              <span className="live-session-line__text">{formatProductText(item.detail || item.title)}</span>
+              <span className="live-session-line__status">{formatProductText(item.status)}</span>
             </div>
           ))
         ) : (

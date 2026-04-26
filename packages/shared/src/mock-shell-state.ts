@@ -98,63 +98,88 @@ function createReplayReviewerWalkthrough({
 const mockCommandSurface: StudioCommandSurface = {
   title: "Command Palette",
   summary:
-    "Phase60 deepens the local-only command layer again: cross-view orchestration, sequence previews, active flow state, route-aware next-step boards, action-deck lanes, typed companion review-path orchestration, ordered companion review sequences, typed companion route states, explicit active/alternate routes, switchable sequence posture, companion route-history memory, route replay restore, replay scenario packs, screenshot-driven acceptance review packs, acceptance pass layers, screenshot pass records, reviewer flow ladders, acceptance reading queues, reviewer signoff boards, final review closeouts, final verdict console framing, acceptance closeout timeline context, capture review flows, proof-linked comparison bundles, acceptance storyboards, evidence dossiers, evidence trace lenses, product-review console polish, replay acceptance checks, stabilized path handoffs, review-surface coverage pivots, multi-window review coverage, recent command history, inspector-command linkage, review-posture ownership, delivery-stage exploration, and review-deck coverage routing now stay tied to the current route, workflow lane, focused slot, and detached-window posture.",
-  placeholder: "Search orchestration, delivery coverage, verdict context, closeout timeline, observability, navigation, next steps, detached workspace, or keyboard routes",
+    "命令面板优先提供总览、会话、历史、能力、配置和高级诊断入口；复杂诊断动作只在高级诊断内展开。",
+  placeholder: "搜索页面、状态、会话、能力、配置或诊断入口",
   quickActionIds: [
-    "command-open-home",
-    "command-inspect-boundary",
-    "command-show-trace",
-    "command-focus-lane-apply",
-    "command-advance-workflow"
+    "command-open-dashboard",
+    "command-open-session",
+    "command-open-history",
+    "command-open-capabilities",
+    "command-open-settings",
+    "command-open-diagnostics"
   ],
   actions: [
     {
       id: "command-open-dashboard",
-      label: "Open Dashboard",
-      description: "Navigate to the program health view.",
+      label: "打开总览",
+      description: "进入运行健康、网关状态和实时概览。",
       kind: "navigate",
       scope: "route",
       safety: "local-only",
       tone: "neutral",
-      keywords: ["dashboard", "home", "navigate", "route"],
+      keywords: ["dashboard", "overview", "health", "navigate", "route", "总览"],
       routeId: "dashboard",
       hotkey: "Alt+1"
     },
     {
-      id: "command-open-home",
-      label: "Open Home",
-      description: "Navigate to the shell overview and recovery surface.",
+      id: "command-open-session",
+      label: "打开会话",
+      description: "进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。",
       kind: "navigate",
       scope: "route",
       safety: "local-only",
       tone: "neutral",
-      keywords: ["home", "overview", "navigate", "route"],
-      routeId: "home",
+      keywords: ["session", "chat", "openclaw", "hermes", "claude", "navigate", "route"],
+      routeId: "chat",
       hotkey: "Alt+2"
     },
     {
-      id: "command-open-skills",
-      label: "Open Skills / Tools / MCP",
-      description: "Navigate to the runtime inventory and preview surface.",
+      id: "command-open-history",
+      label: "打开历史",
+      description: "进入历史与恢复，继续最近任务、工作区和回放记录。",
       kind: "navigate",
       scope: "route",
       safety: "local-only",
       tone: "neutral",
-      keywords: ["skills", "tools", "mcp", "navigate", "preview"],
+      keywords: ["history", "sessions", "resume", "replay", "navigate", "route", "历史"],
+      routeId: "sessions",
+      hotkey: "Alt+3"
+    },
+    {
+      id: "command-open-capabilities",
+      label: "打开能力",
+      description: "进入技能、工具和 MCP 能力清单。",
+      kind: "navigate",
+      scope: "route",
+      safety: "local-only",
+      tone: "neutral",
+      keywords: ["skills", "tools", "mcp", "navigate", "capabilities", "能力"],
       routeId: "skills",
-      hotkey: "Alt+6"
+      hotkey: "Alt+4"
     },
     {
       id: "command-open-settings",
-      label: "Open Settings",
-      description: "Navigate to the shell policy and runtime posture view.",
+      label: "打开配置",
+      description: "进入工作区、运行态和安全策略配置。",
       kind: "navigate",
       scope: "route",
       safety: "local-only",
       tone: "neutral",
       keywords: ["settings", "policy", "navigate", "runtime"],
       routeId: "settings",
-      hotkey: "Alt+7"
+      hotkey: "Alt+5"
+    },
+    {
+      id: "command-open-diagnostics",
+      label: "打开高级诊断",
+      description: "进入运行态探针、桥接与 IPC、安全边界等诊断入口。",
+      kind: "navigate",
+      scope: "route",
+      safety: "local-only",
+      tone: "neutral",
+      keywords: ["diagnostics", "gateway", "ipc", "boundary", "navigate", "诊断"],
+      routeId: "agents",
+      hotkey: "Alt+6"
     },
     {
       id: "command-inspect-boundary",
@@ -534,64 +559,58 @@ const mockCommandSurface: StudioCommandSurface = {
   contexts: [
     {
       id: "global",
-      label: "Global quick actions",
-      summary: "Safe actions that can run anywhere in the shell.",
+      label: "全局入口",
+      summary: "任何页面都可以打开的主要工作入口。",
       actionIds: [
-        "command-open-home",
-        "command-inspect-boundary",
-        "command-show-trace",
-        "command-open-windows-observability",
-        "command-advance-workflow",
-        "command-toggle-right-rail",
-        "command-toggle-bottom-dock",
-        "command-toggle-compact-mode",
-        "command-open-operator-view"
+        "command-open-dashboard",
+        "command-open-session",
+        "command-open-history",
+        "command-open-capabilities",
+        "command-open-settings",
+        "command-open-diagnostics"
       ]
     },
     {
       id: "dashboard",
-      label: "Dashboard route actions",
-      summary: "Program-level actions for health, focus, and preview posture.",
+      label: "总览入口",
+      summary: "健康、网关和实时状态的判断入口。",
       actionIds: [
         "command-open-dashboard",
-        "command-open-operator-view",
-        "command-focus-lane-apply",
-        "command-inspect-boundary",
-        "command-advance-workflow",
-        "command-preview-lane-apply"
+        "command-open-session",
+        "command-open-history",
+        "command-open-diagnostics"
       ]
     },
     {
-      id: "home",
-      label: "Home route actions",
-      summary: "Shell-level actions for restoring operator posture and handing off into the next boundary step.",
+      id: "chat",
+      label: "会话入口",
+      summary: "OpenClaw、Hermes 和 Claude 会话工作台入口。",
       actionIds: [
-        "command-open-home",
-        "command-open-operator-view",
-        "command-inspect-boundary",
-        "command-focus-lane-apply",
-        "command-open-dashboard",
-        "command-advance-workflow"
+        "command-open-session",
+        "command-open-history",
+        "command-open-settings",
+        "command-open-diagnostics"
       ]
     },
     {
       id: "sessions",
-      label: "Sessions route actions",
-      summary: "Actions that pivot from queues back into operator review surfaces.",
+      label: "历史入口",
+      summary: "继续任务、最近工作区和回放记录入口。",
       actionIds: [
+        "command-open-history",
+        "command-open-session",
         "command-open-dashboard",
-        "command-show-trace",
-        "command-open-review-view",
-        "command-focus-approval-reviewer-queue",
-        "command-focus-approval-decision-handoff",
-        "command-advance-workflow"
+        "command-open-diagnostics"
       ]
     },
     {
       id: "agents",
-      label: "Agents route actions",
-      summary: "Actions that keep the shell in review and window-aware posture.",
+      label: "高级诊断动作",
+      summary: "运行态探针、桥接、边界和审查链路动作集中在这里。",
       actionIds: [
+        "command-open-diagnostics",
+        "command-inspect-boundary",
+        "command-show-trace",
         "command-open-review-view",
         "command-open-windows-observability",
         "command-stage-review-window",
@@ -603,61 +622,40 @@ const mockCommandSurface: StudioCommandSurface = {
       ]
     },
     {
-      id: "codex",
-      label: "Codex route actions",
-      summary: "Actions that bias the shell toward compact review and route switching.",
-      actionIds: [
-        "command-open-review-view",
-        "command-open-windows-observability",
-        "command-stage-review-window",
-        "command-focus-approval-decision-handoff",
-        "command-focus-rollback-closeout-window",
-        "command-toggle-compact-mode",
-        "command-open-settings",
-        "command-advance-workflow"
-      ]
-    },
-    {
       id: "skills",
-      label: "Skills route actions",
-      summary: "Actions that keep preview-host posture visible while the shell orchestrates a trace-first review flow locally.",
+      label: "能力入口",
+      summary: "插件、MCP、工具和技能清单入口。",
       actionIds: [
-        "command-open-trace-view",
-        "command-focus-lane-apply",
-        "command-show-trace",
-        "command-advance-workflow",
-        "command-preview-lane-apply",
-        "command-stage-trace-window",
-        "command-focus-connector-activate",
-        "command-focus-connector-lifecycle"
+        "command-open-capabilities",
+        "command-open-settings",
+        "command-open-diagnostics"
       ]
     },
     {
       id: "settings",
-      label: "Settings route actions",
-      summary: "Actions for policy review, layout posture, and detached workspace behavior.",
+      label: "配置入口",
+      summary: "运行路径、网关策略、安全策略和模型设置入口。",
       actionIds: [
         "command-open-settings",
-        "command-open-review-view",
-        "command-open-windows-observability",
-        "command-focus-lifecycle-review-packet",
-        "command-focus-materialization-validator-bridge",
-        "command-focus-materialization-failure-path",
-        "command-focus-publish-decision-gate",
-        "command-stage-review-window",
-        "command-stage-trace-window",
-        "command-advance-workflow",
-        "command-toggle-compact-mode"
+        "command-open-capabilities",
+        "command-open-diagnostics"
       ]
     }
   ],
   actionGroups: [
     {
       id: "group-route-routing",
-      label: "Route Routing",
-      summary: "Route-level shortcuts and page handoffs stay inside the local shell.",
+      label: "页面入口",
+      summary: "一级页面跳转入口。",
       tone: "neutral",
-      actionIds: ["command-open-dashboard", "command-open-home", "command-open-skills", "command-open-settings"]
+      actionIds: [
+        "command-open-dashboard",
+        "command-open-session",
+        "command-open-history",
+        "command-open-capabilities",
+        "command-open-settings",
+        "command-open-diagnostics"
+      ]
     },
     {
       id: "group-focused-slot",
@@ -746,16 +744,16 @@ const mockCommandSurface: StudioCommandSurface = {
       }
     },
     {
-      id: "sequence-home-operator-restore",
-      label: "Operator Shell Restore",
-      summary: "Use Home as a recovery surface: restore operator-shell posture, refresh the boundary rail, and line up the current focused slot for the next workflow handoff.",
+      id: "sequence-session-operator-restore",
+      label: "Session Workspace Restore",
+      summary: "Use the unified session workspace as the recovery surface for returning to a usable conversation state.",
       tone: "neutral",
       safety: "local-only",
       actionIds: ["command-open-operator-view", "command-inspect-boundary", "command-focus-lane-apply"],
       recommendedActionId: "command-open-operator-view",
       followUpActionIds: ["command-open-dashboard", "command-advance-workflow"],
       match: {
-        routeIds: ["home"]
+        routeIds: ["chat"]
       }
     },
     {
@@ -808,7 +806,7 @@ const mockCommandSurface: StudioCommandSurface = {
         "command-focus-publish-decision-gate"
       ],
       match: {
-        routeIds: ["settings", "agents", "codex"],
+        routeIds: ["settings", "agents"],
         workspaceViewIds: ["review-deck"],
         windowIntentIds: ["window-intent-review-workspace"]
       }
@@ -830,17 +828,17 @@ const mockCommandSurface: StudioCommandSurface = {
       }
     },
     {
-      id: "flow-home-operator-restore",
-      surfaceIds: ["shell", "home"],
-      label: "Home Recommended Flow",
-      summary: "Home now surfaces a contextual restore flow that can hand the shell back into boundary review without leaving local-only mode.",
-      sequenceId: "sequence-home-operator-restore",
+      id: "flow-session-operator-restore",
+      surfaceIds: ["shell", "chat"],
+      label: "Session Recommended Flow",
+      summary: "The session workspace keeps recovery actions close to the active conversation.",
+      sequenceId: "sequence-session-operator-restore",
       recommendedActionId: "command-open-operator-view",
       followUpActionIds: ["command-open-dashboard", "command-advance-workflow"],
       groupIds: ["group-route-routing", "group-focused-slot"],
-      keyboardShortcutIds: ["keyboard-run-active-flow", "keyboard-open-home", "keyboard-inspect-boundary"],
+      keyboardShortcutIds: ["keyboard-run-active-flow", "keyboard-open-session", "keyboard-inspect-boundary"],
       match: {
-        routeIds: ["home"]
+        routeIds: ["chat"]
       }
     },
     {
@@ -874,7 +872,7 @@ const mockCommandSurface: StudioCommandSurface = {
     },
     {
       id: "flow-review-deck-coverage",
-      surfaceIds: ["shell", "settings", "agents", "codex"],
+      surfaceIds: ["shell", "settings", "agents"],
       label: "Review Coverage Flow",
       summary:
         "When Review Deck and its review-workspace intent are active, command-surface pivots into delivery coverage, validator/failure readouts, review-surface actions, and cross-window observability instead of staying in generic route recovery mode.",
@@ -888,7 +886,7 @@ const mockCommandSurface: StudioCommandSurface = {
       groupIds: ["group-review-coverage", "group-review-surface-actions", "group-workflow-lane"],
       keyboardShortcutIds: ["keyboard-run-active-flow", "keyboard-run-review-sequence", "keyboard-open-settings"],
       match: {
-        routeIds: ["settings", "agents", "codex"],
+        routeIds: ["settings", "agents"],
         workspaceViewIds: ["review-deck"],
         windowIntentIds: ["window-intent-review-workspace"]
       }
@@ -1045,14 +1043,14 @@ const mockCommandSurface: StudioCommandSurface = {
       }
     },
     {
-      id: "board-home-operator-restore",
-      label: "Home Route-aware Next-step Board",
-      summary: "Home keeps restore, inspector refresh, and workflow advance actions grouped as one local-only operator recovery board.",
-      flowId: "flow-home-operator-restore",
-      sequenceId: "sequence-home-operator-restore",
+      id: "board-session-operator-restore",
+      label: "Session Route-aware Next-step Board",
+      summary: "Session recovery keeps conversation restore, diagnostics, and workflow return actions grouped together.",
+      flowId: "flow-session-operator-restore",
+      sequenceId: "sequence-session-operator-restore",
       stepIds: ["next-step-home-restore", "next-step-home-boundary", "next-step-home-workflow"],
       match: {
-        routeIds: ["home"]
+        routeIds: ["chat"]
       }
     },
     {
@@ -1104,7 +1102,7 @@ const mockCommandSurface: StudioCommandSurface = {
         "next-step-settings-lane"
       ],
       match: {
-        routeIds: ["settings", "agents", "codex"],
+        routeIds: ["settings", "agents"],
         workspaceViewIds: ["review-deck"],
         windowIntentIds: ["window-intent-review-workspace"]
       }
@@ -3258,20 +3256,20 @@ const mockCommandSurface: StudioCommandSurface = {
         }
       ],
       match: {
-        routeIds: ["settings", "agents", "codex"]
+        routeIds: ["settings", "agents"]
       }
     }
   ],
   history: {
-    title: "Recent Command History",
-    summary: "Recent local-only commands stay visible so route changes, remembered companion handoffs, flow advances, slot focus, and staged window intents remain auditable inside the shell.",
+    title: "最近命令",
+    summary: "最近打开的页面和诊断动作会保留在本地，方便继续操作。",
     retention: 8,
     emptyState: "No local command history yet."
   },
   keyboardRouting: {
-    title: "Keyboard Routing",
+    title: "快捷键",
     summary:
-      "Phase60 keeps keyboard routing local-only: palette open/close, contextual flow advance, direct sequence launch, route shortcuts, and slot/trace hotkeys all stay inside the shell UI while cross-view coordination and review-posture ownership remain reviewable.",
+      "快捷键只负责打开命令面板、切换主入口和触发高级诊断动作。",
     shortcuts: [
       {
         id: "keyboard-open-palette",
@@ -3313,33 +3311,53 @@ const mockCommandSurface: StudioCommandSurface = {
         altKey: true
       },
       {
-        id: "keyboard-open-home",
-        label: "Route to Home",
+        id: "keyboard-open-session",
+        label: "打开会话",
         combo: "Alt+2",
         key: "2",
         scope: "route",
         target: "action",
-        actionId: "command-open-home",
+        actionId: "command-open-session",
         altKey: true
       },
       {
-        id: "keyboard-open-skills",
-        label: "Route to Skills",
-        combo: "Alt+6",
-        key: "6",
+        id: "keyboard-open-history",
+        label: "打开历史",
+        combo: "Alt+3",
+        key: "3",
         scope: "route",
         target: "action",
-        actionId: "command-open-skills",
+        actionId: "command-open-history",
+        altKey: true
+      },
+      {
+        id: "keyboard-open-capabilities",
+        label: "打开能力",
+        combo: "Alt+4",
+        key: "4",
+        scope: "route",
+        target: "action",
+        actionId: "command-open-capabilities",
         altKey: true
       },
       {
         id: "keyboard-open-settings",
-        label: "Route to Settings",
-        combo: "Alt+7",
-        key: "7",
+        label: "打开配置",
+        combo: "Alt+5",
+        key: "5",
         scope: "route",
         target: "action",
         actionId: "command-open-settings",
+        altKey: true
+      },
+      {
+        id: "keyboard-open-diagnostics",
+        label: "打开高级诊断",
+        combo: "Alt+6",
+        key: "6",
+        scope: "route",
+        target: "action",
+        actionId: "command-open-diagnostics",
         altKey: true
       },
       {
@@ -5244,16 +5262,12 @@ export const mockShellState: StudioShellState = {
     runtime: "ready"
   },
   pages: [
-    { id: "dashboard", label: "Dashboard", hint: "Program health, watchlist, and milestones" },
-    { id: "home", label: "Home", hint: "Overview and launch state" },
-    { id: "chat", label: "OpenClaw", hint: "Chat commands and agent turns" },
-    { id: "hermes", label: "Hermes", hint: "Realtime external session stream" },
-    { id: "claude", label: "Claude", hint: "Claude Code session browser" },
-    { id: "sessions", label: "Sessions", hint: "Workspace activity and handoffs" },
-    { id: "agents", label: "Agents", hint: "Operator roster and queued lanes" },
-    { id: "codex", label: "Codex", hint: "Task queue and operator context" },
-    { id: "skills", label: "Skills", hint: "Skills, tools, and MCP inventory" },
-    { id: "settings", label: "Settings", hint: "Workspace policy and runtime knobs" }
+    { id: "dashboard", label: "总览", hint: "健康、网关、会话和模型路由判断入口" },
+    { id: "chat", label: "会话", hint: "OpenClaw、Hermes 和 Claude 会话工作台" },
+    { id: "sessions", label: "历史", hint: "继续任务、最近工作区和回放记录" },
+    { id: "skills", label: "能力", hint: "插件、MCP、工具和技能清单" },
+    { id: "settings", label: "配置", hint: "运行路径、网关策略、安全策略和模型设置" },
+    { id: "agents", label: "高级诊断", hint: "运行态探针、桥接与 IPC、安全边界" }
   ],
   commandSurface: mockCommandSurface,
   layout: mockLayout,
@@ -5262,7 +5276,7 @@ export const mockShellState: StudioShellState = {
   boundary: mockBoundarySummary,
   dashboard: {
     headline:
-      "Phase60 keeps the shell on a safe control boundary: runtime-backed detail, dry-runs, Studio-local execution, detached workspace workflows, readiness-aware window intents, review-posture ownership, shell-level multi-window feedback, and delivery-stage exploration are available, while real host execution remains explicitly withheld.",
+      "当前处于离线/回退快照：总览只展示健康、网关、会话、模型路由和资源趋势的判断信息。",
     metrics: [
       {
         id: "metric-bridge",
@@ -5274,8 +5288,8 @@ export const mockShellState: StudioShellState = {
       {
         id: "metric-pages",
         label: "Primary Views",
-        value: "9 routes",
-        detail: "Dashboard, OpenClaw, Hermes, Claude, Sessions, Agents, Codex, Skills, Settings.",
+        value: "6 routes",
+        detail: "总览、会话、历史、能力、配置、高级诊断。",
         tone: "positive"
       },
       {
@@ -5298,7 +5312,7 @@ export const mockShellState: StudioShellState = {
         id: "workstream-shell",
         title: "Phase 27 product foundations",
         detail:
-          "Shared types, runtime detail/results, route-aware commands, persisted layout controls, and multi-window placeholders now describe a more product-grade shell without opening host execution.",
+          "当前 fallback 只保留主入口和诊断摘要，等待 Electron 运行态刷新真实读数。",
         owner: "Codex",
         stage: "Closed",
         updatedAt: "Today",
@@ -5332,8 +5346,8 @@ export const mockShellState: StudioShellState = {
       },
       {
         id: "alert-bridge",
-        title: "Host execution stays withheld",
-        detail: "The shell can describe future host execution in detail, but it still cannot mutate ~/.openclaw, services, installs, or external processes.",
+        title: "宿主写入受保护",
+        detail: "当前主界面只显示状态摘要；需要查看边界细节时进入高级诊断。",
         tone: "neutral"
       },
       {
@@ -5361,8 +5375,8 @@ export const mockShellState: StudioShellState = {
       {
         id: "check-runtime",
         label: "Runtime Source",
-        value: "Mock runtime",
-        detail: "Fallback mode still reflects the phase60 disabled bridge and cross-window observability contract even when live probes are unavailable.",
+        value: "Fallback runtime",
+        detail: "离线快照只作为空状态和诊断摘要，不模拟真实业务进度。",
         tone: "warning"
       }
     ]

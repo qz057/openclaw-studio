@@ -16,10 +16,10 @@ const iconMap = {
 
 function formatSource(source: DashboardKpiItem["source"]): string {
   const map: Record<DashboardKpiItem["source"], string> = {
-    snapshot: "snapshot",
-    "runtime-metric": "metric",
-    "runtime-service": "service",
-    "rolling-buffer": "rolling",
+    snapshot: "快照",
+    "runtime-metric": "指标",
+    "runtime-service": "服务",
+    "rolling-buffer": "滚动",
     "collector-missing": "未采样"
   };
 

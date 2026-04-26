@@ -10,6 +10,7 @@ import {
   stopOpenClawGatewayService
 } from "@openclaw/bridge";
 import type { StudioGatewayServiceState, StudioModelCatalog, StudioOpenClawChatMessage, StudioOpenClawChatState } from "@openclaw/shared";
+import { OperationResultPanel, type OperationResultState } from "../components/OperationResultPanel";
 
 interface ChatPageProps {
   bridgeStatus: string;
@@ -291,6 +292,54 @@ function resolveSelectedModelLabel(modelCatalog: StudioModelCatalog | null, sele
   return modelCatalog?.options.find((option) => option.id === selectedModelId)?.label ?? selectedModelId;
 }
 
+function extractErrorMessage(cause: unknown, fallback: string): string {
+  if (cause instanceof Error && cause.message.trim()) {
+    return cause.message.trim();
+  }
+
+  const message = String(cause ?? "").trim();
+  return message || fallback;
+}
+
+function buildOpenClawNextStep(scope: "gateway" | "model" | "send", detail: string): string {
+  if (/command not found|not recognized|找不到/i.test(detail)) {
+    return "在 WSL 里确认 openclaw CLI 已安装并加入 PATH，然后刷新状态。";
+  }
+
+  if (/timeout|timed out|超时/i.test(detail)) {
+    return "先手动执行对应 CLI 命令，确认是否被网络、认证或后台服务阻塞。";
+  }
+
+  if (/permission|denied|权限/i.test(detail)) {
+    return "检查 WSL 当前用户权限和配置文件权限，再用同一用户重试。";
+  }
+
+  if (scope === "gateway") {
+    return "刷新网关状态；若 RPC 仍不可达，在 WSL 手动运行 openclaw gateway status --json 查看完整输出。";
+  }
+
+  if (scope === "model") {
+    return "确认模型在 OpenClaw 配置中存在，再应用一次并发送短消息验证。";
+  }
+
+  return "确认网关、模型和会话状态均可用，然后点击重试发送。";
+}
+
+function createOperationResult(
+  status: OperationResultState["status"],
+  summary: string,
+  nextStep: string,
+  detail?: string | null
+): OperationResultState {
+  return {
+    status,
+    summary,
+    detail,
+    nextStep,
+    updatedAt: Date.now()
+  };
+}
+
 function MessageBubble({
   message,
   grouped,
@@ -356,6 +405,9 @@ export function ChatPage({
   const [gatewayServiceState, setGatewayServiceState] = useState<StudioGatewayServiceState | null>(null);
   const [gatewayError, setGatewayError] = useState<string | null>(null);
   const [gatewayBusy, setGatewayBusy] = useState(false);
+  const [sendResult, setSendResult] = useState<OperationResultState | null>(null);
+  const [modelResult, setModelResult] = useState<OperationResultState | null>(null);
+  const [gatewayResult, setGatewayResult] = useState<OperationResultState | null>(null);
   const [freshSessionStartedAt, setFreshSessionStartedAt] = useState(() => persistedFreshSession.startedAt);
   const [freshSessionId, setFreshSessionId] = useState(() => persistedFreshSession.sessionId);
   const [freshSessionKey, setFreshSessionKey] = useState(() => persistedFreshSession.sessionKey);
@@ -397,7 +449,9 @@ export function ChatPage({
       } catch (cause) {
         console.error("[ChatPage] 模型列表加载失败:", cause);
         if (!cancelled) {
-          setModelError(cause instanceof Error ? cause.message : "加载模型选项失败。");
+          const detail = extractErrorMessage(cause, "加载模型选项失败。");
+          setModelError(detail);
+          setModelResult(createOperationResult("error", "模型列表加载未完成", buildOpenClawNextStep("model", detail), detail));
         }
       }
     };
@@ -421,7 +475,9 @@ export function ChatPage({
         }
       } catch (cause) {
         if (!cancelled) {
-          setGatewayError(cause instanceof Error ? cause.message : "加载 OpenClaw Gateway 状态失败。");
+          const detail = extractErrorMessage(cause, "加载 OpenClaw Gateway 状态失败。");
+          setGatewayError(detail);
+          setGatewayResult(createOperationResult("error", "网关状态读取未完成", buildOpenClawNextStep("gateway", detail), detail));
         }
       }
     };
@@ -534,7 +590,9 @@ export function ChatPage({
     }
 
     if (!chatState?.canSend) {
-      setError(chatState?.disabledReason ?? "当前发送链路不可用，无法发送到 OpenClaw。");
+      const detail = chatState?.disabledReason ?? "当前发送链路不可用，无法发送到 OpenClaw。";
+      setError(detail);
+      setSendResult(createOperationResult("error", "OpenClaw 发送受阻", buildOpenClawNextStep("send", detail), detail));
       return;
     }
 
@@ -576,6 +634,7 @@ export function ChatPage({
 
     setSubmitting(true);
     setError(null);
+    setSendResult(createOperationResult("info", "正在发送到 OpenClaw", "等待当前回合返回，完成后会自动同步最新消息。", normalizedPrompt));
 
     try {
       await sendOpenClawChatTurn(normalizedPrompt, freshSessionId);
@@ -583,7 +642,16 @@ export function ChatPage({
       const nextState = await loadOpenClawChatState(freshSessionId);
       setChatState(nextState);
       setMessages(nextState.messages);
+      setSendResult(
+        createOperationResult(
+          "success",
+          "OpenClaw 发送完成",
+          "查看最新回复；如果要验证模型切换，再发送一条短消息确认返回链路。",
+          `${nextState.messages.length} 条消息已同步。`
+        )
+      );
     } catch (cause) {
+      const detail = extractErrorMessage(cause, "发送聊天命令失败。");
       setLocalMessages((currentMessages) =>
         currentMessages.map((message) =>
           message.id === localMessageId
@@ -595,7 +663,8 @@ export function ChatPage({
         )
       );
       setDraft(normalizedPrompt);
-      setError(cause instanceof Error ? cause.message : "发送聊天命令失败。");
+      setError(detail);
+      setSendResult(createOperationResult("error", "OpenClaw 发送未完成", buildOpenClawNextStep("send", detail), detail));
     } finally {
       setSubmitting(false);
     }
@@ -678,6 +747,7 @@ export function ChatPage({
 
     setApplyingModel(true);
     setModelError(null);
+    setModelResult(createOperationResult("info", "正在应用 OpenClaw 模型", "等待配置写入完成，完成后会刷新主会话状态。", selectedModelId));
 
     try {
       const result = await setOpenClawModel(selectedModelId);
@@ -686,14 +756,26 @@ export function ChatPage({
       setSelectedModelId(result.catalog.selectedModelId ?? result.catalog.options[0]?.id ?? selectedModelId);
 
       if (!result.applied) {
-        setModelError(result.error ?? "切换 OpenClaw 默认模型失败。");
+        const detail = result.error ?? "切换 OpenClaw 默认模型失败。";
+        setModelError(detail);
+        setModelResult(createOperationResult("error", "OpenClaw 模型应用未完成", buildOpenClawNextStep("model", detail), detail));
         return;
       }
 
       const nextState = await loadOpenClawChatState(freshSessionId);
       setChatState(nextState);
+      setModelResult(
+        createOperationResult(
+          "success",
+          "OpenClaw 模型已应用",
+          "发送一条短消息验证新模型是否被当前会话采用。",
+          result.catalog.selectedModelId ?? selectedModelId
+        )
+      );
     } catch (cause) {
-      setModelError(cause instanceof Error ? cause.message : "切换 OpenClaw 默认模型失败。");
+      const detail = extractErrorMessage(cause, "切换 OpenClaw 默认模型失败。");
+      setModelError(detail);
+      setModelResult(createOperationResult("error", "OpenClaw 模型应用未完成", buildOpenClawNextStep("model", detail), detail));
     } finally {
       setApplyingModel(false);
     }
@@ -702,10 +784,27 @@ export function ChatPage({
   async function handleGatewayAction(action: "start" | "stop" | "refresh") {
     setGatewayBusy(action !== "refresh");
     setGatewayError(null);
+    setGatewayResult(
+      createOperationResult(
+        "info",
+        action === "refresh" ? "正在刷新 OpenClaw Gateway" : `正在${action === "start" ? "启动" : "停止"} OpenClaw Gateway`,
+        "等待状态读取完成，最近结果会在这里更新。",
+        gatewayServiceState?.detail ?? null
+      )
+    );
 
     try {
       if (action === "refresh") {
-        setGatewayServiceState(await loadOpenClawGatewayServiceState());
+        const nextState = await loadOpenClawGatewayServiceState();
+        setGatewayServiceState(nextState);
+        setGatewayResult(
+          createOperationResult(
+            "success",
+            "OpenClaw Gateway 状态已刷新",
+            nextState.running ? "RPC 已可继续观察；需要维护时再停止网关。" : "如需发送真实请求，先启动网关。",
+            nextState.detail
+          )
+        );
         return;
       }
 
@@ -713,10 +812,28 @@ export function ChatPage({
       setGatewayServiceState(result.state);
 
       if (!result.applied) {
-        setGatewayError(result.error ?? `OpenClaw Gateway ${action === "start" ? "启动" : "停止"}失败。`);
+        const detail = result.error ?? `OpenClaw Gateway ${action === "start" ? "启动" : "停止"}失败。`;
+        setGatewayError(detail);
+        setGatewayResult(
+          createOperationResult("error", `OpenClaw Gateway ${action === "start" ? "启动" : "停止"}未完成`, buildOpenClawNextStep("gateway", detail), detail)
+        );
+        return;
       }
+
+      setGatewayResult(
+        createOperationResult(
+          "success",
+          `OpenClaw Gateway 已${action === "start" ? "启动" : "停止"}`,
+          result.state.running ? "现在可以发送 OpenClaw 消息或刷新 RPC 状态。" : "如需继续会话，重新启动网关后再发送。",
+          result.state.detail
+        )
+      );
     } catch (cause) {
-      setGatewayError(cause instanceof Error ? cause.message : `OpenClaw Gateway ${action === "start" ? "启动" : "停止"}失败。`);
+      const detail = extractErrorMessage(cause, `OpenClaw Gateway ${action === "start" ? "启动" : "停止"}失败。`);
+      setGatewayError(detail);
+      setGatewayResult(
+        createOperationResult("error", `OpenClaw Gateway ${action === "start" ? "启动" : "停止"}未完成`, buildOpenClawNextStep("gateway", detail), detail)
+      );
     } finally {
       setGatewayBusy(false);
     }
@@ -725,6 +842,15 @@ export function ChatPage({
   const liveStatusLabel = freshSessionActive ? "独立新会话" : submitting ? "OpenClaw 回复中" : chatState?.readinessLabel ?? "检查发送链路";
   const latestMessageLabel = latestMessage ? `${latestMessage.role === "assistant" ? "OpenClaw" : "你"} · ${formatMessageTimestamp(latestMessage.timestamp)}` : "暂无新消息";
   const selectedModelLabel = resolveSelectedModelLabel(modelCatalog, selectedModelId);
+  const currentModelLabel = resolveSelectedModelLabel(modelCatalog, modelCatalog?.selectedModelId ?? "");
+  const pendingModelLabel = canApplyModel ? selectedModelLabel : "无待应用变更";
+  const gatewayActionSummary = [
+    "可刷新",
+    gatewayServiceState?.startAllowed ? "可启动" : null,
+    gatewayServiceState?.stopAllowed ? "可停止" : null
+  ]
+    .filter(Boolean)
+    .join(" / ");
   const visibleModelLabel =
     chatState?.model && chatState?.provider
       ? `${chatState.model} · ${chatState.provider}`
@@ -756,32 +882,49 @@ export function ChatPage({
         </div>
 
         <div className="chat-workspace__controls">
-          <label className="chat-select-field">
-            <span>模型选项</span>
-            <select
-              value={selectedModelId}
-              disabled={applyingModel || (modelCatalog?.options.length ?? 0) === 0}
-              onChange={(event: { target: { value: string } }) => {
-                setSelectedModelId(event.target.value);
-              }}
-            >
-              {modelCatalog?.options.length ? (
-                modelCatalog.options.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label}
-                  </option>
-                ))
-              ) : (
-                <option value="">未发现可用模型</option>
-              )}
-            </select>
-          </label>
-          <div className="chat-session-actions">
-            <div className="chat-session-actions__summary">
-              <strong>{selectedModelLabel}</strong>
-              <span>修改的是 OpenClaw 主会话的默认模型，新回合会沿用这个选择。</span>
+          <div className="operation-card operation-card--model">
+            <div className="operation-card__header">
+              <div>
+                <span>模型设置</span>
+                <strong>OpenClaw 默认模型</strong>
+              </div>
+              <em>{modelCatalog?.options.length ? `${modelCatalog.options.length} 个可选模型` : "等待模型列表"}</em>
             </div>
-            <div className="chat-session-actions__buttons">
+            <label className="chat-select-field">
+              <span>待应用模型</span>
+              <select
+                value={selectedModelId}
+                disabled={applyingModel || (modelCatalog?.options.length ?? 0) === 0}
+                onChange={(event: { target: { value: string } }) => {
+                  setSelectedModelId(event.target.value);
+                }}
+              >
+                {modelCatalog?.options.length ? (
+                  modelCatalog.options.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))
+                ) : (
+                  <option value="">未发现可用模型</option>
+                )}
+              </select>
+            </label>
+            <div className="operation-status-grid">
+              <div>
+                <span>当前模型</span>
+                <strong>{currentModelLabel}</strong>
+              </div>
+              <div>
+                <span>待应用模型</span>
+                <strong>{pendingModelLabel}</strong>
+              </div>
+              <div>
+                <span>会话模型</span>
+                <strong>{visibleModelLabel}</strong>
+              </div>
+            </div>
+            <div className="operation-card__actions">
               {freshSessionActive ? (
                 <button type="button" className="secondary-button" onClick={() => void handleReturnToMainSession()}>
                   返回主会话
@@ -794,13 +937,35 @@ export function ChatPage({
                 {applyingModel ? "应用中…" : "应用模型"}
               </button>
             </div>
+            <OperationResultPanel label="应用结果" result={modelResult} emptySummary="尚未执行模型应用" emptyNextStep="选择模型后点击应用模型。" />
           </div>
-          <div className="chat-session-actions">
-            <div className="chat-session-actions__summary">
-              <strong>{gatewayServiceState?.statusLabel ?? "Gateway 状态加载中"}</strong>
-              <span>{gatewayServiceState?.detail ?? "读取 OpenClaw Gateway 的独立服务状态。"}</span>
+          <div className="operation-card operation-card--gateway">
+            <div className="operation-card__header">
+              <div>
+                <span>Gateway 控制</span>
+                <strong>{gatewayServiceState?.statusLabel ?? "Gateway 状态加载中"}</strong>
+              </div>
+              <em>{gatewayBusy ? "操作中" : "可操作"}</em>
             </div>
-            <div className="chat-session-actions__buttons">
+            <div className="operation-status-grid">
+              <div>
+                <span>当前网关状态</span>
+                <strong>{gatewayServiceState?.running ? "运行中" : gatewayServiceState ? "未运行" : "读取中"}</strong>
+              </div>
+              <div>
+                <span>网络/RPC 状态</span>
+                <strong>{gatewayServiceState?.detail ?? networkStatus}</strong>
+              </div>
+              <div>
+                <span>可执行动作</span>
+                <strong>{gatewayActionSummary}</strong>
+              </div>
+              <div>
+                <span>最近检查</span>
+                <strong>{formatUpdatedAt(gatewayServiceState?.lastCheckedAt ?? null)}</strong>
+              </div>
+            </div>
+            <div className="operation-card__actions">
               <button type="button" className="secondary-button" onClick={() => void handleGatewayAction("refresh")} disabled={gatewayBusy}>
                 刷新网关
               </button>
@@ -821,6 +986,7 @@ export function ChatPage({
                 停止网关
               </button>
             </div>
+            <OperationResultPanel label="最近结果" result={gatewayResult} emptySummary="尚未执行网关操作" emptyNextStep="先刷新网关状态，确认 RPC 是否可达。" />
           </div>
         </div>
 
@@ -910,6 +1076,7 @@ export function ChatPage({
           {modelError ? <div className="chat-error">{modelError}</div> : null}
           {chatState?.disabledReason ? <div className="chat-error">{chatState.disabledReason}</div> : null}
           {error ? <div className="chat-error">{error}</div> : null}
+          <OperationResultPanel label="发送结果" result={sendResult} emptySummary="尚未发送消息" emptyNextStep="确认网关与模型可用后再发送。" />
 
           <div className="chat-preset-strip chat-preset-strip--toolbar">
             {promptPresets.map((preset) => (

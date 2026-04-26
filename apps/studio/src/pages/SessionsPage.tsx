@@ -1,5 +1,6 @@
 import type { SessionSummary } from "@openclaw/shared";
 import type { WorkbenchSessionFilter } from "../components/workbench-persistence";
+import { formatProductText } from "../lib/product-text";
 
 type WorkbenchTone = "positive" | "warning" | "neutral";
 type SessionFilter = WorkbenchSessionFilter;
@@ -75,13 +76,13 @@ const FILTER_LABELS: Record<SessionFilter, string> = {
 
 function translateActionLabel(label: string): string {
   const map: Record<string, string> = {
-    "Open Home": "打开 Home",
-    "Inspect Boundary Contract": "检查 Boundary Contract",
-    "Show Focused Slot Trace": "查看 Focused Slot Trace",
-    "Focus Lane Apply Slot": "应用 Focus Lane Slot",
-    "Activate Review Deck View": "进入 Review Deck",
-    "Activate Operator Shell View": "进入 Operator Shell",
-    "Activate Trace Deck View": "进入 Trace Deck",
+    "Open Home": "打开总览",
+    "Inspect Boundary Contract": "检查边界契约",
+    "Show Focused Slot Trace": "查看聚焦槽位追踪",
+    "Focus Lane Apply Slot": "聚焦应用槽位",
+    "Activate Review Deck View": "进入审查台",
+    "Activate Operator Shell View": "进入操作壳层",
+    "Activate Trace Deck View": "进入轨迹台",
     "Advance Current Workflow Lane": "推进当前流程",
     "Open Command Palette": "打开命令面板",
     "Resume Last Work": "恢复上次工作",
@@ -94,7 +95,7 @@ function translateActionLabel(label: string): string {
     "Inspect Cross-window Observability": "检查跨窗口可观测链"
   };
 
-  return map[label] ?? label;
+  return map[label] ?? formatProductText(label);
 }
 
 function getActionGlyph(label: string, tone: WorkbenchTone): string {
@@ -229,9 +230,9 @@ function EnvironmentStatusBar({ items }: { items: WorkbenchStatusItem[] }) {
       <div className="workbench-statusbar__items" role="list" aria-label="环境状态条">
         {items.map((item, index) => (
           <div key={item.id} className={`workbench-statusbar__item ${toneClassName(item.tone)}`} role="listitem">
-            <span className="workbench-statusbar__label">{item.label}</span>
-            <strong className="workbench-statusbar__value">{item.value}</strong>
-            {item.meta ? <em className="workbench-statusbar__meta-text">{item.meta}</em> : null}
+            <span className="workbench-statusbar__label">{formatProductText(item.label)}</span>
+            <strong className="workbench-statusbar__value">{formatProductText(item.value)}</strong>
+            {item.meta ? <em className="workbench-statusbar__meta-text">{formatProductText(item.meta)}</em> : null}
             {index < items.length - 1 ? <i className="workbench-statusbar__divider" aria-hidden="true" /> : null}
           </div>
         ))}
@@ -246,7 +247,7 @@ function CurrentWorkflowCard({ nodes }: { nodes: WorkflowNode[] }) {
       <div className="card-header card-header--stack workbench-section-header">
         <div>
           <p className="eyebrow">当前流程</p>
-          <h2>Operator Shell → Trace Deck → Review Deck</h2>
+          <h2>操作壳层 → 轨迹台 → 审查台</h2>
         </div>
         <p>按流程查看当前锚点、追踪位与复核位，把状态与入口放在同一条主链上。</p>
       </div>
@@ -261,16 +262,16 @@ function CurrentWorkflowCard({ nodes }: { nodes: WorkflowNode[] }) {
             <div className="workflow-node-v2__content">
               <div className="workflow-node-v2__header">
                 <div>
-                  <strong>{node.title}</strong>
+              <strong>{formatProductText(node.title)}</strong>
                   <span className="workflow-node-v2__state-label">{node.active ? "当前节点" : "流程节点"}</span>
                 </div>
                 <span className={`status-chip status-chip--${node.active ? "active" : node.tone === "warning" ? "waiting" : node.tone === "positive" ? "complete" : "recent"}`}>
                   {node.status}
                 </span>
               </div>
-              <p>{node.summary}</p>
+              <p>{formatProductText(node.summary)}</p>
               <button type="button" className="secondary-button workbench-inline-action" onClick={node.onEnter}>
-                进入 {node.title}
+                进入 {formatProductText(node.title)}
               </button>
             </div>
           </div>
@@ -298,7 +299,7 @@ function NextActionPanel({
           <p className="eyebrow">建议下一步</p>
           <h2>{primaryAction ? translateActionLabel(primaryAction.label) : "先打开命令面板"}</h2>
         </div>
-        <p>{summary}</p>
+        <p>{formatProductText(summary)}</p>
       </div>
 
       <div className="workbench-suggestion-list">
@@ -310,7 +311,7 @@ function NextActionPanel({
             <span className="workbench-suggestion-card__index">0{index + 1}</span>
             <div className="workbench-suggestion-card__body">
               <strong>{translateActionLabel(action.label)}</strong>
-              <p>{action.description}</p>
+              <p>{formatProductText(action.description)}</p>
             </div>
             <button type="button" className={index === 0 ? "quick-action-button quick-action-button--primary" : "secondary-button"} onClick={action.onTrigger}>
               {index === 0 ? "立即进入" : "执行"}
@@ -327,10 +328,10 @@ function ExecutionReadinessSnapshot({ cards }: { cards: WorkbenchReadinessCard[]
     <article className="workbench-panel surface card">
       <div className="card-header card-header--stack workbench-section-header">
         <div>
-          <p className="eyebrow">Execution Readiness Snapshot</p>
+          <p className="eyebrow">执行就绪快照</p>
           <h2>当前执行就绪快照</h2>
         </div>
-        <p>把 focused slot handoff、delivery anchor、review closeout、resume anchor 放进同一眼可读的工作台首页。</p>
+        <p>把聚焦槽位交接、交付锚点、审查收口和恢复锚点放进同一眼可读的工作台首页。</p>
       </div>
 
       <div className="workbench-readiness-grid">
@@ -338,20 +339,20 @@ function ExecutionReadinessSnapshot({ cards }: { cards: WorkbenchReadinessCard[]
           <article key={card.id} className={`workbench-readiness-card workbench-readiness-card--${card.tone}`}>
             <div className="workbench-readiness-card__header">
               <div>
-                <span className="workbench-readiness-card__eyebrow">{card.title}</span>
-                <strong>{card.headline}</strong>
+                <span className="workbench-readiness-card__eyebrow">{formatProductText(card.title)}</span>
+                <strong>{formatProductText(card.headline)}</strong>
               </div>
               <span className={`status-chip status-chip--${card.tone === "positive" ? "complete" : card.tone === "warning" ? "waiting" : "recent"}`}>
                 {card.tone === "positive" ? "已就绪" : card.tone === "warning" ? "需复核" : "观察中"}
               </span>
             </div>
-            <p>{card.summary}</p>
+            <p>{formatProductText(card.summary)}</p>
             <div className="workbench-readiness-card__metrics">
               {card.metrics.map((metric) => (
                 <article key={metric.id} className="workbench-readiness-card__metric">
-                  <span>{metric.label}</span>
-                  <strong>{metric.value}</strong>
-                  {metric.meta ? <p>{metric.meta}</p> : null}
+                  <span>{formatProductText(metric.label)}</span>
+                  <strong>{formatProductText(metric.value)}</strong>
+                  {metric.meta ? <p>{formatProductText(metric.meta)}</p> : null}
                 </article>
               ))}
             </div>
@@ -370,7 +371,7 @@ function ExecutionReadinessSnapshot({ cards }: { cards: WorkbenchReadinessCard[]
               </div>
             ) : card.onOpen ? (
               <button type="button" className="secondary-button workbench-inline-action" onClick={card.onOpen}>
-                {card.actionLabel ?? "查看详情"}
+                {formatProductText(card.actionLabel, "查看详情")}
               </button>
             ) : null}
           </article>
@@ -397,7 +398,7 @@ function QuickLaunchGrid({ actions }: { actions: WorkbenchAction[] }) {
             <div className="workbench-action-card__body">
               <span>{action.hotkey ?? "动作入口"}</span>
               <strong>{translateActionLabel(action.label)}</strong>
-              <p>{action.description}</p>
+              <p>{formatProductText(action.description)}</p>
             </div>
           </button>
         ))}
@@ -462,7 +463,7 @@ function RecentSessionsList({
             }}
           >
             <div className="recent-session-row__title">
-              <strong>{session.title}</strong>
+              <strong>{formatProductText(session.title)}</strong>
               <p>
                 {session.workspace} · {session.owner}
               </p>
@@ -473,7 +474,7 @@ function RecentSessionsList({
             </div>
             <div className="recent-session-row__status">
               <span className={`status-chip status-chip--${session.status}`}>{getSessionStatusLabel(session.status)}</span>
-              <p>{session.updatedAt}</p>
+              <p>{formatProductText(session.updatedAt)}</p>
             </div>
             <div className="recent-session-row__actions">
               <button
@@ -535,7 +536,7 @@ export function SessionsPage({
               onClick={action.onTrigger}
             >
               <strong>{translateActionLabel(action.label)}</strong>
-              <span>{action.description}</span>
+              <span>{formatProductText(action.description)}</span>
             </button>
           ))}
         </div>

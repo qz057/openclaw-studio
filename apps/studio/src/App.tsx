@@ -139,11 +139,6 @@ const LazyAgentsPage = lazy(async () => {
   return { default: AgentsPage };
 });
 
-const LazyCodexPage = lazy(async () => {
-  const { CodexPage } = await import("./pages/CodexPage");
-  return { default: CodexPage };
-});
-
 const LazySkillsPage = lazy(async () => {
   const { SkillsPage } = await import("./pages/SkillsPage");
   return { default: SkillsPage };
@@ -154,24 +149,55 @@ const LazySettingsPage = lazy(async () => {
   return { default: SettingsPage };
 });
 
-import { resolvePage, normalizePageId, formatLiveSyncAge, dedupeCommandActions, dedupeById } from "./lib/app-utils";
+import {
+  resolvePage,
+  getRouteHashForPageId,
+  visibleStudioPageIds,
+  formatLiveSyncAge,
+  dedupeCommandActions,
+  dedupeById
+} from "./lib/app-utils";
+import { formatProductText } from "./lib/product-text";
 
 function navigateToPage(pageId: StudioPageId) {
-  window.location.hash = `#${normalizePageId(pageId)}`;
+  window.location.hash = `#${getRouteHashForPageId(pageId)}`;
 }
 
-const LIVE_PAGE_IDS = new Set<StudioPageId>(["dashboard", "chat", "hermes", "sessions"]);
-const PREVIEW_PAGE_IDS = new Set<StudioPageId>(["agents", "skills", "settings"]);
+const LIVE_PAGE_IDS = new Set<StudioPageId>(["dashboard", "chat", "sessions"]);
+const UTILITY_PAGE_IDS = new Set<StudioPageId>(["skills", "settings", "agents"]);
+type SessionSurfaceId = "openclaw" | "hermes" | "claude";
+const SESSION_SURFACES: Array<{ id: SessionSurfaceId; label: string; detail: string }> = [
+  { id: "openclaw", label: "OpenClaw", detail: "主会话" },
+  { id: "hermes", label: "Hermes", detail: "终端会话" },
+  { id: "claude", label: "Claude", detail: "历史记录" }
+];
+
+function resolveInitialSessionSurface(): SessionSurfaceId {
+  if (typeof window === "undefined") {
+    return "openclaw";
+  }
+
+  const route = window.location.hash.replace("#", "").trim().toLowerCase();
+  if (route === "hermes") {
+    return "hermes";
+  }
+  if (route === "claude") {
+    return "claude";
+  }
+  return "openclaw";
+}
+
 const PAGE_LABEL_ZH: Partial<Record<StudioPageId, string>> = {
   dashboard: "总览",
-  chat: "OpenClaw",
-  hermes: "Hermes",
-  claude: "Claude",
-  sessions: "会话",
-  agents: "代理",
-  codex: "Codex",
-  skills: "技能",
-  settings: "设置"
+  home: "总览",
+  chat: "会话",
+  hermes: "会话",
+  claude: "会话",
+  sessions: "历史",
+  agents: "高级诊断",
+  codex: "总览",
+  skills: "能力",
+  settings: "配置"
 };
 const ADVANCED_REVIEW_DECK_QUERY_PARAM = "reviewDeck";
 const ADVANCED_REVIEW_DECK_STORAGE_KEY = "openclaw-studio.reviewDeck";
@@ -208,13 +234,14 @@ function isAdvancedReviewDeckEnabled(): boolean {
 }
 
 const PAGE_HINT_ZH: Partial<Record<StudioPageId, string>> = {
-  dashboard: "实时总览",
-  chat: "主会话",
-  hermes: "终端会话",
-  claude: "Claude 会话",
+  dashboard: "运行健康",
+  home: "运行健康",
+  chat: "主会话与终端流",
+  hermes: "主会话与终端流",
+  claude: "主会话与终端流",
   sessions: "历史与恢复",
-  agents: "协作与分工",
-  codex: "任务与上下文",
+  agents: "诊断与审查",
+  codex: "运行健康",
   skills: "能力与接入",
   settings: "当前配置"
 };
@@ -287,10 +314,6 @@ function getZhStatusValue(value: string): string {
     "local-only": "仅本地"
   };
   return map[normalized] ?? value;
-}
-
-function getPreviewPageSummary(pageId: StudioPageId): string {
-  return "当前页面以只读信息为主。";
 }
 
 function getPageIcon(pageId: StudioPageId) {
@@ -1159,10 +1182,6 @@ function renderPage(
       return <DashboardPage viewModel={dashboardRealtime} themeMode={dashboardThemeMode} onThemeModeChange={onDashboardThemeModeChange} />;
     case "chat":
       return <LazyChatPage {...chatSummary} />;
-    case "hermes":
-      return <LazyHermesPage {...chatSummary} readinessLabel={hermesReadinessLabel} />;
-    case "claude":
-      return <LazyClaudeSessionsPage />;
     case "sessions":
       return (
         <LazySessionsPage
@@ -1182,21 +1201,7 @@ function renderPage(
         />
       );
     case "agents":
-      return <LazyAgentsPage agents={data.agents} />;
-    case "codex":
-      return (
-        <LazyCodexPage
-          summary={data.codex.summary}
-          stats={data.codex.stats}
-          tasks={data.codex.tasks}
-          observations={data.codex.observations}
-          loopSummary={data.codex.loopSummary}
-          loopStats={data.codex.loopStats}
-          loopSignals={data.codex.loopSignals}
-          contextSummary={data.codex.contextSummary}
-          contextNotes={data.codex.contextNotes}
-        />
-      );
+      return <LazyAgentsPage agents={data.agents} boundary={data.boundary} status={data.status} commandSurface={data.commandSurface} />;
     case "skills":
       return (
         <LazySkillsPage
@@ -1250,6 +1255,7 @@ export function App() {
   const dashboardRealtime = useDashboardRealtimeData(data, lastUpdatedAt);
   const [hermesState, setHermesState] = useState<StudioHermesState | null>(null);
   const [activePage, setActivePage] = useState<StudioPageId>(() => resolvePage());
+  const [sessionSurface, setSessionSurface] = useState<SessionSurfaceId>(resolveInitialSessionSurface);
   const [dashboardThemeMode, setDashboardThemeMode] = useState<DashboardThemeMode>(getInitialDashboardTheme);
   const [paletteReturnFocus, setPaletteReturnFocus] = useState<HTMLElement | null>(null);
   const [focusedSlotId, setFocusedSlotId] = useState<string | null>(() => readPersistedFocusedSlotId());
@@ -1289,7 +1295,11 @@ export function App() {
 
   useEffect(() => {
     const syncRoute = () => {
-      setActivePage(resolvePage());
+      const nextPage = resolvePage();
+      setActivePage(nextPage);
+      if (nextPage === "chat") {
+        setSessionSurface(resolveInitialSessionSurface());
+      }
     };
 
     window.addEventListener("hashchange", syncRoute);
@@ -1547,7 +1557,16 @@ export function App() {
       activeMaterializationPlatform?.id
     );
   const dockItems = createDockItems(hostTraceFocus);
-  const activePageMeta = data.pages.find((page) => page.id === activePage) ?? {
+  const pageById = new Map(data.pages.map((page) => [page.id, page]));
+  const visiblePages = visibleStudioPageIds.map(
+    (pageId) =>
+      pageById.get(pageId) ?? {
+        id: pageId,
+        label: PAGE_LABEL_ZH[pageId] ?? pageId,
+        hint: PAGE_HINT_ZH[pageId] ?? "工作台入口"
+      }
+  );
+  const activePageMeta = visiblePages.find((page) => page.id === activePage) ?? {
     id: activePage,
     label: "Studio",
     hint: "工作台主壳"
@@ -1555,9 +1574,9 @@ export function App() {
   const activePageLabel = getZhPageLabel(activePageMeta.id, activePageMeta.label);
   const activePageHint = getZhPageHint(activePageMeta.id, activePageMeta.hint);
   const latestCommandEntry = commandLog[0] ?? null;
-  const livePages = data.pages.filter((page) => LIVE_PAGE_IDS.has(page.id));
-  const previewPages = data.pages.filter((page) => PREVIEW_PAGE_IDS.has(page.id));
-  const currentPageIsPreview = PREVIEW_PAGE_IDS.has(activePage);
+  const livePages = visiblePages.filter((page) => LIVE_PAGE_IDS.has(page.id));
+  const utilityPages = visiblePages.filter((page) => UTILITY_PAGE_IDS.has(page.id));
+  const currentPageUsesSimpleShell = UTILITY_PAGE_IDS.has(activePage);
   const rightRailTab = data.layout.rightRailTabs.find((tab) => tab.id === resolvedLayoutState.rightRailTabId) ?? data.layout.rightRailTabs[0];
   const bottomDockTab = data.layout.bottomDockTabs.find((tab) => tab.id === resolvedLayoutState.bottomDockTabId) ?? data.layout.bottomDockTabs[0];
   const workspaceView =
@@ -1667,10 +1686,10 @@ export function App() {
   const chatSummary = {
     bridgeStatus: `桥接 · ${getZhStatusValue(data.status.bridge)}`,
     runtimeStatus: `运行态 · ${getZhStatusValue(data.status.runtime)}`,
-    workspaceLabel: `工作区 · ${workspaceView?.label ?? "不可用"}`,
+    workspaceLabel: `工作区 · ${formatProductText(workspaceView?.label, "不可用")}`,
     readinessLabel: "聊天状态 · 检查发送链路",
-    gatewayStatus: gatewayCheck ? `${gatewayCheck.label} · ${gatewayCheck.value}` : `Gateway · ${getZhStatusValue(data.status.bridge)}`,
-    networkStatus: networkCheck ? `${networkCheck.label} · ${networkCheck.value}` : `Network · ${getZhStatusValue(data.status.runtime)}`
+    gatewayStatus: gatewayCheck ? `${formatProductText(gatewayCheck.label)} · ${formatProductText(gatewayCheck.value)}` : `网关 · ${getZhStatusValue(data.status.bridge)}`,
+    networkStatus: networkCheck ? `${formatProductText(networkCheck.label)} · ${formatProductText(networkCheck.value)}` : `网络 · ${getZhStatusValue(data.status.runtime)}`
   };
   const activeOrchestrationBoard =
     data.windowing.orchestration.boards.find((board) => board.laneId === selectedWorkflowLane?.id) ??
@@ -1688,6 +1707,16 @@ export function App() {
     null;
   const activeObservabilityMapping = selectStudioWindowObservabilityActiveMapping(data.windowing) ?? null;
   const actionById = new Map(data.commandSurface.actions.map((action) => [action.id, action]));
+  const showAdvancedCommandSurface = activePage === "agents";
+  const primaryCommandActionIds = [
+    "command-open-dashboard",
+    "command-open-session",
+    "command-open-history",
+    "command-open-capabilities",
+    "command-open-settings",
+    "command-open-diagnostics"
+  ];
+  const primaryCommandActions = dedupeCommandActions(primaryCommandActionIds.map((actionId) => actionById.get(actionId)));
   const activeContexts = data.commandSurface.contexts.filter((context) => context.id === "global" || context.id === activePage);
   const contextualActions = dedupeCommandActions(activeContexts.flatMap((context) => context.actionIds.map((actionId) => actionById.get(actionId))));
   const quickActions = dedupeCommandActions([
@@ -1697,8 +1726,10 @@ export function App() {
   const normalizedCommandQuery = commandQuery.trim().toLowerCase();
   const paletteActions =
     normalizedCommandQuery.length === 0
-      ? contextualActions
-      : data.commandSurface.actions.filter((action) => {
+      ? showAdvancedCommandSurface
+        ? contextualActions
+        : primaryCommandActions
+      : (showAdvancedCommandSurface ? data.commandSurface.actions : primaryCommandActions).filter((action) => {
           const haystack = [
             action.label,
             action.description,
@@ -3150,7 +3181,7 @@ export function App() {
       label: "正式发布就绪度",
       value: "RELEASE-MANIFEST / BUILD-METADATA / REVIEW-MANIFEST",
       detail:
-        "Phase60 保留了 manifest 主骨架，并在操作员审查闭环上叠加出更清晰的交付链工作区，因此看板归属、队列、确认时序、交付阶段、产物和跨窗口审查姿态都能继续联动，而不会执行任何动作。"
+        "发布清单、构建元数据和审查清单会在操作审查闭环里保持联动，方便同时查看看板归属、队列、确认时序、交付阶段和跨窗口审查姿态。"
     },
     {
       id: "release-depth-delivery-chain",
@@ -3635,7 +3666,7 @@ export function App() {
       label: "安全姿态",
       value: "仅本地 / 不安装 / 不执行",
       detail:
-        "Phase60 slice 36 会把回放、审查状态连续性、打包应用实体化任务状态映射、校验器 / 观测桥读数、实体化 Stage C 读数链和带类型的 Stage C 就绪度串进同一条仅本地链路中，因此当前审查面、包交接、窗口 / 通道 / 看板主干、审查队列、收口时序、当前任务证据、审批工作流阶段、检查点链路、回滚契约、边界交接姿态、实体化根路径、staged-output 交接、bundle 封装姿态以及跨窗口校验器链路都可以保持可读，而不会安装、发布、签名或启用 host 侧执行。"
+        "回放、审查状态、打包任务、校验器读数和就绪度会串在同一条仅本地链路中，因此当前审查面、包交接、窗口 / 通道 / 看板、审查队列、收口时序和回滚契约都可以保持可读。"
     }
   ];
   const buildPaletteEntryDetailLines = (
@@ -3762,7 +3793,19 @@ export function App() {
     meta: options?.meta ?? [action.scope, action.safety, action.hotkey ?? "无快捷键"],
     detailLines: buildPaletteEntryDetailLines(action, options?.detailLines)
   });
-  const paletteSectionsBase: CommandPaletteSection[] = [
+  const primaryPaletteSection: CommandPaletteSection = {
+    id: "section-primary-pages",
+    label: "主入口",
+    summary: "打开总览、会话、历史、能力、配置或高级诊断。",
+    entries: primaryCommandActions.map((action) =>
+      actionToPaletteEntry(action, {
+        entryId: `section-primary-${action.id}`,
+        badge: "一级页",
+        meta: ["导航", action.hotkey ?? "无快捷键"]
+      })
+    )
+  };
+  const advancedPaletteSectionsBase: CommandPaletteSection[] = [
     {
       id: "section-flow",
       label: activeContextualFlow?.label ?? "推荐流程",
@@ -3986,6 +4029,9 @@ export function App() {
       )
     }
   ];
+  const paletteSectionsBase: CommandPaletteSection[] = showAdvancedCommandSurface
+    ? [primaryPaletteSection, ...advancedPaletteSectionsBase]
+    : [primaryPaletteSection];
   const matchesPaletteEntry = (entry: CommandPaletteEntry) => {
     if (!normalizedCommandQuery.length) {
       return true;
@@ -4017,42 +4063,46 @@ export function App() {
         id: context.id,
         label: context.label
       })),
-      resolvedDeliveryCoverageStage
-        ? {
-            id: `palette-context-stage-${resolvedDeliveryCoverageStage.id}`,
-            label: `${resolvedDeliveryCoverageStage.label} / 交付阶段`
-          }
-        : null,
-      resolvedReviewSurfaceAction
-        ? {
-            id: `palette-context-surface-${resolvedReviewSurfaceAction.id}`,
-            label: `${resolvedReviewSurfaceAction.label} / 审查面`
-          }
-        : null,
-      activeCompanionRouteState
-        ? {
-            id: `palette-context-route-${activeCompanionRouteState.id}`,
-            label: `${activeCompanionRouteState.label} / 伴随路由`
-          }
-        : null,
-      activeReplayScenarioPack
-        ? {
-            id: `palette-context-pack-${activeReplayScenarioPack.id}`,
-            label: `${activeReplayScenarioPack.label} / 回放包`
-          }
-        : null,
-      resolvedCoverageWindow && resolvedCoverageLane
-        ? {
-            id: `palette-context-window-${resolvedCoverageWindow.id}-${resolvedCoverageLane.id}`,
-            label: `${resolvedCoverageWindow.label} -> ${resolvedCoverageLane.label}`
-          }
-        : null,
-      resolvedCoverageMapping
-        ? {
-            id: `palette-context-mapping-${resolvedCoverageMapping.id}`,
-            label: `${resolvedCoverageMapping.label} / ${formatReviewPostureRelationship(resolvedCoverageMapping.relationship)}`
-          }
-        : null
+      ...(showAdvancedCommandSurface
+        ? [
+            resolvedDeliveryCoverageStage
+              ? {
+                  id: `palette-context-stage-${resolvedDeliveryCoverageStage.id}`,
+                  label: `${resolvedDeliveryCoverageStage.label} / 交付阶段`
+                }
+              : null,
+            resolvedReviewSurfaceAction
+              ? {
+                  id: `palette-context-surface-${resolvedReviewSurfaceAction.id}`,
+                  label: `${resolvedReviewSurfaceAction.label} / 审查面`
+                }
+              : null,
+            activeCompanionRouteState
+              ? {
+                  id: `palette-context-route-${activeCompanionRouteState.id}`,
+                  label: `${activeCompanionRouteState.label} / 伴随路由`
+                }
+              : null,
+            activeReplayScenarioPack
+              ? {
+                  id: `palette-context-pack-${activeReplayScenarioPack.id}`,
+                  label: `${activeReplayScenarioPack.label} / 回放包`
+                }
+              : null,
+            resolvedCoverageWindow && resolvedCoverageLane
+              ? {
+                  id: `palette-context-window-${resolvedCoverageWindow.id}-${resolvedCoverageLane.id}`,
+                  label: `${resolvedCoverageWindow.label} -> ${resolvedCoverageLane.label}`
+                }
+              : null,
+            resolvedCoverageMapping
+              ? {
+                  id: `palette-context-mapping-${resolvedCoverageMapping.id}`,
+                  label: `${resolvedCoverageMapping.label} / ${formatReviewPostureRelationship(resolvedCoverageMapping.relationship)}`
+                }
+              : null
+          ]
+        : [])
     ].filter((context): context is { id: string; label: string } => Boolean(context))
   );
 
@@ -4787,7 +4837,7 @@ export function App() {
   const operatorViewAction = toWorkbenchAction(actionById.get("command-open-operator-view"));
   const traceViewAction = toWorkbenchAction(actionById.get("command-open-trace-view"));
   const reviewViewAction = toWorkbenchAction(actionById.get("command-open-review-view"));
-  const openHomeAction = toWorkbenchAction(actionById.get("command-open-home"));
+  const openSessionAction = toWorkbenchAction(actionById.get("command-open-session"));
   const inspectBoundaryAction = toWorkbenchAction(actionById.get("command-inspect-boundary"));
   const showTraceAction = toWorkbenchAction(actionById.get("command-show-trace"));
   const focusLaneApplyAction = toWorkbenchAction(actionById.get("command-focus-lane-apply"));
@@ -4828,22 +4878,22 @@ export function App() {
     }
 
     if (haystack.includes("layout") || haystack.includes("renderer") || haystack.includes("ui")) {
-      return operatorViewAction ?? openHomeAction ?? workbenchCommandBarAction;
+      return operatorViewAction ?? openSessionAction ?? workbenchCommandBarAction;
     }
 
     if (haystack.includes("bootstrap") || haystack.includes("launch") || haystack.includes("start")) {
-      return openHomeAction ?? operatorViewAction ?? workbenchCommandBarAction;
+      return openSessionAction ?? operatorViewAction ?? workbenchCommandBarAction;
     }
 
     if (session.status === "active") {
-      return traceViewAction ?? operatorViewAction ?? openHomeAction ?? workbenchCommandBarAction;
+      return traceViewAction ?? operatorViewAction ?? openSessionAction ?? workbenchCommandBarAction;
     }
 
     if (session.status === "waiting") {
       return reviewViewAction ?? inspectBoundaryAction ?? workbenchCommandBarAction;
     }
 
-    return openHomeAction ?? operatorViewAction ?? workbenchCommandBarAction;
+    return openSessionAction ?? operatorViewAction ?? workbenchCommandBarAction;
   };
 
   const handleSessionAction = (session: SessionSummary) => {
@@ -5075,27 +5125,27 @@ export function App() {
       title: "聚焦槽位交接",
       headline: hostTraceFocus?.slot.label ?? "当前未聚焦槽位",
       summary: hostTraceFocus
-        ? `${hostTraceFocus.previewSummary} 当前工作台会把校验、结果与回滚 / 审计一起保留在同一张卡里，方便继续顺着当前槽位往下看。`
+        ? `${formatProductText(hostTraceFocus.previewSummary)} 当前工作台会把校验、结果与回滚 / 审计一起保留在同一张卡里，方便继续顺着当前槽位往下看。`
         : "当前还没有聚焦槽位；先从命令面板或轨迹台进入一条明确的执行链。",
       tone: hostTraceFocus ? (hostTraceFocus.usesHandoff ? "positive" : "neutral") : "warning",
       metrics: [
         {
           id: "focused-slot-validation",
           label: "校验",
-          value: hostTraceFocus?.validationValue ?? "不可用",
-          meta: hostTraceFocus?.validationDetail
+          value: formatProductText(hostTraceFocus?.validationValue, "不可用"),
+          meta: formatProductText(hostTraceFocus?.validationDetail)
         },
         {
           id: "focused-slot-result",
           label: "结果",
-          value: hostTraceFocus?.resultValue ?? "不可用",
-          meta: hostTraceFocus?.resultDetail
+          value: formatProductText(hostTraceFocus?.resultValue, "不可用"),
+          meta: formatProductText(hostTraceFocus?.resultDetail)
         },
         {
           id: "focused-slot-rollback",
           label: "回滚 / 审计",
-          value: hostTraceFocus?.rollbackAuditValue ?? "不可用",
-          meta: hostTraceFocus?.rollbackAuditDetail
+          value: formatProductText(hostTraceFocus?.rollbackAuditValue, "不可用"),
+          meta: formatProductText(hostTraceFocus?.rollbackAuditDetail)
         }
       ],
       actionLabel: "打开轨迹台",
@@ -5219,7 +5269,7 @@ export function App() {
           meta:
             activeCompanionRouteHistoryEntry?.transitionKind
               ? formatCompanionRouteTransitionKind(activeCompanionRouteHistoryEntry.transitionKind)
-              : activeCompanionPathHandoff?.summary ?? "暂无记忆交接"
+              : formatProductText(activeCompanionPathHandoff?.summary, "暂无记忆交接")
         },
         {
           id: "review-surface-resume-observability",
@@ -5252,7 +5302,7 @@ export function App() {
       tone: "positive",
       active: workspaceView?.id === "operator-shell",
       onEnter: () => {
-        (operatorViewAction ?? openHomeAction ?? workbenchCommandBarAction).onTrigger();
+        (operatorViewAction ?? openSessionAction ?? workbenchCommandBarAction).onTrigger();
       }
     },
     {
@@ -5281,7 +5331,7 @@ export function App() {
 
   const workbenchNextActionPrimary =
     toWorkbenchAction(recommendedAction ?? undefined) ??
-    (reviewViewAction ?? traceViewAction ?? openHomeAction ?? workbenchCommandBarAction);
+    (reviewViewAction ?? traceViewAction ?? openSessionAction ?? workbenchCommandBarAction);
 
   const workbenchNextActionSecondary = dedupeById(
     [inspectBoundaryAction, showTraceAction, reviewViewAction, focusLaneApplyAction].filter(
@@ -5347,10 +5397,10 @@ export function App() {
     }
   };
 
-  const chatFocusMode = activePage === "chat" || activePage === "hermes" || activePage === "claude";
+  const chatFocusMode = activePage === "chat";
   const centerFocusMode = activePage === "sessions";
   const dashboardHomeMode = activePage === "dashboard";
-  const showWorkbenchScaffolding = !dashboardHomeMode && !chatFocusMode && !centerFocusMode && !currentPageIsPreview;
+  const showWorkbenchScaffolding = !dashboardHomeMode && !chatFocusMode && !centerFocusMode && !currentPageUsesSimpleShell;
   const showWorkbenchBlocks = showWorkbenchScaffolding && !dashboardHomeMode;
   const showRightRail = showWorkbenchBlocks && resolvedLayoutState.rightRailVisible;
   const showBottomDock = showWorkbenchBlocks && resolvedLayoutState.bottomDockVisible;
@@ -5406,6 +5456,20 @@ export function App() {
               </div>
             </div>
           </div>
+          <button
+            type="button"
+            className="nav-command-button"
+            aria-label="打开命令面板"
+            onClick={() => {
+              openCommandPalette("");
+            }}
+          >
+            <span>
+              <Command size={16} strokeWidth={2.2} aria-hidden="true" />
+              打开命令面板
+            </span>
+            <strong>Ctrl/Cmd K</strong>
+          </button>
           <div className="nav-section">
             <span className="nav-section__label">主入口</span>
             <nav className="nav-list">
@@ -5416,6 +5480,9 @@ export function App() {
                   className={page.id === activePage ? "nav-item nav-item--active" : "nav-item"}
                   onClick={() => {
                     setActivePage(page.id);
+                    if (page.id === "chat") {
+                      setSessionSurface("openclaw");
+                    }
                     navigateToPage(page.id);
                   }}
                 >
@@ -5429,15 +5496,15 @@ export function App() {
             </nav>
           </div>
 
-          {previewPages.length > 0 ? (
-            <div className="nav-section nav-section--preview">
-              <span className="nav-section__label">更多</span>
-              <nav className="nav-list nav-list--preview">
-                {previewPages.map((page) => (
+          {utilityPages.length > 0 ? (
+            <div className="nav-section nav-section--utility">
+              <span className="nav-section__label">工具配置</span>
+              <nav className="nav-list nav-list--utility">
+                {utilityPages.map((page) => (
                   <button
                     key={page.id}
                     type="button"
-                    className={page.id === activePage ? "nav-item nav-item--active nav-item--preview" : "nav-item nav-item--preview"}
+                    className={page.id === activePage ? "nav-item nav-item--active" : "nav-item"}
                     onClick={() => {
                       setActivePage(page.id);
                       navigateToPage(page.id);
@@ -5568,7 +5635,6 @@ export function App() {
 
         <main className="main-panel">
           {syncError ? <div className="runtime-sync-banner runtime-sync-banner--warning">实时同步失败，当前显示最近成功快照：{syncError}</div> : null}
-          {currentPageIsPreview ? <div className="page-mode-banner">当前页：{getPreviewPageSummary(activePage)}</div> : null}
           {showWorkbenchBlocks ? (
             <>
               <section className="foundation-strip">
@@ -5732,7 +5798,7 @@ export function App() {
               <OperatorReviewBoard
                 pipeline={releaseApprovalPipeline}
                 windowing={data.windowing}
-                eyebrow="Phase60"
+                eyebrow="高级审查"
                 title="操作审查面板"
                 summary="把当前只读评审链路按操作面板方式展示，方便查看阶段归属、审核队列、确认状态与交接关系。"
               />
@@ -5755,7 +5821,7 @@ export function App() {
                 onRunReviewSurfaceAction={handleRunReviewSurfaceAction}
                 onRunCompanionSequence={handleRunCompanionSequence}
                 onRunCompanionRouteHistory={handleRunCompanionRouteHistory}
-                eyebrow="Phase60"
+                eyebrow="高级审查"
                 title="交付链路"
                 summary="把当前交付阶段、衔接关系与只读审查路径放在同一处查看。"
               />
@@ -5857,7 +5923,7 @@ export function App() {
                     activeLaneId={windowingSurface.activeLaneId}
                     activeBoardId={windowingSurface.activeBoardId}
                     activeMappingId={windowingSurface.activeMappingId}
-                    eyebrow="Phase60"
+                    eyebrow="高级审查"
                     title="跨窗口协同"
                     summary="把窗口、共享状态、审查归属和本地阻塞统一放在同一块区域。"
                   />
@@ -5957,11 +6023,26 @@ export function App() {
           ) : null}
 
           <Suspense fallback={<PageLoadingState />}>
-            {activePage === "chat" || activePage === "hermes" || activePage === "claude" ? (
-              <>
+            {activePage === "chat" ? (
+              <section className="session-workspace-shell">
+                <div className="session-surface-switcher" aria-label="会话来源切换">
+                  {SESSION_SURFACES.map((surface) => (
+                    <button
+                      key={surface.id}
+                      type="button"
+                      className={sessionSurface === surface.id ? "session-surface-tab session-surface-tab--active" : "session-surface-tab"}
+                      onClick={() => {
+                        setSessionSurface(surface.id);
+                      }}
+                    >
+                      <strong>{surface.label}</strong>
+                      <span>{surface.detail}</span>
+                    </button>
+                  ))}
+                </div>
                 <div
                   style={{
-                    display: activePage === "chat" ? "block" : "none",
+                    display: sessionSurface === "openclaw" ? "block" : "none",
                     minHeight: 0,
                     height: "100%"
                   }}
@@ -5970,7 +6051,7 @@ export function App() {
                 </div>
                 <div
                   style={{
-                    display: activePage === "hermes" ? "block" : "none",
+                    display: sessionSurface === "hermes" ? "block" : "none",
                     minHeight: 0,
                     height: "100%"
                   }}
@@ -5979,14 +6060,14 @@ export function App() {
                 </div>
                 <div
                   style={{
-                    display: activePage === "claude" ? "block" : "none",
+                    display: sessionSurface === "claude" ? "block" : "none",
                     minHeight: 0,
                     height: "100%"
                   }}
                 >
                   <LazyClaudeSessionsPage />
                 </div>
-              </>
+              </section>
             ) : (
               renderPage(
                 activePage,

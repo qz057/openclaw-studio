@@ -1,4 +1,5 @@
 import type { StudioTone } from "@openclaw/shared";
+import { formatProductText } from "../lib/product-text";
 
 export interface CommandPaletteEntryDetailLine {
   id: string;
@@ -82,22 +83,22 @@ export function CommandPalette({
         className="command-palette surface"
         role="dialog"
         aria-modal="true"
-        aria-label="Command Palette"
+        aria-label="命令面板"
         onClick={(event: any) => {
           event.stopPropagation();
         }}
       >
         <div className="command-palette__header">
           <div>
-            <p className="eyebrow">Command Surface</p>
-            <h2>Command Palette</h2>
+            <p className="eyebrow">命令面</p>
+            <h2>命令面板</h2>
           </div>
           <button type="button" className="command-palette__close" onClick={onClose}>
             Esc
           </button>
         </div>
         <label className="command-palette__input">
-          <span>Workflow-aware local action router</span>
+          <span>感知当前流程的本地动作路由器</span>
           <input
             autoFocus
             value={query}
@@ -133,7 +134,7 @@ export function CommandPalette({
         <div className="command-palette__contexts">
           {contexts.map((context) => (
             <span key={context.id} className="command-context-pill">
-              {context.label}
+              {formatProductText(context.label)}
             </span>
           ))}
         </div>
@@ -141,7 +142,7 @@ export function CommandPalette({
           <div className="command-palette__contexts">
             {shortcuts.map((shortcut) => (
               <span key={shortcut.id} className="command-context-pill">
-                {shortcut.combo} · {shortcut.label}
+                {shortcut.combo} · {formatProductText(shortcut.label)}
               </span>
             ))}
           </div>
@@ -154,8 +155,8 @@ export function CommandPalette({
                   <section key={section.id} className="command-palette__section">
                     <div className="command-palette__section-header">
                       <div>
-                        <strong>{section.label}</strong>
-                        <p>{section.summary}</p>
+                        <strong>{formatProductText(section.label)}</strong>
+                        <p>{formatProductText(section.summary)}</p>
                       </div>
                     </div>
                     <div className="command-palette__section-list">
@@ -182,14 +183,14 @@ export function CommandPalette({
                           >
                             <div>
                               <div className="command-palette__item-header">
-                                <strong>{entry.label}</strong>
-                                {entry.badge ? <span className="command-palette__badge">{entry.badge}</span> : null}
+                                <strong>{formatProductText(entry.label)}</strong>
+                                {entry.badge ? <span className="command-palette__badge">{formatProductText(entry.badge)}</span> : null}
                               </div>
-                              <p>{entry.description}</p>
+                              <p>{formatProductText(entry.description)}</p>
                             </div>
                             <div className="command-palette__meta">
                               {entry.meta.map((value) => (
-                                <span key={`${entry.id}-${value}`}>{value}</span>
+                                <span key={`${entry.id}-${value}`}>{formatProductText(value)}</span>
                               ))}
                             </div>
                           </button>
@@ -201,8 +202,8 @@ export function CommandPalette({
               )
             ) : (
               <div className="command-palette__empty">
-                <strong>No local orchestration matches</strong>
-                <p>Try another route, workflow, slot, or keyboard shortcut label.</p>
+                <strong>没有匹配的本地编排动作</strong>
+                <p>可以换一个页面、流程、槽位或快捷键关键词。</p>
               </div>
             )}
           </div>
@@ -210,34 +211,34 @@ export function CommandPalette({
             <aside className="command-palette__preview surface">
               <div className="command-palette__section-header">
                 <div>
-                  <span>Command preview</span>
-                  <strong>{selectedEntry.label}</strong>
-                  <p>{selectedEntry.description}</p>
+                  <span>命令预览</span>
+                  <strong>{formatProductText(selectedEntry.label)}</strong>
+                  <p>{formatProductText(selectedEntry.description)}</p>
                 </div>
               </div>
               <div className="command-palette__contexts">
-                {selectedSection ? <span className="command-context-pill">{selectedSection.label}</span> : null}
-                {selectedEntry.badge ? <span className="command-context-pill">{selectedEntry.badge}</span> : null}
+                {selectedSection ? <span className="command-context-pill">{formatProductText(selectedSection.label)}</span> : null}
+                {selectedEntry.badge ? <span className="command-context-pill">{formatProductText(selectedEntry.badge)}</span> : null}
               </div>
               {selectedEntry.detailLines?.length ? (
                 <div className="windowing-preview-list">
                   {selectedEntry.detailLines.map((line) => (
                     <div key={line.id} className="windowing-preview-line">
-                      <span>{line.label}</span>
-                      <strong>{line.value}</strong>
+                      <span>{formatProductText(line.label)}</span>
+                      <strong>{formatProductText(line.value)}</strong>
                     </div>
                   ))}
                 </div>
               ) : null}
               <div className="command-palette__meta">
                 {selectedEntry.meta.map((value) => (
-                  <span key={`${selectedEntry.id}-preview-${value}`}>{value}</span>
+                  <span key={`${selectedEntry.id}-preview-${value}`}>{formatProductText(value)}</span>
                 ))}
               </div>
               <div className="windowing-preview-line windowing-preview-line--stacked">
-                <span>Execution hint</span>
-                <strong>Enter runs the active local-only action.</strong>
-                <p>Arrow keys change selection without leaving the current reviewer context.</p>
+                <span>执行提示</span>
+                <strong>按 Enter 执行当前受控本地动作。</strong>
+                <p>方向键只切换选择，不离开当前审查上下文。</p>
               </div>
             </aside>
           ) : null}

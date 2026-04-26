@@ -1,4 +1,5 @@
 import type { StudioShellState } from "@openclaw/shared";
+import { formatProductText } from "../lib/product-text";
 
 interface SettingsPageProps {
   settings: StudioShellState["settings"];
@@ -30,7 +31,7 @@ export function SettingsPage({ settings }: SettingsPageProps) {
         <div className="card-header card-header--stack">
           <div>
             <h2>当前配置概览</h2>
-            <p>{settings.summary}</p>
+            <p>{formatProductText(settings.summary)}</p>
           </div>
         </div>
       </article>
@@ -55,8 +56,8 @@ export function SettingsPage({ settings }: SettingsPageProps) {
           <article key={section!.id} className="surface card">
             <div className="card-header card-header--stack">
               <div>
-                <h2>{section!.title}</h2>
-                <p>{section!.description}</p>
+                <h2>{formatProductText(section!.title)}</h2>
+                <p>{formatProductText(section!.description)}</p>
               </div>
               <span>{section!.items.length} 项</span>
             </div>
@@ -64,11 +65,11 @@ export function SettingsPage({ settings }: SettingsPageProps) {
               {section!.items.map((item) => (
                 <article key={item.id} className="setting-row">
                   <div>
-                    <strong>{item.label}</strong>
-                    <p>{item.detail}</p>
+                    <strong>{formatProductText(item.label)}</strong>
+                    <p>{formatProductText(item.detail)}</p>
                   </div>
                   <div className="setting-meta">
-                    <span className={`tone-chip tone-chip--${item.tone}`}>{item.value}</span>
+                    <span className={`tone-chip tone-chip--${item.tone}`}>{formatProductText(item.value)}</span>
                   </div>
                 </article>
               ))}
@@ -89,10 +90,10 @@ export function SettingsPage({ settings }: SettingsPageProps) {
             {toolPolicyItems.map((item) => (
               <article key={item.id} className="list-row list-row--stacked">
                 <div className="row-heading">
-                  <strong>{item.label}</strong>
-                  <span className={`tone-chip tone-chip--${item.tone}`}>{item.value}</span>
+                  <strong>{formatProductText(item.label)}</strong>
+                  <span className={`tone-chip tone-chip--${item.tone}`}>{formatProductText(item.value)}</span>
                 </div>
-                <p>{item.detail}</p>
+                <p>{formatProductText(item.detail)}</p>
               </article>
             ))}
           </div>
@@ -109,10 +110,10 @@ export function SettingsPage({ settings }: SettingsPageProps) {
             {pluginItems.map((item) => (
               <article key={item.id} className="list-row list-row--stacked">
                 <div className="row-heading">
-                  <strong>{item.label}</strong>
-                  <span className={`tone-chip tone-chip--${item.tone}`}>{item.value}</span>
+                  <strong>{formatProductText(item.label)}</strong>
+                  <span className={`tone-chip tone-chip--${item.tone}`}>{formatProductText(item.value)}</span>
                 </div>
-                <p>{item.detail}</p>
+                <p>{formatProductText(item.detail)}</p>
               </article>
             ))}
           </div>

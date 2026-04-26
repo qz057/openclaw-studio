@@ -7,16 +7,70 @@ const { spawn, spawnSync } = require("node:child_process");
 const WebSocket = require("ws");
 
 const PAGES = [
-  { id: "dashboard", label: "总览" },
-  { id: "chat", label: "OpenClaw" },
-  { id: "hermes", label: "Hermes" },
-  { id: "sessions", label: "会话" },
-  { id: "agents", label: "代理" },
-  { id: "skills", label: "技能" },
-  { id: "settings", label: "设置" }
+  { id: "dashboard", label: "总览", hash: "dashboard" },
+  { id: "chat", label: "会话", hash: "session" },
+  { id: "sessions", label: "历史", hash: "history" },
+  { id: "skills", label: "能力", hash: "capabilities" },
+  { id: "settings", label: "配置", hash: "settings" },
+  { id: "agents", label: "高级诊断", hash: "diagnostics" }
 ];
 
-const REMOVED_NAV_LABELS = ["Claude", "Codex"];
+const REMOVED_NAV_LABELS = ["Hermes", "Claude", "Codex", "代理", "Home"];
+const PRIMARY_COMMAND_LABELS = ["打开总览", "打开会话", "打开历史", "打开能力", "打开配置", "打开高级诊断"];
+const REMOVED_COMMAND_LABELS = ["打开 Home", "打开 Codex", "打开 Claude", "打开 Hermes", "打开代理"];
+const MAIN_PAGE_FORBIDDEN_TERMS = ["preview-host", "withheld", "Phase60", "placeholder"];
+const VISIBLE_ENGLISH_PHRASES = [
+  "Bias the shell",
+  "Focus the right rail",
+  "Move the shell",
+  "Settings now reads",
+  "Shell mode and integration posture",
+  "Connector-adjacent runtime",
+  "No dedicated MCP roots",
+  "standard profile",
+  "exec ask/always",
+  "OpenClaw tool profile",
+  "OpenClaw plugin runtime",
+  "Runtime connector lane",
+  "Active Agents",
+  "Waiting Lanes",
+  "Shell Integrator",
+  "Bridge Watcher",
+  "Execution Readiness Snapshot",
+  "focused slot handoff",
+  "delivery anchor",
+  "review closeout",
+  "resume anchor",
+  "Review Deck",
+  "Trace Deck",
+  "Operator Shell",
+  "Boundary Contract",
+  "Focused Slot Trace",
+  "Studio Alpha bootstrap",
+  "Fallback active",
+  "Operational",
+  "Offline smoke",
+  "Recent sessions",
+  "Codex tasks",
+  "This operation was aborted",
+  "Just now",
+  "min ago",
+  "hr ago",
+  "updated navigation",
+  "queued live probes",
+  "local-only",
+  "in-review",
+  "runtime sampled",
+  "latest batch",
+  "runtime connected",
+  "snapshot / service",
+  "GPU utilization",
+  "MODEL ROUTES",
+  "TASK MIX",
+  "COLLECTORS",
+  "MONO STREAM",
+  "CLAUDE LIVE"
+];
 
 const DANGEROUS_BUTTON_PATTERNS = [
   /停止/,
@@ -51,7 +105,25 @@ const SAFE_BUTTON_PATTERNS = [
 ];
 
 const PAGE_ROUTE_CHANGING_BUTTON_PATTERNS = {
-  sessions: [/继续/, /查看/, /打开命令面板/, /Focused Slot Trace/, /Boundary Contract/, /^打开$/, /^立即进入$/, /^执行$/]
+  sessions: [
+    /继续/,
+    /查看/,
+    /打开命令面板/,
+    /Focused Slot Trace/,
+    /聚焦槽位追踪/,
+    /Boundary Contract/,
+    /边界契约/,
+    /Operator Shell/,
+    /操作壳层/,
+    /Trace Deck/,
+    /轨迹台/,
+    /Review Deck/,
+    /审查台/,
+    /聚焦应用槽位/,
+    /^打开$/,
+    /^立即进入$/,
+    /^执行$/
+  ]
 };
 
 const DEFAULT_TIMEOUT_MS = 120_000;
@@ -544,6 +616,18 @@ async function collectUiState(cdp) {
       .slice(0, 12)
       .map((heading) => normalize(heading.innerText || heading.textContent));
     const bodyText = normalize(document.body?.innerText ?? "");
+    const internalTermContexts = [];
+    const internalTermRegex = /preview-host|withheld|Phase60|placeholder/gi;
+    let internalTermMatch = null;
+    while ((internalTermMatch = internalTermRegex.exec(bodyText)) && internalTermContexts.length < 8) {
+      internalTermContexts.push(bodyText.slice(Math.max(0, internalTermMatch.index - 80), internalTermMatch.index + internalTermMatch[0].length + 80));
+    }
+    const visibleEnglishPhrases = ${JSON.stringify(VISIBLE_ENGLISH_PHRASES)};
+    const visibleEnglishMatches = visibleEnglishPhrases.filter((phrase) => bodyText.toLowerCase().includes(phrase.toLowerCase())).slice(0, 12);
+    const visibleEnglishContexts = visibleEnglishMatches.map((phrase) => {
+      const index = bodyText.toLowerCase().indexOf(phrase.toLowerCase());
+      return bodyText.slice(Math.max(0, index - 70), index + phrase.length + 70);
+    });
     return {
       hash: window.location.hash,
       title: document.title,
@@ -560,7 +644,53 @@ async function collectUiState(cdp) {
       hasObjectObjectText: bodyText.includes("[object Object]"),
       hasNaNText: /(^|\\s)NaN($|\\s|%)/.test(bodyText),
       hasOldLiveSessionTitle: bodyText.includes("Codex 实时会话") || bodyText.includes("Claude 实时会话"),
-      hasClaudeCodeTitle: bodyText.includes("Claude Code")
+      hasClaudeCodeTitle: bodyText.includes("Claude Code"),
+      internalTermMatches: Array.from(new Set(bodyText.match(/preview-host|withheld|Phase60|placeholder/gi) || [])).slice(0, 8),
+      internalTermContexts,
+      visibleEnglishMatches,
+      visibleEnglishContexts,
+      hasGatewayControl: bodyText.includes("Gateway 控制") || bodyText.includes("刷新网关"),
+      hasModelControl: bodyText.includes("模型设置") || bodyText.includes("待应用模型") || bodyText.includes("应用模型"),
+      hasChatOperationResult: bodyText.includes("发送结果") && bodyText.includes("应用结果"),
+      hasDiagnosticsTabs: bodyText.includes("运行态探针") && bodyText.includes("桥接与 IPC") && bodyText.includes("安全边界")
+    };
+  })()`);
+}
+
+async function collectCommandPaletteState(cdp) {
+  return cdp.evaluate(`(() => {
+    const normalize = (value) => (value || "").replace(/\\s+/g, " ").trim();
+    const root = document.querySelector(".command-palette");
+    if (!root) {
+      return {
+        open: false,
+        entries: [],
+        contexts: [],
+        internalTermMatches: [],
+        visibleEnglishMatches: [],
+        removedCommandMatches: [],
+        primaryCommandMatches: []
+      };
+    }
+    const bodyText = normalize(root.innerText || root.textContent);
+    const entries = Array.from(root.querySelectorAll(".command-palette__item"))
+      .map((item) => normalize(item.innerText || item.textContent))
+      .filter(Boolean);
+    const contexts = Array.from(root.querySelectorAll(".command-context-pill"))
+      .map((item) => normalize(item.innerText || item.textContent))
+      .filter(Boolean);
+    const primaryLabels = ${JSON.stringify(PRIMARY_COMMAND_LABELS)};
+    const removedLabels = ${JSON.stringify(REMOVED_COMMAND_LABELS)};
+    const visibleEnglishPhrases = ${JSON.stringify(VISIBLE_ENGLISH_PHRASES)};
+    return {
+      open: true,
+      entries,
+      contexts,
+      bodyPreview: bodyText.slice(0, 700),
+      internalTermMatches: Array.from(new Set(bodyText.match(/preview-host|withheld|Phase60|placeholder/gi) || [])).slice(0, 8),
+      visibleEnglishMatches: visibleEnglishPhrases.filter((phrase) => bodyText.toLowerCase().includes(phrase.toLowerCase())).slice(0, 12),
+      removedCommandMatches: removedLabels.filter((label) => bodyText.includes(label)),
+      primaryCommandMatches: primaryLabels.filter((label) => bodyText.includes(label))
     };
   })()`);
 }
@@ -651,6 +781,7 @@ async function main() {
   const timeoutMs = Number.parseInt(process.env.STUDIO_UI_FULL_CHECK_TIMEOUT_MS ?? `${DEFAULT_TIMEOUT_MS}`, 10);
   const port = await findFreePort();
   const explicitExe = process.env.STUDIO_UI_FULL_CHECK_EXE ? path.resolve(process.env.STUDIO_UI_FULL_CHECK_EXE) : null;
+  const preferPackaged = process.env.STUDIO_UI_FULL_CHECK_PACKAGED === "1";
   const packagedExe = path.join(appRoot, "release", "win-unpacked", "OpenClaw Studio.exe");
   const sourceElectronPath = require("electron");
   const launchTarget = explicitExe
@@ -660,7 +791,7 @@ async function main() {
         args: [`--remote-debugging-port=${port}`, `--user-data-dir=${userDataDir}`],
         cwd: path.dirname(explicitExe)
       }
-    : fs.existsSync(packagedExe)
+    : preferPackaged && fs.existsSync(packagedExe)
     ? {
         mode: "packaged",
         command: packagedExe,
@@ -749,11 +880,32 @@ async function main() {
     });
 
     const commandPaletteClick = await realClick(cdp, "button", "打开命令面板", { waitMs: 500 });
+    const commandPaletteState = await collectCommandPaletteState(cdp);
     report.globalInteractions.push({
       name: "open-command-palette",
       result: commandPaletteClick,
-      state: await collectUiState(cdp)
+      state: await collectUiState(cdp),
+      paletteState: commandPaletteState
     });
+    if (!commandPaletteClick.clicked) {
+      report.failures.push(`Command palette launcher was not clickable: ${commandPaletteClick.reason}`);
+    }
+    if (!commandPaletteState.open) {
+      report.failures.push("Command palette did not open after clicking the launcher.");
+    }
+    const missingPrimaryCommands = PRIMARY_COMMAND_LABELS.filter((label) => !commandPaletteState.primaryCommandMatches.includes(label));
+    if (missingPrimaryCommands.length > 0) {
+      report.failures.push(`Command palette is missing primary entries: ${missingPrimaryCommands.join(", ")}`);
+    }
+    if (commandPaletteState.removedCommandMatches.length > 0) {
+      report.failures.push(`Command palette still exposes removed entries: ${commandPaletteState.removedCommandMatches.join(", ")}`);
+    }
+    if (commandPaletteState.internalTermMatches.length > 0) {
+      report.failures.push(`Command palette exposes internal terms: ${commandPaletteState.internalTermMatches.join(", ")}`);
+    }
+    if (commandPaletteState.visibleEnglishMatches.length > 0) {
+      report.failures.push(`Command palette exposes untranslated user-facing phrases: ${commandPaletteState.visibleEnglishMatches.join(", ")}`);
+    }
     await cdp.command("Input.dispatchKeyEvent", {
       type: "keyDown",
       windowsVirtualKeyCode: 27,
@@ -773,7 +925,22 @@ async function main() {
       const beforeConsoleErrors = cdp.consoleMessages.filter((entry) => ["error", "log-error", "assert"].includes(entry.type)).length;
       const navResult = await realClickNav(cdp, page.label);
       const stateAfterNav = await collectUiState(cdp);
-      const typed = page.id === "chat" || page.id === "hermes" ? await typeIntoFirstField(cdp, `Phase 11 UI smoke ${page.id}`) : { typed: false, reason: "No chat input expected on this page" };
+      const pagePaletteClick = await realClick(cdp, "button", "打开命令面板", { waitMs: 350 });
+      const pagePaletteState = await collectCommandPaletteState(cdp);
+      await cdp.command("Input.dispatchKeyEvent", {
+        type: "keyDown",
+        windowsVirtualKeyCode: 27,
+        code: "Escape",
+        key: "Escape"
+      });
+      await cdp.command("Input.dispatchKeyEvent", {
+        type: "keyUp",
+        windowsVirtualKeyCode: 27,
+        code: "Escape",
+        key: "Escape"
+      });
+      await sleep(250);
+      const typed = page.id === "chat" ? await typeIntoFirstField(cdp, `Phase 11 UI smoke ${page.id}`) : { typed: false, reason: "No chat input expected on this page" };
       const interactions = await clickSafePageButtons(cdp, page.id);
       const finalState = await collectUiState(cdp);
       const shot = await screenshot(cdp, path.join(screenshotRoot, `${page.id}.png`));
@@ -783,8 +950,20 @@ async function main() {
         pageFailures.push(`Navigation click failed for ${page.label}: ${navResult.reason}`);
       }
 
-      if (!stateAfterNav.hash.includes(page.id)) {
-        pageFailures.push(`Expected hash after nav to include ${page.id}, actual ${stateAfterNav.hash}`);
+      if (!stateAfterNav.hash.includes(page.hash)) {
+        pageFailures.push(`Expected hash after nav to include ${page.hash}, actual ${stateAfterNav.hash}`);
+      }
+
+      if (!pagePaletteClick.clicked || !pagePaletteState.open) {
+        pageFailures.push(`Command palette did not open on ${page.label}: ${pagePaletteClick.reason ?? "not open"}`);
+      }
+
+      if (pagePaletteState.internalTermMatches.length > 0) {
+        pageFailures.push(`Command palette on ${page.label} exposes internal terms: ${pagePaletteState.internalTermMatches.join(", ")}`);
+      }
+
+      if (pagePaletteState.visibleEnglishMatches.length > 0) {
+        pageFailures.push(`Command palette on ${page.label} exposes untranslated phrases: ${pagePaletteState.visibleEnglishMatches.join(", ")}`);
       }
 
       const removedNavItems = finalState.buttons.filter(
@@ -818,12 +997,39 @@ async function main() {
         pageFailures.push(`Page ${page.id} contains raw NaN text.`);
       }
 
+      if (finalState.internalTermMatches.length > 0) {
+        pageFailures.push(`Page ${page.id} exposes internal terms: ${finalState.internalTermMatches.join(", ")}.`);
+      }
+
+      if (finalState.visibleEnglishMatches.length > 0) {
+        pageFailures.push(`Page ${page.id} exposes untranslated phrases: ${finalState.visibleEnglishMatches.join(", ")}.`);
+      }
+
       if (page.id === "dashboard" && finalState.hasOldLiveSessionTitle) {
         pageFailures.push("Dashboard still contains removed live-session title text.");
       }
 
       if (page.id === "dashboard" && !finalState.hasClaudeCodeTitle) {
         pageFailures.push("Dashboard is missing Claude Code stream title.");
+      }
+
+      if (page.id === "chat") {
+        if (!typed.typed) {
+          pageFailures.push(`Chat input was not editable: ${typed.reason ?? "value did not update"}`);
+        }
+        if (!finalState.hasGatewayControl) {
+          pageFailures.push("Chat page is missing gateway control entry.");
+        }
+        if (!finalState.hasModelControl) {
+          pageFailures.push("Chat page is missing model settings entry.");
+        }
+        if (!finalState.hasChatOperationResult) {
+          pageFailures.push("Chat page is missing operation result panels.");
+        }
+      }
+
+      if (page.id === "agents" && !finalState.hasDiagnosticsTabs) {
+        pageFailures.push("Advanced diagnostics page is missing the runtime / IPC / boundary tabs.");
       }
 
       const afterErrors = cdp.pageErrors.length;
@@ -837,7 +1043,7 @@ async function main() {
         report.warnings.push(`Page ${page.id} produced ${afterConsoleErrors - beforeConsoleErrors} console error log(s); see consoleErrors.`);
       }
 
-      if (!finalState.hash.includes(page.id)) {
+      if (!finalState.hash.includes(page.hash)) {
         report.warnings.push(`Page ${page.id} interactions changed route from ${stateAfterNav.hash} to ${finalState.hash}.`);
         await realClickNav(cdp, page.label);
       }
@@ -848,6 +1054,8 @@ async function main() {
         label: page.label,
         navResult,
         stateAfterNav,
+        pagePaletteClick,
+        pagePaletteState,
         typed,
         interactions,
         finalState,

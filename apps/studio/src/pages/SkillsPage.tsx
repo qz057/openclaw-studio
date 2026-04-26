@@ -2,6 +2,7 @@ import { useState } from "react";
 import { loadRuntimeItemAction, loadRuntimeItemDetail } from "@openclaw/bridge";
 import type { SkillCatalogItem, StudioRuntimeAction, StudioRuntimeActionResult, StudioRuntimeDetail, StudioShellState } from "@openclaw/shared";
 import { HostTracePanel } from "../components/HostTracePanel";
+import { formatProductText } from "../lib/product-text";
 
 interface SkillsPageProps {
   skills: StudioShellState["skills"];
@@ -111,15 +112,15 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
         </article>
         <article className="surface stat-pill stat-pill--neutral">
           <span>根路径状态</span>
-          <strong>{rootsScannedItem?.status ?? "未知"}</strong>
+          <strong>{formatProductText(rootsScannedItem?.status, "未知")}</strong>
         </article>
         <article className="surface stat-pill stat-pill--neutral">
           <span>插件路径</span>
-          <strong>{pluginPathsItem?.status ?? "未知"}</strong>
+          <strong>{formatProductText(pluginPathsItem?.status, "未知")}</strong>
         </article>
         <article className="surface stat-pill stat-pill--neutral">
           <span>MCP 根路径</span>
-          <strong>{mcpRootsItem?.status ?? "未知"}</strong>
+          <strong>{formatProductText(mcpRootsItem?.status, "未知")}</strong>
         </article>
       </div>
 
@@ -133,8 +134,8 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
           </div>
           <div className="stack-list">
             <article className="list-row list-row--stacked">
-              <strong>{rootsScannedItem?.status ?? "未知"}</strong>
-              <p>{rootsScannedItem?.detail ?? "暂无扫描详情。"}</p>
+              <strong>{formatProductText(rootsScannedItem?.status, "未知")}</strong>
+              <p>{formatProductText(rootsScannedItem?.detail, "暂无扫描详情。")}</p>
               {rootsScannedItem?.path ? (
                 <div className="row-meta row-meta--compact">
                   <span>{rootsScannedItem.path}</span>
@@ -154,7 +155,7 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
           <div className="stack-list">
             <article className="list-row list-row--stacked">
               <strong>插件路径</strong>
-              <p>{pluginPathsItem?.detail ?? "暂无插件路径详情。"}</p>
+              <p>{formatProductText(pluginPathsItem?.detail, "暂无插件路径详情。")}</p>
               {pluginPathsItem?.path ? (
                 <div className="row-meta row-meta--compact">
                   <span>{pluginPathsItem.path}</span>
@@ -163,7 +164,7 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
             </article>
             <article className="list-row list-row--stacked">
               <strong>MCP 根路径</strong>
-              <p>{mcpRootsItem?.detail ?? "暂无 MCP 根路径详情。"}</p>
+              <p>{formatProductText(mcpRootsItem?.detail, "暂无 MCP 根路径详情。")}</p>
               {mcpRootsItem?.path ? (
                 <div className="row-meta row-meta--compact">
                   <span>{mcpRootsItem.path}</span>
@@ -179,8 +180,8 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
           <article key={section.id} className="surface card">
             <div className="card-header card-header--stack">
               <div>
-                <h2>{section.label}</h2>
-                <p>{section.description}</p>
+                <h2>{formatProductText(section.label)}</h2>
+                <p>{formatProductText(section.description)}</p>
               </div>
               <span>{section.items.length} 项</span>
             </div>
@@ -192,15 +193,15 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
                   <article key={item.id} className="list-row list-row--stacked">
                     <div className="row-heading">
                       <div>
-                        <strong>{item.name}</strong>
+                        <strong>{formatProductText(item.name)}</strong>
                         <p>
-                          {item.origin ? `${item.origin} · ` : ""}
-                          {item.surface} · {item.source}
+                          {item.origin ? `${formatProductText(item.origin)} · ` : ""}
+                          {formatProductText(item.surface)} · {formatProductText(item.source)}
                         </p>
                       </div>
-                      <span className={`tone-chip tone-chip--${item.tone}`}>{item.status}</span>
+                      <span className={`tone-chip tone-chip--${item.tone}`}>{formatProductText(item.status)}</span>
                     </div>
-                    <p>{item.detail}</p>
+                    <p>{formatProductText(item.detail)}</p>
                     {item.path ? (
                       <div className="row-meta row-meta--compact">
                         <span>{item.path}</span>
@@ -227,7 +228,7 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
             <h2>详情面板</h2>
             <p>选中某个条目后，展示它的只读详情与可执行动作。</p>
           </div>
-          {selectedItem ? <span>{selectedItem.name}</span> : <span>未选择</span>}
+          {selectedItem ? <span>{formatProductText(selectedItem.name)}</span> : <span>未选择</span>}
         </div>
 
         {detailLoading ? (
@@ -243,8 +244,8 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
         ) : detail ? (
           <div className="detail-stack">
             <div className="placeholder-block">
-              <strong>{detail.title}</strong>
-              <p>{detail.summary}</p>
+              <strong>{formatProductText(detail.title)}</strong>
+              <p>{formatProductText(detail.summary)}</p>
               {detail.path ? (
                 <div className="row-meta row-meta--compact">
                   <span>{detail.path}</span>
@@ -255,7 +256,7 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
             {detail.actions?.length ? (
               <div className="placeholder-block">
                 <strong>可执行动作</strong>
-                <p>这里只显示当前条目允许的只读、dry-run、Studio-local 或 preview-host 动作。</p>
+                <p>这里只显示当前条目允许的查看、验证、刷新或受保护预检动作。</p>
                 <div className="action-toolbar">
                   {detail.actions.map((action) => (
                     <button
@@ -265,7 +266,7 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
                       onClick={() => void runAction(action)}
                       disabled={Boolean(actionLoadingId)}
                     >
-                      {actionLoadingId === action.id ? `正在执行：${action.label}` : action.label}
+                      {actionLoadingId === action.id ? `正在执行：${formatProductText(action.label)}` : formatProductText(action.label)}
                     </button>
                   ))}
                 </div>
@@ -275,10 +276,10 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
             <div className="detail-grid">
               {detail.sections.map((section) => (
                 <div key={section.id} className="placeholder-block">
-                  <strong>{section.title}</strong>
+                  <strong>{formatProductText(section.title)}</strong>
                   <ul className="detail-lines">
                     {section.lines.map((line) => (
-                      <li key={line}>{line}</li>
+                      <li key={line}>{formatProductText(line)}</li>
                     ))}
                   </ul>
                 </div>
@@ -298,12 +299,12 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
             ) : actionResult ? (
               <div className="detail-stack">
                 <div className="placeholder-block">
-                  <strong>{actionResult.title}</strong>
-                  <p>{actionResult.summary}</p>
+                  <strong>{formatProductText(actionResult.title)}</strong>
+                  <p>{formatProductText(actionResult.summary)}</p>
                   <div className="row-meta row-meta--compact">
-                    <span>{actionResult.action.kind}</span>
-                    <span>{actionResult.action.safety}</span>
-                    <span>{actionResult.execution.status}</span>
+                    <span>{formatProductText(actionResult.action.kind)}</span>
+                    <span>{formatProductText(actionResult.action.safety)}</span>
+                    <span>{formatProductText(actionResult.execution.status)}</span>
                   </div>
                 </div>
 

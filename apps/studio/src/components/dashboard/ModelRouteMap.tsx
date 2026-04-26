@@ -1,5 +1,6 @@
 import { Boxes, Route } from "lucide-react";
 import type { DashboardRouteItem } from "../../hooks/useDashboardRealtimeData";
+import { formatProductText } from "../../lib/product-text";
 
 interface ModelRouteMapProps {
   routes: DashboardRouteItem[];
@@ -26,7 +27,7 @@ export function ModelRouteMap({ routes }: ModelRouteMapProps) {
     <article className="dashboard-panel model-route-map">
       <div className="dashboard-panel__header">
         <div>
-          <p className="eyebrow">MODEL ROUTES</p>
+          <p className="eyebrow">模型通道</p>
           <h2>模型路由</h2>
         </div>
         <span className="dashboard-source-chip">负载控制中</span>
@@ -35,7 +36,7 @@ export function ModelRouteMap({ routes }: ModelRouteMapProps) {
         <div className="model-route-map__entry">
           <span>请求入口</span>
           <strong>{formatLoad(totalRequests || null)}</strong>
-          <em>snapshot / service</em>
+          <em>快照 / 服务</em>
         </div>
         <div className="model-route-map__hub">
           <Boxes size={28} strokeWidth={2.1} aria-hidden="true" />
@@ -52,7 +53,7 @@ export function ModelRouteMap({ routes }: ModelRouteMapProps) {
               </div>
               <div className="model-route-row__copy">
                 <strong>{route.model}</strong>
-                <span>{route.label} · {route.detail}</span>
+                <span>{route.label} · {formatProductText(route.detail)}</span>
               </div>
               <div className="model-route-row__load">
                 <span>{formatLoad(route.load)}</span>

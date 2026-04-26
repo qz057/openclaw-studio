@@ -35,7 +35,7 @@ export function TaskTypeDonut({ slices }: TaskTypeDonutProps) {
     <article className="dashboard-panel task-type-donut">
       <div className="dashboard-panel__header">
         <div>
-          <p className="eyebrow">TASK MIX</p>
+          <p className="eyebrow">任务构成</p>
           <h2>任务类型分布</h2>
         </div>
         <span className="dashboard-source-chip">近 24 小时</span>

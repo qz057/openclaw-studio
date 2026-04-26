@@ -21,6 +21,7 @@ import type {
   StudioHermesState,
   StudioModelCatalog
 } from "@openclaw/shared";
+import { OperationResultPanel, type OperationResultState } from "../components/OperationResultPanel";
 
 interface HermesPageProps {
   bridgeStatus: string;
@@ -310,6 +311,58 @@ function resolveSelectedModelLabel(modelCatalog: StudioModelCatalog | null, sele
   return modelCatalog?.options.find((option) => option.id === selectedModelId)?.label ?? selectedModelId;
 }
 
+function extractErrorMessage(cause: unknown, fallback: string): string {
+  if (cause instanceof Error && cause.message.trim()) {
+    return cause.message.trim();
+  }
+
+  const message = String(cause ?? "").trim();
+  return message || fallback;
+}
+
+function buildHermesNextStep(scope: "gateway" | "model" | "send" | "connection", detail: string): string {
+  if (/command not found|not recognized|找不到|未检测到 hermes/i.test(detail)) {
+    return "在 WSL 里确认 hermes CLI 已安装并加入 PATH，然后刷新 Hermes 状态。";
+  }
+
+  if (/timeout|timed out|超时/i.test(detail)) {
+    return "先手动执行 Hermes 状态命令，确认是否被网络、认证或后台进程阻塞。";
+  }
+
+  if (/permission|denied|权限/i.test(detail)) {
+    return "检查 WSL 用户权限、Hermes 配置文件权限和网关端口占用。";
+  }
+
+  if (scope === "gateway") {
+    return "刷新网关状态；如果仍不可用，手动运行 hermes gateway status --all --deep。";
+  }
+
+  if (scope === "model") {
+    return "确认模型别名在 Hermes 配置中存在，再创建新会话验证。";
+  }
+
+  if (scope === "connection") {
+    return "先刷新 Hermes 连接状态，再确认 gateway 与认证状态均可用。";
+  }
+
+  return "确认 Hermes 已连接且当前会话存在，然后点击重试发送。";
+}
+
+function createOperationResult(
+  status: OperationResultState["status"],
+  summary: string,
+  nextStep: string,
+  detail?: string | null
+): OperationResultState {
+  return {
+    status,
+    summary,
+    detail,
+    nextStep,
+    updatedAt: Date.now()
+  };
+}
+
 function MessageBubble({
   message,
   grouped,
@@ -388,6 +441,10 @@ export function HermesPage({
   const [hermesState, setHermesState] = useState<StudioHermesState | null>(null);
   const [hermesControlError, setHermesControlError] = useState<string | null>(null);
   const [hermesBusy, setHermesBusy] = useState(false);
+  const [sendResult, setSendResult] = useState<OperationResultState | null>(null);
+  const [modelResult, setModelResult] = useState<OperationResultState | null>(null);
+  const [gatewayResult, setGatewayResult] = useState<OperationResultState | null>(null);
+  const [connectionResult, setConnectionResult] = useState<OperationResultState | null>(null);
   const [freshSessionStartedAt, setFreshSessionStartedAt] = useState(() => persistedFreshSession.startedAt);
   const [freshSessionId, setFreshSessionId] = useState(() => persistedFreshSession.sessionId);
   const [freshSessionKey, setFreshSessionKey] = useState(() => persistedFreshSession.sessionKey);
@@ -439,7 +496,9 @@ export function HermesPage({
       } catch (cause) {
         console.error("[HermesPage] 模型列表加载失败:", cause);
         if (!cancelled) {
-          setModelError(cause instanceof Error ? cause.message : "加载 Hermes 模型选项失败。");
+          const detail = extractErrorMessage(cause, "加载 Hermes 模型选项失败。");
+          setModelError(detail);
+          setModelResult(createOperationResult("error", "Hermes 模型列表加载未完成", buildHermesNextStep("model", detail), detail));
         }
       }
     };
@@ -463,7 +522,9 @@ export function HermesPage({
         }
       } catch (cause) {
         if (!cancelled) {
-          setGatewayError(cause instanceof Error ? cause.message : "加载 Hermes Gateway 状态失败。");
+          const detail = extractErrorMessage(cause, "加载 Hermes Gateway 状态失败。");
+          setGatewayError(detail);
+          setGatewayResult(createOperationResult("error", "Hermes Gateway 状态读取未完成", buildHermesNextStep("gateway", detail), detail));
         }
       }
     };
@@ -671,7 +732,9 @@ export function HermesPage({
     }
 
     if (!currentSession || !hermesCanSend) {
-      setError(hermesState?.disabledReason ?? "当前发送链路不可用，无法发送到 Hermes。");
+      const detail = hermesState?.disabledReason ?? "当前发送链路不可用，无法发送到 Hermes。";
+      setError(detail);
+      setSendResult(createOperationResult("error", "Hermes 发送受阻", buildHermesNextStep("send", detail), detail));
       return;
     }
 
@@ -713,6 +776,7 @@ export function HermesPage({
 
     setSubmitting(true);
     setError(null);
+    setSendResult(createOperationResult("info", "正在发送到 Hermes", "等待 Hermes 返回，完成后会同步当前会话消息。", normalizedPrompt));
 
     try {
       const result = await sendHermesMessage(currentSession.id, normalizedPrompt);
@@ -723,11 +787,20 @@ export function HermesPage({
         const messagesResult = await getHermesMessages(currentSession.id);
         if (messagesResult.success) {
           setMessages(messagesResult.messages);
+          setSendResult(
+            createOperationResult(
+              "success",
+              "Hermes 发送完成",
+              "查看最新回复；如果要验证模型切换，请创建新会话后发送短消息。",
+              `${messagesResult.messages.length} 条消息已同步。`
+            )
+          );
         }
       } else {
         throw new Error(result.error || "发送失败");
       }
     } catch (cause) {
+      const detail = extractErrorMessage(cause, "发送 Hermes 消息失败。");
       setLocalMessages((currentMessages) =>
         currentMessages.map((message) =>
           message.id === localMessageId
@@ -739,7 +812,8 @@ export function HermesPage({
         )
       );
       setDraft(normalizedPrompt);
-      setError(cause instanceof Error ? cause.message : "发送 Hermes 消息失败。");
+      setError(detail);
+      setSendResult(createOperationResult("error", "Hermes 发送未完成", buildHermesNextStep("send", detail), detail));
     } finally {
       setSubmitting(false);
     }
@@ -872,6 +946,7 @@ export function HermesPage({
 
     setApplyingModel(true);
     setModelError(null);
+    setModelResult(createOperationResult("info", "正在应用 Hermes 模型", "等待配置写入完成，后续新会话会优先使用该模型。", selectedModelId));
 
     try {
       const result = await setHermesModel(selectedModelId);
@@ -880,10 +955,19 @@ export function HermesPage({
       setSelectedModelId(result.catalog.selectedModelId ?? result.catalog.options[0]?.id ?? selectedModelId);
 
       if (!result.applied) {
-        setModelError(result.error ?? "切换 Hermes 默认模型失败。");
+        const detail = result.error ?? "切换 Hermes 默认模型失败。";
+        setModelError(detail);
+        setModelResult(createOperationResult("error", "Hermes 模型应用未完成", buildHermesNextStep("model", detail), detail));
+        return;
       }
+
+      setModelResult(
+        createOperationResult("success", "Hermes 模型已应用", "创建新会话或发送短消息，确认 Hermes 是否采用新模型。", result.catalog.selectedModelId ?? selectedModelId)
+      );
     } catch (cause) {
-      setModelError(cause instanceof Error ? cause.message : "切换 Hermes 默认模型失败。");
+      const detail = extractErrorMessage(cause, "切换 Hermes 默认模型失败。");
+      setModelError(detail);
+      setModelResult(createOperationResult("error", "Hermes 模型应用未完成", buildHermesNextStep("model", detail), detail));
     } finally {
       setApplyingModel(false);
     }
@@ -893,10 +977,27 @@ export function HermesPage({
     setGatewayBusy(action !== "refresh");
     setGatewayError(null);
     setHermesControlError(null);
+    setGatewayResult(
+      createOperationResult(
+        "info",
+        action === "refresh" ? "正在刷新 Hermes Gateway" : `正在${action === "start" ? "启动" : "停止"} Hermes Gateway`,
+        "等待状态读取完成，最近结果会在这里更新。",
+        gatewayServiceState?.detail ?? null
+      )
+    );
 
     try {
       if (action === "refresh") {
-        setGatewayServiceState(await loadHermesGatewayServiceState());
+        const nextState = await loadHermesGatewayServiceState();
+        setGatewayServiceState(nextState);
+        setGatewayResult(
+          createOperationResult(
+            "success",
+            "Hermes Gateway 状态已刷新",
+            nextState.running ? "Gateway 正在运行；如仍不能发送，请检查 Hermes 连接状态。" : "如需发送 Hermes 消息，先启动网关。",
+            nextState.detail
+          )
+        );
         return;
       }
 
@@ -904,10 +1005,28 @@ export function HermesPage({
       setGatewayServiceState(result.state);
 
       if (!result.applied) {
-        setGatewayError(result.error ?? `Hermes Gateway ${action === "start" ? "启动" : "停止"}失败。`);
+        const detail = result.error ?? `Hermes Gateway ${action === "start" ? "启动" : "停止"}失败。`;
+        setGatewayError(detail);
+        setGatewayResult(
+          createOperationResult("error", `Hermes Gateway ${action === "start" ? "启动" : "停止"}未完成`, buildHermesNextStep("gateway", detail), detail)
+        );
+        return;
       }
+
+      setGatewayResult(
+        createOperationResult(
+          "success",
+          `Hermes Gateway 已${action === "start" ? "启动" : "停止"}`,
+          result.state.running ? "现在可以连接 Hermes 或刷新会话。" : "需要继续会话时先重新启动 Gateway。",
+          result.state.detail
+        )
+      );
     } catch (cause) {
-      setGatewayError(cause instanceof Error ? cause.message : `Hermes Gateway ${action === "start" ? "启动" : "停止"}失败。`);
+      const detail = extractErrorMessage(cause, `Hermes Gateway ${action === "start" ? "启动" : "停止"}失败。`);
+      setGatewayError(detail);
+      setGatewayResult(
+        createOperationResult("error", `Hermes Gateway ${action === "start" ? "启动" : "停止"}未完成`, buildHermesNextStep("gateway", detail), detail)
+      );
     } finally {
       setGatewayBusy(false);
     }
@@ -920,16 +1039,23 @@ export function HermesPage({
 
     setHermesBusy(true);
     setHermesControlError(null);
+    setConnectionResult(createOperationResult("info", "正在连接 Hermes", "等待连接状态返回，完成后会更新发送可用性。", hermesState.sessionLabel));
 
     try {
       const result = await connectHermes();
       setHermesState(result.state);
 
       if (!result.started) {
-        setHermesControlError(result.state.disabledReason ?? "Hermes 连接失败。");
+        const detail = result.state.disabledReason ?? "Hermes 连接失败。";
+        setHermesControlError(detail);
+        setConnectionResult(createOperationResult("error", "Hermes 连接未完成", buildHermesNextStep("connection", detail), detail));
+        return;
       }
+      setConnectionResult(createOperationResult("success", "Hermes 已连接", "现在可以选择会话并发送消息。", result.state.sessionLabel));
     } catch (cause) {
-      setHermesControlError(cause instanceof Error ? cause.message : "连接 Hermes 失败。");
+      const detail = extractErrorMessage(cause, "连接 Hermes 失败。");
+      setHermesControlError(detail);
+      setConnectionResult(createOperationResult("error", "Hermes 连接未完成", buildHermesNextStep("connection", detail), detail));
       try {
         setHermesState(await loadHermesState());
       } catch {
@@ -947,16 +1073,23 @@ export function HermesPage({
 
     setHermesBusy(true);
     setHermesControlError(null);
+    setConnectionResult(createOperationResult("info", "正在断开 Hermes", "等待断开状态返回。", hermesState.sessionLabel));
 
     try {
       const result = await disconnectHermes();
       setHermesState(result.state);
 
       if (!result.stopped) {
-        setHermesControlError(result.state.disabledReason ?? "断开 Hermes 失败。");
+        const detail = result.state.disabledReason ?? "断开 Hermes 失败。";
+        setHermesControlError(detail);
+        setConnectionResult(createOperationResult("error", "Hermes 断开未完成", buildHermesNextStep("connection", detail), detail));
+        return;
       }
+      setConnectionResult(createOperationResult("success", "Hermes 已断开", "需要继续会话时重新连接 Hermes。", result.state.sessionLabel));
     } catch (cause) {
-      setHermesControlError(cause instanceof Error ? cause.message : "断开 Hermes 失败。");
+      const detail = extractErrorMessage(cause, "断开 Hermes 失败。");
+      setHermesControlError(detail);
+      setConnectionResult(createOperationResult("error", "Hermes 断开未完成", buildHermesNextStep("connection", detail), detail));
       try {
         setHermesState(await loadHermesState());
       } catch {
@@ -1049,6 +1182,7 @@ export function HermesPage({
                 {applyingModel ? "应用中…" : "应用模型"}
               </button>
             </div>
+            <OperationResultPanel label="应用结果" result={modelResult} emptySummary="尚未执行模型应用" emptyNextStep="选择模型后点击应用模型。" />
           </div>
           <div className="chat-session-actions">
             <div className="chat-session-actions__summary">
@@ -1076,6 +1210,7 @@ export function HermesPage({
                 停止网关
               </button>
             </div>
+            <OperationResultPanel label="最近结果" result={gatewayResult} emptySummary="尚未执行网关操作" emptyNextStep="先刷新网关状态，确认 Gateway 是否可达。" />
           </div>
           <div className="chat-session-actions">
             <div className="chat-session-actions__summary">
@@ -1095,6 +1230,7 @@ export function HermesPage({
                 {hermesBusy ? "操作中…" : "断开 Hermes"}
               </button>
             </div>
+            <OperationResultPanel label="连接结果" result={connectionResult} emptySummary="尚未执行连接操作" emptyNextStep="先确认 Gateway 运行，再连接 Hermes。" />
           </div>
         </div>
 
@@ -1184,6 +1320,7 @@ export function HermesPage({
           {gatewayError ? <div className="chat-error">{gatewayError}</div> : null}
           {modelError ? <div className="chat-error">{modelError}</div> : null}
           {error ? <div className="chat-error">{error}</div> : null}
+          <OperationResultPanel label="发送结果" result={sendResult} emptySummary="尚未发送消息" emptyNextStep="确认 Hermes 已连接且当前会话存在后再发送。" />
 
           <div className="chat-preset-strip chat-preset-strip--toolbar">
             {hermesPromptPresets.map((preset) => (

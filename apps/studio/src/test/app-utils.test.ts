@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { resolvePage, formatLiveSyncAge, dedupeCommandActions, dedupeById } from '../lib/app-utils';
+import { mockShellState } from '@openclaw/shared/mock-shell-state';
+import { resolvePage, getRouteHashForPageId, visibleStudioPageIds, formatLiveSyncAge, dedupeCommandActions, dedupeById } from '../lib/app-utils';
 import type { StudioCommandAction } from '@openclaw/shared';
 
 describe('app-utils', () => {
@@ -25,12 +26,72 @@ describe('app-utils', () => {
       expect(resolvePage()).toBe('dashboard'); // studioPageIds keeps legacy IDs, but the shell now defaults removed routes to 总览
     });
 
-    it('returns "dashboard" for removed Claude and Codex pages', () => {
+    it('maps removed Claude and Hermes routes into the unified session page', () => {
       window.location.hash = '#claude';
-      expect(resolvePage()).toBe('dashboard');
+      expect(resolvePage()).toBe('chat');
 
+      window.location.hash = '#hermes';
+      expect(resolvePage()).toBe('chat');
+    });
+
+    it('returns "dashboard" for removed Codex page', () => {
       window.location.hash = '#codex';
       expect(resolvePage()).toBe('dashboard');
+    });
+
+    it('returns product route hashes for visible pages', () => {
+      expect(getRouteHashForPageId('chat')).toBe('session');
+      expect(getRouteHashForPageId('sessions')).toBe('history');
+      expect(getRouteHashForPageId('skills')).toBe('capabilities');
+      expect(getRouteHashForPageId('agents')).toBe('diagnostics');
+    });
+
+    it('keeps fallback pages aligned with the visible navigation', () => {
+      expect(mockShellState.pages.map((page) => page.id)).toEqual([...visibleStudioPageIds]);
+    });
+
+    it('keeps removed routes out of command entry actions', () => {
+      const actionIds = mockShellState.commandSurface.actions.map((action) => action.id);
+      expect(actionIds).not.toContain('command-open-home');
+      expect(actionIds).not.toContain('command-open-skills');
+
+      const routeIds = mockShellState.commandSurface.actions.flatMap((action) => (action.routeId ? [action.routeId] : []));
+      expect(routeIds).not.toContain('home');
+      expect(routeIds).not.toContain('codex');
+      expect(routeIds).not.toContain('claude');
+      expect(routeIds).not.toContain('hermes');
+    });
+
+    it('keeps removed routes out of command matchers and shortcuts', () => {
+      const removedRouteIds = new Set(['home', 'codex', 'claude', 'hermes']);
+      const removedActionIds = new Set(['command-open-home', 'command-open-skills']);
+      const commandSurface = mockShellState.commandSurface;
+      const matcherRouteIds = [
+        ...commandSurface.actionGroups.flatMap((group) => group.match?.routeIds ?? []),
+        ...commandSurface.sequences.flatMap((sequence) => sequence.match?.routeIds ?? []),
+        ...commandSurface.contextualFlows.flatMap((flow) => flow.match?.routeIds ?? []),
+        ...commandSurface.nextStepBoards.flatMap((board) => board.match?.routeIds ?? []),
+        ...commandSurface.actionDecks.flatMap((deck) => deck.match?.routeIds ?? [])
+      ];
+      const referencedActionIds = [
+        ...commandSurface.quickActionIds,
+        ...commandSurface.contexts.flatMap((context) => context.actionIds),
+        ...commandSurface.actionGroups.flatMap((group) => group.actionIds),
+        ...commandSurface.sequences.flatMap((sequence) => [
+          ...sequence.actionIds,
+          sequence.recommendedActionId,
+          ...(sequence.followUpActionIds ?? [])
+        ]),
+        ...commandSurface.contextualFlows.flatMap((flow) => [
+          flow.recommendedActionId,
+          ...(flow.followUpActionIds ?? []),
+          ...(flow.keyboardShortcutIds ?? [])
+        ]),
+        ...commandSurface.keyboardRouting.shortcuts.flatMap((shortcut) => [shortcut.id, shortcut.actionId])
+      ].filter((value): value is string => Boolean(value));
+
+      expect([...new Set(matcherRouteIds)].filter((routeId) => removedRouteIds.has(routeId))).toEqual([]);
+      expect([...new Set(referencedActionIds)].filter((actionId) => removedActionIds.has(actionId))).toEqual([]);
     });
   });
 

@@ -20,10 +20,10 @@ export type DashboardThemeMode = "night" | "day";
 
 function formatSource(source: DashboardDataSource): string {
   const map: Record<DashboardDataSource, string> = {
-    snapshot: "真实 snapshot",
-    "runtime-metric": "runtime metric",
-    "runtime-service": "runtime service",
-    "rolling-buffer": "rolling buffer",
+    snapshot: "真实快照",
+    "runtime-metric": "运行指标",
+    "runtime-service": "运行服务",
+    "rolling-buffer": "滚动缓存",
     "collector-missing": "未采样"
   };
 
@@ -81,7 +81,7 @@ export function DashboardPage({ viewModel, themeMode, onThemeModeChange }: Dashb
           </div>
         </header>
 
-        <div className="dashboard-contract-strip dashboard-contract-strip--audit" aria-label="Dashboard realtime data source audit">
+        <div className="dashboard-contract-strip dashboard-contract-strip--audit" aria-label="总览实时数据源审计">
           <strong>{viewModel.title}</strong>
           <span>{viewModel.runtimeText} · {viewModel.bridgeText} · {formatUpdatedAt(viewModel.generatedAt)}</span>
           {viewModel.sourceLines.map((line) => (
@@ -96,7 +96,7 @@ export function DashboardPage({ viewModel, themeMode, onThemeModeChange }: Dashb
         <DashboardKpiStrip items={viewModel.kpis} />
 
         <div className="dashboard-cockpit-grid">
-          <LiveSessionStream title="Codex" eyebrow="CODEX MONO" items={viewModel.codexStream} emptyText="Codex 任务流暂未采样" />
+          <LiveSessionStream title="Codex" eyebrow="CODEX 任务流" items={viewModel.codexStream} emptyText="Codex 任务流暂未采样" />
           <ModelRouteMap routes={viewModel.routeMap} />
           <TaskTypeDonut slices={viewModel.taskSlices} />
           <ResourceUsagePanel resources={viewModel.resources} />

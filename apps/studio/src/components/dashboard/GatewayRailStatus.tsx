@@ -8,7 +8,7 @@ interface GatewayRailStatusProps {
 
 function formatTime(timestamp: number | null): string {
   if (!timestamp) {
-    return "snapshot";
+    return "快照";
   }
 
   const diffMs = Date.now() - timestamp;
@@ -62,7 +62,7 @@ export function GatewayRailStatus({ items, compact = false }: GatewayRailStatusP
             <strong>{visibleItems.length > 0 ? `${liveServiceCount}/${visibleItems.length}` : "未采样"}</strong>
           </div>
           <div>
-            <span>Host Executor</span>
+            <span>宿主执行</span>
             <strong>{hostItem?.value ?? "未采样"}</strong>
           </div>
         </div>

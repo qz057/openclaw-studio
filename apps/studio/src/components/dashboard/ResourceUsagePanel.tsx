@@ -25,7 +25,7 @@ function formatSampleLabel(sample: DashboardResourceSample, index: number, total
     });
   }
 
-  return total <= 1 ? "now" : `-${total - index - 1}`;
+  return total <= 1 ? "现在" : `-${total - index - 1}`;
 }
 
 export function ResourceUsagePanel({ resources }: ResourceUsagePanelProps) {
@@ -36,10 +36,10 @@ export function ResourceUsagePanel({ resources }: ResourceUsagePanelProps) {
     <article className="dashboard-panel resource-usage-panel">
       <div className="dashboard-panel__header">
         <div>
-          <p className="eyebrow">RESOURCES</p>
+          <p className="eyebrow">资源</p>
           <h2>资源使用趋势</h2>
         </div>
-        <span className="dashboard-source-chip">{resources.source === "collector-missing" ? "未采样" : "metric"}</span>
+        <span className="dashboard-source-chip">{resources.source === "collector-missing" ? "未采样" : "指标"}</span>
       </div>
       <div className="resource-chart-legend">
         <span className="resource-chart-legend__cpu">CPU (%)</span>
@@ -63,7 +63,7 @@ export function ResourceUsagePanel({ resources }: ResourceUsagePanelProps) {
             </div>
           ))
         ) : (
-          <div className="dashboard-empty-state">资源 rolling buffer 等待首个样本</div>
+          <div className="dashboard-empty-state">资源滚动缓存等待首个样本</div>
         )}
       </div>
       <div className="resource-usage-panel__grid">
@@ -89,7 +89,7 @@ export function ResourceUsagePanel({ resources }: ResourceUsagePanelProps) {
         <span>运行 {resources.uptimeText}</span>
         <span>{resources.platformText}</span>
         <span>GPU {resources.gpuDetailText}</span>
-        <span>{hasGpuSamples ? "GPU utilization sampled" : "GPU utilization waiting"}</span>
+        <span>{hasGpuSamples ? "GPU 利用率已采样" : "GPU 利用率等待采样"}</span>
       </div>
       {resources.alerts.length > 0 ? (
         <div className="resource-alert-list">
