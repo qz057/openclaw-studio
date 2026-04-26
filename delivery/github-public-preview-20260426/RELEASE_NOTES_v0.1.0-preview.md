@@ -19,13 +19,14 @@ This preview build is unsigned. Windows may show an Unknown publisher or SmartSc
 - Portable app UI parity: passed (7 pages, 0 failures).
 - Public handoff status: handoff-blocked.
 - Signing handoff audit: external-signing-handoff-ready.
+- Runtime release closeout: release-candidate-ready-for-github-preview.
 
 ## SHA256
 
 | Asset | Size | SHA256 |
 |---|---:|---|
-| Windows NSIS installer | 102268358 | `ABF2616260EDDCA9FEF94A27567D06533B1F824BE09340B693ADCEEB76FC7408` |
-| Windows portable zip | 142884736 | `8AEF3B96E182859CCA6F731F703A2A664EF15407F3847BE54DEFD23324372397` |
+| Windows NSIS installer | 102271599 | `919798396DE786A716B19CE71B240C55E60C44189169A7E4784AD1A363657DD9` |
+| Windows portable zip | 142888611 | `90C4D78AE903C72260D6C8BF1C170ED470E9732F85C8F6E4EBFAF72005DF34F0` |
 | RC Windows zip | 141157276 | `1B22175E8A712938F2AFCE2369EAB445B4AE6BCF5244B2D6A2EF0589468CA56E` |
 
 ## Known Boundary

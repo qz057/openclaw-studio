@@ -50,6 +50,10 @@ const SAFE_BUTTON_PATTERNS = [
   /返回当前会话/
 ];
 
+const PAGE_ROUTE_CHANGING_BUTTON_PATTERNS = {
+  sessions: [/继续/, /查看/, /打开命令面板/, /Focused Slot Trace/, /Boundary Contract/, /^打开$/, /^立即进入$/, /^执行$/]
+};
+
 const DEFAULT_TIMEOUT_MS = 120_000;
 const DEFAULT_PAGE_WAIT_MS = 500;
 
@@ -253,6 +257,45 @@ function terminateChild(child) {
   }
 
   child.kill("SIGKILL");
+}
+
+async function waitForChildExit(child, timeoutMs = 5_000) {
+  if (!child?.pid || child.exitCode !== null || child.signalCode !== null) {
+    return;
+  }
+
+  await new Promise((resolve) => {
+    const timeout = setTimeout(resolve, timeoutMs);
+    child.once("exit", () => {
+      clearTimeout(timeout);
+      resolve();
+    });
+  });
+}
+
+async function cleanupDirectoryWithRetry(targetPath) {
+  let lastError = null;
+
+  for (let attempt = 0; attempt < 14; attempt += 1) {
+    try {
+      fs.rmSync(targetPath, {
+        recursive: true,
+        force: true,
+        maxRetries: 2,
+        retryDelay: 250
+      });
+
+      if (!fs.existsSync(targetPath)) {
+        return null;
+      }
+    } catch (error) {
+      lastError = error;
+    }
+
+    await sleep(500);
+  }
+
+  return lastError ?? new Error(`Directory still exists: ${targetPath}`);
 }
 
 async function waitForAppReady(cdp) {
@@ -513,7 +556,11 @@ async function collectUiState(cdp) {
       modalOpen: Boolean(document.querySelector('[role="dialog"], .command-palette, .command-palette-shell')),
       stuckLoading: /正在加载/.test(bodyText) && bodyText.length < 120,
       hasBlankRoot: !document.querySelector("#root")?.childElementCount,
-      reactCrashText: /Minified React error|Cannot read properties of|Unhandled Runtime Error|ReferenceError|TypeError/.test(bodyText)
+      reactCrashText: /Minified React error|Cannot read properties of|Unhandled Runtime Error|ReferenceError|TypeError/.test(bodyText),
+      hasObjectObjectText: bodyText.includes("[object Object]"),
+      hasNaNText: /(^|\\s)NaN($|\\s|%)/.test(bodyText),
+      hasOldLiveSessionTitle: bodyText.includes("Codex 实时会话") || bodyText.includes("Claude 实时会话"),
+      hasClaudeCodeTitle: bodyText.includes("Claude Code")
     };
   })()`);
 }
@@ -526,15 +573,20 @@ function isSafeButton(text) {
   return SAFE_BUTTON_PATTERNS.some((pattern) => pattern.test(text)) && !isDangerousButton(text);
 }
 
+function isRouteChangingButton(pageId, text) {
+  return (PAGE_ROUTE_CHANGING_BUTTON_PATTERNS[pageId] ?? []).some((pattern) => pattern.test(text));
+}
+
 async function clickSafePageButtons(cdp, pageId) {
   const before = await collectUiState(cdp);
   const candidates = before.buttons
     .filter((button) => !button.disabled)
     .filter((button) => isSafeButton(button.text))
+    .filter((button) => !isRouteChangingButton(pageId, button.text))
     .slice(0, 4);
   const skipped = before.buttons
     .filter((button) => !button.disabled)
-    .filter((button) => isDangerousButton(button.text))
+    .filter((button) => isDangerousButton(button.text) || isRouteChangingButton(pageId, button.text))
     .map((button) => button.text);
   const clicked = [];
 
@@ -758,6 +810,22 @@ async function main() {
         pageFailures.push(`Page ${page.id} contains crash-like text.`);
       }
 
+      if (finalState.hasObjectObjectText) {
+        pageFailures.push(`Page ${page.id} contains raw [object Object] text.`);
+      }
+
+      if (finalState.hasNaNText) {
+        pageFailures.push(`Page ${page.id} contains raw NaN text.`);
+      }
+
+      if (page.id === "dashboard" && finalState.hasOldLiveSessionTitle) {
+        pageFailures.push("Dashboard still contains removed live-session title text.");
+      }
+
+      if (page.id === "dashboard" && !finalState.hasClaudeCodeTitle) {
+        pageFailures.push("Dashboard is missing Claude Code stream title.");
+      }
+
       const afterErrors = cdp.pageErrors.length;
       const afterConsoleErrors = cdp.consoleMessages.filter((entry) => ["error", "log-error", "assert"].includes(entry.type)).length;
 
@@ -799,17 +867,11 @@ async function main() {
     clearTimeout(timeoutHandle);
     cdp?.close();
     terminateChild(child);
-    try {
-      fs.rmSync(userDataDir, {
-        recursive: true,
-        force: true,
-        maxRetries: 8,
-        retryDelay: 500
-      });
-    } catch (error) {
-      if (fs.existsSync(userDataDir)) {
-        report.warnings.push(`Could not remove temp user data dir: ${error instanceof Error ? error.message : String(error)}`);
-      }
+    await waitForChildExit(child);
+    const cleanupError = await cleanupDirectoryWithRetry(userDataDir);
+
+    if (cleanupError && fs.existsSync(userDataDir)) {
+      report.warnings.push(`Could not remove temp user data dir: ${cleanupError instanceof Error ? cleanupError.message : String(cleanupError)}`);
     }
   }
 

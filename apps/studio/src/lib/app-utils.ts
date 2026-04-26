@@ -9,7 +9,7 @@ export function normalizePageId(pageId: string | null | undefined): StudioPageId
     return pageId as StudioPageId;
   }
 
-  return "hermes";
+  return "dashboard";
 }
 
 export function resolvePage(): StudioPageId {

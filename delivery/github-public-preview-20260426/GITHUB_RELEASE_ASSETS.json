@@ -6,8 +6,8 @@
       "role": "release-asset",
       "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-installer\\out\\OpenClaw-Studio-0.1.0-win-x64-setup.exe",
       "exists": true,
-      "size": 102268358,
-      "sha256": "ABF2616260EDDCA9FEF94A27567D06533B1F824BE09340B693ADCEEB76FC7408",
+      "size": 102271599,
+      "sha256": "919798396DE786A716B19CE71B240C55E60C44189169A7E4784AD1A363657DD9",
       "releaseAssetEligible": true,
       "publicWarning": "Unsigned preview installer. Windows may show Unknown publisher or SmartScreen warnings."
     },
@@ -16,8 +16,8 @@
       "role": "release-asset",
       "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-local\\out\\OpenClaw-Studio-0.1.0-alpha-x64-portable.zip",
       "exists": true,
-      "size": 142884736,
-      "sha256": "8AEF3B96E182859CCA6F731F703A2A664EF15407F3847BE54DEFD23324372397",
+      "size": 142888611,
+      "sha256": "90C4D78AE903C72260D6C8BF1C170ED470E9732F85C8F6E4EBFAF72005DF34F0",
       "releaseAssetEligible": true,
       "publicWarning": "Unsigned preview portable package."
     },
@@ -60,6 +60,16 @@
       "sha256": "86B83F9B7054827E7AEAE49BDD30378E184686173920E5ADFB80C93E78CB16FA",
       "releaseAssetEligible": true,
       "publicWarning": "Shows unsigned preview boundary and signing handoff readiness."
+    },
+    {
+      "label": "Runtime release closeout",
+      "role": "release-note-evidence",
+      "path": "E:\\claucd\\界面控制台程序\\delivery\\phase20-runtime-release-closeout-20260426.md",
+      "exists": true,
+      "size": 3142,
+      "sha256": "4995CC5A7F43AC34E8AC8BE706F32597E3DFC19C7F13A5CB0C86473F477B9FA0",
+      "releaseAssetEligible": true,
+      "publicWarning": "Shows final runtime UI, session stream, GPU sampling, and release staging evidence."
     }
   ]
 }

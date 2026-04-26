@@ -5,13 +5,24 @@
 
 import { EventEmitter } from "events";
 import * as os from "os";
+import { execFile, execFileSync } from "child_process";
 import type { PerformanceMetrics, PerformanceAlert } from "@openclaw/shared";
+
+type PerformanceGpuMetrics = NonNullable<PerformanceMetrics["gpu"]>;
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
 
 export class PerformanceMonitor extends EventEmitter {
   private intervalId: NodeJS.Timeout | null = null;
   private lastCpuUsage = process.cpuUsage();
   private lastTimestamp = Date.now();
+  private lastCpuPercent = 0;
   private metricsHistory: PerformanceMetrics[] = [];
+  private lastGpuSample: PerformanceGpuMetrics | null = null;
+  private lastGpuSampleAt = 0;
+  private gpuSampleInFlight = false;
   private readonly maxHistorySize = 100;
 
   // 阈值配置
@@ -110,7 +121,9 @@ export class PerformanceMonitor extends EventEmitter {
 
     // 计算 CPU 使用百分比
     const totalCpuTime = cpuUsage.user + cpuUsage.system;
-    const cpuPercent = (totalCpuTime / (elapsed * 1000)) * 100;
+    const rawCpuPercent = elapsed >= 1_000 ? (totalCpuTime / (elapsed * 1000)) * 100 : this.lastCpuPercent;
+    const cpuPercent = isFiniteNumber(rawCpuPercent) ? Math.min(rawCpuPercent, 100) : 0;
+    this.lastCpuPercent = cpuPercent;
 
     this.lastCpuUsage = process.cpuUsage();
     this.lastTimestamp = now;
@@ -126,7 +139,7 @@ export class PerformanceMonitor extends EventEmitter {
       cpu: {
         user: cpuUsage.user,
         system: cpuUsage.system,
-        percent: Math.min(cpuPercent, 100),
+        percent: cpuPercent,
       },
       system: {
         totalMemory: os.totalmem(),
@@ -134,11 +147,167 @@ export class PerformanceMonitor extends EventEmitter {
         platform: os.platform(),
         arch: os.arch(),
       },
+      gpu: this.collectGpuMetrics(now),
       process: {
         uptime: process.uptime(),
         pid: process.pid,
       },
     };
+  }
+
+  private collectGpuMetrics(now: number): PerformanceGpuMetrics {
+    if (this.lastGpuSample && now - this.lastGpuSampleAt < 10_000) {
+      return this.lastGpuSample;
+    }
+
+    if (process.platform !== "win32") {
+      this.lastGpuSample = {
+        percent: null,
+        name: null,
+        source: "unavailable",
+        detail: "GPU sampler currently supports Windows performance counters only.",
+        timestamp: new Date(now).toISOString(),
+      };
+      this.lastGpuSampleAt = now;
+      return this.lastGpuSample;
+    }
+
+    if (!this.lastGpuSample || !this.lastGpuSample.name) {
+      this.lastGpuSample = this.collectGpuAdapter(now);
+      this.lastGpuSampleAt = now;
+    }
+
+    this.refreshGpuUtilization(now);
+
+    return this.lastGpuSample;
+  }
+
+  private collectGpuAdapter(now: number): PerformanceGpuMetrics {
+    const script = `
+$ErrorActionPreference = "SilentlyContinue"
+$adapter = Get-CimInstance Win32_VideoController | Sort-Object AdapterRAM -Descending | Select-Object -First 1
+[pscustomobject]@{
+  name = $adapter.Name
+} | ConvertTo-Json -Compress
+`;
+
+    try {
+      const raw = execFileSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", script], {
+        encoding: "utf8",
+        timeout: 1_500,
+        windowsHide: true,
+      }).trim();
+      const parsed = JSON.parse(raw) as { name?: unknown };
+      const name = typeof parsed.name === "string" && parsed.name.trim() ? parsed.name.trim() : null;
+
+      return {
+        percent: null,
+        name,
+        source: name ? "adapter" : "unavailable",
+        detail: name ? "GPU adapter detected; utilization counter refresh pending" : "No GPU adapter detected",
+        timestamp: new Date(now).toISOString(),
+      };
+    } catch (cause) {
+      return {
+        percent: null,
+        name: null,
+        source: "unavailable",
+        detail: cause instanceof Error ? cause.message : String(cause),
+        timestamp: new Date(now).toISOString(),
+      };
+    }
+  }
+
+  private refreshGpuUtilization(now: number): void {
+    if (this.gpuSampleInFlight) {
+      return;
+    }
+
+    this.gpuSampleInFlight = true;
+
+    const script = `
+$ErrorActionPreference = "SilentlyContinue"
+$adapter = Get-CimInstance Win32_VideoController | Sort-Object AdapterRAM -Descending | Select-Object -First 1
+$counter = Get-Counter "\\GPU Engine(*)\\Utilization Percentage" -ErrorAction SilentlyContinue
+$sum = $null
+if ($counter) {
+  $sum = ($counter.CounterSamples | Where-Object { $_.CookedValue -gt 0 } | Measure-Object -Property CookedValue -Sum).Sum
+}
+$percent = $null
+if ($null -ne $sum) {
+  $percent = [math]::Min(100, [math]::Round([double]$sum, 1))
+}
+[pscustomobject]@{
+  name = $adapter.Name
+  percent = $percent
+  source = $(if ($null -ne $percent) { "windows-performance-counter" } elseif ($adapter.Name) { "adapter" } else { "unavailable" })
+} | ConvertTo-Json -Compress
+`;
+
+    execFile(
+      "powershell.exe",
+      ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", script],
+      {
+        encoding: "utf8",
+        timeout: 7_000,
+        windowsHide: true,
+      },
+      (error, stdout) => {
+        const sampledAt = Date.now();
+
+        if (error) {
+          this.lastGpuSample = {
+            percent: null,
+            name: this.lastGpuSample?.name ?? null,
+            source: this.lastGpuSample?.name ? "adapter" : "unavailable",
+            detail: error.message,
+            timestamp: new Date(sampledAt).toISOString(),
+          };
+          this.lastGpuSampleAt = sampledAt;
+          this.gpuSampleInFlight = false;
+          return;
+        }
+
+        try {
+          const raw = stdout.trim();
+          const parsed = JSON.parse(raw) as { name?: unknown; percent?: unknown; source?: unknown };
+          const percent = isFiniteNumber(parsed.percent) ? Math.max(0, Math.min(100, parsed.percent)) : null;
+          const name = typeof parsed.name === "string" && parsed.name.trim() ? parsed.name.trim() : this.lastGpuSample?.name ?? null;
+          const source =
+            parsed.source === "windows-performance-counter" || parsed.source === "adapter" || parsed.source === "unavailable"
+              ? parsed.source
+              : percent != null
+                ? "windows-performance-counter"
+                : name
+                  ? "adapter"
+                  : "unavailable";
+
+          this.lastGpuSample = {
+            percent,
+            name,
+            source,
+            detail:
+              source === "windows-performance-counter"
+                ? "Windows GPU Engine utilization counter"
+                : source === "adapter"
+                  ? "GPU adapter detected; utilization counter unavailable"
+                  : "No GPU adapter or utilization counter detected",
+            timestamp: new Date(sampledAt).toISOString(),
+          };
+        } catch (cause) {
+          this.lastGpuSample = {
+            percent: null,
+            name: this.lastGpuSample?.name ?? null,
+            source: this.lastGpuSample?.name ? "adapter" : "unavailable",
+            detail: cause instanceof Error ? cause.message : String(cause),
+            timestamp: new Date(sampledAt).toISOString(),
+          };
+        } finally {
+          this.lastGpuSampleAt = sampledAt;
+          this.gpuSampleInFlight = false;
+        }
+      }
+    );
   }
 
   private checkThresholds(metrics: PerformanceMetrics): void {

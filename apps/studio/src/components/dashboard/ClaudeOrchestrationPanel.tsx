@@ -65,7 +65,7 @@ export function ClaudeOrchestrationPanel({ viewModel }: ClaudeOrchestrationPanel
             <span>{viewModel.claude.rootPath}</span>
           </div>
         </div>
-        <LiveSessionStream title="Claude 实时会话" eyebrow="MONO STREAM" items={viewModel.claudeStream} emptyText="Claude 消息未采样" />
+        <LiveSessionStream title="Claude Code" eyebrow="MONO STREAM" items={viewModel.claudeStream} emptyText="Claude 消息未采样" />
       </div>
     </article>
   );

@@ -99,12 +99,52 @@ function formatRelativeTime(timestampMs: number): string {
   return `${days} day${days === 1 ? "" : "s"} ago`;
 }
 
-function shortenHomePath(rawPath: string | null | undefined): string {
-  if (!rawPath) {
+function normalizePathValue(rawPath: unknown): string | null {
+  if (typeof rawPath === "string") {
+    const trimmed = rawPath.trim();
+    return trimmed && trimmed !== "[object Object]" ? trimmed : null;
+  }
+
+  if (rawPath && typeof rawPath === "object") {
+    const record = rawPath as Record<string, unknown>;
+    const candidate = record.cwd ?? record.path ?? record.workspace ?? record.root ?? record.directory;
+    return normalizePathValue(candidate);
+  }
+
+  return null;
+}
+
+function normalizeTextValue(value: unknown): string | null {
+  if (typeof value === "string") {
+    const trimmed = value.replace(/\s+/g, " ").trim();
+    return trimmed && trimmed !== "[object Object]" ? trimmed : null;
+  }
+
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    for (const key of ["label", "name", "id", "type", "source", "value"]) {
+      const normalized = normalizeTextValue(record[key]);
+      if (normalized) {
+        return normalized;
+      }
+    }
+  }
+
+  return null;
+}
+
+function shortenHomePath(rawPath: unknown): string {
+  const normalizedPath = normalizePathValue(rawPath);
+
+  if (!normalizedPath) {
     return "不可用";
   }
 
-  return rawPath.startsWith(homeDirectory) ? rawPath.replace(homeDirectory, "~") : rawPath;
+  return normalizedPath.startsWith(homeDirectory) ? normalizedPath.replace(homeDirectory, "~") : normalizedPath;
 }
 
 async function pathExists(targetPath: string): Promise<boolean> {
@@ -288,12 +328,14 @@ async function listRecentSessionFiles(rootDirectory: string): Promise<Array<{ pa
   return files.sort((left, right) => right.mtimeMs - left.mtimeMs).slice(0, maxRecentTasks);
 }
 
-function deriveTarget(cwd: string | null | undefined): string {
-  if (!cwd) {
+function deriveTarget(cwd: unknown): string {
+  const normalizedPath = normalizePathValue(cwd);
+
+  if (!normalizedPath) {
     return "workspace";
   }
 
-  return path.basename(cwd) || "workspace";
+  return path.basename(normalizedPath) || "workspace";
 }
 
 function readUserPrompt(events: CodexSessionEvent[]): string | null {
@@ -306,7 +348,7 @@ function readUserPrompt(events: CodexSessionEvent[]): string | null {
   return null;
 }
 
-function deriveTitle(userPrompt: string | null, cwd: string | null | undefined, sessionId: string): string {
+function deriveTitle(userPrompt: string | null, cwd: unknown, sessionId: string): string {
   if (!userPrompt) {
     return `Codex session ${sessionId.slice(0, 8)}`;
   }
@@ -344,12 +386,15 @@ function deriveTitle(userPrompt: string | null, cwd: string | null | undefined, 
 }
 
 function deriveModelLabel(
-  provider: string | null | undefined,
-  model: string | null | undefined,
-  reasoningEffort: string | null | undefined
+  provider: unknown,
+  model: unknown,
+  reasoningEffort: unknown
 ): string {
-  const base = provider && model ? `${provider}/${model}` : model ?? provider ?? "Unknown";
-  return reasoningEffort ? `${base} · ${reasoningEffort}` : base;
+  const normalizedProvider = normalizeTextValue(provider);
+  const normalizedModel = normalizeTextValue(model);
+  const normalizedReasoningEffort = normalizeTextValue(reasoningEffort);
+  const base = normalizedProvider && normalizedModel ? `${normalizedProvider}/${normalizedModel}` : normalizedModel ?? normalizedProvider ?? "Unknown";
+  return normalizedReasoningEffort ? `${base} · ${normalizedReasoningEffort}` : base;
 }
 
 function deriveTaskStatus(events: CodexSessionEvent[], updatedAtMs: number): CodexTaskSummary["status"] {
@@ -363,22 +408,25 @@ function deriveTaskStatus(events: CodexSessionEvent[], updatedAtMs: number): Cod
 }
 
 function deriveDetail(
-  cliVersion: string | null | undefined,
-  lastEventType: string | null | undefined,
-  source: string | null | undefined
+  cliVersion: unknown,
+  lastEventType: unknown,
+  source: unknown
 ): string {
   const parts = [];
+  const normalizedCliVersion = normalizeTextValue(cliVersion);
+  const normalizedLastEventType = normalizeTextValue(lastEventType);
+  const normalizedSource = normalizeTextValue(source);
 
-  if (cliVersion) {
-    parts.push(`CLI ${cliVersion}`);
+  if (normalizedCliVersion) {
+    parts.push(`CLI ${normalizedCliVersion}`);
   }
 
-  if (lastEventType) {
-    parts.push(`latest ${lastEventType.replace(/_/g, " ")}`);
+  if (normalizedLastEventType) {
+    parts.push(`latest ${normalizedLastEventType.replace(/_/g, " ")}`);
   }
 
-  if (source) {
-    parts.push(source);
+  if (normalizedSource) {
+    parts.push(normalizedSource);
   }
 
   return parts.length > 0 ? parts.join(" · ") : "Local Codex session log";

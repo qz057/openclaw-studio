@@ -12,25 +12,25 @@ describe('app-utils', () => {
       expect(resolvePage()).toBe('chat');
     });
 
-    it('returns "hermes" for invalid hash', () => {
+    it('returns "dashboard" for invalid hash', () => {
       window.location.hash = '#invalid-page';
-      expect(resolvePage()).toBe('hermes');
+      expect(resolvePage()).toBe('dashboard');
 
       window.location.hash = '';
-      expect(resolvePage()).toBe('hermes');
+      expect(resolvePage()).toBe('dashboard');
     });
 
-    it('returns "hermes" for removed home page', () => {
+    it('returns "dashboard" for removed home page', () => {
       window.location.hash = '#home';
-      expect(resolvePage()).toBe('hermes'); // studioPageIds keeps legacy IDs, but the shell no longer routes to removed pages
+      expect(resolvePage()).toBe('dashboard'); // studioPageIds keeps legacy IDs, but the shell now defaults removed routes to 总览
     });
 
-    it('returns "hermes" for removed Claude and Codex pages', () => {
+    it('returns "dashboard" for removed Claude and Codex pages', () => {
       window.location.hash = '#claude';
-      expect(resolvePage()).toBe('hermes');
+      expect(resolvePage()).toBe('dashboard');
 
       window.location.hash = '#codex';
-      expect(resolvePage()).toBe('hermes');
+      expect(resolvePage()).toBe('dashboard');
     });
   });
 

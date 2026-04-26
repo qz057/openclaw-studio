@@ -1,0 +1,59 @@
+{
+  "generatedAt": "2026-04-26T17:25:00+08:00",
+  "status": "release-candidate-ready-for-github-preview",
+  "version": "v0.1.0-preview",
+  "assets": [
+    {
+      "label": "Windows NSIS installer",
+      "path": "apps/studio/.packaging/windows-installer/out/OpenClaw-Studio-0.1.0-win-x64-setup.exe",
+      "size": 102271599,
+      "sha256": "919798396DE786A716B19CE71B240C55E60C44189169A7E4784AD1A363657DD9",
+      "authenticodeStatus": "NotSigned"
+    },
+    {
+      "label": "Windows portable zip",
+      "path": "apps/studio/.packaging/windows-local/out/OpenClaw-Studio-0.1.0-alpha-x64-portable.zip",
+      "size": 142888611,
+      "sha256": "90C4D78AE903C72260D6C8BF1C170ED470E9732F85C8F6E4EBFAF72005DF34F0",
+      "authenticodeStatus": "unsigned-preview-zip"
+    }
+  ],
+  "reports": {
+    "phase11PackagedUi": {
+      "path": "delivery/phase11-ui-full-check-runtime4-20260426.json",
+      "status": "passed",
+      "pages": 7,
+      "screenshots": 7,
+      "warnings": 0
+    },
+    "phase12ThemeViewport": {
+      "path": "delivery/phase12-theme-viewport-check-20260426.json",
+      "status": "passed",
+      "states": 28,
+      "screenshots": 28,
+      "failures": 0
+    },
+    "phase18PublicPreviewPack": {
+      "path": "delivery/phase18-github-public-preview-pack-20260426.json",
+      "status": "github-public-preview-pack-ready"
+    },
+    "phase19ReleaseStaging": {
+      "path": "delivery/phase19-github-release-staging-20260426.json",
+      "status": "github-release-upload-staged"
+    }
+  },
+  "runtimeFixes": [
+    "dashboard-default-route-overview",
+    "removed-codex-claude-nav",
+    "codex-and-claude-code-stream-headings",
+    "runtime-codex-claude-session-data",
+    "non-blocking-windows-gpu-sampler",
+    "no-raw-nan-or-object-object-ui-text",
+    "phase11-regression-assertions"
+  ],
+  "boundaries": [
+    "unsigned-public-preview",
+    "host-executor-protected-by-policy",
+    "gh-cli-not-authenticated-in-current-shell"
+  ]
+}

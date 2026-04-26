@@ -217,6 +217,13 @@ export function createFallbackApi(): StudioApi {
           totalMemory: 0,
           freeMemory: 0
         },
+        gpu: {
+          percent: null,
+          name: null,
+          source: "unavailable",
+          detail: "fallback runtime has no GPU sampler",
+          timestamp: null
+        },
         timestamp: new Date().toISOString()
       };
     },

@@ -177,6 +177,7 @@ function main() {
   const phase12PortablePath = path.join(deliveryRoot, `phase12-portable-ui-full-check-${DATE}.json`);
   const phase13Path = path.join(deliveryRoot, `phase13-public-release-handoff-${DATE}.json`);
   const phase17Path = path.join(deliveryRoot, `phase17-signing-handoff-audit-${DATE}.json`);
+  const phase20Path = path.join(deliveryRoot, `phase20-runtime-release-closeout-${DATE}.json`);
 
   const phase7 = fs.existsSync(phase7Path) ? readJson(phase7Path) : null;
   const phase8 = fs.existsSync(phase8Path) ? readJson(phase8Path) : null;
@@ -184,6 +185,7 @@ function main() {
   const phase12Portable = fs.existsSync(phase12PortablePath) ? readJson(phase12PortablePath) : null;
   const phase13 = fs.existsSync(phase13Path) ? readJson(phase13Path) : null;
   const phase17 = fs.existsSync(phase17Path) ? readJson(phase17Path) : null;
+  const phase20 = fs.existsSync(phase20Path) ? readJson(phase20Path) : null;
 
   const ghStatus = run("gh", ["auth", "status"], repoRoot);
   const gitInside = run("git", ["rev-parse", "--is-inside-work-tree"], repoRoot);
@@ -225,6 +227,12 @@ function main() {
       path.join(deliveryRoot, `phase17-signing-handoff-audit-closeout-${DATE}.md`),
       "release-note-evidence",
       "Shows unsigned preview boundary and signing handoff readiness."
+    ),
+    assetFrom(
+      "Runtime release closeout",
+      path.join(deliveryRoot, `phase20-runtime-release-closeout-${DATE}.md`),
+      "release-note-evidence",
+      "Shows final runtime UI, session stream, GPU sampling, and release staging evidence."
     )
   ];
 
@@ -316,6 +324,7 @@ function main() {
     `- Portable app UI parity: ${phase12Portable?.status ?? "missing"} (${phase12Portable?.pages?.length ?? 0} pages, ${phase12Portable?.failures?.length ?? 0} failures).`,
     `- Public handoff status: ${phase13?.status ?? "missing"}.`,
     `- Signing handoff audit: ${phase17?.status ?? "missing"}.`,
+    `- Runtime release closeout: ${phase20?.status ?? "missing"}.`,
     "",
     "## SHA256",
     "",
@@ -441,7 +450,8 @@ function main() {
       phase12InstalledStatus: phase12Installed?.status ?? "missing",
       phase12PortableStatus: phase12Portable?.status ?? "missing",
       phase13Status: phase13?.status ?? "missing",
-      phase17Status: phase17?.status ?? "missing"
+      phase17Status: phase17?.status ?? "missing",
+      phase20Status: phase20?.status ?? "missing"
     },
     warnings,
     blockers
@@ -466,6 +476,7 @@ function main() {
       "- release commands: `delivery/github-public-preview-20260426/GITHUB_RELEASE_COMMANDS.ps1`",
       "- public preview README: `delivery/github-public-preview-20260426/README-PUBLIC-PREVIEW.md`",
       "- security policy draft: `delivery/github-public-preview-20260426/SECURITY.md`",
+      "- runtime release closeout: `delivery/phase20-runtime-release-closeout-20260426.md`",
       "",
       "## Release Assets",
       "",

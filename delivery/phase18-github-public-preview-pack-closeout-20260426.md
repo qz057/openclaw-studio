@@ -12,22 +12,24 @@ github-public-preview-pack-ready
 - release commands: `delivery/github-public-preview-20260426/GITHUB_RELEASE_COMMANDS.ps1`
 - public preview README: `delivery/github-public-preview-20260426/README-PUBLIC-PREVIEW.md`
 - security policy draft: `delivery/github-public-preview-20260426/SECURITY.md`
+- runtime release closeout: `delivery/phase20-runtime-release-closeout-20260426.md`
 
 ## Release Assets
 
 | Asset | Exists | Size | SHA256 |
 |---|---:|---:|---|
-| Windows NSIS installer | yes | 102268358 | `ABF2616260EDDCA9FEF94A27567D06533B1F824BE09340B693ADCEEB76FC7408` |
-| Windows portable zip | yes | 142884736 | `8AEF3B96E182859CCA6F731F703A2A664EF15407F3847BE54DEFD23324372397` |
+| Windows NSIS installer | yes | 102271599 | `919798396DE786A716B19CE71B240C55E60C44189169A7E4784AD1A363657DD9` |
+| Windows portable zip | yes | 142888611 | `90C4D78AE903C72260D6C8BF1C170ED470E9732F85C8F6E4EBFAF72005DF34F0` |
 | RC Windows zip | yes | 141157276 | `1B22175E8A712938F2AFCE2369EAB445B4AE6BCF5244B2D6A2EF0589468CA56E` |
 | RC manifest | yes | 10980 | `6314F97822A75E4AA8242328FEC49B565A4003DD91810030C645BCC72AE3DF83` |
 | Public release handoff | yes | 4619 | `3543B2F7A7B9E8B49B28D286EE378684742A02D326397F68E2BEF571434B5356` |
 | Signing handoff audit | yes | 1146 | `86B83F9B7054827E7AEAE49BDD30378E184686173920E5ADFB80C93E78CB16FA` |
+| Runtime release closeout | yes | 3142 | `4995CC5A7F43AC34E8AC8BE706F32597E3DFC19C7F13A5CB0C86473F477B9FA0` |
 
 ## Public Source Scan
 
-- candidate files: 596
-- text files scanned: 539
+- candidate files: 601
+- text files scanned: 544
 - large files >= 50 MiB: 0
 - secret findings: 0
 

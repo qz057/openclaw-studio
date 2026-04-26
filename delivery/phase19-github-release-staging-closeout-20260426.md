@@ -12,11 +12,12 @@ github-release-upload-staged
 
 | Asset | Size | SHA256 |
 |---|---:|---|
-| OpenClaw-Studio-0.1.0-win-x64-setup.exe | 102268358 | `ABF2616260EDDCA9FEF94A27567D06533B1F824BE09340B693ADCEEB76FC7408` |
-| OpenClaw-Studio-0.1.0-alpha-x64-portable.zip | 142884736 | `8AEF3B96E182859CCA6F731F703A2A664EF15407F3847BE54DEFD23324372397` |
+| OpenClaw-Studio-0.1.0-win-x64-setup.exe | 102271599 | `919798396DE786A716B19CE71B240C55E60C44189169A7E4784AD1A363657DD9` |
+| OpenClaw-Studio-0.1.0-alpha-x64-portable.zip | 142888611 | `90C4D78AE903C72260D6C8BF1C170ED470E9732F85C8F6E4EBFAF72005DF34F0` |
 | openclaw-studio-rc-manifest-20260426.md | 10980 | `6314F97822A75E4AA8242328FEC49B565A4003DD91810030C645BCC72AE3DF83` |
 | phase13-public-release-handoff-20260426.md | 4619 | `3543B2F7A7B9E8B49B28D286EE378684742A02D326397F68E2BEF571434B5356` |
 | phase17-signing-handoff-audit-closeout-20260426.md | 1146 | `86B83F9B7054827E7AEAE49BDD30378E184686173920E5ADFB80C93E78CB16FA` |
+| phase20-runtime-release-closeout-20260426.md | 3142 | `4995CC5A7F43AC34E8AC8BE706F32597E3DFC19C7F13A5CB0C86473F477B9FA0` |
 | SHA256SUMS.txt | | |
 
 ## Commands
@@ -32,7 +33,6 @@ github-release-upload-staged
 
 - Optional asset not staged by default: RC Windows zip (E:\claucd\界面控制台程序\apps\studio\release\OpenClaw Studio-0.1.0-win-x64.zip)
 - GitHub CLI is not logged in. Use browser upload or run gh auth login before CLI publishing.
-- No Git remote is configured. Add origin before pushing main/tag.
 
 ## Verification
 

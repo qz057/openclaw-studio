@@ -26,6 +26,7 @@ function formatCompactLabel(label: string): string {
 export function GatewayRailStatus({ items, compact = false }: GatewayRailStatusProps) {
   const visibleItems = compact ? items.filter((item) => item.id !== "host") : items;
   const hostItem = items.find((item) => item.id === "host") ?? null;
+  const liveServiceCount = visibleItems.filter((item) => item.source === "runtime-service").length;
 
   return (
     <section className={compact ? "gateway-rail gateway-rail--compact" : "gateway-rail"}>
@@ -57,8 +58,8 @@ export function GatewayRailStatus({ items, compact = false }: GatewayRailStatusP
       {compact ? (
         <div className="gateway-rail__metrics">
           <div>
-            <span>延迟</span>
-            <strong>未采样</strong>
+            <span>采样</span>
+            <strong>{visibleItems.length > 0 ? `${liveServiceCount}/${visibleItems.length}` : "未采样"}</strong>
           </div>
           <div>
             <span>Host Executor</span>

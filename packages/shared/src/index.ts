@@ -2613,6 +2613,13 @@ export interface PerformanceMetrics {
     platform: string;
     arch: string;
   };
+  gpu?: {
+    percent: number | null;
+    name: string | null;
+    source: "windows-performance-counter" | "adapter" | "unavailable";
+    detail: string | null;
+    timestamp: string | null;
+  };
   process: {
     uptime: number;
     pid: number;

@@ -19,6 +19,8 @@ function formatLoadPercent(route: DashboardRouteItem): string {
 
 export function ModelRouteMap({ routes }: ModelRouteMapProps) {
   const totalRequests = routes.reduce((sum, route) => sum + (route.load ?? 0), 0);
+  const sampledRoutes = routes.filter((route) => route.source !== "collector-missing" && route.loadPercent != null);
+  const sampledPeakLoad = sampledRoutes.length > 0 ? Math.max(...sampledRoutes.map((route) => route.loadPercent ?? 0)) : null;
 
   return (
     <article className="dashboard-panel model-route-map">
@@ -71,8 +73,8 @@ export function ModelRouteMap({ routes }: ModelRouteMapProps) {
           <strong>{routes.filter((route) => route.source !== "collector-missing").length}</strong>
         </div>
         <div>
-          <span>真实负载</span>
-          <strong>未采样</strong>
+          <span>采样峰值</span>
+          <strong>{sampledPeakLoad == null ? "未采样" : `${sampledPeakLoad}%`}</strong>
         </div>
       </div>
     </article>

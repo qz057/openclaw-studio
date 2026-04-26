@@ -8,6 +8,7 @@ This repository can be published as a GitHub public preview without code signing
 - Version tag: `v0.1.0-preview`
 - Binary delivery: GitHub Release assets
 - Source delivery: Git repository
+- Latest runtime closeout: `delivery/phase20-runtime-release-closeout-20260426.md`
 
 ## Windows Notice
 
@@ -24,6 +25,12 @@ Upload generated binaries as release assets. Do not commit them into Git.
 - `delivery/openclaw-studio-rc-manifest-20260426.md`
 - `delivery/phase13-public-release-handoff-20260426.md`
 - `delivery/phase17-signing-handoff-audit-closeout-20260426.md`
+- `delivery/phase20-runtime-release-closeout-20260426.md`
+
+Current SHA256 values are recorded in:
+
+- `delivery/github-release-upload-20260426/assets/SHA256SUMS.txt`
+- `delivery/phase20-runtime-release-closeout-20260426.json`
 
 ## Generated Release Pack
 
@@ -40,6 +47,19 @@ Output:
 - `delivery/github-public-preview-20260426/GITHUB_RELEASE_COMMANDS.ps1`
 - `delivery/github-public-preview-20260426/README-PUBLIC-PREVIEW.md`
 - `delivery/github-public-preview-20260426/SECURITY.md`
+
+Phase 19 stages the upload-ready release folder:
+
+```powershell
+npm run phase19:github-release-staging
+```
+
+Output:
+
+- `delivery/github-release-upload-20260426/RELEASE_NOTES_v0.1.0-preview.md`
+- `delivery/github-release-upload-20260426/assets/SHA256SUMS.txt`
+- `delivery/github-release-upload-20260426/BROWSER_UPLOAD_STEPS.md`
+- `delivery/github-release-upload-20260426/PUBLISH_WITH_GH.ps1`
 
 ## Public Repo Boundary
 

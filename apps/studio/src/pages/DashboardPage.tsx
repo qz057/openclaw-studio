@@ -2,6 +2,7 @@ import type { DashboardDataSource, DashboardRealtimeViewModel } from "../hooks/u
 import { ChevronDown, Moon, RefreshCw, Sun } from "lucide-react";
 import {
   ClaudeOrchestrationPanel,
+  CollectorDiagnosticsPanel,
   DashboardKpiStrip,
   LiveSessionStream,
   ModelRouteMap,
@@ -95,11 +96,12 @@ export function DashboardPage({ viewModel, themeMode, onThemeModeChange }: Dashb
         <DashboardKpiStrip items={viewModel.kpis} />
 
         <div className="dashboard-cockpit-grid">
-          <LiveSessionStream title="Codex 实时会话" eyebrow="CODEX MONO" items={viewModel.codexStream} emptyText="Codex 任务流暂未采样" />
+          <LiveSessionStream title="Codex" eyebrow="CODEX MONO" items={viewModel.codexStream} emptyText="Codex 任务流暂未采样" />
           <ModelRouteMap routes={viewModel.routeMap} />
           <TaskTypeDonut slices={viewModel.taskSlices} />
           <ResourceUsagePanel resources={viewModel.resources} />
           <ClaudeOrchestrationPanel viewModel={viewModel} />
+          <CollectorDiagnosticsPanel items={viewModel.collectorStatuses} syncError={viewModel.syncError} />
         </div>
       </div>
     </section>

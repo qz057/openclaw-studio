@@ -5,12 +5,16 @@ interface ResourceUsagePanelProps {
   resources: DashboardResourceView;
 }
 
+function isFiniteNumber(value: number | null): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
 function formatPercent(value: number | null): string {
-  return value == null ? "未采样" : `${Math.round(value)}%`;
+  return isFiniteNumber(value) ? `${Math.round(value)}%` : "未采样";
 }
 
 function barHeight(value: number | null): string {
-  return `${Math.max(3, Math.min(100, value ?? 0))}%`;
+  return `${Math.max(3, Math.min(100, isFiniteNumber(value) ? value : 0))}%`;
 }
 
 function formatSampleLabel(sample: DashboardResourceSample, index: number, total: number): string {
@@ -26,6 +30,7 @@ function formatSampleLabel(sample: DashboardResourceSample, index: number, total
 
 export function ResourceUsagePanel({ resources }: ResourceUsagePanelProps) {
   const samples = resources.samples.slice(-7);
+  const hasGpuSamples = samples.some((sample) => isFiniteNumber(sample.gpuPercent));
 
   return (
     <article className="dashboard-panel resource-usage-panel">
@@ -47,7 +52,11 @@ export function ResourceUsagePanel({ resources }: ResourceUsagePanelProps) {
             <div key={`${sample.timestamp}-${index}`} className="resource-bar-group">
               <div className="resource-bar-group__bars">
                 <i className="resource-bar resource-bar--cpu" style={{ "--bar-height": barHeight(sample.cpuPercent) }} title={`CPU ${formatPercent(sample.cpuPercent)}`} />
-                <i className="resource-bar resource-bar--gpu resource-bar--missing" style={{ "--bar-height": "3%" }} title="GPU 未采样" />
+                <i
+                  className={isFiniteNumber(sample.gpuPercent) ? "resource-bar resource-bar--gpu" : "resource-bar resource-bar--gpu resource-bar--missing"}
+                  style={{ "--bar-height": barHeight(sample.gpuPercent) }}
+                  title={`GPU ${formatPercent(sample.gpuPercent)}`}
+                />
                 <i className="resource-bar resource-bar--memory" style={{ "--bar-height": barHeight(sample.memoryPercent) }} title={`内存 ${formatPercent(sample.memoryPercent)}`} />
               </div>
               <span>{formatSampleLabel(sample, index, samples.length)}</span>
@@ -79,6 +88,8 @@ export function ResourceUsagePanel({ resources }: ResourceUsagePanelProps) {
         <span>进程 {resources.pidText}</span>
         <span>运行 {resources.uptimeText}</span>
         <span>{resources.platformText}</span>
+        <span>GPU {resources.gpuDetailText}</span>
+        <span>{hasGpuSamples ? "GPU utilization sampled" : "GPU utilization waiting"}</span>
       </div>
       {resources.alerts.length > 0 ? (
         <div className="resource-alert-list">
