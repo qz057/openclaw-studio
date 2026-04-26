@@ -1,27 +1,27 @@
 {
-  "generatedAt": "2026-04-26T04:52:19.395Z",
+  "generatedAt": "2026-04-26T15:13:30.485Z",
   "status": "passed",
   "artifacts": {
     "installer": {
       "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-installer\\out\\OpenClaw-Studio-0.1.0-win-x64-setup.exe",
       "exists": true,
-      "size": 102268358,
-      "sha256": "ABF2616260EDDCA9FEF94A27567D06533B1F824BE09340B693ADCEEB76FC7408",
-      "lastModified": "2026-04-26T04:51:00.042Z"
+      "size": 102277901,
+      "sha256": "C65BB0165286D2F6103A973A4D4CAB0E8612B00A27B9D53929E521C7A880A0AF",
+      "lastModified": "2026-04-26T15:12:11.495Z"
     },
     "blockMap": {
       "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-installer\\out\\OpenClaw-Studio-0.1.0-win-x64-setup.exe.blockmap",
       "exists": true,
-      "size": 106619,
-      "sha256": "EC0C2AC3CE4B382ABBFEA3AA50742DCBD9837D3AC8C76AF85B30FF71DEAB2F5D",
-      "lastModified": "2026-04-26T04:51:00.972Z"
+      "size": 106607,
+      "sha256": "2BAC8DA1673BB4C2F62FA14FC9BD00889C33EBD4C9BFBEF72E32711C324B4BEE",
+      "lastModified": "2026-04-26T15:12:12.427Z"
     },
     "generatedConfig": {
       "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-installer\\electron-builder.nsis.generated.json",
       "exists": true,
       "size": 1393,
       "sha256": "91AD85C25615F7D353CC03D5AD6EEE5E7CE1628BA8BA0B29A2F8ADBC37F2608A",
-      "lastModified": "2026-04-26T04:50:34.505Z"
+      "lastModified": "2026-04-26T15:11:46.046Z"
     }
   },
   "signature": {
@@ -33,16 +33,16 @@
   "smoke": {
     "reportPath": "E:\\claucd\\界面控制台程序\\delivery\\phase8-installer-smoke-20260426.json",
     "status": "passed",
-    "installRoot": "C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-Ncvs8y",
+    "installRoot": "C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-QwI1w9",
     "launch": {
-      "pid": 14976,
+      "pid": 13516,
       "stayedAliveMs": 20000,
       "shutdownMode": "forced taskkill"
     },
     "cleanup": {
       "status": "removed",
       "attempts": 3,
-      "warning": "EPERM, Permission denied: \\\\?\\C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-Ncvs8y '\\\\?\\C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-Ncvs8y'"
+      "warning": "EPERM, Permission denied: \\\\?\\C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-QwI1w9 '\\\\?\\C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-QwI1w9'"
     }
   },
   "signingBoundary": {

@@ -1,26 +1,26 @@
 {
-  "generatedAt": "2026-04-26T04:51:43.599Z",
+  "generatedAt": "2026-04-26T15:12:54.663Z",
   "installerPath": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-installer\\out\\OpenClaw-Studio-0.1.0-win-x64-setup.exe",
-  "installRoot": "C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-Ncvs8y",
-  "installedExe": "C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-Ncvs8y\\OpenClaw Studio.exe",
+  "installRoot": "C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-QwI1w9",
+  "installedExe": "C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-QwI1w9\\OpenClaw Studio.exe",
   "timeoutMs": 20000,
   "install": {
     "status": "passed",
-    "createdExecutable": "C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-Ncvs8y\\OpenClaw Studio.exe"
+    "createdExecutable": "C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-QwI1w9\\OpenClaw Studio.exe"
   },
   "launch": {
-    "pid": 14976,
+    "pid": 13516,
     "stayedAliveMs": 20000,
     "shutdownMode": "forced taskkill"
   },
   "uninstall": {
     "status": "passed",
-    "uninstaller": "C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-Ncvs8y\\Uninstall OpenClaw Studio.exe"
+    "uninstaller": "C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-QwI1w9\\Uninstall OpenClaw Studio.exe"
   },
   "cleanup": {
     "status": "removed",
     "attempts": 3,
-    "warning": "EPERM, Permission denied: \\\\?\\C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-Ncvs8y '\\\\?\\C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-Ncvs8y'"
+    "warning": "EPERM, Permission denied: \\\\?\\C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-QwI1w9 '\\\\?\\C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-QwI1w9'"
   },
   "status": "passed"
 }

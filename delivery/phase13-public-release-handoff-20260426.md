@@ -9,19 +9,19 @@ Public release remains blocked by signing prerequisites. Local QA and artifact U
 | Artifact | Path | Size | SHA256 |
 |---|---|---:|---|
 | RC Windows zip | `E:\claucd\界面控制台程序\apps\studio\release\OpenClaw Studio-0.1.0-win-x64.zip` | 141157276 bytes | `1B22175E8A712938F2AFCE2369EAB445B4AE6BCF5244B2D6A2EF0589468CA56E` |
-| RC executable | `E:\claucd\界面控制台程序\apps\studio\release\win-unpacked\OpenClaw Studio.exe` | 222973952 bytes | `50730C076C408878624E0284FCC932048B6EBCD76F9EFB0F9C34E6851321FF8B` |
-| Portable zip | `E:\claucd\界面控制台程序\apps\studio\.packaging\windows-local\out\OpenClaw-Studio-0.1.0-alpha-x64-portable.zip` | 142884736 bytes | `8AEF3B96E182859CCA6F731F703A2A664EF15407F3847BE54DEFD23324372397` |
-| Portable executable | `E:\claucd\界面控制台程序\apps\studio\.packaging\windows-local\out\win-unpacked\OpenClaw Studio.exe` | 222973952 bytes | `109B787EA24B71CF0862434B9F38684E0ECFB432BAC3ECF84AAC27CA34563D57` |
-| NSIS installer | `E:\claucd\界面控制台程序\apps\studio\.packaging\windows-installer\out\OpenClaw-Studio-0.1.0-win-x64-setup.exe` | 102268358 bytes | `ABF2616260EDDCA9FEF94A27567D06533B1F824BE09340B693ADCEEB76FC7408` |
-| NSIS blockmap | `E:\claucd\界面控制台程序\apps\studio\.packaging\windows-installer\out\OpenClaw-Studio-0.1.0-win-x64-setup.exe.blockmap` | 106619 bytes | `EC0C2AC3CE4B382ABBFEA3AA50742DCBD9837D3AC8C76AF85B30FF71DEAB2F5D` |
+| RC executable | `E:\claucd\界面控制台程序\apps\studio\release\win-unpacked\OpenClaw Studio.exe` | 222973952 bytes | `B12DAE546AB02BC7BF1940F0B860A5424D72C489C0AAC3C92BB06F3DF457AEFC` |
+| Portable zip | `E:\claucd\界面控制台程序\apps\studio\.packaging\windows-local\out\OpenClaw-Studio-0.1.0-alpha-x64-portable.zip` | 142897544 bytes | `5F7F1D34CED6CA5315ACF921E07F815C52A4174C7B81ACF9BF95BFA4629C6493` |
+| Portable executable | `E:\claucd\界面控制台程序\apps\studio\.packaging\windows-local\out\win-unpacked\OpenClaw Studio.exe` | 222973952 bytes | `F07FF1619A1C33E9C4683CF5A305EAA74E8F4F3DEAC99BE1C6F8041A04411343` |
+| NSIS installer | `E:\claucd\界面控制台程序\apps\studio\.packaging\windows-installer\out\OpenClaw-Studio-0.1.0-win-x64-setup.exe` | 102277901 bytes | `C65BB0165286D2F6103A973A4D4CAB0E8612B00A27B9D53929E521C7A880A0AF` |
+| NSIS blockmap | `E:\claucd\界面控制台程序\apps\studio\.packaging\windows-installer\out\OpenClaw-Studio-0.1.0-win-x64-setup.exe.blockmap` | 106607 bytes | `2BAC8DA1673BB4C2F62FA14FC9BD00889C33EBD4C9BFBEF72E32711C324B4BEE` |
 
 ## UI Parity
 
 | Form | Status | Pages | Failures |
 |---|---|---:|---:|
-| RC unpacked | passed | 7 | 0 |
-| Portable | passed | 7 | 0 |
-| Installed NSIS app | passed | 7 | 0 |
+| RC unpacked | passed | 6 | 0 |
+| Portable | passed | 6 | 0 |
+| Installed NSIS app | passed | 6 | 0 |
 
 ## Signing Inputs
 

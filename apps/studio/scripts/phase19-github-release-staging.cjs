@@ -4,8 +4,17 @@ const crypto = require("node:crypto");
 const { spawnSync } = require("node:child_process");
 
 const DATE = "20260426";
-const VERSION = "v0.1.0-preview.1";
+const VERSION = process.env.OPENCLAW_RELEASE_VERSION || "v0.1.0-preview.2";
 const TWO_GIB = 2 * 1024 * 1024 * 1024;
+
+function releaseTitle(version) {
+  const match = /^v?(\d+\.\d+\.\d+)-preview\.(\d+)$/.exec(version);
+  if (match) {
+    return `OpenClaw Studio v${match[1]} Preview ${match[2]}`;
+  }
+
+  return `OpenClaw Studio ${version}`;
+}
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, ""));
@@ -171,7 +180,7 @@ function main() {
     "gh auth status",
     "git push origin main",
     "git push origin $Tag",
-    "gh release create $Tag --repo \"$Owner/$Repo\" --title 'OpenClaw Studio v0.1.0 Preview 1' --notes-file $Notes --prerelease @Assets",
+    `gh release create $Tag --repo \"$Owner/$Repo\" --title '${releaseTitle(VERSION)}' --notes-file $Notes --prerelease @Assets`,
     ""
   ].join("\n");
   writeFile(path.join(uploadRoot, "PUBLISH_WITH_GH.ps1"), uploadCommand);
@@ -180,11 +189,11 @@ function main() {
     "# Browser Release Upload Steps",
     "",
     "1. Create a public GitHub repository.",
-    "2. Push `main` and `v0.1.0-preview.1` from this local repository.",
+    `2. Push \`main\` and \`${VERSION}\` from this local repository.`,
     "3. Open the GitHub repository page.",
     "4. Go to Releases -> Draft a new release.",
-    "5. Select or type tag `v0.1.0-preview.1`.",
-    "6. Title: `OpenClaw Studio v0.1.0 Preview 1`.",
+    `5. Select or type tag \`${VERSION}\`.`,
+    `6. Title: \`${releaseTitle(VERSION)}\`.`,
     `7. Paste release notes from \`${releaseNotesCopy}\`.`,
     `8. Upload all files from \`${assetsRoot}\`.`,
     "9. Mark the release as pre-release.",

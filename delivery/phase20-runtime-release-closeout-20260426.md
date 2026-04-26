@@ -6,63 +6,57 @@ release-candidate-ready-for-github-preview
 
 ## Current Build Assets
 
-| Asset | Size | SHA256 | Signing |
-|---|---:|---|---|
-| `OpenClaw-Studio-0.1.0-win-x64-setup.exe` | 102271599 | `919798396DE786A716B19CE71B240C55E60C44189169A7E4784AD1A363657DD9` | unsigned / Authenticode `NotSigned` |
-| `OpenClaw-Studio-0.1.0-alpha-x64-portable.zip` | 142888611 | `90C4D78AE903C72260D6C8BF1C170ED470E9732F85C8F6E4EBFAF72005DF34F0` | unsigned preview zip |
+| Asset | Path | Size | SHA256 | Hash matches report |
+|---|---|---:|---|---:|
+| Windows NSIS installer | `E:\claucd\界面控制台程序\apps\studio\.packaging\windows-installer\out\OpenClaw-Studio-0.1.0-win-x64-setup.exe` | 102277901 | `C65BB0165286D2F6103A973A4D4CAB0E8612B00A27B9D53929E521C7A880A0AF` | yes |
+| NSIS blockmap | `E:\claucd\界面控制台程序\apps\studio\.packaging\windows-installer\out\OpenClaw-Studio-0.1.0-win-x64-setup.exe.blockmap` | 106607 | `2BAC8DA1673BB4C2F62FA14FC9BD00889C33EBD4C9BFBEF72E32711C324B4BEE` | yes |
+| Windows portable zip | `E:\claucd\界面控制台程序\apps\studio\.packaging\windows-local\out\OpenClaw-Studio-0.1.0-alpha-x64-portable.zip` | 142897544 | `5F7F1D34CED6CA5315ACF921E07F815C52A4174C7B81ACF9BF95BFA4629C6493` | yes |
+| Windows portable executable | `E:\claucd\界面控制台程序\apps\studio\.packaging\windows-local\out\win-unpacked\OpenClaw Studio.exe` | 222973952 | `F07FF1619A1C33E9C4683CF5A305EAA74E8F4F3DEAC99BE1C6F8041A04411343` | yes |
+| RC Windows zip | `E:\claucd\界面控制台程序\apps\studio\release\OpenClaw Studio-0.1.0-win-x64.zip` | 141157276 | `1B22175E8A712938F2AFCE2369EAB445B4AE6BCF5244B2D6A2EF0589468CA56E` | yes |
+| RC executable | `E:\claucd\界面控制台程序\apps\studio\release\win-unpacked\OpenClaw Studio.exe` | 222973952 | `B12DAE546AB02BC7BF1940F0B860A5424D72C489C0AAC3C92BB06F3DF457AEFC` | yes |
 
 ## Runtime UI Verification
 
-- Packaged app full UI check: `passed`
-- Pages covered: 7
-- Screenshots captured: 7
-- Warnings: 0
-- Report: `delivery/phase11-ui-full-check-runtime4-20260426.json`
-- Screenshot root: `delivery/phase11-ui-screenshots-runtime4-20260426`
+- Expected visible pages: 6
+
+| Form | Status | Pages | Screenshots | Warnings | Failures |
+|---|---|---:|---:|---:|---:|
+| RC unpacked app | passed | 6 | 6 | 0 | 0 |
+| Portable app | passed | 6 | 6 | 0 | 0 |
+| Installed NSIS app | passed | 6 | 6 | 0 | 0 |
 
 ## Theme And Viewport Verification
 
-- Status: `passed`
-- Matrix: 7 navigation pages x 2 themes x 2 viewport sizes = 28 states
-- Failures: 0
-- Report: `delivery/phase12-theme-viewport-check-20260426.json`
-- Screenshot root: `delivery/phase12-theme-viewport-screenshots-20260426`
+- Status: passed; screenshots: 28; failures: 0
 
-## Release Staging
+## Signing And Release Boundary
 
-- Phase 18 public preview pack: `github-public-preview-pack-ready`
-- Phase 19 GitHub upload staging: `github-release-upload-staged`
-- Upload root: `delivery/github-release-upload-20260426`
-- Release notes: `delivery/github-release-upload-20260426/RELEASE_NOTES_v0.1.0-preview.1.md`
-- Asset checksums: `delivery/github-release-upload-20260426/assets/SHA256SUMS.txt`
+- Phase 9 release gate: local-qa-passed-public-blocked
+- Phase 10 signing readiness: blocked
+- Installer Authenticode: NotSigned
+- Public release handoff: handoff-blocked
+- Signing handoff audit: external-signing-handoff-ready
 
-## Fixed In This Closeout
+## GitHub Preview Staging
 
-- Dashboard default route is now `总览`.
-- Removed Codex / Claude standalone navigation entries.
-- Dashboard stream headings now show `Codex` and `Claude Code`; old `实时会话` heading text is removed.
-- Codex and Claude session streams are backed by local runtime/session probes.
-- GPU metrics now use a Windows performance-counter sampler with adapter fallback and non-blocking refresh.
-- Runtime resource UI no longer displays raw `NaN`, `[object Object]`, or false CPU spike alerts from sub-second samples.
-- Phase 11 UI check now fails on raw `[object Object]`, `NaN`, and removed live-session headings.
+- Public preview pack: github-public-preview-pack-ready
+- Upload staging: github-release-upload-staged
+- Public preview root: `E:\claucd\界面控制台程序\delivery\github-public-preview-20260426`
+- Upload root: `E:\claucd\界面控制台程序\delivery\github-release-upload-20260426`
+- Release notes: `E:\claucd\界面控制台程序\delivery\github-release-upload-20260426\RELEASE_NOTES_v0.1.0-preview.2.md`
+- Git tag v0.1.0-preview.2 aligned with HEAD: yes
+- GitHub CLI logged in: no
 
-## Known Boundary
+## Blockers
 
-- This preview remains unsigned until trusted code-signing material is available.
-- `Host Executor` is intentionally shown as `受保护`; live host mutation remains disabled by policy.
-- GitHub CLI is not authenticated in the current shell. Browser upload or a fresh `gh auth login` is required before creating the GitHub Release through CLI.
+- none
 
-## Final Verification Commands
+## Warnings
+
+- Public release remains blocked until trusted signing prerequisites are resolved.
+
+## Verification
 
 ```powershell
-npm run -C "E:\claucd\界面控制台程序\apps\studio" typecheck
-npm run -C "E:\claucd\界面控制台程序\apps\studio" test
-npm run -C "E:\claucd\界面控制台程序\apps\studio" build
-npm run -C "E:\claucd\界面控制台程序\apps\studio" package:windows:portable
-npm run -C "E:\claucd\界面控制台程序\apps\studio" package:windows:installer
-npm run -C "E:\claucd\界面控制台程序\apps\studio" contract:audit
-npm run -C "E:\claucd\界面控制台程序\apps\studio" smoke
-npm run -C "E:\claucd\界面控制台程序\apps\studio" phase11:ui-full-check
-npm run phase18:github-public-preview-pack
-npm run phase19:github-release-staging
+npm run -C "E:\claucd\界面控制台程序\apps\studio" phase20:runtime-release-closeout
 ```

@@ -64,10 +64,20 @@ function check(condition, failures, message) {
   }
 }
 
+const EXPECTED_VISIBLE_PAGE_COUNT = 6;
+
 function checkPhaseUiReport(report, label, failures) {
   check(report?.status === "passed", failures, `${label} report is not passed`);
-  check(Array.isArray(report?.pages) && report.pages.length === 7, failures, `${label} did not validate exactly 7 visible pages`);
-  check(Array.isArray(report?.screenshots) && report.screenshots.length === 7, failures, `${label} did not capture exactly 7 screenshots`);
+  check(
+    Array.isArray(report?.pages) && report.pages.length === EXPECTED_VISIBLE_PAGE_COUNT,
+    failures,
+    `${label} did not validate exactly ${EXPECTED_VISIBLE_PAGE_COUNT} visible pages`
+  );
+  check(
+    Array.isArray(report?.screenshots) && report.screenshots.length === EXPECTED_VISIBLE_PAGE_COUNT,
+    failures,
+    `${label} did not capture exactly ${EXPECTED_VISIBLE_PAGE_COUNT} screenshots`
+  );
   check((report?.failures?.length ?? 0) === 0, failures, `${label} has UI failures`);
   check((report?.consoleErrors?.length ?? 0) === 0, failures, `${label} has console errors`);
   check((report?.pageErrors?.length ?? 0) === 0, failures, `${label} has page errors`);

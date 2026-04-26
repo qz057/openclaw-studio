@@ -4,10 +4,19 @@ const crypto = require("node:crypto");
 const { spawnSync } = require("node:child_process");
 
 const DATE = "20260426";
-const VERSION = "v0.1.0-preview.1";
+const VERSION = process.env.OPENCLAW_RELEASE_VERSION || "v0.1.0-preview.2";
 const TWO_GIB = 2 * 1024 * 1024 * 1024;
 const GIT_WARN_SIZE = 50 * 1024 * 1024;
 const GIT_BLOCK_SIZE = 100 * 1024 * 1024;
+
+function releaseTitle(version) {
+  const match = /^v?(\d+\.\d+\.\d+)-preview\.(\d+)$/.exec(version);
+  if (match) {
+    return `OpenClaw Studio v${match[1]} Preview ${match[2]}`;
+  }
+
+  return `OpenClaw Studio ${version}`;
+}
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, ""));
@@ -187,6 +196,12 @@ function main() {
   const phase17 = fs.existsSync(phase17Path) ? readJson(phase17Path) : null;
   const phase20 = fs.existsSync(phase20Path) ? readJson(phase20Path) : null;
 
+  if (!path.resolve(publicRoot).startsWith(path.resolve(deliveryRoot))) {
+    throw new Error(`Refusing to clean public preview root outside delivery: ${publicRoot}`);
+  }
+  fs.rmSync(publicRoot, { recursive: true, force: true });
+  fs.mkdirSync(publicRoot, { recursive: true });
+
   const ghStatus = run("gh", ["auth", "status"], repoRoot);
   const gitInside = run("git", ["rev-parse", "--is-inside-work-tree"], repoRoot);
   const gitRemote = run("git", ["remote", "-v"], repoRoot);
@@ -331,7 +346,7 @@ function main() {
     "| Asset | Size | SHA256 |",
     "|---|---:|---|",
     ...assets
-      .filter((asset) => asset.exists && asset.role.includes("release-asset"))
+      .filter((asset) => asset.exists && asset.role === "release-asset")
       .map((asset) => `| ${asset.label} | ${asset.size} | \`${asset.sha256}\` |`),
     "",
     "## Known Boundary",
@@ -406,11 +421,11 @@ function main() {
     "git push origin $Tag",
     "gh release create $Tag `",
     "  --repo \"$Owner/$Repo\" `",
-    "  --title \"OpenClaw Studio v0.1.0 Preview 1\" `",
+    `  --title \"${releaseTitle(VERSION)}\" \``,
     "  --notes-file $Notes `",
     "  --prerelease `",
     ...assets
-      .filter((asset) => asset.exists && asset.role.includes("release-asset"))
+      .filter((asset) => asset.exists && asset.role === "release-asset")
       .map((asset, index, arr) => `  \"${asset.path}\"${index === arr.length - 1 ? "" : " `"}`),
     ""
   ].join("\n");

@@ -1,16 +1,5 @@
 {
-  "generatedAt": "2026-04-26T15:41:46.715Z",
-  "status": "github-public-preview-pack-ready",
   "version": "v0.1.0-preview.2",
-  "appRoot": "E:\\claucd\\界面控制台程序\\apps\\studio",
-  "publicRoot": "E:\\claucd\\界面控制台程序\\delivery\\github-public-preview-20260426",
-  "git": {
-    "insideWorktree": true,
-    "remoteOutput": "origin\thttps://github.com/qz057/openclaw-studio.git (fetch)\norigin\thttps://github.com/qz057/openclaw-studio.git (push)"
-  },
-  "githubCli": {
-    "loggedIn": false
-  },
   "assets": [
     {
       "label": "Windows NSIS installer",
@@ -82,24 +71,5 @@
       "releaseAssetEligible": true,
       "publicWarning": "Shows final runtime UI, session stream, GPU sampling, and release staging evidence."
     }
-  ],
-  "publicSourceScan": {
-    "candidateFiles": 600,
-    "scannedTextFiles": 543,
-    "largeFiles": [],
-    "secretFindings": []
-  },
-  "upstream": {
-    "phase7Status": "passed",
-    "phase8Status": "passed",
-    "phase12InstalledStatus": "passed",
-    "phase12PortableStatus": "passed",
-    "phase13Status": "handoff-blocked",
-    "phase17Status": "external-signing-handoff-ready",
-    "phase20Status": "release-candidate-ready-for-github-preview"
-  },
-  "warnings": [
-    "GitHub CLI is not logged in. Manual GitHub login or browser release upload is required."
-  ],
-  "blockers": []
+  ]
 }
