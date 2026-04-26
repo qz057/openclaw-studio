@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-26T05:39:49.394Z",
+  "generatedAt": "2026-04-26T05:51:40.067Z",
   "status": "github-public-preview-pack-ready",
   "version": "v0.1.0-preview",
   "appRoot": "E:\\claucd\\界面控制台程序\\apps\\studio",
@@ -47,8 +47,8 @@
       "role": "release-note-evidence",
       "path": "E:\\claucd\\界面控制台程序\\delivery\\openclaw-studio-rc-manifest-20260426.md",
       "exists": true,
-      "size": 10349,
-      "sha256": "4C2AA6BA229D11D08AD545A4617B11CC8FA38E22E07AA6CC59D9EBB0E552EFD5",
+      "size": 10980,
+      "sha256": "6314F97822A75E4AA8242328FEC49B565A4003DD91810030C645BCC72AE3DF83",
       "releaseAssetEligible": true,
       "publicWarning": "Public evidence document."
     },
@@ -74,8 +74,8 @@
     }
   ],
   "publicSourceScan": {
-    "candidateFiles": 592,
-    "scannedTextFiles": 536,
+    "candidateFiles": 596,
+    "scannedTextFiles": 539,
     "largeFiles": [],
     "secretFindings": []
   },

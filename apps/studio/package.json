@@ -63,6 +63,7 @@
     "phase16:signing-materials-pack": "node ./scripts/phase16-signing-materials-pack.cjs",
     "phase17:signing-handoff-audit": "node ./scripts/phase17-signing-handoff-audit.cjs",
     "phase18:github-public-preview-pack": "node ./scripts/phase18-github-public-preview-pack.cjs",
+    "phase19:github-release-staging": "node ./scripts/phase19-github-release-staging.cjs",
     "release:plan": "node ./scripts/release-plan.cjs",
     "smoke": "node ./scripts/smoke-dist.mjs",
     "start:smoke": "node ./scripts/start-smoke.cjs",

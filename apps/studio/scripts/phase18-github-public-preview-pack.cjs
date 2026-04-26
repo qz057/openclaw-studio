@@ -58,6 +58,7 @@ function shouldSkipDir(root, dirPath) {
     rel === "apps/studio/release" ||
     rel === "apps/studio/output" ||
     rel === "delivery/openclaw-studio-alpha-shell/installers" ||
+    rel.startsWith("delivery/github-release-upload-") ||
     rel.startsWith("node_modules/") ||
     rel.startsWith(".tmp/") ||
     rel.startsWith(".playwright-cli/") ||
@@ -65,6 +66,7 @@ function shouldSkipDir(root, dirPath) {
     rel.startsWith("apps/studio/release/") ||
     rel.startsWith("apps/studio/output/") ||
     rel.startsWith("delivery/openclaw-studio-alpha-shell/installers/") ||
+    rel.startsWith("delivery/github-release-upload-") ||
     /^delivery\/alpha-snapshot-/.test(rel) ||
     /^delivery\/phase\d+-.*screenshots/.test(rel)
   );

@@ -17,6 +17,7 @@ dist-electron
 *.backup
 pnpm-lock.yaml
 delivery/openclaw-studio-alpha-shell/
+delivery/github-release-upload-*/
 delivery/alpha-snapshot-*/
 delivery/phase*-ui-screenshots-*/
 delivery/*screenshots*/

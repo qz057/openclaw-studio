@@ -35,6 +35,7 @@ npm run -C "E:\claucd\界面控制台程序\apps\studio" phase15:trusted-signing
 npm run -C "E:\claucd\界面控制台程序\apps\studio" phase16:signing-materials-pack
 npm run -C "E:\claucd\界面控制台程序\apps\studio" phase17:signing-handoff-audit
 npm run -C "E:\claucd\界面控制台程序\apps\studio" phase18:github-public-preview-pack
+npm run -C "E:\claucd\界面控制台程序\apps\studio" phase19:github-release-staging
 ```
 
 ## Result
@@ -62,6 +63,7 @@ npm run -C "E:\claucd\界面控制台程序\apps\studio" phase18:github-public-p
 - Phase 16 signing materials pack: generated the release signing intake templates, key custody policy, private env template, runbook, acceptance checklist, timestamp policy, evidence template, private-file ignore rules, and public release gate command wrapper under `delivery/signing-materials-20260426`. Report: `delivery/phase16-signing-materials-pack-20260426.json`; closeout: `delivery/phase16-signing-materials-pack-closeout-20260426.md`.
 - Phase 17 signing handoff audit: passed; verified 9 signing material files, confirmed 0 secret-scan findings, and confirmed the public release gate wrapper fails fast with a clear missing-private-env message before real signing inputs are present. Report: `delivery/phase17-signing-handoff-audit-20260426.json`; closeout: `delivery/phase17-signing-handoff-audit-closeout-20260426.md`.
 - Phase 18 GitHub public preview pack: passed; generated unsigned GitHub preview release notes, asset manifest, upload command template, public preview README, and security policy draft. It scanned 591 public-source candidate files, scanned 526 text files, found 0 large-file blockers and 0 secret findings. Report: `delivery/phase18-github-public-preview-pack-20260426.json`; closeout: `delivery/phase18-github-public-preview-pack-closeout-20260426.md`.
+- Phase 19 GitHub release staging: passed; copied the unsigned installer, portable zip, public release evidence documents, and `SHA256SUMS.txt` into `delivery/github-release-upload-20260426/assets` for GitHub Release upload. Report: `delivery/phase19-github-release-staging-20260426.json`; closeout: `delivery/phase19-github-release-staging-closeout-20260426.md`.
 - Manual launch check: `release/win-unpacked/OpenClaw Studio.exe` stayed alive for 20 seconds and was then stopped.
 - Zip contents check: includes `OpenClaw Studio.exe` and `resources/app.asar`.
 
@@ -83,3 +85,4 @@ npm run -C "E:\claucd\界面控制台程序\apps\studio" phase18:github-public-p
 - Phase 16 intentionally does not generate real trusted certificate/private-key material. Legal publisher identity, CA validation, trusted code-signing certificate access, private-key access, and timestamp authority selection remain external release inputs.
 - Phase 17 validates handoff material safety and gate behavior only. It intentionally does not run public signing without `delivery/signing-materials-20260426/SIGNING-ENV.private.ps1`.
 - Phase 18 supports unsigned GitHub public preview distribution only. It does not remove Windows Unknown publisher / SmartScreen warnings; installer and portable zip must be uploaded as GitHub Release assets, not committed to Git.
+- Phase 19 upload staging artifacts are intentionally ignored by Git because they contain large release binaries. Upload them to GitHub Release assets instead of committing them.

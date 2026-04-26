@@ -16,6 +16,7 @@
     "start:smoke": "npm run start:smoke --workspace @openclaw/studio",
     "typecheck": "npm run typecheck --workspace @openclaw/studio",
     "phase18:github-public-preview-pack": "npm run phase18:github-public-preview-pack --workspace @openclaw/studio",
+    "phase19:github-release-staging": "npm run phase19:github-release-staging --workspace @openclaw/studio",
     "verify:product": "node scripts/verify-product.cjs",
     "start": "npm run start --workspace @openclaw/studio",
     "rebuild": "node scripts/rebuild.cjs",
