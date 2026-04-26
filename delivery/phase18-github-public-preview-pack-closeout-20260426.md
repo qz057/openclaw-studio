@@ -7,7 +7,7 @@ github-public-preview-pack-ready
 ## Generated Pack
 
 - root: `E:\claucd\界面控制台程序\delivery\github-public-preview-20260426`
-- release notes: `delivery/github-public-preview-20260426/RELEASE_NOTES_v0.1.0-preview.2.md`
+- release notes: `delivery/github-public-preview-20260426/RELEASE_NOTES_v0.1.0-preview.3.md`
 - release asset manifest: `delivery/github-public-preview-20260426/GITHUB_RELEASE_ASSETS.json`
 - release commands: `delivery/github-public-preview-20260426/GITHUB_RELEASE_COMMANDS.ps1`
 - public preview README: `delivery/github-public-preview-20260426/README-PUBLIC-PREVIEW.md`

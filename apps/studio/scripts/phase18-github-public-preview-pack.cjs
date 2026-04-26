@@ -4,7 +4,7 @@ const crypto = require("node:crypto");
 const { spawnSync } = require("node:child_process");
 
 const DATE = "20260426";
-const VERSION = process.env.OPENCLAW_RELEASE_VERSION || "v0.1.0-preview.2";
+const VERSION = process.env.OPENCLAW_RELEASE_VERSION || "v0.1.0-preview.3";
 const TWO_GIB = 2 * 1024 * 1024 * 1024;
 const GIT_WARN_SIZE = 50 * 1024 * 1024;
 const GIT_BLOCK_SIZE = 100 * 1024 * 1024;

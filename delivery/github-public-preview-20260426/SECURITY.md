@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-The current public preview line is v0.1.0-preview.2.
+The current public preview line is v0.1.0-preview.3.
 
 ## Reporting A Vulnerability
 
