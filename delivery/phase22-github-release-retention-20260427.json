@@ -1,0 +1,64 @@
+{
+  "generatedAt": "2026-04-26T16:30:06.866Z",
+  "status": "github-release-retention-clean",
+  "repo": "qz057/openclaw-studio",
+  "activeVersion": "v0.1.0-preview.4",
+  "retiredVersions": [
+    "v0.1.0-preview.1",
+    "v0.1.0-preview.2",
+    "v0.1.0-preview.3"
+  ],
+  "activeRelease": {
+    "tagName": "v0.1.0-preview.4",
+    "name": "OpenClaw Studio v0.1.0 Preview 4",
+    "isPrerelease": true,
+    "url": "https://github.com/qz057/openclaw-studio/releases/tag/v0.1.0-preview.4"
+  },
+  "releaseTags": [
+    "v0.1.0-preview.4"
+  ],
+  "retiredReleaseFindings": [
+    {
+      "version": "v0.1.0-preview.1",
+      "releasePresent": false
+    },
+    {
+      "version": "v0.1.0-preview.2",
+      "releasePresent": false
+    },
+    {
+      "version": "v0.1.0-preview.3",
+      "releasePresent": false
+    }
+  ],
+  "remoteTagChecks": [
+    {
+      "version": "v0.1.0-preview.4",
+      "present": true,
+      "refs": [
+        "c10aeb5e5d9d3c26dd0724f1d366b352caab01bb\trefs/tags/v0.1.0-preview.4",
+        "18bedbbb972a8745b61d49a57021f2268abfdb0e\trefs/tags/v0.1.0-preview.4^{}"
+      ]
+    },
+    {
+      "version": "v0.1.0-preview.1",
+      "present": false,
+      "refs": []
+    },
+    {
+      "version": "v0.1.0-preview.2",
+      "present": false,
+      "refs": []
+    },
+    {
+      "version": "v0.1.0-preview.3",
+      "present": false,
+      "refs": []
+    }
+  ],
+  "localTags": [
+    "v0.1.0-preview.4"
+  ],
+  "warnings": [],
+  "blockers": []
+}

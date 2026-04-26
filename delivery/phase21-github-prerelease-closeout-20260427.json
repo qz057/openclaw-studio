@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-04-26T16:07:24.086Z",
+  "generatedAt": "2026-04-26T16:29:57.106Z",
   "status": "github-prerelease-published",
-  "version": "v0.1.0-preview.3",
+  "version": "v0.1.0-preview.4",
   "repo": "qz057/openclaw-studio",
   "release": {
-    "tagName": "v0.1.0-preview.3",
-    "name": "OpenClaw Studio v0.1.0 Preview 3",
+    "tagName": "v0.1.0-preview.4",
+    "name": "OpenClaw Studio v0.1.0 Preview 4",
     "isPrerelease": true,
-    "url": "https://github.com/qz057/openclaw-studio/releases/tag/v0.1.0-preview.3",
+    "url": "https://github.com/qz057/openclaw-studio/releases/tag/v0.1.0-preview.4",
     "assetCount": 7
   },
   "upstream": {
@@ -63,11 +63,11 @@
     {
       "name": "phase20-runtime-release-closeout-20260426.md",
       "role": "release-note-evidence",
-      "expectedSize": 2922,
-      "releaseSize": 2922,
+      "expectedSize": 2923,
+      "releaseSize": 2923,
       "existsOnRelease": true,
       "sizeMatches": true,
-      "sha256": "309FB46A5346031CC0BD3622F176C8F17E7D30D1B11B2F6630595446819B7525"
+      "sha256": "BD3B4EC73AA8C98905A85D9AA02DFB79E60D58D8E66A57A51F9CD29E3AB03161"
     },
     {
       "name": "SHA256SUMS.txt",

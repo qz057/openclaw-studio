@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-04-26T16:06:20.040Z",
+  "generatedAt": "2026-04-26T16:29:35.267Z",
   "status": "github-release-upload-staged",
-  "version": "v0.1.0-preview.3",
+  "version": "v0.1.0-preview.4",
   "uploadRoot": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426",
   "assetsRoot": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\assets",
-  "releaseNotes": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\RELEASE_NOTES_v0.1.0-preview.3.md",
+  "releaseNotes": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\RELEASE_NOTES_v0.1.0-preview.4.md",
   "stagedAssets": [
     {
       "label": "Windows NSIS installer",
@@ -57,8 +57,8 @@
       "publicWarning": "Shows final runtime UI, session stream, GPU sampling, and release staging evidence.",
       "source": "E:\\claucd\\界面控制台程序\\delivery\\phase20-runtime-release-closeout-20260426.md",
       "target": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\assets\\phase20-runtime-release-closeout-20260426.md",
-      "size": 2922,
-      "sha256": "309FB46A5346031CC0BD3622F176C8F17E7D30D1B11B2F6630595446819B7525"
+      "size": 2923,
+      "sha256": "BD3B4EC73AA8C98905A85D9AA02DFB79E60D58D8E66A57A51F9CD29E3AB03161"
     }
   ],
   "sha256Sums": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\assets\\SHA256SUMS.txt",
@@ -67,8 +67,8 @@
     "ghPublish": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\PUBLISH_WITH_GH.ps1"
   },
   "git": {
-    "head": "6703a171fe5c127a80a65b4e87d070bbbb3ac2ab",
-    "tagCommit": "6703a171fe5c127a80a65b4e87d070bbbb3ac2ab",
+    "head": "18bedbbb972a8745b61d49a57021f2268abfdb0e",
+    "tagCommit": "18bedbbb972a8745b61d49a57021f2268abfdb0e",
     "tagAlignedWithHead": true,
     "remotes": "origin\thttps://github.com/qz057/openclaw-studio.git (fetch)\norigin\thttps://github.com/qz057/openclaw-studio.git (push)"
   },
