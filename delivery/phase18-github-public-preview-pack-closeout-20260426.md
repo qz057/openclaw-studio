@@ -7,7 +7,7 @@ github-public-preview-pack-ready
 ## Generated Pack
 
 - root: `E:\claucd\界面控制台程序\delivery\github-public-preview-20260426`
-- release notes: `delivery/github-public-preview-20260426/RELEASE_NOTES_v0.1.0-preview.4.md`
+- release notes: `delivery/github-public-preview-20260426/RELEASE_NOTES_v0.1.0-preview.5.md`
 - release asset manifest: `delivery/github-public-preview-20260426/GITHUB_RELEASE_ASSETS.json`
 - release commands: `delivery/github-public-preview-20260426/GITHUB_RELEASE_COMMANDS.ps1`
 - public preview README: `delivery/github-public-preview-20260426/README-PUBLIC-PREVIEW.md`
@@ -22,13 +22,13 @@ github-public-preview-pack-ready
 | Windows portable zip | yes | 142897544 | `5F7F1D34CED6CA5315ACF921E07F815C52A4174C7B81ACF9BF95BFA4629C6493` |
 | RC Windows zip | yes | 141157276 | `1B22175E8A712938F2AFCE2369EAB445B4AE6BCF5244B2D6A2EF0589468CA56E` |
 | RC manifest | yes | 10980 | `6314F97822A75E4AA8242328FEC49B565A4003DD91810030C645BCC72AE3DF83` |
-| Public release handoff | yes | 4619 | `E8EAC6CCD557434165A80B223541C7D883C61391AC912A9662077404E1AABA55` |
-| Signing handoff audit | yes | 1146 | `86B83F9B7054827E7AEAE49BDD30378E184686173920E5ADFB80C93E78CB16FA` |
-| Runtime release closeout | yes | 2923 | `BD3B4EC73AA8C98905A85D9AA02DFB79E60D58D8E66A57A51F9CD29E3AB03161` |
+| Public release handoff | yes | 4635 | `260278DB73D2C16D1D9EB1B68EF75A45E73B57897D91E4D1A205A178CED4357D` |
+| Signing handoff audit | yes | 1190 | `303ECAA9EC7C452B630BCC4AFCED292EF8176C8DF3F20D210363F9FA18955A08` |
+| Runtime release closeout | yes | 3015 | `6BBC753F9A119FC35A19E547875058B14EB2118FDC1C00FDA4CBA4C34092DD71` |
 
 ## Public Source Scan
 
-- candidate files: 606
+- candidate files: 799
 - text files scanned: 549
 - large files >= 50 MiB: 0
 - secret findings: 0
@@ -39,7 +39,7 @@ github-public-preview-pack-ready
 
 ## Warnings
 
-- none
+- GitHub CLI is not logged in. Manual GitHub login or browser release upload is required.
 
 ## Verification
 

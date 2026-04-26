@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-04-26T17:02:05.392Z",
+  "generatedAt": "2026-04-26T17:16:51.519Z",
   "status": "release-candidate-ready-for-github-preview",
-  "version": "v0.1.0-preview.4",
+  "version": "v0.1.0-preview.5",
   "appRoot": "E:\\claucd\\界面控制台程序\\apps\\studio",
   "deliveryRoot": "E:\\claucd\\界面控制台程序\\delivery",
   "artifacts": [
@@ -156,7 +156,7 @@
     "publicPreviewRoot": "E:\\claucd\\界面控制台程序\\delivery\\github-public-preview-20260426",
     "uploadStagingStatus": "github-release-upload-staged",
     "uploadRoot": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426",
-    "releaseNotes": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\RELEASE_NOTES_v0.1.0-preview.4.md",
+    "releaseNotes": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\RELEASE_NOTES_v0.1.0-preview.5.md",
     "stagedAssetCount": 6,
     "stagedAssetLabels": [
       {
@@ -177,27 +177,27 @@
       {
         "label": "Public release handoff",
         "role": "release-note-evidence",
-        "size": 4619
+        "size": 4635
       },
       {
         "label": "Signing handoff audit",
         "role": "release-note-evidence",
-        "size": 1146
+        "size": 1190
       },
       {
         "label": "Runtime release closeout",
         "role": "release-note-evidence",
-        "size": 2923
+        "size": 2922
       }
     ]
   },
   "git": {
-    "head": "f7e38f051ebe8dc182bdab96cf7992fd9fb1a973",
-    "tag": "v0.1.0-preview.4",
-    "tagCommit": "18bedbbb972a8745b61d49a57021f2268abfdb0e",
-    "tagAlignedWithHead": false,
+    "head": "8895dde61641ecf0f36618ba924bb481168492f7",
+    "tag": "v0.1.0-preview.5",
+    "tagCommit": "8895dde61641ecf0f36618ba924bb481168492f7",
+    "tagAlignedWithHead": true,
     "remotes": "origin\thttps://github.com/qz057/openclaw-studio.git (fetch)\norigin\thttps://github.com/qz057/openclaw-studio.git (push)",
-    "dirtyFiles": 22
+    "dirtyFiles": 13
   },
   "githubCli": {
     "loggedIn": false

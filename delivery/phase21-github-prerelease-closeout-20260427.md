@@ -2,31 +2,38 @@
 
 ## Status
 
-github-prerelease-published
+github-prerelease-closeout-blocked
 
 ## Release
 
 - repo: `qz057/openclaw-studio`
-- tag: `v0.1.0-preview.4`
-- url: https://github.com/qz057/openclaw-studio/releases/tag/v0.1.0-preview.4
-- prerelease: yes
-- assets: 7
+- tag: `v0.1.0-preview.5`
+- url: missing
+- prerelease: no
+- assets: 0
 
 ## Asset Checks
 
 | Asset | Exists | Expected Size | Release Size |
 |---|---:|---:|---:|
-| OpenClaw-Studio-0.1.0-win-x64-setup.exe | yes | 102277901 | 102277901 |
-| OpenClaw-Studio-0.1.0-alpha-x64-portable.zip | yes | 142897544 | 142897544 |
-| openclaw-studio-rc-manifest-20260426.md | yes | 10980 | 10980 |
-| phase13-public-release-handoff-20260426.md | yes | 4619 | 4619 |
-| phase17-signing-handoff-audit-closeout-20260426.md | yes | 1146 | 1146 |
-| phase20-runtime-release-closeout-20260426.md | yes | 2923 | 2923 |
-| SHA256SUMS.txt | yes | 660 | 660 |
+| OpenClaw-Studio-0.1.0-win-x64-setup.exe | no | 102277901 |  |
+| OpenClaw-Studio-0.1.0-alpha-x64-portable.zip | no | 142897544 |  |
+| openclaw-studio-rc-manifest-20260426.md | no | 10980 |  |
+| phase13-public-release-handoff-20260426.md | no | 4635 |  |
+| phase17-signing-handoff-audit-closeout-20260426.md | no | 1190 |  |
+| phase20-runtime-release-closeout-20260426.md | no | 2922 |  |
+| SHA256SUMS.txt | no | 660 |  |
 
 ## Blockers
 
-- none
+- github-release-view-failed: release not found
+- github-release-asset-missing: OpenClaw-Studio-0.1.0-win-x64-setup.exe is missing from the GitHub release.
+- github-release-asset-missing: OpenClaw-Studio-0.1.0-alpha-x64-portable.zip is missing from the GitHub release.
+- github-release-asset-missing: openclaw-studio-rc-manifest-20260426.md is missing from the GitHub release.
+- github-release-asset-missing: phase13-public-release-handoff-20260426.md is missing from the GitHub release.
+- github-release-asset-missing: phase17-signing-handoff-audit-closeout-20260426.md is missing from the GitHub release.
+- github-release-asset-missing: phase20-runtime-release-closeout-20260426.md is missing from the GitHub release.
+- github-release-asset-missing: SHA256SUMS.txt is missing from the GitHub release.
 
 ## Warnings
 

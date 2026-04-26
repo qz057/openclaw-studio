@@ -71,6 +71,11 @@ function quotePs(value) {
   return String(value).replace(/'/g, "''");
 }
 
+function githubRepoFromRemote(remotesOutput) {
+  const match = String(remotesOutput || "").match(/github\.com[:/](?<repo>[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+?)(?:\.git)?(?:\s|$)/);
+  return match?.groups?.repo ?? null;
+}
+
 function main() {
   const appRoot = path.resolve(__dirname, "..");
   const repoRoot = path.resolve(appRoot, "..", "..");
@@ -148,6 +153,10 @@ function main() {
 
   const ghStatus = run("gh", ["auth", "status"], repoRoot);
   const remotes = run("git", ["remote", "-v"], repoRoot);
+  const githubRepo = githubRepoFromRemote(remotes.stdout) ?? "<github-owner>/<github-repo>";
+  const [owner, repo] = githubRepo.includes("/")
+    ? githubRepo.split("/", 2)
+    : ["<github-owner>", "<github-repo>"];
   const currentCommit = run("git", ["rev-parse", "HEAD"], repoRoot);
   const tagCommit = run("git", ["rev-list", "-n", "1", VERSION], repoRoot);
 
@@ -168,8 +177,9 @@ function main() {
 
   const uploadCommand = [
     "$ErrorActionPreference = 'Stop'",
-    "$Owner = '<github-owner>'",
-    "$Repo = '<github-repo>'",
+    `Set-Location -LiteralPath '${quotePs(repoRoot)}'`,
+    `$Owner = '${quotePs(owner)}'`,
+    `$Repo = '${quotePs(repo)}'`,
     `$Tag = '${VERSION}'`,
     `$Notes = '${quotePs(releaseNotesCopy)}'`,
     `$Assets = @(`,
@@ -188,8 +198,8 @@ function main() {
   const browserSteps = [
     "# Browser Release Upload Steps",
     "",
-    "1. Create a public GitHub repository.",
-    `2. Push \`main\` and \`${VERSION}\` from this local repository.`,
+    `1. Open \`https://github.com/${githubRepo}\`.`,
+    `2. Push \`main\` and \`${VERSION}\` from this local repository: \`git push origin main; git push origin ${VERSION}\`.`,
     "3. Open the GitHub repository page.",
     "4. Go to Releases -> Draft a new release.",
     `5. Select or type tag \`${VERSION}\`.`,
@@ -218,6 +228,7 @@ function main() {
     uploadRoot,
     assetsRoot,
     releaseNotes: releaseNotesCopy,
+    githubRepo,
     stagedAssets: staged,
     sha256Sums: path.join(assetsRoot, "SHA256SUMS.txt"),
     commands: {
