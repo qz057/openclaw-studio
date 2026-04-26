@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "envVar": "WINDOWS_CODESIGN_TIMESTAMP_URL",
+  "defaultCandidate": "https://timestamp.digicert.com",
+  "notes": [
+    "Use the timestamp authority documented by the selected CA whenever possible.",
+    "Public release should not proceed without timestamped Authenticode verification."
+  ]
+}

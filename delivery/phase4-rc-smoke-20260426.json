@@ -1,0 +1,34 @@
+{
+  "generatedAt": "2026-04-26T04:35:05.255Z",
+  "host": {
+    "platform": "win32",
+    "arch": "x64",
+    "hostname": "山谷神奇"
+  },
+  "artifact": {
+    "zipPath": "E:\\claucd\\界面控制台程序\\apps\\studio\\release\\OpenClaw Studio-0.1.0-win-x64.zip",
+    "zipSize": 141157276,
+    "zipSha256": "1B22175E8A712938F2AFCE2369EAB445B4AE6BCF5244B2D6A2EF0589468CA56E",
+    "exePath": "E:\\claucd\\界面控制台程序\\.tmp\\phase4-rc-smoke\\extracted\\OpenClaw Studio.exe",
+    "exeSize": 222973952,
+    "exeSha256": "50730C076C408878624E0284FCC932048B6EBCD76F9EFB0F9C34E6851321FF8B"
+  },
+  "checks": {
+    "extract": "passed",
+    "firstLaunch": {
+      "label": "first",
+      "pid": 29016,
+      "stayedAliveMs": 16740,
+      "shutdown": "taskkill",
+      "userDataDir": "E:\\claucd\\界面控制台程序\\.tmp\\phase4-rc-smoke\\user-data-first"
+    },
+    "shutdown": "passed",
+    "restartLaunch": {
+      "label": "restart",
+      "pid": 25780,
+      "stayedAliveMs": 16708,
+      "shutdown": "taskkill",
+      "userDataDir": "E:\\claucd\\界面控制台程序\\.tmp\\phase4-rc-smoke\\user-data-restart"
+    }
+  }
+}

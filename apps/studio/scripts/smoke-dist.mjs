@@ -1,0 +1,3796 @@
+import fs from "node:fs/promises";
+import path from "node:path";
+import { createRequire } from "node:module";
+import { fileURLToPath, pathToFileURL } from "node:url";
+
+const require = createRequire(import.meta.url);
+const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const repoRoot = path.resolve(appRoot, "..", "..");
+const { getPreflightSummary } = require(path.join(appRoot, "scripts", "studio-preflight.cjs"));
+const { createReleaseSkeleton, PHASE_ID, PHASE_TITLE, REVIEW_STAGE_ID } = require(path.join(appRoot, "scripts", "release-skeleton.cjs"));
+const rendererRoot = path.join(appRoot, "dist-renderer");
+const electronRuntimePath = path.join(appRoot, "dist-electron", "electron", "runtime", "studio-runtime.js");
+const codexAgentLoopPath = path.join(appRoot, "dist-electron", "electron", "runtime", "probes", "codex-agent-loop.js");
+const runtimeCommandPolicyPath = path.join(appRoot, "dist-electron", "electron", "runtime", "probes", "runtime-command-policy.js");
+const sharedDistPath = path.join(repoRoot, "packages", "shared", "dist", "index.js");
+const bridgeDistPath = path.join(repoRoot, "packages", "bridge", "dist", "index.js");
+
+async function ensureFile(filePath) {
+  await fs.access(filePath);
+}
+
+async function verifyRendererBuild() {
+  const indexHtmlPath = path.join(rendererRoot, "index.html");
+  await ensureFile(indexHtmlPath);
+
+  const html = await fs.readFile(indexHtmlPath, "utf8");
+  const assetReferences = Array.from(html.matchAll(/(?:src|href)="(.+?)"/g), (match) => match[1])
+    .map((reference) => reference.replace(/^\//, ""))
+    .filter((reference) => reference.startsWith("./") || reference.startsWith("assets/"));
+
+  if (assetReferences.length === 0) {
+    throw new Error("Renderer build is missing asset references in dist-renderer/index.html.");
+  }
+
+  for (const reference of assetReferences) {
+    await ensureFile(path.join(rendererRoot, reference));
+  }
+
+  return {
+    indexHtmlPath,
+    assetCount: assetReferences.length
+  };
+}
+
+async function verifyRendererFocusedSlotUi() {
+  const assetsRoot = path.join(rendererRoot, "assets");
+  const assetEntries = await fs.readdir(assetsRoot, {
+    withFileTypes: true
+  });
+  const scriptFiles = assetEntries.filter((entry) => entry.isFile() && entry.name.endsWith(".js"));
+  const styleFiles = assetEntries.filter((entry) => entry.isFile() && entry.name.endsWith(".css"));
+
+  if (scriptFiles.length === 0) {
+    throw new Error("Renderer build is missing compiled JavaScript assets for the phase25 focus UI.");
+  }
+
+  const bundle = (
+    await Promise.all(scriptFiles.map((entry) => fs.readFile(path.join(assetsRoot, entry.name), "utf8")))
+  ).join("\n");
+  const styles = (
+    await Promise.all(styleFiles.map((entry) => fs.readFile(path.join(assetsRoot, entry.name), "utf8")))
+  ).join("\n");
+
+  const requiredMarkers = [
+    "openclaw-studio.focused-slot",
+    "Dashboard",
+    "Home",
+    ["山谷智合实时运营驾驶舱", "实时同步"],
+    ["Codex 实时会话", "CODEX MONO"],
+    ["Claude 实时会话", "CLAUDE LIVE"],
+    ["任务类型分布", "TASK MIX"],
+    ["模型路由", "MODEL ROUTES"],
+    ["资源使用趋势", "RESOURCES"],
+    "Dashboard realtime data source audit",
+    "建议下一步",
+    "聊天状态",
+    "实时消息",
+    "Operator Shell → Trace Deck → Review Deck",
+    "当前流程",
+    ["Agents", "代理"],
+    ["Roster", "当前代理概览"],
+    ["Delegation Topology", "协作提示"],
+    "Codex",
+    ["Task Stream", "任务流"],
+    ["Turn Lifecycle", "回合进展"],
+    ["Project Context", "项目上下文"],
+    ["Skills / Tools / MCP", "技能与工具"],
+    ["Runtime detail", "详情面板"],
+    ["Settings", "设置"],
+    "Command Palette",
+    "Command preview",
+    PHASE_TITLE
+  ];
+
+  for (const marker of requiredMarkers) {
+    const markerOptions = Array.isArray(marker) ? marker : [marker];
+
+    if (!markerOptions.some((entry) => bundle.includes(entry))) {
+      throw new Error(`Renderer build is missing ${PHASE_ID} shell UI marker: ${markerOptions.join(" | ")}.`);
+    }
+  }
+
+  const obsoleteDashboardSelectors = [
+    ".dashboard-realtime-hero",
+    ".dashboard-realtime-kpi",
+    ".dashboard-realtime-grid",
+    ".dashboard-source-audit",
+    ".resource-sparkline"
+  ];
+
+  for (const selector of obsoleteDashboardSelectors) {
+    if (styles.includes(selector)) {
+      throw new Error(`Renderer build still contains obsolete dashboard selector ${selector}.`);
+    }
+  }
+
+  return {
+    markerCount: requiredMarkers.length,
+    dashboardCssAuditCount: obsoleteDashboardSelectors.length
+  };
+}
+
+async function verifyBridgeFallback() {
+  await ensureFile(sharedDistPath);
+  await ensureFile(bridgeDistPath);
+
+  const bridgeModule = await import(pathToFileURL(bridgeDistPath).href);
+  const snapshot = await bridgeModule.loadStudioSnapshot();
+
+  if (!snapshot?.pages?.length) {
+    throw new Error("Bridge fallback returned an empty shell state.");
+  }
+
+  return {
+    appName: snapshot.appName,
+    pageCount: snapshot.pages.length
+  };
+}
+
+async function verifyElectronRuntime() {
+  await ensureFile(electronRuntimePath);
+  await ensureFile(codexAgentLoopPath);
+
+  const { createStudioRuntime } = require(electronRuntimePath);
+  const { analyzeCodexAgentLoop } = require(codexAgentLoopPath);
+  const sharedModule = await import(pathToFileURL(sharedDistPath).href);
+  const runtime = createStudioRuntime();
+  const [shellState, sessions, codexTasks, hostExecutor, hostBridge] = await Promise.all([
+    runtime.getShellState(),
+    runtime.listSessions(),
+    runtime.listCodexTasks(),
+    runtime.getHostExecutorState(),
+    runtime.getHostBridgeState()
+  ]);
+
+  if (!shellState?.appName) {
+    throw new Error("Electron runtime returned an invalid shell state.");
+  }
+
+  assertInspectorContract(shellState.inspector);
+  assertDockContract(shellState.dock, shellState.inspector, hostBridge);
+  assertBoundaryContract(shellState.boundary, "shell state");
+  assertCommandSurfaceContract(shellState.commandSurface, shellState);
+  assertLayoutContract(shellState.layout, shellState.windowing);
+  assertWindowingContract(shellState.windowing, shellState.layout, shellState.boundary.hostExecutor.bridge);
+  assertMaterializationArtifactLedgerContract(shellState, sharedModule);
+  assertMaterializationFailureContinuityContract(shellState, sharedModule);
+  assertCodexLoopContract(shellState.codex, codexTasks);
+  assertCodexContextContract(shellState.codex);
+  assertSkillExtensionContract(shellState.skills);
+  assertAgentDelegationContract(shellState.agents);
+  assertStartupRoutingContract(shellState.settings);
+  assertHostExecutorContract(hostExecutor, "runtime host executor state");
+  assertHostBridgeContract(hostBridge, "runtime host bridge state");
+  const loopBehavior = verifyCodexAgentLoopBehavior(analyzeCodexAgentLoop);
+
+  return {
+    bridge: shellState.status.bridge,
+    runtime: shellState.status.runtime,
+    sessions: sessions.length,
+    codexTasks: codexTasks.length,
+    codexLoopCases: loopBehavior.checkedCases,
+    hostExecutorMode: hostExecutor.mode,
+    hostExecutorSlots: hostExecutor.mutationSlots.length,
+    hostBridgeHandlers: hostBridge.slotHandlers.length,
+    commandActions: shellState.commandSurface.actions.length,
+    windowIntents: shellState.windowing.windowIntents.length,
+    rosterWindows: shellState.windowing.roster.windows.length,
+    sharedStateLanes: shellState.windowing.sharedState.lanes.length
+  };
+}
+
+function assertMaterializationFailureContinuityContract(shellState, sharedModule) {
+  const selectFailureSurfaceMatch = sharedModule.selectStudioReleasePackagedAppMaterializationContractFailureSurfaceMatch;
+
+  if (typeof selectFailureSurfaceMatch !== "function") {
+    throw new Error("Shared package is missing the materialization failure continuity selector export.");
+  }
+
+  const contract = shellState.boundary?.hostExecutor?.releaseApprovalPipeline?.deliveryChain?.packagedAppMaterializationContract;
+  const activePlatform =
+    contract?.platforms.find((platform) => platform.id === contract.activePlatformId) ?? contract?.platforms[0] ?? null;
+  const activeReadout =
+    activePlatform?.failurePath.readouts.find((readout) => readout.id === activePlatform.failurePath.activeReadoutId) ??
+    activePlatform?.failurePath.readouts[0] ??
+    null;
+  const actionDeck =
+    shellState.commandSurface.actionDecks.find((deck) => deck.lanes.some((lane) => lane.id === activeReadout?.commandDeckLaneId)) ??
+    shellState.commandSurface.actionDecks[0] ??
+    null;
+  const failureSurfaceMatch = selectFailureSurfaceMatch(
+    shellState.boundary.hostExecutor.releaseApprovalPipeline.deliveryChain,
+    shellState.windowing,
+    shellState.reviewStateContinuity,
+    actionDeck,
+    shellState.commandSurface.actions,
+    activePlatform?.id
+  );
+
+  if (
+    !failureSurfaceMatch?.activeReadout ||
+    !failureSurfaceMatch?.primaryAction ||
+    !failureSurfaceMatch?.commandDeckLane ||
+    !failureSurfaceMatch?.observabilityMapping ||
+    !failureSurfaceMatch?.window ||
+    !failureSurfaceMatch?.lane ||
+    !failureSurfaceMatch?.board ||
+    !failureSurfaceMatch?.reviewStateContinuityEntry
+  ) {
+    throw new Error("Built shell state is missing the phase60 materialization failure continuity surface match.");
+  }
+
+  if (failureSurfaceMatch.primaryAction.reviewSurfaceKind !== "failure-path") {
+    throw new Error("Materialization failure continuity resolved to a non-failure review surface.");
+  }
+
+  if (failureSurfaceMatch.reviewStateContinuityEntry.surface.actionId !== failureSurfaceMatch.primaryAction.id) {
+    throw new Error("Materialization failure continuity is not aligned with the matched review-state entry.");
+  }
+
+  if (!failureSurfaceMatch.commandPreviewActions.some((action) => action.id === failureSurfaceMatch.primaryAction.id)) {
+    throw new Error("Materialization failure continuity lost the active failure action from its command preview lane.");
+  }
+}
+
+function assertMaterializationArtifactLedgerContract(shellState, sharedModule) {
+  const selectArtifactLedgerSurfaceMatch = sharedModule.selectStudioReleasePackagedAppMaterializationContractArtifactLedgerSurfaceMatch;
+
+  if (typeof selectArtifactLedgerSurfaceMatch !== "function") {
+    throw new Error("Shared package is missing the materialization artifact-ledger selector export.");
+  }
+
+  const contract = shellState.boundary?.hostExecutor?.releaseApprovalPipeline?.deliveryChain?.packagedAppMaterializationContract;
+  const activePlatform =
+    contract?.platforms.find((platform) => platform.id === contract.activePlatformId) ?? contract?.platforms[0] ?? null;
+  const activeHandoff =
+    activePlatform?.artifactLedger?.handoffs.find((handoff) => handoff.id === activePlatform.artifactLedger.activeHandoffId) ??
+    activePlatform?.artifactLedger?.handoffs[0] ??
+    null;
+  const actionDeck =
+    shellState.commandSurface.actionDecks.find((deck) => deck.lanes.some((lane) => lane.id === activeHandoff?.commandDeckLaneId)) ??
+    shellState.commandSurface.actionDecks[0] ??
+    null;
+  const artifactLedgerSurface = selectArtifactLedgerSurfaceMatch(
+    shellState.boundary.hostExecutor.releaseApprovalPipeline.deliveryChain,
+    shellState.windowing,
+    shellState.reviewStateContinuity,
+    actionDeck,
+    shellState.commandSurface.actions,
+    activePlatform?.id
+  );
+
+  if (
+    !artifactLedgerSurface?.artifactLedger ||
+    !artifactLedgerSurface?.activeHandoff ||
+    artifactLedgerSurface.sourceArtifacts.length === 0 ||
+    artifactLedgerSurface.targetArtifacts.length === 0 ||
+    !artifactLedgerSurface?.reviewPacketStep ||
+    !artifactLedgerSurface?.validatorReadout ||
+    !artifactLedgerSurface?.commandDeckLane ||
+    !artifactLedgerSurface?.observabilityMapping ||
+    !artifactLedgerSurface?.window ||
+    !artifactLedgerSurface?.lane ||
+    !artifactLedgerSurface?.board ||
+    !artifactLedgerSurface?.reviewStateContinuityEntry
+  ) {
+    throw new Error("Built shell state is missing the phase60 materialization artifact ledger surface match.");
+  }
+
+  if (!artifactLedgerSurface.commandPreviewActions.length) {
+    throw new Error("Materialization artifact ledger lost its command-preview linkage.");
+  }
+
+  if (
+    !artifactLedgerSurface.artifacts.some((artifact) => artifact.id === artifactLedgerSurface.sourceArtifacts[0].id) ||
+    !artifactLedgerSurface.artifacts.some((artifact) => artifact.id === artifactLedgerSurface.targetArtifacts[0].id)
+  ) {
+    throw new Error("Materialization artifact ledger lost its source/target artifact coverage.");
+  }
+}
+
+function assertCodexLoopContract(codexState, codexTasks) {
+  if (!codexState?.loopSummary || !Array.isArray(codexState.loopStats) || !Array.isArray(codexState.loopSignals)) {
+    throw new Error("Codex state is missing the agent-loop contract.");
+  }
+
+  const requiredLoopStats = new Set(["Loop State", "Turns", "Tool Chain", "Recovery / Stop"]);
+  const actualLoopStats = new Set(codexState.loopStats.map((stat) => stat.label));
+
+  for (const label of requiredLoopStats) {
+    if (!actualLoopStats.has(label)) {
+      throw new Error(`Codex loop stats are missing required marker ${label}.`);
+    }
+  }
+
+  const requiredLoopSignals = new Set([
+    "codex-loop-state",
+    "codex-loop-continuation",
+    "codex-loop-recovery"
+  ]);
+  const actualLoopSignals = new Set(codexState.loopSignals.map((signal) => signal.id));
+
+  for (const signalId of requiredLoopSignals) {
+    if (!actualLoopSignals.has(signalId)) {
+      throw new Error(`Codex loop signals are missing required item ${signalId}.`);
+    }
+  }
+
+  const annotatedTask = codexTasks.find(
+    (task) => task.loopState && typeof task.turnCount === "number" && typeof task.continuation === "string"
+  );
+
+  if (!annotatedTask) {
+    throw new Error("Codex tasks are missing turn-lifecycle annotations.");
+  }
+}
+
+function assertCodexContextContract(codexState) {
+  if (!codexState?.contextSummary || !Array.isArray(codexState.contextNotes) || codexState.contextNotes.length < 3) {
+    throw new Error("Codex state is missing the project-context contract.");
+  }
+
+  const contextNoteIds = new Set(codexState.contextNotes.map((note) => note.id));
+
+  for (const noteId of ["codex-context-docs", "codex-context-git", "codex-context-session"]) {
+    if (!contextNoteIds.has(noteId)) {
+      throw new Error(`Codex context notes are missing required item ${noteId}.`);
+    }
+  }
+}
+
+function assertSkillExtensionContract(skillsState) {
+  const sourceSection = skillsState?.sections?.find((section) => section.id === "skills-sources");
+
+  if (!sourceSection || !Array.isArray(sourceSection.items) || sourceSection.items.length < 4) {
+    throw new Error("Skills state is missing the extension-source contract.");
+  }
+
+  const itemIds = new Set(sourceSection.items.map((item) => item.id));
+
+  for (const itemId of [
+    "skill-source-openclaw-home",
+    "skill-source-workspace",
+    "skill-source-extensions",
+    "skill-source-plugin-load-paths",
+    "skill-source-mcp-roots"
+  ]) {
+    if (!itemIds.has(itemId)) {
+      throw new Error(`Extension source section is missing required item ${itemId}.`);
+    }
+  }
+}
+
+function assertAgentDelegationContract(agentState) {
+  if (!agentState?.delegationSummary || !Array.isArray(agentState.delegationNotes) || agentState.delegationNotes.length < 3) {
+    throw new Error("Agent state is missing the delegation topology contract.");
+  }
+
+  const delegationNoteIds = new Set(agentState.delegationNotes.map((note) => note.id));
+
+  for (const noteId of [
+    "agent-delegation-spawn",
+    "agent-delegation-isolation",
+    "agent-delegation-background",
+    "agent-delegation-handoff"
+  ]) {
+    if (!delegationNoteIds.has(noteId)) {
+      throw new Error(`Agent delegation notes are missing required item ${noteId}.`);
+    }
+  }
+
+  const annotatedRosterEntry = agentState.roster?.find((agent) => agent.isolation && agent.handoff);
+
+  if (!annotatedRosterEntry) {
+    throw new Error("Agent roster entries are missing isolation/handoff annotations.");
+  }
+}
+
+function assertStartupRoutingContract(settingsState) {
+  const startupSection = settingsState?.sections?.find((section) => section.id === "settings-startup");
+
+  if (!startupSection || !Array.isArray(startupSection.items) || startupSection.items.length < 3) {
+    throw new Error("Settings state is missing the startup routing contract.");
+  }
+
+  const startupItemIds = new Set(startupSection.items.map((item) => item.id));
+
+  for (const itemId of ["settings-start-ready", "settings-display", "settings-command-path"]) {
+    if (!startupItemIds.has(itemId)) {
+      throw new Error(`Startup routing section is missing required item ${itemId}.`);
+    }
+  }
+}
+
+function verifyCodexAgentLoopBehavior(analyzeCodexAgentLoop) {
+  const now = Date.now();
+  const settledTool = analyzeCodexAgentLoop(
+    [
+      { type: "turn_context", timestamp: new Date(now - 5_000).toISOString() },
+      { type: "response_item", timestamp: new Date(now - 4_000).toISOString(), payload: { type: "tool_use" } },
+      { type: "response_item", timestamp: new Date(now - 3_000).toISOString(), payload: { type: "tool_result" } }
+    ],
+    "running",
+    now - 2_000,
+    now
+  );
+
+  if (settledTool.state !== "continuing" || settledTool.toolCallCount !== 1 || settledTool.toolResultCount !== 1) {
+    throw new Error("Codex agent-loop analysis failed to keep a balanced tool continuation in the continuing state.");
+  }
+
+  const recovering = analyzeCodexAgentLoop(
+    [
+      { type: "turn_context", timestamp: new Date(now - 5_000).toISOString() },
+      { type: "event_msg", timestamp: new Date(now - 4_000).toISOString(), payload: { type: "retry_request" } },
+      { type: "event_msg", timestamp: new Date(now - 3_000).toISOString(), payload: { type: "max_output_tokens" } }
+    ],
+    "running",
+    now - 2_000,
+    now
+  );
+
+  if (recovering.state !== "recovering" || recovering.recoveryCount < 2) {
+    throw new Error("Codex agent-loop analysis failed to surface retry and token-budget recovery markers.");
+  }
+
+  const interrupted = analyzeCodexAgentLoop(
+    [
+      { type: "turn_context", timestamp: new Date(now - 4_000).toISOString() },
+      { type: "event_msg", timestamp: new Date(now - 3_000).toISOString(), payload: { type: "abort_requested" } }
+    ],
+    "running",
+    now - 2_000,
+    now
+  );
+
+  if (interrupted.state !== "interrupted" || interrupted.interruptionCount < 1) {
+    throw new Error("Codex agent-loop analysis failed to surface interruption handling.");
+  }
+
+  const completed = analyzeCodexAgentLoop(
+    [{ type: "event_msg", timestamp: new Date(now - 3_000).toISOString(), payload: { type: "task_complete" } }],
+    "complete",
+    now - 2_000,
+    now
+  );
+
+  if (completed.state !== "complete") {
+    throw new Error("Codex agent-loop analysis failed to stop on completion.");
+  }
+
+  return {
+    checkedCases: 4
+  };
+}
+
+function assertCommandSurfaceContract(commandSurface, shellState) {
+  if (!commandSurface) {
+    throw new Error("Shell state is missing the phase35 command surface.");
+  }
+
+  if (!Array.isArray(commandSurface.actions) || commandSurface.actions.length < 6) {
+    throw new Error("Shell command surface is missing required actions.");
+  }
+
+  if (!Array.isArray(commandSurface.quickActionIds) || commandSurface.quickActionIds.length === 0) {
+    throw new Error("Shell command surface is missing quick actions.");
+  }
+
+  if (!Array.isArray(commandSurface.contexts) || !commandSurface.contexts.some((context) => context.id === "global")) {
+    throw new Error("Shell command surface is missing the global command context.");
+  }
+
+  if (!Array.isArray(commandSurface.actionGroups) || commandSurface.actionGroups.length === 0) {
+    throw new Error("Shell command surface is missing phase35 action groups.");
+  }
+
+  if (!Array.isArray(commandSurface.sequences) || commandSurface.sequences.length === 0) {
+    throw new Error("Shell command surface is missing phase35 command sequences.");
+  }
+
+  if (!Array.isArray(commandSurface.contextualFlows) || commandSurface.contextualFlows.length === 0) {
+    throw new Error("Shell command surface is missing phase35 contextual flows.");
+  }
+
+  if (!Array.isArray(commandSurface.nextSteps) || commandSurface.nextSteps.length === 0) {
+    throw new Error("Shell command surface is missing phase35 next-step definitions.");
+  }
+
+  if (!Array.isArray(commandSurface.nextStepBoards) || commandSurface.nextStepBoards.length === 0) {
+    throw new Error("Shell command surface is missing phase35 next-step boards.");
+  }
+
+  if (!Array.isArray(commandSurface.actionDecks) || commandSurface.actionDecks.length === 0) {
+    throw new Error("Shell command surface is missing the phase60 action decks.");
+  }
+
+  if (!commandSurface.history?.title || !commandSurface.history?.retention) {
+    throw new Error("Shell command surface is missing phase35 command history contract.");
+  }
+
+  if (!commandSurface.keyboardRouting?.title || !Array.isArray(commandSurface.keyboardRouting.shortcuts) || commandSurface.keyboardRouting.shortcuts.length === 0) {
+    throw new Error("Shell command surface is missing phase35 keyboard routing.");
+  }
+
+  const actionById = new Map(commandSurface.actions.map((action) => [action.id, action]));
+  const requiredActionKinds = new Set([
+    "navigate",
+    "focus-slot",
+    "show-boundary",
+    "show-trace",
+    "show-preview",
+    "focus-review-coverage",
+    "advance-workflow-lane",
+    "toggle-right-rail",
+    "toggle-bottom-dock",
+    "toggle-compact-mode",
+    "activate-workspace-view",
+    "stage-window-intent"
+  ]);
+  const actualActionKinds = new Set(commandSurface.actions.map((action) => action.kind));
+
+  for (const actionKind of requiredActionKinds) {
+    if (!actualActionKinds.has(actionKind)) {
+      throw new Error(`Shell command surface is missing action kind ${actionKind}.`);
+    }
+  }
+
+  for (const actionId of commandSurface.quickActionIds) {
+    if (!actionById.has(actionId)) {
+      throw new Error(`Shell command surface quick action ${actionId} is missing from the action registry.`);
+    }
+  }
+
+  for (const context of commandSurface.contexts) {
+    if (context.id !== "global" && !shellState.pages.some((page) => page.id === context.id)) {
+      throw new Error(`Shell command context ${context.id} does not map to a known route.`);
+    }
+
+    if (!Array.isArray(context.actionIds) || context.actionIds.length === 0) {
+      throw new Error(`Shell command context ${context.id} is missing action ids.`);
+    }
+
+    for (const actionId of context.actionIds) {
+      if (!actionById.has(actionId)) {
+        throw new Error(`Shell command context ${context.id} points at unknown action ${actionId}.`);
+      }
+    }
+  }
+
+  for (const group of commandSurface.actionGroups) {
+    if (!Array.isArray(group.actionIds) || group.actionIds.length === 0) {
+      throw new Error(`Command group ${group.id} is missing action ids.`);
+    }
+    for (const actionId of group.actionIds) {
+      if (!actionById.has(actionId)) {
+        throw new Error(`Command group ${group.id} points at unknown action ${actionId}.`);
+      }
+    }
+  }
+
+  const sequenceIds = new Set(commandSurface.sequences.map((sequence) => sequence.id));
+  const flowIds = new Set(commandSurface.contextualFlows.map((flow) => flow.id));
+  const workspaceViewIds = new Set((shellState.windowing?.views ?? []).map((view) => view.id));
+  const windowIntentIds = new Set((shellState.windowing?.windowIntents ?? []).map((intent) => intent.id));
+  const rosterWindowIds = new Set((shellState.windowing?.roster?.windows ?? []).map((entry) => entry.id));
+  const sharedStateLaneIds = new Set((shellState.windowing?.sharedState?.lanes ?? []).map((lane) => lane.id));
+  const orchestrationBoardIds = new Set((shellState.windowing?.orchestration?.boards ?? []).map((board) => board.id));
+  const observabilityMappingIds = new Set((shellState.windowing?.observability?.mappings ?? []).map((mapping) => mapping.id));
+  const deliveryChainStageIds = new Set(
+    (shellState.boundary?.hostExecutor?.releaseApprovalPipeline?.deliveryChain?.stages ?? []).map((stage) => stage.id)
+  );
+  const reviewCoverageActions = commandSurface.actions.filter((action) => action.kind === "focus-review-coverage");
+
+  if (reviewCoverageActions.length < 4) {
+    throw new Error("Shell command surface is missing the phase60 review-surface coverage actions.");
+  }
+
+  for (const action of reviewCoverageActions) {
+    if (
+      !action.reviewSurfaceKind ||
+      !action.deliveryChainStageId ||
+      !action.windowId ||
+      !action.sharedStateLaneId ||
+      !action.orchestrationBoardId ||
+      !action.observabilityMappingId
+    ) {
+      throw new Error(`Review coverage action ${action.id} is missing typed coverage targets.`);
+    }
+
+    if (!deliveryChainStageIds.has(action.deliveryChainStageId)) {
+      throw new Error(`Review coverage action ${action.id} points at unknown delivery stage ${action.deliveryChainStageId}.`);
+    }
+
+    if (!rosterWindowIds.has(action.windowId)) {
+      throw new Error(`Review coverage action ${action.id} points at unknown window ${action.windowId}.`);
+    }
+
+    if (!sharedStateLaneIds.has(action.sharedStateLaneId)) {
+      throw new Error(`Review coverage action ${action.id} points at unknown shared-state lane ${action.sharedStateLaneId}.`);
+    }
+
+    if (!orchestrationBoardIds.has(action.orchestrationBoardId)) {
+      throw new Error(`Review coverage action ${action.id} points at unknown orchestration board ${action.orchestrationBoardId}.`);
+    }
+
+    if (!observabilityMappingIds.has(action.observabilityMappingId)) {
+      throw new Error(`Review coverage action ${action.id} points at unknown observability mapping ${action.observabilityMappingId}.`);
+    }
+  }
+
+  for (const sequence of commandSurface.sequences) {
+    if (sequence.safety !== "local-only" || !Array.isArray(sequence.actionIds) || sequence.actionIds.length === 0) {
+      throw new Error(`Command sequence ${sequence.id} drifted from the expected local-only posture.`);
+    }
+    for (const actionId of sequence.actionIds) {
+      if (!actionById.has(actionId)) {
+        throw new Error(`Command sequence ${sequence.id} points at unknown action ${actionId}.`);
+      }
+    }
+  }
+
+  for (const flow of commandSurface.contextualFlows) {
+    if (!sequenceIds.has(flow.sequenceId)) {
+      throw new Error(`Contextual flow ${flow.id} points at unknown sequence ${flow.sequenceId}.`);
+    }
+    for (const actionId of [flow.recommendedActionId, ...(flow.followUpActionIds ?? [])].filter(Boolean)) {
+      if (!actionById.has(actionId)) {
+        throw new Error(`Contextual flow ${flow.id} points at unknown action ${actionId}.`);
+      }
+    }
+  }
+
+  for (const nextStep of commandSurface.nextSteps) {
+    if (!actionById.has(nextStep.actionId)) {
+      throw new Error(`Command next step ${nextStep.id} points at unknown action ${nextStep.actionId}.`);
+    }
+  }
+
+  for (const board of commandSurface.nextStepBoards) {
+    if (!sequenceIds.has(board.sequenceId)) {
+      throw new Error(`Command next-step board ${board.id} points at unknown sequence ${board.sequenceId}.`);
+    }
+
+    if (!commandSurface.contextualFlows.some((flow) => flow.id === board.flowId)) {
+      throw new Error(`Command next-step board ${board.id} points at unknown flow ${board.flowId}.`);
+    }
+
+    if (!Array.isArray(board.stepIds) || board.stepIds.length === 0) {
+      throw new Error(`Command next-step board ${board.id} is missing step ids.`);
+    }
+
+    for (const stepId of board.stepIds) {
+      if (!commandSurface.nextSteps.some((nextStep) => nextStep.id === stepId)) {
+        throw new Error(`Command next-step board ${board.id} points at unknown next step ${stepId}.`);
+      }
+    }
+  }
+
+  for (const deck of commandSurface.actionDecks) {
+    if (!flowIds.has(deck.flowId)) {
+      throw new Error(`Command action deck ${deck.id} points at unknown flow ${deck.flowId}.`);
+    }
+
+    if (!sequenceIds.has(deck.sequenceId)) {
+      throw new Error(`Command action deck ${deck.id} points at unknown sequence ${deck.sequenceId}.`);
+    }
+
+    if (!Array.isArray(deck.lanes) || deck.lanes.length === 0) {
+      throw new Error(`Command action deck ${deck.id} is missing lane coverage.`);
+    }
+
+    for (const lane of deck.lanes) {
+      if (!Array.isArray(lane.actionIds) || lane.actionIds.length === 0) {
+        throw new Error(`Command action deck lane ${lane.id} is missing actions.`);
+      }
+
+      if (!lane.primaryActionId || !lane.actionIds.includes(lane.primaryActionId)) {
+        throw new Error(`Command action deck lane ${lane.id} is missing a primary action inside its action list.`);
+      }
+
+      for (const actionId of lane.actionIds) {
+        if (!actionById.has(actionId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown action ${actionId}.`);
+        }
+      }
+
+      for (const followUpActionId of lane.followUpActionIds ?? []) {
+        if (!lane.actionIds.includes(followUpActionId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at follow-up action ${followUpActionId} outside its action list.`);
+        }
+
+        if (!actionById.has(followUpActionId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown follow-up action ${followUpActionId}.`);
+        }
+      }
+
+      for (const workspaceViewId of lane.workspaceViewIds ?? []) {
+        if (!workspaceViewIds.has(workspaceViewId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown workspace view ${workspaceViewId}.`);
+        }
+      }
+
+      for (const windowIntentId of lane.windowIntentIds ?? []) {
+        if (!windowIntentIds.has(windowIntentId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown window intent ${windowIntentId}.`);
+        }
+      }
+
+      for (const deliveryChainStageId of lane.deliveryChainStageIds ?? []) {
+        if (!deliveryChainStageIds.has(deliveryChainStageId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown delivery stage ${deliveryChainStageId}.`);
+        }
+      }
+
+      if (lane.focusDeliveryChainStageId) {
+        if (!deliveryChainStageIds.has(lane.focusDeliveryChainStageId)) {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at unknown focus delivery stage ${lane.focusDeliveryChainStageId}.`
+          );
+        }
+
+        if (lane.deliveryChainStageIds?.length && !lane.deliveryChainStageIds.includes(lane.focusDeliveryChainStageId)) {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at focus delivery stage ${lane.focusDeliveryChainStageId} outside its mapped stages.`
+          );
+        }
+      }
+
+      for (const windowId of lane.windowIds ?? []) {
+        if (!rosterWindowIds.has(windowId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown window ${windowId}.`);
+        }
+      }
+
+      if (lane.focusWindowId) {
+        if (!rosterWindowIds.has(lane.focusWindowId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown focus window ${lane.focusWindowId}.`);
+        }
+
+        if (lane.windowIds?.length && !lane.windowIds.includes(lane.focusWindowId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at focus window ${lane.focusWindowId} outside its mapped windows.`);
+        }
+      }
+
+      for (const sharedStateLaneId of lane.sharedStateLaneIds ?? []) {
+        if (!sharedStateLaneIds.has(sharedStateLaneId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown shared-state lane ${sharedStateLaneId}.`);
+        }
+      }
+
+      if (lane.focusSharedStateLaneId) {
+        if (!sharedStateLaneIds.has(lane.focusSharedStateLaneId)) {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at unknown focus shared-state lane ${lane.focusSharedStateLaneId}.`
+          );
+        }
+
+        if (lane.sharedStateLaneIds?.length && !lane.sharedStateLaneIds.includes(lane.focusSharedStateLaneId)) {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at focus shared-state lane ${lane.focusSharedStateLaneId} outside its mapped lanes.`
+          );
+        }
+      }
+
+      for (const orchestrationBoardId of lane.orchestrationBoardIds ?? []) {
+        if (!orchestrationBoardIds.has(orchestrationBoardId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown orchestration board ${orchestrationBoardId}.`);
+        }
+      }
+
+      if (lane.focusOrchestrationBoardId) {
+        if (!orchestrationBoardIds.has(lane.focusOrchestrationBoardId)) {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at unknown focus orchestration board ${lane.focusOrchestrationBoardId}.`
+          );
+        }
+
+        if (
+          lane.orchestrationBoardIds?.length &&
+          !lane.orchestrationBoardIds.includes(lane.focusOrchestrationBoardId)
+        ) {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at focus orchestration board ${lane.focusOrchestrationBoardId} outside its mapped boards.`
+          );
+        }
+      }
+
+      for (const observabilityMappingId of lane.observabilityMappingIds ?? []) {
+        if (!observabilityMappingIds.has(observabilityMappingId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown observability mapping ${observabilityMappingId}.`);
+        }
+      }
+
+      if (lane.focusObservabilityMappingId) {
+        if (!observabilityMappingIds.has(lane.focusObservabilityMappingId)) {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at unknown focus observability mapping ${lane.focusObservabilityMappingId}.`
+          );
+        }
+
+        if (
+          lane.observabilityMappingIds?.length &&
+          !lane.observabilityMappingIds.includes(lane.focusObservabilityMappingId)
+        ) {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at focus observability mapping ${lane.focusObservabilityMappingId} outside its mapped rows.`
+          );
+        }
+      }
+
+      if (lane.replayScenarioPack) {
+        if (!lane.replayScenarioPack.label || !lane.replayScenarioPack.summary || lane.replayScenarioPack.safety !== "local-only") {
+          throw new Error(`Command action deck lane ${lane.id} is missing the phase60 acceptance review-pack contract.`);
+        }
+
+        if (!(lane.companionRouteHistory?.length ?? 0)) {
+          throw new Error(`Command action deck lane ${lane.id} is missing replay scenarios for its acceptance review-pack.`);
+        }
+
+        if (!lane.replayScenarioPack.continuitySummary || !(lane.replayScenarioPack.continuityHandoffs?.length ?? 0)) {
+          throw new Error(`Command action deck lane ${lane.id} is missing the phase60 acceptance evidence continuity contract.`);
+        }
+
+        const replayScenarioIds = new Set((lane.companionRouteHistory ?? []).map((entry) => entry.id));
+        const replayScenarioEvidenceItemIds = new Set(
+          (lane.companionRouteHistory ?? []).flatMap((entry) => (entry.scenarioEvidenceItems ?? []).map((item) => item.id))
+        );
+        const replayScenarioScreenshotIds = new Set(
+          (lane.companionRouteHistory ?? []).flatMap((entry) => (entry.screenshotReviewItems ?? []).map((item) => item.id))
+        );
+
+        for (const entry of lane.companionRouteHistory ?? []) {
+          if (
+            !entry.scenarioLabel ||
+            !entry.scenarioSummary ||
+            !(entry.reviewerPosture || lane.replayScenarioPack.reviewerPosture) ||
+            !(entry.evidencePosture || lane.replayScenarioPack.evidencePosture)
+          ) {
+            throw new Error(`Replay scenario ${entry.id} is missing reviewer-facing acceptance copy.`);
+          }
+
+          if (!(entry.acceptanceChecks?.length ?? 0) || !(entry.screenshotReviewItems?.length ?? 0)) {
+            throw new Error(`Replay scenario ${entry.id} is missing the phase60 acceptance pass flow metadata.`);
+          }
+
+          if (!(entry.scenarioEvidenceItems?.length ?? 0) || !(entry.evidenceContinuityChecks?.length ?? 0)) {
+            throw new Error(`Replay scenario ${entry.id} is missing the phase60 evidence bundle metadata.`);
+          }
+
+          for (const check of entry.acceptanceChecks ?? []) {
+            if (!check.label || !check.detail || !check.state) {
+              throw new Error(`Replay scenario ${entry.id} has an incomplete acceptance check ${check.id}.`);
+            }
+          }
+
+          for (const item of entry.scenarioEvidenceItems ?? []) {
+            if (!item.label || !item.artifact || !item.detail || !item.posture || !item.kind || !item.owner || !item.dossierSection) {
+              throw new Error(`Replay scenario ${entry.id} has an incomplete proof-bundle item ${item.id}.`);
+            }
+          }
+
+          for (const check of entry.evidenceContinuityChecks ?? []) {
+            if (!check.label || !check.handoff || !check.detail || !check.state) {
+              throw new Error(`Replay scenario ${entry.id} has an incomplete evidence continuity check ${check.id}.`);
+            }
+          }
+
+          const evidenceItemIds = new Set((entry.scenarioEvidenceItems ?? []).map((item) => item.id));
+          const screenshotCaptureGroups = new Map();
+          const screenshotShotIndexes = new Set();
+
+          for (const item of entry.screenshotReviewItems ?? []) {
+            if (
+              !item.label ||
+              !item.surface ||
+              !item.detail ||
+              !item.posture ||
+              !item.storyboardRole ||
+              !item.shotIndex ||
+              !item.viewport ||
+              !item.focus ||
+              !item.framing
+            ) {
+              throw new Error(`Replay scenario ${entry.id} has an incomplete screenshot target ${item.id}.`);
+            }
+
+            if (!item.captureGroup || !item.comparisonFrame || !(item.linkedEvidenceItemIds?.length ?? 0)) {
+              throw new Error(`Replay scenario ${entry.id} is missing grouped screenshot comparison metadata on ${item.id}.`);
+            }
+
+            if (screenshotShotIndexes.has(item.shotIndex)) {
+              throw new Error(`Replay scenario ${entry.id} reuses storyboard shot index ${item.shotIndex}.`);
+            }
+
+            screenshotShotIndexes.add(item.shotIndex);
+
+            const captureGroup = screenshotCaptureGroups.get(item.captureGroup);
+
+            if (captureGroup && captureGroup.comparisonFrame !== item.comparisonFrame) {
+              throw new Error(
+                `Replay scenario ${entry.id} capture group ${item.captureGroup} mixes comparison frames ${captureGroup.comparisonFrame} and ${item.comparisonFrame}.`
+              );
+            }
+
+            screenshotCaptureGroups.set(item.captureGroup, {
+              comparisonFrame: item.comparisonFrame,
+              count: (captureGroup?.count ?? 0) + 1
+            });
+
+            for (const linkedEvidenceItemId of item.linkedEvidenceItemIds) {
+              if (!evidenceItemIds.has(linkedEvidenceItemId)) {
+                throw new Error(
+                  `Replay scenario ${entry.id} screenshot target ${item.id} points at unknown proof item ${linkedEvidenceItemId}.`
+                );
+              }
+            }
+          }
+
+          for (const [captureGroupId, captureGroup] of screenshotCaptureGroups) {
+            if (captureGroup.count < 2) {
+              throw new Error(`Replay scenario ${entry.id} capture group ${captureGroupId} does not form a comparison pair.`);
+            }
+          }
+        }
+
+        for (const handoff of lane.replayScenarioPack.continuityHandoffs ?? []) {
+          if (!handoff.label || !handoff.sourceLabel || !handoff.targetLabel || !handoff.detail || !handoff.state) {
+            throw new Error(`Replay scenario pack ${lane.replayScenarioPack.id} has an incomplete continuity handoff ${handoff.id}.`);
+          }
+
+          if (!handoff.sourceScenarioId && !handoff.targetScenarioId) {
+            throw new Error(`Replay scenario pack ${lane.replayScenarioPack.id} continuity handoff ${handoff.id} is missing scenario linkage.`);
+          }
+
+          if (handoff.sourceScenarioId && !replayScenarioIds.has(handoff.sourceScenarioId)) {
+            throw new Error(
+              `Replay scenario pack ${lane.replayScenarioPack.id} continuity handoff ${handoff.id} points at unknown source scenario ${handoff.sourceScenarioId}.`
+            );
+          }
+
+          if (handoff.targetScenarioId && !replayScenarioIds.has(handoff.targetScenarioId)) {
+            throw new Error(
+              `Replay scenario pack ${lane.replayScenarioPack.id} continuity handoff ${handoff.id} points at unknown target scenario ${handoff.targetScenarioId}.`
+            );
+          }
+
+          if (!(handoff.linkedEvidenceItemIds?.length ?? 0) || !(handoff.linkedScreenshotIds?.length ?? 0)) {
+            throw new Error(
+              `Replay scenario pack ${lane.replayScenarioPack.id} continuity handoff ${handoff.id} is missing proof or capture linkage.`
+            );
+          }
+
+          for (const evidenceItemId of handoff.linkedEvidenceItemIds) {
+            if (!replayScenarioEvidenceItemIds.has(evidenceItemId)) {
+              throw new Error(
+                `Replay scenario pack ${lane.replayScenarioPack.id} continuity handoff ${handoff.id} points at unknown proof item ${evidenceItemId}.`
+              );
+            }
+          }
+
+          for (const screenshotId of handoff.linkedScreenshotIds) {
+            if (!replayScenarioScreenshotIds.has(screenshotId)) {
+              throw new Error(
+                `Replay scenario pack ${lane.replayScenarioPack.id} continuity handoff ${handoff.id} points at unknown screenshot target ${screenshotId}.`
+              );
+            }
+          }
+        }
+      }
+
+      const companionSequenceIds = new Set((lane.companionSequences ?? []).map((sequence) => sequence.id));
+      const laneCompanionActionIds = new Set([
+        ...lane.actionIds,
+        ...(lane.companionReviewPaths ?? []).flatMap((path) => [path.sourceActionId, path.primaryActionId, ...(path.followUpActionIds ?? [])])
+      ]);
+
+      for (const companionSequence of lane.companionSequences ?? []) {
+        if (!companionSequence.label || !companionSequence.summary || companionSequence.steps.length < 2) {
+          throw new Error(`Command action deck lane ${lane.id} has an invalid companion sequence ${companionSequence.id}.`);
+        }
+
+        for (const step of companionSequence.steps) {
+          const sequenceAction = actionById.get(step.actionId);
+
+          if (!sequenceAction || sequenceAction.kind !== "focus-review-coverage") {
+            throw new Error(
+              `Command action deck lane ${lane.id} points at invalid companion-sequence action ${step.actionId}.`
+            );
+          }
+
+          if (!laneCompanionActionIds.has(step.actionId)) {
+            throw new Error(
+              `Command action deck lane ${lane.id} companion sequence ${companionSequence.id} points outside its linked companion actions.`
+            );
+          }
+        }
+      }
+
+      for (const companionPath of lane.companionReviewPaths ?? []) {
+        const sourceAction = actionById.get(companionPath.sourceActionId);
+        const primaryAction = actionById.get(companionPath.primaryActionId);
+
+        if (!companionPath.sequenceId || !companionSequenceIds.has(companionPath.sequenceId)) {
+          throw new Error(`Command action deck lane ${lane.id} points at unknown companion-path sequence ${companionPath.sequenceId}.`);
+        }
+
+        if (!sourceAction || sourceAction.kind !== "focus-review-coverage") {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at invalid companion-path source action ${companionPath.sourceActionId}.`
+          );
+        }
+
+        if (!primaryAction || primaryAction.kind !== "focus-review-coverage") {
+          throw new Error(
+            `Command action deck lane ${lane.id} points at invalid companion-path primary action ${companionPath.primaryActionId}.`
+          );
+        }
+
+        for (const followUpActionId of companionPath.followUpActionIds ?? []) {
+          const followUpAction = actionById.get(followUpActionId);
+
+          if (!followUpAction || followUpAction.kind !== "focus-review-coverage") {
+            throw new Error(
+              `Command action deck lane ${lane.id} points at invalid companion-path follow-up action ${followUpActionId}.`
+            );
+          }
+        }
+      }
+    }
+  }
+
+  if (!commandSurface.actionDecks.some((deck) => deck.id === "deck-review-deck-orchestration")) {
+    throw new Error("Shell command surface is missing the phase60 review-deck orchestration deck.");
+  }
+
+  if (!commandSurface.actionDecks.some((deck) => deck.lanes.some((lane) => lane.actionIds.some((actionId) => actionById.get(actionId)?.kind === "focus-review-coverage")))) {
+    throw new Error("Shell command surface action decks are missing review-surface coverage pivots.");
+  }
+
+  if (!commandSurface.actionDecks.some((deck) => deck.lanes.some((lane) => (lane.companionReviewPaths?.length ?? 0) > 0))) {
+    throw new Error("Shell command surface action decks are missing typed companion review-path orchestration.");
+  }
+
+  if (!commandSurface.actionDecks.some((deck) => deck.lanes.some((lane) => (lane.companionSequences?.length ?? 0) > 0))) {
+    throw new Error("Shell command surface action decks are missing sequence-aware companion review navigation.");
+  }
+
+  if (!commandSurface.actionDecks.some((deck) => deck.lanes.some((lane) => (lane.companionSequences?.length ?? 0) > 1))) {
+    throw new Error("Shell command surface action decks are missing companion sequence switching coverage.");
+  }
+
+  for (const shortcut of commandSurface.keyboardRouting.shortcuts) {
+    if (!shortcut.key || !shortcut.scope || !shortcut.target || !shortcut.combo) {
+      throw new Error(`Keyboard shortcut ${shortcut.id} is missing required routing metadata.`);
+    }
+  }
+
+  for (const action of commandSurface.actions) {
+    if (!["local-only", "preview-host"].includes(action.safety)) {
+      throw new Error(`Shell command action ${action.id} escaped the allowed safety range.`);
+    }
+  }
+}
+
+function assertLayoutContract(layout, windowing) {
+  if (!layout?.persistence) {
+    throw new Error("Shell state is missing the phase29 layout persistence contract.");
+  }
+
+  if (layout.persistence.strategy !== "localStorage" || !layout.persistence.storageKey) {
+    throw new Error("Shell layout persistence contract drifted from the expected localStorage posture.");
+  }
+
+  if (!Array.isArray(layout.rightRailTabs) || layout.rightRailTabs.length < 3) {
+    throw new Error("Shell layout contract is missing right rail tabs.");
+  }
+
+  if (!Array.isArray(layout.bottomDockTabs) || layout.bottomDockTabs.length < 3) {
+    throw new Error("Shell layout contract is missing bottom dock tabs.");
+  }
+
+  const rightRailTabIds = new Set(layout.rightRailTabs.map((tab) => tab.id));
+  const bottomDockTabIds = new Set(layout.bottomDockTabs.map((tab) => tab.id));
+  const workspaceViewIds = new Set((windowing?.views ?? []).map((view) => view.id));
+
+  if (!rightRailTabIds.has(layout.defaultState?.rightRailTabId)) {
+    throw new Error("Shell layout default right rail tab does not exist.");
+  }
+
+  if (!bottomDockTabIds.has(layout.defaultState?.bottomDockTabId)) {
+    throw new Error("Shell layout default bottom dock tab does not exist.");
+  }
+
+  if (!workspaceViewIds.has(layout.defaultState?.workspaceViewId)) {
+    throw new Error("Shell layout default workspace view does not exist.");
+  }
+
+  for (const requiredField of [
+    "rightRailVisible",
+    "bottomDockVisible",
+    "compactMode",
+    "rightRailTabId",
+    "bottomDockTabId",
+    "workspaceViewId"
+  ]) {
+    if (!layout.persistence.persistedFields.includes(requiredField)) {
+      throw new Error(`Shell layout persistence is missing field ${requiredField}.`);
+    }
+  }
+}
+
+function assertWindowingContract(windowing, layout, hostBridge) {
+  if (!windowing || windowing.readiness !== "contract-ready") {
+    throw new Error("Shell state is missing the phase35 detached workspace contract.");
+  }
+
+  const assertReviewPosture = (label, reviewPosture) => {
+    if (
+      !reviewPosture?.stageId ||
+      !reviewPosture?.stageLabel ||
+      !reviewPosture?.reviewerQueueId ||
+      !reviewPosture?.decisionHandoffId ||
+      !reviewPosture?.evidenceCloseoutId ||
+      !reviewPosture?.escalationWindowId ||
+      !reviewPosture?.closeoutWindowId ||
+      !reviewPosture?.summary
+    ) {
+      throw new Error(`${label} is missing cross-window review posture linkage.`);
+    }
+  };
+
+  if (!Array.isArray(windowing.views) || windowing.views.length < 2) {
+    throw new Error("Shell multi-window contract is missing workspace views.");
+  }
+
+  if (!Array.isArray(windowing.detachedPanels) || windowing.detachedPanels.length === 0) {
+    throw new Error("Shell multi-window contract is missing detached panel placeholders.");
+  }
+
+  if (!Array.isArray(windowing.windowIntents) || windowing.windowIntents.length === 0) {
+    throw new Error("Shell multi-window contract is missing window intents.");
+  }
+
+  if (!windowing.workflow || !Array.isArray(windowing.workflow.lanes) || windowing.workflow.lanes.length === 0) {
+    throw new Error("Shell multi-window contract is missing phase35 workflow lanes.");
+  }
+
+  if (!Array.isArray(windowing.workflow.steps) || windowing.workflow.steps.length === 0) {
+    throw new Error("Shell multi-window contract is missing phase35 workflow steps.");
+  }
+
+  if (!windowing.orchestration || !Array.isArray(windowing.orchestration.boards) || windowing.orchestration.boards.length === 0) {
+    throw new Error("Shell multi-window contract is missing phase35 orchestration boards.");
+  }
+
+  if (!Array.isArray(windowing.orchestration.checkpoints) || windowing.orchestration.checkpoints.length === 0) {
+    throw new Error("Shell multi-window contract is missing phase35 orchestration checkpoints.");
+  }
+
+  if (!windowing.roster || !Array.isArray(windowing.roster.windows) || windowing.roster.windows.length === 0) {
+    throw new Error("Shell multi-window contract is missing the phase60 window roster.");
+  }
+
+  if (!windowing.sharedState || !Array.isArray(windowing.sharedState.lanes) || windowing.sharedState.lanes.length === 0) {
+    throw new Error("Shell multi-window contract is missing the phase60 shared-state lanes.");
+  }
+
+  if (
+    !windowing.observability ||
+    !Array.isArray(windowing.observability.mappings) ||
+    windowing.observability.mappings.length === 0 ||
+    !Array.isArray(windowing.observability.signals) ||
+    windowing.observability.signals.length === 0
+  ) {
+    throw new Error("Shell multi-window contract is missing the phase60 cross-window observability map.");
+  }
+
+  const rightRailTabIds = new Set((layout?.rightRailTabs ?? []).map((tab) => tab.id));
+  const bottomDockTabIds = new Set((layout?.bottomDockTabs ?? []).map((tab) => tab.id));
+  const workspaceViewIds = new Set(windowing.views.map((view) => view.id));
+  const detachedPanelIds = new Set(windowing.detachedPanels.map((panel) => panel.id));
+  const windowIntentIds = new Set(windowing.windowIntents.map((intent) => intent.id));
+  const workflowStepIds = new Set(windowing.workflow.steps.map((step) => step.id));
+  const workflowLaneIds = new Set(windowing.workflow.lanes.map((lane) => lane.id));
+  const rosterWindowIds = new Set(windowing.roster.windows.map((entry) => entry.id));
+  const sharedStateLaneIds = new Set(windowing.sharedState.lanes.map((lane) => lane.id));
+  const focusSlotIds = new Set((hostBridge?.trace?.slotRoster ?? []).map((entry) => entry.slotId));
+
+  if (!windowing.posture?.mode || !windowing.posture?.label || !windowing.posture?.summary) {
+    throw new Error("Shell windowing contract is missing phase35 posture summary.");
+  }
+
+  if (!workspaceViewIds.has(windowing.posture.activeWorkspaceViewId)) {
+    throw new Error("Shell window posture points at an unknown workspace view.");
+  }
+
+  if (windowing.posture.focusedIntentId && !windowIntentIds.has(windowing.posture.focusedIntentId)) {
+    throw new Error("Shell window posture points at an unknown focused intent.");
+  }
+
+  if (windowing.posture.activeDetachedPanelId && !detachedPanelIds.has(windowing.posture.activeDetachedPanelId)) {
+    throw new Error("Shell window posture points at an unknown detached panel.");
+  }
+
+  if (!workflowLaneIds.has(windowing.workflow.activeLaneId)) {
+    throw new Error("Shell workflow points at an unknown active lane.");
+  }
+
+  for (const view of windowing.views) {
+    if (!rightRailTabIds.has(view.rightRailTabId) || !bottomDockTabIds.has(view.bottomDockTabId)) {
+      throw new Error(`Workspace view ${view.id} points at a missing layout tab.`);
+    }
+
+    if (!view.detachState || !view.shellRole || !Array.isArray(view.intentIds)) {
+      throw new Error(`Workspace view ${view.id} is missing phase35 detach state, shell role, or intent linkage.`);
+    }
+  }
+
+  for (const panel of windowing.detachedPanels) {
+    if (!rightRailTabIds.has(panel.sourceTabId) && !bottomDockTabIds.has(panel.sourceTabId)) {
+      throw new Error(`Detached panel placeholder ${panel.id} points at an unknown source tab.`);
+    }
+
+    if (!panel.workspaceViewId || !workspaceViewIds.has(panel.workspaceViewId)) {
+      throw new Error(`Detached panel placeholder ${panel.id} points at an unknown workspace view.`);
+    }
+
+    if (!panel.detachState || !panel.shellRole) {
+      throw new Error(`Detached panel placeholder ${panel.id} is missing phase35 detach metadata.`);
+    }
+  }
+
+  for (const lane of windowing.workflow.lanes) {
+    if (!workspaceViewIds.has(lane.workspaceViewId)) {
+      throw new Error(`Workflow lane ${lane.id} points at an unknown workspace view.`);
+    }
+
+    if (!detachedPanelIds.has(lane.detachedPanelId)) {
+      throw new Error(`Workflow lane ${lane.id} points at an unknown detached panel.`);
+    }
+
+    if (!windowIntentIds.has(lane.windowIntentId)) {
+      throw new Error(`Workflow lane ${lane.id} points at an unknown window intent.`);
+    }
+
+    if (!Array.isArray(lane.stepIds) || lane.stepIds.length < 3) {
+      throw new Error(`Workflow lane ${lane.id} is missing the expected step chain.`);
+    }
+
+    for (const stepId of lane.stepIds) {
+      if (!workflowStepIds.has(stepId)) {
+        throw new Error(`Workflow lane ${lane.id} points at missing step ${stepId}.`);
+      }
+    }
+  }
+
+  for (const step of windowing.workflow.steps) {
+    if (!step.kind || !step.posture) {
+      throw new Error(`Workflow step ${step.id} is missing phase35 step metadata.`);
+    }
+
+    if (step.workspaceViewId && !workspaceViewIds.has(step.workspaceViewId)) {
+      throw new Error(`Workflow step ${step.id} points at an unknown workspace view.`);
+    }
+
+    if (step.detachedPanelId && !detachedPanelIds.has(step.detachedPanelId)) {
+      throw new Error(`Workflow step ${step.id} points at an unknown detached panel.`);
+    }
+
+    if (step.windowIntentId && !windowIntentIds.has(step.windowIntentId)) {
+      throw new Error(`Workflow step ${step.id} points at an unknown window intent.`);
+    }
+  }
+
+  for (const intent of windowing.windowIntents) {
+    if (intent.safeMode !== "local-only") {
+      throw new Error(`Window intent ${intent.id} escaped the local-only safety boundary.`);
+    }
+
+    if (intent.workspaceViewId && !workspaceViewIds.has(intent.workspaceViewId)) {
+      throw new Error(`Window intent ${intent.id} points at an unknown workspace view.`);
+    }
+
+    if (intent.detachedPanelId && !detachedPanelIds.has(intent.detachedPanelId)) {
+      throw new Error(`Window intent ${intent.id} points at an unknown detached panel.`);
+    }
+
+    if (!intent.focus || !intent.preview?.title || !intent.preview?.summary || !Array.isArray(intent.preview?.lines) || intent.preview.lines.length === 0) {
+      throw new Error(`Window intent ${intent.id} is missing phase35 focus/preview metadata.`);
+    }
+
+    if (!intent.workflowStep?.label || !intent.workflowStep?.summary || !intent.readiness?.label || !Array.isArray(intent.readiness?.checks) || intent.readiness.checks.length === 0) {
+      throw new Error(`Window intent ${intent.id} is missing phase35 workflow/readiness metadata.`);
+    }
+
+    if (!intent.handoff?.label || !intent.handoff?.destination || intent.handoff?.safeMode !== "local-only") {
+      throw new Error(`Window intent ${intent.id} is missing phase35 handoff posture metadata.`);
+    }
+
+    if (!intent.shellLink?.pageId || !rightRailTabIds.has(intent.shellLink.rightRailTabId) || !bottomDockTabIds.has(intent.shellLink.bottomDockTabId)) {
+      throw new Error(`Window intent ${intent.id} is missing a valid shell linkage contract.`);
+    }
+
+    assertReviewPosture(`Window intent ${intent.id}`, intent.reviewPosture);
+  }
+
+  const boardIds = new Set(windowing.orchestration.boards.map((board) => board.id));
+  const checkpointIds = new Set(windowing.orchestration.checkpoints.map((checkpoint) => checkpoint.id));
+  const observabilityMappingIds = new Set(windowing.observability.mappings.map((mapping) => mapping.id));
+
+  if (!boardIds.has(windowing.orchestration.activeBoardId)) {
+    throw new Error("Shell orchestration points at an unknown active board.");
+  }
+
+  if (!rosterWindowIds.has(windowing.roster.activeWindowId)) {
+    throw new Error("Shell window roster points at an unknown active window.");
+  }
+
+  if (!sharedStateLaneIds.has(windowing.sharedState.activeLaneId)) {
+    throw new Error("Shell shared-state contract points at an unknown active lane.");
+  }
+
+  if (!observabilityMappingIds.has(windowing.observability.activeMappingId)) {
+    throw new Error("Shell observability contract points at an unknown active mapping.");
+  }
+
+  for (const board of windowing.orchestration.boards) {
+    if (!workflowLaneIds.has(board.laneId) || !workspaceViewIds.has(board.workspaceViewId) || !detachedPanelIds.has(board.detachedPanelId) || !windowIntentIds.has(board.windowIntentId)) {
+      throw new Error(`Window orchestration board ${board.id} points at unknown workflow/window entities.`);
+    }
+
+    if (!Array.isArray(board.checkpointIds) || board.checkpointIds.length === 0) {
+      throw new Error(`Window orchestration board ${board.id} is missing checkpoint linkage.`);
+    }
+
+    for (const checkpointId of board.checkpointIds) {
+      if (!checkpointIds.has(checkpointId)) {
+        throw new Error(`Window orchestration board ${board.id} points at unknown checkpoint ${checkpointId}.`);
+      }
+    }
+
+    assertReviewPosture(`Window orchestration board ${board.id}`, board.reviewPosture);
+  }
+
+  for (const entry of windowing.roster.windows) {
+    if (!workflowLaneIds.has(entry.workflowLaneId)) {
+      throw new Error(`Window roster entry ${entry.id} points at an unknown workflow lane.`);
+    }
+
+    if (!workspaceViewIds.has(entry.workspaceViewId)) {
+      throw new Error(`Window roster entry ${entry.id} points at an unknown workspace view.`);
+    }
+
+    if (!entry.routeId || !entry.role || !entry.ownership?.owner || !entry.sync?.health || !entry.lastHandoff?.label) {
+      throw new Error(`Window roster entry ${entry.id} is missing ownership, sync, or handoff metadata.`);
+    }
+
+    if (!Array.isArray(entry.routeLinks) || entry.routeLinks.length === 0) {
+      throw new Error(`Window roster entry ${entry.id} is missing route/workspace intent links.`);
+    }
+
+    if (!Array.isArray(entry.blockers) || entry.blockers.length === 0) {
+      throw new Error(`Window roster entry ${entry.id} is missing local-only blockers.`);
+    }
+
+    if (entry.windowIntentId && !windowIntentIds.has(entry.windowIntentId)) {
+      throw new Error(`Window roster entry ${entry.id} points at an unknown window intent.`);
+    }
+
+    if (entry.detachedPanelId && !detachedPanelIds.has(entry.detachedPanelId)) {
+      throw new Error(`Window roster entry ${entry.id} points at an unknown detached panel.`);
+    }
+
+    if (entry.focusedSlotId && focusSlotIds.size > 0 && !focusSlotIds.has(entry.focusedSlotId)) {
+      throw new Error(`Window roster entry ${entry.id} points at an unknown focused slot ${entry.focusedSlotId}.`);
+    }
+
+    assertReviewPosture(`Window roster entry ${entry.id}`, entry.reviewPosture);
+  }
+
+  for (const lane of windowing.sharedState.lanes) {
+    if (!workflowLaneIds.has(lane.workflowLaneId)) {
+      throw new Error(`Shared-state lane ${lane.id} points at an unknown workflow lane.`);
+    }
+
+    if (!rosterWindowIds.has(lane.windowId)) {
+      throw new Error(`Shared-state lane ${lane.id} points at an unknown roster window.`);
+    }
+
+    if (!workspaceViewIds.has(lane.workspaceViewId)) {
+      throw new Error(`Shared-state lane ${lane.id} points at an unknown workspace view.`);
+    }
+
+    if (!windowIntentIds.has(lane.windowIntentId)) {
+      throw new Error(`Shared-state lane ${lane.id} points at an unknown window intent.`);
+    }
+
+    if (lane.detachedPanelId && !detachedPanelIds.has(lane.detachedPanelId)) {
+      throw new Error(`Shared-state lane ${lane.id} points at an unknown detached panel.`);
+    }
+
+    if (focusSlotIds.size > 0 && !focusSlotIds.has(lane.focusedSlotId)) {
+      throw new Error(`Shared-state lane ${lane.id} points at an unknown focused slot ${lane.focusedSlotId}.`);
+    }
+
+    if (!lane.status || !lane.ownership?.owner || !lane.sync?.health || !lane.lastHandoff?.label) {
+      throw new Error(`Shared-state lane ${lane.id} is missing status, ownership, sync, or handoff metadata.`);
+    }
+
+    if (!Array.isArray(lane.routeLinks) || lane.routeLinks.length === 0) {
+      throw new Error(`Shared-state lane ${lane.id} is missing route/workspace intent links.`);
+    }
+
+    if (!Array.isArray(lane.stateFields) || lane.stateFields.length === 0) {
+      throw new Error(`Shared-state lane ${lane.id} is missing explicit shared-state fields.`);
+    }
+
+    if (!Array.isArray(lane.blockers) || lane.blockers.length === 0) {
+      throw new Error(`Shared-state lane ${lane.id} is missing local-only blockers.`);
+    }
+
+    assertReviewPosture(`Shared-state lane ${lane.id}`, lane.reviewPosture);
+  }
+
+  for (const mapping of windowing.observability.mappings) {
+    if (!rosterWindowIds.has(mapping.windowId)) {
+      throw new Error(`Observability mapping ${mapping.id} points at unknown window ${mapping.windowId}.`);
+    }
+
+    if (!sharedStateLaneIds.has(mapping.sharedStateLaneId)) {
+      throw new Error(`Observability mapping ${mapping.id} points at unknown shared-state lane ${mapping.sharedStateLaneId}.`);
+    }
+
+    if (!boardIds.has(mapping.orchestrationBoardId)) {
+      throw new Error(`Observability mapping ${mapping.id} points at unknown orchestration board ${mapping.orchestrationBoardId}.`);
+    }
+
+    if (mapping.windowIntentId && !windowIntentIds.has(mapping.windowIntentId)) {
+      throw new Error(`Observability mapping ${mapping.id} points at unknown window intent ${mapping.windowIntentId}.`);
+    }
+
+    if (mapping.detachedPanelId && !detachedPanelIds.has(mapping.detachedPanelId)) {
+      throw new Error(`Observability mapping ${mapping.id} points at unknown detached panel ${mapping.detachedPanelId}.`);
+    }
+
+    if (focusSlotIds.size > 0 && !focusSlotIds.has(mapping.focusedSlotId)) {
+      throw new Error(`Observability mapping ${mapping.id} points at unknown focused slot ${mapping.focusedSlotId}.`);
+    }
+
+    assertReviewPosture(`Observability mapping ${mapping.id}`, mapping.reviewPosture);
+  }
+}
+
+function assertHostBridgeContract(hostBridge, label) {
+  if (!hostBridge) {
+    throw new Error(`${label} is missing host bridge state.`);
+  }
+
+  if (hostBridge.mode !== "disabled" || hostBridge.defaultEnabled !== false || hostBridge.previewHandoff !== "placeholder") {
+    throw new Error(`${label} does not reflect the expected disabled placeholder bridge posture.`);
+  }
+
+  if (!Array.isArray(hostBridge.validators) || hostBridge.validators.length === 0) {
+    throw new Error(`${label} is missing registered validators.`);
+  }
+
+  if (!Array.isArray(hostBridge.slotHandlers) || hostBridge.slotHandlers.length === 0) {
+    throw new Error(`${label} is missing registered slot handlers.`);
+  }
+
+  if (!hostBridge.trace?.focusSlotId || !Array.isArray(hostBridge.trace.slotRoster) || hostBridge.trace.slotRoster.length === 0) {
+    throw new Error(`${label} is missing phase25 trace focus state.`);
+  }
+
+  if (!hostBridge.trace.slotRoster.some((entry) => entry.slotId === hostBridge.trace.focusSlotId)) {
+    throw new Error(`${label} trace focus points at a missing slot ${hostBridge.trace.focusSlotId}.`);
+  }
+
+  for (const validator of hostBridge.validators) {
+    if (!validator.slotId) {
+      throw new Error(`${label} validator ${validator.id} is missing an explicit slotId.`);
+    }
+
+    if (!hostBridge.slotHandlers.some((handler) => handler.slotId === validator.slotId)) {
+      throw new Error(`${label} validator ${validator.id} points at missing slot ${validator.slotId}.`);
+    }
+  }
+
+  const simulatedOutcomeStatuses = new Set();
+
+  for (const handler of hostBridge.slotHandlers) {
+    if (!Array.isArray(handler.simulatedOutcomes) || handler.simulatedOutcomes.length === 0) {
+      throw new Error(`${label} handler ${handler.id} is missing simulated outcomes.`);
+    }
+
+    if (!hostBridge.validators.some((validator) => validator.slotId === handler.slotId)) {
+      throw new Error(`${label} handler ${handler.id} is missing a slot-linked validator.`);
+    }
+
+    for (const outcome of handler.simulatedOutcomes) {
+      simulatedOutcomeStatuses.add(outcome.status);
+    }
+  }
+
+  for (const slot of hostBridge.trace.slotRoster) {
+    if (!hostBridge.slotHandlers.some((handler) => handler.slotId === slot.slotId)) {
+      throw new Error(`${label} trace slot ${slot.slotId} is missing a linked handler.`);
+    }
+
+    if (!slot.outcomeChain.length) {
+      throw new Error(`${label} trace slot ${slot.slotId} is missing an outcome chain.`);
+    }
+
+    if (!Array.isArray(slot.phases) || slot.phases.length < 4) {
+      throw new Error(`${label} trace slot ${slot.slotId} is missing structured phase drill-down.`);
+    }
+
+    if (!slot.phases.every((phase) => phase.stage && Array.isArray(phase.notes))) {
+      throw new Error(`${label} trace slot ${slot.slotId} is missing structured phase stage/note metadata.`);
+    }
+  }
+
+  for (const requiredStatus of ["blocked", "abort", "partial-apply", "rollback-required", "rollback-incomplete"]) {
+    if (!simulatedOutcomeStatuses.has(requiredStatus)) {
+      throw new Error(`${label} simulated outcome coverage is missing ${requiredStatus}.`);
+    }
+  }
+}
+
+function assertHostExecutorContract(hostExecutor, label) {
+  if (!hostExecutor) {
+    throw new Error(`${label} is missing host executor state.`);
+  }
+
+  const requiredCollections = [
+    ["intents", hostExecutor.intents],
+    ["lifecycle", hostExecutor.lifecycle],
+    ["releaseApprovalPipeline.stages", hostExecutor.releaseApprovalPipeline?.stages],
+    ["releaseApprovalPipeline.reviewerQueues", hostExecutor.releaseApprovalPipeline?.reviewerQueues],
+    ["releaseApprovalPipeline.escalationWindows", hostExecutor.releaseApprovalPipeline?.escalationWindows],
+    ["releaseApprovalPipeline.closeoutWindows", hostExecutor.releaseApprovalPipeline?.closeoutWindows],
+    ["releaseApprovalPipeline.deliveryChain.stages", hostExecutor.releaseApprovalPipeline?.deliveryChain?.stages],
+    ["failureTaxonomy", hostExecutor.failureTaxonomy],
+    ["mutationSlots", hostExecutor.mutationSlots],
+    ["rollback.stages", hostExecutor.rollback?.stages],
+    ["approval.request.fields", hostExecutor.approval?.request?.fields],
+    ["approval.result.fields", hostExecutor.approval?.result?.fields],
+    ["audit.event.fields", hostExecutor.audit?.event?.fields],
+    ["rollback.context.fields", hostExecutor.rollback?.context?.fields]
+  ];
+
+  for (const [field, value] of requiredCollections) {
+    if (!Array.isArray(value) || value.length === 0) {
+      throw new Error(`${label} host executor contract is missing required collection ${field}.`);
+    }
+  }
+
+  if (hostExecutor.releaseApprovalPipeline?.mode !== "review-only" || !hostExecutor.releaseApprovalPipeline?.currentStageId) {
+    throw new Error(`${label} host executor contract is missing the phase60 review-only operator review loop posture.`);
+  }
+
+  if (!hostExecutor.releaseApprovalPipeline.stages.some((stage) => stage.id === hostExecutor.releaseApprovalPipeline.currentStageId)) {
+    throw new Error(`${label} host executor contract points at a missing phase60 operator review stage.`);
+  }
+
+  if (!Array.isArray(hostExecutor.releaseApprovalPipeline.blockedBy) || hostExecutor.releaseApprovalPipeline.blockedBy.length === 0) {
+    throw new Error(`${label} host executor contract is missing release-approval pipeline blockers.`);
+  }
+
+  if (
+    !hostExecutor.releaseApprovalPipeline.deliveryChain?.currentStageId ||
+    hostExecutor.releaseApprovalPipeline.deliveryChain.title !== "Delivery-chain Workspace" ||
+    typeof hostExecutor.releaseApprovalPipeline.deliveryChain.summary !== "string" ||
+    !hostExecutor.releaseApprovalPipeline.deliveryChain.summary.toLowerCase().includes("stage explorer") ||
+    !hostExecutor.releaseApprovalPipeline.deliveryChain.stages.some(
+      (stage) => stage.id === hostExecutor.releaseApprovalPipeline.deliveryChain.currentStageId
+    )
+  ) {
+    throw new Error(`${label} host executor contract is missing the phase60 delivery-chain workspace posture.`);
+  }
+
+  if (
+    !Array.isArray(hostExecutor.releaseApprovalPipeline.deliveryChain.packagedAppMaterializationContract?.platforms) ||
+    hostExecutor.releaseApprovalPipeline.deliveryChain.packagedAppMaterializationContract.platforms.length < 3 ||
+    !hostExecutor.releaseApprovalPipeline.deliveryChain.packagedAppMaterializationContract.platforms.every(
+      (platform) =>
+        typeof platform.reviewPacket?.currentStepId === "string" &&
+        Array.isArray(platform.reviewPacket?.steps) &&
+        platform.reviewPacket.steps.length >= 3 &&
+        typeof platform.validatorObservabilityBridge?.activeReadoutId === "string" &&
+        Array.isArray(platform.validatorObservabilityBridge?.readouts) &&
+        platform.validatorObservabilityBridge.readouts.length === 3 &&
+        typeof platform.failurePath?.activeReadoutId === "string" &&
+        Array.isArray(platform.failurePath?.readouts) &&
+        platform.failurePath.readouts.length === 3 &&
+        platform.failurePath.readouts.some((readout) => readout.id === platform.failurePath.activeReadoutId) &&
+        (!platform.failurePath.nextReadoutId ||
+          platform.failurePath.readouts.some((readout) => readout.id === platform.failurePath.nextReadoutId)) &&
+        platform.failurePath.readouts.every(
+          (readout) =>
+            typeof readout.reviewPacketStepId === "string" &&
+            typeof readout.validatorReadoutId === "string" &&
+            typeof readout.rollbackContractId === "string" &&
+            typeof readout.rollbackCheckpointId === "string" &&
+            typeof readout.commandDeckLaneId === "string" &&
+            Array.isArray(readout.commandActionIds) &&
+            readout.commandActionIds.length > 0 &&
+            Array.isArray(readout.observabilitySignalIds) &&
+            readout.observabilitySignalIds.length > 0 &&
+            Array.isArray(readout.reviewChecks) &&
+            readout.reviewChecks.length > 0
+        )
+    )
+  ) {
+    throw new Error(`${label} host executor contract is missing phase60 materialization failure-path metadata.`);
+  }
+
+  if (
+    !hostExecutor.releaseApprovalPipeline.reviewBoard?.title ||
+    !hostExecutor.releaseApprovalPipeline.reviewBoard?.activeDeliveryChainStageId ||
+    !hostExecutor.releaseApprovalPipeline.reviewBoard?.activeReviewerQueueId ||
+    !hostExecutor.releaseApprovalPipeline.reviewBoard?.activeEscalationWindowId ||
+    !hostExecutor.releaseApprovalPipeline.reviewBoard?.activeCloseoutWindowId ||
+    !Array.isArray(hostExecutor.releaseApprovalPipeline.reviewBoard?.reviewerNotes) ||
+    hostExecutor.releaseApprovalPipeline.reviewBoard.reviewerNotes.length === 0
+  ) {
+    throw new Error(`${label} host executor contract is missing the phase60 operator review board metadata.`);
+  }
+
+  if (
+    !hostExecutor.releaseApprovalPipeline.decisionHandoff?.label ||
+    !hostExecutor.releaseApprovalPipeline.decisionHandoff?.acknowledgementState ||
+    !hostExecutor.releaseApprovalPipeline.decisionHandoff?.reviewerQueueId ||
+    !hostExecutor.releaseApprovalPipeline.decisionHandoff?.escalationWindowId ||
+    !hostExecutor.releaseApprovalPipeline.decisionHandoff?.closeoutWindowId ||
+    !Array.isArray(hostExecutor.releaseApprovalPipeline.decisionHandoff?.pending) ||
+    !Array.isArray(hostExecutor.releaseApprovalPipeline.decisionHandoff?.reviewerNotes)
+  ) {
+    throw new Error(`${label} host executor contract is missing the phase60 decision handoff metadata.`);
+  }
+
+  if (
+    !hostExecutor.releaseApprovalPipeline.evidenceCloseout?.label ||
+    !hostExecutor.releaseApprovalPipeline.evidenceCloseout?.acknowledgementState ||
+    !hostExecutor.releaseApprovalPipeline.evidenceCloseout?.reviewerQueueId ||
+    !hostExecutor.releaseApprovalPipeline.evidenceCloseout?.closeoutWindowId ||
+    !Array.isArray(hostExecutor.releaseApprovalPipeline.evidenceCloseout?.sealedEvidence) ||
+    !Array.isArray(hostExecutor.releaseApprovalPipeline.evidenceCloseout?.pendingEvidence) ||
+    !Array.isArray(hostExecutor.releaseApprovalPipeline.evidenceCloseout?.reviewerNotes)
+  ) {
+    throw new Error(`${label} host executor contract is missing the phase60 evidence closeout metadata.`);
+  }
+
+  if (
+    !hostExecutor.releaseApprovalPipeline.stages.every(
+      (stage) =>
+        stage.deliveryChainStageId &&
+        stage.deliveryPhase &&
+        Array.isArray(stage.evidence) &&
+        stage.evidence.length > 0 &&
+        stage.reviewerQueueId &&
+        stage.escalationWindowId &&
+        stage.closeoutWindowId &&
+        Array.isArray(stage.notes) &&
+        stage.notes.length > 0 &&
+        stage.packet?.label &&
+        Array.isArray(stage.packet?.evidence) &&
+        stage.packet.evidence.length > 0 &&
+        stage.handoff?.label &&
+        Array.isArray(stage.handoff?.pending) &&
+        stage.closeout?.label &&
+        Array.isArray(stage.closeout?.pendingEvidence)
+    )
+  ) {
+    throw new Error(`${label} host executor contract is missing structured phase60 review packet, queue, escalation, closeout, evidence, or note metadata.`);
+  }
+
+  const currentStage = hostExecutor.releaseApprovalPipeline.stages.find(
+    (stage) => stage.id === hostExecutor.releaseApprovalPipeline.currentStageId
+  );
+
+  if (
+    !currentStage ||
+    hostExecutor.releaseApprovalPipeline.reviewBoard.activeDeliveryChainStageId !== currentStage.deliveryChainStageId ||
+    hostExecutor.releaseApprovalPipeline.decisionHandoff.id !== currentStage.handoff.id ||
+    hostExecutor.releaseApprovalPipeline.evidenceCloseout.id !== currentStage.closeout.id
+  ) {
+    throw new Error(`${label} host executor contract lost alignment between the active stage, decision handoff, and evidence closeout.`);
+  }
+
+  if (
+    !hostExecutor.releaseApprovalPipeline.deliveryChain.stages.every(
+      (stage) =>
+        stage.phase &&
+        stage.pipelineStageId &&
+        stage.reviewerQueueId &&
+        stage.decisionHandoffId &&
+        stage.evidenceCloseoutId &&
+        Array.isArray(stage.artifactGroups) &&
+        stage.artifactGroups.length > 0 &&
+        stage.artifactGroups.every((group) => group.label && Array.isArray(group.artifacts) && group.artifacts.length > 0) &&
+        Array.isArray(stage.blockedBy)
+    )
+  ) {
+    throw new Error(`${label} host executor contract is missing structured review-only delivery-chain stage metadata.`);
+  }
+
+  if (
+    !hostExecutor.releaseApprovalPipeline.reviewerQueues.some(
+      (queue) =>
+        queue.id === currentStage?.reviewerQueueId &&
+        queue.acknowledgementState &&
+        Array.isArray(queue.entries) &&
+        queue.entries.length > 0 &&
+        queue.entries.every((entry) => entry.windowId && entry.sharedStateLaneId && Array.isArray(entry.pending))
+    )
+  ) {
+    throw new Error(`${label} host executor contract is missing the phase60 reviewer queue contract.`);
+  }
+
+  if (
+    !hostExecutor.releaseApprovalPipeline.escalationWindows.some(
+      (window) =>
+        window.id === currentStage?.escalationWindowId &&
+        window.acknowledgementState &&
+        window.deadlineLabel &&
+        window.trigger &&
+        Array.isArray(window.pending)
+    )
+  ) {
+    throw new Error(`${label} host executor contract is missing the phase60 escalation window contract.`);
+  }
+
+  if (
+    !hostExecutor.releaseApprovalPipeline.closeoutWindows.some(
+      (window) =>
+        window.id === currentStage?.closeoutWindowId &&
+        window.acknowledgementState &&
+        window.deadlineLabel &&
+        Array.isArray(window.pendingEvidence) &&
+        Array.isArray(window.reviewerNotes)
+    )
+  ) {
+    throw new Error(`${label} host executor contract is missing the phase60 closeout window contract.`);
+  }
+
+  assertHostBridgeContract(hostExecutor.bridge, `${label} bridge`);
+}
+
+function assertHostPreviewHandoff(handoff, label) {
+  if (!handoff) {
+    throw new Error(`${label} is missing host preview handoff state.`);
+  }
+
+  const requiredObjects = [
+    ["mapping", handoff.mapping],
+    ["validation", handoff.validation],
+    ["approval", handoff.approval],
+    ["approvalPacket", handoff.approvalPacket],
+    ["audit", handoff.audit],
+    ["rollback", handoff.rollback],
+    ["executorPacket", handoff.executorPacket],
+    ["slotResult", handoff.slotResult]
+  ];
+
+  for (const [field, value] of requiredObjects) {
+    if (!value) {
+      throw new Error(`${label} is missing ${field}.`);
+    }
+  }
+
+  if (handoff.mapping.status !== "mapped") {
+    throw new Error(`${label} did not stay on mapped preview-to-slot status.`);
+  }
+
+  if (handoff.simulated !== true) {
+    throw new Error(`${label} did not stay on simulated placeholder mode.`);
+  }
+
+  if (!Array.isArray(handoff.validation.checkedFieldIds) || handoff.validation.checkedFieldIds.length === 0) {
+    throw new Error(`${label} did not expose validator field coverage.`);
+  }
+
+  if (!handoff.slotResult.auditCorrelationId || !handoff.slotResult.failureCode || !handoff.slotResult.rollbackDisposition) {
+    throw new Error(`${label} is missing audit/failure/rollback linkage on the slot result.`);
+  }
+
+  if (!Array.isArray(handoff.simulatedOutcomes) || handoff.simulatedOutcomes.length === 0) {
+    throw new Error(`${label} is missing simulated outcomes.`);
+  }
+
+  if (handoff.slotResult.status !== handoff.simulatedOutcomes[0].status) {
+    throw new Error(`${label} slot result does not match the primary simulated outcome.`);
+  }
+
+  const terminalOutcome = handoff.simulatedOutcomes[handoff.simulatedOutcomes.length - 1];
+
+  if (handoff.slotResult.rollbackDisposition !== terminalOutcome.rollbackDisposition) {
+    throw new Error(`${label} slot result rollback disposition does not match the terminal simulated outcome.`);
+  }
+
+  if (!Array.isArray(handoff.trace) || handoff.trace.length < 4) {
+    throw new Error(`${label} is missing the phase25 handoff trace.`);
+  }
+
+  const phases = new Set(handoff.trace.map((step) => step.phase));
+
+  for (const phase of ["preview", "slot", "result", "rollback"]) {
+    if (!phases.has(phase)) {
+      throw new Error(`${label} is missing handoff trace phase ${phase}.`);
+    }
+  }
+
+  if (!handoff.trace.every((step) => step.stage && Array.isArray(step.notes))) {
+    throw new Error(`${label} is missing phase55 trace stage/note drill-down metadata.`);
+  }
+}
+
+function assertInspectorContract(inspector) {
+  if (!inspector?.boundary) {
+    throw new Error("Shell inspector is missing boundary state.");
+  }
+
+  if (!inspector.route?.routeId || !inspector.flow?.sequenceId || !inspector.linkage?.workflowLaneId) {
+    throw new Error("Shell inspector is missing phase35 route/flow/linkage metadata.");
+  }
+
+  if (!Array.isArray(inspector.drilldowns) || inspector.drilldowns.length === 0) {
+    throw new Error("Shell inspector is missing phase35 drilldowns.");
+  }
+
+  const sectionIds = new Set((inspector.sections ?? []).map((section) => section.id));
+  const requiredSectionIds = [
+    "layer",
+    "host",
+    "next",
+    "slot-focus",
+    "handler",
+    "validator",
+    "approval-pipeline",
+    "reviewer-queue",
+    "ack-state",
+    "decision-handoff",
+    "escalation-window",
+    "evidence-closeout",
+    "closeout-window",
+    "window-focus",
+    "shared-state",
+    "orchestration-board",
+    "review-posture",
+    "rollback",
+    "audit",
+    "blocked",
+    "slots"
+  ];
+
+  for (const sectionId of requiredSectionIds) {
+    if (!sectionIds.has(sectionId)) {
+      throw new Error(`Shell inspector is missing required section ${sectionId}.`);
+    }
+  }
+
+  for (const drilldown of inspector.drilldowns) {
+    if (!Array.isArray(drilldown.lines) || drilldown.lines.length === 0) {
+      throw new Error(`Shell inspector drilldown ${drilldown.id} is missing lines.`);
+    }
+  }
+
+  if (!inspector.drilldowns.some((drilldown) => drilldown.id === "drilldown-release-approval-pipeline")) {
+    throw new Error("Shell inspector is missing the phase60 operator review drilldown.");
+  }
+
+  if (!inspector.drilldowns.some((drilldown) => drilldown.id === "drilldown-cross-window-observability")) {
+    throw new Error("Shell inspector is missing the phase60 cross-window observability drilldown.");
+  }
+
+  if (
+    !inspector.linkage?.windowId ||
+    !inspector.linkage?.sharedStateLaneId ||
+    !inspector.linkage?.orchestrationBoardId ||
+    !inspector.linkage?.reviewStageId ||
+    !inspector.linkage?.reviewerQueueId ||
+    !inspector.linkage?.observabilityMappingId
+  ) {
+    throw new Error("Shell inspector is missing the phase60 cross-window linkage metadata.");
+  }
+
+  if (!inspector.drilldowns.some((drilldown) => drilldown.lines.some((line) => Array.isArray(line.links) && line.links.length > 0))) {
+    throw new Error("Shell inspector drilldowns are missing cross-linkable notes.");
+  }
+}
+
+function assertDockContract(dock, inspector, hostBridge) {
+  if (!Array.isArray(dock) || dock.length === 0) {
+    throw new Error("Shell dock is missing focus-linked cards.");
+  }
+
+  const focusSlotId = hostBridge.trace.focusSlotId;
+  const focusSlot = hostBridge.trace.slotRoster.find((entry) => entry.slotId === focusSlotId);
+
+  if (!focusSlot) {
+    throw new Error(`Shell dock could not resolve the host bridge focus slot ${focusSlotId}.`);
+  }
+
+  const sectionById = new Map((inspector.sections ?? []).map((section) => [section.id, section]));
+  const dockById = new Map(dock.map((item) => [item.id, item]));
+  const requiredDockIds = [
+    "dock-focus-slot",
+    "dock-focus-handler",
+    "dock-focus-validator",
+    "dock-focus-result",
+    "dock-focus-rollback"
+  ];
+
+  for (const dockId of requiredDockIds) {
+    if (!dockById.has(dockId)) {
+      throw new Error(`Shell dock is missing required focus-linked card ${dockId}.`);
+    }
+  }
+
+  if (sectionById.get("slot-focus")?.value !== focusSlot.label) {
+    throw new Error("Inspector slot focus is not synchronized with the host bridge trace focus.");
+  }
+
+  if (dockById.get("dock-focus-slot")?.value !== focusSlot.label || dockById.get("dock-focus-slot")?.slotId !== focusSlotId) {
+    throw new Error("Dock focus slot card is not synchronized with the host bridge trace focus.");
+  }
+
+  if (!dockById.get("dock-focus-handler")?.value?.includes(focusSlot.handlerState)) {
+    throw new Error("Dock handler card is not synchronized with the focused slot handler state.");
+  }
+
+  if (!dockById.get("dock-focus-validator")?.value?.includes(focusSlot.validatorState)) {
+    throw new Error("Dock validator card is not synchronized with the focused slot validator state.");
+  }
+
+  if (!dockById.get("dock-focus-result")?.value?.includes(focusSlot.primaryStatus)) {
+    throw new Error("Dock result card is not synchronized with the focused slot result status.");
+  }
+
+  if (!dockById.get("dock-focus-rollback")?.value?.includes(focusSlot.rollbackDisposition)) {
+    throw new Error("Dock rollback card is not synchronized with the focused slot rollback posture.");
+  }
+}
+
+function assertBoundaryContract(boundary, label) {
+  if (!boundary) {
+    throw new Error(`${label} is missing a boundary summary.`);
+  }
+
+  if (!boundary.currentLayer || !boundary.nextLayer || !boundary.policy) {
+    throw new Error(`${label} boundary summary is missing core layer or policy fields.`);
+  }
+
+  const requiredCollections = [
+    ["progression", boundary.progression],
+    ["capabilities", boundary.capabilities],
+    ["blockedReasons", boundary.blockedReasons],
+    ["requiredPreconditions", boundary.requiredPreconditions],
+    ["withheldExecutionPlan", boundary.withheldExecutionPlan],
+    ["futureExecutorSlots", boundary.futureExecutorSlots]
+  ];
+
+  for (const [field, value] of requiredCollections) {
+    if (!Array.isArray(value) || value.length === 0) {
+      throw new Error(`${label} boundary summary is missing required collection ${field}.`);
+    }
+  }
+
+  assertHostExecutorContract(boundary.hostExecutor, label);
+}
+
+function assertRuntimeActionContract(action, label) {
+  if (!action?.id || !action?.label || !action?.description || !action?.kind || !action?.safety || typeof action.refreshDetailOnSuccess !== "boolean") {
+    throw new Error(`${label} is missing the normalized runtime action contract.`);
+  }
+
+  if (!["probe", "validate", "dry-run", "execute-local", "preview-host"].includes(action.kind)) {
+    throw new Error(`${label} exposed an unknown runtime action kind ${action.kind}.`);
+  }
+
+  if (!["read-only", "dry-run", "local-only", "preview-host"].includes(action.safety)) {
+    throw new Error(`${label} exposed an unknown runtime action safety ${action.safety}.`);
+  }
+}
+
+function assertRuntimeActionCatalog(detail, label) {
+  for (const action of detail.actions ?? []) {
+    assertRuntimeActionContract(action, `${label} action ${action.id}`);
+  }
+}
+
+function assertRuntimeActionResultContract(result, itemId, actionId, expectedSafety) {
+  if (!result?.action || !result?.execution) {
+    throw new Error(`Runtime action ${itemId}:${actionId} is missing normalized action execution metadata.`);
+  }
+
+  assertRuntimeActionContract(result.action, `runtime action result ${itemId}:${actionId}`);
+
+  if (result.action.id !== actionId) {
+    throw new Error(`Runtime action ${itemId}:${actionId} returned mismatched action metadata (${result.action.id}).`);
+  }
+
+  if (result.execution.safety !== result.action.safety || result.execution.safety !== expectedSafety) {
+    throw new Error(`Runtime action ${itemId}:${actionId} returned mismatched safety metadata.`);
+  }
+
+  if (result.execution.detailRefresh === "required" && result.action.refreshDetailOnSuccess !== true) {
+    throw new Error(`Runtime action ${itemId}:${actionId} drifted on detail-refresh policy.`);
+  }
+
+  if (result.execution.detailRefresh === "not-needed" && result.action.refreshDetailOnSuccess !== false) {
+    throw new Error(`Runtime action ${itemId}:${actionId} drifted on detail-refresh policy.`);
+  }
+
+  if (expectedSafety === "preview-host" && result.execution.status !== "blocked") {
+    throw new Error(`Runtime action ${itemId}:${actionId} should stay blocked on the preview-host boundary.`);
+  }
+
+  if (expectedSafety !== "preview-host" && result.execution.status !== "completed") {
+    throw new Error(`Runtime action ${itemId}:${actionId} should complete inside the ${expectedSafety} contract.`);
+  }
+}
+
+function assertHostBoundaryResult(result, itemId, actionId) {
+  if (!result) {
+    throw new Error(`Host boundary action ${itemId}:${actionId} returned no result.`);
+  }
+
+  assertRuntimeActionResultContract(result, itemId, actionId, "preview-host");
+
+  assertBoundaryContract(result.boundary, `host boundary action ${itemId}:${actionId}`);
+
+  const sectionIds = new Set((result.sections ?? []).map((section) => section.id));
+  const requiredSectionIds = [
+    "host-boundary-action",
+    "host-boundary-readiness",
+    "host-boundary-blockers",
+    "host-boundary-permission",
+    "host-boundary-capabilities",
+    "host-boundary-preconditions",
+    "host-boundary-plan",
+    "host-boundary-executor-slots",
+    "host-boundary-enablement",
+    "host-boundary-approval-contract",
+    "host-boundary-handoff-contract",
+    "host-bridge-preview-map",
+    "host-bridge-focus",
+    "host-bridge-slot-state",
+    "host-bridge-validation",
+    "host-bridge-approval",
+    "host-bridge-approval-packet",
+    "host-bridge-audit",
+    "host-bridge-rollback",
+    "host-bridge-executor-packet",
+    "host-bridge-recovery-drilldown",
+    "host-bridge-dispositions",
+    "host-bridge-result",
+    "host-bridge-simulated-outcomes",
+    "host-bridge-slot-roster",
+    "host-bridge-trace"
+  ];
+
+  for (const sectionId of requiredSectionIds) {
+    if (!sectionIds.has(sectionId)) {
+      throw new Error(`Host boundary action ${itemId}:${actionId} is missing required section ${sectionId}.`);
+    }
+  }
+
+  if (!result.hostPreview || !result.hostHandoff) {
+    throw new Error(`Host boundary action ${itemId}:${actionId} did not expose preview/handoff linkage.`);
+  }
+
+  assertHostPreviewHandoff(result.hostHandoff, `host boundary action ${itemId}:${actionId}`);
+
+  if (result.hostPreview.slotId !== result.hostHandoff.mapping.slotId) {
+    throw new Error(`Host boundary action ${itemId}:${actionId} returned mismatched preview and handoff slot ids.`);
+  }
+
+  const traceSection = result.sections.find((section) => section.id === "host-bridge-trace");
+  const focusSection = result.sections.find((section) => section.id === "host-bridge-focus");
+  const slotStateSection = result.sections.find((section) => section.id === "host-bridge-slot-state");
+  const dispositionSection = result.sections.find((section) => section.id === "host-bridge-dispositions");
+  const approvalContractSection = result.sections.find((section) => section.id === "host-boundary-approval-contract");
+  const handoffContractSection = result.sections.find((section) => section.id === "host-boundary-handoff-contract");
+  const approvalPacketSection = result.sections.find((section) => section.id === "host-bridge-approval-packet");
+  const executorPacketSection = result.sections.find((section) => section.id === "host-bridge-executor-packet");
+  const recoveryDrilldownSection = result.sections.find((section) => section.id === "host-bridge-recovery-drilldown");
+  const slotRosterSection = result.sections.find((section) => section.id === "host-bridge-slot-roster");
+  const requiredTracePrefixes = ["preview · ", "slot · ", "result · ", "rollback · "];
+
+  for (const prefix of requiredTracePrefixes) {
+    if (!traceSection?.lines.some((line) => line.startsWith(prefix))) {
+      throw new Error(`Host boundary action ${itemId}:${actionId} is missing trace line ${prefix.trim()}.`);
+    }
+  }
+
+  for (const prefix of ["focus slot · ", "focus source · ", "focus result · ", "focus rollback · ", "focus audit · "]) {
+    if (!focusSection?.lines.some((line) => line.startsWith(prefix))) {
+      throw new Error(`Host boundary action ${itemId}:${actionId} is missing focus line ${prefix.trim()}.`);
+    }
+  }
+
+  for (const prefix of ["current slot · ", "handler · ", "validator · ", "current stage · "]) {
+    if (!slotStateSection?.lines.some((line) => line.startsWith(prefix))) {
+      throw new Error(`Host boundary action ${itemId}:${actionId} is missing slot-state line ${prefix.trim()}.`);
+    }
+  }
+
+  for (const prefix of ["audit correlation · ", "failure disposition · ", "rollback disposition · "]) {
+    if (!dispositionSection?.lines.some((line) => line.startsWith(prefix))) {
+      throw new Error(`Host boundary action ${itemId}:${actionId} is missing disposition line ${prefix.trim()}.`);
+    }
+  }
+
+  if (!slotRosterSection?.lines.some((line) => line.includes("outcomes "))) {
+    throw new Error(`Host boundary action ${itemId}:${actionId} is missing slot roster outcome visibility.`);
+  }
+
+  for (const prefix of ["approval mode · ", "request shape · ", "result shape · ", "current decision · "]) {
+    if (!approvalContractSection?.lines.some((line) => line.startsWith(prefix))) {
+      throw new Error(`Host boundary action ${itemId}:${actionId} is missing approval contract line ${prefix.trim()}.`);
+    }
+  }
+
+  for (const prefix of ["contract version · ", "slot mapping · ", "handoff readiness · ", "audit/rollback linkage · "]) {
+    if (!handoffContractSection?.lines.some((line) => line.startsWith(prefix))) {
+      throw new Error(`Host boundary action ${itemId}:${actionId} is missing handoff contract line ${prefix.trim()}.`);
+    }
+  }
+
+  for (const prefix of ["packet id · ", "slot scope · ", "route artifacts · "]) {
+    if (!approvalPacketSection?.lines.some((line) => line.startsWith(prefix))) {
+      throw new Error(`Host boundary action ${itemId}:${actionId} is missing approval packet line ${prefix.trim()}.`);
+    }
+    if (!executorPacketSection?.lines.some((line) => line.startsWith(prefix))) {
+      throw new Error(`Host boundary action ${itemId}:${actionId} is missing executor packet line ${prefix.trim()}.`);
+    }
+  }
+
+  for (const prefix of [
+    "pre-coupling gate · ",
+    "apply coupling · ",
+    "primary outcome · ",
+    "rollback path · ",
+    "recovery readiness · ",
+    "route handoff · "
+  ]) {
+    if (!recoveryDrilldownSection?.lines.some((line) => line.startsWith(prefix))) {
+      throw new Error(`Host boundary action ${itemId}:${actionId} is missing recovery drilldown line ${prefix.trim()}.`);
+    }
+  }
+
+  if (!slotRosterSection?.lines.some((line) => line.startsWith("focus active · yes"))) {
+    throw new Error(`Host boundary action ${itemId}:${actionId} is missing the active focused slot roster line.`);
+  }
+}
+
+async function verifyHostBoundaryActions() {
+  await ensureFile(electronRuntimePath);
+
+  const { createStudioRuntime } = require(electronRuntimePath);
+  const runtime = createStudioRuntime();
+  const [rootDetail, connectorDetail] = await Promise.all([
+    runtime.getRuntimeItemDetail("mcp-root-scan"),
+    runtime.getRuntimeItemDetail("mcp-adjacent-runtime")
+  ]);
+
+  if (!rootDetail || !connectorDetail) {
+    return {
+      status: "skipped",
+      detail: "live tools/MCP detail unavailable"
+    };
+  }
+
+  assertRuntimeActionCatalog(rootDetail, "root detail");
+  assertRuntimeActionCatalog(connectorDetail, "connector detail");
+  assertBoundaryContract(rootDetail.boundary, "root detail");
+  assertBoundaryContract(connectorDetail.boundary, "connector detail");
+
+  const rootHostBoundarySection = rootDetail.sections.find((section) => section.id === "mcp-root-host-boundary");
+  const connectorHostBoundarySection = connectorDetail.sections.find((section) => section.id === "mcp-connector-host-boundary");
+
+  if (!rootHostBoundarySection || !connectorHostBoundarySection) {
+    throw new Error("MCP detail is missing the host/runtime boundary summary sections.");
+  }
+
+  const rootActionIds = new Set((rootDetail.actions ?? []).map((action) => action.id));
+  const connectorActionIds = new Set((connectorDetail.actions ?? []).map((action) => action.id));
+  const requiredRootActions = ["preview-host-root-connect"];
+  const requiredConnectorActions = [
+    "preview-host-bridge-attach",
+    "preview-host-connector-activate",
+    "preview-host-connector-lifecycle",
+    "preview-host-lifecycle-rollback",
+    "preview-host-lane-apply"
+  ];
+
+  for (const actionId of requiredRootActions) {
+    if (!rootActionIds.has(actionId)) {
+      throw new Error(`Root detail is missing required host boundary action ${actionId}.`);
+    }
+  }
+
+  for (const actionId of requiredConnectorActions) {
+    if (!connectorActionIds.has(actionId)) {
+      throw new Error(`Connector detail is missing required host boundary action ${actionId}.`);
+    }
+  }
+
+  const results = [];
+  const simulatedOutcomeStatuses = new Set();
+
+  for (const actionId of requiredRootActions) {
+    results.push(["mcp-root-scan", actionId, await runtime.runRuntimeItemAction("mcp-root-scan", actionId)]);
+  }
+
+  for (const actionId of requiredConnectorActions) {
+    results.push(["mcp-adjacent-runtime", actionId, await runtime.runRuntimeItemAction("mcp-adjacent-runtime", actionId)]);
+  }
+
+  for (const [itemId, actionId, result] of results) {
+    assertHostBoundaryResult(result, itemId, actionId);
+    const handoff = await runtime.handoffHostPreview(itemId, actionId);
+    assertHostPreviewHandoff(handoff, `direct host preview handoff ${itemId}:${actionId}`);
+
+    const resultOutcomeChain = result.hostHandoff.simulatedOutcomes.map((outcome) => outcome.status).join(" -> ");
+    const directOutcomeChain = handoff.simulatedOutcomes.map((outcome) => outcome.status).join(" -> ");
+
+    if (resultOutcomeChain !== directOutcomeChain) {
+      throw new Error(`Host boundary action ${itemId}:${actionId} returned a different outcome chain than the direct handoff.`);
+    }
+
+    if (actionId === "preview-host-lifecycle-rollback" || actionId === "preview-host-lane-apply") {
+      const readinessSection = result.sections.find((section) => section.id === "host-boundary-readiness");
+      const actionSection = result.sections.find((section) => section.id === "host-boundary-action");
+      const recoveryDrilldownSection = result.sections.find((section) => section.id === "host-bridge-recovery-drilldown");
+
+      for (const prefix of ["Studio-local lifecycle stage · ", "Studio-local rollback settlement · "]) {
+        if (!readinessSection?.lines.some((line) => line.startsWith(prefix))) {
+          throw new Error(`Host boundary action ${itemId}:${actionId} is missing apply-coupling readiness line ${prefix.trim()}.`);
+        }
+      }
+
+      if (!actionSection?.lines.some((line) => line.startsWith("apply coupling · "))) {
+        throw new Error(`Host boundary action ${itemId}:${actionId} is missing apply-coupling action visibility.`);
+      }
+
+      if (!recoveryDrilldownSection?.lines.some((line) => line === "apply coupling · unresolved · recovery-drilldown")) {
+        throw new Error(`Host boundary action ${itemId}:${actionId} did not expose the unresolved recovery drilldown state.`);
+      }
+
+      if (!recoveryDrilldownSection?.lines.some((line) => line === "recovery readiness · recovery-drilldown · audit seeded")) {
+        throw new Error(`Host boundary action ${itemId}:${actionId} did not expose the seeded recovery-readiness drilldown.`);
+      }
+
+      if (handoff.validation.status !== "invalid") {
+        throw new Error(`Host boundary action ${itemId}:${actionId} should stay validation-invalid before local lifecycle/apply coupling is staged.`);
+      }
+
+      if (handoff.approval.decision !== "withheld") {
+        throw new Error(`Host boundary action ${itemId}:${actionId} should keep approval withheld before local lifecycle/apply coupling is staged.`);
+      }
+    }
+
+    for (const outcome of handoff.simulatedOutcomes) {
+      simulatedOutcomeStatuses.add(outcome.status);
+    }
+  }
+
+  for (const requiredStatus of ["blocked", "abort", "partial-apply", "rollback-required", "rollback-incomplete"]) {
+    if (!simulatedOutcomeStatuses.has(requiredStatus)) {
+      throw new Error(`Host boundary actions did not expose simulated outcome ${requiredStatus}.`);
+    }
+  }
+
+  const [refreshedRootDetail, refreshedConnectorDetail] = await Promise.all([
+    runtime.getRuntimeItemDetail("mcp-root-scan"),
+    runtime.getRuntimeItemDetail("mcp-adjacent-runtime")
+  ]);
+  const rootSessionSection = refreshedRootDetail?.sections.find((section) => section.id === "mcp-local-root-control");
+  const connectorSessionSection = refreshedConnectorDetail?.sections.find((section) => section.id === "mcp-local-connector-control");
+
+  if (!rootSessionSection || !connectorSessionSection) {
+    throw new Error("Host boundary verification could not re-read the Studio-local control session sections.");
+  }
+
+  const rootSelectionLine = rootSessionSection.lines.find((line) => line.startsWith("selection status · "));
+  const connectorExecutionLine = connectorSessionSection.lines.find((line) => line.startsWith("executions · "));
+
+  if (rootSelectionLine !== "selection status · idle") {
+    throw new Error(`Host boundary actions unexpectedly changed local root state: ${rootSelectionLine ?? "missing"}.`);
+  }
+
+  if (connectorExecutionLine !== "executions · 0") {
+    throw new Error(`Host boundary actions unexpectedly changed local connector execution count: ${connectorExecutionLine ?? "missing"}.`);
+  }
+
+  return {
+    status: "verified",
+    detail: `${[...requiredRootActions, ...requiredConnectorActions].join(", ")} | outcomes=${Array.from(simulatedOutcomeStatuses).join("/")}`
+  };
+}
+
+async function verifyLocalConnectorControls() {
+  await ensureFile(electronRuntimePath);
+
+  const { createStudioRuntime } = require(electronRuntimePath);
+  const runtime = createStudioRuntime();
+  const [rootDetail, connectorDetail] = await Promise.all([
+    runtime.getRuntimeItemDetail("mcp-root-scan"),
+    runtime.getRuntimeItemDetail("mcp-adjacent-runtime")
+  ]);
+
+  if (!rootDetail || !connectorDetail) {
+    return {
+      status: "skipped",
+      detail: "live tools/MCP detail unavailable"
+    };
+  }
+
+  assertRuntimeActionCatalog(rootDetail, "root detail");
+  assertRuntimeActionCatalog(connectorDetail, "connector detail");
+  const rootActionIds = new Set((rootDetail.actions ?? []).map((action) => action.id));
+  const connectorActionIds = new Set((connectorDetail.actions ?? []).map((action) => action.id));
+  const requiredRootAction = "execute-local-root-select";
+  const requiredConnectorActions = [
+    "execute-local-bridge-stage",
+    "execute-local-connector-activate",
+    "execute-local-lane-apply",
+    "execute-local-lifecycle-stage",
+    "execute-local-rollback-settlement"
+  ];
+
+  if (!rootActionIds.has(requiredRootAction)) {
+    throw new Error(`Root detail is missing required action ${requiredRootAction}.`);
+  }
+
+  for (const actionId of requiredConnectorActions) {
+    if (!connectorActionIds.has(actionId)) {
+      throw new Error(`Connector detail is missing required action ${actionId}.`);
+    }
+  }
+
+  const executedResults = [];
+
+  executedResults.push(await runtime.runRuntimeItemAction("mcp-root-scan", requiredRootAction));
+
+  for (const actionId of requiredConnectorActions) {
+    executedResults.push(await runtime.runRuntimeItemAction("mcp-adjacent-runtime", actionId));
+  }
+
+  if (executedResults.some((result) => !result)) {
+    throw new Error("One or more local connector control actions returned no result.");
+  }
+
+  for (const [index, result] of executedResults.entries()) {
+    assertRuntimeActionResultContract(
+      result,
+      index === 0 ? "mcp-root-scan" : "mcp-adjacent-runtime",
+      index === 0 ? requiredRootAction : requiredConnectorActions[index - 1],
+      "local-only"
+    );
+    assertBoundaryContract(result.boundary, `local connector control result ${index + 1}`);
+  }
+
+  const refreshedConnectorDetail = await runtime.getRuntimeItemDetail("mcp-adjacent-runtime");
+  const localSessionSection = refreshedConnectorDetail?.sections.find((section) => section.id === "mcp-local-connector-control");
+  const localHistorySection = refreshedConnectorDetail?.sections.find((section) => section.id === "mcp-local-connector-history");
+
+  if (!localSessionSection || !localHistorySection) {
+    throw new Error("Connector detail did not expose Studio-local control session sections after executing actions.");
+  }
+
+  const executionLine = localSessionSection.lines.find((line) => line.startsWith("executions · "));
+  const laneLine = localSessionSection.lines.find((line) => line.startsWith("lane apply · "));
+  const lifecycleLine = localSessionSection.lines.find((line) => line.startsWith("lifecycle stage · "));
+  const rollbackLine = localSessionSection.lines.find((line) => line.startsWith("rollback settlement · "));
+
+  if (executionLine !== "executions · 6") {
+    throw new Error(`Unexpected Studio-local execution count after smoke run: ${executionLine ?? "missing"}.`);
+  }
+
+  if (!lifecycleLine || lifecycleLine === "lifecycle stage · idle") {
+    throw new Error(`Lifecycle local control line did not advance after smoke run: ${lifecycleLine ?? "missing"}.`);
+  }
+
+  if (!lifecycleLine.includes("coupling partial") || !lifecycleLine.includes("recovery rollback-ready")) {
+    throw new Error(`Lifecycle local control line lost apply-coupling or rollback-ready visibility: ${lifecycleLine ?? "missing"}.`);
+  }
+
+  if (!rollbackLine || rollbackLine === "rollback settlement · idle") {
+    throw new Error(`Rollback settlement line did not advance after smoke run: ${rollbackLine ?? "missing"}.`);
+  }
+
+  if (!rollbackLine.includes("coupling ready") || !rollbackLine.includes("recovery rollback-ready")) {
+    throw new Error(`Rollback settlement line lost coupled recovery visibility: ${rollbackLine ?? "missing"}.`);
+  }
+
+  return {
+    status: "verified",
+    detail: `${laneLine ?? "lane apply · unknown"} | ${lifecycleLine} | ${rollbackLine}`,
+    historyCount: localHistorySection.lines.length
+  };
+}
+
+async function verifyLocalApplyCouplingPreviewReadiness() {
+  await ensureFile(electronRuntimePath);
+
+  const { createStudioRuntime } = require(electronRuntimePath);
+  const runtime = createStudioRuntime();
+  const localActionPlan = [
+    ["mcp-root-scan", "execute-local-root-select"],
+    ["mcp-adjacent-runtime", "execute-local-bridge-stage"],
+    ["mcp-adjacent-runtime", "execute-local-connector-activate"],
+    ["mcp-adjacent-runtime", "execute-local-lane-apply"],
+    ["mcp-adjacent-runtime", "execute-local-lifecycle-stage"],
+    ["mcp-adjacent-runtime", "execute-local-rollback-settlement"]
+  ];
+
+  for (const [itemId, actionId] of localActionPlan) {
+    const result = await runtime.runRuntimeItemAction(itemId, actionId);
+
+    if (!result) {
+      throw new Error(`Local apply-coupling smoke could not execute ${itemId}:${actionId}.`);
+    }
+  }
+
+  const previewActionIds = ["preview-host-lifecycle-rollback", "preview-host-lane-apply"];
+
+  for (const actionId of previewActionIds) {
+    const result = await runtime.runRuntimeItemAction("mcp-adjacent-runtime", actionId);
+
+    assertHostBoundaryResult(result, "mcp-adjacent-runtime", actionId);
+
+    if (result.hostPreview.currentLifecycleStage !== "rollback-host") {
+      throw new Error(`Host boundary action mcp-adjacent-runtime:${actionId} did not advance to rollback-host after local coupling was staged.`);
+    }
+
+    if (result.hostHandoff.validation.status !== "valid") {
+      throw new Error(`Host boundary action mcp-adjacent-runtime:${actionId} did not become validation-valid after local coupling was staged.`);
+    }
+
+    if (result.hostHandoff.approval.decision !== "approved") {
+      throw new Error(`Host boundary action mcp-adjacent-runtime:${actionId} did not become approval-approved after local coupling was staged.`);
+    }
+
+    if (result.hostHandoff.audit.status !== "rollback-linked") {
+      throw new Error(`Host boundary action mcp-adjacent-runtime:${actionId} did not become rollback-linked after local coupling was staged.`);
+    }
+
+    const recoveryDrilldownSection = result.sections.find((section) => section.id === "host-bridge-recovery-drilldown");
+
+    if (!recoveryDrilldownSection?.lines.some((line) => line === "apply coupling · ready · rollback-ready")) {
+      throw new Error(`Host boundary action mcp-adjacent-runtime:${actionId} did not expose rollback-ready apply coupling after local staging.`);
+    }
+
+    if (!recoveryDrilldownSection?.lines.some((line) => line === "recovery readiness · rollback-ready · audit rollback-linked")) {
+      throw new Error(`Host boundary action mcp-adjacent-runtime:${actionId} did not expose rollback-linked recovery readiness after local staging.`);
+    }
+
+    const directHandoff = await runtime.handoffHostPreview("mcp-adjacent-runtime", actionId);
+
+    assertHostPreviewHandoff(directHandoff, `post-local host preview handoff mcp-adjacent-runtime:${actionId}`);
+
+    if (directHandoff.validation.status !== "valid" || directHandoff.approval.decision !== "approved") {
+      throw new Error(`Direct host preview handoff mcp-adjacent-runtime:${actionId} did not stay valid/approved after local coupling was staged.`);
+    }
+  }
+
+  return {
+    status: "verified",
+    detail: `${previewActionIds.join(", ")} => valid/approved/rollback-ready`
+  };
+}
+
+async function verifyRuntimeActionContracts() {
+  await ensureFile(electronRuntimePath);
+  await ensureFile(runtimeCommandPolicyPath);
+
+  const { createStudioRuntime } = require(electronRuntimePath);
+  const { assessRuntimeCommand, matchRuntimeShellRule } = require(runtimeCommandPolicyPath);
+  const runtime = createStudioRuntime();
+  const [toolDetail, rootDetail] = await Promise.all([
+    runtime.getRuntimeItemDetail("tool-openclaw-runtime"),
+    runtime.getRuntimeItemDetail("mcp-root-scan")
+  ]);
+
+  if (!toolDetail || !rootDetail) {
+    return {
+      status: "skipped",
+      detail: "live tools/MCP detail unavailable"
+    };
+  }
+
+  assertRuntimeActionCatalog(toolDetail, "tool runtime detail");
+  assertRuntimeActionCatalog(rootDetail, "root detail");
+
+  const toolSectionIds = new Set(toolDetail.sections.map((section) => section.id));
+
+  for (const sectionId of ["tool-permissions", "tool-allow-rules"]) {
+    if (!toolSectionIds.has(sectionId)) {
+      throw new Error(`Tool runtime detail is missing permission section ${sectionId}.`);
+    }
+  }
+
+  const readOnlyResult = await runtime.runRuntimeItemAction("tool-openclaw-runtime", "probe-config");
+  const dryRunResult = await runtime.runRuntimeItemAction("mcp-root-scan", "dry-run-connect-root");
+
+  if (!readOnlyResult || !dryRunResult) {
+    throw new Error("Runtime action contract verification could not execute the expected read-only and dry-run actions.");
+  }
+
+  assertRuntimeActionResultContract(readOnlyResult, "tool-openclaw-runtime", "probe-config", "read-only");
+  assertRuntimeActionResultContract(dryRunResult, "mcp-root-scan", "dry-run-connect-root", "dry-run");
+
+  const readOnlySectionIds = new Set(readOnlyResult.sections.map((section) => section.id));
+
+  for (const sectionId of ["action-command-policy", "action-allow-rules"]) {
+    if (!readOnlySectionIds.has(sectionId)) {
+      throw new Error(`Tool runtime action probe-config is missing permission section ${sectionId}.`);
+    }
+  }
+
+  const readOnlyAssessment = assessRuntimeCommand("rg --files apps/studio", ["git:*"]);
+  const protectedWriteAssessment = assessRuntimeCommand("mkdir -p ~/.openclaw/plugins", []);
+  const dangerousRemovalAssessment = assessRuntimeCommand("rm -rf ~/.openclaw", []);
+  const dangerousServiceAssessment = assessRuntimeCommand("systemctl restart openclaw", []);
+
+  if (readOnlyAssessment.classification !== "read-only" || readOnlyAssessment.approval !== "not-required") {
+    throw new Error("Runtime command policy failed to classify a read-only workspace command.");
+  }
+
+  if (protectedWriteAssessment.classification !== "protected-write" || protectedWriteAssessment.approval !== "required") {
+    throw new Error("Runtime command policy failed to classify a protected write.");
+  }
+
+  if (dangerousRemovalAssessment.classification !== "dangerous" || dangerousRemovalAssessment.approval !== "blocked") {
+    throw new Error("Runtime command policy failed to block a dangerous removal.");
+  }
+
+  if (dangerousServiceAssessment.classification !== "dangerous" || dangerousServiceAssessment.approval !== "blocked") {
+    throw new Error("Runtime command policy failed to block a service-control mutation.");
+  }
+
+  if (!matchRuntimeShellRule("git:*", "git status") || matchRuntimeShellRule("git:*", "npm run build")) {
+    throw new Error("Runtime shell rule matching drifted from expected exact/prefix behavior.");
+  }
+
+  return {
+    status: "verified",
+    detail: `read-only=${readOnlyResult.action.kind}/${readOnlyResult.action.safety}, dry-run=${dryRunResult.action.kind}/${dryRunResult.action.safety}, permissions=5 checks`
+  };
+}
+
+function verifyReleaseSkeletonContract() {
+  const skeleton = createReleaseSkeleton(getPreflightSummary());
+  const requiredLayoutPaths = new Set([".", "artifacts/renderer", "artifacts/electron", "release", "scripts"]);
+  const actualLayoutPaths = new Set((skeleton.releaseManifest.layout ?? []).map((entry) => entry.path));
+  const requiredDocs = new Set([
+    "README.md",
+    "HANDOFF.md",
+    "IMPLEMENTATION-PLAN.md",
+    "PACKAGE-README.md",
+    "release/RELEASE-SUMMARY.md",
+    "release/REVIEW-MANIFEST.json",
+    "release/BUNDLE-MATRIX.json",
+    "release/BUNDLE-ASSEMBLY.json",
+    "release/PACKAGED-APP-DIRECTORY-SKELETON.json",
+    "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json",
+    "release/PACKAGED-APP-MATERIALIZATION-SKELETON.json",
+    "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json",
+    "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json",
+    "release/PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json",
+    "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json",
+    "release/INTEGRITY-ATTESTATION-EVIDENCE.json",
+    "release/ATTESTATION-VERIFICATION-PACKS.json",
+    "release/ATTESTATION-APPLY-AUDIT-PACKS.json",
+    "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json",
+    "release/ATTESTATION-OPERATOR-WORKLISTS.json",
+    "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json",
+    "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json",
+    "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json",
+    "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json",
+    "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json",
+    "release/REVIEW-ONLY-DELIVERY-CHAIN.json",
+    "release/OPERATOR-REVIEW-BOARD.json",
+    "release/RELEASE-DECISION-HANDOFF.json",
+    "release/REVIEW-EVIDENCE-CLOSEOUT.json",
+    "release/INSTALLER-TARGETS.json",
+    "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json",
+    "release/INSTALLER-TARGET-BUILDER-SKELETON.json",
+    "release/INSTALLER-BUILDER-ORCHESTRATION.json",
+    "release/INSTALLER-CHANNEL-ROUTING.json",
+    "release/CHANNEL-PROMOTION-EVIDENCE.json",
+    "release/PROMOTION-APPLY-READINESS.json",
+    "release/PROMOTION-APPLY-MANIFESTS.json",
+    "release/PROMOTION-EXECUTION-CHECKPOINTS.json",
+    "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json",
+    "release/PROMOTION-STAGED-APPLY-LEDGERS.json",
+    "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json",
+    "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json",
+    "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json",
+    "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json",
+    "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json",
+    "release/SIGNING-METADATA.json",
+    "release/NOTARIZATION-PLAN.json",
+    "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json",
+    "release/SIGNING-PUBLISH-PIPELINE.json",
+    "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json",
+    "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json",
+    "release/PUBLISH-ROLLBACK-HANDSHAKE.json",
+    "release/ROLLBACK-RECOVERY-LEDGER.json",
+    "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json",
+    "release/ROLLBACK-OPERATOR-DRILLBOOKS.json",
+    "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json",
+    "release/ROLLBACK-CUTOVER-READINESS-MAPS.json",
+    "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json",
+    "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json",
+    "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json",
+    "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json",
+    "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json",
+    "release/RELEASE-APPROVAL-WORKFLOW.json",
+    "release/RELEASE-NOTES.md",
+    "release/PUBLISH-GATES.json",
+    "release/PROMOTION-GATES.json",
+    "release/RELEASE-CHECKLIST.md"
+  ]);
+  const actualDocs = new Set((skeleton.releaseManifest.docs ?? []).map((doc) => doc.path));
+  const requiredArtifactGroups = new Set(["renderer", "electron"]);
+  const actualArtifactGroups = new Map((skeleton.releaseManifest.artifactGroups ?? []).map((group) => [group.id, group]));
+
+  if (skeleton.releaseManifest.phase !== PHASE_ID || skeleton.releaseManifest.packageKind !== "alpha-shell-release-skeleton") {
+    throw new Error(`Release skeleton manifest does not reflect the expected ${PHASE_ID} alpha-shell package kind.`);
+  }
+
+  if (skeleton.buildMetadata.app?.phase !== PHASE_ID || skeleton.buildMetadata.preflight?.buildReady !== true) {
+    throw new Error(`Release build metadata is missing the expected ${PHASE_ID}/preflight markers.`);
+  }
+
+  if (skeleton.installerPlaceholder.status !== "placeholder" || skeleton.installerPlaceholder.canInstall !== false) {
+    throw new Error("Installer placeholder contract drifted from the expected non-installer posture.");
+  }
+
+  if (skeleton.releaseManifest.installer?.scriptPath !== "scripts/install-placeholder.cjs") {
+    throw new Error("Release manifest is missing the placeholder installer script path.");
+  }
+
+  if (
+    skeleton.installerPlaceholder.packagedAppDirectorySkeletonPath !== "release/PACKAGED-APP-DIRECTORY-SKELETON.json" ||
+    skeleton.installerPlaceholder.packagedAppDirectoryMaterializationPath !== "release/PACKAGED-APP-DIRECTORY-MATERIALIZATION.json" ||
+    skeleton.installerPlaceholder.packagedAppMaterializationSkeletonPath !== "release/PACKAGED-APP-MATERIALIZATION-SKELETON.json" ||
+    skeleton.installerPlaceholder.packagedAppStagedOutputSkeletonPath !== "release/PACKAGED-APP-STAGED-OUTPUT-SKELETON.json" ||
+    skeleton.installerPlaceholder.packagedAppBundleSealingSkeletonPath !== "release/PACKAGED-APP-BUNDLE-SEALING-SKELETON.json" ||
+    skeleton.installerPlaceholder.packagedAppLocalMaterializationContractPath !==
+      "release/PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json" ||
+    skeleton.installerPlaceholder.sealedBundleIntegrityContractPath !== "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json" ||
+    skeleton.installerPlaceholder.integrityAttestationEvidencePath !== "release/INTEGRITY-ATTESTATION-EVIDENCE.json" ||
+    skeleton.installerPlaceholder.attestationVerificationPacksPath !== "release/ATTESTATION-VERIFICATION-PACKS.json" ||
+    skeleton.installerPlaceholder.attestationApplyAuditPacksPath !== "release/ATTESTATION-APPLY-AUDIT-PACKS.json" ||
+    skeleton.installerPlaceholder.attestationApplyExecutionPacketsPath !== "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json" ||
+    skeleton.installerPlaceholder.attestationOperatorWorklistsPath !== "release/ATTESTATION-OPERATOR-WORKLISTS.json" ||
+    skeleton.installerPlaceholder.attestationOperatorDispatchManifestsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json" ||
+    skeleton.installerPlaceholder.attestationOperatorDispatchPacketsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json" ||
+    skeleton.installerPlaceholder.attestationOperatorDispatchReceiptsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" ||
+    skeleton.installerPlaceholder.attestationOperatorReconciliationLedgersPath !== "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" ||
+    skeleton.installerPlaceholder.attestationOperatorSettlementPacksPath !== "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" ||
+    skeleton.installerPlaceholder.reviewOnlyDeliveryChainPath !== "release/REVIEW-ONLY-DELIVERY-CHAIN.json" ||
+    skeleton.installerPlaceholder.operatorReviewBoardPath !== "release/OPERATOR-REVIEW-BOARD.json" ||
+    skeleton.installerPlaceholder.releaseDecisionHandoffPath !== "release/RELEASE-DECISION-HANDOFF.json" ||
+    skeleton.installerPlaceholder.reviewEvidenceCloseoutPath !== "release/REVIEW-EVIDENCE-CLOSEOUT.json" ||
+    skeleton.installerPlaceholder.installerTargetsPath !== "release/INSTALLER-TARGETS.json" ||
+    skeleton.installerPlaceholder.installerBuilderExecutionSkeletonPath !== "release/INSTALLER-BUILDER-EXECUTION-SKELETON.json" ||
+    skeleton.installerPlaceholder.installerTargetBuilderSkeletonPath !== "release/INSTALLER-TARGET-BUILDER-SKELETON.json" ||
+    skeleton.installerPlaceholder.installerBuilderOrchestrationPath !== "release/INSTALLER-BUILDER-ORCHESTRATION.json" ||
+    skeleton.installerPlaceholder.installerChannelRoutingPath !== "release/INSTALLER-CHANNEL-ROUTING.json" ||
+    skeleton.installerPlaceholder.channelPromotionEvidencePath !== "release/CHANNEL-PROMOTION-EVIDENCE.json" ||
+    skeleton.installerPlaceholder.promotionApplyReadinessPath !== "release/PROMOTION-APPLY-READINESS.json" ||
+    skeleton.installerPlaceholder.promotionApplyManifestsPath !== "release/PROMOTION-APPLY-MANIFESTS.json" ||
+    skeleton.installerPlaceholder.promotionExecutionCheckpointsPath !== "release/PROMOTION-EXECUTION-CHECKPOINTS.json" ||
+    skeleton.installerPlaceholder.promotionOperatorHandoffRailsPath !== "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json" ||
+    skeleton.installerPlaceholder.promotionStagedApplyLedgersPath !== "release/PROMOTION-STAGED-APPLY-LEDGERS.json" ||
+    skeleton.installerPlaceholder.promotionStagedApplyRunsheetsPath !== "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json" ||
+    skeleton.installerPlaceholder.promotionStagedApplyCommandSheetsPath !== "release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json" ||
+    skeleton.installerPlaceholder.promotionStagedApplyConfirmationLedgersPath !== "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json" ||
+    skeleton.installerPlaceholder.promotionStagedApplyCloseoutJournalsPath !== "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json" ||
+    skeleton.installerPlaceholder.promotionStagedApplySignoffSheetsPath !== "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json" ||
+    skeleton.installerPlaceholder.signingPublishGatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
+    skeleton.installerPlaceholder.signingPublishPipelinePath !== "release/SIGNING-PUBLISH-PIPELINE.json" ||
+    skeleton.installerPlaceholder.signingPublishApprovalBridgePath !== "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json" ||
+    skeleton.installerPlaceholder.signingPublishPromotionHandshakePath !== "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json" ||
+    skeleton.installerPlaceholder.publishRollbackHandshakePath !== "release/PUBLISH-ROLLBACK-HANDSHAKE.json" ||
+    skeleton.installerPlaceholder.rollbackRecoveryLedgerPath !== "release/ROLLBACK-RECOVERY-LEDGER.json" ||
+    skeleton.installerPlaceholder.rollbackExecutionRehearsalLedgerPath !== "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json" ||
+    skeleton.installerPlaceholder.rollbackOperatorDrillbooksPath !== "release/ROLLBACK-OPERATOR-DRILLBOOKS.json" ||
+    skeleton.installerPlaceholder.rollbackLiveReadinessContractsPath !== "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json" ||
+    skeleton.installerPlaceholder.rollbackCutoverReadinessMapsPath !== "release/ROLLBACK-CUTOVER-READINESS-MAPS.json" ||
+    skeleton.installerPlaceholder.rollbackCutoverHandoffPlansPath !== "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json" ||
+    skeleton.installerPlaceholder.rollbackCutoverExecutionChecklistsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json" ||
+    skeleton.installerPlaceholder.rollbackCutoverExecutionRecordsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json" ||
+    skeleton.installerPlaceholder.rollbackCutoverOutcomeReportsPath !== "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json" ||
+    skeleton.installerPlaceholder.rollbackCutoverPublicationBundlesPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" ||
+    skeleton.installerPlaceholder.approvalWorkflowPath !== "release/RELEASE-APPROVAL-WORKFLOW.json"
+  ) {
+    throw new Error(`Installer placeholder is missing ${PHASE_ID} dispatch / runsheet / handoff paths.`);
+  }
+
+  for (const requiredLayoutPath of requiredLayoutPaths) {
+    if (!actualLayoutPaths.has(requiredLayoutPath)) {
+      throw new Error(`Release skeleton layout is missing required path ${requiredLayoutPath}.`);
+    }
+  }
+
+  for (const requiredDoc of requiredDocs) {
+    if (!actualDocs.has(requiredDoc)) {
+      throw new Error(`Release skeleton docs are missing required file ${requiredDoc}.`);
+    }
+  }
+
+  for (const requiredGroup of requiredArtifactGroups) {
+    const artifactGroup = actualArtifactGroups.get(requiredGroup);
+
+    if (!artifactGroup) {
+      throw new Error(`Release skeleton is missing artifact group ${requiredGroup}.`);
+    }
+
+    if (!Array.isArray(artifactGroup.entrypoints) || artifactGroup.entrypoints.length === 0 || artifactGroup.fileCount === 0) {
+      throw new Error(`Release skeleton artifact group ${requiredGroup} is missing entrypoints or files.`);
+    }
+  }
+
+  if (!Array.isArray(skeleton.releaseManifest.artifacts) || skeleton.releaseManifest.artifacts.length < 4) {
+    throw new Error("Release skeleton manifest is missing copied artifact entries.");
+  }
+
+  if (!Array.isArray(skeleton.buildMetadata.currentDeliverySurfaces) || skeleton.buildMetadata.currentDeliverySurfaces.length === 0) {
+    throw new Error("Release build metadata is missing current delivery surface declarations.");
+  }
+
+  if (!Array.isArray(skeleton.buildMetadata.formalInstallerGaps) || skeleton.buildMetadata.formalInstallerGaps.length < 3) {
+    throw new Error("Release build metadata is missing formal installer gap declarations.");
+  }
+
+  if (
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-VERIFICATION-PACKS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-APPLY-AUDIT-PACKS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-APPLY-EXECUTION-PACKETS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-WORKLISTS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/REVIEW-ONLY-DELIVERY-CHAIN.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/OPERATOR-REVIEW-BOARD.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/RELEASE-DECISION-HANDOFF.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/REVIEW-EVIDENCE-CLOSEOUT.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-EXECUTION-CHECKPOINTS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-OPERATOR-HANDOFF-RAILS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-STAGED-APPLY-LEDGERS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-STAGED-APPLY-RUNSHEETS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/PUBLISH-ROLLBACK-HANDSHAKE.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-OPERATOR-DRILLBOOKS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-LIVE-READINESS-CONTRACTS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-CUTOVER-READINESS-MAPS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json") ||
+    !skeleton.buildMetadata.pipeline?.formalReleaseArtifacts?.includes("release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json")
+  ) {
+    throw new Error(`Release build metadata is missing ${PHASE_ID} formal release artifacts.`);
+  }
+
+  if (!Array.isArray(skeleton.releaseManifest.reviewArtifacts) || !skeleton.releaseManifest.reviewArtifacts.includes("release/RELEASE-SUMMARY.md")) {
+    throw new Error(`Release manifest is missing ${PHASE_ID} review artifacts.`);
+  }
+
+  if (
+    !Array.isArray(skeleton.releaseManifest.formalReleaseArtifacts) ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-VERIFICATION-PACKS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-APPLY-AUDIT-PACKS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-APPLY-EXECUTION-PACKETS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-WORKLISTS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/REVIEW-ONLY-DELIVERY-CHAIN.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/OPERATOR-REVIEW-BOARD.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/RELEASE-DECISION-HANDOFF.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/REVIEW-EVIDENCE-CLOSEOUT.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-EXECUTION-CHECKPOINTS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-OPERATOR-HANDOFF-RAILS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-STAGED-APPLY-LEDGERS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-STAGED-APPLY-RUNSHEETS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/PUBLISH-ROLLBACK-HANDSHAKE.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-OPERATOR-DRILLBOOKS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-LIVE-READINESS-CONTRACTS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-CUTOVER-READINESS-MAPS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json") ||
+    !skeleton.releaseManifest.formalReleaseArtifacts.includes("release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json")
+  ) {
+    throw new Error(`Release manifest is missing ${PHASE_ID} formal release artifacts.`);
+  }
+
+  if (!Array.isArray(skeleton.releaseManifest.pipelineStages) || skeleton.releaseManifest.pipelineStages.length < 24) {
+    throw new Error(`Release manifest is missing ${PHASE_ID} pipeline stage declarations.`);
+  }
+
+  if (
+    skeleton.reviewManifest?.pipeline?.stage !== REVIEW_STAGE_ID ||
+    !Array.isArray(skeleton.reviewManifest?.pipeline?.stages) ||
+    skeleton.reviewManifest.pipeline.stages.length < 24
+  ) {
+    throw new Error(`Review manifest is missing ${PHASE_ID} review pipeline depth.`);
+  }
+
+  if (!Array.isArray(skeleton.bundleMatrix?.bundles) || skeleton.bundleMatrix.bundles.length < 3) {
+    throw new Error(`Bundle matrix is missing ${PHASE_ID} per-platform bundle declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.bundleAssembly?.assemblies) || skeleton.bundleAssembly.assemblies.length < 3) {
+    throw new Error(`Bundle assembly is missing ${PHASE_ID} assembly declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.packagedAppDirectorySkeleton?.directories) || skeleton.packagedAppDirectorySkeleton.directories.length < 3) {
+    throw new Error(`Packaged app directory skeleton is missing ${PHASE_ID} directory declarations.`);
+  }
+
+  if (
+    !Array.isArray(skeleton.packagedAppDirectoryMaterialization?.directories) ||
+    skeleton.packagedAppDirectoryMaterialization.directories.length < 3 ||
+    !skeleton.packagedAppDirectoryMaterialization.directories.every(
+      (entry) => entry.taskState === "review-ready" && typeof entry.localMaterializationContractId === "string"
+    )
+  ) {
+    throw new Error(`Packaged app directory materialization is missing ${PHASE_ID} directory materialization declarations.`);
+  }
+
+  if (
+    !Array.isArray(skeleton.packagedAppMaterializationSkeleton?.materializations) ||
+    skeleton.packagedAppMaterializationSkeleton.materializations.length < 3 ||
+    !skeleton.packagedAppMaterializationSkeleton.materializations.every(
+      (entry) => entry.taskState === "review-ready" && typeof entry.localMaterializationContractId === "string"
+    )
+  ) {
+    throw new Error(`Packaged app materialization skeleton is missing ${PHASE_ID} materialization declarations.`);
+  }
+
+  if (
+    !Array.isArray(skeleton.packagedAppStagedOutputSkeleton?.outputs) ||
+    skeleton.packagedAppStagedOutputSkeleton.outputs.length < 3 ||
+    !skeleton.packagedAppStagedOutputSkeleton.outputs.every(
+      (entry) =>
+        entry.taskState === "review-ready" &&
+        typeof entry.localMaterializationContractId === "string" &&
+        typeof entry.artifactLedgerId === "string" &&
+        Array.isArray(entry.sourceArtifactIds) &&
+        entry.sourceArtifactIds.length > 0 &&
+        Array.isArray(entry.resultArtifactIds) &&
+        entry.resultArtifactIds.length > 0 &&
+        typeof entry.activeArtifactHandoffId === "string" &&
+        Array.isArray(entry.taskDependencies)
+    )
+  ) {
+    throw new Error(`Packaged-app staged output skeleton is missing ${PHASE_ID} staged-output declarations.`);
+  }
+
+  if (
+    !Array.isArray(skeleton.packagedAppBundleSealingSkeleton?.bundles) ||
+    skeleton.packagedAppBundleSealingSkeleton.bundles.length < 3 ||
+    !skeleton.packagedAppBundleSealingSkeleton.bundles.every(
+      (entry) =>
+        entry.taskState === "review-ready" &&
+        typeof entry.localMaterializationContractId === "string" &&
+        typeof entry.artifactLedgerId === "string" &&
+        Array.isArray(entry.sourceArtifactIds) &&
+        entry.sourceArtifactIds.length > 0 &&
+        Array.isArray(entry.resultArtifactIds) &&
+        entry.resultArtifactIds.length > 0 &&
+        typeof entry.activeArtifactHandoffId === "string" &&
+        Array.isArray(entry.taskDependencies)
+    )
+  ) {
+    throw new Error(`Packaged-app bundle sealing skeleton is missing ${PHASE_ID} sealing declarations.`);
+  }
+
+  if (
+    skeleton.packagedAppLocalMaterializationContract?.phase !== PHASE_ID ||
+    skeleton.packagedAppLocalMaterializationContract?.mode !== "review-only" ||
+    skeleton.packagedAppLocalMaterializationContract?.scope !== "local-only" ||
+    skeleton.packagedAppLocalMaterializationContract?.currentTaskState !== "reviewing" ||
+    skeleton.packagedAppLocalMaterializationContract?.activeContractId !== "local-materialization-contract-windows" ||
+    skeleton.packagedAppLocalMaterializationContract?.ownerStageId !== "delivery-chain-promotion-readiness" ||
+    skeleton.packagedAppLocalMaterializationContract?.downstreamGateStageId !== "delivery-chain-publish-decision" ||
+    !Array.isArray(skeleton.packagedAppLocalMaterializationContract?.contracts) ||
+    skeleton.packagedAppLocalMaterializationContract.contracts.length < 3 ||
+    !skeleton.packagedAppLocalMaterializationContract.contracts.every(
+      (contract) =>
+        typeof contract.currentTaskId === "string" &&
+        typeof contract.taskState === "string" &&
+        Array.isArray(contract.tasks) &&
+        contract.tasks.length === 3 &&
+        contract.tasks.some((task) => task.id === contract.currentTaskId) &&
+        typeof contract.artifactLedger?.activeHandoffId === "string" &&
+        Array.isArray(contract.artifactLedger?.artifacts) &&
+        contract.artifactLedger.artifacts.length >= 6 &&
+        Array.isArray(contract.artifactLedger?.handoffs) &&
+        contract.artifactLedger.handoffs.length >= 4 &&
+        contract.artifactLedger.handoffs.some((handoff) => handoff.id === contract.artifactLedger.activeHandoffId) &&
+        (!contract.artifactLedger.nextHandoffId ||
+          contract.artifactLedger.handoffs.some((handoff) => handoff.id === contract.artifactLedger.nextHandoffId)) &&
+        contract.artifactLedger.artifacts.every(
+          (artifact) =>
+            typeof artifact.path === "string" &&
+            artifact.path.length > 0 &&
+            typeof artifact.taskId === "string" &&
+            typeof artifact.deliveryChainStageId === "string"
+        ) &&
+        contract.artifactLedger.handoffs.every(
+          (handoff) =>
+            typeof handoff.taskId === "string" &&
+            typeof handoff.reviewPacketStepId === "string" &&
+            typeof handoff.validatorReadoutId === "string" &&
+            typeof handoff.bundleSealingCheckpointId === "string" &&
+            contract.bundleSealingReadiness?.checkpoints.some(
+              (checkpoint) => checkpoint.id === handoff.bundleSealingCheckpointId
+            ) &&
+            typeof handoff.failureReadoutId === "string" &&
+            contract.failurePath?.readouts.some((readout) => readout.id === handoff.failureReadoutId) &&
+            typeof handoff.stageCCheckpointId === "string" &&
+            [
+              "entry-approval-routing",
+              "entry-audit-retention",
+              "entry-rollback-live-readiness",
+              "entry-receipt-settlement"
+            ].includes(handoff.stageCCheckpointId) &&
+            typeof handoff.windowId === "string" &&
+            typeof handoff.sharedStateLaneId === "string" &&
+            typeof handoff.orchestrationBoardId === "string" &&
+            typeof handoff.observabilityMappingId === "string" &&
+            Array.isArray(handoff.observabilitySignalIds) &&
+            handoff.observabilitySignalIds.length > 0 &&
+            Array.isArray(handoff.commandActionIds) &&
+            handoff.commandActionIds.length > 0 &&
+            Array.isArray(handoff.fromArtifactIds) &&
+            handoff.fromArtifactIds.length > 0 &&
+            Array.isArray(handoff.toArtifactIds) &&
+            handoff.toArtifactIds.length > 0
+        ) &&
+        typeof contract.validatorObservabilityBridge?.activeReadoutId === "string" &&
+        Array.isArray(contract.validatorObservabilityBridge?.readouts) &&
+        contract.validatorObservabilityBridge.readouts.length === 3 &&
+        contract.validatorObservabilityBridge.readouts.some(
+          (readout) => readout.id === contract.validatorObservabilityBridge.activeReadoutId
+        ) &&
+        (!contract.validatorObservabilityBridge.nextReadoutId ||
+          contract.validatorObservabilityBridge.readouts.some(
+            (readout) => readout.id === contract.validatorObservabilityBridge.nextReadoutId
+          )) &&
+        contract.validatorObservabilityBridge.readouts.every(
+          (readout) =>
+            typeof readout.windowId === "string" &&
+            typeof readout.sharedStateLaneId === "string" &&
+            typeof readout.orchestrationBoardId === "string" &&
+            typeof readout.observabilityMappingId === "string" &&
+            Array.isArray(readout.observabilitySignalIds) &&
+            readout.observabilitySignalIds.length > 0 &&
+            Array.isArray(readout.validatorChecks) &&
+            readout.validatorChecks.length > 0
+        ) &&
+        typeof contract.failurePath?.activeReadoutId === "string" &&
+        Array.isArray(contract.failurePath?.readouts) &&
+        contract.failurePath.readouts.length === 3 &&
+        contract.failurePath.readouts.some((readout) => readout.id === contract.failurePath.activeReadoutId) &&
+        (!contract.failurePath.nextReadoutId ||
+          contract.failurePath.readouts.some((readout) => readout.id === contract.failurePath.nextReadoutId)) &&
+        contract.failurePath.readouts.every(
+          (readout) =>
+            typeof readout.reviewPacketStepId === "string" &&
+            typeof readout.validatorReadoutId === "string" &&
+            typeof readout.rollbackContractId === "string" &&
+            typeof readout.rollbackCheckpointId === "string" &&
+            typeof readout.commandDeckLaneId === "string" &&
+            Array.isArray(readout.commandActionIds) &&
+            readout.commandActionIds.length > 0 &&
+            Array.isArray(readout.observabilitySignalIds) &&
+            readout.observabilitySignalIds.length > 0 &&
+            Array.isArray(readout.reviewChecks) &&
+            readout.reviewChecks.length > 0
+        ) &&
+        contract.tasks.every(
+          (task) =>
+            typeof task.summary === "string" &&
+            task.summary.length > 0 &&
+            typeof task.deliveryChainStageId === "string" &&
+            task.deliveryChainStageId.length > 0
+        )
+    ) ||
+    !skeleton.packagedAppLocalMaterializationContract.contracts.some((contract) => contract.taskState === "reviewing") ||
+    !skeleton.packagedAppLocalMaterializationContract.contracts.some((contract) =>
+      contract.tasks.some((task) => task.taskState === "blocked")
+    )
+  ) {
+    throw new Error(`Packaged-app local materialization contract is missing ${PHASE_ID} task-state declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.sealedBundleIntegrityContract?.contracts) || skeleton.sealedBundleIntegrityContract.contracts.length < 3) {
+    throw new Error(`Sealed-bundle integrity contract is missing ${PHASE_ID} integrity declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.integrityAttestationEvidence?.attestations) || skeleton.integrityAttestationEvidence.attestations.length < 3) {
+    throw new Error(`Integrity attestation evidence is missing ${PHASE_ID} attestation declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.attestationVerificationPacks?.packs) || skeleton.attestationVerificationPacks.packs.length < 3) {
+    throw new Error(`Attestation verification packs are missing ${PHASE_ID} verification declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.attestationApplyAuditPacks?.packs) || skeleton.attestationApplyAuditPacks.packs.length < 2) {
+    throw new Error(`Attestation apply audit packs are missing ${PHASE_ID} audit declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.attestationApplyExecutionPackets?.packets) || skeleton.attestationApplyExecutionPackets.packets.length < 2) {
+    throw new Error(`Attestation apply execution packets are missing ${PHASE_ID} execution declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.attestationOperatorWorklists?.worklists) || skeleton.attestationOperatorWorklists.worklists.length < 2) {
+    throw new Error(`Attestation operator worklists are missing ${PHASE_ID} worklist declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.attestationOperatorDispatchManifests?.manifests) || skeleton.attestationOperatorDispatchManifests.manifests.length < 2) {
+    throw new Error(`Attestation operator dispatch manifests are missing ${PHASE_ID} dispatch declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.attestationOperatorDispatchPackets?.packets) || skeleton.attestationOperatorDispatchPackets.packets.length < 2) {
+    throw new Error(`Attestation operator dispatch packets are missing ${PHASE_ID} packet declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.attestationOperatorDispatchReceipts?.receipts) || skeleton.attestationOperatorDispatchReceipts.receipts.length < 2) {
+    throw new Error(`Attestation operator dispatch receipts are missing ${PHASE_ID} receipt declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.attestationOperatorReconciliationLedgers?.ledgers) || skeleton.attestationOperatorReconciliationLedgers.ledgers.length < 2) {
+    throw new Error(`Attestation operator reconciliation ledgers are missing ${PHASE_ID} reconciliation declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.attestationOperatorSettlementPacks?.packs) || skeleton.attestationOperatorSettlementPacks.packs.length < 2) {
+    throw new Error(`Attestation operator settlement packs are missing ${PHASE_ID} settlement-pack declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.attestationOperatorApprovalRoutingContracts?.contracts) || skeleton.attestationOperatorApprovalRoutingContracts.contracts.length < 2) {
+    throw new Error(`Attestation operator approval routing contracts are missing ${PHASE_ID} routing-contract declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.attestationOperatorApprovalOrchestration?.orchestrations) || skeleton.attestationOperatorApprovalOrchestration.orchestrations.length < 2) {
+    throw new Error(`Attestation operator approval orchestration is missing ${PHASE_ID} orchestration declarations.`);
+  }
+
+  if (
+    skeleton.reviewOnlyDeliveryChain?.title !== "Delivery-chain Workspace" ||
+    typeof skeleton.reviewOnlyDeliveryChain?.summary !== "string" ||
+    !skeleton.reviewOnlyDeliveryChain.summary.toLowerCase().includes("stage explorer") ||
+    !skeleton.reviewOnlyDeliveryChain.summary.toLowerCase().includes("observability") ||
+    skeleton.reviewOnlyDeliveryChain?.activeStageId !== "delivery-chain-operator-review" ||
+    skeleton.reviewOnlyDeliveryChain?.operatorReviewBoardPath !== "release/OPERATOR-REVIEW-BOARD.json" ||
+    skeleton.reviewOnlyDeliveryChain?.releaseDecisionHandoffPath !== "release/RELEASE-DECISION-HANDOFF.json" ||
+    skeleton.reviewOnlyDeliveryChain?.reviewEvidenceCloseoutPath !== "release/REVIEW-EVIDENCE-CLOSEOUT.json" ||
+    skeleton.reviewOnlyDeliveryChain?.packagedAppLocalMaterializationContractPath !==
+      "release/PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json" ||
+    !Array.isArray(skeleton.reviewOnlyDeliveryChain?.packagedAppMaterializationContract?.artifacts) ||
+    skeleton.reviewOnlyDeliveryChain.packagedAppMaterializationContract.artifacts.length < 5 ||
+    !Array.isArray(skeleton.reviewOnlyDeliveryChain?.packagedAppMaterializationContract?.platforms) ||
+    skeleton.reviewOnlyDeliveryChain.packagedAppMaterializationContract.platforms.length < 3 ||
+    !skeleton.reviewOnlyDeliveryChain.packagedAppMaterializationContract.platforms.every(
+      (platform) =>
+        typeof platform.artifactLedger?.activeHandoffId === "string" &&
+        Array.isArray(platform.artifactLedger?.artifacts) &&
+        platform.artifactLedger.artifacts.length >= 6 &&
+        Array.isArray(platform.artifactLedger?.handoffs) &&
+        platform.artifactLedger.handoffs.length >= 4 &&
+        platform.artifactLedger.handoffs.some((handoff) => handoff.id === platform.artifactLedger.activeHandoffId) &&
+        (!platform.artifactLedger.nextHandoffId ||
+          platform.artifactLedger.handoffs.some((handoff) => handoff.id === platform.artifactLedger.nextHandoffId)) &&
+        platform.artifactLedger.handoffs.every(
+          (handoff) =>
+            typeof handoff.bundleSealingCheckpointId === "string" &&
+            platform.bundleSealingReadiness?.checkpoints.some((checkpoint) => checkpoint.id === handoff.bundleSealingCheckpointId) &&
+            typeof handoff.failureReadoutId === "string" &&
+            platform.failurePath?.readouts.some((readout) => readout.id === handoff.failureReadoutId) &&
+            typeof handoff.stageCCheckpointId === "string" &&
+            [
+              "entry-approval-routing",
+              "entry-audit-retention",
+              "entry-rollback-live-readiness",
+              "entry-receipt-settlement"
+            ].includes(handoff.stageCCheckpointId)
+        ) &&
+        typeof platform.validatorObservabilityBridge?.activeReadoutId === "string" &&
+        Array.isArray(platform.validatorObservabilityBridge?.readouts) &&
+        platform.validatorObservabilityBridge.readouts.length === 3 &&
+        platform.validatorObservabilityBridge.readouts.some(
+          (readout) => readout.id === platform.validatorObservabilityBridge.activeReadoutId
+        ) &&
+        (!platform.validatorObservabilityBridge.nextReadoutId ||
+          platform.validatorObservabilityBridge.readouts.some(
+            (readout) => readout.id === platform.validatorObservabilityBridge.nextReadoutId
+          )) &&
+        platform.validatorObservabilityBridge.readouts.every(
+          (readout) =>
+            typeof readout.windowId === "string" &&
+            typeof readout.sharedStateLaneId === "string" &&
+            typeof readout.orchestrationBoardId === "string" &&
+            typeof readout.observabilityMappingId === "string" &&
+            Array.isArray(readout.observabilitySignalIds) &&
+            readout.observabilitySignalIds.length > 0 &&
+            Array.isArray(readout.validatorChecks) &&
+            readout.validatorChecks.length > 0
+        ) &&
+        typeof platform.failurePath?.activeReadoutId === "string" &&
+        Array.isArray(platform.failurePath?.readouts) &&
+        platform.failurePath.readouts.length === 3 &&
+        platform.failurePath.readouts.some((readout) => readout.id === platform.failurePath.activeReadoutId) &&
+        (!platform.failurePath.nextReadoutId ||
+          platform.failurePath.readouts.some((readout) => readout.id === platform.failurePath.nextReadoutId)) &&
+        platform.failurePath.readouts.every(
+          (readout) =>
+            typeof readout.reviewPacketStepId === "string" &&
+            typeof readout.validatorReadoutId === "string" &&
+            typeof readout.rollbackContractId === "string" &&
+            typeof readout.rollbackCheckpointId === "string" &&
+            typeof readout.commandDeckLaneId === "string" &&
+            Array.isArray(readout.commandActionIds) &&
+            readout.commandActionIds.length > 0 &&
+            Array.isArray(readout.observabilitySignalIds) &&
+            readout.observabilitySignalIds.length > 0 &&
+            Array.isArray(readout.reviewChecks) &&
+            readout.reviewChecks.length > 0
+        )
+    ) ||
+    !Array.isArray(skeleton.reviewOnlyDeliveryChain?.stages) ||
+    skeleton.reviewOnlyDeliveryChain.stages.length < 5 ||
+    !skeleton.reviewOnlyDeliveryChain.stages.every(
+      (stage) =>
+        Array.isArray(stage.artifactGroups) &&
+        stage.artifactGroups.length > 0 &&
+        Array.isArray(stage.blockedBy) &&
+        stage.blockedBy.length > 0
+    ) ||
+    !Array.isArray(skeleton.reviewOnlyDeliveryChain?.paths?.promotionStageIds) ||
+    !Array.isArray(skeleton.reviewOnlyDeliveryChain?.paths?.publishStageIds) ||
+    !Array.isArray(skeleton.reviewOnlyDeliveryChain?.paths?.rollbackStageIds) ||
+    !Array.isArray(skeleton.reviewOnlyDeliveryChain?.blockedBy) ||
+    skeleton.reviewOnlyDeliveryChain.blockedBy.length < 3
+  ) {
+    throw new Error(`Review-only delivery chain metadata is missing ${PHASE_ID} staged workflow declarations.`);
+  }
+
+  if (
+    skeleton.operatorReviewBoard?.board?.reviewOnlyDeliveryChainPath !== "release/REVIEW-ONLY-DELIVERY-CHAIN.json" ||
+    skeleton.operatorReviewBoard?.board?.activeDeliveryChainStageId !== "delivery-chain-operator-review" ||
+    skeleton.operatorReviewBoard?.board?.decisionHandoffPath !== "release/RELEASE-DECISION-HANDOFF.json" ||
+    skeleton.operatorReviewBoard?.board?.evidenceCloseoutPath !== "release/REVIEW-EVIDENCE-CLOSEOUT.json" ||
+    skeleton.operatorReviewBoard?.board?.activeReviewerQueueId !== "reviewer-queue-approval-orchestration" ||
+    skeleton.operatorReviewBoard?.board?.activeEscalationWindowId !== "escalation-window-approval-orchestration" ||
+    skeleton.operatorReviewBoard?.board?.activeCloseoutWindowId !== "closeout-window-approval-orchestration" ||
+    !Array.isArray(skeleton.operatorReviewBoard?.stages) ||
+    skeleton.operatorReviewBoard.stages.length < 5 ||
+    !Array.isArray(skeleton.operatorReviewBoard?.reviewerQueues) ||
+    skeleton.operatorReviewBoard.reviewerQueues.length < 5 ||
+    !Array.isArray(skeleton.operatorReviewBoard?.escalationWindows) ||
+    skeleton.operatorReviewBoard.escalationWindows.length < 5 ||
+    !Array.isArray(skeleton.operatorReviewBoard?.closeoutWindows) ||
+    skeleton.operatorReviewBoard.closeoutWindows.length < 5 ||
+    !Array.isArray(skeleton.operatorReviewBoard?.reviewerNotes) ||
+    skeleton.operatorReviewBoard.reviewerNotes.length < 3
+  ) {
+    throw new Error(`Operator review board metadata is missing ${PHASE_ID} board declarations.`);
+  }
+
+  if (
+    skeleton.releaseDecisionHandoff?.activeHandoffId !== "decision-handoff-approval-orchestration" ||
+    skeleton.releaseDecisionHandoff?.activeReviewerQueueId !== "reviewer-queue-approval-orchestration" ||
+    skeleton.releaseDecisionHandoff?.activeDeliveryChainStageId !== "delivery-chain-operator-review" ||
+    skeleton.releaseDecisionHandoff?.reviewOnlyDeliveryChainPath !== "release/REVIEW-ONLY-DELIVERY-CHAIN.json" ||
+    !Array.isArray(skeleton.releaseDecisionHandoff?.handoffs) ||
+    skeleton.releaseDecisionHandoff.handoffs.length < 5 ||
+    !Array.isArray(skeleton.releaseDecisionHandoff?.blockedBy) ||
+    skeleton.releaseDecisionHandoff.blockedBy.length < 3
+  ) {
+    throw new Error(`Release decision handoff metadata is missing ${PHASE_ID} handoff declarations.`);
+  }
+
+  if (
+    skeleton.reviewEvidenceCloseout?.activeCloseoutId !== "evidence-closeout-approval-orchestration" ||
+    skeleton.reviewEvidenceCloseout?.activeCloseoutWindowId !== "closeout-window-approval-orchestration" ||
+    skeleton.reviewEvidenceCloseout?.activeDeliveryChainStageId !== "delivery-chain-operator-review" ||
+    skeleton.reviewEvidenceCloseout?.reviewOnlyDeliveryChainPath !== "release/REVIEW-ONLY-DELIVERY-CHAIN.json" ||
+    !Array.isArray(skeleton.reviewEvidenceCloseout?.closeouts) ||
+    skeleton.reviewEvidenceCloseout.closeouts.length < 5 ||
+    !Array.isArray(skeleton.reviewEvidenceCloseout?.closeoutWindows) ||
+    skeleton.reviewEvidenceCloseout.closeoutWindows.length < 5 ||
+    !Array.isArray(skeleton.reviewEvidenceCloseout?.blockedBy) ||
+    skeleton.reviewEvidenceCloseout.blockedBy.length < 3
+  ) {
+    throw new Error(`Review evidence closeout metadata is missing ${PHASE_ID} closeout declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.installerTargets?.targets) || skeleton.installerTargets.targets.length < 7) {
+    throw new Error(`Installer targets are missing ${PHASE_ID} target declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.installerBuilderExecutionSkeleton?.executions) || skeleton.installerBuilderExecutionSkeleton.executions.length < 7) {
+    throw new Error(`Installer builder execution skeleton is missing ${PHASE_ID} execution declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.installerTargetBuilderSkeleton?.builders) || skeleton.installerTargetBuilderSkeleton.builders.length < 7) {
+    throw new Error(`Installer-target builder skeleton is missing ${PHASE_ID} builder declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.installerBuilderOrchestration?.flows) || skeleton.installerBuilderOrchestration.flows.length < 3) {
+    throw new Error(`Installer builder orchestration is missing ${PHASE_ID} orchestration declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.installerChannelRouting?.routes) || skeleton.installerChannelRouting.routes.length < 3) {
+    throw new Error(`Installer channel routing is missing ${PHASE_ID} routing declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.channelPromotionEvidence?.promotions) || skeleton.channelPromotionEvidence.promotions.length < 2) {
+    throw new Error(`Channel promotion evidence is missing ${PHASE_ID} promotion declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.promotionApplyReadiness?.readiness) || skeleton.promotionApplyReadiness.readiness.length < 2) {
+    throw new Error(`Promotion apply readiness is missing ${PHASE_ID} readiness declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.promotionApplyManifests?.manifests) || skeleton.promotionApplyManifests.manifests.length < 2) {
+    throw new Error(`Promotion apply manifests are missing ${PHASE_ID} manifest declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.promotionExecutionCheckpoints?.checkpoints) || skeleton.promotionExecutionCheckpoints.checkpoints.length < 2) {
+    throw new Error(`Promotion execution checkpoints are missing ${PHASE_ID} checkpoint declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.promotionOperatorHandoffRails?.rails) || skeleton.promotionOperatorHandoffRails.rails.length < 2) {
+    throw new Error(`Promotion operator handoff rails are missing ${PHASE_ID} handoff declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.promotionStagedApplyLedgers?.ledgers) || skeleton.promotionStagedApplyLedgers.ledgers.length < 2) {
+    throw new Error(`Promotion staged-apply ledgers are missing ${PHASE_ID} staged-apply declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.promotionStagedApplyRunsheets?.runsheets) || skeleton.promotionStagedApplyRunsheets.runsheets.length < 2) {
+    throw new Error(`Promotion staged-apply runsheets are missing ${PHASE_ID} runsheet declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.promotionStagedApplyCommandSheets?.commandSheets) || skeleton.promotionStagedApplyCommandSheets.commandSheets.length < 2) {
+    throw new Error(`Promotion staged-apply command sheets are missing ${PHASE_ID} command-sheet declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.promotionStagedApplyConfirmationLedgers?.ledgers) || skeleton.promotionStagedApplyConfirmationLedgers.ledgers.length < 2) {
+    throw new Error(`Promotion staged-apply confirmation ledgers are missing ${PHASE_ID} confirmation-ledger declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.promotionStagedApplyCloseoutJournals?.journals) || skeleton.promotionStagedApplyCloseoutJournals.journals.length < 2) {
+    throw new Error(`Promotion staged-apply closeout journals are missing ${PHASE_ID} closeout-journal declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.promotionStagedApplySignoffSheets?.signoffSheets) || skeleton.promotionStagedApplySignoffSheets.signoffSheets.length < 2) {
+    throw new Error(`Promotion staged-apply signoff sheets are missing ${PHASE_ID} signoff-sheet declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.promotionStagedApplyReleaseDecisionEnforcementContracts?.contracts) || skeleton.promotionStagedApplyReleaseDecisionEnforcementContracts.contracts.length < 2) {
+    throw new Error(`Promotion staged-apply release decision enforcement contracts are missing ${PHASE_ID} enforcement-contract declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.promotionStagedApplyReleaseDecisionEnforcementLifecycle?.lifecycles) || skeleton.promotionStagedApplyReleaseDecisionEnforcementLifecycle.lifecycles.length < 2) {
+    throw new Error(`Promotion staged-apply release decision enforcement lifecycle is missing ${PHASE_ID} lifecycle declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.signingMetadata?.readiness) || skeleton.signingMetadata.readiness.length < 3) {
+    throw new Error(`Signing metadata is missing ${PHASE_ID} readiness declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.notarizationPlan?.platforms) || skeleton.notarizationPlan.platforms.length < 3) {
+    throw new Error(`Notarization plan is missing ${PHASE_ID} platform declarations.`);
+  }
+
+  if (
+    skeleton.signingPublishGatingHandshake?.canHandshake !== false ||
+    skeleton.signingPublishGatingHandshake?.sealedBundleIntegrityContractPath !== "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json" ||
+    skeleton.signingPublishGatingHandshake?.attestationVerificationPacksPath !== "release/ATTESTATION-VERIFICATION-PACKS.json" ||
+    skeleton.signingPublishGatingHandshake?.attestationApplyAuditPacksPath !== "release/ATTESTATION-APPLY-AUDIT-PACKS.json" ||
+    skeleton.signingPublishGatingHandshake?.attestationApplyExecutionPacketsPath !== "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json" ||
+    skeleton.signingPublishGatingHandshake?.attestationOperatorWorklistsPath !== "release/ATTESTATION-OPERATOR-WORKLISTS.json" ||
+    skeleton.signingPublishGatingHandshake?.attestationOperatorDispatchManifestsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json" ||
+    skeleton.signingPublishGatingHandshake?.attestationOperatorDispatchReceiptsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" ||
+    skeleton.signingPublishGatingHandshake?.attestationOperatorReconciliationLedgersPath !== "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" ||
+    skeleton.signingPublishGatingHandshake?.attestationOperatorSettlementPacksPath !== "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" ||
+    skeleton.signingPublishGatingHandshake?.attestationOperatorApprovalRoutingContractsPath !== "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json" ||
+    skeleton.signingPublishGatingHandshake?.attestationOperatorApprovalOrchestrationPath !== "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json" ||
+    skeleton.signingPublishGatingHandshake?.channelPromotionEvidencePath !== "release/CHANNEL-PROMOTION-EVIDENCE.json" ||
+    skeleton.signingPublishGatingHandshake?.publishRollbackHandshakePath !== "release/PUBLISH-ROLLBACK-HANDSHAKE.json" ||
+    skeleton.signingPublishGatingHandshake?.promotionStagedApplyRunsheetsPath !== "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json" ||
+    skeleton.signingPublishGatingHandshake?.promotionStagedApplyConfirmationLedgersPath !== "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json" ||
+    skeleton.signingPublishGatingHandshake?.promotionStagedApplyCloseoutJournalsPath !== "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json" ||
+    skeleton.signingPublishGatingHandshake?.promotionStagedApplySignoffSheetsPath !== "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json" ||
+    skeleton.signingPublishGatingHandshake?.promotionStagedApplyReleaseDecisionEnforcementContractsPath !== "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json" ||
+    skeleton.signingPublishGatingHandshake?.promotionStagedApplyReleaseDecisionEnforcementLifecyclePath !== "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json" ||
+    skeleton.signingPublishGatingHandshake?.rollbackCutoverHandoffPlansPath !== "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json" ||
+    skeleton.signingPublishGatingHandshake?.rollbackCutoverExecutionRecordsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json" ||
+    skeleton.signingPublishGatingHandshake?.rollbackCutoverOutcomeReportsPath !== "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json" ||
+    skeleton.signingPublishGatingHandshake?.rollbackCutoverPublicationBundlesPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" ||
+    skeleton.signingPublishGatingHandshake?.rollbackCutoverPublicationReceiptCloseoutContractsPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json" ||
+    skeleton.signingPublishGatingHandshake?.rollbackCutoverPublicationReceiptSettlementCloseoutPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json" ||
+    !Array.isArray(skeleton.signingPublishGatingHandshake?.stages) ||
+    skeleton.signingPublishGatingHandshake.stages.length < 15 ||
+    !Array.isArray(skeleton.signingPublishGatingHandshake?.acknowledgements) ||
+    skeleton.signingPublishGatingHandshake.acknowledgements.length < 14
+  ) {
+    throw new Error(`Signing-publish gating handshake is missing ${PHASE_ID} handshake declarations.`);
+  }
+
+  if (
+    skeleton.signingPublishPipeline?.sealedBundleIntegrityContractPath !== "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json" ||
+    skeleton.signingPublishPipeline?.attestationVerificationPacksPath !== "release/ATTESTATION-VERIFICATION-PACKS.json" ||
+    skeleton.signingPublishPipeline?.attestationApplyAuditPacksPath !== "release/ATTESTATION-APPLY-AUDIT-PACKS.json" ||
+    skeleton.signingPublishPipeline?.attestationApplyExecutionPacketsPath !== "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json" ||
+    skeleton.signingPublishPipeline?.attestationOperatorWorklistsPath !== "release/ATTESTATION-OPERATOR-WORKLISTS.json" ||
+    skeleton.signingPublishPipeline?.attestationOperatorDispatchManifestsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json" ||
+    skeleton.signingPublishPipeline?.attestationOperatorDispatchReceiptsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" ||
+    skeleton.signingPublishPipeline?.attestationOperatorReconciliationLedgersPath !== "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" ||
+    skeleton.signingPublishPipeline?.attestationOperatorSettlementPacksPath !== "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" ||
+    skeleton.signingPublishPipeline?.attestationOperatorApprovalRoutingContractsPath !== "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json" ||
+    skeleton.signingPublishPipeline?.attestationOperatorApprovalOrchestrationPath !== "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json" ||
+    skeleton.signingPublishPipeline?.gatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
+    skeleton.signingPublishPipeline?.approvalBridgePath !== "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json" ||
+    skeleton.signingPublishPipeline?.channelRoutingPath !== "release/INSTALLER-CHANNEL-ROUTING.json" ||
+    skeleton.signingPublishPipeline?.channelPromotionEvidencePath !== "release/CHANNEL-PROMOTION-EVIDENCE.json" ||
+    skeleton.signingPublishPipeline?.promotionApplyManifestsPath !== "release/PROMOTION-APPLY-MANIFESTS.json" ||
+    skeleton.signingPublishPipeline?.promotionExecutionCheckpointsPath !== "release/PROMOTION-EXECUTION-CHECKPOINTS.json" ||
+    skeleton.signingPublishPipeline?.promotionOperatorHandoffRailsPath !== "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json" ||
+    skeleton.signingPublishPipeline?.promotionStagedApplyLedgersPath !== "release/PROMOTION-STAGED-APPLY-LEDGERS.json" ||
+    skeleton.signingPublishPipeline?.promotionStagedApplyRunsheetsPath !== "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json" ||
+    skeleton.signingPublishPipeline?.promotionStagedApplyConfirmationLedgersPath !== "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json" ||
+    skeleton.signingPublishPipeline?.promotionStagedApplyCloseoutJournalsPath !== "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json" ||
+    skeleton.signingPublishPipeline?.promotionStagedApplySignoffSheetsPath !== "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json" ||
+    skeleton.signingPublishPipeline?.promotionStagedApplyReleaseDecisionEnforcementContractsPath !== "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json" ||
+    skeleton.signingPublishPipeline?.promotionStagedApplyReleaseDecisionEnforcementLifecyclePath !== "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json" ||
+    skeleton.signingPublishPipeline?.promotionHandshakePath !== "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json" ||
+    skeleton.signingPublishPipeline?.publishRollbackHandshakePath !== "release/PUBLISH-ROLLBACK-HANDSHAKE.json" ||
+    skeleton.signingPublishPipeline?.rollbackExecutionRehearsalLedgerPath !== "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json" ||
+    skeleton.signingPublishPipeline?.rollbackOperatorDrillbooksPath !== "release/ROLLBACK-OPERATOR-DRILLBOOKS.json" ||
+    skeleton.signingPublishPipeline?.rollbackLiveReadinessContractsPath !== "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json" ||
+    skeleton.signingPublishPipeline?.rollbackCutoverReadinessMapsPath !== "release/ROLLBACK-CUTOVER-READINESS-MAPS.json" ||
+    skeleton.signingPublishPipeline?.rollbackCutoverHandoffPlansPath !== "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json" ||
+    skeleton.signingPublishPipeline?.rollbackCutoverExecutionRecordsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json" ||
+    skeleton.signingPublishPipeline?.rollbackCutoverOutcomeReportsPath !== "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json" ||
+    skeleton.signingPublishPipeline?.rollbackCutoverPublicationBundlesPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" ||
+    skeleton.signingPublishPipeline?.rollbackCutoverPublicationReceiptCloseoutContractsPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json" ||
+    skeleton.signingPublishPipeline?.rollbackCutoverPublicationReceiptSettlementCloseoutPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json" ||
+    !Array.isArray(skeleton.signingPublishPipeline?.stages) ||
+    skeleton.signingPublishPipeline.stages.length < 27
+  ) {
+    throw new Error(`Signing & publish pipeline is missing ${PHASE_ID} pipeline declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.signingPublishApprovalBridge?.bridge) || skeleton.signingPublishApprovalBridge.bridge.length < 9) {
+    throw new Error(`Signing-publish approval bridge is missing ${PHASE_ID} bridge declarations.`);
+  }
+
+  if (
+    skeleton.signingPublishPromotionHandshake?.channelRoutingPath !== "release/INSTALLER-CHANNEL-ROUTING.json" ||
+    skeleton.signingPublishPromotionHandshake?.sealedBundleIntegrityContractPath !== "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json" ||
+    skeleton.signingPublishPromotionHandshake?.channelPromotionEvidencePath !== "release/CHANNEL-PROMOTION-EVIDENCE.json" ||
+    skeleton.signingPublishPromotionHandshake?.attestationApplyAuditPacksPath !== "release/ATTESTATION-APPLY-AUDIT-PACKS.json" ||
+    skeleton.signingPublishPromotionHandshake?.attestationApplyExecutionPacketsPath !== "release/ATTESTATION-APPLY-EXECUTION-PACKETS.json" ||
+    skeleton.signingPublishPromotionHandshake?.attestationOperatorWorklistsPath !== "release/ATTESTATION-OPERATOR-WORKLISTS.json" ||
+    skeleton.signingPublishPromotionHandshake?.attestationOperatorDispatchManifestsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json" ||
+    skeleton.signingPublishPromotionHandshake?.attestationOperatorDispatchReceiptsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" ||
+    skeleton.signingPublishPromotionHandshake?.attestationOperatorReconciliationLedgersPath !== "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" ||
+    skeleton.signingPublishPromotionHandshake?.attestationOperatorSettlementPacksPath !== "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" ||
+    skeleton.signingPublishPromotionHandshake?.attestationOperatorApprovalRoutingContractsPath !== "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json" ||
+    skeleton.signingPublishPromotionHandshake?.attestationOperatorApprovalOrchestrationPath !== "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json" ||
+    skeleton.signingPublishPromotionHandshake?.promotionApplyManifestsPath !== "release/PROMOTION-APPLY-MANIFESTS.json" ||
+    skeleton.signingPublishPromotionHandshake?.promotionExecutionCheckpointsPath !== "release/PROMOTION-EXECUTION-CHECKPOINTS.json" ||
+    skeleton.signingPublishPromotionHandshake?.promotionOperatorHandoffRailsPath !== "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json" ||
+    skeleton.signingPublishPromotionHandshake?.promotionStagedApplyLedgersPath !== "release/PROMOTION-STAGED-APPLY-LEDGERS.json" ||
+    skeleton.signingPublishPromotionHandshake?.promotionStagedApplyRunsheetsPath !== "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json" ||
+    skeleton.signingPublishPromotionHandshake?.promotionStagedApplyConfirmationLedgersPath !== "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json" ||
+    skeleton.signingPublishPromotionHandshake?.promotionStagedApplyCloseoutJournalsPath !== "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json" ||
+    skeleton.signingPublishPromotionHandshake?.promotionStagedApplySignoffSheetsPath !== "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json" ||
+    skeleton.signingPublishPromotionHandshake?.promotionStagedApplyReleaseDecisionEnforcementContractsPath !== "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json" ||
+    skeleton.signingPublishPromotionHandshake?.promotionStagedApplyReleaseDecisionEnforcementLifecyclePath !== "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json" ||
+    skeleton.signingPublishPromotionHandshake?.publishRollbackHandshakePath !== "release/PUBLISH-ROLLBACK-HANDSHAKE.json" ||
+    skeleton.signingPublishPromotionHandshake?.rollbackCutoverHandoffPlansPath !== "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json" ||
+    skeleton.signingPublishPromotionHandshake?.rollbackCutoverExecutionRecordsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json" ||
+    skeleton.signingPublishPromotionHandshake?.rollbackCutoverOutcomeReportsPath !== "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json" ||
+    skeleton.signingPublishPromotionHandshake?.rollbackCutoverPublicationBundlesPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" ||
+    skeleton.signingPublishPromotionHandshake?.rollbackCutoverPublicationReceiptCloseoutContractsPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json" ||
+    skeleton.signingPublishPromotionHandshake?.rollbackCutoverPublicationReceiptSettlementCloseoutPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json" ||
+    !Array.isArray(skeleton.signingPublishPromotionHandshake?.stages) ||
+    skeleton.signingPublishPromotionHandshake.stages.length < 14 ||
+    !Array.isArray(skeleton.signingPublishPromotionHandshake?.acknowledgements) ||
+    skeleton.signingPublishPromotionHandshake.acknowledgements.length < 14
+  ) {
+    throw new Error(`Signing-publish promotion handshake is missing ${PHASE_ID} promotion declarations.`);
+  }
+
+  if (
+    skeleton.publishRollbackHandshake?.sealedBundleIntegrityContractPath !== "release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json" ||
+    skeleton.publishRollbackHandshake?.channelPromotionEvidencePath !== "release/CHANNEL-PROMOTION-EVIDENCE.json" ||
+    skeleton.publishRollbackHandshake?.attestationOperatorDispatchManifestsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json" ||
+    skeleton.publishRollbackHandshake?.attestationOperatorDispatchReceiptsPath !== "release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json" ||
+    skeleton.publishRollbackHandshake?.attestationOperatorReconciliationLedgersPath !== "release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json" ||
+    skeleton.publishRollbackHandshake?.attestationOperatorSettlementPacksPath !== "release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json" ||
+    skeleton.publishRollbackHandshake?.attestationOperatorApprovalRoutingContractsPath !== "release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json" ||
+    skeleton.publishRollbackHandshake?.attestationOperatorApprovalOrchestrationPath !== "release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json" ||
+    skeleton.publishRollbackHandshake?.promotionHandshakePath !== "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json" ||
+    skeleton.publishRollbackHandshake?.promotionExecutionCheckpointsPath !== "release/PROMOTION-EXECUTION-CHECKPOINTS.json" ||
+    skeleton.publishRollbackHandshake?.promotionOperatorHandoffRailsPath !== "release/PROMOTION-OPERATOR-HANDOFF-RAILS.json" ||
+    skeleton.publishRollbackHandshake?.promotionStagedApplyLedgersPath !== "release/PROMOTION-STAGED-APPLY-LEDGERS.json" ||
+    skeleton.publishRollbackHandshake?.promotionStagedApplyRunsheetsPath !== "release/PROMOTION-STAGED-APPLY-RUNSHEETS.json" ||
+    skeleton.publishRollbackHandshake?.promotionStagedApplyConfirmationLedgersPath !== "release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json" ||
+    skeleton.publishRollbackHandshake?.promotionStagedApplyCloseoutJournalsPath !== "release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json" ||
+    skeleton.publishRollbackHandshake?.promotionStagedApplySignoffSheetsPath !== "release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json" ||
+    skeleton.publishRollbackHandshake?.promotionStagedApplyReleaseDecisionEnforcementContractsPath !== "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json" ||
+    skeleton.publishRollbackHandshake?.promotionStagedApplyReleaseDecisionEnforcementLifecyclePath !== "release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json" ||
+    skeleton.publishRollbackHandshake?.rollbackExecutionRehearsalLedgerPath !== "release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json" ||
+    skeleton.publishRollbackHandshake?.rollbackOperatorDrillbooksPath !== "release/ROLLBACK-OPERATOR-DRILLBOOKS.json" ||
+    skeleton.publishRollbackHandshake?.rollbackLiveReadinessContractsPath !== "release/ROLLBACK-LIVE-READINESS-CONTRACTS.json" ||
+    skeleton.publishRollbackHandshake?.rollbackCutoverReadinessMapsPath !== "release/ROLLBACK-CUTOVER-READINESS-MAPS.json" ||
+    skeleton.publishRollbackHandshake?.rollbackCutoverHandoffPlansPath !== "release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json" ||
+    skeleton.publishRollbackHandshake?.rollbackCutoverExecutionRecordsPath !== "release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json" ||
+    skeleton.publishRollbackHandshake?.rollbackCutoverOutcomeReportsPath !== "release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json" ||
+    skeleton.publishRollbackHandshake?.rollbackCutoverPublicationBundlesPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json" ||
+    skeleton.publishRollbackHandshake?.rollbackCutoverPublicationReceiptCloseoutContractsPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json" ||
+    skeleton.publishRollbackHandshake?.rollbackCutoverPublicationReceiptSettlementCloseoutPath !== "release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json" ||
+    !Array.isArray(skeleton.publishRollbackHandshake?.paths) ||
+    skeleton.publishRollbackHandshake.paths.length < 2 ||
+    !Array.isArray(skeleton.publishRollbackHandshake?.stages) ||
+    skeleton.publishRollbackHandshake.stages.length < 12 ||
+    !Array.isArray(skeleton.publishRollbackHandshake?.acknowledgements) ||
+    skeleton.publishRollbackHandshake.acknowledgements.length < 12
+  ) {
+    throw new Error(`Publish rollback handshake is missing ${PHASE_ID} rollback declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.rollbackRecoveryLedger?.ledgers) || skeleton.rollbackRecoveryLedger.ledgers.length < 2) {
+    throw new Error(`Rollback recovery ledger is missing ${PHASE_ID} recovery declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.rollbackExecutionRehearsalLedger?.rehearsals) || skeleton.rollbackExecutionRehearsalLedger.rehearsals.length < 2) {
+    throw new Error(`Rollback execution rehearsal ledger is missing ${PHASE_ID} rehearsal declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.rollbackOperatorDrillbooks?.drillbooks) || skeleton.rollbackOperatorDrillbooks.drillbooks.length < 2) {
+    throw new Error(`Rollback operator drillbooks are missing ${PHASE_ID} operator declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.rollbackLiveReadinessContracts?.contracts) || skeleton.rollbackLiveReadinessContracts.contracts.length < 2) {
+    throw new Error(`Rollback live-readiness contracts are missing ${PHASE_ID} readiness declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.rollbackCutoverReadinessMaps?.maps) || skeleton.rollbackCutoverReadinessMaps.maps.length < 2) {
+    throw new Error(`Rollback cutover readiness maps are missing ${PHASE_ID} cutover declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.rollbackCutoverHandoffPlans?.plans) || skeleton.rollbackCutoverHandoffPlans.plans.length < 2) {
+    throw new Error(`Rollback cutover handoff plans are missing ${PHASE_ID} handoff declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.rollbackCutoverExecutionChecklists?.checklists) || skeleton.rollbackCutoverExecutionChecklists.checklists.length < 2) {
+    throw new Error(`Rollback cutover execution checklists are missing ${PHASE_ID} execution-checklist declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.rollbackCutoverExecutionRecords?.records) || skeleton.rollbackCutoverExecutionRecords.records.length < 2) {
+    throw new Error(`Rollback cutover execution records are missing ${PHASE_ID} execution-record declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.rollbackCutoverOutcomeReports?.reports) || skeleton.rollbackCutoverOutcomeReports.reports.length < 2) {
+    throw new Error(`Rollback cutover outcome reports are missing ${PHASE_ID} outcome-report declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.rollbackCutoverPublicationBundles?.bundles) || skeleton.rollbackCutoverPublicationBundles.bundles.length < 2) {
+    throw new Error(`Rollback cutover publication bundles are missing ${PHASE_ID} publication-bundle declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.rollbackCutoverPublicationReceiptCloseoutContracts?.contracts) || skeleton.rollbackCutoverPublicationReceiptCloseoutContracts.contracts.length < 2) {
+    throw new Error(`Rollback cutover publication receipt closeout contracts are missing ${PHASE_ID} closeout-contract declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.rollbackCutoverPublicationReceiptSettlementCloseout?.closeouts) || skeleton.rollbackCutoverPublicationReceiptSettlementCloseout.closeouts.length < 2) {
+    throw new Error(`Rollback cutover publication receipt settlement closeout is missing ${PHASE_ID} settlement-closeout declarations.`);
+  }
+
+  if (
+    skeleton.releaseApprovalWorkflow?.mode !== "local-only-review" ||
+    skeleton.releaseApprovalWorkflow?.gatingHandshakePath !== "release/SIGNING-PUBLISH-GATING-HANDSHAKE.json" ||
+    skeleton.releaseApprovalWorkflow?.approvalBridgePath !== "release/SIGNING-PUBLISH-APPROVAL-BRIDGE.json" ||
+    skeleton.releaseApprovalWorkflow?.promotionHandshakePath !== "release/SIGNING-PUBLISH-PROMOTION-HANDSHAKE.json" ||
+    skeleton.releaseApprovalWorkflow?.reviewOnlyDeliveryChainPath !== "release/REVIEW-ONLY-DELIVERY-CHAIN.json" ||
+    skeleton.releaseApprovalWorkflow?.operatorReviewBoardPath !== "release/OPERATOR-REVIEW-BOARD.json" ||
+    skeleton.releaseApprovalWorkflow?.releaseDecisionHandoffPath !== "release/RELEASE-DECISION-HANDOFF.json" ||
+    skeleton.releaseApprovalWorkflow?.reviewEvidenceCloseoutPath !== "release/REVIEW-EVIDENCE-CLOSEOUT.json" ||
+    !Array.isArray(skeleton.releaseApprovalWorkflow?.stages) ||
+    skeleton.releaseApprovalWorkflow.stages.length < 8
+  ) {
+    throw new Error(`Release approval workflow is missing ${PHASE_ID} approval declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.publishGates?.gates) || skeleton.publishGates.gates.length < 21) {
+    throw new Error(`Publish gates are missing ${PHASE_ID} gating declarations.`);
+  }
+
+  if (!Array.isArray(skeleton.promotionGates?.promotions) || skeleton.promotionGates.promotions.length < 2) {
+    throw new Error(`Promotion gates are missing ${PHASE_ID} promotion declarations.`);
+  }
+
+  if (
+    !skeleton.packageReadme.includes(`${PHASE_ID} alpha-shell release skeleton`) ||
+    !skeleton.packageReadme.includes("Delivery-chain Workspace") ||
+    !skeleton.packageReadme.includes("Stage Explorer") ||
+    !skeleton.packageReadme.includes("正式 installer 仍缺什么") ||
+    !skeleton.packageReadme.includes("artifacts/renderer") ||
+    !skeleton.packageReadme.includes("release/PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json") ||
+    !skeleton.packageReadme.includes("release/SEALED-BUNDLE-INTEGRITY-CONTRACT.json") ||
+    !skeleton.packageReadme.includes("release/INTEGRITY-ATTESTATION-EVIDENCE.json") ||
+    !skeleton.packageReadme.includes("release/ATTESTATION-VERIFICATION-PACKS.json") ||
+    !skeleton.packageReadme.includes("release/ATTESTATION-APPLY-AUDIT-PACKS.json") ||
+    !skeleton.packageReadme.includes("release/ATTESTATION-APPLY-EXECUTION-PACKETS.json") ||
+    !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-WORKLISTS.json") ||
+    !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json") ||
+    !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-DISPATCH-PACKETS.json") ||
+    !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json") ||
+    !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json") ||
+    !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json") ||
+    !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json") ||
+    !skeleton.packageReadme.includes("release/ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json") ||
+    !skeleton.packageReadme.includes("release/REVIEW-ONLY-DELIVERY-CHAIN.json") ||
+    !skeleton.packageReadme.includes("release/OPERATOR-REVIEW-BOARD.json") ||
+    !skeleton.packageReadme.includes("release/RELEASE-DECISION-HANDOFF.json") ||
+    !skeleton.packageReadme.includes("release/REVIEW-EVIDENCE-CLOSEOUT.json") ||
+    !skeleton.packageReadme.includes("release/RELEASE-QA-CLOSEOUT-READINESS.json") ||
+    !skeleton.packageReadme.includes("release/APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT.json") ||
+    !skeleton.packageReadme.includes("release/CHANNEL-PROMOTION-EVIDENCE.json") ||
+    !skeleton.packageReadme.includes("release/PROMOTION-APPLY-READINESS.json") ||
+    !skeleton.packageReadme.includes("release/PROMOTION-APPLY-MANIFESTS.json") ||
+    !skeleton.packageReadme.includes("release/PROMOTION-EXECUTION-CHECKPOINTS.json") ||
+    !skeleton.packageReadme.includes("release/PROMOTION-OPERATOR-HANDOFF-RAILS.json") ||
+    !skeleton.packageReadme.includes("release/PROMOTION-STAGED-APPLY-LEDGERS.json") ||
+    !skeleton.packageReadme.includes("release/PROMOTION-STAGED-APPLY-RUNSHEETS.json") ||
+    !skeleton.packageReadme.includes("release/PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json") ||
+    !skeleton.packageReadme.includes("release/PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json") ||
+    !skeleton.packageReadme.includes("release/PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json") ||
+    !skeleton.packageReadme.includes("release/PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json") ||
+    !skeleton.packageReadme.includes("release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json") ||
+    !skeleton.packageReadme.includes("release/PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json") ||
+    !skeleton.packageReadme.includes("release/PUBLISH-ROLLBACK-HANDSHAKE.json") ||
+    !skeleton.packageReadme.includes("release/ROLLBACK-RECOVERY-LEDGER.json") ||
+    !skeleton.packageReadme.includes("release/ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json") ||
+    !skeleton.packageReadme.includes("release/ROLLBACK-OPERATOR-DRILLBOOKS.json") ||
+    !skeleton.packageReadme.includes("release/ROLLBACK-LIVE-READINESS-CONTRACTS.json") ||
+    !skeleton.packageReadme.includes("release/ROLLBACK-CUTOVER-READINESS-MAPS.json") ||
+    !skeleton.packageReadme.includes("release/ROLLBACK-CUTOVER-HANDOFF-PLANS.json") ||
+    !skeleton.packageReadme.includes("release/ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json") ||
+    !skeleton.packageReadme.includes("release/ROLLBACK-CUTOVER-EXECUTION-RECORDS.json") ||
+    !skeleton.packageReadme.includes("release/ROLLBACK-CUTOVER-OUTCOME-REPORTS.json") ||
+    !skeleton.packageReadme.includes("release/ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json") ||
+    !skeleton.packageReadme.includes("release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json") ||
+    !skeleton.packageReadme.includes("release/ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json") ||
+    !skeleton.packageReadme.includes("scripts/install-placeholder.cjs")
+  ) {
+    throw new Error(`Generated package README is missing required ${PHASE_ID} packaging markers.`);
+  }
+
+  if (
+    !skeleton.releaseSummary?.includes(`${PHASE_TITLE} Release Summary`) ||
+    !skeleton.releaseSummary?.includes(REVIEW_STAGE_ID)
+  ) {
+    throw new Error(`Generated release summary is missing required ${PHASE_ID} review markers.`);
+  }
+
+  if (
+    !skeleton.releaseNotes?.includes(`${PHASE_TITLE} Release Notes`) ||
+    !skeleton.releaseNotes?.includes("Delivery-chain Workspace") ||
+    !skeleton.releaseNotes?.includes("Stage Explorer") ||
+    !skeleton.releaseNotes?.includes("attestation operator approval orchestration") ||
+    !skeleton.releaseNotes?.includes("operator review board") ||
+    !skeleton.releaseNotes?.includes("release decision handoff") ||
+    !skeleton.releaseNotes?.includes("review evidence closeout") ||
+    !skeleton.releaseNotes?.includes("packaged-app local materialization contract") ||
+    !skeleton.releaseNotes?.includes("local review packet") ||
+    !skeleton.releaseNotes?.includes("promotion staged-apply release decision enforcement lifecycle") ||
+    !skeleton.releaseNotes?.includes("rollback cutover publication receipt settlement closeout") ||
+    !skeleton.releaseNotes?.includes("release QA closeout readiness") ||
+    !skeleton.releaseNotes?.includes("Stage C entry") ||
+    !Array.isArray(skeleton.releaseQaCloseoutReadiness?.tracks) ||
+    !skeleton.releaseQaCloseoutReadiness?.activeTrackId ||
+    skeleton.releaseQaCloseoutReadiness.tracks.length < 4 ||
+    !skeleton.releaseQaCloseoutReadiness.tracks.every((track) => Array.isArray(track.checkpointIds) && track.checkpointIds.length > 0) ||
+    !Array.isArray(skeleton.approvalAuditRollbackEntryContract?.checkpoints) ||
+    !skeleton.approvalAuditRollbackEntryContract?.activeCheckpointId ||
+    skeleton.approvalAuditRollbackEntryContract.checkpoints.length < 4 ||
+    !skeleton.approvalAuditRollbackEntryContract.checkpoints.every(
+      (checkpoint) =>
+        checkpoint.deliveryChainStageId &&
+        Array.isArray(checkpoint.workflowStageIds) &&
+        checkpoint.workflowStageIds.length > 0 &&
+        Array.isArray(checkpoint.boundaryStepIds) &&
+        checkpoint.boundaryStepIds.length > 0 &&
+        Array.isArray(checkpoint.futureExecutorSlotIds) &&
+        checkpoint.futureExecutorSlotIds.length > 0
+    ) ||
+    !skeleton.approvalAuditRollbackEntryContract?.boundaryLinkage ||
+    !Array.isArray(skeleton.approvalAuditRollbackEntryContract.boundaryLinkage.withheldPlanStepIds) ||
+    skeleton.approvalAuditRollbackEntryContract.boundaryLinkage.withheldPlanStepIds.length < 4 ||
+    !Array.isArray(skeleton.approvalAuditRollbackEntryContract.boundaryLinkage.futureExecutorSlotIds) ||
+    skeleton.approvalAuditRollbackEntryContract.boundaryLinkage.futureExecutorSlotIds.length < 4 ||
+    !Array.isArray(skeleton.releaseApprovalWorkflow?.stages) ||
+    !skeleton.releaseApprovalWorkflow?.activeStageId ||
+    !skeleton.releaseApprovalWorkflow.stages.length ||
+    !skeleton.releaseApprovalWorkflow.stages.every(
+      (stage) =>
+        Array.isArray(stage.deliveryChainStageIds) &&
+        stage.deliveryChainStageIds.length > 0 &&
+        Array.isArray(stage.checkpointIds) &&
+        stage.checkpointIds.length > 0
+    ) ||
+    !skeleton.rollbackLiveReadinessContracts?.activeContractId ||
+    !skeleton.rollbackLiveReadinessContracts?.contracts?.every(
+      (contract) =>
+        contract.deliveryChainStageId &&
+        contract.checkpointId &&
+        Array.isArray(contract.boundaryStepIds) &&
+        contract.boundaryStepIds.length > 0 &&
+        Array.isArray(contract.futureExecutorSlotIds) &&
+        contract.futureExecutorSlotIds.length > 0
+    ) ||
+    !skeleton.signingPublishApprovalBridge?.bridge?.length ||
+    !skeleton.signingPublishPromotionHandshake?.stages?.length ||
+    !skeleton.signingPublishPipeline?.stages?.length ||
+    !skeleton.publishGates?.gates?.length ||
+    !skeleton.promotionGates?.promotions?.length
+  ) {
+    throw new Error(`Generated release notes or promotion gating are missing required ${PHASE_ID} markers.`);
+  }
+
+  if (
+    !skeleton.releaseChecklist.includes("npm run package:alpha") ||
+    !skeleton.releaseChecklist.includes("npm run release:plan") ||
+    !skeleton.releaseChecklist.includes("PACKAGED-APP-LOCAL-MATERIALIZATION-CONTRACT.json") ||
+    !skeleton.releaseChecklist.includes("review packet") ||
+    !skeleton.releaseChecklist.includes("SEALED-BUNDLE-INTEGRITY-CONTRACT.json") ||
+    !skeleton.releaseChecklist.includes("INTEGRITY-ATTESTATION-EVIDENCE.json") ||
+    !skeleton.releaseChecklist.includes("ATTESTATION-VERIFICATION-PACKS.json") ||
+    !skeleton.releaseChecklist.includes("ATTESTATION-APPLY-AUDIT-PACKS.json") ||
+    !skeleton.releaseChecklist.includes("ATTESTATION-APPLY-EXECUTION-PACKETS.json") ||
+    !skeleton.releaseChecklist.includes("ATTESTATION-OPERATOR-WORKLISTS.json") ||
+    !skeleton.releaseChecklist.includes("ATTESTATION-OPERATOR-DISPATCH-MANIFESTS.json") ||
+    !skeleton.releaseChecklist.includes("ATTESTATION-OPERATOR-DISPATCH-PACKETS.json") ||
+    !skeleton.releaseChecklist.includes("ATTESTATION-OPERATOR-DISPATCH-RECEIPTS.json") ||
+    !skeleton.releaseChecklist.includes("ATTESTATION-OPERATOR-RECONCILIATION-LEDGERS.json") ||
+    !skeleton.releaseChecklist.includes("ATTESTATION-OPERATOR-SETTLEMENT-PACKS.json") ||
+    !skeleton.releaseChecklist.includes("ATTESTATION-OPERATOR-APPROVAL-ROUTING-CONTRACTS.json") ||
+    !skeleton.releaseChecklist.includes("ATTESTATION-OPERATOR-APPROVAL-ORCHESTRATION.json") ||
+    !skeleton.releaseChecklist.includes("OPERATOR-REVIEW-BOARD.json") ||
+    !skeleton.releaseChecklist.includes("RELEASE-DECISION-HANDOFF.json") ||
+    !skeleton.releaseChecklist.includes("REVIEW-EVIDENCE-CLOSEOUT.json") ||
+    !skeleton.releaseChecklist.includes("RELEASE-QA-CLOSEOUT-READINESS.json") ||
+    !skeleton.releaseChecklist.includes("APPROVAL-AUDIT-ROLLBACK-ENTRY-CONTRACT.json") ||
+    !skeleton.releaseChecklist.includes("CHANNEL-PROMOTION-EVIDENCE.json") ||
+    !skeleton.releaseChecklist.includes("PROMOTION-APPLY-READINESS.json") ||
+    !skeleton.releaseChecklist.includes("PROMOTION-APPLY-MANIFESTS.json") ||
+    !skeleton.releaseChecklist.includes("PROMOTION-EXECUTION-CHECKPOINTS.json") ||
+    !skeleton.releaseChecklist.includes("PROMOTION-OPERATOR-HANDOFF-RAILS.json") ||
+    !skeleton.releaseChecklist.includes("PROMOTION-STAGED-APPLY-LEDGERS.json") ||
+    !skeleton.releaseChecklist.includes("PROMOTION-STAGED-APPLY-RUNSHEETS.json") ||
+    !skeleton.releaseChecklist.includes("PROMOTION-STAGED-APPLY-COMMAND-SHEETS.json") ||
+    !skeleton.releaseChecklist.includes("PROMOTION-STAGED-APPLY-CONFIRMATION-LEDGERS.json") ||
+    !skeleton.releaseChecklist.includes("PROMOTION-STAGED-APPLY-CLOSEOUT-JOURNALS.json") ||
+    !skeleton.releaseChecklist.includes("PROMOTION-STAGED-APPLY-SIGNOFF-SHEETS.json") ||
+    !skeleton.releaseChecklist.includes("PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-CONTRACTS.json") ||
+    !skeleton.releaseChecklist.includes("PROMOTION-STAGED-APPLY-RELEASE-DECISION-ENFORCEMENT-LIFECYCLE.json") ||
+    !skeleton.releaseChecklist.includes("PUBLISH-ROLLBACK-HANDSHAKE.json") ||
+    !skeleton.releaseChecklist.includes("ROLLBACK-RECOVERY-LEDGER.json") ||
+    !skeleton.releaseChecklist.includes("ROLLBACK-EXECUTION-REHEARSAL-LEDGER.json") ||
+    !skeleton.releaseChecklist.includes("ROLLBACK-OPERATOR-DRILLBOOKS.json") ||
+    !skeleton.releaseChecklist.includes("ROLLBACK-LIVE-READINESS-CONTRACTS.json") ||
+    !skeleton.releaseChecklist.includes("ROLLBACK-CUTOVER-READINESS-MAPS.json") ||
+    !skeleton.releaseChecklist.includes("ROLLBACK-CUTOVER-HANDOFF-PLANS.json") ||
+    !skeleton.releaseChecklist.includes("ROLLBACK-CUTOVER-EXECUTION-CHECKLISTS.json") ||
+    !skeleton.releaseChecklist.includes("ROLLBACK-CUTOVER-EXECUTION-RECORDS.json") ||
+    !skeleton.releaseChecklist.includes("ROLLBACK-CUTOVER-OUTCOME-REPORTS.json") ||
+    !skeleton.releaseChecklist.includes("ROLLBACK-CUTOVER-PUBLICATION-BUNDLES.json") ||
+    !skeleton.releaseChecklist.includes("ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-CLOSEOUT-CONTRACTS.json") ||
+    !skeleton.releaseChecklist.includes("ROLLBACK-CUTOVER-PUBLICATION-RECEIPT-SETTLEMENT-CLOSEOUT.json") ||
+    !skeleton.releaseChecklist.includes("RELEASE-APPROVAL-WORKFLOW.json") ||
+    !skeleton.releaseChecklist.includes("PROMOTION-GATES.json") ||
+    !skeleton.releaseChecklist.includes("INSTALLER-PLACEHOLDER.json")
+  ) {
+    throw new Error(`Generated release checklist is missing required ${PHASE_ID} verification commands or metadata files.`);
+  }
+
+  return {
+    phase: skeleton.releaseManifest.phase,
+    artifactGroups: skeleton.releaseManifest.artifactGroups.length,
+    artifactCount: skeleton.releaseManifest.artifacts.length,
+    installerStatus: skeleton.installerPlaceholder.status
+  };
+}
+
+async function main() {
+  const renderer = await verifyRendererBuild();
+  const rendererFocusedSlotUi = await verifyRendererFocusedSlotUi();
+  const bridge = await verifyBridgeFallback();
+  const runtime = await verifyElectronRuntime();
+  const runtimeActions = await verifyRuntimeActionContracts();
+  const hostBoundary = await verifyHostBoundaryActions();
+  const localControls = await verifyLocalConnectorControls();
+  const coupledHostPreview = await verifyLocalApplyCouplingPreviewReadiness();
+  const releaseSkeleton = verifyReleaseSkeletonContract();
+  const preflight = getPreflightSummary();
+
+  console.log("OpenClaw Studio alpha smoke passed.");
+  console.log(
+    `Renderer: ${renderer.indexHtmlPath} (${renderer.assetCount} assets, ${PHASE_ID}-markers=${rendererFocusedSlotUi.markerCount}, dashboard-css-audit=${rendererFocusedSlotUi.dashboardCssAuditCount})`
+  );
+  console.log(`Bridge fallback: ${bridge.appName} (${bridge.pageCount} pages)`);
+  console.log(
+    `Electron runtime: bridge=${runtime.bridge}, runtime=${runtime.runtime}, sessions=${runtime.sessions}, codexTasks=${runtime.codexTasks}, hostExecutor=${runtime.hostExecutorMode}, slots=${runtime.hostExecutorSlots}, handlers=${runtime.hostBridgeHandlers}, commands=${runtime.commandActions}, intents=${runtime.windowIntents}`
+  );
+  console.log(`Runtime action contracts: ${runtimeActions.status}${runtimeActions.detail ? ` (${runtimeActions.detail})` : ""}`);
+  console.log(`Host boundary actions: ${hostBoundary.status}${hostBoundary.detail ? ` (${hostBoundary.detail})` : ""}`);
+  console.log(
+    `Local connector controls: ${localControls.status}${localControls.detail ? ` (${localControls.detail})` : ""}${
+      typeof localControls.historyCount === "number" ? `, history=${localControls.historyCount}` : ""
+    }`
+  );
+  console.log(`Coupled host preview readiness: ${coupledHostPreview.status}${coupledHostPreview.detail ? ` (${coupledHostPreview.detail})` : ""}`);
+  console.log(
+    `Release skeleton: phase=${releaseSkeleton.phase}, groups=${releaseSkeleton.artifactGroups}, artifacts=${releaseSkeleton.artifactCount}, installer=${releaseSkeleton.installerStatus}`
+  );
+  console.log(`Start preflight: build=${preflight.buildReady ? "ready" : "missing"}, electron=${preflight.electron.available ? "ready" : "missing"}`);
+}
+
+main().catch((error) => {
+  const message = error instanceof Error ? error.message : String(error);
+
+  console.error(`OpenClaw Studio alpha smoke failed: ${message}`);
+  process.exit(1);
+});

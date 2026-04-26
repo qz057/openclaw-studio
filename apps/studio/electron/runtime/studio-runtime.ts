@@ -1,0 +1,1997 @@
+import {
+  type DockItem,
+  type HomeActivity,
+  type SessionSummary,
+  type SettingItem,
+  type SkillCatalogItem,
+  type SkillCatalogSection,
+  type StudioApi,
+  type StudioHostBridgeSlotChannel,
+  type StudioHostBridgeState,
+  type StudioHostTraceSlotState,
+  type StudioHostPreviewHandoff,
+  type StudioHermesEvent,
+  type StudioHermesSendMessageResult,
+  type StudioMetric,
+  type PerformanceMetrics,
+  type PerformanceAlert,
+  selectStudioReleaseCloseoutWindow,
+  selectStudioReleaseEscalationWindow,
+  selectStudioReleaseApprovalPipelineStage,
+  selectStudioReleaseReviewerQueue,
+  selectStudioWindowObservabilityActiveMapping,
+  type StudioShellState
+} from "@openclaw/shared";
+import { mockShellState } from "@openclaw/shared/mock-shell-state";
+import { probeLiveCodex } from "./probes/codex";
+import { connectHermesRuntime, disconnectHermesRuntime, loadHermesSessionMessages, loadHermesSnapshot, loadHermesState, sendHermesMessage, subscribeToHermesEvents } from "./probes/hermes";
+import {
+  loadHermesGatewayServiceState,
+  loadOpenClawGatewayServiceState,
+  startHermesGatewayService,
+  startOpenClawGatewayService,
+  stopHermesGatewayService,
+  stopOpenClawGatewayService
+} from "./probes/gateway-services";
+import { loadClaudeSessionMessages, loadClaudeSnapshot } from "./probes/claude-sessions";
+import { probeProjectContext } from "./probes/project-context";
+import { probeLiveRuntimeObservations } from "./probes/runtime-observations";
+import { probeLiveSessions, type LiveSessionProbe, type LiveSessionRecord } from "./probes/sessions";
+import { probeLiveSkills } from "./probes/skills";
+import { createOpenClawChatSession, loadOpenClawChatState, sendOpenClawChatTurn } from "./probes/openclaw-chat";
+import { loadHermesModelCatalog, loadOpenClawModelCatalog, setHermesModel, setOpenClawModel } from "./probes/model-config";
+import { createHermesSessionFromWSL } from "./probes/hermes";
+import { probeStartupRouting } from "./probes/startup-routing";
+import { probeLiveSystemStatus } from "./probes/system-status";
+import {
+  buildToolsMcpHostExecutorState,
+  buildToolsMcpShellBoundarySummary,
+  createToolsMcpLocalControlSession,
+  handoffToolsMcpHostPreview,
+  probeLiveToolsMcp,
+  readToolsMcpDetail,
+  runToolsMcpAction,
+  simulateToolsMcpHostPreviewHandoff,
+  type ToolsMcpLocalControlSession
+} from "./probes/tools-mcp";
+
+export type StudioRuntime = StudioApi & {
+  invokeHostBridgeSlot(channel: StudioHostBridgeSlotChannel, handoff: StudioHostPreviewHandoff | null): Promise<StudioHostPreviewHandoff | null>;
+};
+
+function cloneState(): StudioShellState {
+  return JSON.parse(JSON.stringify(mockShellState)) as StudioShellState;
+}
+
+function updateSettingItem(items: SettingItem[], id: string, patch: Partial<SettingItem>) {
+  return items.map((item) => (item.id === id ? { ...item, ...patch } : item));
+}
+
+function upsertSettingItem(items: SettingItem[], item: SettingItem): SettingItem[] {
+  return items.some((entry) => entry.id === item.id)
+    ? updateSettingItem(items, item.id, item)
+    : [...items, item];
+}
+
+function upsertSettingItems(items: SettingItem[], nextItems: SettingItem[]): SettingItem[] {
+  return nextItems.reduce((currentItems, item) => upsertSettingItem(currentItems, item), items);
+}
+
+function formatRelativeTime(timestampMs: number | null): string {
+  if (!timestampMs) {
+    return "Unknown";
+  }
+
+  const diffMs = Date.now() - timestampMs;
+
+  if (diffMs < 60_000) {
+    return "Just now";
+  }
+
+  const minutes = Math.floor(diffMs / 60_000);
+
+  if (minutes < 60) {
+    return `${minutes} min ago`;
+  }
+
+  const hours = Math.floor(minutes / 60);
+
+  if (hours < 24) {
+    return `${hours} hr ago`;
+  }
+
+  const days = Math.floor(hours / 24);
+  return `${days} day${days === 1 ? "" : "s"} ago`;
+}
+
+function deriveStatus(timestampMs: number | null): SessionSummary["status"] {
+  if (!timestampMs) {
+    return "waiting";
+  }
+
+  const ageMs = Date.now() - timestampMs;
+
+  if (ageMs < 8 * 60 * 60 * 1000) {
+    return "active";
+  }
+
+  if (ageMs < 48 * 60 * 60 * 1000) {
+    return "waiting";
+  }
+
+  return "complete";
+}
+
+function shortenHomePath(rawPath: string | null | undefined): string {
+  if (!rawPath) {
+    return "Unavailable";
+  }
+
+  const homeDirectory = process.env.HOME;
+
+  if (homeDirectory && rawPath.startsWith(homeDirectory)) {
+    return rawPath.replace(homeDirectory, "~");
+  }
+
+  return rawPath;
+}
+
+function formatCount(value: number, singular: string, plural = `${singular}s`): string {
+  return `${value} ${value === 1 ? singular : plural}`;
+}
+
+function formatModelLabel(provider: string | null | undefined, model: string | null | undefined): string {
+  if (provider && model) {
+    return `${provider}/${model}`;
+  }
+
+  if (model) {
+    return model;
+  }
+
+  if (provider) {
+    return provider;
+  }
+
+  return "Unknown";
+}
+
+function parseIsoTimestamp(value: string | null | undefined): number | null {
+  if (!value) {
+    return null;
+  }
+
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function formatBoundaryLayerLabel(layer: StudioShellState["boundary"]["currentLayer"]): string {
+  switch (layer) {
+    case "local-only":
+      return "Local-only";
+    case "preview-host":
+      return "Preview-host";
+    case "withheld":
+      return "Withheld";
+    default:
+      return "Future executor";
+  }
+}
+
+function formatBoundaryHostState(hostState: StudioShellState["boundary"]["hostState"]): string {
+  return hostState === "future-executor" ? "Future executor" : "Withheld";
+}
+
+function formatReviewPostureRelationship(
+  relationship: StudioShellState["windowing"]["observability"]["mappings"][number]["relationship"]
+): string {
+  switch (relationship) {
+    case "owns-current-posture":
+      return "Owns current posture";
+    case "mirrors-current-posture":
+      return "Mirrors current posture";
+    case "staged-for-handoff":
+      return "Staged for handoff";
+    case "blocked-upstream":
+      return "Blocked upstream";
+    case "escalation-shadow":
+      return "Escalation shadow";
+    default:
+      return "Blocked decision gate";
+  }
+}
+
+function createInspectorTraceFocus(boundary: StudioShellState["boundary"]) {
+  const trace = boundary.hostExecutor.bridge.trace;
+  return trace.slotRoster.find((entry) => entry.slotId === trace.focusSlotId) ?? trace.slotRoster[0] ?? null;
+}
+
+function createDockItemsFromTraceFocus(traceFocus: StudioHostTraceSlotState | null): DockItem[] {
+  if (!traceFocus) {
+    return [];
+  }
+
+  return [
+    {
+      id: "dock-focus-slot",
+      label: "Focus slot",
+      value: traceFocus.label,
+      detail: "Bottom dock follows the same per-slot focus as the inspector and trace roster.",
+      tone: "neutral",
+      slotId: traceFocus.slotId
+    },
+    {
+      id: "dock-focus-handler",
+      label: "Handler",
+      value: `${traceFocus.handlerState} / disabled`,
+      detail: traceFocus.handlerLabel,
+      tone: traceFocus.handlerState === "registered" ? "positive" : "warning",
+      slotId: traceFocus.slotId
+    },
+    {
+      id: "dock-focus-validator",
+      label: "Validator",
+      value: `${traceFocus.validatorState} / slot-linked`,
+      detail: `${traceFocus.validatorLabel} · ${traceFocus.requiredPayloadFieldCount} payload / ${traceFocus.requiredResultFieldCount} result fields`,
+      tone: traceFocus.validatorState === "registered" ? "positive" : "warning",
+      slotId: traceFocus.slotId
+    },
+    {
+      id: "dock-focus-result",
+      label: "Result",
+      value: `${traceFocus.primaryStatus} / ${traceFocus.primaryStage}`,
+      detail: `${traceFocus.failureCode} · ${traceFocus.failureDisposition}`,
+      tone: traceFocus.primaryStatus === "blocked" ? "neutral" : "warning",
+      slotId: traceFocus.slotId
+    },
+    {
+      id: "dock-focus-rollback",
+      label: "Rollback / audit",
+      value: `${traceFocus.rollbackDisposition} / placeholder`,
+      detail: "Rollback posture and placeholder audit linkage stay synchronized with the focused slot.",
+      tone: traceFocus.rollbackDisposition === "not-needed" ? "positive" : "warning",
+      slotId: traceFocus.slotId
+    }
+  ];
+}
+
+function getInteractiveSessions(sessionProbe: LiveSessionProbe): LiveSessionRecord[] {
+  return sessionProbe.sessionRecords.filter((session) => session.kind === "interactive");
+}
+
+function getCronBackedSessions(sessionProbe: LiveSessionProbe): LiveSessionRecord[] {
+  return sessionProbe.sessionRecords.filter((session) => session.kind === "cron");
+}
+
+function createMetrics(
+  bridgeMode: StudioShellState["status"]["bridge"],
+  sessionProbe: LiveSessionProbe,
+  interactiveSessions: LiveSessionRecord[],
+  cronBackedSessions: LiveSessionRecord[],
+  runtimeObservations: Awaited<ReturnType<typeof probeLiveRuntimeObservations>>
+): StudioMetric[] {
+  const hasLiveSessions = sessionProbe.source === "live" && sessionProbe.sessionRecords.length > 0;
+  const hasLiveRuntime = runtimeObservations.source === "live";
+
+  const bridgeMetric: StudioMetric = {
+    id: "metric-bridge",
+    label: "Bridge Mode",
+    value: bridgeMode === "hybrid" ? "Hybrid live" : "Mock IPC",
+    detail:
+      bridgeMode === "hybrid"
+        ? "System probes, recent sessions, and runtime observations are reading local OpenClaw data."
+        : "Renderer-safe mock data remains active until local runtime signals are available.",
+    tone: bridgeMode === "hybrid" ? "positive" : "warning"
+  };
+
+  const sessionsMetric: StudioMetric = hasLiveSessions
+    ? {
+        id: "metric-sessions",
+        label: "Recent Sessions",
+        value: formatCount(sessionProbe.sessionRecords.length, "session"),
+        detail: `${formatCount(interactiveSessions.length, "interactive session")}, ${formatCount(cronBackedSessions.length, "scheduled session")} across ${formatCount(
+          sessionProbe.agentCount,
+          "agent directory"
+        )}.`,
+        tone: "positive"
+      }
+    : {
+        id: "metric-sessions",
+        label: "Recent Sessions",
+        value: "Fallback",
+        detail: "Recent session JSONL files were unavailable, so the shell stayed on the typed mock snapshot.",
+        tone: "warning"
+      };
+
+  const runtimeMetric: StudioMetric = hasLiveRuntime
+    ? {
+        id: "metric-runtime",
+        label: "Runtime Footprint",
+        value: `${formatCount(runtimeObservations.configuredAgents.length, "agent")} / ${formatCount(
+          runtimeObservations.cronJobsCount,
+          "cron job"
+        )}`,
+        detail:
+          runtimeObservations.cronTotalRuns > 0
+            ? `${runtimeObservations.cronOkRuns} ok, ${runtimeObservations.cronErrorRuns} error across ${formatCount(
+                runtimeObservations.cronTotalRuns,
+                "run log"
+              )}.`
+            : "OpenClaw config was detected, but no cron run logs were available yet.",
+        tone: runtimeObservations.cronErrorRuns > 0 ? "warning" : "positive"
+      }
+    : {
+        id: "metric-runtime",
+        label: "Runtime Footprint",
+        value: "Fallback",
+        detail: "No local OpenClaw config or cron observations were available.",
+        tone: "warning"
+      };
+
+  const modelsMetric: StudioMetric = hasLiveRuntime
+    ? {
+        id: "metric-models",
+        label: "Model Coverage",
+        value: formatCount(runtimeObservations.modelCount, "model"),
+        detail:
+          runtimeObservations.modelLabels.length > 0
+            ? runtimeObservations.modelLabels.slice(0, 3).join(" · ")
+            : "Configured model labels were unavailable in the local runtime files.",
+        tone: runtimeObservations.modelCount > 0 ? "neutral" : "warning"
+      }
+    : {
+        id: "metric-models",
+        label: "Model Coverage",
+        value: "Unknown",
+        detail: "Model configuration remains mock-backed until local runtime config is readable.",
+        tone: "warning"
+      };
+
+  return [bridgeMetric, sessionsMetric, runtimeMetric, modelsMetric];
+}
+
+function createWorkstreams(
+  sessionProbe: LiveSessionProbe,
+  interactiveSessions: LiveSessionRecord[],
+  runtimeObservations: Awaited<ReturnType<typeof probeLiveRuntimeObservations>>
+): StudioShellState["dashboard"]["workstreams"] {
+  const latestInteractiveSession = interactiveSessions[0] ?? null;
+  const latestCronRun = runtimeObservations.recentCronRuns[0] ?? null;
+  const configTouchedAt = parseIsoTimestamp(runtimeObservations.lastTouchedAt);
+
+  return [
+    {
+      id: "workstream-interactive",
+      title: "Interactive session lane",
+      detail: latestInteractiveSession
+        ? `Latest operator session is “${latestInteractiveSession.title}” from ${shortenHomePath(latestInteractiveSession.cwd)}.`
+        : "No recent interactive session was detected in the local agent session directories.",
+      owner: latestInteractiveSession?.owner ?? "Runtime",
+      stage: latestInteractiveSession ? latestInteractiveSession.status : "Fallback",
+      updatedAt: latestInteractiveSession?.updatedAt ?? "Unknown",
+      tone: latestInteractiveSession ? (latestInteractiveSession.status === "active" ? "positive" : "neutral") : "warning"
+    },
+    {
+      id: "workstream-scheduled",
+      title: "Scheduled runtime lane",
+      detail: latestCronRun
+        ? `${runtimeObservations.cronOkRuns} ok / ${runtimeObservations.cronErrorRuns} error across ${formatCount(
+            runtimeObservations.cronTotalRuns,
+            "run log"
+          )}; latest job ${latestCronRun.jobId} finished ${latestCronRun.status}.`
+        : runtimeObservations.cronJobsCount > 0
+          ? "Cron jobs are configured locally, but no recent run logs were found."
+          : "No cron jobs are configured in the detected OpenClaw runtime.",
+      owner: "Cron",
+      stage: latestCronRun ? latestCronRun.status : runtimeObservations.cronJobsCount > 0 ? "Waiting" : "Idle",
+      updatedAt: latestCronRun ? formatRelativeTime(latestCronRun.runAtMs) : "Unknown",
+      tone: latestCronRun ? (latestCronRun.status === "ok" ? "positive" : "warning") : "neutral"
+    },
+    {
+      id: "workstream-config",
+      title: "Local runtime config",
+      detail:
+        runtimeObservations.source === "live"
+          ? `${formatCount(runtimeObservations.configuredAgents.length, "configured agent")}, ${formatCount(
+              runtimeObservations.providerCount,
+              "provider"
+            )}, and ${formatCount(runtimeObservations.modelCount, "model")} were indexed from ${shortenHomePath(runtimeObservations.configPath)}.`
+          : "OpenClaw config was unavailable, so the shell stayed on its typed fallback posture.",
+      owner: "Config",
+      stage: runtimeObservations.source === "live" ? "Observed" : "Fallback",
+      updatedAt: formatRelativeTime(configTouchedAt),
+      tone: runtimeObservations.source === "live" ? "positive" : "warning"
+    }
+  ];
+}
+
+function createAlerts(
+  runtimeObservations: Awaited<ReturnType<typeof probeLiveRuntimeObservations>>,
+  sessionProbe: LiveSessionProbe,
+  toolsMcpProbe: Awaited<ReturnType<typeof probeLiveToolsMcp>>
+): StudioShellState["dashboard"]["alerts"] {
+  return [
+    {
+      id: "alert-electron",
+      title: "Electron launch still depends on a local optional install",
+      detail: "The desktop shell remains buildable and smokeable even if Electron is not present in node_modules here.",
+      tone: "warning"
+    },
+    runtimeObservations.cronErrorRuns > 0
+      ? {
+          id: "alert-cron",
+          title: "Cron logs include failed runs",
+          detail: `${runtimeObservations.cronErrorRuns} of ${runtimeObservations.cronTotalRuns} recorded cron runs finished with errors.`,
+          tone: "warning"
+        }
+      : {
+          id: "alert-cron",
+          title: runtimeObservations.cronJobsCount > 0 ? "Cron logs look healthy" : "No cron jobs configured",
+          detail:
+            runtimeObservations.cronJobsCount > 0
+              ? `Recent cron observations are readable and ${runtimeObservations.cronDeliveredRuns} delivered outputs were recorded.`
+              : "The dashboard detected no configured cron jobs and kept the rest of the shell stable.",
+          tone: runtimeObservations.cronJobsCount > 0 ? "neutral" : "neutral"
+        },
+    {
+      id: "alert-fallback",
+      title: toolsMcpProbe.source === "live" ? "Tools probes are live, MCP execution stays local-only" : "Tools and MCP remain conservative",
+      detail:
+        toolsMcpProbe.source === "live"
+          ? toolsMcpProbe.discoveredMcpRoots.length > 0
+            ? "Tool and MCP root probing is now live, and the detail panel can execute connector controls only against Studio-local in-memory state."
+            : "Tool probing is now live across OpenClaw, Codex, and workspace surfaces; no dedicated MCP roots were found, so connector controls remain constrained to Studio-local in-memory state."
+          : sessionProbe.source === "live" || runtimeObservations.source === "live"
+            ? "Dashboard and Agents now use local data, but tool and MCP surfaces still stay on safe structured fallback."
+          : "The shell remains entirely fallback-safe until more reliable local runtime signals are available.",
+      tone: "neutral"
+    }
+  ];
+}
+
+function createSystemChecks(
+  systemStatus: Awaited<ReturnType<typeof probeLiveSystemStatus>>,
+  runtimeObservations: Awaited<ReturnType<typeof probeLiveRuntimeObservations>>,
+  skillProbe: Awaited<ReturnType<typeof probeLiveSkills>>,
+  codexProbe: Awaited<ReturnType<typeof probeLiveCodex>>
+): SettingItem[] {
+  return [
+    ...systemStatus.checks.map((check) => ({ ...check })),
+    {
+      id: "check-openclaw-config",
+      label: "OpenClaw Config",
+      value: runtimeObservations.source === "live" ? "Detected" : "Unavailable",
+      detail: shortenHomePath(runtimeObservations.configPath),
+      tone: runtimeObservations.source === "live" ? "positive" : "warning"
+    },
+    {
+      id: "check-cron-logs",
+      label: "Cron Logs",
+      value:
+        runtimeObservations.cronTotalRuns > 0
+          ? `${runtimeObservations.cronTotalRuns} runs`
+          : runtimeObservations.cronJobsCount > 0
+            ? "No runs"
+            : "Not configured",
+      detail:
+        runtimeObservations.cronTotalRuns > 0
+          ? `${runtimeObservations.cronOkRuns} ok / ${runtimeObservations.cronErrorRuns} error across ${formatCount(
+              runtimeObservations.cronJobsCount,
+              "job"
+            )}.`
+          : "No cron run logs were available in the local OpenClaw home.",
+      tone:
+        runtimeObservations.cronTotalRuns > 0
+          ? runtimeObservations.cronErrorRuns > 0
+            ? "warning"
+            : "positive"
+          : runtimeObservations.cronJobsCount > 0
+            ? "neutral"
+            : "neutral"
+    },
+    {
+      id: "check-skills",
+      label: "Skill Scan",
+      value: skillProbe.source === "live" ? `${skillProbe.totalSkills} indexed` : "Fallback",
+      detail:
+        skillProbe.source === "live"
+          ? `${skillProbe.sections.length} live skill section(s) discovered across ${formatCount(skillProbe.rootsScanned.length, "known root")}.`
+          : "No local skill roots were readable, so the skills catalog stayed on its structured mock snapshot.",
+      tone: skillProbe.source === "live" ? "positive" : "neutral"
+    },
+    {
+      id: "check-codex",
+      label: "Codex Runtime",
+      value:
+        codexProbe.source === "live"
+          ? codexProbe.tasks.length > 0
+            ? `${codexProbe.tasks.length} sessions`
+            : codexProbe.authPresent || codexProbe.configuredModel || codexProbe.reviewModel
+              ? "Config only"
+              : "Observed"
+          : "Fallback",
+      detail:
+        codexProbe.source === "live"
+          ? `${codexProbe.authPresent ? "auth present" : codexProbe.requiresOpenAiAuth ? "auth missing" : "auth not required"} · ${formatCount(
+              codexProbe.enabledPluginCount,
+              "plugin"
+            )} enabled of ${codexProbe.pluginCount} · ${formatCount(codexProbe.shellSnapshotsCount, "shell snapshot")}.`
+          : "No local Codex config or session roots were readable, so the shell kept the typed fallback state.",
+      tone:
+        codexProbe.source === "live"
+          ? codexProbe.requiresOpenAiAuth && !codexProbe.authPresent
+            ? "warning"
+            : "positive"
+          : "neutral"
+    }
+  ];
+}
+
+function createHomeActivity(
+  baseActivity: HomeActivity[],
+  sessionProbe: LiveSessionProbe,
+  interactiveSessions: LiveSessionRecord[],
+  runtimeObservations: Awaited<ReturnType<typeof probeLiveRuntimeObservations>>
+): HomeActivity[] {
+  const latestInteractiveSession = interactiveSessions[0] ?? null;
+  const latestCronRun = runtimeObservations.recentCronRuns[0] ?? null;
+
+  const nextItems: HomeActivity[] = [
+    {
+      id: "activity-runtime-snapshot",
+      title:
+        sessionProbe.source === "live" || runtimeObservations.source === "live"
+          ? "Runtime snapshot is now locally observed"
+          : "Runtime snapshot stayed on fallback",
+      detail:
+        sessionProbe.source === "live" || runtimeObservations.source === "live"
+          ? "Dashboard and Agents are now driven by local system, session, and runtime observations where available."
+          : "No usable local runtime signals were detected, so the shell kept rendering the mock-safe baseline.",
+      timestamp: "Now"
+    }
+  ];
+
+  if (latestInteractiveSession) {
+    nextItems.push({
+      id: "activity-latest-session",
+      title: `Latest interactive session: ${latestInteractiveSession.title}`,
+      detail: `${formatModelLabel(latestInteractiveSession.provider, latestInteractiveSession.model)} in ${shortenHomePath(latestInteractiveSession.cwd)}.`,
+      timestamp: latestInteractiveSession.updatedAt
+    });
+  }
+
+  if (latestCronRun) {
+    nextItems.push({
+      id: "activity-latest-cron",
+      title: `Latest cron run: ${latestCronRun.jobId}`,
+      detail: `${latestCronRun.status} via ${formatModelLabel(latestCronRun.provider, latestCronRun.model)}.`,
+      timestamp: formatRelativeTime(latestCronRun.runAtMs)
+    });
+  }
+
+  return [...nextItems, ...baseActivity].slice(0, 3);
+}
+
+function createAgentRoster(
+  sessionProbe: LiveSessionProbe,
+  interactiveSessions: LiveSessionRecord[],
+  cronBackedSessions: LiveSessionRecord[],
+  runtimeObservations: Awaited<ReturnType<typeof probeLiveRuntimeObservations>>
+): StudioShellState["agents"]["roster"] {
+  const roster: StudioShellState["agents"]["roster"] = [];
+  const latestInteractiveSession = interactiveSessions[0] ?? null;
+  const latestCronRun = runtimeObservations.recentCronRuns[0] ?? null;
+
+  for (const configuredAgent of runtimeObservations.configuredAgents) {
+    const agentSessions = sessionProbe.sessionRecords.filter((session) => session.owner === configuredAgent.id);
+    const latestAgentSession = agentSessions[0] ?? null;
+
+    roster.push({
+      id: `agent-${configuredAgent.id}`,
+      name: configuredAgent.id,
+      role: "Configured agent",
+      model: configuredAgent.model ?? formatModelLabel(latestAgentSession?.provider, latestAgentSession?.model),
+      provider: latestAgentSession?.provider ?? undefined,
+      workspace: shortenHomePath(configuredAgent.workspace ?? latestAgentSession?.cwd ?? null),
+      cwd: shortenHomePath(latestAgentSession?.cwd ?? configuredAgent.workspace ?? null),
+      status: latestAgentSession?.status ?? "waiting",
+      focus: latestAgentSession
+        ? `Latest local session: ${latestAgentSession.title}`
+        : "No recent local session was observed for this configured agent.",
+      approvals:
+        runtimeObservations.cronJobsCount > 0
+          ? `${formatCount(runtimeObservations.cronJobsCount, "cron job")} configured`
+          : "No approval surface detected",
+      isolation: "config-scoped lane",
+      handoff: latestAgentSession ? `Session ${latestAgentSession.id.slice(0, 8)}` : "Awaiting session handoff",
+      sessionCount: agentSessions.length,
+      source: "config",
+      updatedAt:
+        latestAgentSession?.updatedAt ?? formatRelativeTime(parseIsoTimestamp(runtimeObservations.lastTouchedAt))
+    });
+  }
+
+  if (latestInteractiveSession) {
+    roster.push({
+      id: "runtime-interactive",
+      name: "Interactive sessions",
+      role: "Runtime session lane",
+      model: formatModelLabel(latestInteractiveSession.provider, latestInteractiveSession.model),
+      provider: latestInteractiveSession.provider ?? undefined,
+      workspace: shortenHomePath(latestInteractiveSession.cwd),
+      cwd: shortenHomePath(latestInteractiveSession.cwd),
+      status: latestInteractiveSession.status,
+      focus: `${formatCount(interactiveSessions.length, "recent session")} detected outside cron-driven runs.`,
+      approvals: "Session titles are derived from local JSONL content",
+      isolation: "session-local lane",
+      handoff: "Runtime session handoff active",
+      sessionCount: interactiveSessions.length,
+      source: "runtime",
+      updatedAt: latestInteractiveSession.updatedAt
+    });
+  }
+
+  if (latestCronRun || cronBackedSessions.length > 0 || runtimeObservations.cronJobsCount > 0) {
+    roster.push({
+      id: "runtime-cron",
+      name: "Scheduled runtime",
+      role: "Cron execution lane",
+      model: formatModelLabel(
+        latestCronRun?.provider ?? cronBackedSessions[0]?.provider,
+        latestCronRun?.model ?? cronBackedSessions[0]?.model
+      ),
+      provider: latestCronRun?.provider ?? cronBackedSessions[0]?.provider ?? undefined,
+      workspace: shortenHomePath(runtimeObservations.defaultWorkspace),
+      cwd: shortenHomePath(runtimeObservations.defaultWorkspace),
+      status: deriveStatus(latestCronRun?.runAtMs ?? cronBackedSessions[0]?.updatedAtMs ?? null),
+      focus:
+        runtimeObservations.cronTotalRuns > 0
+          ? `${runtimeObservations.cronOkRuns} ok / ${runtimeObservations.cronErrorRuns} error across ${formatCount(
+              runtimeObservations.cronTotalRuns,
+              "logged run"
+            )}.`
+          : runtimeObservations.cronJobsCount > 0
+            ? "Cron jobs are configured locally, but no recent run logs were detected."
+            : "Recent scheduled session prompts were detected without a current cron config snapshot.",
+      approvals:
+        runtimeObservations.cronDeliveredRuns > 0
+          ? `${formatCount(runtimeObservations.cronDeliveredRuns, "delivered output")} recorded`
+          : "No delivered outputs recorded",
+      isolation: "background lane",
+      handoff: latestCronRun ? `Cron ${latestCronRun.jobId}` : "Background handoff pending",
+      sessionCount: cronBackedSessions.length,
+      source: "cron",
+      updatedAt: formatRelativeTime(latestCronRun?.runAtMs ?? cronBackedSessions[0]?.updatedAtMs ?? null)
+    });
+  }
+
+  return roster;
+}
+
+function createAgentMetrics(
+  roster: StudioShellState["agents"]["roster"],
+  interactiveSessions: LiveSessionRecord[],
+  runtimeObservations: Awaited<ReturnType<typeof probeLiveRuntimeObservations>>
+): StudioShellState["agents"]["metrics"] {
+  const activeLanes = roster.filter((agent) => agent.status === "active").length;
+  const discoveredModels = new Set(
+    roster
+      .map((agent) => agent.model)
+      .concat(runtimeObservations.modelLabels)
+      .filter((value): value is string => Boolean(value) && value !== "Unknown")
+  );
+
+  return [
+    {
+      id: "agent-metric-active",
+      label: "Active Lanes",
+      value: String(activeLanes),
+      detail: `${formatCount(roster.length, "lane")} rendered from local config and runtime observations.`,
+      tone: activeLanes > 0 ? "positive" : "warning"
+    },
+    {
+      id: "agent-metric-runtime",
+      label: "Runtime Signals",
+      value:
+        runtimeObservations.cronTotalRuns > 0
+          ? `${runtimeObservations.cronTotalRuns} cron logs`
+          : `${interactiveSessions.length} recent sessions`,
+      detail:
+        runtimeObservations.cronTotalRuns > 0
+          ? `${runtimeObservations.cronOkRuns} ok / ${runtimeObservations.cronErrorRuns} error.`
+          : "No cron logs were available, so the roster is leaning on direct session activity.",
+      tone: runtimeObservations.cronErrorRuns > 0 ? "warning" : "neutral"
+    },
+    {
+      id: "agent-metric-models",
+      label: "Model Coverage",
+      value: formatCount(discoveredModels.size, "model"),
+      detail:
+        discoveredModels.size > 0
+          ? Array.from(discoveredModels).slice(0, 3).join(" · ")
+          : "No live model labels were available from the local runtime.",
+      tone: discoveredModels.size > 0 ? "neutral" : "warning"
+    }
+  ];
+}
+
+function createAgentActivity(
+  baseActivity: HomeActivity[],
+  interactiveSessions: LiveSessionRecord[],
+  runtimeObservations: Awaited<ReturnType<typeof probeLiveRuntimeObservations>>
+): HomeActivity[] {
+  const latestInteractiveSession = interactiveSessions[0] ?? null;
+  const latestCronRun = runtimeObservations.recentCronRuns[0] ?? null;
+  const items: HomeActivity[] = [];
+
+  if (latestInteractiveSession) {
+    items.push({
+      id: "agent-activity-session",
+      title: `Interactive lane touched ${shortenHomePath(latestInteractiveSession.cwd)}`,
+      detail: `Latest session “${latestInteractiveSession.title}” used ${formatModelLabel(
+        latestInteractiveSession.provider,
+        latestInteractiveSession.model
+      )}.`,
+      timestamp: latestInteractiveSession.updatedAt
+    });
+  }
+
+  if (latestCronRun) {
+    items.push({
+      id: "agent-activity-cron",
+      title: `Cron lane finished ${latestCronRun.jobId}`,
+      detail: `${latestCronRun.status} via ${formatModelLabel(latestCronRun.provider, latestCronRun.model)}.`,
+      timestamp: formatRelativeTime(latestCronRun.runAtMs)
+    });
+  }
+
+  if (runtimeObservations.source === "live") {
+    items.push({
+      id: "agent-activity-config",
+      title: "Configured agents were indexed from local runtime config",
+      detail: `${formatCount(runtimeObservations.configuredAgents.length, "configured agent")} discovered in ${shortenHomePath(
+        runtimeObservations.configPath
+      )}.`,
+      timestamp: formatRelativeTime(parseIsoTimestamp(runtimeObservations.lastTouchedAt))
+    });
+  }
+
+  return [...items, ...baseActivity].slice(0, 3);
+}
+
+function createAgentDelegationState(
+  baseAgents: StudioShellState["agents"],
+  roster: StudioShellState["agents"]["roster"],
+  interactiveSessions: LiveSessionRecord[],
+  runtimeObservations: Awaited<ReturnType<typeof probeLiveRuntimeObservations>>,
+  codexProbe: Awaited<ReturnType<typeof probeLiveCodex>>
+): Pick<StudioShellState["agents"], "delegationSummary" | "delegationNotes"> {
+  if (runtimeObservations.source !== "live" && interactiveSessions.length === 0) {
+    return {
+      delegationSummary: baseAgents.delegationSummary,
+      delegationNotes: baseAgents.delegationNotes
+    };
+  }
+
+  const latestInteractiveSession = interactiveSessions[0] ?? null;
+  const latestCronRun = runtimeObservations.recentCronRuns[0] ?? null;
+  const latestTask = codexProbe.tasks[0] ?? null;
+
+  return {
+    delegationSummary:
+      `Delegation remains local-only and observational: ${formatCount(roster.length, "lane")} are visible, ` +
+      `${formatCount(runtimeObservations.cronJobsCount, "background cron path")} are tracked, and result handoff stays on shell surfaces instead of spawning host-side workers.`,
+    delegationNotes: [
+      {
+        id: "agent-delegation-spawn",
+        label: "Spawn path",
+        value: `${formatCount(roster.length, "lane")} observed`,
+        detail: "Configured agents, runtime session lanes, and cron-backed lanes are modeled as delegation paths; Studio does not spawn worktrees, tmux panes, or remote workers.",
+        tone: "neutral"
+      },
+      {
+        id: "agent-delegation-isolation",
+        label: "Isolation",
+        value: "local-only / shared repo",
+        detail: "Isolation is expressed as lane ownership and workspace scoping only. Real subagent process isolation remains outside this shell.",
+        tone: "warning"
+      },
+      {
+        id: "agent-delegation-background",
+        label: "Background",
+        value: latestCronRun ? `${latestCronRun.jobId} ${latestCronRun.status}` : `${runtimeObservations.cronJobsCount} configured`,
+        detail:
+          runtimeObservations.cronJobsCount > 0
+            ? `${runtimeObservations.cronDeliveredRuns} delivered outputs recorded across ${runtimeObservations.cronTotalRuns} logged runs.`
+            : "No background cron path is currently configured.",
+        tone: runtimeObservations.cronJobsCount > 0 ? "neutral" : "warning"
+      },
+      {
+        id: "agent-delegation-handoff",
+        label: "Result handoff",
+        value: latestInteractiveSession && latestTask ? `${latestInteractiveSession.workspace} -> ${latestTask.target}` : "No active handoff",
+        detail:
+          latestInteractiveSession && latestTask
+            ? `Latest runtime session “${latestInteractiveSession.title}” aligns with Codex task “${latestTask.title}”.`
+            : "Result handoff is currently represented only by the observed shell surfaces.",
+        tone: latestInteractiveSession && latestTask ? "positive" : "neutral"
+      }
+    ]
+  };
+}
+
+function createSkillsState(
+  baseSkills: StudioShellState["skills"],
+  skillProbe: Awaited<ReturnType<typeof probeLiveSkills>>,
+  toolsMcpProbe: Awaited<ReturnType<typeof probeLiveToolsMcp>>
+): StudioShellState["skills"] {
+  const baseSkillSections = baseSkills.sections.filter((section) => section.id !== "skills-tools" && section.id !== "skills-mcp" && section.id !== "skills-sources");
+  const baseToolsSection = baseSkills.sections.find((section) => section.id === "skills-tools") ?? null;
+  const baseMcpSection = baseSkills.sections.find((section) => section.id === "skills-mcp") ?? null;
+  const baseSourcesSection = baseSkills.sections.find((section) => section.id === "skills-sources") ?? null;
+  const skillSections = skillProbe.source === "live" && skillProbe.sections.length > 0 ? skillProbe.sections : baseSkillSections;
+
+  if (skillSections.length === 0 && toolsMcpProbe.source !== "live") {
+    return baseSkills;
+  }
+
+  const toolItems: SkillCatalogItem[] =
+    toolsMcpProbe.source === "live"
+      ? [
+          ...(baseToolsSection?.items.map((item) =>
+            item.id === "tool-ipc"
+              ? {
+                  ...item,
+                  detail: "Preload exposes the typed renderer API and now carries live system, session, skill, Codex, and tool/MCP observations."
+                }
+              : item.id === "tool-smoke"
+                ? {
+                    ...item,
+                    detail: "Smoke remains the offline validation path while the runtime progressively adds live local probes."
+                  }
+                : item
+          ) ?? []),
+          {
+            id: "tool-openclaw-runtime",
+            name: "OpenClaw tool profile",
+            surface: "Runtime",
+            status: toolsMcpProbe.openclawToolProfile ? "Configured" : "Unavailable",
+            source: "runtime",
+            detail: toolsMcpProbe.openclawToolProfile
+              ? `${toolsMcpProbe.openclawToolProfile} profile · exec ${toolsMcpProbe.execSecurity ?? "unknown"}/${toolsMcpProbe.execAsk ?? "unknown"} · search ${
+                  toolsMcpProbe.webSearchEnabled ? `on (${toolsMcpProbe.webSearchProvider ?? "configured"})` : "off"
+                } · fetch ${toolsMcpProbe.webFetchEnabled ? "on" : "off"}${
+                  toolsMcpProbe.openclawAlsoAllow.length > 0 ? ` · alsoAllow ${toolsMcpProbe.openclawAlsoAllow.join(", ")}` : ""
+                }.`
+              : "openclaw.json was unavailable or did not expose a tool profile.",
+            origin: "OpenClaw Config",
+            path: shortenHomePath(toolsMcpProbe.openclawConfigPath),
+            tone: toolsMcpProbe.openclawToolProfile ? "positive" : "warning"
+          },
+          {
+            id: "tool-openclaw-plugins",
+            name: "OpenClaw plugin runtime",
+            surface: "Plugin",
+            status: toolsMcpProbe.pluginInstallCount > 0 || toolsMcpProbe.pluginLoadPaths.length > 0 ? "Observed" : "Sparse",
+            source: "runtime",
+            detail: `${formatCount(toolsMcpProbe.pluginInstallCount, "install")}, ${formatCount(
+              toolsMcpProbe.pluginEntryCount,
+              "entry",
+              "entries"
+            )}, ${formatCount(toolsMcpProbe.pluginAllowCount, "allow rule")}.${
+              toolsMcpProbe.pluginInstallIds.length > 0
+                ? ` Installs: ${toolsMcpProbe.pluginInstallIds.join(" · ")}.`
+                : ""
+            }${
+              toolsMcpProbe.pluginEntryIds.length > 0
+                ? ` Entries: ${toolsMcpProbe.pluginEntryIds.join(" · ")}.`
+                : ""
+            }${
+              toolsMcpProbe.pluginLoadPaths.length > 0
+                ? ` Load paths: ${toolsMcpProbe.pluginLoadPaths.map((pluginPath) => shortenHomePath(pluginPath)).join(" · ")}.`
+                : " No additional plugin load paths were configured."
+            }`,
+            origin: "OpenClaw Plugins",
+            path:
+              toolsMcpProbe.pluginLoadPaths.length > 0
+                ? shortenHomePath(toolsMcpProbe.pluginLoadPaths[0])
+                : shortenHomePath(toolsMcpProbe.openclawConfigPath),
+            tone: toolsMcpProbe.pluginInstallCount > 0 || toolsMcpProbe.pluginLoadPaths.length > 0 ? "positive" : "neutral"
+          },
+          {
+            id: "tool-codex-runtime",
+            name: "Codex local runtime",
+            surface: "CLI",
+            status:
+              toolsMcpProbe.codexConfigPresent && toolsMcpProbe.codexAuthPresent && toolsMcpProbe.codexSessionsPresent ? "Ready" : "Partial",
+            source: "runtime",
+            detail: `config ${toolsMcpProbe.codexConfigPresent ? "present" : "missing"} · auth ${
+              toolsMcpProbe.codexAuthPresent ? "present" : "missing"
+            } · sessions ${toolsMcpProbe.codexSessionsPresent ? "present" : "missing"} · shell snapshots ${
+              toolsMcpProbe.codexShellSnapshotsPresent ? "present" : "missing"
+            } · curated plugin cache ${toolsMcpProbe.codexPluginCachePresent ? "present" : "missing"} · temp plugin checkout ${
+              toolsMcpProbe.codexPluginTempRepoPresent ? "present" : "missing"
+            }.`,
+            origin: "Codex Home",
+            path: shortenHomePath(toolsMcpProbe.codexConfigPath),
+            tone:
+              toolsMcpProbe.codexConfigPresent && toolsMcpProbe.codexAuthPresent && toolsMcpProbe.codexSessionsPresent ? "positive" : "neutral"
+          },
+          {
+            id: "tool-workspace-tooling",
+            name: "Workspace tooling",
+            surface: "Tooling",
+            status: toolsMcpProbe.toolingRootPresent ? "Detected" : "Unavailable",
+            source: "runtime",
+            detail: toolsMcpProbe.toolingRootPresent
+              ? `${shortenHomePath(toolsMcpProbe.toolingRoot)} is present · playwright-runner ${
+                  toolsMcpProbe.playwrightRunnerPresent ? "detected" : "missing"
+                } · ${formatCount(toolsMcpProbe.hookCount, "hook directory", "hook directories")}.${
+                  toolsMcpProbe.hookNames.length > 0 ? ` Hooks: ${toolsMcpProbe.hookNames.join(" · ")}.` : ""
+                }`
+              : "No shared workspace tooling root was detected under ~/.openclaw/workspace/.tooling.",
+            origin: "Workspace",
+            path: shortenHomePath(toolsMcpProbe.toolingRoot),
+            tone: toolsMcpProbe.toolingRootPresent ? "positive" : "warning"
+          }
+        ]
+      : (baseToolsSection?.items ?? []);
+
+  const mcpItems: SkillCatalogItem[] =
+    toolsMcpProbe.source === "live"
+      ? [
+          {
+            id: "mcp-root-scan",
+            name: "Dedicated MCP roots",
+            surface: "MCP",
+            status: toolsMcpProbe.discoveredMcpRoots.length > 0 ? "Detected" : "Not found",
+            source: "runtime",
+            detail:
+              toolsMcpProbe.discoveredMcpRoots.length > 0
+                ? `Found ${formatCount(toolsMcpProbe.discoveredMcpRoots.length, "dedicated root")} at ${toolsMcpProbe.discoveredMcpRoots
+                    .map((root) => shortenHomePath(root))
+                    .join(" · ")}. Detail now supports Studio-local root selection plus blocked host/runtime connect previews without touching the host runtime.`
+                : `Scanned ${toolsMcpProbe.mcpRootsScanned.map((root) => shortenHomePath(root)).join(" · ")} and found no dedicated MCP config roots. Detail still exposes Studio-local root selection history plus blocked host/runtime connect previews.`,
+            origin: "Runtime Probe",
+            path:
+              toolsMcpProbe.discoveredMcpRoots.length > 0 ? shortenHomePath(toolsMcpProbe.discoveredMcpRoots[0]) : undefined,
+            tone: toolsMcpProbe.discoveredMcpRoots.length > 0 ? "positive" : "warning"
+          },
+          {
+            id: "mcp-adjacent-runtime",
+            name: "Connector-adjacent runtime",
+            surface: "Plugin bridge",
+            status:
+              toolsMcpProbe.codexPluginCachePresent || toolsMcpProbe.pluginInstallCount > 0 || toolsMcpProbe.pluginLoadPaths.length > 0
+                ? "Observed"
+                : "Fallback",
+            source: "runtime",
+            detail: `Codex plugin cache ${toolsMcpProbe.codexPluginCachePresent ? "present" : "missing"} · OpenClaw plugin installs ${
+              toolsMcpProbe.pluginInstallCount
+            } (${toolsMcpProbe.pluginInstallIds.join(" · ") || "none"}) · load paths ${toolsMcpProbe.pluginLoadPaths.length}.${
+              toolsMcpProbe.discoveredMcpRoots.length === 0
+                ? ` Dedicated MCP roots are absent here; scanned ${toolsMcpProbe.mcpRootsScanned
+                    .map((root) => shortenHomePath(root))
+                    .join(" · ")} and kept connector rows on Studio-local execution plus blocked host/runtime previews only.`
+                : " Dedicated roots were found, and the detail panel now exposes Studio-local bridge stage, activate, apply, and blocked host/runtime preview controls."
+            }`,
+            origin: "Codex + OpenClaw",
+            path:
+              toolsMcpProbe.pluginLoadPaths.length > 0
+                ? shortenHomePath(toolsMcpProbe.pluginLoadPaths[0])
+                : shortenHomePath(toolsMcpProbe.codexConfigPath),
+            tone:
+              toolsMcpProbe.codexPluginCachePresent || toolsMcpProbe.pluginInstallCount > 0 || toolsMcpProbe.pluginLoadPaths.length > 0
+                ? "neutral"
+                : "warning"
+          },
+          ...(baseMcpSection
+            ? baseMcpSection.items.map((item) => ({
+                ...item,
+                status: toolsMcpProbe.discoveredMcpRoots.length > 0 ? "Fallback active" : "Fallback active",
+                detail:
+                  toolsMcpProbe.discoveredMcpRoots.length > 0
+                    ? "Dedicated MCP roots exist locally, but the alpha shell still keeps connector actions on structured fallback until a stable bridge is defined."
+                    : "No dedicated MCP roots were detected locally, so the alpha shell keeps connector actions on structured fallback instead of inventing readiness."
+              }))
+            : [])
+        ]
+      : (baseMcpSection?.items ?? []);
+
+  const toolsSection: SkillCatalogSection | null = baseToolsSection
+    ? {
+        ...baseToolsSection,
+        description:
+          toolsMcpProbe.source === "live"
+            ? "Shell-facing execution surfaces now mix bridge helpers with local OpenClaw, Codex, and workspace tooling probes."
+            : baseToolsSection.description,
+        items: toolItems
+      }
+    : null;
+
+  const mcpSection: SkillCatalogSection | null = baseMcpSection
+    ? {
+        ...baseMcpSection,
+        description:
+          toolsMcpProbe.source === "live"
+            ? "Known local MCP roots are now probed directly; when none are found the shell says so and keeps fallback connector rows."
+            : baseMcpSection.description,
+        items: mcpItems
+      }
+    : null;
+
+  const sourceFallbackItems = new Map((baseSourcesSection?.items ?? []).map((item) => [item.id, item]));
+  const getSkillSourceCount = (sectionId: string) => skillProbe.sections.find((section) => section.id === sectionId)?.items.length ?? 0;
+  const sourcesSection: SkillCatalogSection | null =
+    skillProbe.source === "live" || toolsMcpProbe.source === "live" || baseSourcesSection
+      ? {
+          id: "skills-sources",
+          label: "Extension Sources",
+          description: "Capability provenance across local skill roots, extension bundles, plugin caches, and MCP roots.",
+          items: [
+            {
+              id: "skill-source-roots-scanned",
+              name: "Roots scanned",
+              surface: "Scan",
+              status:
+                skillProbe.source === "live"
+                  ? `${skillProbe.rootsScanned.length} scanned`
+                  : sourceFallbackItems.get("skill-source-openclaw-home")?.status ?? "Fallback",
+              source: skillProbe.source === "live" ? "runtime" : "mock",
+              detail:
+                skillProbe.source === "live"
+                  ? skillProbe.rootsScanned.map((root) => shortenHomePath(root)).join(" · ")
+                  : "Skill roots fallback.",
+              origin: "Runtime Scan",
+              path: skillProbe.source === "live" ? shortenHomePath(skillProbe.rootsScanned[0] ?? "") : undefined,
+              tone: skillProbe.source === "live" ? "positive" : "neutral"
+            },
+            {
+              ...(sourceFallbackItems.get("skill-source-openclaw-home") ?? {}),
+              id: "skill-source-openclaw-home",
+              name: "OpenClaw home skills",
+              surface: "Skill root",
+              status: getSkillSourceCount("skills-openclaw-home") > 0 ? `${getSkillSourceCount("skills-openclaw-home")} indexed` : "Not found",
+              source: skillProbe.source === "live" ? "runtime" : "mock",
+              detail:
+                skillProbe.source === "live"
+                  ? `Root ${shortenHomePath(skillProbe.rootsScanned[0] ?? "")} -> ${getSkillSourceCount("skills-openclaw-home")} indexed skills.`
+                  : sourceFallbackItems.get("skill-source-openclaw-home")?.detail ?? "OpenClaw home skill root fallback.",
+              origin: "OpenClaw Home",
+              path: skillProbe.source === "live" ? shortenHomePath(skillProbe.rootsScanned[0] ?? "") : sourceFallbackItems.get("skill-source-openclaw-home")?.path,
+              tone: getSkillSourceCount("skills-openclaw-home") > 0 ? "positive" : "neutral"
+            },
+            {
+              ...(sourceFallbackItems.get("skill-source-workspace") ?? {}),
+              id: "skill-source-workspace",
+              name: "Workspace skills",
+              surface: "Skill root",
+              status: getSkillSourceCount("skills-workspace") > 0 ? `${getSkillSourceCount("skills-workspace")} indexed` : "Not found",
+              source: skillProbe.source === "live" ? "runtime" : "mock",
+              detail:
+                skillProbe.source === "live"
+                  ? `Root ${shortenHomePath(skillProbe.rootsScanned[1] ?? "")} -> ${getSkillSourceCount("skills-workspace")} indexed skills.`
+                  : sourceFallbackItems.get("skill-source-workspace")?.detail ?? "Workspace skill root fallback.",
+              origin: "Workspace",
+              path: skillProbe.source === "live" ? shortenHomePath(skillProbe.rootsScanned[1] ?? "") : sourceFallbackItems.get("skill-source-workspace")?.path,
+              tone: getSkillSourceCount("skills-workspace") > 0 ? "positive" : "neutral"
+            },
+            {
+              ...(sourceFallbackItems.get("skill-source-extensions") ?? {}),
+              id: "skill-source-extensions",
+              name: "Extension bundles",
+              surface: "Extension root",
+              status: getSkillSourceCount("skills-extensions") > 0 ? `${getSkillSourceCount("skills-extensions")} indexed` : "Not found",
+              source: skillProbe.source === "live" ? "runtime" : "mock",
+              detail:
+                skillProbe.source === "live"
+                  ? `Root ${shortenHomePath(skillProbe.rootsScanned[2] ?? "")} -> ${getSkillSourceCount("skills-extensions")} extension-bundled skills.`
+                  : sourceFallbackItems.get("skill-source-extensions")?.detail ?? "Extension bundle fallback.",
+              origin: "Extensions",
+              path: skillProbe.source === "live" ? shortenHomePath(skillProbe.rootsScanned[2] ?? "") : sourceFallbackItems.get("skill-source-extensions")?.path,
+              tone: getSkillSourceCount("skills-extensions") > 0 ? "positive" : "neutral"
+            },
+            {
+              ...(sourceFallbackItems.get("skill-source-plugin-load-paths") ?? {}),
+              id: "skill-source-plugin-load-paths",
+              name: "Plugin load paths",
+              surface: "Plugin source",
+              status:
+                toolsMcpProbe.source === "live"
+                  ? `${toolsMcpProbe.pluginLoadPaths.length} paths`
+                  : sourceFallbackItems.get("skill-source-plugin-load-paths")?.status ?? "Fallback",
+              source: toolsMcpProbe.source === "live" ? "runtime" : "mock",
+              detail:
+                toolsMcpProbe.source === "live"
+                  ? `Load paths ${toolsMcpProbe.pluginLoadPaths.length} · curated cache ${toolsMcpProbe.codexPluginCachePresent ? "present" : "missing"} · installs ${toolsMcpProbe.pluginInstallCount}.`
+                  : sourceFallbackItems.get("skill-source-plugin-load-paths")?.detail ?? "Plugin source fallback.",
+              origin: "OpenClaw Plugins",
+              path:
+                toolsMcpProbe.source === "live"
+                  ? shortenHomePath(toolsMcpProbe.pluginLoadPaths[0] ?? toolsMcpProbe.codexConfigPath)
+                  : sourceFallbackItems.get("skill-source-plugin-load-paths")?.path,
+              tone:
+                toolsMcpProbe.source === "live"
+                  ? toolsMcpProbe.pluginLoadPaths.length > 0 || toolsMcpProbe.codexPluginCachePresent || toolsMcpProbe.pluginInstallCount > 0
+                    ? "positive"
+                    : "neutral"
+                  : sourceFallbackItems.get("skill-source-plugin-load-paths")?.tone ?? "neutral"
+            },
+            {
+              ...(sourceFallbackItems.get("skill-source-mcp-roots") ?? {}),
+              id: "skill-source-mcp-roots",
+              name: "Dedicated MCP roots",
+              surface: "MCP source",
+              status:
+                toolsMcpProbe.source === "live"
+                  ? toolsMcpProbe.discoveredMcpRoots.length > 0
+                    ? `${toolsMcpProbe.discoveredMcpRoots.length} detected`
+                    : "Not found"
+                  : sourceFallbackItems.get("skill-source-mcp-roots")?.status ?? "Fallback",
+              source: toolsMcpProbe.source === "live" ? "runtime" : "mock",
+              detail:
+                toolsMcpProbe.source === "live"
+                  ? `Scanned ${toolsMcpProbe.mcpRootsScanned.map((root) => shortenHomePath(root)).join(" · ")} -> ${toolsMcpProbe.discoveredMcpRoots.length > 0 ? toolsMcpProbe.discoveredMcpRoots.map((root) => shortenHomePath(root)).join(" · ") : "no dedicated roots"}.`
+                  : sourceFallbackItems.get("skill-source-mcp-roots")?.detail ?? "MCP root fallback.",
+              origin: "MCP Runtime",
+              path:
+                toolsMcpProbe.source === "live" && toolsMcpProbe.discoveredMcpRoots.length > 0
+                  ? shortenHomePath(toolsMcpProbe.discoveredMcpRoots[0])
+                  : sourceFallbackItems.get("skill-source-mcp-roots")?.path,
+              tone:
+                toolsMcpProbe.source === "live"
+                  ? toolsMcpProbe.discoveredMcpRoots.length > 0
+                    ? "positive"
+                    : "warning"
+                  : sourceFallbackItems.get("skill-source-mcp-roots")?.tone ?? "warning"
+            }
+          ]
+        }
+      : null;
+
+  const summaryParts = [];
+
+  if (skillProbe.source === "live" && skillProbe.sections.length > 0) {
+    summaryParts.push(`Indexed ${skillProbe.totalSkills} local skill directories from known OpenClaw and Codex roots.`);
+  }
+
+  if (toolsMcpProbe.source === "live") {
+    summaryParts.push("Tools now probe local OpenClaw, Codex, and workspace runtime surfaces.");
+    summaryParts.push("MCP detail now distinguishes read-only inspection, dry-run planning, Studio-local control state, and blocked host/runtime previews.");
+    summaryParts.push(
+      toolsMcpProbe.discoveredMcpRoots.length > 0
+        ? `Detected ${formatCount(toolsMcpProbe.discoveredMcpRoots.length, "dedicated MCP root")}.`
+        : "No dedicated MCP roots were found, so connector rows stay on structured fallback."
+    );
+  }
+
+  if (sourcesSection) {
+    summaryParts.push("Extension provenance now distinguishes bundled skill roots, external extension bundles, plugin load-path sources, and dedicated MCP roots.");
+  }
+
+  return {
+    summary: summaryParts.length > 0 ? summaryParts.join(" ") : baseSkills.summary,
+    sections: [
+      ...skillSections,
+      ...(sourcesSection ? [sourcesSection] : []),
+      ...(toolsSection ? [toolsSection] : []),
+      ...(mcpSection ? [mcpSection] : [])
+    ]
+  };
+}
+
+function createCodexObservations(codexProbe: Awaited<ReturnType<typeof probeLiveCodex>>): SettingItem[] {
+  if (codexProbe.source !== "live") {
+    return cloneState().codex.observations;
+  }
+
+  const configuredModel = formatModelLabel(codexProbe.provider, codexProbe.configuredModel);
+  const reviewModel = codexProbe.reviewModel ? formatModelLabel(codexProbe.provider, codexProbe.reviewModel) : "Unavailable";
+
+  return [
+    {
+      id: "codex-observation-config",
+      label: "Config",
+      value: codexProbe.configuredModel || codexProbe.provider ? configuredModel : "Observed",
+      detail: `review ${reviewModel}${codexProbe.reasoningEffort ? ` · effort ${codexProbe.reasoningEffort}` : ""}`,
+      tone: codexProbe.configuredModel || codexProbe.provider ? "positive" : "neutral"
+    },
+    {
+      id: "codex-observation-auth",
+      label: "Auth / Plugins",
+      value: codexProbe.requiresOpenAiAuth ? (codexProbe.authPresent ? "Ready" : "Missing") : codexProbe.authPresent ? "Present" : "Not required",
+      detail: `${formatCount(codexProbe.enabledPluginCount, "plugin")} enabled of ${codexProbe.pluginCount} configured.`,
+      tone: codexProbe.requiresOpenAiAuth ? (codexProbe.authPresent ? "positive" : "warning") : "neutral"
+    },
+    {
+      id: "codex-observation-sessions",
+      label: "Session Roots",
+      value: `${codexProbe.tasks.length} recent`,
+      detail: `${shortenHomePath(codexProbe.sessionsRoot)} · ${formatCount(codexProbe.shellSnapshotsCount, "shell snapshot")}.`,
+      tone: codexProbe.tasks.length > 0 || codexProbe.shellSnapshotsCount > 0 ? "positive" : "neutral"
+    },
+    {
+      id: "codex-observation-paths",
+      label: "Config Path",
+      value: codexProbe.latestCliVersion ?? "CLI unknown",
+      detail: shortenHomePath(codexProbe.configPath),
+      tone: codexProbe.latestCliVersion ? "neutral" : "warning"
+    }
+  ];
+}
+
+function createCodexState(
+  baseCodex: StudioShellState["codex"],
+  codexProbe: Awaited<ReturnType<typeof probeLiveCodex>>,
+  projectContext: Awaited<ReturnType<typeof probeProjectContext>>
+): StudioShellState["codex"] {
+  if (codexProbe.source !== "live") {
+    return {
+      ...baseCodex,
+      contextSummary: projectContext.summary,
+      contextNotes: projectContext.notes
+    };
+  }
+
+  const hasLiveTasks = codexProbe.tasks.length > 0;
+
+  return {
+    summary: hasLiveTasks
+      ? "Recent Codex task sessions are now read from local ~/.codex session logs, and the detail panel also reflects local config, auth, plugin, and shell-snapshot metadata. Status stays heuristic and safe: unfinished logs updated recently show as running, older unfinished logs show as recent, and completed logs stay complete."
+      : "Codex config and auth readiness are observable locally even when no recent session logs were readable, so the page now surfaces local config/auth/plugin roots instead of staying on a generic placeholder. The agent-loop surface also remains read-only and observational: it summarizes turn continuity, recovery hints, and interruptions without replaying any session.",
+    stats: codexProbe.stats,
+    tasks: hasLiveTasks ? codexProbe.tasks : baseCodex.tasks,
+    observations: createCodexObservations(codexProbe),
+    loopSummary: codexProbe.loopSummary,
+    loopStats: codexProbe.loopStats,
+    loopSignals: codexProbe.loopSignals,
+    contextSummary: projectContext.summary,
+    contextNotes: projectContext.notes
+  };
+}
+
+function buildShellState(
+  baseState: StudioShellState,
+  systemStatus: Awaited<ReturnType<typeof probeLiveSystemStatus>>,
+  sessionProbe: LiveSessionProbe,
+  runtimeObservations: Awaited<ReturnType<typeof probeLiveRuntimeObservations>>,
+  skillProbe: Awaited<ReturnType<typeof probeLiveSkills>>,
+  codexProbe: Awaited<ReturnType<typeof probeLiveCodex>>,
+  projectContext: Awaited<ReturnType<typeof probeProjectContext>>,
+  startupRouting: Awaited<ReturnType<typeof probeStartupRouting>>,
+  toolsMcpProbe: Awaited<ReturnType<typeof probeLiveToolsMcp>>,
+  toolsMcpControlSession: ToolsMcpLocalControlSession
+): StudioShellState {
+  const shellState = cloneState();
+  const hasLiveSessions = sessionProbe.source === "live" && sessionProbe.sessionRecords.length > 0;
+  const hasLiveRuntime = runtimeObservations.source === "live";
+  const hasLiveSkills = skillProbe.source === "live" && skillProbe.totalSkills > 0;
+  const hasLiveCodex = codexProbe.source === "live";
+  const hasLiveToolsMcp = toolsMcpProbe.source === "live";
+  const bridgeMode: StudioShellState["status"]["bridge"] =
+    systemStatus.source === "live" || hasLiveSessions || hasLiveRuntime || hasLiveSkills || hasLiveCodex || hasLiveToolsMcp ? "hybrid" : "mock";
+  const interactiveSessions = getInteractiveSessions(sessionProbe);
+  const cronBackedSessions = getCronBackedSessions(sessionProbe);
+  const roster = hasLiveSessions || hasLiveRuntime ? createAgentRoster(sessionProbe, interactiveSessions, cronBackedSessions, runtimeObservations) : baseState.agents.roster;
+
+  shellState.status = {
+    ...systemStatus.status,
+    bridge: bridgeMode
+  };
+  shellState.boundary = buildToolsMcpShellBoundarySummary(toolsMcpProbe, toolsMcpControlSession);
+
+  shellState.dashboard.headline =
+    bridgeMode === "hybrid"
+      ? "Local OpenClaw observations now feed the shell summary from system probes, session history, runtime config, and skill indexing while renderer-safe fallback stays intact. The boundary ladder below shows how far execution can go before host mutation is withheld."
+      : baseState.dashboard.headline;
+  shellState.dashboard.metrics = createMetrics(bridgeMode, sessionProbe, interactiveSessions, cronBackedSessions, runtimeObservations);
+  shellState.dashboard.workstreams = createWorkstreams(sessionProbe, interactiveSessions, runtimeObservations);
+  shellState.dashboard.alerts = createAlerts(runtimeObservations, sessionProbe, toolsMcpProbe);
+  shellState.dashboard.systemChecks = createSystemChecks(systemStatus, runtimeObservations, skillProbe, codexProbe);
+
+  shellState.sessions = hasLiveSessions ? sessionProbe.sessions : baseState.sessions;
+
+  shellState.home.panels = shellState.home.panels.map((panel) => {
+    if (panel.id !== "system") {
+      return panel;
+    }
+
+    return {
+      ...panel,
+      description:
+        bridgeMode === "hybrid"
+          ? "Bridge contracts, Electron shell, and renderer shell are now observing local OpenClaw runtime signals."
+          : panel.description,
+      stats: panel.stats.map((stat) => {
+        if (stat.label === "Runtime") {
+          return {
+            ...stat,
+            value: shellState.status.runtime === "ready" ? "Ready" : "Degraded",
+            tone: shellState.status.runtime === "ready" ? "positive" : "warning"
+          };
+        }
+
+        if (stat.label === "Bridge") {
+          return {
+            ...stat,
+            value: bridgeMode === "hybrid" ? "Hybrid live" : "Mock IPC",
+            tone: bridgeMode === "hybrid" ? "positive" : "warning"
+          };
+        }
+
+        if (stat.label === "Workspace") {
+          return {
+            ...stat,
+            value: hasLiveRuntime ? shortenHomePath(runtimeObservations.defaultWorkspace) : stat.value,
+            tone: hasLiveRuntime ? "positive" : stat.tone
+          };
+        }
+
+        return stat;
+      })
+    };
+  });
+  shellState.home.recentActivity = createHomeActivity(baseState.home.recentActivity, sessionProbe, interactiveSessions, runtimeObservations);
+
+  shellState.agents = {
+    summary:
+      hasLiveSessions || hasLiveRuntime
+        ? "Local OpenClaw config, recent sessions, and cron run logs are now shaping the roster. When a probe is missing, the shell keeps a typed fallback instead of breaking."
+        : baseState.agents.summary,
+    metrics: hasLiveSessions || hasLiveRuntime ? createAgentMetrics(roster, interactiveSessions, runtimeObservations) : baseState.agents.metrics,
+    roster,
+    recentActivity:
+      hasLiveSessions || hasLiveRuntime
+        ? createAgentActivity(baseState.agents.recentActivity, interactiveSessions, runtimeObservations)
+        : baseState.agents.recentActivity,
+    ...createAgentDelegationState(baseState.agents, roster, interactiveSessions, runtimeObservations, codexProbe)
+  };
+  shellState.codex = createCodexState(baseState.codex, codexProbe, projectContext);
+  shellState.skills = createSkillsState(baseState.skills, skillProbe, toolsMcpProbe);
+
+  const gatewayCheck = systemStatus.checks.find((item) => item.id === "check-local-gateway") ?? null;
+  const networkCheck = systemStatus.checks.find((item) => item.id === "check-network") ?? null;
+  const cliCheck = systemStatus.checks.find((item) => item.id === "check-cli") ?? null;
+  const openclawHomeCheck = systemStatus.checks.find((item) => item.id === "check-openclaw-home") ?? null;
+  const latestInteractiveSession = interactiveSessions[0] ?? null;
+
+  shellState.settings.summary = [
+    "Settings now reads live shell/runtime posture first, while keeping typed fallback for anything the probes cannot safely read.",
+    gatewayCheck ? `Gateway ${gatewayCheck.value.toLowerCase()}.` : null,
+    networkCheck ? `Network ${networkCheck.value.toLowerCase()}.` : null,
+    startupRouting.summary
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  shellState.settings.sections = shellState.settings.sections.map((section) => {
+    if (section.id === "settings-workspace") {
+      const rootValue = latestInteractiveSession?.workspace ?? runtimeObservations.defaultWorkspace ?? "openclaw-studio";
+      const rootDetail = latestInteractiveSession?.cwd
+        ? shortenHomePath(latestInteractiveSession.cwd)
+        : runtimeObservations.defaultWorkspace ?? "Renderer, bridge, and shared contracts live in the monorepo.";
+
+      return {
+        ...section,
+        items: upsertSettingItems(
+          updateSettingItem(
+            updateSettingItem(section.items, "settings-root", {
+              value: rootValue,
+              detail: rootDetail,
+              tone: latestInteractiveSession?.cwd || runtimeObservations.defaultWorkspace ? "positive" : "neutral"
+            }),
+            "settings-version",
+            {
+              value: "0.1.0-alpha",
+              detail: `Recent sessions ${interactiveSessions.length} · Codex tasks ${codexProbe.tasks.length}.`,
+              tone: "positive"
+            }
+          ),
+          [
+            {
+              id: "settings-workspace-recent",
+              label: "Recent workspace",
+              value: latestInteractiveSession?.title ?? "Unavailable",
+              detail: latestInteractiveSession
+                  ? `${latestInteractiveSession.workspace} · ${latestInteractiveSession.updatedAt}`
+                : "No interactive session is currently visible through the runtime probe.",
+              tone: latestInteractiveSession ? "positive" : "warning"
+            }
+          ]
+        )
+      };
+    }
+
+    if (section.id === "settings-runtime") {
+      return {
+        ...section,
+        items: upsertSettingItems(
+          updateSettingItem(
+            updateSettingItem(section.items, "settings-bridge", {
+              value: bridgeMode === "hybrid" ? "Hybrid" : "Mock",
+              detail:
+                bridgeMode === "hybrid"
+                  ? "Dashboard, Agents, Codex, Skills, and Tools/MCP now mix local runtime observations with typed fallback where probes stay intentionally read-only."
+                  : "Live runtime probes were unavailable, so the shell stayed mock-backed.",
+              tone: bridgeMode === "hybrid" ? "positive" : "warning"
+            }),
+            "settings-fallback",
+            {
+              value: hasLiveSessions || hasLiveRuntime || hasLiveCodex || hasLiveToolsMcp ? "Active" : "Renderer-safe",
+              detail:
+                hasLiveSessions || hasLiveRuntime || hasLiveCodex || hasLiveToolsMcp
+                  ? "Renderer is receiving live-backed observations with typed fallback still available for missing probes."
+                  : "Renderer keeps rendering even when live runtime access is unavailable.",
+              tone: "positive"
+            }
+          ),
+          [
+            {
+              id: "settings-gateway",
+              label: "Local gateway",
+              value: gatewayCheck?.value ?? "Unknown",
+              detail: gatewayCheck?.detail ?? "Gateway probe unavailable.",
+              tone: gatewayCheck?.tone ?? "neutral"
+            },
+            {
+              id: "settings-network",
+              label: "Network probe",
+              value: networkCheck?.value ?? "Unknown",
+              detail: networkCheck?.detail ?? "Network probe unavailable.",
+              tone: networkCheck?.tone ?? "neutral"
+            },
+            {
+              id: "settings-cli-live",
+              label: "CLI binaries",
+              value: cliCheck?.value ?? "Unknown",
+              detail: cliCheck?.detail ?? "CLI probe unavailable.",
+              tone: cliCheck?.tone ?? "neutral"
+            },
+            {
+              id: "settings-openclaw-home",
+              label: "OpenClaw home",
+              value: openclawHomeCheck?.value ?? "Unknown",
+              detail: openclawHomeCheck?.detail ?? "OpenClaw home probe unavailable.",
+              tone: openclawHomeCheck?.tone ?? "neutral"
+            }
+          ]
+        )
+      };
+    }
+
+    if (section.id === "settings-startup") {
+      return {
+        ...section,
+        items: startupRouting.items.map((item) => ({ ...item }))
+      };
+    }
+
+    if (section.id === "settings-safety") {
+      return {
+        ...section,
+        items: upsertSettingItems(
+          updateSettingItem(
+            updateSettingItem(section.items, "settings-scope", {
+              value: "Local-only",
+              detail: `exec ${toolsMcpProbe.execSecurity ?? "unknown"}/${toolsMcpProbe.execAsk ?? "unknown"} · search ${
+                toolsMcpProbe.webSearchEnabled ? `on (${toolsMcpProbe.webSearchProvider ?? "configured"})` : "off"
+              } · fetch ${toolsMcpProbe.webFetchEnabled ? "on" : "off"}.`,
+              tone: "positive"
+            }),
+            "settings-advanced",
+            {
+              value: "Phase60 active",
+              detail:
+                `Plugins ${toolsMcpProbe.pluginInstallCount} · load paths ${toolsMcpProbe.pluginLoadPaths.length} · MCP roots ${toolsMcpProbe.discoveredMcpRoots.length}.`,
+              tone: "positive"
+            }
+          ),
+          [
+            {
+              id: "settings-tools-profile",
+              label: "Tools profile",
+              value: toolsMcpProbe.openclawToolProfile ?? "Unavailable",
+              detail:
+                toolsMcpProbe.openclawToolProfile
+                  ? `${shortenHomePath(toolsMcpProbe.openclawConfigPath)} · alsoAllow ${toolsMcpProbe.openclawAlsoAllow.length}.`
+                  : "openclaw.json did not expose a runtime tools profile.",
+              tone: toolsMcpProbe.openclawToolProfile ? "positive" : "warning"
+            },
+            {
+              id: "settings-plugin-runtime",
+              label: "Plugin runtime",
+              value: `${toolsMcpProbe.pluginInstallCount} installs / ${toolsMcpProbe.pluginEntryCount} entries`,
+              detail:
+                toolsMcpProbe.pluginLoadPaths.length > 0
+                  ? toolsMcpProbe.pluginLoadPaths.map((pluginPath) => shortenHomePath(pluginPath)).join(" · ")
+                  : "No additional plugin load paths were configured.",
+              tone: toolsMcpProbe.pluginInstallCount > 0 || toolsMcpProbe.pluginLoadPaths.length > 0 ? "positive" : "neutral"
+            },
+            {
+              id: "settings-mcp-runtime",
+              label: "MCP roots",
+              value: `${toolsMcpProbe.discoveredMcpRoots.length} detected`,
+              detail:
+                toolsMcpProbe.discoveredMcpRoots.length > 0
+                  ? toolsMcpProbe.discoveredMcpRoots.map((root) => shortenHomePath(root)).join(" · ")
+                  : "No dedicated MCP roots were found in the known runtime locations.",
+              tone: toolsMcpProbe.discoveredMcpRoots.length > 0 ? "positive" : "warning"
+            }
+          ]
+        )
+      };
+    }
+
+    return section;
+  });
+
+  shellState.inspector.summary =
+    hasLiveToolsMcp || hasLiveRuntime
+      ? "Shared boundary state now summarizes the live local-only layer, preview-host contract, per-slot trace focus, operator review loop posture, review posture ownership, reviewer queues, acknowledgement state, escalation windows, closeout windows, decision handoff, evidence closeout, cross-window shared-state posture, dock linkage, blockers, and future executor posture."
+      : baseState.inspector.summary;
+  shellState.inspector.boundary = shellState.boundary;
+  const traceFocus = createInspectorTraceFocus(shellState.boundary);
+  const currentReleaseStage = selectStudioReleaseApprovalPipelineStage(shellState.boundary.hostExecutor.releaseApprovalPipeline);
+  const currentReviewerQueue = selectStudioReleaseReviewerQueue(shellState.boundary.hostExecutor.releaseApprovalPipeline, currentReleaseStage);
+  const currentDecisionHandoff = shellState.boundary.hostExecutor.releaseApprovalPipeline.decisionHandoff;
+  const currentEscalationWindow = selectStudioReleaseEscalationWindow(shellState.boundary.hostExecutor.releaseApprovalPipeline, currentReleaseStage);
+  const currentEvidenceCloseout = shellState.boundary.hostExecutor.releaseApprovalPipeline.evidenceCloseout;
+  const currentCloseoutWindow = selectStudioReleaseCloseoutWindow(shellState.boundary.hostExecutor.releaseApprovalPipeline, currentReleaseStage);
+  const activeSharedStateLane =
+    shellState.windowing.sharedState.lanes.find((lane) => lane.id === shellState.windowing.sharedState.activeLaneId) ??
+    shellState.windowing.sharedState.lanes[0];
+  const activeWindow =
+    shellState.windowing.roster.windows.find((entry) => entry.id === activeSharedStateLane?.windowId) ??
+    shellState.windowing.roster.windows.find((entry) => entry.id === shellState.windowing.roster.activeWindowId) ??
+    shellState.windowing.roster.windows[0];
+  const activeOrchestrationBoard =
+    shellState.windowing.orchestration.boards.find((board) => board.laneId === activeSharedStateLane?.workflowLaneId) ??
+    shellState.windowing.orchestration.boards.find((board) => board.id === shellState.windowing.orchestration.activeBoardId) ??
+    shellState.windowing.orchestration.boards[0];
+  const activeObservabilityMapping = selectStudioWindowObservabilityActiveMapping(shellState.windowing) ?? null;
+  shellState.inspector.sections = [
+    {
+      id: "layer",
+      label: "Current layer",
+      value: formatBoundaryLayerLabel(shellState.boundary.currentLayer)
+    },
+    {
+      id: "host",
+      label: "Host state",
+      value: formatBoundaryHostState(shellState.boundary.hostState)
+    },
+    {
+      id: "next",
+      label: "Next layer",
+      value: formatBoundaryLayerLabel(shellState.boundary.nextLayer)
+    },
+    {
+      id: "slot-focus",
+      label: "Trace focus",
+      value: traceFocus?.label ?? "Unavailable"
+    },
+    {
+      id: "handler",
+      label: "Handler state",
+      value: traceFocus ? `${traceFocus.handlerState} / disabled` : "Unavailable"
+    },
+    {
+      id: "validator",
+      label: "Validator state",
+      value: traceFocus ? `${traceFocus.validatorState} / slot-linked` : "Unavailable"
+    },
+    {
+      id: "approval-pipeline",
+      label: "Operator review board",
+      value: currentReleaseStage ? `${currentReleaseStage.label} / ${currentReleaseStage.status}` : "Unavailable"
+    },
+    {
+      id: "reviewer-queue",
+      label: "Reviewer queue",
+      value: currentReviewerQueue ? `${currentReviewerQueue.label} / ${currentReviewerQueue.status}` : "Unavailable"
+    },
+    {
+      id: "ack-state",
+      label: "Acknowledgement",
+      value: currentReviewerQueue ? `${currentReviewerQueue.acknowledgementState} / ${currentReviewerQueue.owner}` : "Unavailable"
+    },
+    {
+      id: "decision-handoff",
+      label: "Decision handoff",
+      value: `${currentDecisionHandoff.batonState} / ${currentDecisionHandoff.targetOwner}`
+    },
+    {
+      id: "escalation-window",
+      label: "Escalation window",
+      value: currentEscalationWindow ? `${currentEscalationWindow.label} / ${currentEscalationWindow.state}` : "Unavailable"
+    },
+    {
+      id: "evidence-closeout",
+      label: "Evidence closeout",
+      value: `${currentEvidenceCloseout.sealingState} / ${currentEvidenceCloseout.owner}`
+    },
+    {
+      id: "closeout-window",
+      label: "Closeout window",
+      value: currentCloseoutWindow ? `${currentCloseoutWindow.label} / ${currentCloseoutWindow.state}` : "Unavailable"
+    },
+    {
+      id: "window-focus",
+      label: "Window focus",
+      value: activeWindow?.label ?? "Unavailable"
+    },
+    {
+      id: "shared-state",
+      label: "Shared-state lane",
+      value: activeSharedStateLane ? `${activeSharedStateLane.label} / ${activeSharedStateLane.sync.health}` : "Unavailable"
+    },
+    {
+      id: "orchestration-board",
+      label: "Orchestration board",
+      value: activeOrchestrationBoard ? `${activeOrchestrationBoard.label} / ${activeOrchestrationBoard.reviewPosture.stageLabel}` : "Unavailable"
+    },
+    {
+      id: "review-posture",
+      label: "Review posture owner",
+      value: activeObservabilityMapping
+        ? `${activeObservabilityMapping.owner} / ${formatReviewPostureRelationship(activeObservabilityMapping.relationship)}`
+        : "Unavailable"
+    },
+    {
+      id: "rollback",
+      label: "Rollback posture",
+      value: traceFocus ? `${traceFocus.rollbackDisposition} / ${traceFocus.terminalStatus}` : "Unavailable"
+    },
+    {
+      id: "audit",
+      label: "Audit posture",
+      value: traceFocus?.rollbackDisposition === "incomplete" ? "Rollback-linked" : "Placeholder linked"
+    },
+    {
+      id: "blocked",
+      label: "Blocked reasons",
+      value: `${shellState.boundary.blockedReasons.length} active`
+    },
+    {
+      id: "slots",
+      label: "Future slots",
+      value: `${shellState.boundary.futureExecutorSlots.length} planned`
+    }
+  ];
+  shellState.inspector.linkage = {
+    ...shellState.inspector.linkage,
+    routeId: activeObservabilityMapping?.routeId ?? activeWindow?.routeId ?? shellState.inspector.linkage.routeId,
+    workspaceViewId: shellState.windowing.posture.activeWorkspaceViewId,
+    windowIntentId: shellState.windowing.posture.focusedIntentId ?? shellState.inspector.linkage.windowIntentId,
+    detachedPanelId: shellState.windowing.posture.activeDetachedPanelId ?? shellState.inspector.linkage.detachedPanelId,
+    focusedSlotId: traceFocus?.slotId ?? shellState.inspector.linkage.focusedSlotId,
+    windowId: activeWindow?.id ?? shellState.inspector.linkage.windowId,
+    sharedStateLaneId: activeSharedStateLane?.id ?? shellState.inspector.linkage.sharedStateLaneId,
+    orchestrationBoardId: activeOrchestrationBoard?.id ?? shellState.inspector.linkage.orchestrationBoardId,
+    reviewStageId: activeObservabilityMapping?.reviewPosture.stageId ?? currentReleaseStage?.id ?? shellState.inspector.linkage.reviewStageId,
+    reviewerQueueId: activeObservabilityMapping?.reviewPosture.reviewerQueueId ?? currentReviewerQueue?.id ?? shellState.inspector.linkage.reviewerQueueId,
+    decisionHandoffId:
+      activeObservabilityMapping?.reviewPosture.decisionHandoffId ?? currentDecisionHandoff.id ?? shellState.inspector.linkage.decisionHandoffId,
+    evidenceCloseoutId:
+      activeObservabilityMapping?.reviewPosture.evidenceCloseoutId ?? currentEvidenceCloseout.id ?? shellState.inspector.linkage.evidenceCloseoutId,
+    escalationWindowId:
+      activeObservabilityMapping?.reviewPosture.escalationWindowId ?? currentEscalationWindow?.id ?? shellState.inspector.linkage.escalationWindowId,
+    closeoutWindowId:
+      activeObservabilityMapping?.reviewPosture.closeoutWindowId ?? currentCloseoutWindow?.id ?? shellState.inspector.linkage.closeoutWindowId,
+    observabilityMappingId: activeObservabilityMapping?.id ?? shellState.inspector.linkage.observabilityMappingId
+  };
+  shellState.inspector.drilldowns = shellState.inspector.drilldowns.map((drilldown) => {
+    if (drilldown.id === "drilldown-active-flow-insight") {
+      return {
+        ...drilldown,
+        lines: drilldown.lines.map((line) => {
+          if (line.id !== "drilldown-flow-slot") {
+            return line;
+          }
+
+          return {
+            ...line,
+            value: traceFocus?.label ?? line.value,
+            detail: traceFocus?.summary ?? line.detail
+          };
+        })
+      };
+    }
+
+    if (drilldown.id === "drilldown-release-approval-pipeline") {
+      return {
+        ...drilldown,
+        lines: drilldown.lines.map((line) => {
+          if (line.id === "drilldown-pipeline-current") {
+            return {
+              ...line,
+              value: currentReleaseStage?.label ?? line.value,
+              detail: `${shellState.boundary.hostExecutor.releaseApprovalPipeline.reviewBoard.posture}. ${line.detail}`
+            };
+          }
+
+          if (line.id === "drilldown-pipeline-queue") {
+            return {
+              ...line,
+              value: currentReviewerQueue ? `${currentReviewerQueue.label} / ${currentReviewerQueue.acknowledgementState}` : line.value,
+              detail: currentReviewerQueue?.summary ?? line.detail
+            };
+          }
+
+          if (line.id === "drilldown-pipeline-lifecycle") {
+            return {
+              ...line,
+              value: currentDecisionHandoff.label,
+              detail: `${currentDecisionHandoff.sourceOwner} -> ${currentDecisionHandoff.targetOwner} · ${currentDecisionHandoff.posture}`
+            };
+          }
+
+          if (line.id === "drilldown-pipeline-escalation") {
+            return {
+              ...line,
+              value: currentEscalationWindow?.label ?? line.value,
+              detail: currentEscalationWindow
+                ? `${currentEscalationWindow.state} · ${currentEscalationWindow.deadlineLabel} · ${currentEscalationWindow.trigger}`
+                : line.detail
+            };
+          }
+
+          if (line.id === "drilldown-pipeline-rollback") {
+            return {
+              ...line,
+              value: currentEvidenceCloseout.label,
+              detail: `${currentEvidenceCloseout.sealingState} · ${currentEvidenceCloseout.owner} · ${currentEvidenceCloseout.pendingEvidence.length} pending evidence`
+            };
+          }
+
+          if (line.id === "drilldown-pipeline-closeout-window") {
+            return {
+              ...line,
+              value: currentCloseoutWindow?.label ?? line.value,
+              detail: currentCloseoutWindow
+                ? `${currentCloseoutWindow.state} · ${currentCloseoutWindow.deadlineLabel} · ${currentCloseoutWindow.pendingEvidence.length} pending evidence`
+                : line.detail
+            };
+          }
+
+          return line;
+        })
+      };
+    }
+
+    if (drilldown.id === "drilldown-cross-window-observability") {
+      return {
+        ...drilldown,
+        lines: drilldown.lines.map((line) => {
+          if (line.id === "drilldown-observability-owner") {
+            return {
+              ...line,
+              value: activeObservabilityMapping
+                ? `${activeWindow?.label ?? activeObservabilityMapping.windowId} -> ${activeSharedStateLane?.label ?? activeObservabilityMapping.sharedStateLaneId} -> ${
+                    activeOrchestrationBoard?.label ?? activeObservabilityMapping.orchestrationBoardId
+                  }`
+                : line.value,
+              detail: activeObservabilityMapping?.summary ?? line.detail
+            };
+          }
+
+          if (line.id === "drilldown-observability-queue") {
+            return {
+              ...line,
+              value: activeObservabilityMapping
+                ? `${activeObservabilityMapping.reviewPosture.reviewerQueueId} / ${activeObservabilityMapping.reviewPosture.acknowledgementState}`
+                : line.value,
+              detail: activeObservabilityMapping
+                ? `${activeObservabilityMapping.owner} · ${formatReviewPostureRelationship(activeObservabilityMapping.relationship)} · ${activeObservabilityMapping.reviewPosture.summary}`
+                : line.detail
+            };
+          }
+
+          if (line.id === "drilldown-observability-windows") {
+            return {
+              ...line,
+              value: activeObservabilityMapping
+                ? `${activeObservabilityMapping.reviewPosture.escalationWindowId} / ${activeObservabilityMapping.reviewPosture.closeoutWindowId}`
+                : line.value,
+              detail: activeObservabilityMapping
+                ? `${activeObservabilityMapping.reviewPosture.stageLabel} · ${activeObservabilityMapping.focusedSlotId} · ${activeObservabilityMapping.reviewPosture.summary}`
+                : line.detail
+            };
+          }
+
+          if (line.id === "drilldown-observability-shadow") {
+            const relatedMappings = shellState.windowing.observability.mappings.filter((mapping) => mapping.id !== activeObservabilityMapping?.id);
+            return {
+              ...line,
+              value: relatedMappings.map((mapping) => mapping.label).join(" / ") || line.value,
+              detail:
+                relatedMappings.length > 0
+                  ? relatedMappings.map((mapping) => `${mapping.owner} · ${mapping.reviewPosture.stageLabel}`).join(" · ")
+                  : line.detail
+            };
+          }
+
+          return line;
+        })
+      };
+    }
+
+    return drilldown;
+  });
+  shellState.dock = createDockItemsFromTraceFocus(traceFocus);
+
+  return shellState;
+}
+
+export function createStudioRuntime(): StudioRuntime {
+  const toolsMcpControlSession = createToolsMcpLocalControlSession();
+
+  async function getLiveHostBridgeState(): Promise<StudioHostBridgeState> {
+    const toolsMcpProbe = await probeLiveToolsMcp();
+    return toolsMcpProbe.source === "live"
+      ? buildToolsMcpHostExecutorState(toolsMcpProbe, toolsMcpControlSession).bridge
+      : cloneState().boundary.hostExecutor.bridge;
+  }
+
+  async function handoffLiveHostPreview(itemId: string, actionId: string): Promise<StudioHostPreviewHandoff | null> {
+    return handoffToolsMcpHostPreview(itemId, actionId, toolsMcpControlSession);
+  }
+
+  async function invokeHostBridgeSlot(
+    channel: StudioHostBridgeSlotChannel,
+    handoff: StudioHostPreviewHandoff | null
+  ): Promise<StudioHostPreviewHandoff | null> {
+    const toolsMcpProbe = await probeLiveToolsMcp();
+    const hostExecutor =
+      toolsMcpProbe.source === "live"
+        ? buildToolsMcpHostExecutorState(toolsMcpProbe, toolsMcpControlSession)
+        : cloneState().boundary.hostExecutor;
+
+    return simulateToolsMcpHostPreviewHandoff(handoff, hostExecutor, channel);
+  }
+
+  return {
+    async getShellState(): Promise<StudioShellState> {
+      const baseState = cloneState();
+      const [systemStatus, sessionProbe, runtimeObservations, skillProbe, codexProbe, toolsMcpProbe, startupRouting] = await Promise.all([
+        probeLiveSystemStatus(),
+        probeLiveSessions(),
+        probeLiveRuntimeObservations(),
+        probeLiveSkills(),
+        probeLiveCodex(),
+        probeLiveToolsMcp(),
+        probeStartupRouting()
+      ]);
+      const projectContext = await probeProjectContext(sessionProbe, codexProbe);
+
+      return buildShellState(baseState, systemStatus, sessionProbe, runtimeObservations, skillProbe, codexProbe, projectContext, startupRouting, toolsMcpProbe, toolsMcpControlSession);
+    },
+    async listSessions(): Promise<SessionSummary[]> {
+      const liveSessions = await probeLiveSessions();
+      return liveSessions.source === "live" && liveSessions.sessions.length > 0 ? liveSessions.sessions : cloneState().sessions;
+    },
+    async listCodexTasks() {
+      const codexProbe = await probeLiveCodex();
+      return codexProbe.source === "live" && codexProbe.tasks.length > 0 ? codexProbe.tasks : cloneState().codex.tasks;
+    },
+    async getClaudeSnapshot() {
+      return loadClaudeSnapshot();
+    },
+    async getClaudeSessionMessages(sessionId: string) {
+      return loadClaudeSessionMessages(sessionId);
+    },
+    async getOpenClawChatState(sessionId?: string | null) {
+      return loadOpenClawChatState(sessionId);
+    },
+    async sendOpenClawChatTurn(prompt: string, sessionId?: string | null) {
+      return sendOpenClawChatTurn(prompt, sessionId);
+    },
+    async createOpenClawChatSession() {
+      return createOpenClawChatSession();
+    },
+    async getOpenClawGatewayServiceState() {
+      return loadOpenClawGatewayServiceState();
+    },
+    async startOpenClawGatewayService() {
+      return startOpenClawGatewayService();
+    },
+    async stopOpenClawGatewayService() {
+      return stopOpenClawGatewayService();
+    },
+    async getOpenClawModelCatalog() {
+      return loadOpenClawModelCatalog();
+    },
+    async setOpenClawModel(modelId: string) {
+      return setOpenClawModel(modelId);
+    },
+    async getHermesState() {
+      return loadHermesState();
+    },
+    async getHermesSnapshot() {
+      return loadHermesSnapshot();
+    },
+    async getHermesSessionMessages(sessionId: string) {
+      return loadHermesSessionMessages(sessionId);
+    },
+    async createHermesSession(modelId?: string | null) {
+      return createHermesSessionFromWSL(modelId);
+    },
+    async getHermesGatewayServiceState() {
+      return loadHermesGatewayServiceState();
+    },
+    async startHermesGatewayService() {
+      return startHermesGatewayService();
+    },
+    async stopHermesGatewayService() {
+      return stopHermesGatewayService();
+    },
+    async connectHermes() {
+      return connectHermesRuntime();
+    },
+    async disconnectHermes() {
+      return disconnectHermesRuntime();
+    },
+    async getHostExecutorState() {
+      const toolsMcpProbe = await probeLiveToolsMcp();
+      return toolsMcpProbe.source === "live"
+        ? buildToolsMcpHostExecutorState(toolsMcpProbe, toolsMcpControlSession)
+        : cloneState().boundary.hostExecutor;
+    },
+    async getHostBridgeState() {
+      return getLiveHostBridgeState();
+    },
+    async handoffHostPreview(itemId: string, actionId: string) {
+      const handoff = await handoffLiveHostPreview(itemId, actionId);
+      return invokeHostBridgeSlot((handoff?.mapping.channel ?? "") as StudioHostBridgeSlotChannel, handoff);
+    },
+    async invokeHostBridgeSlot(channel: StudioHostBridgeSlotChannel, handoff: StudioHostPreviewHandoff | null) {
+      return invokeHostBridgeSlot(channel, handoff);
+    },
+    async getRuntimeItemDetail(itemId: string) {
+      return readToolsMcpDetail(itemId, toolsMcpControlSession);
+    },
+    async runRuntimeItemAction(itemId: string, actionId: string) {
+      return runToolsMcpAction(itemId, actionId, toolsMcpControlSession);
+    },
+    subscribeHermesEvents(listener: (event: StudioHermesEvent) => void): () => void {
+      return subscribeToHermesEvents(listener);
+    },
+    async sendHermesMessage(sessionId: string, content: string): Promise<StudioHermesSendMessageResult> {
+      return sendHermesMessage(sessionId, content);
+    },
+    async getHermesModelCatalog() {
+      return loadHermesModelCatalog();
+    },
+    async setHermesModel(modelId: string) {
+      return setHermesModel(modelId);
+    },
+    async getPerformanceMetrics(): Promise<PerformanceMetrics> {
+      const { getPerformanceMonitor } = await import("./performance-monitor");
+      return getPerformanceMonitor().getMetrics();
+    },
+    subscribePerformanceAlerts(listener: (alert: PerformanceAlert) => void): () => void {
+      const { getPerformanceMonitor } = require("./performance-monitor");
+      const monitor = getPerformanceMonitor();
+      monitor.on("alert", listener);
+      return () => {
+        monitor.off("alert", listener);
+      };
+    },
+    async loadHermesSessions(): Promise<import("@openclaw/shared").StudioHermesLoadSessionsResult> {
+      const { loadHermesSessionsFromWSL } = await import("./probes/hermes");
+      return loadHermesSessionsFromWSL();
+    },
+    async loadHermesSession(sessionId: string): Promise<import("@openclaw/shared").StudioHermesLoadSessionResult> {
+      const { loadHermesSessionFromWSL } = await import("./probes/hermes");
+      return loadHermesSessionFromWSL(sessionId);
+    },
+    async getHermesSessions(): Promise<import("@openclaw/shared").StudioHermesLoadSessionsResult> {
+      const { loadHermesSessionsFromWSL } = await import("./probes/hermes");
+      return loadHermesSessionsFromWSL();
+    },
+    async getHermesMessages(sessionId: string): Promise<import("@openclaw/shared").StudioHermesLoadSessionResult> {
+      const { loadHermesSessionFromWSL } = await import("./probes/hermes");
+      return loadHermesSessionFromWSL(sessionId);
+    }
+  };
+}

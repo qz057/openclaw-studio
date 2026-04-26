@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+      "@openclaw/shared": ["packages/shared/src/index.ts"],
+      "@openclaw/shared/*": ["packages/shared/src/*"],
+      "@openclaw/bridge": ["packages/bridge/src/index.ts"]
+    }
+  }
+}

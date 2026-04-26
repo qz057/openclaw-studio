@@ -1,0 +1,138 @@
+{
+  "generatedAt": "2026-04-26T05:04:20.349Z",
+  "mode": "local-qa",
+  "status": "local-qa-passed-public-blocked",
+  "localQa": {
+    "status": "passed",
+    "evidence": {
+      "phase4RcSmoke": "E:\\claucd\\界面控制台程序\\delivery\\phase4-rc-smoke-20260426.json",
+      "phase5RuntimeCloseout": "E:\\claucd\\界面控制台程序\\delivery\\phase5-runtime-gateway-closeout-20260426.md",
+      "phase6ContractAudit": "E:\\claucd\\界面控制台程序\\delivery\\phase6-contract-audit-20260426.json",
+      "phase7PackageCloseout": "E:\\claucd\\界面控制台程序\\delivery\\phase7-package-closeout-20260426.json",
+      "phase8InstallerCloseout": "E:\\claucd\\界面控制台程序\\delivery\\phase8-installer-closeout-20260426.json",
+      "phase8InstallerSmoke": "E:\\claucd\\界面控制台程序\\delivery\\phase8-installer-smoke-20260426.json",
+      "phase11UiFullCheck": "E:\\claucd\\界面控制台程序\\delivery\\phase11-ui-full-check-20260426.json",
+      "phase12PortableUiFullCheck": "E:\\claucd\\界面控制台程序\\delivery\\phase12-portable-ui-full-check-20260426.json",
+      "phase12InstalledUiFullCheck": "E:\\claucd\\界面控制台程序\\delivery\\phase12-installed-ui-full-check-20260426.json",
+      "rcManifest": "E:\\claucd\\界面控制台程序\\delivery\\openclaw-studio-rc-manifest-20260426.md"
+    }
+  },
+  "publicRelease": {
+    "status": "blocked",
+    "signatureStatus": "NotSigned",
+    "blockers": [
+      {
+        "id": "windows-installer-not-signed",
+        "severity": "release-blocker",
+        "detail": "NSIS installer signature status is NotSigned."
+      },
+      {
+        "id": "signing-certificate-input-missing",
+        "severity": "release-blocker",
+        "detail": "No signing certificate input env var is present."
+      },
+      {
+        "id": "signing-password-input-missing",
+        "severity": "release-blocker",
+        "detail": "No signing password env var is present."
+      },
+      {
+        "id": "timestamp-url-missing",
+        "severity": "release-blocker",
+        "detail": "No timestamp authority URL env var is present."
+      }
+    ]
+  },
+  "signingEnv": {
+    "candidates": {
+      "CSC_LINK": false,
+      "CSC_KEY_PASSWORD": false,
+      "WIN_CSC_LINK": false,
+      "WIN_CSC_KEY_PASSWORD": false,
+      "WINDOWS_CODESIGN_CERT_FILE": false,
+      "WINDOWS_CODESIGN_CERT_PASSWORD": false,
+      "WINDOWS_CODESIGN_CERT_THUMBPRINT": false,
+      "WINDOWS_CODESIGN_CERT_SUBJECT": false,
+      "WINDOWS_CODESIGN_TIMESTAMP_URL": false
+    },
+    "hasCertificateInput": false,
+    "hasPasswordInput": false,
+    "hasTimestampInput": false
+  },
+  "artifacts": {
+    "rcZip": {
+      "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\release\\OpenClaw Studio-0.1.0-win-x64.zip",
+      "exists": true,
+      "size": 141157276,
+      "sha256": "1B22175E8A712938F2AFCE2369EAB445B4AE6BCF5244B2D6A2EF0589468CA56E",
+      "lastModified": "2026-04-26T04:31:41.140Z",
+      "actualExists": true,
+      "actualSize": 141157276,
+      "actualSha256": "1B22175E8A712938F2AFCE2369EAB445B4AE6BCF5244B2D6A2EF0589468CA56E",
+      "sizeMatches": true,
+      "hashMatches": true
+    },
+    "rcExe": {
+      "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\release\\win-unpacked\\OpenClaw Studio.exe",
+      "exists": true,
+      "size": 222973952,
+      "sha256": "50730C076C408878624E0284FCC932048B6EBCD76F9EFB0F9C34E6851321FF8B",
+      "lastModified": "2026-04-26T04:30:43.510Z",
+      "actualExists": true,
+      "actualSize": 222973952,
+      "actualSha256": "50730C076C408878624E0284FCC932048B6EBCD76F9EFB0F9C34E6851321FF8B",
+      "sizeMatches": true,
+      "hashMatches": true
+    },
+    "portableZip": {
+      "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-local\\out\\OpenClaw-Studio-0.1.0-alpha-x64-portable.zip",
+      "exists": true,
+      "size": 142884736,
+      "sha256": "8AEF3B96E182859CCA6F731F703A2A664EF15407F3847BE54DEFD23324372397",
+      "lastModified": "2026-04-26T04:51:16.405Z",
+      "actualExists": true,
+      "actualSize": 142884736,
+      "actualSha256": "8AEF3B96E182859CCA6F731F703A2A664EF15407F3847BE54DEFD23324372397",
+      "sizeMatches": true,
+      "hashMatches": true
+    },
+    "portableExe": {
+      "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-local\\out\\win-unpacked\\OpenClaw Studio.exe",
+      "exists": true,
+      "size": 222973952,
+      "sha256": "109B787EA24B71CF0862434B9F38684E0ECFB432BAC3ECF84AAC27CA34563D57",
+      "lastModified": "2026-04-26T04:51:03.656Z",
+      "actualExists": true,
+      "actualSize": 222973952,
+      "actualSha256": "109B787EA24B71CF0862434B9F38684E0ECFB432BAC3ECF84AAC27CA34563D57",
+      "sizeMatches": true,
+      "hashMatches": true
+    },
+    "installer": {
+      "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-installer\\out\\OpenClaw-Studio-0.1.0-win-x64-setup.exe",
+      "exists": true,
+      "size": 102268358,
+      "sha256": "ABF2616260EDDCA9FEF94A27567D06533B1F824BE09340B693ADCEEB76FC7408",
+      "lastModified": "2026-04-26T04:51:00.042Z",
+      "actualExists": true,
+      "actualSize": 102268358,
+      "actualSha256": "ABF2616260EDDCA9FEF94A27567D06533B1F824BE09340B693ADCEEB76FC7408",
+      "sizeMatches": true,
+      "hashMatches": true
+    },
+    "installerBlockMap": {
+      "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-installer\\out\\OpenClaw-Studio-0.1.0-win-x64-setup.exe.blockmap",
+      "exists": true,
+      "size": 106619,
+      "sha256": "EC0C2AC3CE4B382ABBFEA3AA50742DCBD9837D3AC8C76AF85B30FF71DEAB2F5D",
+      "lastModified": "2026-04-26T04:51:00.972Z",
+      "actualExists": true,
+      "actualSize": 106619,
+      "actualSha256": "EC0C2AC3CE4B382ABBFEA3AA50742DCBD9837D3AC8C76AF85B30FF71DEAB2F5D",
+      "sizeMatches": true,
+      "hashMatches": true
+    }
+  },
+  "warnings": [],
+  "failures": []
+}

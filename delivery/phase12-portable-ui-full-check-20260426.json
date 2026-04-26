@@ -1,0 +1,2319 @@
+{
+  "generatedAt": "2026-04-26T04:52:36.926Z",
+  "status": "passed",
+  "host": {
+    "platform": "win32",
+    "arch": "x64",
+    "hostname": "山谷神奇"
+  },
+  "runtime": {
+    "launchMode": "explicit-packaged",
+    "launchCommand": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-local\\out\\win-unpacked\\OpenClaw Studio.exe",
+    "appRoot": "E:\\claucd\\界面控制台程序\\apps\\studio",
+    "userDataDir": "C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-ui-full-check-pFWZi8",
+    "cdpPort": 57747
+  },
+  "pages": [
+    {
+      "id": "dashboard",
+      "label": "总览",
+      "navResult": {
+        "clicked": true,
+        "target": {
+          "x": 120.00000381469727,
+          "y": 200.33334350585938,
+          "width": 186.6666717529297,
+          "height": 61,
+          "text": "总览 实时总览",
+          "tag": "BUTTON",
+          "className": "nav-item"
+        }
+      },
+      "stateAfterNav": {
+        "hash": "#dashboard",
+        "title": "山谷智合",
+        "bodyLength": 1854,
+        "bodyPreview": "山谷智合 正在同步 刚刚同步 主入口 总览 实时总览 OpenClaw 主会话 Hermes 终端会话 会话 历史与恢复 更多 代理 协作与分工 技能 能力与接入 设置 当前配置 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 延迟 未采样 Host Executor 禁用 总览 实时同步 数据每 5 秒刷新 近 24 小时 山谷智合实时运营驾驶舱 就绪 · 混合 · 刚刚同步 Shell snapshot 5s refresh 真实 snapshot Runtime metric connected · 40ms runtime metric Gateway/Hermes 8/8 ok · 1838ms runtime service Rolling buffer 1 samples rolling buffer 任务总数 snapshot 6 rolling 0 1 运行 · 0 待处理 · 5 完成 采样成功率 service 100% runtime sampled 8/8 runtime 调用成功 · 会话 2/3 采样耗时 serv",
+        "activeNav": [
+          "总览 实时总览"
+        ],
+        "headings": [
+          "总览",
+          "Codex 实时会话",
+          "模型路由",
+          "任务类型分布",
+          "资源使用趋势",
+          "协同节点",
+          "Claude 实时会话"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 实时总览",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 1,
+            "text": "OpenClaw 主会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "Hermes 终端会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "会话 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "代理 协作与分工",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 5,
+            "text": "技能 能力与接入",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 6,
+            "text": "设置 当前配置",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 7,
+            "text": "近 24 小时",
+            "disabled": false,
+            "className": "dashboard-range-button"
+          },
+          {
+            "index": 10,
+            "text": "全部会话",
+            "disabled": false,
+            "className": "dashboard-session-filter"
+          },
+          {
+            "index": 11,
+            "text": "全部会话",
+            "disabled": false,
+            "className": "dashboard-session-filter"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false
+      },
+      "typed": {
+        "typed": false,
+        "reason": "No chat input expected on this page"
+      },
+      "interactions": {
+        "clicked": [],
+        "skippedDangerous": [],
+        "pageId": "dashboard"
+      },
+      "finalState": {
+        "hash": "#dashboard",
+        "title": "山谷智合",
+        "bodyLength": 1860,
+        "bodyPreview": "山谷智合 实时同步 刚刚同步 主入口 总览 实时总览 OpenClaw 主会话 Hermes 终端会话 会话 历史与恢复 更多 代理 协作与分工 技能 能力与接入 设置 当前配置 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 延迟 未采样 Host Executor 禁用 总览 实时同步 数据每 5 秒刷新 近 24 小时 山谷智合实时运营驾驶舱 就绪 · 混合 · 刚刚同步 Shell snapshot 5s refresh 真实 snapshot Runtime metric connected · 40ms runtime metric Gateway/Hermes 8/8 ok · 1838ms runtime service Rolling buffer 2 samples rolling buffer 任务总数 snapshot 6 rolling 0 1 运行 · 0 待处理 · 5 完成 采样成功率 service 100% runtime sampled 8/8 runtime 调用成功 · 会话 2/3 采样耗时 serv",
+        "activeNav": [
+          "总览 实时总览"
+        ],
+        "headings": [
+          "总览",
+          "Codex 实时会话",
+          "模型路由",
+          "任务类型分布",
+          "资源使用趋势",
+          "协同节点",
+          "Claude 实时会话"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 实时总览",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 1,
+            "text": "OpenClaw 主会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "Hermes 终端会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "会话 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "代理 协作与分工",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 5,
+            "text": "技能 能力与接入",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 6,
+            "text": "设置 当前配置",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 7,
+            "text": "近 24 小时",
+            "disabled": false,
+            "className": "dashboard-range-button"
+          },
+          {
+            "index": 10,
+            "text": "全部会话",
+            "disabled": false,
+            "className": "dashboard-session-filter"
+          },
+          {
+            "index": 11,
+            "text": "全部会话",
+            "disabled": false,
+            "className": "dashboard-session-filter"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false
+      },
+      "screenshot": {
+        "path": "E:\\claucd\\界面控制台程序\\delivery\\phase12-portable-ui-screenshots-20260426\\dashboard.png",
+        "size": 225418,
+        "sha256": "8A9D8A7A3404F9F102CA9DCD719E687EFC47FD276250FAF7365E6B7623CE2B2F"
+      },
+      "failures": []
+    },
+    {
+      "id": "chat",
+      "label": "OpenClaw",
+      "navResult": {
+        "clicked": true,
+        "target": {
+          "x": 120.00000381469727,
+          "y": 236.6666717529297,
+          "width": 186.6666717529297,
+          "height": 61,
+          "text": "OpenClaw 主会话",
+          "tag": "BUTTON",
+          "className": "nav-item"
+        }
+      },
+      "stateAfterNav": {
+        "hash": "#chat",
+        "title": "山谷智合",
+        "bodyLength": 21517,
+        "bodyPreview": "山谷智合 当前版本 实时同步 刚刚同步 主入口 总览 实时总览 OpenClaw 主会话 Hermes 终端会话 会话 历史与恢复 更多 代理 协作与分工 技能 能力与接入 设置 当前配置 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 延迟 未采样 Host Executor 禁用 OPENCLAW 主会话 agent:main:main gpt-5.4 · relay 未选择模型 本地网关 · 已连接 网络连接 · 可访问 桥接 · 混合 运行态 · 就绪 工作区 · Operator Shell 聊天状态 · 可发送 15 分钟前同步 模型选项 未发现可用模型 未选择模型 修改的是 OpenClaw 主会话的默认模型，新回合会沿用这个选择。 新建会话 应用模型 Gateway 状态加载中 读取 OpenClaw Gateway 的独立服务状态。 刷新网关 启动网关 停止网关 实时动态 可发送 OpenClaw · 04/26 12:37 常规同步 4s 实时消息 你往上翻历史时不会再被拉回底部；只有贴近底部时才会继续跟随最新消息。 40 ",
+        "activeNav": [
+          "OpenClaw 主会话"
+        ],
+        "headings": [],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 实时总览",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "OpenClaw 主会话",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 2,
+            "text": "Hermes 终端会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "会话 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "代理 协作与分工",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 5,
+            "text": "技能 能力与接入",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 6,
+            "text": "设置 当前配置",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 7,
+            "text": "新建会话",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 8,
+            "text": "应用模型",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 9,
+            "text": "刷新网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 10,
+            "text": "启动网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 11,
+            "text": "停止网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 12,
+            "text": "总结当前 OpenClaw 运行状态",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 13,
+            "text": "检查最近会话和待处理事项",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 14,
+            "text": "告诉我现在最值得继续的下一步",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 15,
+            "text": "帮我诊断当前工作区里最明显的问题",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 16,
+            "text": "清空",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 17,
+            "text": "发送到 OpenClaw Ctrl/Cmd + Enter",
+            "disabled": true,
+            "className": "quick-action-button quick-action-button--primary"
+          }
+        ],
+        "fields": [
+          {
+            "tag": "SELECT",
+            "placeholder": "",
+            "disabled": true,
+            "readOnly": false,
+            "valueLength": 0
+          },
+          {
+            "tag": "TEXTAREA",
+            "placeholder": "直接向 OpenClaw 主会话发消息，例如：总结当前 OpenClaw 状态，并告诉我下一步最应该做什么。",
+            "disabled": false,
+            "readOnly": false,
+            "valueLength": 0
+          }
+        ],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false
+      },
+      "typed": {
+        "typed": true,
+        "target": {
+          "x": 832,
+          "y": 881.7396049499512,
+          "tag": "TEXTAREA",
+          "placeholder": "直接向 OpenClaw 主会话发消息，例如：总结当前 OpenClaw 状态，并告诉我下一步最应该做什么。",
+          "valueLength": 0
+        },
+        "valueLength": 22
+      },
+      "interactions": {
+        "clicked": [
+          {
+            "text": "刷新网关",
+            "result": {
+              "clicked": true,
+              "target": {
+                "x": 559.4166679382324,
+                "y": 227.8229217529297,
+                "width": 97.33333587646484,
+                "height": 46,
+                "text": "刷新网关",
+                "tag": "BUTTON",
+                "className": "secondary-button"
+              }
+            }
+          },
+          {
+            "text": "检查最近会话和待处理事项",
+            "result": {
+              "clicked": true,
+              "target": {
+                "x": 604.1041717529297,
+                "y": 779.8125,
+                "width": 217.33334350585938,
+                "height": 46,
+                "text": "检查最近会话和待处理事项",
+                "tag": "BUTTON",
+                "className": "secondary-button chat-preset-button"
+              }
+            }
+          },
+          {
+            "text": "清空",
+            "result": {
+              "clicked": true,
+              "target": {
+                "x": 276.6666679382324,
+                "y": 958,
+                "width": 65.33333587646484,
+                "height": 56,
+                "text": "清空",
+                "tag": "BUTTON",
+                "className": "secondary-button"
+              }
+            }
+          }
+        ],
+        "skippedDangerous": [
+          "新建会话",
+          "启动网关",
+          "停止网关",
+          "发送到 OpenClaw Ctrl/Cmd + Enter"
+        ],
+        "pageId": "chat"
+      },
+      "finalState": {
+        "hash": "#chat",
+        "title": "山谷智合",
+        "bodyLength": 21516,
+        "bodyPreview": "山谷智合 当前版本 正在同步 刚刚同步 主入口 总览 实时总览 OpenClaw 主会话 Hermes 终端会话 会话 历史与恢复 更多 代理 协作与分工 技能 能力与接入 设置 当前配置 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 延迟 未采样 Host Executor 禁用 OPENCLAW 主会话 agent:main:main gpt-5.4 · relay 未选择模型 本地网关 · 已连接 网络连接 · 可访问 桥接 · 混合 运行态 · 就绪 工作区 · Operator Shell 聊天状态 · 可发送 15 分钟前同步 模型选项 未发现可用模型 未选择模型 修改的是 OpenClaw 主会话的默认模型，新回合会沿用这个选择。 新建会话 应用模型 Gateway 已运行 RPC 可达 · ws://127.0.0.1:18789 刷新网关 启动网关 停止网关 实时动态 可发送 OpenClaw · 04/26 12:37 常规同步 4s 实时消息 你往上翻历史时不会再被拉回底部；只有贴近底部时才会继续跟随最新消息。 40 条",
+        "activeNav": [
+          "OpenClaw 主会话"
+        ],
+        "headings": [],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 实时总览",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "OpenClaw 主会话",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 2,
+            "text": "Hermes 终端会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "会话 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "代理 协作与分工",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 5,
+            "text": "技能 能力与接入",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 6,
+            "text": "设置 当前配置",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 7,
+            "text": "新建会话",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 8,
+            "text": "应用模型",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 9,
+            "text": "刷新网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 10,
+            "text": "启动网关",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 11,
+            "text": "停止网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 12,
+            "text": "总结当前 OpenClaw 运行状态",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 13,
+            "text": "检查最近会话和待处理事项",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 14,
+            "text": "告诉我现在最值得继续的下一步",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 15,
+            "text": "帮我诊断当前工作区里最明显的问题",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 16,
+            "text": "清空",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 17,
+            "text": "发送到 OpenClaw Ctrl/Cmd + Enter",
+            "disabled": true,
+            "className": "quick-action-button quick-action-button--primary"
+          }
+        ],
+        "fields": [
+          {
+            "tag": "SELECT",
+            "placeholder": "",
+            "disabled": true,
+            "readOnly": false,
+            "valueLength": 0
+          },
+          {
+            "tag": "TEXTAREA",
+            "placeholder": "直接向 OpenClaw 主会话发消息，例如：总结当前 OpenClaw 状态，并告诉我下一步最应该做什么。",
+            "disabled": false,
+            "readOnly": false,
+            "valueLength": 0
+          }
+        ],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false
+      },
+      "screenshot": {
+        "path": "E:\\claucd\\界面控制台程序\\delivery\\phase12-portable-ui-screenshots-20260426\\chat.png",
+        "size": 183549,
+        "sha256": "491A9F5FA4F037227F5114C59984A7B6A870823A993DEC37B69E27AD54289770"
+      },
+      "failures": []
+    },
+    {
+      "id": "hermes",
+      "label": "Hermes",
+      "navResult": {
+        "clicked": true,
+        "target": {
+          "x": 120.00000381469727,
+          "y": 334.3333435058594,
+          "width": 186.6666717529297,
+          "height": 61,
+          "text": "Hermes 终端会话",
+          "tag": "BUTTON",
+          "className": "nav-item"
+        }
+      },
+      "stateAfterNav": {
+        "hash": "#hermes",
+        "title": "山谷智合",
+        "bodyLength": 890,
+        "bodyPreview": "山谷智合 当前版本 实时同步 刚刚同步 主入口 总览 实时总览 OpenClaw 主会话 Hermes 终端会话 会话 历史与恢复 更多 代理 协作与分工 技能 能力与接入 设置 当前配置 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 延迟 未采样 Host Executor 禁用 HERMES 会话 20260426_124245_04d00b 2 条消息 · 等待识别模型 未选择模型 本地网关 · 已连接 网络连接 · 可访问 桥接 · 混合 运行态 · 就绪 工作区 · Operator Shell Hermes 待连接会话层 刚刚同步 模型选项 未发现可用模型 未选择模型 修改的是 Hermes 的默认模型配置，后续消息会优先沿用这个选择。 新建会话 应用模型 Gateway 已运行 Loaded: loaded (/home/qz057/.config/systemd/user/hermes-gateway.service; enabled; preset: enabled) 刷新网关 启动网关 停止网关 o9cq800HJIQEQ",
+        "activeNav": [
+          "Hermes 终端会话"
+        ],
+        "headings": [],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 实时总览",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "OpenClaw 主会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "Hermes 终端会话",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 3,
+            "text": "会话 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "代理 协作与分工",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 5,
+            "text": "技能 能力与接入",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 6,
+            "text": "设置 当前配置",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 7,
+            "text": "新建会话",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 8,
+            "text": "应用模型",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 9,
+            "text": "刷新网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 10,
+            "text": "启动网关",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 11,
+            "text": "停止网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 12,
+            "text": "连接 Hermes",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 13,
+            "text": "断开 Hermes",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 14,
+            "text": "查看当前 Hermes 连接状态",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 15,
+            "text": "显示最近的 Hermes 会话",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 16,
+            "text": "检查 Hermes 网关配置",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 17,
+            "text": "诊断 Hermes 通信问题",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 18,
+            "text": "发送到 Hermes",
+            "disabled": true,
+            "className": "primary-button"
+          }
+        ],
+        "fields": [
+          {
+            "tag": "SELECT",
+            "placeholder": "",
+            "disabled": true,
+            "readOnly": false,
+            "valueLength": 0
+          },
+          {
+            "tag": "TEXTAREA",
+            "placeholder": "输入你想发送给 Hermes 的命令或问题",
+            "disabled": false,
+            "readOnly": false,
+            "valueLength": 0
+          }
+        ],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false
+      },
+      "typed": {
+        "typed": true,
+        "target": {
+          "x": 832,
+          "y": 911.0729179382324,
+          "tag": "TEXTAREA",
+          "placeholder": "输入你想发送给 Hermes 的命令或问题",
+          "valueLength": 0
+        },
+        "valueLength": 24
+      },
+      "interactions": {
+        "clicked": [
+          {
+            "text": "刷新网关",
+            "result": {
+              "clicked": true,
+              "target": {
+                "x": 938.2812919616699,
+                "y": 227.8229217529297,
+                "width": 97.33333587646484,
+                "height": 46,
+                "text": "刷新网关",
+                "tag": "BUTTON",
+                "className": "secondary-button"
+              }
+            }
+          },
+          {
+            "text": "查看当前 Hermes 连接状态",
+            "result": {
+              "clicked": true,
+              "target": {
+                "x": 354.90625,
+                "y": 809.1458740234375,
+                "width": 221.8125,
+                "height": 46,
+                "text": "查看当前 Hermes 连接状态",
+                "tag": "BUTTON",
+                "className": "secondary-button chat-preset-button"
+              }
+            }
+          },
+          {
+            "text": "检查 Hermes 网关配置",
+            "result": {
+              "clicked": true,
+              "target": {
+                "x": 786.53125,
+                "y": 809.1458740234375,
+                "width": 189.8125,
+                "height": 46,
+                "text": "检查 Hermes 网关配置",
+                "tag": "BUTTON",
+                "className": "secondary-button chat-preset-button"
+              }
+            }
+          }
+        ],
+        "skippedDangerous": [
+          "新建会话",
+          "停止网关",
+          "连接 Hermes",
+          "发送到 Hermes"
+        ],
+        "pageId": "hermes"
+      },
+      "finalState": {
+        "hash": "#hermes",
+        "title": "山谷智合",
+        "bodyLength": 890,
+        "bodyPreview": "山谷智合 当前版本 实时同步 刚刚同步 主入口 总览 实时总览 OpenClaw 主会话 Hermes 终端会话 会话 历史与恢复 更多 代理 协作与分工 技能 能力与接入 设置 当前配置 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 延迟 未采样 Host Executor 禁用 HERMES 会话 20260426_124245_04d00b 2 条消息 · 等待识别模型 未选择模型 本地网关 · 已连接 网络连接 · 可访问 桥接 · 混合 运行态 · 就绪 工作区 · Operator Shell Hermes 待连接会话层 刚刚同步 模型选项 未发现可用模型 未选择模型 修改的是 Hermes 的默认模型配置，后续消息会优先沿用这个选择。 新建会话 应用模型 Gateway 已运行 Loaded: loaded (/home/qz057/.config/systemd/user/hermes-gateway.service; enabled; preset: enabled) 刷新网关 启动网关 停止网关 o9cq800HJIQEQ",
+        "activeNav": [
+          "Hermes 终端会话"
+        ],
+        "headings": [],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 实时总览",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "OpenClaw 主会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "Hermes 终端会话",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 3,
+            "text": "会话 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "代理 协作与分工",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 5,
+            "text": "技能 能力与接入",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 6,
+            "text": "设置 当前配置",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 7,
+            "text": "新建会话",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 8,
+            "text": "应用模型",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 9,
+            "text": "刷新网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 10,
+            "text": "启动网关",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 11,
+            "text": "停止网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 12,
+            "text": "连接 Hermes",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 13,
+            "text": "断开 Hermes",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 14,
+            "text": "查看当前 Hermes 连接状态",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 15,
+            "text": "显示最近的 Hermes 会话",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 16,
+            "text": "检查 Hermes 网关配置",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 17,
+            "text": "诊断 Hermes 通信问题",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 18,
+            "text": "发送到 Hermes",
+            "disabled": false,
+            "className": "primary-button"
+          }
+        ],
+        "fields": [
+          {
+            "tag": "SELECT",
+            "placeholder": "",
+            "disabled": true,
+            "readOnly": false,
+            "valueLength": 0
+          },
+          {
+            "tag": "TEXTAREA",
+            "placeholder": "输入你想发送给 Hermes 的命令或问题",
+            "disabled": false,
+            "readOnly": false,
+            "valueLength": 14
+          }
+        ],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false
+      },
+      "screenshot": {
+        "path": "E:\\claucd\\界面控制台程序\\delivery\\phase12-portable-ui-screenshots-20260426\\hermes.png",
+        "size": 176881,
+        "sha256": "26C49ACD96B1839EDD5DECD3CD34024D3100B59297069DC00A95B471B0D4CC1C"
+      },
+      "failures": []
+    },
+    {
+      "id": "sessions",
+      "label": "会话",
+      "navResult": {
+        "clicked": true,
+        "target": {
+          "x": 120.00000381469727,
+          "y": 401.3333435058594,
+          "width": 186.6666717529297,
+          "height": 61,
+          "text": "会话 历史与恢复",
+          "tag": "BUTTON",
+          "className": "nav-item"
+        }
+      },
+      "stateAfterNav": {
+        "hash": "#sessions",
+        "title": "山谷智合",
+        "bodyLength": 2954,
+        "bodyPreview": "山谷智合 当前版本 实时同步 刚刚同步 主入口 总览 实时总览 OpenClaw 主会话 Hermes 终端会话 会话 历史与恢复 更多 代理 协作与分工 技能 能力与接入 设置 当前配置 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 延迟 未采样 Host Executor 禁用 工作台首页 工作台 继续当前任务，或启动新的流程 新建会话 通过命令面板启动新的流程或任务。 恢复上次工作 Studio Alpha bootstrap · 2 min ago 桥接 混合 Studio Alpha (Hybrid) 运行态 就绪 0.1.0-alpha 工作区 Operator Shell 意图聚焦 聚焦 Lane apply IPC slot 当前聚焦 最近同步 2 min ago 暂无最近操作 待处理 2 项 1 项待复核 当前流程 Operator Shell → Trace Deck → Review Deck 按流程查看当前锚点、追踪位与复核位，把状态与入口放在同一条主链上。 操作壳层当前节点 已锚定 保持导航锚点和边界检查入口，作为当",
+        "activeNav": [
+          "会话 历史与恢复"
+        ],
+        "headings": [
+          "工作台",
+          "Operator Shell → Trace Deck → Review Deck",
+          "进入 Review Deck",
+          "最近会话",
+          "快速启动",
+          "当前执行就绪快照"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 实时总览",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "OpenClaw 主会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "Hermes 终端会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "会话 历史与恢复",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 4,
+            "text": "代理 协作与分工",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 5,
+            "text": "技能 能力与接入",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 6,
+            "text": "设置 当前配置",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 7,
+            "text": "新建会话 通过命令面板启动新的流程或任务。",
+            "disabled": false,
+            "className": "workbench-header-action workbench-header-action--primary"
+          },
+          {
+            "index": 8,
+            "text": "恢复上次工作 Studio Alpha bootstrap · 2 min ago",
+            "disabled": false,
+            "className": "workbench-header-action"
+          },
+          {
+            "index": 9,
+            "text": "进入 操作壳层",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 10,
+            "text": "进入 轨迹台",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 11,
+            "text": "进入 审查台",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 12,
+            "text": "立即进入",
+            "disabled": false,
+            "className": "quick-action-button quick-action-button--primary"
+          },
+          {
+            "index": 13,
+            "text": "执行",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 14,
+            "text": "执行",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 15,
+            "text": "全部",
+            "disabled": false,
+            "className": "shell-tab shell-tab--active"
+          },
+          {
+            "index": 16,
+            "text": "进行中",
+            "disabled": false,
+            "className": "shell-tab"
+          },
+          {
+            "index": 17,
+            "text": "待复核",
+            "disabled": false,
+            "className": "shell-tab"
+          },
+          {
+            "index": 18,
+            "text": "已完成",
+            "disabled": false,
+            "className": "shell-tab"
+          },
+          {
+            "index": 19,
+            "text": "继续",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 20,
+            "text": "查看",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 21,
+            "text": "打开",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 22,
+            "text": "↗ Shift+T 查看 Focused Slot Trace Move the shell into trace-first posture for the current focused slot.",
+            "disabled": false,
+            "className": "workbench-action-card workbench-action-card--positive"
+          },
+          {
+            "index": 23,
+            "text": "▣ 动作入口 进入 Review Deck Bias the shell toward window intents, placeholders, and review posture.",
+            "disabled": false,
+            "className": "workbench-action-card workbench-action-card--neutral"
+          },
+          {
+            "index": 24,
+            "text": "◎ Shift+I 检查 Boundary Contract Focus the right rail on boundary state and keep dock context visible.",
+            "disabled": false,
+            "className": "workbench-action-card workbench-action-card--positive"
+          },
+          {
+            "index": 25,
+            "text": "↺ 动作入口 恢复最近工作区 Studio Alpha bootstrap · openclaw-studio",
+            "disabled": false,
+            "className": "workbench-action-card workbench-action-card--neutral"
+          },
+          {
+            "index": 26,
+            "text": "● 动作入口 打开命令面板 打开命令面板并启动新的流程或任务。",
+            "disabled": false,
+            "className": "workbench-action-card workbench-action-card--positive"
+          },
+          {
+            "index": 27,
+            "text": "打开轨迹台",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 28,
+            "text": "打开审查台",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 29,
+            "text": "查看收口状态",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 30,
+            "text": "恢复上次工作",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 31,
+            "text": "进入审查面",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false
+      },
+      "typed": {
+        "typed": false,
+        "reason": "No chat input expected on this page"
+      },
+      "interactions": {
+        "clicked": [
+          {
+            "text": "查看",
+            "result": {
+              "clicked": true,
+              "target": {
+                "x": 1351.3334159851074,
+                "y": 488.26043701171875,
+                "width": 65.33333587646484,
+                "height": 46,
+                "text": "查看",
+                "tag": "BUTTON",
+                "className": "secondary-button"
+              }
+            }
+          },
+          {
+            "text": "打开",
+            "result": {
+              "clicked": false,
+              "reason": "No clickable element matched button / 打开"
+            }
+          },
+          {
+            "text": "↗ Shift+T 查看 Focused Slot Trace Move the shell into trace-first posture for the current focused slot.",
+            "result": {
+              "clicked": false,
+              "reason": "No clickable element matched button / ↗ Shift+T 查看 Focused Slot Trace Move the shell into trace-first posture for the current focused slot."
+            }
+          },
+          {
+            "text": "◎ Shift+I 检查 Boundary Contract Focus the right rail on boundary state and keep dock context visible.",
+            "result": {
+              "clicked": false,
+              "reason": "No clickable element matched button / ◎ Shift+I 检查 Boundary Contract Focus the right rail on boundary state and keep dock context visible."
+            }
+          }
+        ],
+        "skippedDangerous": [
+          "新建会话 通过命令面板启动新的流程或任务。"
+        ],
+        "pageId": "sessions"
+      },
+      "finalState": {
+        "hash": "#settings",
+        "title": "山谷智合",
+        "bodyLength": 2626,
+        "bodyPreview": "山谷智合 当前版本 正在同步 刚刚同步 主入口 总览 实时总览 OpenClaw 主会话 Hermes 终端会话 会话 历史与恢复 更多 代理 协作与分工 技能 能力与接入 设置 当前配置 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 延迟 未采样 Host Executor 禁用 当前页：当前页面以只读信息为主。 配置概览 设置 这里集中查看当前工作区、运行态与安全策略。 当前配置概览 Settings now reads live shell/runtime posture first, while keeping typed fallback for anything the probes cannot safely read. Gateway 已连接. Network 可访问. Startup routing now mirrors the local preflight chain inside Settings: build ready, Electron ready, display not-required, and star",
+        "activeNav": [
+          "设置 当前配置"
+        ],
+        "headings": [
+          "设置",
+          "当前配置概览",
+          "Runtime",
+          "Workspace",
+          "Startup Routing",
+          "Safety",
+          "工具策略",
+          "插件与 MCP"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 实时总览",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "OpenClaw 主会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "Hermes 终端会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "会话 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "代理 协作与分工",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 5,
+            "text": "技能 能力与接入",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 6,
+            "text": "设置 当前配置",
+            "disabled": false,
+            "className": "nav-item nav-item--active nav-item--preview"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false
+      },
+      "screenshot": {
+        "path": "E:\\claucd\\界面控制台程序\\delivery\\phase12-portable-ui-screenshots-20260426\\sessions.png",
+        "size": 153583,
+        "sha256": "A19C12AEC7BFFFBCB6E4AA93ACAF3361FD6EA27C5953A740DDF91EBD25BA0B3B"
+      },
+      "failures": []
+    },
+    {
+      "id": "agents",
+      "label": "代理",
+      "navResult": {
+        "clicked": true,
+        "target": {
+          "x": 112.00000381469727,
+          "y": 505.66668701171875,
+          "width": 170.6666717529297,
+          "height": 61,
+          "text": "代理 协作与分工",
+          "tag": "BUTTON",
+          "className": "nav-item nav-item--preview"
+        }
+      },
+      "stateAfterNav": {
+        "hash": "#agents",
+        "title": "山谷智合",
+        "bodyLength": 1937,
+        "bodyPreview": "山谷智合 当前版本 实时同步 刚刚同步 主入口 总览 实时总览 OpenClaw 主会话 Hermes 终端会话 会话 历史与恢复 更多 代理 协作与分工 技能 能力与接入 设置 当前配置 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 延迟 未采样 Host Executor 禁用 当前页：当前页面以只读信息为主。 代理概览 代理 这里集中查看当前代理分工、会话通道与近期协作状态。 当前代理概览 当前显示 Studio 本地编排视图：代理分工、隔离姿态、交接状态与运行态接入边界集中在这一页。 Active Agents 2 Waiting Lanes 1 Model Mix 3 models 代理列表 当前可见的代理角色与协作通道。 3 条通道 Shell Integrator Renderer shell owner active Extending the route shell and page registry. 来源 未知 提供方 未知 会话数 - 工作目录 apps/studio gpt-5.4 apps/studio None ",
+        "activeNav": [
+          "代理 协作与分工"
+        ],
+        "headings": [
+          "代理",
+          "当前代理概览",
+          "代理列表",
+          "最近动态",
+          "协作提示"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 实时总览",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "OpenClaw 主会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "Hermes 终端会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "会话 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "代理 协作与分工",
+            "disabled": false,
+            "className": "nav-item nav-item--active nav-item--preview"
+          },
+          {
+            "index": 5,
+            "text": "技能 能力与接入",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 6,
+            "text": "设置 当前配置",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false
+      },
+      "typed": {
+        "typed": false,
+        "reason": "No chat input expected on this page"
+      },
+      "interactions": {
+        "clicked": [],
+        "skippedDangerous": [],
+        "pageId": "agents"
+      },
+      "finalState": {
+        "hash": "#agents",
+        "title": "山谷智合",
+        "bodyLength": 1937,
+        "bodyPreview": "山谷智合 当前版本 实时同步 刚刚同步 主入口 总览 实时总览 OpenClaw 主会话 Hermes 终端会话 会话 历史与恢复 更多 代理 协作与分工 技能 能力与接入 设置 当前配置 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 延迟 未采样 Host Executor 禁用 当前页：当前页面以只读信息为主。 代理概览 代理 这里集中查看当前代理分工、会话通道与近期协作状态。 当前代理概览 当前显示 Studio 本地编排视图：代理分工、隔离姿态、交接状态与运行态接入边界集中在这一页。 Active Agents 2 Waiting Lanes 1 Model Mix 3 models 代理列表 当前可见的代理角色与协作通道。 3 条通道 Shell Integrator Renderer shell owner active Extending the route shell and page registry. 来源 未知 提供方 未知 会话数 - 工作目录 apps/studio gpt-5.4 apps/studio None ",
+        "activeNav": [
+          "代理 协作与分工"
+        ],
+        "headings": [
+          "代理",
+          "当前代理概览",
+          "代理列表",
+          "最近动态",
+          "协作提示"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 实时总览",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "OpenClaw 主会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "Hermes 终端会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "会话 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "代理 协作与分工",
+            "disabled": false,
+            "className": "nav-item nav-item--active nav-item--preview"
+          },
+          {
+            "index": 5,
+            "text": "技能 能力与接入",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 6,
+            "text": "设置 当前配置",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false
+      },
+      "screenshot": {
+        "path": "E:\\claucd\\界面控制台程序\\delivery\\phase12-portable-ui-screenshots-20260426\\agents.png",
+        "size": 138660,
+        "sha256": "66D16D60C2CEF6A1AB84B18EF43300CB1A434A2FBCC282A2FDDD708653936DCC"
+      },
+      "failures": []
+    },
+    {
+      "id": "skills",
+      "label": "技能",
+      "navResult": {
+        "clicked": true,
+        "target": {
+          "x": 120.00000381469727,
+          "y": 572.6666870117188,
+          "width": 186.6666717529297,
+          "height": 61,
+          "text": "技能 能力与接入",
+          "tag": "BUTTON",
+          "className": "nav-item nav-item--preview"
+        }
+      },
+      "stateAfterNav": {
+        "hash": "#skills",
+        "title": "山谷智合",
+        "bodyLength": 5181,
+        "bodyPreview": "山谷智合 当前版本 实时同步 刚刚同步 主入口 总览 实时总览 OpenClaw 主会话 Hermes 终端会话 会话 历史与恢复 更多 代理 协作与分工 技能 能力与接入 设置 当前配置 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 延迟 未采样 Host Executor 禁用 当前页：当前页面以只读信息为主。 能力概览 技能与工具 这里集中查看当前可用能力、根路径与详情，支持只读检查和安全动作。 分组 5 运行态条目 19 可查看详情 6 根路径状态 4 scanned 插件路径 1 paths MCP 根路径 Not found 已扫描根路径 当前实际扫描到的能力根路径。 4 scanned ~\\.openclaw\\skills · ~\\.openclaw\\workspace\\skills · ~\\.openclaw\\extensions · ~\\.codex\\skills\\.system ~\\.openclaw\\skills 插件与 MCP 概览 把插件路径和 MCP 根路径放到页首统一查看。 插件路径 Load paths 1 ·",
+        "activeNav": [
+          "技能 能力与接入"
+        ],
+        "headings": [
+          "技能与工具",
+          "已扫描根路径",
+          "插件与 MCP 概览",
+          "OpenClaw Skills",
+          "Codex System Skills",
+          "Extension Sources",
+          "Tools",
+          "MCP",
+          "详情面板"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 实时总览",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "OpenClaw 主会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "Hermes 终端会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "会话 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "代理 协作与分工",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 5,
+            "text": "技能 能力与接入",
+            "disabled": false,
+            "className": "nav-item nav-item--active nav-item--preview"
+          },
+          {
+            "index": 6,
+            "text": "设置 当前配置",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 7,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 8,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 9,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 10,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 11,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 12,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false
+      },
+      "typed": {
+        "typed": false,
+        "reason": "No chat input expected on this page"
+      },
+      "interactions": {
+        "clicked": [
+          {
+            "text": "查看详情",
+            "result": {
+              "clicked": true,
+              "target": {
+                "x": 326.0000114440918,
+                "y": 487.66668701171875,
+                "width": 89.33333587646484,
+                "height": 38,
+                "text": "查看详情",
+                "tag": "BUTTON",
+                "className": "action-button"
+              }
+            }
+          },
+          {
+            "text": "查看详情",
+            "result": {
+              "clicked": true,
+              "target": {
+                "x": 326.0000114440918,
+                "y": 487.66668701171875,
+                "width": 89.33333587646484,
+                "height": 38,
+                "text": "查看详情",
+                "tag": "BUTTON",
+                "className": "action-button"
+              }
+            }
+          },
+          {
+            "text": "查看详情",
+            "result": {
+              "clicked": true,
+              "target": {
+                "x": 326.0000114440918,
+                "y": 487.66668701171875,
+                "width": 89.33333587646484,
+                "height": 38,
+                "text": "查看详情",
+                "tag": "BUTTON",
+                "className": "action-button"
+              }
+            }
+          },
+          {
+            "text": "查看详情",
+            "result": {
+              "clicked": true,
+              "target": {
+                "x": 326.0000114440918,
+                "y": 487.66668701171875,
+                "width": 89.33333587646484,
+                "height": 38,
+                "text": "查看详情",
+                "tag": "BUTTON",
+                "className": "action-button"
+              }
+            }
+          }
+        ],
+        "skippedDangerous": [],
+        "pageId": "skills"
+      },
+      "finalState": {
+        "hash": "#skills",
+        "title": "山谷智合",
+        "bodyLength": 6041,
+        "bodyPreview": "山谷智合 当前版本 正在同步 刚刚同步 主入口 总览 实时总览 OpenClaw 主会话 Hermes 终端会话 会话 历史与恢复 更多 代理 协作与分工 技能 能力与接入 设置 当前配置 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 延迟 未采样 Host Executor 禁用 当前页：当前页面以只读信息为主。 能力概览 技能与工具 这里集中查看当前可用能力、根路径与详情，支持只读检查和安全动作。 分组 5 运行态条目 19 可查看详情 6 根路径状态 4 scanned 插件路径 1 paths MCP 根路径 Not found 已扫描根路径 当前实际扫描到的能力根路径。 4 scanned ~\\.openclaw\\skills · ~\\.openclaw\\workspace\\skills · ~\\.openclaw\\extensions · ~\\.codex\\skills\\.system ~\\.openclaw\\skills 插件与 MCP 概览 把插件路径和 MCP 根路径放到页首统一查看。 插件路径 Load paths 1 ·",
+        "activeNav": [
+          "技能 能力与接入"
+        ],
+        "headings": [
+          "技能与工具",
+          "已扫描根路径",
+          "插件与 MCP 概览",
+          "OpenClaw Skills",
+          "Codex System Skills",
+          "Extension Sources",
+          "Tools",
+          "MCP",
+          "详情面板"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 实时总览",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "OpenClaw 主会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "Hermes 终端会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "会话 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "代理 协作与分工",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 5,
+            "text": "技能 能力与接入",
+            "disabled": false,
+            "className": "nav-item nav-item--active nav-item--preview"
+          },
+          {
+            "index": 6,
+            "text": "设置 当前配置",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 7,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 8,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 9,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 10,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 11,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 12,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 13,
+            "text": "Probe config",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 14,
+            "text": "List hooks",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 15,
+            "text": "Test web readiness",
+            "disabled": false,
+            "className": "action-button"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false
+      },
+      "screenshot": {
+        "path": "E:\\claucd\\界面控制台程序\\delivery\\phase12-portable-ui-screenshots-20260426\\skills.png",
+        "size": 156846,
+        "sha256": "CBE61A1AD57E26A54B58CCB0AEEFE362013AD4AD13F6B269E860036F63CC8AA5"
+      },
+      "failures": []
+    },
+    {
+      "id": "settings",
+      "label": "设置",
+      "navResult": {
+        "clicked": true,
+        "target": {
+          "x": 120.00000381469727,
+          "y": 639.6666870117188,
+          "width": 186.6666717529297,
+          "height": 61,
+          "text": "设置 当前配置",
+          "tag": "BUTTON",
+          "className": "nav-item nav-item--preview"
+        }
+      },
+      "stateAfterNav": {
+        "hash": "#settings",
+        "title": "山谷智合",
+        "bodyLength": 2626,
+        "bodyPreview": "山谷智合 当前版本 正在同步 刚刚同步 主入口 总览 实时总览 OpenClaw 主会话 Hermes 终端会话 会话 历史与恢复 更多 代理 协作与分工 技能 能力与接入 设置 当前配置 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 延迟 未采样 Host Executor 禁用 当前页：当前页面以只读信息为主。 配置概览 设置 这里集中查看当前工作区、运行态与安全策略。 当前配置概览 Settings now reads live shell/runtime posture first, while keeping typed fallback for anything the probes cannot safely read. Gateway 已连接. Network 可访问. Startup routing now mirrors the local preflight chain inside Settings: build ready, Electron ready, display not-required, and star",
+        "activeNav": [
+          "设置 当前配置"
+        ],
+        "headings": [
+          "设置",
+          "当前配置概览",
+          "Runtime",
+          "Workspace",
+          "Startup Routing",
+          "Safety",
+          "工具策略",
+          "插件与 MCP"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 实时总览",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "OpenClaw 主会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "Hermes 终端会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "会话 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "代理 协作与分工",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 5,
+            "text": "技能 能力与接入",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 6,
+            "text": "设置 当前配置",
+            "disabled": false,
+            "className": "nav-item nav-item--active nav-item--preview"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false
+      },
+      "typed": {
+        "typed": false,
+        "reason": "No chat input expected on this page"
+      },
+      "interactions": {
+        "clicked": [],
+        "skippedDangerous": [],
+        "pageId": "settings"
+      },
+      "finalState": {
+        "hash": "#settings",
+        "title": "山谷智合",
+        "bodyLength": 2626,
+        "bodyPreview": "山谷智合 当前版本 正在同步 刚刚同步 主入口 总览 实时总览 OpenClaw 主会话 Hermes 终端会话 会话 历史与恢复 更多 代理 协作与分工 技能 能力与接入 设置 当前配置 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 延迟 未采样 Host Executor 禁用 当前页：当前页面以只读信息为主。 配置概览 设置 这里集中查看当前工作区、运行态与安全策略。 当前配置概览 Settings now reads live shell/runtime posture first, while keeping typed fallback for anything the probes cannot safely read. Gateway 已连接. Network 可访问. Startup routing now mirrors the local preflight chain inside Settings: build ready, Electron ready, display not-required, and star",
+        "activeNav": [
+          "设置 当前配置"
+        ],
+        "headings": [
+          "设置",
+          "当前配置概览",
+          "Runtime",
+          "Workspace",
+          "Startup Routing",
+          "Safety",
+          "工具策略",
+          "插件与 MCP"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 实时总览",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "OpenClaw 主会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "Hermes 终端会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "会话 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "代理 协作与分工",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 5,
+            "text": "技能 能力与接入",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 6,
+            "text": "设置 当前配置",
+            "disabled": false,
+            "className": "nav-item nav-item--active nav-item--preview"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false
+      },
+      "screenshot": {
+        "path": "E:\\claucd\\界面控制台程序\\delivery\\phase12-portable-ui-screenshots-20260426\\settings.png",
+        "size": 124677,
+        "sha256": "31FE1F9AFFF9363B51D399F8012A08A68825CF22A6727ECD445E610A006335E4"
+      },
+      "failures": []
+    }
+  ],
+  "globalInteractions": [
+    {
+      "name": "initial-render",
+      "state": {
+        "hash": "",
+        "title": "山谷智合",
+        "bodyLength": 745,
+        "bodyPreview": "山谷智合 当前版本 实时同步 刚刚同步 主入口 总览 实时总览 OpenClaw 主会话 Hermes 终端会话 会话 历史与恢复 更多 代理 协作与分工 技能 能力与接入 设置 当前配置 网关连接 OpenClaw 混合 Hermes 状态加载中 延迟 未采样 Host Executor 禁用 HERMES 会话 20260426_124245_04d00b 2 条消息 · 等待识别模型 未选择模型 本地网关 · 已连接 网络连接 · 可访问 桥接 · 混合 运行态 · 就绪 工作区 · Operator Shell Hermes · 待连接会话层 刚刚同步 模型选项 未发现可用模型 未选择模型 修改的是 Hermes 的默认模型配置，后续消息会优先沿用这个选择。 新建会话 应用模型 Gateway 状态加载中 读取 Hermes Gateway 的独立服务状态。 刷新网关 启动网关 停止网关 未检测到 Hermes 状态 读取 Hermes 连接状态中… 连接 Hermes 断开 Hermes 实时动态 等待 Hermes 可用 Hermes · 01/21 21:39 常规同步 ",
+        "activeNav": [
+          "Hermes 终端会话"
+        ],
+        "headings": [],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 实时总览",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "OpenClaw 主会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "Hermes 终端会话",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 3,
+            "text": "会话 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "代理 协作与分工",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 5,
+            "text": "技能 能力与接入",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 6,
+            "text": "设置 当前配置",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 7,
+            "text": "新建会话",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 8,
+            "text": "应用模型",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 9,
+            "text": "刷新网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 10,
+            "text": "启动网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 11,
+            "text": "停止网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 12,
+            "text": "连接 Hermes",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 13,
+            "text": "断开 Hermes",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 14,
+            "text": "查看当前 Hermes 连接状态",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 15,
+            "text": "显示最近的 Hermes 会话",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 16,
+            "text": "检查 Hermes 网关配置",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 17,
+            "text": "诊断 Hermes 通信问题",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 18,
+            "text": "发送到 Hermes",
+            "disabled": true,
+            "className": "primary-button"
+          }
+        ],
+        "fields": [
+          {
+            "tag": "SELECT",
+            "placeholder": "",
+            "disabled": true,
+            "readOnly": false,
+            "valueLength": 0
+          },
+          {
+            "tag": "TEXTAREA",
+            "placeholder": "输入你想发送给 Hermes 的命令或问题",
+            "disabled": true,
+            "readOnly": false,
+            "valueLength": 0
+          }
+        ],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false
+      }
+    },
+    {
+      "name": "open-command-palette",
+      "result": {
+        "clicked": false,
+        "reason": "No clickable element matched button / 打开命令面板"
+      },
+      "state": {
+        "hash": "",
+        "title": "山谷智合",
+        "bodyLength": 745,
+        "bodyPreview": "山谷智合 当前版本 实时同步 刚刚同步 主入口 总览 实时总览 OpenClaw 主会话 Hermes 终端会话 会话 历史与恢复 更多 代理 协作与分工 技能 能力与接入 设置 当前配置 网关连接 OpenClaw 混合 Hermes 状态加载中 延迟 未采样 Host Executor 禁用 HERMES 会话 20260426_124245_04d00b 2 条消息 · 等待识别模型 未选择模型 本地网关 · 已连接 网络连接 · 可访问 桥接 · 混合 运行态 · 就绪 工作区 · Operator Shell Hermes · 待连接会话层 刚刚同步 模型选项 未发现可用模型 未选择模型 修改的是 Hermes 的默认模型配置，后续消息会优先沿用这个选择。 新建会话 应用模型 Gateway 状态加载中 读取 Hermes Gateway 的独立服务状态。 刷新网关 启动网关 停止网关 未检测到 Hermes 状态 读取 Hermes 连接状态中… 连接 Hermes 断开 Hermes 实时动态 等待 Hermes 可用 Hermes · 01/21 21:39 常规同步 ",
+        "activeNav": [
+          "Hermes 终端会话"
+        ],
+        "headings": [],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 实时总览",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "OpenClaw 主会话",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "Hermes 终端会话",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 3,
+            "text": "会话 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "代理 协作与分工",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 5,
+            "text": "技能 能力与接入",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 6,
+            "text": "设置 当前配置",
+            "disabled": false,
+            "className": "nav-item nav-item--preview"
+          },
+          {
+            "index": 7,
+            "text": "新建会话",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 8,
+            "text": "应用模型",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 9,
+            "text": "刷新网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 10,
+            "text": "启动网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 11,
+            "text": "停止网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 12,
+            "text": "连接 Hermes",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 13,
+            "text": "断开 Hermes",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 14,
+            "text": "查看当前 Hermes 连接状态",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 15,
+            "text": "显示最近的 Hermes 会话",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 16,
+            "text": "检查 Hermes 网关配置",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 17,
+            "text": "诊断 Hermes 通信问题",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 18,
+            "text": "发送到 Hermes",
+            "disabled": true,
+            "className": "primary-button"
+          }
+        ],
+        "fields": [
+          {
+            "tag": "SELECT",
+            "placeholder": "",
+            "disabled": true,
+            "readOnly": false,
+            "valueLength": 0
+          },
+          {
+            "tag": "TEXTAREA",
+            "placeholder": "输入你想发送给 Hermes 的命令或问题",
+            "disabled": true,
+            "readOnly": false,
+            "valueLength": 0
+          }
+        ],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false
+      }
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "E:\\claucd\\界面控制台程序\\delivery\\phase12-portable-ui-screenshots-20260426\\dashboard.png",
+      "size": 225418,
+      "sha256": "8A9D8A7A3404F9F102CA9DCD719E687EFC47FD276250FAF7365E6B7623CE2B2F"
+    },
+    {
+      "path": "E:\\claucd\\界面控制台程序\\delivery\\phase12-portable-ui-screenshots-20260426\\chat.png",
+      "size": 183549,
+      "sha256": "491A9F5FA4F037227F5114C59984A7B6A870823A993DEC37B69E27AD54289770"
+    },
+    {
+      "path": "E:\\claucd\\界面控制台程序\\delivery\\phase12-portable-ui-screenshots-20260426\\hermes.png",
+      "size": 176881,
+      "sha256": "26C49ACD96B1839EDD5DECD3CD34024D3100B59297069DC00A95B471B0D4CC1C"
+    },
+    {
+      "path": "E:\\claucd\\界面控制台程序\\delivery\\phase12-portable-ui-screenshots-20260426\\sessions.png",
+      "size": 153583,
+      "sha256": "A19C12AEC7BFFFBCB6E4AA93ACAF3361FD6EA27C5953A740DDF91EBD25BA0B3B"
+    },
+    {
+      "path": "E:\\claucd\\界面控制台程序\\delivery\\phase12-portable-ui-screenshots-20260426\\agents.png",
+      "size": 138660,
+      "sha256": "66D16D60C2CEF6A1AB84B18EF43300CB1A434A2FBCC282A2FDDD708653936DCC"
+    },
+    {
+      "path": "E:\\claucd\\界面控制台程序\\delivery\\phase12-portable-ui-screenshots-20260426\\skills.png",
+      "size": 156846,
+      "sha256": "CBE61A1AD57E26A54B58CCB0AEEFE362013AD4AD13F6B269E860036F63CC8AA5"
+    },
+    {
+      "path": "E:\\claucd\\界面控制台程序\\delivery\\phase12-portable-ui-screenshots-20260426\\settings.png",
+      "size": 124677,
+      "sha256": "31FE1F9AFFF9363B51D399F8012A08A68825CF22A6727ECD445E610A006335E4"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "warnings": [
+    "Page sessions interactions changed route from #sessions to #settings.",
+    "Could not remove temp user data dir: EPERM, Permission denied: \\\\?\\C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-ui-full-check-pFWZi8 '\\\\?\\C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-ui-full-check-pFWZi8'"
+  ],
+  "failures": []
+}

@@ -1,0 +1,85 @@
+{
+  "generatedAt": "2026-04-26T05:17:14.988Z",
+  "status": "materials-pack-ready-external-inputs-required",
+  "materialsRoot": "E:\\claucd\\界面控制台程序\\delivery\\signing-materials-20260426",
+  "requiredExternalMaterials": [
+    {
+      "id": "legal-publisher-identity",
+      "owner": "publisher",
+      "status": "external-required",
+      "detail": "Legal publisher name exactly as it should appear in Windows signature details."
+    },
+    {
+      "id": "organization-validation-record",
+      "owner": "publisher-ca",
+      "status": "external-required",
+      "detail": "CA organization or individual validation record, including verified address, phone, and requester contact."
+    },
+    {
+      "id": "trusted-code-signing-certificate",
+      "owner": "ca",
+      "status": "external-required",
+      "detail": "OV/EV code-signing certificate provisioned on compliant hardware token, HSM, cloud key storage, or installed certificate store."
+    },
+    {
+      "id": "private-key-access",
+      "owner": "publisher-security",
+      "status": "external-secret-required",
+      "detail": "Token PIN, HSM credential, cloud signing credential, PFX password, or certificate-store private-key access. Do not store this in repo."
+    },
+    {
+      "id": "timestamp-authority-url",
+      "owner": "publisher-release",
+      "status": "external-required",
+      "detail": "Trusted timestamp URL such as the timestamp service provided by the selected CA."
+    }
+  ],
+  "generatedMaterials": [
+    "E:\\claucd\\界面控制台程序\\delivery\\signing-materials-20260426\\.gitignore",
+    "E:\\claucd\\界面控制台程序\\delivery\\signing-materials-20260426\\CERTIFICATE-REQUEST-DATA.template.json",
+    "E:\\claucd\\界面控制台程序\\delivery\\signing-materials-20260426\\KEY-CUSTODY-POLICY.template.md",
+    "E:\\claucd\\界面控制台程序\\delivery\\signing-materials-20260426\\SIGNING-ENV.private.template.ps1",
+    "E:\\claucd\\界面控制台程序\\delivery\\signing-materials-20260426\\SIGNING-RUNBOOK.md",
+    "E:\\claucd\\界面控制台程序\\delivery\\signing-materials-20260426\\SIGNING-ACCEPTANCE-CHECKLIST.md",
+    "E:\\claucd\\界面控制台程序\\delivery\\signing-materials-20260426\\SIGNING-EVIDENCE.template.json",
+    "E:\\claucd\\界面控制台程序\\delivery\\signing-materials-20260426\\TIMESTAMP-POLICY.json",
+    "E:\\claucd\\界面控制台程序\\delivery\\signing-materials-20260426\\PUBLIC-RELEASE-GATE-COMMANDS.ps1"
+  ],
+  "upstream": {
+    "phase13Status": "handoff-blocked",
+    "phase14Status": "dev-signed-untrusted",
+    "phase15Status": "trusted-signing-input-blocked"
+  },
+  "blockers": [
+    {
+      "id": "legal-publisher-identity",
+      "owner": "publisher",
+      "status": "external-required",
+      "detail": "Legal publisher name exactly as it should appear in Windows signature details."
+    },
+    {
+      "id": "organization-validation-record",
+      "owner": "publisher-ca",
+      "status": "external-required",
+      "detail": "CA organization or individual validation record, including verified address, phone, and requester contact."
+    },
+    {
+      "id": "trusted-code-signing-certificate",
+      "owner": "ca",
+      "status": "external-required",
+      "detail": "OV/EV code-signing certificate provisioned on compliant hardware token, HSM, cloud key storage, or installed certificate store."
+    },
+    {
+      "id": "private-key-access",
+      "owner": "publisher-security",
+      "status": "external-secret-required",
+      "detail": "Token PIN, HSM credential, cloud signing credential, PFX password, or certificate-store private-key access. Do not store this in repo."
+    },
+    {
+      "id": "timestamp-authority-url",
+      "owner": "publisher-release",
+      "status": "external-required",
+      "detail": "Trusted timestamp URL such as the timestamp service provided by the selected CA."
+    }
+  ]
+}

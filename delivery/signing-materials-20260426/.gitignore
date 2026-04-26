@@ -1,0 +1,8 @@
+SIGNING-ENV.private.ps1
+*.pfx
+*.p12
+*.key
+*.pem
+*.cer.private
+*.token
+*.secret

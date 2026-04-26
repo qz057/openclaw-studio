@@ -1,0 +1,30 @@
+{
+  "appId": "com.openclaw.studio.localalpha",
+  "productName": "OpenClaw Studio",
+  "directories": {
+    "app": ".packaging/windows-local/app",
+    "output": ".packaging/windows-local/out"
+  },
+  "files": [
+    "dist-electron/**/*",
+    "dist-renderer/**/*",
+    "node_modules/@openclaw/shared/**/*",
+    "package.json"
+  ],
+  "asar": true,
+  "npmRebuild": false,
+  "publish": null,
+  "compression": "normal",
+  "win": {
+    "signAndEditExecutable": false,
+    "target": [
+      {
+        "target": "dir",
+        "arch": [
+          "x64"
+        ]
+      }
+    ],
+    "artifactName": "OpenClaw-Studio-${version}-alpha-${arch}.${ext}"
+  }
+}

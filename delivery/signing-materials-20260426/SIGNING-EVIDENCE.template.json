@@ -1,0 +1,28 @@
+{
+  "signedAt": "<ISO timestamp>",
+  "signer": {
+    "publisher": "<signature publisher name>",
+    "subject": "<certificate subject>",
+    "thumbprint": "<certificate thumbprint>",
+    "issuer": "<certificate issuer>",
+    "validFrom": "<certificate valid from>",
+    "validTo": "<certificate valid to>"
+  },
+  "timestamp": {
+    "url": "<timestamp authority URL>",
+    "present": false,
+    "verifiedAt": "<ISO timestamp>"
+  },
+  "artifact": {
+    "path": "<signed installer path>",
+    "sha256": "<signed installer SHA256>",
+    "size": "<signed installer size bytes>"
+  },
+  "verification": {
+    "authenticodeStatus": "<Valid>",
+    "phase14Status": "<public-signature-valid>",
+    "phase8InstallerSmoke": "<passed>",
+    "phase9ReleaseGate": "<public-release-ready>",
+    "phase10SigningReadiness": "<ready>"
+  }
+}

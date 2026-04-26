@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "lib": ["ES2022", "DOM"],
+    "paths": {
+      "@openclaw/shared": ["../shared/dist/index.d.ts"],
+      "@openclaw/shared/*": ["../shared/dist/*"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

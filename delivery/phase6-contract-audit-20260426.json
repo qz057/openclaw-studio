@@ -1,0 +1,822 @@
+{
+  "generatedAt": "2026-04-26T05:38:37.397Z",
+  "workspaceRoot": "E:\\claucd\\界面控制台程序",
+  "apiMethodCount": 37,
+  "channelCount": 39,
+  "rows": [
+    {
+      "api": "getShellState",
+      "namespace": "studioRead",
+      "wrapper": "loadStudioSnapshot",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "shellState",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "listSessions",
+      "namespace": "studioRead",
+      "wrapper": "listStudioSessions",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "sessions",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "listCodexTasks",
+      "namespace": "studioRead",
+      "wrapper": "listCodexTasks",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "codexTasks",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "getClaudeSnapshot",
+      "namespace": "studioRead",
+      "wrapper": "loadClaudeSnapshot",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "claudeSnapshot",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "getClaudeSessionMessages",
+      "namespace": "studioRead",
+      "wrapper": "loadClaudeSessionMessages",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "claudeSessionMessages",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "getOpenClawChatState",
+      "namespace": "studioRead",
+      "wrapper": "loadOpenClawChatState",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "openclawChatState",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "sendOpenClawChatTurn",
+      "namespace": "studioSession",
+      "wrapper": "sendOpenClawChatTurn",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "openclawChatTurn",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "createOpenClawChatSession",
+      "namespace": "studioSession",
+      "wrapper": "createOpenClawChatSession",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "openclawChatCreateSession",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "getOpenClawGatewayServiceState",
+      "namespace": "studioRead",
+      "wrapper": "loadOpenClawGatewayServiceState",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "openclawGatewayState",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "startOpenClawGatewayService",
+      "namespace": "studioGateway",
+      "wrapper": "startOpenClawGatewayService",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "openclawGatewayStart",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "stopOpenClawGatewayService",
+      "namespace": "studioGateway",
+      "wrapper": "stopOpenClawGatewayService",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "openclawGatewayStop",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "getOpenClawModelCatalog",
+      "namespace": "studioRead",
+      "wrapper": "loadOpenClawModelCatalog",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "openclawChatModels",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "setOpenClawModel",
+      "namespace": "studioGateway",
+      "wrapper": "setOpenClawModel",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "openclawChatSetModel",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "getHermesState",
+      "namespace": "studioRead",
+      "wrapper": "loadHermesState",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hermesState",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "getHermesSnapshot",
+      "namespace": "studioRead",
+      "wrapper": "loadHermesSnapshot",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hermesSnapshot",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "getHermesSessionMessages",
+      "namespace": "studioRead",
+      "wrapper": "loadHermesSessionMessages",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hermesSessionMessages",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "createHermesSession",
+      "namespace": "studioSession",
+      "wrapper": "createHermesSession",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hermesCreateSession",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "getHermesGatewayServiceState",
+      "namespace": "studioRead",
+      "wrapper": "loadHermesGatewayServiceState",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hermesGatewayState",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "startHermesGatewayService",
+      "namespace": "studioGateway",
+      "wrapper": "startHermesGatewayService",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hermesGatewayStart",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "stopHermesGatewayService",
+      "namespace": "studioGateway",
+      "wrapper": "stopHermesGatewayService",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hermesGatewayStop",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "connectHermes",
+      "namespace": "studioSession",
+      "wrapper": "connectHermes",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hermesConnect",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "disconnectHermes",
+      "namespace": "studioSession",
+      "wrapper": "disconnectHermes",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hermesDisconnect",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "sendHermesMessage",
+      "namespace": "studioSession",
+      "wrapper": "sendHermesMessage",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hermesSendMessage",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "getHermesModelCatalog",
+      "namespace": "studioRead",
+      "wrapper": "loadHermesModelCatalog",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hermesModels",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "setHermesModel",
+      "namespace": "studioGateway",
+      "wrapper": "setHermesModel",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hermesSetModel",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "subscribeHermesEvents",
+      "namespace": "studioSession",
+      "wrapper": "subscribeToHermesEvents",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hermesSubscribe",
+          "declared": true,
+          "preload": true,
+          "main": true
+        },
+        {
+          "key": "hermesUnsubscribe",
+          "declared": true,
+          "preload": true,
+          "main": true
+        },
+        {
+          "key": "hermesEvent",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "loadHermesSessions",
+      "namespace": "studioRead",
+      "wrapper": "loadHermesSessions",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hermesGetSessions",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "loadHermesSession",
+      "namespace": "studioRead",
+      "wrapper": "loadHermesSession",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hermesGetMessages",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "getHermesSessions",
+      "namespace": "studioRead",
+      "wrapper": "getHermesSessions",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hermesGetSessions",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "getHermesMessages",
+      "namespace": "studioRead",
+      "wrapper": "getHermesMessages",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hermesGetMessages",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "getHostExecutorState",
+      "namespace": "studioRead",
+      "wrapper": "loadHostExecutorState",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hostExecutorState",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "getHostBridgeState",
+      "namespace": "studioRead",
+      "wrapper": "loadHostBridgeState",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hostBridgeState",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "handoffHostPreview",
+      "namespace": "studioRuntime",
+      "wrapper": "handoffHostPreview",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "hostPreviewHandoff",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "getRuntimeItemDetail",
+      "namespace": "studioRead",
+      "wrapper": "loadRuntimeItemDetail",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "runtimeItemDetail",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "runRuntimeItemAction",
+      "namespace": "studioRuntime",
+      "wrapper": "loadRuntimeItemAction",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "runtimeItemAction",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "getPerformanceMetrics",
+      "namespace": "studioRead",
+      "wrapper": "getPerformanceMetrics",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "performanceMetrics",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    },
+    {
+      "api": "subscribePerformanceAlerts",
+      "namespace": "studioRead",
+      "wrapper": "subscribeToPerformanceAlerts",
+      "shared": true,
+      "bridgeWrapper": true,
+      "bridgeCallsApi": true,
+      "fallback": true,
+      "preload": true,
+      "namespaceExport": true,
+      "mainChannels": [
+        {
+          "key": "performanceSubscribe",
+          "declared": true,
+          "preload": true,
+          "main": true
+        },
+        {
+          "key": "performanceUnsubscribe",
+          "declared": true,
+          "preload": true,
+          "main": true
+        },
+        {
+          "key": "performanceAlert",
+          "declared": true,
+          "preload": true,
+          "main": true
+        }
+      ],
+      "runtime": true,
+      "mockRuntime": true
+    }
+  ],
+  "artifact": {
+    "zipPath": "E:\\claucd\\界面控制台程序\\apps\\studio\\release\\OpenClaw Studio-0.1.0-win-x64.zip",
+    "zipExists": true,
+    "zipSize": 141157276,
+    "zipSha256": "1B22175E8A712938F2AFCE2369EAB445B4AE6BCF5244B2D6A2EF0589468CA56E",
+    "exePath": "E:\\claucd\\界面控制台程序\\apps\\studio\\release\\win-unpacked\\OpenClaw Studio.exe",
+    "exeExists": true,
+    "exeSize": 222973952,
+    "exeSha256": "50730C076C408878624E0284FCC932048B6EBCD76F9EFB0F9C34E6851321FF8B"
+  },
+  "warnings": [],
+  "failures": [],
+  "passed": true
+}

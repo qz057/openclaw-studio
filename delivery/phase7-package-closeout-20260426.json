@@ -1,0 +1,53 @@
+{
+  "generatedAt": "2026-04-26T04:52:18.158Z",
+  "status": "passed",
+  "artifacts": {
+    "portableZip": {
+      "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-local\\out\\OpenClaw-Studio-0.1.0-alpha-x64-portable.zip",
+      "exists": true,
+      "size": 142884736,
+      "sha256": "8AEF3B96E182859CCA6F731F703A2A664EF15407F3847BE54DEFD23324372397",
+      "lastModified": "2026-04-26T04:51:16.405Z"
+    },
+    "portableExe": {
+      "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-local\\out\\win-unpacked\\OpenClaw Studio.exe",
+      "exists": true,
+      "size": 222973952,
+      "sha256": "109B787EA24B71CF0862434B9F38684E0ECFB432BAC3ECF84AAC27CA34563D57",
+      "lastModified": "2026-04-26T04:51:03.656Z"
+    },
+    "rcZip": {
+      "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\release\\OpenClaw Studio-0.1.0-win-x64.zip",
+      "exists": true,
+      "size": 141157276,
+      "sha256": "1B22175E8A712938F2AFCE2369EAB445B4AE6BCF5244B2D6A2EF0589468CA56E",
+      "lastModified": "2026-04-26T04:31:41.140Z"
+    },
+    "rcExe": {
+      "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\release\\win-unpacked\\OpenClaw Studio.exe",
+      "exists": true,
+      "size": 222973952,
+      "sha256": "50730C076C408878624E0284FCC932048B6EBCD76F9EFB0F9C34E6851321FF8B",
+      "lastModified": "2026-04-26T04:30:43.510Z"
+    }
+  },
+  "archiveChecks": {
+    "portableEntryCount": 77,
+    "rcEntryCount": 76,
+    "portableRequiredEntries": [
+      "win-unpacked/OpenClaw Studio.exe",
+      "win-unpacked/resources/app.asar"
+    ],
+    "rcRequiredEntries": [
+      "OpenClaw Studio.exe",
+      "resources/app.asar"
+    ]
+  },
+  "installerBoundary": {
+    "nsisInstallerGenerated": false,
+    "setupCandidates": [],
+    "status": "not-generated",
+    "reason": "Current release configuration generates win-unpacked, RC zip, and local portable zip. NSIS installer remains outside this RC until explicit installer target and signing policy are enabled."
+  },
+  "failures": []
+}

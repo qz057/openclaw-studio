@@ -1,0 +1,39 @@
+{
+  "publisher": {
+    "legalName": "<exact legal publisher name>",
+    "organizationType": "<organization|individual>",
+    "country": "<country>",
+    "stateOrProvince": "<state/province>",
+    "locality": "<city>",
+    "addressLine1": "<street address>",
+    "postalCode": "<postal code>",
+    "phone": "<verified phone>",
+    "domainOrWebsite": "<publisher website>",
+    "supportEmail": "<support email>"
+  },
+  "requester": {
+    "fullName": "<requester full name>",
+    "role": "<release/signing owner role>",
+    "email": "<validated requester email>",
+    "phone": "<validated requester phone>"
+  },
+  "certificate": {
+    "type": "OV or EV Code Signing",
+    "keyStorage": "<CA cloud key locker|hardware token|HSM|installed certificate store>",
+    "targetPlatform": "Windows Authenticode / NSIS installer",
+    "productName": "OpenClaw Studio",
+    "appId": "com.openclaw.studio"
+  },
+  "securityContacts": [
+    {
+      "name": "<primary key custodian>",
+      "role": "<role>",
+      "contact": "<private contact>"
+    },
+    {
+      "name": "<backup key custodian>",
+      "role": "<role>",
+      "contact": "<private contact>"
+    }
+  ]
+}

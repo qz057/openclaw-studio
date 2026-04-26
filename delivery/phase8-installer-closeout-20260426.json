@@ -1,0 +1,54 @@
+{
+  "generatedAt": "2026-04-26T04:52:19.395Z",
+  "status": "passed",
+  "artifacts": {
+    "installer": {
+      "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-installer\\out\\OpenClaw-Studio-0.1.0-win-x64-setup.exe",
+      "exists": true,
+      "size": 102268358,
+      "sha256": "ABF2616260EDDCA9FEF94A27567D06533B1F824BE09340B693ADCEEB76FC7408",
+      "lastModified": "2026-04-26T04:51:00.042Z"
+    },
+    "blockMap": {
+      "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-installer\\out\\OpenClaw-Studio-0.1.0-win-x64-setup.exe.blockmap",
+      "exists": true,
+      "size": 106619,
+      "sha256": "EC0C2AC3CE4B382ABBFEA3AA50742DCBD9837D3AC8C76AF85B30FF71DEAB2F5D",
+      "lastModified": "2026-04-26T04:51:00.972Z"
+    },
+    "generatedConfig": {
+      "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-installer\\electron-builder.nsis.generated.json",
+      "exists": true,
+      "size": 1393,
+      "sha256": "91AD85C25615F7D353CC03D5AD6EEE5E7CE1628BA8BA0B29A2F8ADBC37F2608A",
+      "lastModified": "2026-04-26T04:50:34.505Z"
+    }
+  },
+  "signature": {
+    "status": "NotSigned",
+    "statusMessage": "The file E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-installer\\out\\OpenClaw-Studio-0.1.0-win-x64-setup.exe is not digitally signed. You cannot run this script on the current system. For more information about running scripts and setting execution policy, see about_Execution_Policies at https://go.microsoft.com/fwlink/?LinkID=135170",
+    "signerSubject": null,
+    "timestampSubject": null
+  },
+  "smoke": {
+    "reportPath": "E:\\claucd\\界面控制台程序\\delivery\\phase8-installer-smoke-20260426.json",
+    "status": "passed",
+    "installRoot": "C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-Ncvs8y",
+    "launch": {
+      "pid": 14976,
+      "stayedAliveMs": 20000,
+      "shutdownMode": "forced taskkill"
+    },
+    "cleanup": {
+      "status": "removed",
+      "attempts": 3,
+      "warning": "EPERM, Permission denied: \\\\?\\C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-Ncvs8y '\\\\?\\C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-nsis-smoke-Ncvs8y'"
+    }
+  },
+  "signingBoundary": {
+    "signed": false,
+    "status": "NotSigned",
+    "reason": "Installer was generated as an unsigned local candidate. Release signing requires a certificate and timestamp policy."
+  },
+  "failures": []
+}

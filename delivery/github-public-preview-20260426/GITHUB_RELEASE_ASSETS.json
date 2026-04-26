@@ -1,0 +1,65 @@
+{
+  "version": "v0.1.0-preview",
+  "assets": [
+    {
+      "label": "Windows NSIS installer",
+      "role": "release-asset",
+      "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-installer\\out\\OpenClaw-Studio-0.1.0-win-x64-setup.exe",
+      "exists": true,
+      "size": 102268358,
+      "sha256": "ABF2616260EDDCA9FEF94A27567D06533B1F824BE09340B693ADCEEB76FC7408",
+      "releaseAssetEligible": true,
+      "publicWarning": "Unsigned preview installer. Windows may show Unknown publisher or SmartScreen warnings."
+    },
+    {
+      "label": "Windows portable zip",
+      "role": "release-asset",
+      "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-local\\out\\OpenClaw-Studio-0.1.0-alpha-x64-portable.zip",
+      "exists": true,
+      "size": 142884736,
+      "sha256": "8AEF3B96E182859CCA6F731F703A2A664EF15407F3847BE54DEFD23324372397",
+      "releaseAssetEligible": true,
+      "publicWarning": "Unsigned preview portable package."
+    },
+    {
+      "label": "RC Windows zip",
+      "role": "optional-release-asset",
+      "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\release\\OpenClaw Studio-0.1.0-win-x64.zip",
+      "exists": true,
+      "size": 141157276,
+      "sha256": "1B22175E8A712938F2AFCE2369EAB445B4AE6BCF5244B2D6A2EF0589468CA56E",
+      "releaseAssetEligible": true,
+      "publicWarning": "Unsigned RC zip. Prefer portable zip for public preview downloads."
+    },
+    {
+      "label": "RC manifest",
+      "role": "release-note-evidence",
+      "path": "E:\\claucd\\界面控制台程序\\delivery\\openclaw-studio-rc-manifest-20260426.md",
+      "exists": true,
+      "size": 10349,
+      "sha256": "4C2AA6BA229D11D08AD545A4617B11CC8FA38E22E07AA6CC59D9EBB0E552EFD5",
+      "releaseAssetEligible": true,
+      "publicWarning": "Public evidence document."
+    },
+    {
+      "label": "Public release handoff",
+      "role": "release-note-evidence",
+      "path": "E:\\claucd\\界面控制台程序\\delivery\\phase13-public-release-handoff-20260426.md",
+      "exists": true,
+      "size": 4619,
+      "sha256": "3543B2F7A7B9E8B49B28D286EE378684742A02D326397F68E2BEF571434B5356",
+      "releaseAssetEligible": true,
+      "publicWarning": "Public evidence document."
+    },
+    {
+      "label": "Signing handoff audit",
+      "role": "release-note-evidence",
+      "path": "E:\\claucd\\界面控制台程序\\delivery\\phase17-signing-handoff-audit-closeout-20260426.md",
+      "exists": true,
+      "size": 1146,
+      "sha256": "86B83F9B7054827E7AEAE49BDD30378E184686173920E5ADFB80C93E78CB16FA",
+      "releaseAssetEligible": true,
+      "publicWarning": "Shows unsigned preview boundary and signing handoff readiness."
+    }
+  ]
+}
