@@ -9,7 +9,8 @@ import type {
   StudioOpenClawChatMessage,
   StudioOpenClawChatSessionRef,
   StudioOpenClawChatState,
-  StudioOpenClawChatTurnResult
+  StudioOpenClawChatTurnResult,
+  StudioTokenContextSummary
 } from "@openclaw/shared";
 
 const DEFAULT_TIMEOUT_MS = 180_000;
@@ -43,12 +44,27 @@ interface OpenClawSessionEvent {
   id?: string;
   timestamp?: string;
   type?: string;
+  customType?: string;
+  data?: unknown;
   message?: {
     role?: string;
     content?: Array<{
       type?: string;
       text?: string;
     }>;
+    usage?: {
+      input?: number;
+      output?: number;
+      cacheRead?: number;
+      cacheWrite?: number;
+      totalTokens?: number;
+      cost?: {
+        total?: number;
+      };
+    };
+    details?: {
+      statusText?: string;
+    };
   };
 }
 
@@ -85,7 +101,9 @@ type SessionReadInvocation =
 
 function createChatState(
   readiness: OpenClawChatReadiness,
-  overrides: Partial<Pick<StudioOpenClawChatState, "source" | "sessionKey" | "sessionId" | "model" | "provider" | "updatedAt" | "messages">> = {}
+  overrides: Partial<
+    Pick<StudioOpenClawChatState, "source" | "sessionKey" | "sessionId" | "model" | "provider" | "updatedAt" | "tokenContext" | "messages">
+  > = {}
 ): StudioOpenClawChatState {
   return {
     source: overrides.source ?? "runtime",
@@ -99,6 +117,7 @@ function createChatState(
     model: overrides.model ?? null,
     provider: overrides.provider ?? null,
     updatedAt: overrides.updatedAt ?? null,
+    tokenContext: overrides.tokenContext ?? null,
     messages: overrides.messages ?? []
   };
 }
@@ -528,7 +547,7 @@ async function listRecentSessionPaths(): Promise<string[]> {
             "-e",
             "bash",
             "-lc",
-            `ls -t "$HOME/.openclaw/agents/main/sessions"/*.jsonl 2>/dev/null | head -n ${SESSION_FILE_SCAN_LIMIT}`
+            `ls -t "$HOME/.openclaw/agents/main/sessions"/*.jsonl 2>/dev/null | grep -v '\\.trajectory\\.jsonl$' | head -n ${SESSION_FILE_SCAN_LIMIT}`
           ],
           env: {
             ...process.env
@@ -552,7 +571,7 @@ async function listRecentSessionPaths(): Promise<string[]> {
     const entries = await fs.readdir(directory, { withFileTypes: true });
     const filesWithStats = await Promise.all(
       entries
-        .filter((entry) => entry.isFile() && entry.name.endsWith(".jsonl"))
+        .filter((entry) => entry.isFile() && entry.name.endsWith(".jsonl") && !entry.name.endsWith(".trajectory.jsonl"))
         .map(async (entry) => {
           const targetPath = path.join(directory, entry.name);
           const stats = await fs.stat(targetPath);
@@ -588,9 +607,157 @@ function deriveUpdatedAtFromMessages(messages: StudioOpenClawChatMessage[]): num
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function parseCompactTokenValue(rawValue: string): number | null {
+  const normalized = rawValue.trim().toLowerCase().replace(/,/g, "");
+  const match = normalized.match(/^(\d+(?:\.\d+)?)(k|m)?$/);
+
+  if (!match) {
+    return null;
+  }
+
+  const value = Number(match[1]);
+
+  if (!Number.isFinite(value)) {
+    return null;
+  }
+
+  switch (match[2]) {
+    case "m":
+      return Math.round(value * 1_000_000);
+    case "k":
+      return Math.round(value * 1_000);
+    default:
+      return Math.round(value);
+  }
+}
+
+function parseStatusTokenContext(statusText: string): Partial<StudioTokenContextSummary> {
+  const tokenMatch = statusText.match(/Tokens:\s*([\d.,]+[km]?)\s*in\s*\/\s*([\d.,]+[km]?)\s*out/i);
+  const cacheMatch = statusText.match(/Cache:\s*([\d.]+)%\s*hit\s*·\s*([\d.,]+[km]?)\s*cached,\s*([\d.,]+[km]?)\s*new/i);
+  const contextMatch = statusText.match(/Context:\s*([\d.,]+[km]?)\s*\/\s*([\d.,]+[km]?)\s*\(([\d.]+)%\)/i);
+  const compactionsMatch = statusText.match(/Compactions:\s*(\d+)/i);
+  const costMatch = statusText.match(/Cost:\s*\$([\d.]+)/i);
+
+  const inputTokens = tokenMatch ? parseCompactTokenValue(tokenMatch[1] ?? "") : null;
+  const outputTokens = tokenMatch ? parseCompactTokenValue(tokenMatch[2] ?? "") : null;
+
+  return {
+    inputTokens,
+    outputTokens,
+    totalTokens: inputTokens != null || outputTokens != null ? (inputTokens ?? 0) + (outputTokens ?? 0) : null,
+    cacheHitPercent: cacheMatch ? Number(cacheMatch[1]) : null,
+    cacheReadTokens: cacheMatch ? parseCompactTokenValue(cacheMatch[2] ?? "") : null,
+    cacheWriteTokens: cacheMatch ? parseCompactTokenValue(cacheMatch[3] ?? "") : null,
+    contextUsedTokens: contextMatch ? parseCompactTokenValue(contextMatch[1] ?? "") : null,
+    contextWindowTokens: contextMatch ? parseCompactTokenValue(contextMatch[2] ?? "") : null,
+    contextPercent: contextMatch ? Number(contextMatch[3]) : null,
+    costUsd: costMatch ? Number(costMatch[1]) : null,
+    compactions: compactionsMatch ? Number(compactionsMatch[1]) : null
+  };
+}
+
+function extractStatusText(event: OpenClawSessionEvent): string | null {
+  const detailsStatusText = event.message?.details?.statusText;
+
+  if (typeof detailsStatusText === "string" && detailsStatusText.trim()) {
+    return detailsStatusText;
+  }
+
+  const text = event.message?.content
+    ?.filter((item) => item.type === "text" && typeof item.text === "string")
+    .map((item) => item.text?.trim() ?? "")
+    .find((item) => /Tokens:|Context:|Cache:/i.test(item));
+
+  return text ?? null;
+}
+
+function parseSessionTokenContext(raw: string): StudioTokenContextSummary | null {
+  let latestUsage: StudioTokenContextSummary | null = null;
+  let latestStatusPatch: Partial<StudioTokenContextSummary> | null = null;
+  let latestUpdatedAt: number | null = null;
+  let toolCallCount = 0;
+
+  for (const line of raw.split(/\r?\n/)) {
+    const event = parseJsonLine(line.trim());
+
+    if (!event) {
+      continue;
+    }
+
+    if (event.type === "message" && event.message?.role === "toolResult") {
+      toolCallCount += 1;
+    }
+
+    const updatedAt = event.timestamp ? Date.parse(event.timestamp) : null;
+
+    if (Number.isFinite(updatedAt)) {
+      latestUpdatedAt = updatedAt;
+    }
+
+    const usage = event.message?.usage;
+
+    if (usage) {
+      latestUsage = {
+        source: "runtime",
+        statusLabel: "运行态 usage",
+        detail: "来自 OpenClaw session JSONL assistant message.usage",
+        inputTokens: typeof usage.input === "number" ? usage.input : null,
+        outputTokens: typeof usage.output === "number" ? usage.output : null,
+        totalTokens: typeof usage.totalTokens === "number" ? usage.totalTokens : null,
+        cacheReadTokens: typeof usage.cacheRead === "number" ? usage.cacheRead : null,
+        cacheWriteTokens: typeof usage.cacheWrite === "number" ? usage.cacheWrite : null,
+        cacheHitPercent: null,
+        contextUsedTokens: null,
+        contextWindowTokens: null,
+        contextPercent: null,
+        costUsd: typeof usage.cost?.total === "number" ? usage.cost.total : null,
+        compactions: null,
+        toolCallCount,
+        availableFunctionCount: null,
+        fileCount: null,
+        updatedAt: Number.isFinite(updatedAt) ? updatedAt : latestUpdatedAt
+      };
+    }
+
+    const statusText = extractStatusText(event);
+
+    if (statusText) {
+      latestStatusPatch = parseStatusTokenContext(statusText);
+    }
+  }
+
+  if (!latestUsage && !latestStatusPatch) {
+    return null;
+  }
+
+  return {
+    source: "runtime",
+    statusLabel: latestStatusPatch?.contextUsedTokens != null ? "会话状态" : latestUsage?.statusLabel ?? "运行态 usage",
+    detail: latestStatusPatch?.contextUsedTokens != null
+      ? "来自 OpenClaw session_status 工具结果与 assistant usage"
+      : latestUsage?.detail ?? "来自 OpenClaw session JSONL",
+    inputTokens: latestStatusPatch?.inputTokens ?? latestUsage?.inputTokens ?? null,
+    outputTokens: latestStatusPatch?.outputTokens ?? latestUsage?.outputTokens ?? null,
+    totalTokens: latestStatusPatch?.totalTokens ?? latestUsage?.totalTokens ?? null,
+    cacheReadTokens: latestStatusPatch?.cacheReadTokens ?? latestUsage?.cacheReadTokens ?? null,
+    cacheWriteTokens: latestStatusPatch?.cacheWriteTokens ?? latestUsage?.cacheWriteTokens ?? null,
+    cacheHitPercent: latestStatusPatch?.cacheHitPercent ?? latestUsage?.cacheHitPercent ?? null,
+    contextUsedTokens: latestStatusPatch?.contextUsedTokens ?? latestUsage?.contextUsedTokens ?? null,
+    contextWindowTokens: latestStatusPatch?.contextWindowTokens ?? latestUsage?.contextWindowTokens ?? null,
+    contextPercent: latestStatusPatch?.contextPercent ?? latestUsage?.contextPercent ?? null,
+    costUsd: latestStatusPatch?.costUsd ?? latestUsage?.costUsd ?? null,
+    compactions: latestStatusPatch?.compactions ?? latestUsage?.compactions ?? null,
+    toolCallCount,
+    availableFunctionCount: null,
+    fileCount: null,
+    updatedAt: latestUsage?.updatedAt ?? latestUpdatedAt
+  };
+}
+
 async function resolveReadableSessionHistory(primarySessionId: string): Promise<{
   sessionId: string;
   messages: StudioOpenClawChatMessage[];
+  tokenContext: StudioTokenContextSummary | null;
   updatedAt: number | null;
 } | null> {
   return resolveReadableSessionHistoryWithOptions(primarySessionId, true);
@@ -602,6 +769,7 @@ async function resolveReadableSessionHistoryWithOptions(
 ): Promise<{
   sessionId: string;
   messages: StudioOpenClawChatMessage[];
+  tokenContext: StudioTokenContextSummary | null;
   updatedAt: number | null;
 } | null> {
   const primaryReadCommand = buildPrimarySessionCommand(primarySessionId);
@@ -620,6 +788,7 @@ async function resolveReadableSessionHistoryWithOptions(
       return {
         sessionId: primarySessionId,
         messages: primaryMessages,
+        tokenContext: parseSessionTokenContext(primaryRaw),
         updatedAt: deriveUpdatedAtFromMessages(primaryMessages)
       };
     }
@@ -635,6 +804,7 @@ async function resolveReadableSessionHistoryWithOptions(
         return {
           sessionId: primarySessionId,
           messages: primaryMessages,
+          tokenContext: parseSessionTokenContext(primaryFallbackRaw),
           updatedAt: deriveUpdatedAtFromMessages(primaryMessages)
         };
       }
@@ -669,6 +839,7 @@ async function resolveReadableSessionHistoryWithOptions(
     return {
       sessionId: candidateSessionId,
       messages,
+      tokenContext: parseSessionTokenContext(raw),
       updatedAt: deriveUpdatedAtFromMessages(messages)
     };
   }
@@ -837,6 +1008,7 @@ export async function loadOpenClawChatState(sessionId?: string | null): Promise<
       model: explicitSession?.model ?? null,
       provider: explicitSession?.modelProvider ?? null,
       updatedAt: readableSession?.updatedAt ?? (typeof explicitSession?.updatedAt === "number" ? explicitSession.updatedAt : null),
+      tokenContext: readableSession?.tokenContext ?? null,
       messages: readableSession?.messages ?? []
     });
   }
@@ -855,6 +1027,7 @@ export async function loadOpenClawChatState(sessionId?: string | null): Promise<
     model: mainSession.model ?? null,
     provider: mainSession.modelProvider ?? null,
     updatedAt: readableSession?.updatedAt ?? (typeof mainSession.updatedAt === "number" ? mainSession.updatedAt : null),
+    tokenContext: readableSession?.tokenContext ?? null,
     messages: readableSession?.messages ?? []
   });
 }

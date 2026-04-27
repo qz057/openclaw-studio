@@ -15,9 +15,9 @@ const PAGES = [
   { id: "agents", label: "高级诊断", hash: "diagnostics" }
 ];
 
-const REMOVED_NAV_LABELS = ["Hermes", "Claude", "Codex", "代理", "Home"];
+const REMOVED_NAV_LABELS = ["Claude", "Codex", "代理", "Home"];
 const PRIMARY_COMMAND_LABELS = ["打开总览", "打开会话", "打开历史", "打开能力", "打开配置", "打开高级诊断"];
-const REMOVED_COMMAND_LABELS = ["打开 Home", "打开 Codex", "打开 Claude", "打开 Hermes", "打开代理"];
+const REMOVED_COMMAND_LABELS = ["打开 Home", "打开 Codex", "打开 Claude", "打开代理"];
 const MAIN_PAGE_FORBIDDEN_TERMS = ["preview-host", "withheld", "Phase60", "placeholder"];
 const VISIBLE_ENGLISH_PHRASES = [
   "Bias the shell",
@@ -693,9 +693,9 @@ async function collectUiState(cdp) {
       internalTermContexts,
       visibleEnglishMatches,
       visibleEnglishContexts,
-      hasGatewayControl: bodyText.includes("Gateway 控制") || bodyText.includes("刷新网关"),
+      hasGatewayControl: bodyText.includes("网关控制") || bodyText.includes("Gateway Control") || bodyText.includes("刷新状态"),
       hasModelControl: bodyText.includes("模型设置") || bodyText.includes("待应用模型") || bodyText.includes("应用模型"),
-      hasChatOperationResult: bodyText.includes("发送结果") && bodyText.includes("应用结果"),
+      hasChatOperationResult: bodyText.includes("会话操作") && bodyText.includes("发送状态"),
       hasDiagnosticsTabs: bodyText.includes("运行态探针") && bodyText.includes("桥接与 IPC") && bodyText.includes("安全边界")
     };
   })()`);
@@ -1068,7 +1068,7 @@ async function main() {
           pageFailures.push("Chat page is missing model settings entry.");
         }
         if (!finalState.hasChatOperationResult) {
-          pageFailures.push("Chat page is missing operation result panels.");
+          pageFailures.push("Chat page is missing session action status panels.");
         }
       }
 

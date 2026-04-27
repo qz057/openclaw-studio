@@ -37,6 +37,7 @@ import {
   type ConversationSurfaceId,
   type ConversationThemeMode
 } from "../components/conversation/ConversationShell";
+import { buildTokenContextChips, buildTokenContextDisplay } from "../lib/token-context";
 
 interface HermesPageProps {
   bridgeStatus: string;
@@ -211,7 +212,7 @@ function formatGatewayLatency(state: StudioGatewayServiceState | null): string {
     return "读取中";
   }
 
-  return typeof state.latencyMs === "number" ? `${state.latencyMs} ms` : "未采样";
+  return typeof state.latencyMs === "number" ? `${state.latencyMs} ms` : "无延迟样本";
 }
 
 function pickSelectedModelId(catalog: StudioModelCatalog, currentSelectedModelId: string): string {
@@ -1179,6 +1180,8 @@ export function HermesPage({
           : "等待 Hermes 可用";
   const selectedModelLabel = resolveSelectedModelLabel(modelCatalog, selectedModelId);
   const visibleModelLabel = selectedModelLabel !== "未选择模型" ? selectedModelLabel : "等待识别模型";
+  const tokenContextDisplay = buildTokenContextDisplay(currentSession?.tokenContext ?? null, "等待 Hermes usage");
+  const tokenContextChips = buildTokenContextChips(currentSession?.tokenContext ?? null);
   const openClawGatewayStatus = formatGatewayStatus(openClawGatewayServiceState, gatewayStatus);
   const hermesGatewayStatus = formatGatewayStatus(gatewayServiceState);
   const openClawGatewayLatency = formatGatewayLatency(openClawGatewayServiceState);
@@ -1222,7 +1225,7 @@ export function HermesPage({
             <ModelRouteCard
               title={modelCatalog?.options.length ? `${modelCatalog.options.length} 个可选模型` : "等待模型列表"}
               currentModel={selectedModelLabel}
-              secondaryModel="Hermes 默认模型"
+              secondaryModel={currentSession?.sessionLabel ?? "未发现运行态会话"}
               routeStrategy={hermesState?.sessionLabel ?? "Hermes 待连接会话层"}
               result={<CompactOperationResult label="模型" result={modelResult} />}
             >
@@ -1254,14 +1257,9 @@ export function HermesPage({
             </ModelRouteCard>
 
             <ContextTokenCard
-              contextLabel="未采样"
-              progress={0}
-              rows={[
-                { label: "输入令牌", value: "未采样" },
-                { label: "输出令牌", value: "未采样" },
-                { label: "缓存命中", value: "未采样" },
-                { label: "数据来源", value: "运行时暂未暴露" }
-              ]}
+              contextLabel={tokenContextDisplay.contextLabel}
+              progress={tokenContextDisplay.progress}
+              rows={tokenContextDisplay.rows}
             />
 
             <GatewayControlCard
@@ -1308,10 +1306,6 @@ export function HermesPage({
                 <button type="button" onClick={() => void handleStartFreshSession()}>
                   新建会话
                 </button>
-                <button type="button">导出对话</button>
-                <button type="button" className="conversation-card-actions__danger">
-                  结束会话
-                </button>
               </div>
             </SessionActionsCard>
           </>
@@ -1325,10 +1319,7 @@ export function HermesPage({
             { label: gatewayServiceState?.running ? "本地网关 · 已连接" : "本地网关 · 待连接", tone: gatewayServiceState?.running ? "positive" : "warning" },
             { label: `运行态 · ${effectiveReadinessLabel}`, tone: isHermesConnected ? "positive" : "warning" }
           ]}
-          contextChips={[
-            { label: "上下文统计 · 未采样", tone: "neutral" },
-            { label: "工具调用 · 未采样", tone: "neutral" }
-          ]}
+          contextChips={tokenContextChips}
           composer={
             <ComposerBar
               value={draft}

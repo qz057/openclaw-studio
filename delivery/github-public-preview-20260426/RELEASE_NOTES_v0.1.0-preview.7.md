@@ -1,4 +1,4 @@
-# OpenClaw Studio v0.1.0-preview.5
+# OpenClaw Studio v0.1.0-preview.7
 
 ## Preview Status
 
@@ -25,8 +25,8 @@ This preview build is unsigned. Windows may show an Unknown publisher or SmartSc
 
 | Asset | Size | SHA256 |
 |---|---:|---|
-| Windows NSIS installer | 102277901 | `C65BB0165286D2F6103A973A4D4CAB0E8612B00A27B9D53929E521C7A880A0AF` |
-| Windows portable zip | 142897544 | `5F7F1D34CED6CA5315ACF921E07F815C52A4174C7B81ACF9BF95BFA4629C6493` |
+| Windows NSIS installer | 102285737 | `DB56693AD9F9229275D52C49E065E04AE43DCBB28D7190E28D97DD686E1B59D3` |
+| Windows portable zip | 142909286 | `1C904F7DAF15A80E90D948915E538323F302F5736A1B06EDE56A7D696DF99C59` |
 
 ## Known Boundary
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-26T11:22:46.933Z",
+  "generatedAt": "2026-04-27T14:21:55.750Z",
   "workspaceRoot": "E:\\claucd\\界面控制台程序",
   "apiMethodCount": 37,
   "channelCount": 39,
@@ -809,12 +809,12 @@
   "artifact": {
     "zipPath": "E:\\claucd\\界面控制台程序\\apps\\studio\\release\\OpenClaw Studio-0.1.0-win-x64.zip",
     "zipExists": true,
-    "zipSize": 141157276,
-    "zipSha256": "1B22175E8A712938F2AFCE2369EAB445B4AE6BCF5244B2D6A2EF0589468CA56E",
+    "zipSize": 141182170,
+    "zipSha256": "337330D8DE49DD98E5833B54F39D4BAF34CD14A76CF9C054171FAA9B70D8BB7B",
     "exePath": "E:\\claucd\\界面控制台程序\\apps\\studio\\release\\win-unpacked\\OpenClaw Studio.exe",
     "exeExists": true,
     "exeSize": 222973952,
-    "exeSha256": "50730C076C408878624E0284FCC932048B6EBCD76F9EFB0F9C34E6851321FF8B"
+    "exeSha256": "BD316F0BF9DC12DDF592074E000BE68466C950D2164E920AD8F332B8824D4EAB"
   },
   "warnings": [],
   "failures": [],

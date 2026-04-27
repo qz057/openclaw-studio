@@ -8,8 +8,8 @@ Status: RC directory and Windows zip are generated and verified.
 
 | Artifact | Path | Size | SHA256 |
 |---|---|---:|---|
-| Windows zip | `apps/studio/release/OpenClaw Studio-0.1.0-win-x64.zip` | 141157276 bytes | `1B22175E8A712938F2AFCE2369EAB445B4AE6BCF5244B2D6A2EF0589468CA56E` |
-| Unpacked Windows app | `apps/studio/release/win-unpacked/OpenClaw Studio.exe` | 222973952 bytes | `50730C076C408878624E0284FCC932048B6EBCD76F9EFB0F9C34E6851321FF8B` |
+| Windows zip | `apps/studio/release/OpenClaw Studio-0.1.0-win-x64.zip` | 141182170 bytes | `337330D8DE49DD98E5833B54F39D4BAF34CD14A76CF9C054171FAA9B70D8BB7B` |
+| Unpacked Windows app | `apps/studio/release/win-unpacked/OpenClaw Studio.exe` | 222973952 bytes | `BD316F0BF9DC12DDF592074E000BE68466C950D2164E920AD8F332B8824D4EAB` |
 
 ## Verification
 

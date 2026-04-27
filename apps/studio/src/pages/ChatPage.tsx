@@ -27,6 +27,7 @@ import {
   type ConversationSurfaceId,
   type ConversationThemeMode
 } from "../components/conversation/ConversationShell";
+import { buildTokenContextChips, buildTokenContextDisplay } from "../lib/token-context";
 
 interface ChatPageProps {
   bridgeStatus: string;
@@ -223,7 +224,7 @@ function formatGatewayLatency(state: StudioGatewayServiceState | null): string {
     return "读取中";
   }
 
-  return typeof state.latencyMs === "number" ? `${state.latencyMs} ms` : "未采样";
+  return typeof state.latencyMs === "number" ? `${state.latencyMs} ms` : "无延迟样本";
 }
 
 function pickSelectedModelId(catalog: StudioModelCatalog, currentSelectedModelId: string): string {
@@ -1004,6 +1005,10 @@ export function ChatPage({
         : chatState?.availability === "blocked"
           ? "发送链路不可用"
           : "等待识别模型";
+  const secondaryModelLabel =
+    modelCatalog?.options.find((option) => option.id !== (modelCatalog.selectedModelId ?? selectedModelId))?.label ?? "未发现备用模型";
+  const tokenContextDisplay = buildTokenContextDisplay(chatState?.tokenContext ?? null, "等待 OpenClaw usage");
+  const tokenContextChips = buildTokenContextChips(chatState?.tokenContext ?? null);
 
   return (
     <section className="page chat-page chat-page--full">
@@ -1043,8 +1048,8 @@ export function ChatPage({
             <ModelRouteCard
               title={modelCatalog?.options.length ? `${modelCatalog.options.length} 个可选模型` : "等待模型列表"}
               currentModel={currentModelLabel}
-              secondaryModel="claude-opus-4-7"
-              routeStrategy="自动路由 · 混合模式"
+              secondaryModel={secondaryModelLabel}
+              routeStrategy={chatState?.provider ? `运行态提供方 · ${chatState.provider}` : "读取 OpenClaw 运行态配置"}
               result={<CompactOperationResult label="模型" result={modelResult} />}
             >
               <label className="conversation-select-field">
@@ -1075,14 +1080,9 @@ export function ChatPage({
             </ModelRouteCard>
 
             <ContextTokenCard
-              contextLabel="未采样"
-              progress={0}
-              rows={[
-                { label: "输入令牌", value: "未采样" },
-                { label: "输出令牌", value: "未采样" },
-                { label: "缓存命中", value: "未采样" },
-                { label: "数据来源", value: "运行时暂未暴露" }
-              ]}
+              contextLabel={tokenContextDisplay.contextLabel}
+              progress={tokenContextDisplay.progress}
+              rows={tokenContextDisplay.rows}
             />
 
             <GatewayControlCard
@@ -1124,10 +1124,6 @@ export function ChatPage({
                 <button type="button" onClick={() => void handleStartFreshSession()}>
                   新建会话
                 </button>
-                <button type="button">导出对话</button>
-                <button type="button" className="conversation-card-actions__danger">
-                  结束会话
-                </button>
               </div>
             </SessionActionsCard>
           </>
@@ -1141,10 +1137,7 @@ export function ChatPage({
             { label: `本地网关 · ${openClawGatewayStatus}`, tone: gatewayServiceState?.running ? "positive" : "warning" },
             { label: `运行态 · ${chatState?.readinessLabel ?? readinessLabel}`, tone: chatState?.canSend ? "positive" : "warning" }
           ]}
-          contextChips={[
-            { label: "上下文统计 · 未采样", tone: "neutral" },
-            { label: "工具调用 · 未采样", tone: "neutral" }
-          ]}
+          contextChips={tokenContextChips}
           composer={
             <ComposerBar
               value={draft}

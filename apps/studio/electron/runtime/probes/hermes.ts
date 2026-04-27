@@ -11,7 +11,8 @@ import type {
   StudioHermesMessageRole,
   StudioHermesSessionSummary,
   StudioHermesSnapshot,
-  StudioHermesState
+  StudioHermesState,
+  StudioTokenContextSummary
 } from "@openclaw/shared";
 
 const homeDirectory = os.homedir();
@@ -66,6 +67,9 @@ interface HermesSessionFile {
   session_start?: string;
   last_updated?: string;
   message_count?: number;
+  system_prompt?: string;
+  tools?: unknown[];
+  model?: string;
   messages?: Array<Record<string, unknown>>;
 }
 
@@ -194,6 +198,84 @@ function normalizeHermesMessageContent(raw: unknown): string {
   return "";
 }
 
+function estimateTokenCount(text: string): number {
+  const normalized = text.trim();
+
+  if (!normalized) {
+    return 0;
+  }
+
+  const cjkCount = (normalized.match(/[\u3400-\u9fff]/gu) ?? []).length;
+  const latinSegments = normalized
+    .replace(/[\u3400-\u9fff]/gu, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+
+  return Math.max(1, Math.ceil(cjkCount * 1.15 + latinSegments.length * 1.35));
+}
+
+function createEstimatedTokenContextSummary(
+  inputText: string,
+  outputText: string,
+  messageCount: number,
+  updatedAt: string | null | undefined,
+  contextWindowTokens: number | null,
+  availableFunctionCount: number | null
+): StudioTokenContextSummary {
+  const inputTokens = estimateTokenCount(inputText);
+  const outputTokens = estimateTokenCount(outputText);
+  const totalTokens = inputTokens + outputTokens;
+  const parsedUpdatedAt = parseIsoTimestamp(updatedAt);
+  const contextPercent =
+    contextWindowTokens && contextWindowTokens > 0
+      ? Math.max(0, Math.min(100, Math.round((totalTokens / contextWindowTokens) * 100)))
+      : null;
+
+  return {
+    source: "local-estimate",
+    statusLabel: "本地估算",
+    detail: `基于 Hermes session 文件的 system prompt 与 ${messageCount} 条消息估算；上游未写入 usage 字段。`,
+    inputTokens,
+    outputTokens,
+    totalTokens,
+    cacheReadTokens: null,
+    cacheWriteTokens: null,
+    cacheHitPercent: null,
+    contextUsedTokens: totalTokens,
+    contextWindowTokens,
+    contextPercent,
+    costUsd: null,
+    compactions: null,
+    toolCallCount: 0,
+    availableFunctionCount,
+    fileCount: null,
+    updatedAt: parsedUpdatedAt ?? Date.now()
+  };
+}
+
+function createHermesTokenContextSummary(sessionFile: HermesSessionFile): StudioTokenContextSummary {
+  const messages = Array.isArray(sessionFile.messages) ? sessionFile.messages : [];
+  const inputText = [
+    typeof sessionFile.system_prompt === "string" ? sessionFile.system_prompt : "",
+    ...messages
+      .filter((message) => message.role !== "assistant")
+      .map((message) => normalizeHermesMessageContent(message.content))
+  ].join("\n\n");
+  const outputText = messages
+    .filter((message) => message.role === "assistant")
+    .map((message) => normalizeHermesMessageContent(message.content))
+    .join("\n\n");
+
+  return createEstimatedTokenContextSummary(
+    inputText,
+    outputText,
+    typeof sessionFile.message_count === "number" ? sessionFile.message_count : messages.length,
+    sessionFile.last_updated ?? sessionFile.session_start ?? null,
+    128_000,
+    Array.isArray(sessionFile.tools) ? sessionFile.tools.length : 0
+  );
+}
+
 async function pathExists(targetPath: string): Promise<boolean> {
   try {
     await fs.access(targetPath);
@@ -305,6 +387,7 @@ async function readSessionFileMeta(sessionId: string): Promise<{
   createdAt: string | null;
   updatedAt: string | null;
   platform: string | null;
+  tokenContext: StudioTokenContextSummary | null;
 } | null> {
   const sessionFilePath = await resolveSessionFilePath(sessionId);
 
@@ -329,7 +412,8 @@ async function readSessionFileMeta(sessionId: string): Promise<{
             : 0,
       createdAt: sessionFile.session_start ?? null,
       updatedAt: sessionFile.last_updated ?? null,
-      platform: sessionFile.platform ?? null
+      platform: sessionFile.platform ?? null,
+      tokenContext: createHermesTokenContextSummary(sessionFile)
     };
   }
 
@@ -344,7 +428,15 @@ async function readSessionFileMeta(sessionId: string): Promise<{
       messageCount: lines.length,
       createdAt: null,
       updatedAt: null,
-      platform: null
+      platform: null,
+      tokenContext: createEstimatedTokenContextSummary(
+        lines.join("\n"),
+        "",
+        lines.length,
+        null,
+        null,
+        0
+      )
     };
   } catch {
     return null;
@@ -368,7 +460,7 @@ async function readHermesSessions(): Promise<HermesSessionRecord[]> {
     .slice(0, maxSessionList);
 
   const sessions = await Promise.all(
-    entries.map(async (entry) => {
+    entries.map(async (entry): Promise<HermesSessionRecord | null> => {
       const sessionId = entry.session_id;
 
       if (!sessionId) {
@@ -389,6 +481,7 @@ async function readHermesSessions(): Promise<HermesSessionRecord[]> {
         messageCount: meta?.messageCount ?? 0,
         createdAt: entry.created_at ?? meta?.createdAt ?? null,
         updatedAt: entry.updated_at ?? meta?.updatedAt ?? null,
+        tokenContext: meta?.tokenContext ?? null,
         origin: entry.origin ?? null
       } satisfies HermesSessionRecord;
     })
@@ -879,7 +972,8 @@ export async function loadHermesSessionsFromWSL(): Promise<import("@openclaw/sha
       chatType: "direct",
       messageCount: session.messageCount ?? 0,
       createdAt: session.lastModified.toISOString(),
-      updatedAt: session.lastModified.toISOString()
+      updatedAt: session.lastModified.toISOString(),
+      tokenContext: session.tokenContext ?? null
     }));
 
     return {
@@ -949,6 +1043,7 @@ export async function createHermesSessionFromWSL(modelId?: string | null): Promi
     chatType: "direct",
     messageCount: 0,
     createdAt: created.lastModified.toISOString(),
-    updatedAt: created.lastModified.toISOString()
+    updatedAt: created.lastModified.toISOString(),
+    tokenContext: null
   };
 }

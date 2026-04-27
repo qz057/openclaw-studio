@@ -4,7 +4,7 @@ OpenClaw Studio is an Electron + React + TypeScript desktop control console.
 
 ## Current Public Build
 
-- Version: v0.1.0-preview.5
+- Version: v0.1.0-preview.7
 - Channel: unsigned public preview
 - Platform artifact focus: Windows installer and Windows portable zip
 

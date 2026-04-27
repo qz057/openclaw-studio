@@ -1,4 +1,5 @@
 import { execFileSync } from "child_process";
+import type { StudioTokenContextSummary } from "@openclaw/shared";
 
 export interface HermesMessage {
   role: "user" | "assistant" | "system";
@@ -16,6 +17,17 @@ export interface HermesSession {
   messageCount?: number;
   model?: string | null;
   source?: string | null;
+  tokenContext?: StudioTokenContextSummary | null;
+}
+
+export interface HermesSessionListItem {
+  id: string;
+  name: string;
+  lastModified: Date;
+  messageCount: number;
+  model: string | null;
+  source: string | null;
+  tokenContext: StudioTokenContextSummary | null;
 }
 
 /**
@@ -41,7 +53,7 @@ export class WSLHermesReader {
   /**
    * 列出所有会话文件
    */
-  async listSessions(): Promise<{ id: string; name: string; lastModified: Date; messageCount: number; model: string | null; source: string | null }[]> {
+  async listSessions(): Promise<HermesSessionListItem[]> {
     try {
       const output = this.execWSLPython(`
 import json
@@ -57,13 +69,39 @@ if not db.exists():
 conn = sqlite3.connect(str(db))
 conn.row_factory = sqlite3.Row
 rows = conn.execute(
-    "SELECT id, source, model, started_at, ended_at, message_count, title FROM sessions WHERE source = ? ORDER BY started_at DESC LIMIT 50",
+    """
+    SELECT
+      id,
+      source,
+      model,
+      started_at,
+      ended_at,
+      message_count,
+      title,
+      tool_call_count,
+      input_tokens,
+      output_tokens,
+      cache_read_tokens,
+      cache_write_tokens,
+      estimated_cost_usd,
+      actual_cost_usd
+    FROM sessions
+    WHERE source = ?
+    ORDER BY started_at DESC
+    LIMIT 50
+    """,
     ('cli',)
 ).fetchall()
 
 payload = []
 for row in rows:
     ts = row['ended_at'] if row['ended_at'] is not None else row['started_at']
+    input_tokens = int(row['input_tokens'] or 0)
+    output_tokens = int(row['output_tokens'] or 0)
+    cache_read_tokens = int(row['cache_read_tokens'] or 0)
+    cache_write_tokens = int(row['cache_write_tokens'] or 0)
+    total_tokens = input_tokens + output_tokens
+    cost = row['actual_cost_usd'] if row['actual_cost_usd'] is not None else row['estimated_cost_usd']
     payload.append(
         {
             'id': row['id'],
@@ -71,7 +109,27 @@ for row in rows:
             'timestamp_ms': int((ts or time.time()) * 1000),
             'message_count': int(row['message_count'] or 0),
             'model': row['model'],
-            'source': row['source']
+            'source': row['source'],
+            'token_context': {
+                'source': 'runtime',
+                'statusLabel': 'Hermes session.db',
+                'detail': '来自 ~/.hermes/state.db sessions token columns',
+                'inputTokens': input_tokens if input_tokens > 0 else None,
+                'outputTokens': output_tokens if output_tokens > 0 else None,
+                'totalTokens': total_tokens if total_tokens > 0 else None,
+                'cacheReadTokens': cache_read_tokens if cache_read_tokens > 0 else None,
+                'cacheWriteTokens': cache_write_tokens if cache_write_tokens > 0 else None,
+                'cacheHitPercent': round((cache_read_tokens / (cache_read_tokens + input_tokens)) * 100) if (cache_read_tokens + input_tokens) > 0 else None,
+                'contextUsedTokens': total_tokens if total_tokens > 0 else None,
+                'contextWindowTokens': 128000,
+                'contextPercent': round((total_tokens / 128000) * 100) if total_tokens > 0 else None,
+                'costUsd': cost,
+                'compactions': None,
+                'toolCallCount': int(row['tool_call_count'] or 0),
+                'availableFunctionCount': None,
+                'fileCount': None,
+                'updatedAt': int((ts or time.time()) * 1000)
+            }
         }
     )
 
@@ -85,10 +143,11 @@ print(json.dumps(payload, ensure_ascii=False))
         message_count?: number;
         model?: string | null;
         source?: string | null;
+        token_context?: StudioTokenContextSummary | null;
       }>;
 
       return parsed
-        .filter((session): session is { id: string; name?: string; timestamp_ms?: number; message_count?: number; model?: string | null; source?: string | null } => Boolean(session?.id))
+        .filter((session): session is { id: string; name?: string; timestamp_ms?: number; message_count?: number; model?: string | null; source?: string | null; token_context?: StudioTokenContextSummary | null } => Boolean(session?.id))
         .map((session) => ({
           id: session.id,
           name: session.name || session.id,
@@ -96,6 +155,7 @@ print(json.dumps(payload, ensure_ascii=False))
           messageCount: session.message_count ?? 0,
           model: session.model ?? null,
           source: session.source ?? null,
+          tokenContext: session.token_context ?? null,
         }));
     } catch {
       return [];
@@ -129,7 +189,25 @@ if not db.exists():
 conn = sqlite3.connect(str(db))
 conn.row_factory = sqlite3.Row
 session = conn.execute(
-    "SELECT id, source, model, started_at, ended_at, message_count, title FROM sessions WHERE id = ?",
+    """
+    SELECT
+      id,
+      source,
+      model,
+      started_at,
+      ended_at,
+      message_count,
+      title,
+      tool_call_count,
+      input_tokens,
+      output_tokens,
+      cache_read_tokens,
+      cache_write_tokens,
+      estimated_cost_usd,
+      actual_cost_usd
+    FROM sessions
+    WHERE id = ?
+    """,
     (session_id,)
 ).fetchone()
 if not session:
@@ -140,6 +218,12 @@ messages = conn.execute(
     "SELECT role, content, timestamp, tool_calls FROM messages WHERE session_id = ? ORDER BY timestamp ASC, id ASC",
     (session_id,)
 ).fetchall()
+input_tokens = int(session['input_tokens'] or 0)
+output_tokens = int(session['output_tokens'] or 0)
+cache_read_tokens = int(session['cache_read_tokens'] or 0)
+cache_write_tokens = int(session['cache_write_tokens'] or 0)
+total_tokens = input_tokens + output_tokens
+cost = session['actual_cost_usd'] if session['actual_cost_usd'] is not None else session['estimated_cost_usd']
 payload = {
     'id': session['id'],
     'name': session['title'] or session['id'],
@@ -147,6 +231,26 @@ payload = {
     'model': session['model'],
     'message_count': int(session['message_count'] or 0),
     'timestamp_ms': int(((session['ended_at'] if session['ended_at'] is not None else session['started_at']) or time.time()) * 1000),
+    'token_context': {
+        'source': 'runtime',
+        'statusLabel': 'Hermes session.db',
+        'detail': '来自 ~/.hermes/state.db sessions token columns',
+        'inputTokens': input_tokens if input_tokens > 0 else None,
+        'outputTokens': output_tokens if output_tokens > 0 else None,
+        'totalTokens': total_tokens if total_tokens > 0 else None,
+        'cacheReadTokens': cache_read_tokens if cache_read_tokens > 0 else None,
+        'cacheWriteTokens': cache_write_tokens if cache_write_tokens > 0 else None,
+        'cacheHitPercent': round((cache_read_tokens / (cache_read_tokens + input_tokens)) * 100) if (cache_read_tokens + input_tokens) > 0 else None,
+        'contextUsedTokens': total_tokens if total_tokens > 0 else None,
+        'contextWindowTokens': 128000,
+        'contextPercent': round((total_tokens / 128000) * 100) if total_tokens > 0 else None,
+        'costUsd': cost,
+        'compactions': None,
+        'toolCallCount': int(session['tool_call_count'] or 0),
+        'availableFunctionCount': None,
+        'fileCount': None,
+        'updatedAt': int(((session['ended_at'] if session['ended_at'] is not None else session['started_at']) or time.time()) * 1000)
+    },
     'messages': [
         {
             'role': row['role'],
@@ -173,6 +277,7 @@ print(json.dumps(payload, ensure_ascii=False))
         model?: string | null;
         message_count?: number;
         timestamp_ms?: number;
+        token_context?: StudioTokenContextSummary | null;
         messages?: HermesMessage[];
       };
       const messages = Array.isArray(parsed.messages) ? parsed.messages : [];
@@ -185,6 +290,7 @@ print(json.dumps(payload, ensure_ascii=False))
         messageCount: parsed.message_count ?? messages.length,
         model: parsed.model ?? null,
         source: parsed.source ?? null,
+        tokenContext: parsed.token_context ?? null,
       };
     } catch {
       return null;

@@ -2489,6 +2489,27 @@ export interface StudioOpenClawChatMessage {
 
 export type StudioOpenClawChatAvailability = "ready" | "blocked";
 
+export interface StudioTokenContextSummary {
+  source: "runtime" | "local-estimate" | "unavailable" | "mock";
+  statusLabel: string;
+  detail: string;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  totalTokens: number | null;
+  cacheReadTokens: number | null;
+  cacheWriteTokens: number | null;
+  cacheHitPercent: number | null;
+  contextUsedTokens: number | null;
+  contextWindowTokens: number | null;
+  contextPercent: number | null;
+  costUsd: number | null;
+  compactions: number | null;
+  toolCallCount: number | null;
+  availableFunctionCount: number | null;
+  fileCount: number | null;
+  updatedAt: number | null;
+}
+
 export interface StudioOpenClawChatState {
   source: "runtime" | "mock";
   availability: StudioOpenClawChatAvailability;
@@ -2501,6 +2522,7 @@ export interface StudioOpenClawChatState {
   model: string | null;
   provider: string | null;
   updatedAt: number | null;
+  tokenContext: StudioTokenContextSummary | null;
   messages: StudioOpenClawChatMessage[];
 }
 
@@ -2553,6 +2575,7 @@ export interface StudioHermesSessionSummary {
   messageCount: number;
   createdAt: string | null;
   updatedAt: string | null;
+  tokenContext?: StudioTokenContextSummary | null;
 }
 
 export interface StudioHermesHistoryEntry {

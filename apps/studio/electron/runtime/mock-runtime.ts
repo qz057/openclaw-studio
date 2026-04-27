@@ -112,6 +112,26 @@ export function createMockRuntime(): StudioApi {
         model: null,
         provider: null,
         updatedAt: null,
+        tokenContext: {
+          source: "unavailable",
+          statusLabel: "Mock runtime",
+          detail: "Mock runtime 不提供真实 OpenClaw usage。",
+          inputTokens: null,
+          outputTokens: null,
+          totalTokens: null,
+          cacheReadTokens: null,
+          cacheWriteTokens: null,
+          cacheHitPercent: null,
+          contextUsedTokens: null,
+          contextWindowTokens: null,
+          contextPercent: null,
+          costUsd: null,
+          compactions: null,
+          toolCallCount: null,
+          availableFunctionCount: null,
+          fileCount: null,
+          updatedAt: null
+        },
         messages: []
       };
     },

@@ -2,7 +2,7 @@
 
 ## Status
 
-github-release-upload-staging-blocked
+github-release-upload-staged
 
 ## Upload Root
 
@@ -12,9 +12,9 @@ github-release-upload-staging-blocked
 
 | Asset | Size | SHA256 |
 |---|---:|---|
-| OpenClaw-Studio-0.1.0-win-x64-setup.exe | 102277901 | `C65BB0165286D2F6103A973A4D4CAB0E8612B00A27B9D53929E521C7A880A0AF` |
-| OpenClaw-Studio-0.1.0-alpha-x64-portable.zip | 142897544 | `5F7F1D34CED6CA5315ACF921E07F815C52A4174C7B81ACF9BF95BFA4629C6493` |
-| openclaw-studio-rc-manifest-20260426.md | 10980 | `6314F97822A75E4AA8242328FEC49B565A4003DD91810030C645BCC72AE3DF83` |
+| OpenClaw-Studio-0.1.0-win-x64-setup.exe | 102285737 | `DB56693AD9F9229275D52C49E065E04AE43DCBB28D7190E28D97DD686E1B59D3` |
+| OpenClaw-Studio-0.1.0-alpha-x64-portable.zip | 142909286 | `1C904F7DAF15A80E90D948915E538323F302F5736A1B06EDE56A7D696DF99C59` |
+| openclaw-studio-rc-manifest-20260426.md | 10980 | `D793C91F0536DD9C873BA9334E9C8A4CFB27D93B889532900B91E972AF4529B4` |
 | phase13-public-release-handoff-20260426.md | 4635 | `260278DB73D2C16D1D9EB1B68EF75A45E73B57897D91E4D1A205A178CED4357D` |
 | phase17-signing-handoff-audit-closeout-20260426.md | 1190 | `303ECAA9EC7C452B630BCC4AFCED292EF8176C8DF3F20D210363F9FA18955A08` |
 | phase20-runtime-release-closeout-20260426.md | 2922 | `67DEE441F06F5AAFF5F41B35A63C3057EB9B2D7157A2A909A91FD280CC4101FF` |
@@ -27,7 +27,7 @@ github-release-upload-staging-blocked
 
 ## Blockers
 
-- tag-not-aligned-with-head: v0.1.0-preview.5 must point to current HEAD before publishing.
+- none
 
 ## Warnings
 

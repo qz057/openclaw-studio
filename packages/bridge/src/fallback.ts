@@ -145,6 +145,26 @@ export function createFallbackApi(): StudioApi {
         model: "gpt-5.5",
         provider: "relay",
         updatedAt: Date.now(),
+        tokenContext: {
+          source: "unavailable",
+          statusLabel: "运行态未连接",
+          detail: "浏览器预览 fallback 不提供真实 OpenClaw usage。",
+          inputTokens: null,
+          outputTokens: null,
+          totalTokens: null,
+          cacheReadTokens: null,
+          cacheWriteTokens: null,
+          cacheHitPercent: null,
+          contextUsedTokens: null,
+          contextWindowTokens: null,
+          contextPercent: null,
+          costUsd: null,
+          compactions: null,
+          toolCallCount: null,
+          availableFunctionCount: null,
+          fileCount: null,
+          updatedAt: null
+        },
         messages: [...fallbackOpenClawMessages]
       };
     },

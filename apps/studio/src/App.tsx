@@ -203,11 +203,15 @@ function getInitialDashboardTheme(): DashboardThemeMode {
   }
 
   try {
-    const saved = window.localStorage.getItem(DASHBOARD_THEME_STORAGE_KEY);
-    return saved === "day" || saved === "night" ? saved : "night";
+    const persisted = window.localStorage.getItem(DASHBOARD_THEME_STORAGE_KEY);
+    if (persisted === "night" || persisted === "day") {
+      return persisted;
+    }
   } catch {
-    return "night";
+    // Theme persistence is optional; fall back to the default theme when storage is unavailable.
   }
+
+  return "night";
 }
 
 function isAdvancedReviewDeckEnabled(): boolean {
@@ -5416,7 +5420,9 @@ export function App() {
   const liveSyncLabel = syncError ? "同步异常" : isRefreshing ? "正在同步" : "实时同步";
   const liveSyncDetail = syncError ? `最近快照 · ${formatLiveSyncAge(lastUpdatedAt)}` : formatLiveSyncAge(lastUpdatedAt);
   const nextDashboardThemeMode: DashboardThemeMode = dashboardThemeMode === "night" ? "day" : "night";
-  const ThemeModeIcon = dashboardThemeMode === "night" ? Sun : Moon;
+  const ThemeModeIcon = dashboardThemeMode === "night" ? Moon : Sun;
+  const themeModeLabel = dashboardThemeMode === "night" ? "夜晚模式" : "白天模式";
+  const themeModeTitle = nextDashboardThemeMode === "night" ? "切换到夜晚模式" : "切换到白天模式";
   const shellClassNames = [
     "studio-shell",
     resolvedLayoutState.compactMode ? "studio-shell--compact" : "",
@@ -5478,14 +5484,14 @@ export function App() {
           <button
             type="button"
             className="theme-mode-switch"
-            aria-label={dashboardThemeMode === "night" ? "切换白天模式" : "切换夜晚模式"}
-            title={dashboardThemeMode === "night" ? "切换白天模式" : "切换夜晚模式"}
+            aria-label={themeModeTitle}
+            title={themeModeTitle}
             onClick={() => {
               setDashboardThemeMode(nextDashboardThemeMode);
             }}
           >
             <ThemeModeIcon size={16} strokeWidth={2.2} aria-hidden="true" />
-            <span>{dashboardThemeMode === "night" ? "白天模式" : "夜晚模式"}</span>
+            <span>{themeModeLabel}</span>
           </button>
           <div className="nav-section">
             <span className="nav-section__label">主入口</span>

@@ -30,11 +30,20 @@ function formatLoopState(state: CodexTaskSummary["loopState"]): string {
 }
 
 function formatTaskSource(source: CodexTaskSummary["source"]): string {
-  return source === "runtime" ? "runtime" : "fallback";
+  return source === "runtime" ? "runtime" : "非实时";
+}
+
+function hasLiveObservation(item: SettingItem): boolean {
+  const text = `${item.value} ${item.detail}`.toLowerCase();
+  return !/(fallback|mock|模拟|回退|未采样|未采集|未读取|暂无|不可用)/i.test(text);
 }
 
 export function CodexPage({ summary, stats, tasks, observations, loopSummary, loopStats, loopSignals, contextSummary, contextNotes }: CodexPageProps) {
-  const leadTask = tasks[0] ?? null;
+  const runtimeTasks = tasks.filter((task) => task.source === "runtime");
+  const liveObservations = observations.filter(hasLiveObservation);
+  const liveLoopSignals = loopSignals.filter(hasLiveObservation);
+  const liveContextNotes = contextNotes.filter(hasLiveObservation);
+  const leadTask = runtimeTasks[0] ?? null;
 
   return (
     <section className="page">
@@ -64,31 +73,38 @@ export function CodexPage({ summary, stats, tasks, observations, loopSummary, lo
             </div>
           </div>
           <div className="task-list">
-            {tasks.map((task) => (
-              <article key={task.id} className="list-row list-row--stacked">
-                <div>
-                  <strong>{task.title}</strong>
-                  <p>
-                    {task.id} · {task.target}
-                  </p>
-                  {task.detail ? <p>{task.detail}</p> : null}
-                  {task.continuation ? <p>{task.continuation}</p> : null}
-                  {task.workdir ? (
-                    <div className="row-meta row-meta--compact">
-                      <span>{task.workdir}</span>
-                    </div>
-                  ) : null}
-                </div>
-                <div className="row-meta row-meta--compact">
-                  <span>{task.model}</span>
-                  <span>{formatTaskSource(task.source)}</span>
-                  <span className={`status-chip status-chip--${task.status}`}>{task.status}</span>
-                  {task.loopState ? <span>{formatLoopState(task.loopState)}</span> : null}
-                  {typeof task.turnCount === "number" ? <span>{task.turnCount} 回合</span> : null}
-                  <span>{task.updatedAt}</span>
-                </div>
+            {runtimeTasks.length > 0 ? (
+              runtimeTasks.map((task) => (
+                <article key={task.id} className="list-row list-row--stacked">
+                  <div>
+                    <strong>{task.title}</strong>
+                    <p>
+                      {task.id} · {task.target}
+                    </p>
+                    {task.detail ? <p>{task.detail}</p> : null}
+                    {task.continuation ? <p>{task.continuation}</p> : null}
+                    {task.workdir ? (
+                      <div className="row-meta row-meta--compact">
+                        <span>{task.workdir}</span>
+                      </div>
+                    ) : null}
+                  </div>
+                  <div className="row-meta row-meta--compact">
+                    <span>{task.model}</span>
+                    <span>{formatTaskSource(task.source)}</span>
+                    <span className={`status-chip status-chip--${task.status}`}>{task.status}</span>
+                    {task.loopState ? <span>{formatLoopState(task.loopState)}</span> : null}
+                    {typeof task.turnCount === "number" ? <span>{task.turnCount} 回合</span> : null}
+                    <span>{task.updatedAt}</span>
+                  </div>
+                </article>
+              ))
+            ) : (
+              <article className="list-row list-row--stacked">
+                <strong>未检测到实时 Codex 任务</strong>
+                <p>已隐藏非实时 fallback 任务；等待本机 ~/.codex/sessions 产生可读任务后显示。</p>
               </article>
-            ))}
+            )}
           </div>
         </article>
 
@@ -123,13 +139,19 @@ export function CodexPage({ summary, stats, tasks, observations, loopSummary, lo
               </div>
             )}
 
-            {observations.map((item) => (
+            {liveObservations.map((item) => (
               <div key={item.id} className="placeholder-block">
                 <strong>{item.label}</strong>
                 <p>{item.value}</p>
                 <p>{item.detail}</p>
               </div>
             ))}
+            {liveObservations.length === 0 ? (
+              <div className="placeholder-block">
+                <strong>未检测到实时信号</strong>
+                <p>已隐藏缺少实时连接依据的观测项。</p>
+              </div>
+            ) : null}
           </div>
         </article>
 
@@ -153,13 +175,19 @@ export function CodexPage({ summary, stats, tasks, observations, loopSummary, lo
               <strong>回合摘要</strong>
               <p>{loopSummary}</p>
             </div>
-            {loopSignals.map((item) => (
+            {liveLoopSignals.map((item) => (
               <div key={item.id} className="placeholder-block">
                 <strong>{item.label}</strong>
                 <p>{item.value}</p>
                 <p>{item.detail}</p>
               </div>
             ))}
+            {liveLoopSignals.length === 0 ? (
+              <div className="placeholder-block">
+                <strong>未检测到实时回合信号</strong>
+                <p>已隐藏 fallback 回合信息。</p>
+              </div>
+            ) : null}
           </div>
         </article>
 
@@ -175,13 +203,19 @@ export function CodexPage({ summary, stats, tasks, observations, loopSummary, lo
               <strong>上下文摘要</strong>
               <p>{contextSummary}</p>
             </div>
-            {contextNotes.map((item) => (
+            {liveContextNotes.map((item) => (
               <div key={item.id} className="placeholder-block">
                 <strong>{item.label}</strong>
                 <p>{item.value}</p>
                 <p>{item.detail}</p>
               </div>
             ))}
+            {liveContextNotes.length === 0 ? (
+              <div className="placeholder-block">
+                <strong>未检测到实时上下文</strong>
+                <p>已隐藏缺少本机读数支撑的上下文项。</p>
+              </div>
+            ) : null}
           </div>
         </article>
       </div>

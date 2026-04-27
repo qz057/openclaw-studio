@@ -29,7 +29,13 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
-  const allItems = skills.sections.flatMap((section) => section.items);
+  const liveSections = skills.sections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => item.source !== "mock")
+    }))
+    .filter((section) => section.items.length > 0);
+  const allItems = liveSections.flatMap((section) => section.items);
   const runtimeItemCount = allItems.filter((item) => item.source === "runtime").length;
   const inspectableCount = allItems.filter((item) => inspectableItemIds.has(item.id)).length;
   const rootsScannedItem = allItems.find((item) => item.id === "skill-source-roots-scanned") ?? null;
@@ -100,7 +106,7 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
       <div className="metric-grid metric-grid--compact">
         <article className="surface stat-pill stat-pill--neutral">
           <span>分组</span>
-          <strong>{skills.sections.length}</strong>
+          <strong>{liveSections.length}</strong>
         </article>
         <article className="surface stat-pill stat-pill--positive">
           <span>运行态条目</span>
@@ -176,50 +182,61 @@ export function SkillsPage({ skills, boundary, focusedSlotId, onFocusedSlotChang
       </div>
 
       <div className="catalog-grid">
-        {skills.sections.map((section) => (
-          <article key={section.id} className="surface card">
+        {liveSections.length > 0 ? (
+          liveSections.map((section) => (
+            <article key={section.id} className="surface card">
+              <div className="card-header card-header--stack">
+                <div>
+                  <h2>{formatProductText(section.label)}</h2>
+                  <p>{formatProductText(section.description)}</p>
+                </div>
+                <span>{section.items.length} 项</span>
+              </div>
+              <div className="stack-list">
+                {section.items.map((item) => {
+                  const inspectable = inspectableItemIds.has(item.id);
+
+                  return (
+                    <article key={item.id} className="list-row list-row--stacked">
+                      <div className="row-heading">
+                        <div>
+                          <strong>{formatProductText(item.name)}</strong>
+                          <p>
+                            {item.origin ? `${formatProductText(item.origin)} · ` : ""}
+                            {formatProductText(item.surface)} · {formatProductText(item.source)}
+                          </p>
+                        </div>
+                        <span className={`tone-chip tone-chip--${item.tone}`}>{formatProductText(item.status)}</span>
+                      </div>
+                      <p>{formatProductText(item.detail)}</p>
+                      {item.path ? (
+                        <div className="row-meta row-meta--compact">
+                          <span>{item.path}</span>
+                        </div>
+                      ) : null}
+                      {inspectable ? (
+                        <div className="row-meta row-meta--compact">
+                          <button type="button" className="action-button" onClick={() => void inspectItem(item)}>
+                            查看详情
+                          </button>
+                        </div>
+                      ) : null}
+                    </article>
+                  );
+                })}
+              </div>
+            </article>
+          ))
+        ) : (
+          <article className="surface card">
             <div className="card-header card-header--stack">
               <div>
-                <h2>{formatProductText(section.label)}</h2>
-                <p>{formatProductText(section.description)}</p>
+                <h2>未检测到实时能力条目</h2>
+                <p>已隐藏 mock 能力数据；等待运行态扫描返回真实能力后显示。</p>
               </div>
-              <span>{section.items.length} 项</span>
-            </div>
-            <div className="stack-list">
-              {section.items.map((item) => {
-                const inspectable = inspectableItemIds.has(item.id);
-
-                return (
-                  <article key={item.id} className="list-row list-row--stacked">
-                    <div className="row-heading">
-                      <div>
-                        <strong>{formatProductText(item.name)}</strong>
-                        <p>
-                          {item.origin ? `${formatProductText(item.origin)} · ` : ""}
-                          {formatProductText(item.surface)} · {formatProductText(item.source)}
-                        </p>
-                      </div>
-                      <span className={`tone-chip tone-chip--${item.tone}`}>{formatProductText(item.status)}</span>
-                    </div>
-                    <p>{formatProductText(item.detail)}</p>
-                    {item.path ? (
-                      <div className="row-meta row-meta--compact">
-                        <span>{item.path}</span>
-                      </div>
-                    ) : null}
-                    {inspectable ? (
-                      <div className="row-meta row-meta--compact">
-                        <button type="button" className="action-button" onClick={() => void inspectItem(item)}>
-                          查看详情
-                        </button>
-                      </div>
-                    ) : null}
-                  </article>
-                );
-              })}
             </div>
           </article>
-        ))}
+        )}
       </div>
 
       <article className="surface card detail-card">

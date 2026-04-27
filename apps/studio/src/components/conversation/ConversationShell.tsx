@@ -305,8 +305,10 @@ export function GlobalNav({
   themeMode?: ConversationThemeMode;
   onThemeModeChange?: (mode: ConversationThemeMode) => void;
 }) {
-  const ThemeIcon = themeMode === "night" ? Sun : Moon;
   const nextThemeMode: ConversationThemeMode = themeMode === "night" ? "day" : "night";
+  const ThemeIcon = themeMode === "night" ? Moon : Sun;
+  const themeModeLabel = themeMode === "night" ? "夜晚模式" : "白天模式";
+  const themeModeTitle = nextThemeMode === "night" ? "切换到夜晚模式" : "切换到白天模式";
 
   return (
     <aside className="conversation-global-nav" aria-label="全局导航栏">
@@ -323,14 +325,14 @@ export function GlobalNav({
         <button
           type="button"
           className="theme-mode-switch theme-mode-switch--conversation"
-          aria-label={themeMode === "night" ? "切换白天模式" : "切换夜晚模式"}
-          title={themeMode === "night" ? "切换白天模式" : "切换夜晚模式"}
+          aria-label={themeModeTitle}
+          title={themeModeTitle}
           onClick={() => {
             onThemeModeChange(nextThemeMode);
           }}
         >
           <ThemeIcon size={16} strokeWidth={2.2} aria-hidden="true" />
-          <span>{themeMode === "night" ? "白天模式" : "夜晚模式"}</span>
+          <span>{themeModeLabel}</span>
         </button>
       ) : null}
 

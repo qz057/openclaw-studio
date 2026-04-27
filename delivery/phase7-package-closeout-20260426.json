@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-04-26T15:13:29.248Z",
+  "generatedAt": "2026-04-27T14:18:03.021Z",
   "status": "passed",
   "artifacts": {
     "portableZip": {
       "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-local\\out\\OpenClaw-Studio-0.1.0-alpha-x64-portable.zip",
       "exists": true,
-      "size": 142897544,
-      "sha256": "5F7F1D34CED6CA5315ACF921E07F815C52A4174C7B81ACF9BF95BFA4629C6493",
-      "lastModified": "2026-04-26T15:12:27.619Z"
+      "size": 142909286,
+      "sha256": "1C904F7DAF15A80E90D948915E538323F302F5736A1B06EDE56A7D696DF99C59",
+      "lastModified": "2026-04-27T14:17:01.047Z"
     },
     "portableExe": {
       "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\.packaging\\windows-local\\out\\win-unpacked\\OpenClaw Studio.exe",
       "exists": true,
       "size": 222973952,
-      "sha256": "F07FF1619A1C33E9C4683CF5A305EAA74E8F4F3DEAC99BE1C6F8041A04411343",
-      "lastModified": "2026-04-26T15:12:15.085Z"
+      "sha256": "14A5792A682CB4D20BAC857C8DBBF649598DB8DD992C19C6FAB517E5E7DCADA2",
+      "lastModified": "2026-04-27T14:16:48.850Z"
     },
     "rcZip": {
       "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\release\\OpenClaw Studio-0.1.0-win-x64.zip",
       "exists": true,
-      "size": 141157276,
-      "sha256": "1B22175E8A712938F2AFCE2369EAB445B4AE6BCF5244B2D6A2EF0589468CA56E",
-      "lastModified": "2026-04-26T04:31:41.140Z"
+      "size": 141182170,
+      "sha256": "337330D8DE49DD98E5833B54F39D4BAF34CD14A76CF9C054171FAA9B70D8BB7B",
+      "lastModified": "2026-04-27T14:07:55.103Z"
     },
     "rcExe": {
       "path": "E:\\claucd\\界面控制台程序\\apps\\studio\\release\\win-unpacked\\OpenClaw Studio.exe",
       "exists": true,
       "size": 222973952,
-      "sha256": "B12DAE546AB02BC7BF1940F0B860A5424D72C489C0AAC3C92BB06F3DF457AEFC",
-      "lastModified": "2026-04-26T13:00:42.904Z"
+      "sha256": "BD316F0BF9DC12DDF592074E000BE68466C950D2164E920AD8F332B8824D4EAB",
+      "lastModified": "2026-04-27T14:07:02.229Z"
     }
   },
   "archiveChecks": {
