@@ -820,11 +820,14 @@ export async function loadOpenClawChatState(sessionId?: string | null): Promise<
 
   if (sessionId?.trim()) {
     const explicitSessionId = sessionId.trim();
-    const explicitSession = summaries.find((entry) => entry.sessionId === explicitSessionId) ?? null;
-    const readableSession = await resolveReadableSessionHistoryWithOptions(explicitSessionId, false);
+    const explicitSessionKey = buildExplicitSessionKey(explicitSessionId);
+    const explicitSession =
+      summaries.find((entry) => entry.key === explicitSessionKey || entry.sessionId === explicitSessionId) ?? null;
+    const readableSessionId = explicitSession?.sessionId ?? explicitSessionId;
+    const readableSession = await resolveReadableSessionHistoryWithOptions(readableSessionId, false);
 
     return createChatState(readiness, {
-      sessionKey: explicitSession?.key ?? buildExplicitSessionKey(explicitSessionId),
+      sessionKey: explicitSession?.key ?? explicitSessionKey,
       sessionId: explicitSessionId,
       model: explicitSession?.model ?? null,
       provider: explicitSession?.modelProvider ?? null,
