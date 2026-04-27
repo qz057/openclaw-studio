@@ -38,6 +38,7 @@
     "build:renderer": "vite build --config vite.config.mts",
     "build:electron": "tsc -p tsconfig.electron.json",
     "contract:audit": "node ./scripts/contract-audit.cjs",
+    "icon:generate": "node ./scripts/generate-app-icon.cjs",
     "dist": "npm run build && electron-builder --config electron-builder.json",
     "dist:win": "npm run build && electron-builder --win --config electron-builder.json",
     "dist:mac": "npm run build && electron-builder --mac --config electron-builder.json",
