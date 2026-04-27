@@ -53,6 +53,7 @@ import {
   type SessionSummary
 } from "@openclaw/shared";
 import { loadHermesState, subscribeToHermesEvents } from "@openclaw/bridge";
+import { applyPreviewHygiene } from "./preview-hygiene";
 import { useStudioData } from "./hooks/useStudioData";
 import { useDashboardRealtimeData, type DashboardRealtimeViewModel } from "./hooks/useDashboardRealtimeData";
 import { DashboardPage, type DashboardThemeMode } from "./pages/DashboardPage";
@@ -156,6 +157,8 @@ import {
   dedupeById
 } from "./lib/app-utils";
 import { formatProductText } from "./lib/product-text";
+
+applyPreviewHygiene();
 
 function navigateToPage(pageId: StudioPageId) {
   window.location.hash = `#${getRouteHashForPageId(pageId)}`;

@@ -27,10 +27,25 @@ let readinessCacheTime = 0;
 const READINESS_CACHE_DURATION_MS = 30 * 1000; // 30 秒
 const SESSION_DIRECTORY_PATH_SEGMENTS = [".openclaw", "agents", "main", "sessions"] as const;
 const SESSION_FILE_SCAN_LIMIT = 12;
-const WIN32_WSL_OPENCLAW_ROOT_CANDIDATES = [
-  "\\\\wsl$\\Ubuntu-24.04\\home\\qz057\\.openclaw",
-  "\\\\wsl.localhost\\Ubuntu-24.04\\home\\qz057\\.openclaw"
-] as const;
+
+function resolveWslDistroName(): string {
+  return process.env.OPENCLAW_STUDIO_WSL_DISTRO?.trim() || process.env.WSL_DISTRO_NAME?.trim() || "Ubuntu-24.04";
+}
+
+function resolveWslUserName(): string {
+  return (
+    process.env.OPENCLAW_STUDIO_WSL_USER?.trim() ||
+    process.env.WSL_USER?.trim() ||
+    process.env.USERNAME?.trim() ||
+    os.userInfo().username
+  );
+}
+
+function getWin32WslOpenClawRootCandidates(): string[] {
+  const distro = resolveWslDistroName();
+  const user = resolveWslUserName();
+  return [`\\\\wsl$\\${distro}\\home\\${user}\\.openclaw`, `\\\\wsl.localhost\\${distro}\\home\\${user}\\.openclaw`];
+}
 
 interface OpenClawChatReadiness {
   availability: StudioOpenClawChatAvailability;
@@ -404,7 +419,7 @@ function parseSessionSummaries(raw: string): IndexedOpenClawSessionSummary[] {
 
 function getSessionsDirectoryPath() {
   if (process.platform === "win32") {
-    const win32Candidate = WIN32_WSL_OPENCLAW_ROOT_CANDIDATES[0];
+    const win32Candidate = getWin32WslOpenClawRootCandidates()[0] ?? path.win32.join("\\\\wsl$", "Ubuntu-24.04", "home", resolveWslUserName(), ".openclaw");
     return path.win32.join(win32Candidate, "agents", "main", "sessions");
   }
 
@@ -413,7 +428,7 @@ function getSessionsDirectoryPath() {
 
 function getSessionIndexPath() {
   if (process.platform === "win32") {
-    const win32Candidate = WIN32_WSL_OPENCLAW_ROOT_CANDIDATES[0];
+    const win32Candidate = getWin32WslOpenClawRootCandidates()[0] ?? path.win32.join("\\\\wsl$", "Ubuntu-24.04", "home", resolveWslUserName(), ".openclaw");
     return path.win32.join(win32Candidate, "agents", "main", "sessions", "sessions.json");
   }
 
@@ -423,7 +438,7 @@ function getSessionIndexPath() {
 async function loadSessionSummariesSafe(): Promise<IndexedOpenClawSessionSummary[]> {
   try {
     if (process.platform === "win32") {
-      for (const candidateRoot of WIN32_WSL_OPENCLAW_ROOT_CANDIDATES) {
+      for (const candidateRoot of getWin32WslOpenClawRootCandidates()) {
         const candidatePath = path.win32.join(candidateRoot, "agents", "main", "sessions", "sessions.json");
 
         if (!(await pathExists(candidatePath))) {

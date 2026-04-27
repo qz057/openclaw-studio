@@ -16,13 +16,33 @@ import type {
 } from "@openclaw/shared";
 
 const homeDirectory = os.homedir();
-const win32WslHermesRootCandidates = [
-  "\\\\wsl$\\Ubuntu-24.04\\home\\qz057\\.hermes",
-  "\\\\wsl.localhost\\Ubuntu-24.04\\home\\qz057\\.hermes"
-] as const;
-const hermesRoot =
+
+function resolveWslDistroName(): string {
+  return process.env.OPENCLAW_STUDIO_WSL_DISTRO?.trim() || process.env.WSL_DISTRO_NAME?.trim() || "Ubuntu-24.04";
+}
+
+function resolveWslUserName(): string {
+  return (
+    process.env.OPENCLAW_STUDIO_WSL_USER?.trim() ||
+    process.env.WSL_USER?.trim() ||
+    process.env.USERNAME?.trim() ||
+    os.userInfo().username
+  );
+}
+
+function getWin32WslHermesRootCandidates(): string[] {
+  const distro = resolveWslDistroName();
+  const user = resolveWslUserName();
+  return [`\\\\wsl$\\${distro}\\home\\${user}\\.hermes`, `\\\\wsl.localhost\\${distro}\\home\\${user}\\.hermes`];
+}
+
+function getDefaultWin32HermesRoot(): string {
+  return path.win32.join("\\\\wsl$", resolveWslDistroName(), "home", resolveWslUserName(), ".hermes");
+}
+
+const hermesRoot: string =
   process.env.OPENCLAW_STUDIO_HERMES_ROOT?.trim() ||
-  (process.platform === "win32" ? win32WslHermesRootCandidates[0] : path.join(homeDirectory, ".hermes"));
+  (process.platform === "win32" ? (getWin32WslHermesRootCandidates()[0] ?? getDefaultWin32HermesRoot()) : path.join(homeDirectory, ".hermes"));
 
 function joinHermesPath(...segments: string[]): string {
   return hermesRoot.startsWith("\\\\") ? path.win32.join(hermesRoot, ...segments) : path.join(hermesRoot, ...segments);

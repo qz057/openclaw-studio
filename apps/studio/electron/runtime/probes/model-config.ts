@@ -9,10 +9,28 @@ const DEFAULT_TIMEOUT_MS = 30_000;
 const MAX_CAPTURE_CHARS = 128_000;
 const OPENCLAW_CONFIG_PATH_SEGMENTS = [".openclaw", "openclaw.json"] as const;
 const HERMES_CONFIG_PATH_SEGMENTS = [".hermes", "config.yaml"] as const;
-const WIN32_OPENCLAW_CONFIG_CANDIDATES = [
-  "\\\\wsl$\\Ubuntu-24.04\\home\\qz057\\.openclaw\\openclaw.json",
-  "\\\\wsl.localhost\\Ubuntu-24.04\\home\\qz057\\.openclaw\\openclaw.json"
-] as const;
+
+function resolveWslDistroName(): string {
+  return process.env.OPENCLAW_STUDIO_WSL_DISTRO?.trim() || process.env.WSL_DISTRO_NAME?.trim() || "Ubuntu-24.04";
+}
+
+function resolveWslUserName(): string {
+  return (
+    process.env.OPENCLAW_STUDIO_WSL_USER?.trim() ||
+    process.env.WSL_USER?.trim() ||
+    process.env.USERNAME?.trim() ||
+    os.userInfo().username
+  );
+}
+
+function getWin32OpenClawConfigCandidates(): string[] {
+  const distro = resolveWslDistroName();
+  const user = resolveWslUserName();
+  return [
+    `\\\\wsl$\\${distro}\\home\\${user}\\.openclaw\\openclaw.json`,
+    `\\\\wsl.localhost\\${distro}\\home\\${user}\\.openclaw\\openclaw.json`
+  ];
+}
 
 interface CommandInvocation {
   command: string;
@@ -155,7 +173,7 @@ async function readOpenClawConfig(): Promise<OpenClawConfigFile | null> {
     if (process.platform === "win32") {
       raw = "";
 
-      for (const candidatePath of WIN32_OPENCLAW_CONFIG_CANDIDATES) {
+      for (const candidatePath of getWin32OpenClawConfigCandidates()) {
         try {
           raw = await fs.readFile(candidatePath, "utf8");
           break;

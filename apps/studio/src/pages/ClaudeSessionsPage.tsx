@@ -162,7 +162,7 @@ export function ClaudeSessionsPage() {
           <p className="eyebrow">Claude Code</p>
           <h1>Claude 会话</h1>
         </div>
-        <p className="page-summary">直接读取 `C:\\Users\\qz057\\.claude` 下的 settings、history 和 project session jsonl，显示真实 Claude Code 会话内容。</p>
+        <p className="page-summary">直接读取当前用户 Claude Code 配置、history 和 project session jsonl，显示真实 Claude Code 会话内容。</p>
       </div>
 
       <div className="metric-grid metric-grid--compact">
@@ -174,7 +174,7 @@ export function ClaudeSessionsPage() {
         <article className="surface card metric-card">
           <span className="metric-label">Active</span>
           <strong className="metric-value">{activeSessionCount}</strong>
-          <p>当前 `C:\\Users\\qz057\\.claude\\sessions` 里仍处于活动态的会话。</p>
+          <p>当前用户 `.claude/sessions` 里仍处于活动态的会话。</p>
         </article>
         <article className="surface card metric-card">
           <span className="metric-label">Model</span>
@@ -188,7 +188,7 @@ export function ClaudeSessionsPage() {
           <div className="card-header">
             <div>
               <h2>会话列表</h2>
-              <p>{settings?.rootPath ?? "C:\\Users\\qz057\\.claude"} · 最近 {sessions.length} 个会话</p>
+              <p>{settings?.rootPath ?? "~/.claude"} · 最近 {sessions.length} 个会话</p>
             </div>
             <span>{activeSessionCount} active</span>
           </div>

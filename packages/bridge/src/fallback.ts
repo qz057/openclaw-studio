@@ -64,20 +64,7 @@ export function createFallbackApi(): StudioApi {
       }
     ]
   };
-  const fallbackOpenClawMessages: StudioOpenClawChatMessage[] = [
-    {
-      id: "fallback-openclaw-user-1",
-      role: "user",
-      text: "请帮我分析一下最近 24 小时的系统运行状况。",
-      timestamp: new Date(Date.now() - 1000 * 60 * 8).toISOString()
-    },
-    {
-      id: "fallback-openclaw-assistant-1",
-      role: "assistant",
-      text: "OpenClaw 当前处于浏览器预览模式：页面结构、模型选项和消息时间线可检查；真实发送需要 Electron 运行态接入。",
-      timestamp: new Date(Date.now() - 1000 * 60 * 7).toISOString()
-    }
-  ];
+  const fallbackOpenClawMessages: StudioOpenClawChatMessage[] = [];
   const fallbackGatewayState = (serviceId: "openclaw" | "hermes"): StudioGatewayServiceState => ({
     serviceId,
     running: false,
@@ -134,9 +121,9 @@ export function createFallbackApi(): StudioApi {
     readinessLabel: "未接入运行态",
     disabledReason: "当前 fallback 模式未接入 Hermes 实时连接，请在 Electron 运行态里使用这个页面。",
     endpoint: null,
-    sessionLabel: "Hermes 外部会话",
-    transportLabel: "SSE / runtime-owned",
-    authLabel: "沿用现有 Token",
+    sessionLabel: "未连接",
+    transportLabel: "未接入",
+    authLabel: "未检测到认证",
     lastEventAt: null,
     updatedAt: null,
     events: []
@@ -155,9 +142,9 @@ export function createFallbackApi(): StudioApi {
     async getClaudeSnapshot(): Promise<StudioClaudeSnapshot> {
       return {
         settings: {
-          rootPath: "C:\\Users\\qz057\\.claude",
-          settingsPath: "C:\\Users\\qz057\\.claude\\settings.json",
-          historyPath: "C:\\Users\\qz057\\.claude\\history.jsonl",
+          rootPath: "~/.claude",
+          settingsPath: "~/.claude/settings.json",
+          historyPath: "~/.claude/history.jsonl",
           model: null,
           modelType: null,
           availableModels: [],
@@ -173,10 +160,10 @@ export function createFallbackApi(): StudioApi {
     async getOpenClawChatState(): Promise<StudioOpenClawChatState> {
       return {
         source: "mock",
-        availability: "ready",
-        canSend: true,
-        readinessLabel: "预览可发送",
-        disabledReason: null,
+        availability: "blocked",
+        canSend: false,
+        readinessLabel: "未接入运行态",
+        disabledReason: "当前 fallback 模式不会模拟发送。请在桌面运行态连接本机 OpenClaw 后再发送。",
         command: "openclaw agent --agent main --json --message <prompt>",
         sessionKey: "agent:main:main",
         sessionId: "fallback-openclaw-session",
@@ -207,33 +194,14 @@ export function createFallbackApi(): StudioApi {
       };
     },
     async sendOpenClawChatTurn(prompt: string): Promise<StudioOpenClawChatTurnResult> {
-      const normalizedPrompt = prompt.trim();
-      const now = Date.now();
-      const reply = `已收到：${normalizedPrompt}\n\n当前是浏览器预览模式，真实 OpenClaw 回复需要从 Electron 运行态发送。`;
-
-      fallbackOpenClawMessages.push(
-        {
-          id: `fallback-openclaw-user-${now}`,
-          role: "user",
-          text: normalizedPrompt,
-          timestamp: new Date(now).toISOString()
-        },
-        {
-          id: `fallback-openclaw-assistant-${now}`,
-          role: "assistant",
-          text: reply,
-          timestamp: new Date(now + 1).toISOString()
-        }
-      );
-
       return {
-        prompt: normalizedPrompt,
-        reply,
+        prompt: prompt.trim(),
+        reply: "当前 fallback 模式未接入 OpenClaw 聊天执行链，消息未发送。",
         source: "mock",
-        sessionId: "fallback-openclaw-session",
-        provider: "relay",
-        model: "gpt-5.5",
-        durationMs: 180,
+        sessionId: null,
+        provider: null,
+        model: null,
+        durationMs: null,
         command: "openclaw agent --agent main --json --message <prompt>"
       };
     },
@@ -318,7 +286,7 @@ export function createFallbackApi(): StudioApi {
       return {
         sent: false,
         messageId: null,
-        error: "Mock mode: Hermes message sending not available"
+        error: "Fallback mode: Hermes message sending not available"
       };
     },
     async getHermesModelCatalog(): Promise<StudioModelCatalog> {
@@ -370,81 +338,29 @@ export function createFallbackApi(): StudioApi {
     async loadHermesSessions(): Promise<import("@openclaw/shared").StudioHermesLoadSessionsResult> {
       return {
         success: true,
-        sessions: [
-          {
-            id: "mock-session-1",
-            sessionKey: "mock-session-1",
-            filename: "mock-session-1.jsonl",
-            label: "Mock Session 1",
-            sessionLabel: "Mock Session 1",
-            platform: null,
-            chatType: null,
-            messageCount: 3,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
-        ],
+        sessions: [],
         error: null
       };
     },
     async loadHermesSession(_sessionId: string): Promise<import("@openclaw/shared").StudioHermesLoadSessionResult> {
       return {
-        success: true,
-        messages: [
-          {
-            id: "mock-msg-1",
-            role: "user",
-            content: "Hello from mock mode",
-            timestamp: new Date().toISOString()
-          },
-          {
-            id: "mock-msg-2",
-            role: "assistant",
-            content: "This is a mock response",
-            timestamp: new Date().toISOString()
-          }
-        ],
-        error: null
+        success: false,
+        messages: [],
+        error: "Fallback mode has no real Hermes session data."
       };
     },
     async getHermesSessions(): Promise<import("@openclaw/shared").StudioHermesLoadSessionsResult> {
       return {
         success: true,
-        sessions: [
-          {
-            id: "mock-session-1",
-            sessionKey: "mock-session-1",
-            filename: "mock-session-1.jsonl",
-            label: "Mock Session 1",
-            sessionLabel: "Mock Session 1",
-            platform: null,
-            chatType: null,
-            messageCount: 3,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
-        ],
+        sessions: [],
         error: null
       };
     },
     async getHermesMessages(_sessionId: string): Promise<import("@openclaw/shared").StudioHermesLoadSessionResult> {
       return {
-        success: true,
-        messages: [
-          {
-            id: "mock-msg-1",
-            role: "user",
-            content: "Hello from mock mode",
-            timestamp: new Date().toISOString()
-          },
-          {
-            id: "mock-msg-2",
-            role: "assistant",
-            content: "This is a mock response",
-            timestamp: new Date().toISOString()
-          }
-        ],
-        error: null
+        success: false,
+        messages: [],
+        error: "Fallback mode has no real Hermes message data."
       };
     },
   };

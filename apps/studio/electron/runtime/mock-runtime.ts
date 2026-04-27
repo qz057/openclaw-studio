@@ -85,9 +85,9 @@ export function createMockRuntime(): StudioApi {
     async getClaudeSnapshot(): Promise<StudioClaudeSnapshot> {
       return {
         settings: {
-          rootPath: "C:\\Users\\qz057\\.claude",
-          settingsPath: "C:\\Users\\qz057\\.claude\\settings.json",
-          historyPath: "C:\\Users\\qz057\\.claude\\history.jsonl",
+          rootPath: "~/.claude",
+          settingsPath: "~/.claude/settings.json",
+          historyPath: "~/.claude/history.jsonl",
           model: null,
           modelType: null,
           availableModels: [],
