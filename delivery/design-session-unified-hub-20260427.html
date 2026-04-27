@@ -1,0 +1,1063 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>会话中枢统一入口设计稿</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #070b10;
+        --panel: #0d131b;
+        --panel-2: #111a24;
+        --panel-3: #162232;
+        --line: rgba(154, 177, 207, 0.18);
+        --line-strong: rgba(92, 173, 255, 0.5);
+        --text: #f4f8ff;
+        --muted: #9fb0c7;
+        --soft: #c8d8ec;
+        --blue: #61b8ff;
+        --green: #4ade80;
+        --yellow: #f6c95c;
+        --pink: #ff6f9f;
+        --ink: #05070a;
+        --radius: 8px;
+        --shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+        font-family:
+          Inter, "Segoe UI", "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at 35% 10%, rgba(97, 184, 255, 0.12), transparent 26%),
+          linear-gradient(180deg, #090d13 0%, var(--bg) 44%, #05080d 100%);
+        color: var(--text);
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      .app {
+        width: 1440px;
+        min-height: 980px;
+        display: grid;
+        grid-template-columns: 228px 1fr;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+      }
+
+      .rail {
+        border-right: 1px solid var(--line);
+        background: rgba(7, 11, 16, 0.86);
+        padding: 26px 14px 20px 26px;
+        display: flex;
+        flex-direction: column;
+        gap: 26px;
+      }
+
+      .brand {
+        display: grid;
+        grid-template-columns: 42px 1fr;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .mark {
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        background: #eef6ff;
+        color: #06111f;
+        font-weight: 900;
+      }
+
+      .brand strong {
+        display: block;
+        font-size: 17px;
+        letter-spacing: 0;
+      }
+
+      .brand span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 4px;
+        color: var(--soft);
+        font-size: 12px;
+      }
+
+      .sync-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 99px;
+        background: var(--green);
+      }
+
+      .command {
+        min-height: 64px;
+        border-radius: var(--radius);
+        border: 1px solid rgba(97, 184, 255, 0.45);
+        background: rgba(20, 54, 88, 0.72);
+        color: var(--text);
+        padding: 14px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 16px 45px rgba(0, 0, 0, 0.18);
+      }
+
+      .command span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 4px;
+      }
+
+      .nav-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .group-label {
+        margin: 0 0 8px;
+        color: #73849c;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .nav-item {
+        min-height: 58px;
+        border: 1px solid transparent;
+        border-radius: var(--radius);
+        color: var(--soft);
+        background: transparent;
+        padding: 10px 10px;
+        display: grid;
+        grid-template-columns: 34px 1fr auto;
+        gap: 10px;
+        align-items: center;
+        text-align: left;
+      }
+
+      .nav-item.active {
+        border-color: rgba(97, 184, 255, 0.56);
+        background: rgba(25, 54, 82, 0.82);
+        color: var(--text);
+      }
+
+      .nav-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--soft);
+        font-weight: 800;
+      }
+
+      .nav-item.active .nav-icon {
+        background: var(--blue);
+        color: var(--ink);
+      }
+
+      .nav-copy strong {
+        display: block;
+        font-size: 14px;
+      }
+
+      .nav-copy span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 3px;
+      }
+
+      .badge {
+        min-width: 26px;
+        height: 24px;
+        border-radius: 99px;
+        background: rgba(246, 201, 92, 0.18);
+        color: #ffe7a3;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .rail-note {
+        margin-top: auto;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .rail-note strong {
+        font-size: 13px;
+      }
+
+      .rail-note p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      .content {
+        padding: 28px 36px 24px 18px;
+      }
+
+      .view {
+        display: none;
+      }
+
+      body[data-view="overview"] .view-overview,
+      body[data-view="detail"] .view-detail,
+      body[data-view="new"] .view-new {
+        display: block;
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: 1fr 394px;
+        gap: 24px;
+        align-items: start;
+        margin-bottom: 20px;
+      }
+
+      .eyebrow {
+        color: var(--blue);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 6px 0 8px;
+        font-size: 34px;
+        line-height: 1.12;
+        letter-spacing: 0;
+      }
+
+      .summary {
+        margin: 0;
+        color: var(--soft);
+        font-size: 14px;
+        line-height: 1.65;
+      }
+
+      .toolbar {
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        gap: 10px;
+        margin-top: 24px;
+      }
+
+      .search {
+        min-height: 44px;
+        border-radius: var(--radius);
+        border: 1px solid var(--line);
+        background: rgba(15, 23, 33, 0.9);
+        color: var(--text);
+        padding: 0 14px;
+      }
+
+      .btn {
+        min-height: 44px;
+        border-radius: var(--radius);
+        border: 1px solid var(--line);
+        background: #121a25;
+        color: var(--text);
+        padding: 0 16px;
+        font-weight: 800;
+      }
+
+      .btn.primary {
+        background: #143f67;
+        border-color: rgba(97, 184, 255, 0.62);
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+
+      .stat {
+        min-height: 72px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(15, 22, 31, 0.9);
+        padding: 12px;
+      }
+
+      .stat span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .stat strong {
+        display: block;
+        margin-top: 5px;
+        font-size: 24px;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 216px minmax(480px, 1fr) 344px;
+        gap: 14px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(12, 18, 26, 0.9);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .panel-head {
+        min-height: 70px;
+        border-bottom: 1px solid var(--line);
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .panel-head strong {
+        font-size: 17px;
+      }
+
+      .panel-head span {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .filter-list {
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .filter-block {
+        min-height: 70px;
+        border-radius: var(--radius);
+        border: 1px solid transparent;
+        background: rgba(255, 255, 255, 0.035);
+        padding: 12px;
+      }
+
+      .filter-block.active {
+        border-color: var(--line-strong);
+        background: rgba(24, 63, 96, 0.78);
+      }
+
+      .filter-block span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .filter-block strong {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 6px;
+        font-size: 14px;
+      }
+
+      .session-list {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .session-row {
+        min-height: 92px;
+        border-bottom: 1px solid var(--line);
+        padding: 16px;
+        display: grid;
+        grid-template-columns: 42px 1fr 100px 84px;
+        gap: 14px;
+        align-items: center;
+        background: rgba(9, 14, 21, 0.65);
+      }
+
+      .session-row.active {
+        background: rgba(24, 45, 64, 0.9);
+        border-left: 4px solid var(--blue);
+        padding-left: 12px;
+      }
+
+      .index {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        color: var(--ink);
+        background: var(--blue);
+        font-weight: 900;
+      }
+
+      .index.green {
+        background: var(--green);
+      }
+
+      .index.yellow {
+        background: var(--yellow);
+      }
+
+      .index.pink {
+        background: var(--pink);
+      }
+
+      .row-title strong {
+        display: block;
+        font-size: 16px;
+      }
+
+      .row-title span {
+        display: block;
+        color: var(--muted);
+        margin-top: 5px;
+        font-size: 12px;
+      }
+
+      .source span,
+      .status span {
+        display: block;
+        color: var(--muted);
+        font-size: 11px;
+        margin-bottom: 4px;
+      }
+
+      .source strong,
+      .status strong {
+        font-size: 13px;
+      }
+
+      .pill {
+        display: inline-flex;
+        border-radius: 99px;
+        padding: 5px 10px;
+        background: rgba(246, 201, 92, 0.18);
+        color: #ffe9ad;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .pill.green {
+        background: rgba(74, 222, 128, 0.14);
+        color: #80ffaa;
+      }
+
+      .pill.blue {
+        background: rgba(97, 184, 255, 0.16);
+        color: #8ed0ff;
+      }
+
+      .detail-card {
+        padding: 18px 16px;
+        min-height: 770px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .detail-card h2 {
+        margin: 6px 0 10px;
+        font-size: 22px;
+        letter-spacing: 0;
+      }
+
+      .detail-card p {
+        margin: 0;
+        color: var(--soft);
+        font-size: 13px;
+        line-height: 1.65;
+      }
+
+      .next-box {
+        margin-top: 16px;
+        border: 1px solid rgba(97, 184, 255, 0.42);
+        border-radius: var(--radius);
+        background: rgba(20, 54, 88, 0.65);
+        padding: 14px;
+      }
+
+      .next-box span {
+        color: var(--blue);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .next-box strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 17px;
+      }
+
+      .meta-list {
+        margin-top: 18px;
+        display: grid;
+        gap: 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .meta-row {
+        min-height: 42px;
+        border-bottom: 1px solid var(--line);
+        display: grid;
+        grid-template-columns: 94px 1fr;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+      }
+
+      .meta-row span {
+        color: var(--muted);
+      }
+
+      .detail-actions {
+        margin-top: auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .detail-actions .primary {
+        grid-column: 1 / -1;
+      }
+
+      .detail-layout {
+        display: grid;
+        grid-template-columns: minmax(620px, 1fr) 358px;
+        gap: 14px;
+      }
+
+      .wide-panel {
+        min-height: 770px;
+      }
+
+      .timeline {
+        padding: 18px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .step {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 14px;
+        background: rgba(255, 255, 255, 0.03);
+        display: grid;
+        grid-template-columns: 38px 1fr auto;
+        gap: 14px;
+        align-items: center;
+      }
+
+      .step-num {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        background: rgba(97, 184, 255, 0.16);
+        color: var(--blue);
+        font-weight: 900;
+      }
+
+      .step strong {
+        display: block;
+      }
+
+      .step p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .evidence-grid {
+        padding: 0 18px 18px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+
+      .evidence {
+        min-height: 132px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 14px;
+        background: rgba(17, 26, 36, 0.78);
+      }
+
+      .evidence span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .evidence strong {
+        display: block;
+        margin-top: 9px;
+        font-size: 17px;
+      }
+
+      .evidence p {
+        margin: 8px 0 0;
+        color: var(--soft);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .new-layout {
+        display: grid;
+        grid-template-columns: 300px minmax(520px, 1fr) 320px;
+        gap: 14px;
+      }
+
+      .template-list,
+      .form-panel,
+      .preview-panel {
+        min-height: 770px;
+      }
+
+      .templates {
+        padding: 16px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .template {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 14px;
+        background: rgba(255, 255, 255, 0.035);
+      }
+
+      .template.active {
+        border-color: var(--line-strong);
+        background: rgba(24, 63, 96, 0.78);
+      }
+
+      .template strong {
+        display: block;
+      }
+
+      .template span {
+        display: block;
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .form {
+        padding: 18px;
+        display: grid;
+        gap: 14px;
+      }
+
+      .field {
+        display: grid;
+        gap: 8px;
+      }
+
+      .field label {
+        color: var(--soft);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .input-like {
+        min-height: 48px;
+        border-radius: var(--radius);
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        padding: 13px 14px;
+      }
+
+      .option-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+
+      .option {
+        min-height: 72px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.03);
+        padding: 12px;
+      }
+
+      .option.active {
+        border-color: var(--line-strong);
+        background: rgba(24, 63, 96, 0.78);
+      }
+
+      .option strong {
+        display: block;
+        font-size: 13px;
+      }
+
+      .option span {
+        display: block;
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .checklist {
+        padding: 18px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .check {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        display: grid;
+        grid-template-columns: 22px 1fr;
+        gap: 10px;
+        align-items: start;
+      }
+
+      .box {
+        width: 18px;
+        height: 18px;
+        border-radius: 5px;
+        background: var(--blue);
+        margin-top: 1px;
+      }
+
+      .check strong {
+        display: block;
+        font-size: 13px;
+      }
+
+      .check span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 4px;
+        line-height: 1.45;
+      }
+    </style>
+  </head>
+  <body data-view="overview">
+    <main class="app">
+      <aside class="rail">
+        <div class="brand">
+          <div class="mark">盾</div>
+          <div>
+            <strong>山谷智合</strong>
+            <span><i class="sync-dot"></i>实时同步 · 刚刚</span>
+          </div>
+        </div>
+
+        <button class="command" type="button">
+          <strong>命令面板<span>搜索动作、页面和会话</span></strong>
+          <b>⌘K</b>
+        </button>
+
+        <section class="nav-group">
+          <p class="group-label">主入口</p>
+          <button class="nav-item" type="button">
+            <span class="nav-icon">⌂</span>
+            <span class="nav-copy"><strong>总览</strong><span>运行健康</span></span>
+          </button>
+          <button class="nav-item active" type="button">
+            <span class="nav-icon">↻</span>
+            <span class="nav-copy"><strong>会话</strong><span>继续、复核、新建</span></span>
+            <span class="badge">4</span>
+          </button>
+        </section>
+
+        <section class="nav-group">
+          <p class="group-label">工具配置</p>
+          <button class="nav-item" type="button">
+            <span class="nav-icon">◇</span>
+            <span class="nav-copy"><strong>能力</strong><span>模型与接入</span></span>
+          </button>
+          <button class="nav-item" type="button">
+            <span class="nav-icon">⚙</span>
+            <span class="nav-copy"><strong>配置</strong><span>当前配置</span></span>
+          </button>
+          <button class="nav-item" type="button">
+            <span class="nav-icon">⌁</span>
+            <span class="nav-copy"><strong>诊断</strong><span>高级审查</span></span>
+          </button>
+        </section>
+
+        <div class="rail-note">
+          <strong>入口合并</strong>
+          <p>原“主会话”和“终端流”不再作为导航项出现；OpenClaw、Hermes、Claude 都从会话中枢筛选和恢复。</p>
+        </div>
+      </aside>
+
+      <section class="content">
+        <article class="view view-overview">
+          <header class="topbar">
+            <div>
+              <div class="eyebrow">Session Hub</div>
+              <h1>只保留一个会话入口</h1>
+              <p class="summary">所有继续、复核、新建都在这里完成。首屏直接给待处理队列，不再先进入主会话或终端流。</p>
+              <div class="toolbar">
+                <input class="search" value="搜索标题、工作区、模型、最近动作" />
+                <button class="btn" type="button">恢复上次</button>
+                <button class="btn primary" type="button">新会话</button>
+              </div>
+            </div>
+            <div class="stats">
+              <div class="stat"><span>当前队列</span><strong>12</strong></div>
+              <div class="stat"><span>需继续</span><strong>4</strong></div>
+              <div class="stat"><span>待复核</span><strong>2</strong></div>
+            </div>
+          </header>
+
+          <div class="layout">
+            <aside class="panel">
+              <div class="panel-head">
+                <div><strong>筛选</strong><span>按来源和状态收窄</span></div>
+              </div>
+              <div class="filter-list">
+                <div class="filter-block active"><span>来源</span><strong>全部来源 <em>12</em></strong></div>
+                <div class="filter-block"><span>OpenClaw</span><strong>发布 / UI <em>5</em></strong></div>
+                <div class="filter-block"><span>Hermes</span><strong>链路 / 网关 <em>4</em></strong></div>
+                <div class="filter-block"><span>Claude</span><strong>历史导入 <em>3</em></strong></div>
+                <div class="filter-block active"><span>状态</span><strong>需继续 <em>4</em></strong></div>
+                <div class="filter-block"><span>状态</span><strong>待复核 <em>2</em></strong></div>
+              </div>
+            </aside>
+
+            <section class="panel">
+              <div class="panel-head">
+                <div><strong>最近会话</strong><span>按可继续程度排序，点击任一项进入详情</span></div>
+                <span>排序：待处理优先</span>
+              </div>
+              <div class="session-list">
+                <div class="session-row active">
+                  <span class="index">01</span>
+                  <span class="row-title"><strong>GitHub 预览发布收口</strong><span>E:\claucd\界面控制台程序 · 刚刚</span></span>
+                  <span class="source"><span>来源</span><strong>OpenClaw</strong></span>
+                  <span class="status"><span class="pill">待复核</span></span>
+                </div>
+                <div class="session-row">
+                  <span class="index green">02</span>
+                  <span class="row-title"><strong>Hermes 网关状态巡检</strong><span>~/.hermes · 14 分钟前</span></span>
+                  <span class="source"><span>来源</span><strong>Hermes</strong></span>
+                  <span class="status"><span class="pill green">进行中</span></span>
+                </div>
+                <div class="session-row">
+                  <span class="index yellow">03</span>
+                  <span class="row-title"><strong>会话页导航收敛方案</strong><span>UI review · 刚刚</span></span>
+                  <span class="source"><span>来源</span><strong>OpenClaw</strong></span>
+                  <span class="status"><span class="pill blue">设计中</span></span>
+                </div>
+                <div class="session-row">
+                  <span class="index pink">04</span>
+                  <span class="row-title"><strong>签名材料包与 TSA 验证</strong><span>release chain · 1 小时前</span></span>
+                  <span class="source"><span>来源</span><strong>OpenClaw</strong></span>
+                  <span class="status"><span class="pill">需证书</span></span>
+                </div>
+              </div>
+            </section>
+
+            <aside class="panel detail-card">
+              <span class="eyebrow">Selected</span>
+              <h2>GitHub 预览发布收口</h2>
+              <p>检测到最新版已上传，需要清理旧 release/tag，并复跑 retention 验证。</p>
+              <div class="next-box">
+                <span>建议下一步</span>
+                <strong>删除旧版 v0.1.0-preview.4</strong>
+                <p>执行清理脚本后，Phase22 应返回 clean。</p>
+              </div>
+              <div class="meta-list">
+                <div class="meta-row"><span>当前版本</span><strong>v0.1.0-preview.5</strong></div>
+                <div class="meta-row"><span>旧版状态</span><strong>preview.4 仍存在</strong></div>
+                <div class="meta-row"><span>工作区</span><strong>E:\claucd\界面控制台程序</strong></div>
+                <div class="meta-row"><span>验证</span><strong>phase21 / phase22</strong></div>
+              </div>
+              <div class="detail-actions">
+                <button class="btn primary" type="button">运行清理动作</button>
+                <button class="btn" type="button">复制命令</button>
+                <button class="btn" type="button">打开 GitHub</button>
+              </div>
+            </aside>
+          </div>
+        </article>
+
+        <article class="view view-detail">
+          <header class="topbar">
+            <div>
+              <div class="eyebrow">Session Detail</div>
+              <h1>详情页只放结构化步骤，不放终端流</h1>
+              <p class="summary">终端输出折成证据卡和状态，不占主画面；用户只看下一步、结果、风险。</p>
+            </div>
+            <div class="stats">
+              <div class="stat"><span>步骤</span><strong>5</strong></div>
+              <div class="stat"><span>已完成</span><strong>3</strong></div>
+              <div class="stat"><span>待人工</span><strong>1</strong></div>
+            </div>
+          </header>
+
+          <div class="detail-layout">
+            <section class="panel wide-panel">
+              <div class="panel-head">
+                <div><strong>当前会话：GitHub 预览发布收口</strong><span>从命令、报告、GitHub 状态提炼成可审查记录</span></div>
+                <span class="pill">待复核</span>
+              </div>
+              <div class="timeline">
+                <div class="step">
+                  <span class="step-num">1</span>
+                  <div><strong>确认最新版 release</strong><p>已识别 v0.1.0-preview.5 为当前预览发布。</p></div>
+                  <span class="pill green">完成</span>
+                </div>
+                <div class="step">
+                  <span class="step-num">2</span>
+                  <div><strong>生成旧版清理脚本</strong><p>保留 active tag，清理旧 preview release 与 tag。</p></div>
+                  <span class="pill green">完成</span>
+                </div>
+                <div class="step">
+                  <span class="step-num">3</span>
+                  <div><strong>复跑 retention 验证</strong><p>phase22 用公开 API 兜底检查 release 留存。</p></div>
+                  <span class="pill blue">准备好</span>
+                </div>
+                <div class="step">
+                  <span class="step-num">4</span>
+                  <div><strong>人工授权 GitHub 删除</strong><p>当前本机 gh 未登录，删除动作需要用户授权。</p></div>
+                  <span class="pill">待人工</span>
+                </div>
+              </div>
+              <div class="evidence-grid">
+                <div class="evidence"><span>报告</span><strong>phase20 ready</strong><p>运行时收口状态为 GitHub preview ready。</p></div>
+                <div class="evidence"><span>报告</span><strong>phase22 cleanable</strong><p>清理脚本生成，等待 GitHub 权限执行。</p></div>
+                <div class="evidence"><span>风险</span><strong>旧版入口混淆</strong><p>清理前用户可能下载 preview.4。</p></div>
+              </div>
+            </section>
+
+            <aside class="panel detail-card">
+              <span class="eyebrow">Action</span>
+              <h2>下一步固定在右侧</h2>
+              <p>不展示滚动终端流；只把真正需要用户决策或执行的动作固定出来。</p>
+              <div class="next-box">
+                <span>主动作</span>
+                <strong>执行旧版清理脚本</strong>
+                <p>脚本完成后重新跑 phase22，确认只保留 preview.5。</p>
+              </div>
+              <div class="meta-list">
+                <div class="meta-row"><span>权限</span><strong>需要 gh 登录</strong></div>
+                <div class="meta-row"><span>破坏性</span><strong>删除旧 release/tag</strong></div>
+                <div class="meta-row"><span>回滚</span><strong>可重新创建 tag</strong></div>
+              </div>
+              <div class="detail-actions">
+                <button class="btn primary" type="button">运行动作</button>
+                <button class="btn" type="button">查看脚本</button>
+                <button class="btn" type="button">标记阻塞</button>
+              </div>
+            </aside>
+          </div>
+        </article>
+
+        <article class="view view-new">
+          <header class="topbar">
+            <div>
+              <div class="eyebrow">New Session</div>
+              <h1>新建会话也从同一个入口进入</h1>
+              <p class="summary">用户只选择目标和模板；模型、工具、报告位置自动跟随工作区。这里不再出现单独“主会话”页面。</p>
+            </div>
+            <div class="stats">
+              <div class="stat"><span>模板</span><strong>8</strong></div>
+              <div class="stat"><span>可用工具</span><strong>14</strong></div>
+              <div class="stat"><span>默认工作区</span><strong>1</strong></div>
+            </div>
+          </header>
+
+          <div class="new-layout">
+            <section class="panel template-list">
+              <div class="panel-head">
+                <div><strong>任务模板</strong><span>选择一种开始方式</span></div>
+              </div>
+              <div class="templates">
+                <div class="template active"><strong>继续当前工作</strong><span>读取最近会话、报告和下一步动作。</span></div>
+                <div class="template"><strong>发布收口</strong><span>版本、签名、GitHub release、留存验证。</span></div>
+                <div class="template"><strong>界面审查</strong><span>截图、布局、可用性、导航编排。</span></div>
+                <div class="template"><strong>线路排查</strong><span>模型、provider、网关、token 状态。</span></div>
+                <div class="template"><strong>诊断修复</strong><span>跑脚本、看日志、最小修复、复测。</span></div>
+              </div>
+            </section>
+
+            <section class="panel form-panel">
+              <div class="panel-head">
+                <div><strong>会话设置</strong><span>保持轻量，减少开局选择成本</span></div>
+              </div>
+              <div class="form">
+                <div class="field">
+                  <label>目标</label>
+                  <div class="input-like">把会话页改成统一入口，去掉主会话和终端流</div>
+                </div>
+                <div class="field">
+                  <label>工作区</label>
+                  <div class="input-like">E:\claucd\界面控制台程序</div>
+                </div>
+                <div class="field">
+                  <label>来源</label>
+                  <div class="option-grid">
+                    <div class="option active"><strong>OpenClaw</strong><span>产品主线</span></div>
+                    <div class="option"><strong>Hermes</strong><span>网关链路</span></div>
+                    <div class="option"><strong>Claude</strong><span>历史导入</span></div>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>输出方式</label>
+                  <div class="option-grid">
+                    <div class="option active"><strong>直接修复</strong><span>改代码并验证</span></div>
+                    <div class="option"><strong>只做设计</strong><span>先出图片</span></div>
+                    <div class="option"><strong>只做审查</strong><span>不改源码</span></div>
+                  </div>
+                </div>
+                <button class="btn primary" type="button">创建并进入会话</button>
+              </div>
+            </section>
+
+            <aside class="panel preview-panel">
+              <div class="panel-head">
+                <div><strong>开局清单</strong><span>替代终端流的可读状态</span></div>
+              </div>
+              <div class="checklist">
+                <div class="check"><span class="box"></span><div><strong>读取当前页面结构</strong><span>导航、会话页、右侧栏、底部 dock。</span></div></div>
+                <div class="check"><span class="box"></span><div><strong>生成最小修改计划</strong><span>只动入口命名、路由归并和 SessionsPage。</span></div></div>
+                <div class="check"><span class="box"></span><div><strong>保留证据路径</strong><span>截图和报告写入 delivery，不堆在页面里。</span></div></div>
+                <div class="check"><span class="box"></span><div><strong>复跑验证</strong><span>typecheck、测试、截图 smoke。</span></div></div>
+              </div>
+            </aside>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script>
+      const view = new URLSearchParams(window.location.search).get("view") || "overview";
+      document.body.dataset.view = ["overview", "detail", "new"].includes(view) ? view : "overview";
+    </script>
+  </body>
+</html>

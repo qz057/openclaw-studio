@@ -113,12 +113,12 @@ function formatProbeFailure(cause: unknown): string {
 
   if (firstLine.includes("ENOENT") || firstLine.includes("command not found")) {
     return process.platform === "win32"
-      ? "未检测到 WSL 内的 openclaw 命令，当前不能从 Studio 发送到主会话。"
-      : "未检测到 openclaw 命令，当前不能从 Studio 发送到主会话。";
+      ? "未检测到 WSL 内的 openclaw 命令，当前不能从 Studio 发送到 OpenClaw。"
+      : "未检测到 openclaw 命令，当前不能从 Studio 发送到 OpenClaw。";
   }
 
   if (firstLine.includes("wsl.exe")) {
-    return "未检测到可用的 WSL 发送链路，当前不能从 Studio 发送到主会话。";
+    return "未检测到可用的 WSL 发送链路，当前不能从 Studio 发送到 OpenClaw。";
   }
 
   return `OpenClaw 发送链路不可用：${firstLine}`;

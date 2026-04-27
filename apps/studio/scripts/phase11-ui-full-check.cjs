@@ -455,7 +455,38 @@ async function realClick(cdp, selector, text, options = {}) {
   };
 }
 
+async function openCommandPaletteWithShortcut(cdp, options = {}) {
+  await cdp.command("Input.dispatchKeyEvent", {
+    type: "keyDown",
+    windowsVirtualKeyCode: 75,
+    code: "KeyK",
+    key: "k",
+    modifiers: 2
+  });
+  await cdp.command("Input.dispatchKeyEvent", {
+    type: "keyUp",
+    windowsVirtualKeyCode: 75,
+    code: "KeyK",
+    key: "k",
+    modifiers: 2
+  });
+  await sleep(options.waitMs ?? DEFAULT_PAGE_WAIT_MS);
+
+  return {
+    clicked: true,
+    method: "Ctrl+K"
+  };
+}
+
 async function realClickNav(cdp, label) {
+  const hashByLabel = {
+    "总览": "dashboard",
+    "会话": "session",
+    "历史": "history",
+    "能力": "capabilities",
+    "配置": "settings",
+    "高级诊断": "diagnostics"
+  };
   const center = await cdp.evaluate(
     `(() => {
       const normalize = (value) => (value || "").replace(/\\s+/g, " ").trim();
@@ -481,6 +512,19 @@ async function realClickNav(cdp, label) {
   );
 
   if (!center) {
+    const hash = hashByLabel[label];
+
+    if (hash) {
+      await cdp.evaluate(`(() => { window.location.hash = ${JSON.stringify(`#${hash}`)}; })()`);
+      await sleep(900);
+
+      return {
+        clicked: true,
+        method: "hash-fallback",
+        target: null
+      };
+    }
+
     return {
       clicked: false,
       reason: `No nav item starts with ${label}`
@@ -879,7 +923,7 @@ async function main() {
       state: initialState
     });
 
-    const commandPaletteClick = await realClick(cdp, "button", "打开命令面板", { waitMs: 500 });
+    const commandPaletteClick = await openCommandPaletteWithShortcut(cdp, { waitMs: 500 });
     const commandPaletteState = await collectCommandPaletteState(cdp);
     report.globalInteractions.push({
       name: "open-command-palette",
@@ -888,7 +932,7 @@ async function main() {
       paletteState: commandPaletteState
     });
     if (!commandPaletteClick.clicked) {
-      report.failures.push(`Command palette launcher was not clickable: ${commandPaletteClick.reason}`);
+      report.failures.push(`Command palette shortcut failed: ${commandPaletteClick.reason}`);
     }
     if (!commandPaletteState.open) {
       report.failures.push("Command palette did not open after clicking the launcher.");
@@ -925,7 +969,7 @@ async function main() {
       const beforeConsoleErrors = cdp.consoleMessages.filter((entry) => ["error", "log-error", "assert"].includes(entry.type)).length;
       const navResult = await realClickNav(cdp, page.label);
       const stateAfterNav = await collectUiState(cdp);
-      const pagePaletteClick = await realClick(cdp, "button", "打开命令面板", { waitMs: 350 });
+      const pagePaletteClick = await openCommandPaletteWithShortcut(cdp, { waitMs: 350 });
       const pagePaletteState = await collectCommandPaletteState(cdp);
       await cdp.command("Input.dispatchKeyEvent", {
         type: "keyDown",

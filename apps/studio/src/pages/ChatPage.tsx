@@ -23,7 +23,8 @@ import {
   SessionActionsCard,
   type ConversationChip,
   type ConversationNavTarget,
-  type ConversationSurfaceId
+  type ConversationSurfaceId,
+  type ConversationThemeMode
 } from "../components/conversation/ConversationShell";
 
 interface ChatPageProps {
@@ -35,6 +36,8 @@ interface ChatPageProps {
   networkStatus: string;
   onNavigatePage?: (pageId: ConversationNavTarget) => void;
   onSessionSurfaceChange?: (surface: ConversationSurfaceId) => void;
+  themeMode?: ConversationThemeMode;
+  onThemeModeChange?: (mode: ConversationThemeMode) => void;
 }
 
 interface PersistedChatState {
@@ -49,10 +52,11 @@ interface FreshSessionState {
 
 interface LocalChatMessage {
   id: string;
-  role: "user";
+  role: "user" | "assistant";
   text: string;
   timestamp: string;
-  deliveryStatus: "pending" | "failed";
+  deliveryStatus?: "pending" | "failed";
+  clientTurnId?: string;
 }
 
 interface DisplayChatMessage {
@@ -308,6 +312,30 @@ function mergeMessages(remoteMessages: StudioOpenClawChatMessage[], localMessage
   });
 }
 
+function normalizeComparableText(text: string): string {
+  return text.replace(/\s+/g, " ").trim();
+}
+
+function remoteContainsLocalMessage(remoteMessages: StudioOpenClawChatMessage[], localMessage: Pick<LocalChatMessage, "role" | "text">): boolean {
+  const target = normalizeComparableText(localMessage.text);
+
+  if (!target) {
+    return false;
+  }
+
+  return remoteMessages.some(
+    (message) => message.role === localMessage.role && normalizeComparableText(message.text) === target
+  );
+}
+
+function pruneSyncedLocalMessages(localMessages: LocalChatMessage[], remoteMessages: StudioOpenClawChatMessage[]): LocalChatMessage[] {
+  if (remoteMessages.length === 0 || localMessages.length === 0) {
+    return localMessages;
+  }
+
+  return localMessages.filter((message) => !remoteContainsLocalMessage(remoteMessages, message));
+}
+
 function resolveSelectedModelLabel(modelCatalog: StudioModelCatalog | null, selectedModelId: string): string {
   if (!selectedModelId) {
     return "未选择模型";
@@ -381,7 +409,9 @@ export function ChatPage({
   readinessLabel,
   gatewayStatus,
   onNavigatePage,
-  onSessionSurfaceChange
+  onSessionSurfaceChange,
+  themeMode,
+  onThemeModeChange
 }: ChatPageProps) {
   const persistedFreshSession = readFreshSessionState();
   const [draft, setDraft] = useState(() => readPersistedChatState().draft);
@@ -414,7 +444,7 @@ export function ChatPage({
   const canSend = draft.trim().length > 0 && !submitting && Boolean(chatState?.canSend);
   const canApplyModel = selectedModelId.trim().length > 0 && !applyingModel && selectedModelId !== (modelCatalog?.selectedModelId ?? "");
   const composeHint = chatState?.canSend
-    ? "下面输入，按 Ctrl/Cmd + Enter 直接发送到主会话。"
+    ? "下面输入，按 Ctrl/Cmd + Enter 直接发送到 OpenClaw。"
     : chatState?.disabledReason ?? "当前发送链路不可用。";
   const composeStatus = submitting ? "OpenClaw 正在回复…" : chatState?.readinessLabel ?? "检查发送链路";
 
@@ -550,6 +580,7 @@ export function ChatPage({
 
         setChatState(nextState);
         setMessages(nextState.messages);
+        setLocalMessages((currentMessages) => pruneSyncedLocalMessages(currentMessages, nextState.messages));
         setLoading(false);
 
         window.requestAnimationFrame(() => {
@@ -635,11 +666,47 @@ export function ChatPage({
     setSendResult(createOperationResult("info", "正在发送到 OpenClaw", "等待当前回合返回，完成后会自动同步最新消息。", normalizedPrompt));
 
     try {
-      await sendOpenClawChatTurn(normalizedPrompt, freshSessionId);
-      setLocalMessages((currentMessages) => currentMessages.filter((message) => message.id !== localMessageId));
+      const turnResult = await sendOpenClawChatTurn(normalizedPrompt, freshSessionId);
       const nextState = await loadOpenClawChatState(freshSessionId);
+      const replyText = turnResult.reply.trim();
+      const remoteHasPrompt = remoteContainsLocalMessage(nextState.messages, { role: "user", text: normalizedPrompt });
+      const remoteHasReply = replyText ? remoteContainsLocalMessage(nextState.messages, { role: "assistant", text: replyText }) : true;
+
       setChatState(nextState);
       setMessages(nextState.messages);
+      setLocalMessages((currentMessages) => {
+        const withoutCurrentTurn = currentMessages.filter(
+          (message) => message.id !== localMessageId && message.clientTurnId !== localMessageId
+        );
+
+        if (remoteHasPrompt && remoteHasReply) {
+          return pruneSyncedLocalMessages(withoutCurrentTurn, nextState.messages);
+        }
+
+        const fallbackMessages: LocalChatMessage[] = [];
+
+        if (!remoteHasPrompt) {
+          fallbackMessages.push({
+            id: localMessageId,
+            role: "user",
+            text: normalizedPrompt,
+            timestamp: localMessageTimestamp,
+            clientTurnId: localMessageId
+          });
+        }
+
+        if (replyText && !remoteHasReply) {
+          fallbackMessages.push({
+            id: `${localMessageId}-assistant`,
+            role: "assistant",
+            text: replyText,
+            timestamp: new Date().toISOString(),
+            clientTurnId: localMessageId
+          });
+        }
+
+        return pruneSyncedLocalMessages([...withoutCurrentTurn, ...fallbackMessages], nextState.messages);
+      });
       setSendResult(
         createOperationResult(
           "success",
@@ -745,7 +812,7 @@ export function ChatPage({
 
     setApplyingModel(true);
     setModelError(null);
-    setModelResult(createOperationResult("info", "正在应用 OpenClaw 模型", "等待配置写入完成，完成后会刷新主会话状态。", selectedModelId));
+    setModelResult(createOperationResult("info", "正在应用 OpenClaw 模型", "等待配置写入完成，完成后会刷新 OpenClaw 状态。", selectedModelId));
 
     try {
       const result = await setOpenClawModel(selectedModelId);
@@ -856,6 +923,10 @@ export function ChatPage({
         onCreateSession={() => void handleStartFreshSession()}
         onNavigatePage={onNavigatePage}
         onSessionSurfaceChange={onSessionSurfaceChange}
+        themeMode={themeMode}
+        onThemeModeChange={onThemeModeChange}
+        showGlobalNav={false}
+        showSessionList={false}
         gatewaySummary={{
           openclaw: gatewayServiceState?.running ? "运行中" : gatewayServiceState ? "待连接" : "读取中",
           hermes: "运行中",
@@ -864,7 +935,7 @@ export function ChatPage({
           admin: "在线"
         }}
         header={{
-          title: freshSessionActive ? "独立新会话" : "主会话",
+          title: freshSessionActive ? "OpenClaw 新会话" : "OpenClaw",
           subtitle: visibleModelLabel,
           chips: [
             { label: "进行中", tone: "positive" },
@@ -953,7 +1024,7 @@ export function ChatPage({
               <div className="conversation-card-actions">
                 {freshSessionActive ? (
                   <button type="button" onClick={() => void handleReturnToMainSession()}>
-                    返回主会话
+                    返回 OpenClaw
                   </button>
                 ) : null}
                 <button type="button" onClick={() => void handleStartFreshSession()}>
@@ -969,7 +1040,7 @@ export function ChatPage({
         }
       >
         <ChatPanel
-          title="主会话"
+          title="OpenClaw"
           subtitle={freshSessionActive ? freshSessionKey ?? "独立新会话" : chatState?.sessionKey ?? "agent:main:main"}
           statusChips={[
             { label: visibleModelLabel, tone: visibleModelLabel === "未选择模型" ? "warning" : "active" },
@@ -993,7 +1064,7 @@ export function ChatPage({
               helperText={composeHint}
               presets={promptPresets}
               errors={[
-                freshSessionActive ? "当前是独立新会话：后续消息不会写回主会话，只显示这个新会话里的内容。" : null,
+                freshSessionActive ? "当前是独立新会话：后续消息不会写回 OpenClaw，只显示这个新会话里的内容。" : null,
                 gatewayError,
                 modelError,
                 chatState?.disabledReason,
@@ -1015,11 +1086,11 @@ export function ChatPage({
           <MessageTimeline
             threadId={CHAT_THREAD_ID}
             loading={loading}
-            emptyTitle={freshSessionActive ? "新会话已就绪" : "主会话里还没有可显示的文本消息"}
+            emptyTitle={freshSessionActive ? "OpenClaw 新会话已就绪" : "OpenClaw 还没有可显示的文本消息"}
             emptyDescription={
               freshSessionActive
                 ? "现在只会显示你点击“新建会话”之后产生的新消息。"
-                : "发送一条命令后，这里会直接出现 OpenClaw 主会话的真实对话内容。"
+                : "发送一条命令后，这里会直接出现 OpenClaw 的真实对话内容。"
             }
             detachedFromLatest={detachedFromLatest}
             onJumpToLatest={handleJumpToLatest}

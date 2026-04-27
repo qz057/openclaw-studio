@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-27T00:06:42.747Z",
+  "generatedAt": "2026-04-27T00:59:15.995Z",
   "status": "release-candidate-ready-for-github-preview",
   "version": "v0.1.0-preview.5",
   "appRoot": "E:\\claucd\\界面控制台程序\\apps\\studio",
@@ -192,15 +192,15 @@
     ]
   },
   "git": {
-    "head": "8b2ea8cfb9d0ac2ae4aa9a858f5d46156d6d62b8",
+    "head": "5542b8d48c9bfbe8ec83cb9da5fe1eb34b8d8e5c",
     "tag": "v0.1.0-preview.5",
     "tagCommit": "8b2ea8cfb9d0ac2ae4aa9a858f5d46156d6d62b8",
-    "tagAlignedWithHead": true,
+    "tagAlignedWithHead": false,
     "remotes": "origin\thttps://github.com/qz057/openclaw-studio.git (fetch)\norigin\thttps://github.com/qz057/openclaw-studio.git (push)",
-    "dirtyFiles": 10
+    "dirtyFiles": 4
   },
   "githubCli": {
-    "loggedIn": false
+    "loggedIn": true
   },
   "boundaries": [
     "Windows preview artifacts remain unsigned until trusted code-signing material is supplied.",

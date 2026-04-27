@@ -32,12 +32,12 @@ describe('app-utils', () => {
       expect(resolvePage()).toBe('dashboard'); // studioPageIds keeps legacy IDs, but the shell now defaults removed routes to 总览
     });
 
-    it('maps removed Claude and Hermes routes into the unified session page', () => {
+    it('keeps Hermes as its own visible conversation page and maps removed Claude into OpenClaw', () => {
       window.location.hash = '#claude';
       expect(resolvePage()).toBe('chat');
 
       window.location.hash = '#hermes';
-      expect(resolvePage()).toBe('chat');
+      expect(resolvePage()).toBe('hermes');
     });
 
     it('returns "dashboard" for removed Codex page', () => {
@@ -47,6 +47,7 @@ describe('app-utils', () => {
 
     it('returns product route hashes for visible pages', () => {
       expect(getRouteHashForPageId('chat')).toBe('session');
+      expect(getRouteHashForPageId('hermes')).toBe('hermes');
       expect(getRouteHashForPageId('sessions')).toBe('history');
       expect(getRouteHashForPageId('skills')).toBe('capabilities');
       expect(getRouteHashForPageId('agents')).toBe('diagnostics');
@@ -65,11 +66,11 @@ describe('app-utils', () => {
       expect(routeIds).not.toContain('home');
       expect(routeIds).not.toContain('codex');
       expect(routeIds).not.toContain('claude');
-      expect(routeIds).not.toContain('hermes');
+      expect(visibleStudioPageIds).toContain('hermes');
     });
 
     it('keeps removed routes out of command matchers and shortcuts', () => {
-      const removedRouteIds = new Set(['home', 'codex', 'claude', 'hermes']);
+      const removedRouteIds = new Set(['home', 'codex', 'claude']);
       const removedActionIds = new Set(['command-open-home', 'command-open-skills']);
       const commandSurface = mockShellState.commandSurface;
       const matcherRouteIds = [

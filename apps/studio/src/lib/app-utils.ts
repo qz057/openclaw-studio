@@ -1,13 +1,13 @@
 import { studioPageIds, type StudioPageId, type StudioCommandAction } from "@openclaw/shared";
 
-export const visibleStudioPageIds = ["dashboard", "chat", "sessions", "skills", "settings", "agents"] as const satisfies ReadonlyArray<StudioPageId>;
+export const visibleStudioPageIds = ["dashboard", "chat", "hermes", "sessions", "skills", "settings", "agents"] as const satisfies ReadonlyArray<StudioPageId>;
 
 const visibleStudioPageIdSet = new Set<StudioPageId>(visibleStudioPageIds);
 
 const routeAliases: Record<string, StudioPageId> = {
   session: "chat",
   conversations: "chat",
-  hermes: "chat",
+  hermes: "hermes",
   claude: "chat",
   history: "sessions",
   capabilities: "skills",
@@ -22,6 +22,7 @@ const routeAliases: Record<string, StudioPageId> = {
 const routeHashByPageId: Partial<Record<StudioPageId, string>> = {
   dashboard: "dashboard",
   chat: "session",
+  hermes: "hermes",
   sessions: "history",
   skills: "capabilities",
   settings: "settings",

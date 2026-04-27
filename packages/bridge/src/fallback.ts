@@ -23,6 +23,7 @@ import {
   type StudioRuntimeActionResult,
   type StudioRuntimeDetail,
   type StudioShellState,
+  type StudioOpenClawChatMessage,
   type PerformanceMetrics,
   type PerformanceAlert
 } from "@openclaw/shared";
@@ -30,9 +31,52 @@ import { mockShellState } from "@openclaw/shared/mock-shell-state";
 
 export function createFallbackApi(): StudioApi {
   const fallbackModelCatalog: StudioModelCatalog = {
-    selectedModelId: null,
-    options: []
+    selectedModelId: "relay/gpt-5.5",
+    options: [
+      {
+        id: "relay/gpt-5.5",
+        label: "relay/gpt-5.5",
+        provider: "relay",
+        model: "gpt-5.5",
+        source: "fallback"
+      },
+      {
+        id: "openai-codex/gpt-5.5",
+        label: "openai-codex/gpt-5.5",
+        provider: "openai-codex",
+        model: "gpt-5.5",
+        source: "fallback"
+      },
+      {
+        id: "relay/gpt-5.4",
+        label: "relay/gpt-5.4",
+        provider: "relay",
+        model: "gpt-5.4",
+        source: "fallback"
+      },
+      {
+        id: "relay/gpt-5.3-codex",
+        label: "relay/gpt-5.3-codex",
+        provider: "relay",
+        model: "gpt-5.3-codex",
+        source: "fallback"
+      }
+    ]
   };
+  const fallbackOpenClawMessages: StudioOpenClawChatMessage[] = [
+    {
+      id: "fallback-openclaw-user-1",
+      role: "user",
+      text: "请帮我分析一下最近 24 小时的系统运行状况。",
+      timestamp: new Date(Date.now() - 1000 * 60 * 8).toISOString()
+    },
+    {
+      id: "fallback-openclaw-assistant-1",
+      role: "assistant",
+      text: "OpenClaw 当前处于浏览器预览模式：页面结构、模型选项和消息时间线可检查；真实发送需要 Electron 运行态接入。",
+      timestamp: new Date(Date.now() - 1000 * 60 * 7).toISOString()
+    }
+  ];
   const fallbackGatewayState = (serviceId: "openclaw" | "hermes"): StudioGatewayServiceState => ({
     serviceId,
     running: false,
@@ -90,24 +134,55 @@ export function createFallbackApi(): StudioApi {
     async getOpenClawChatState(): Promise<StudioOpenClawChatState> {
       return {
         source: "mock",
-        availability: "blocked",
-        canSend: false,
-        readinessLabel: "不可发送",
-        disabledReason: "当前 fallback 模式未接入 Electron 运行态，不能发送到 OpenClaw 主会话。",
+        availability: "ready",
+        canSend: true,
+        readinessLabel: "预览可发送",
+        disabledReason: null,
         command: "openclaw agent --agent main --json --message <prompt>",
         sessionKey: "agent:main:main",
-        sessionId: null,
-        model: null,
-        provider: null,
-        updatedAt: null,
-        messages: []
+        sessionId: "fallback-openclaw-session",
+        model: "gpt-5.5",
+        provider: "relay",
+        updatedAt: Date.now(),
+        messages: [...fallbackOpenClawMessages]
       };
     },
-    async sendOpenClawChatTurn(_prompt: string): Promise<StudioOpenClawChatTurnResult> {
-      throw new Error("当前 fallback 模式未接入 OpenClaw 聊天执行链，请在 Electron 运行态里使用这个页面。");
+    async sendOpenClawChatTurn(prompt: string): Promise<StudioOpenClawChatTurnResult> {
+      const normalizedPrompt = prompt.trim();
+      const now = Date.now();
+      const reply = `已收到：${normalizedPrompt}\n\n当前是浏览器预览模式，真实 OpenClaw 回复需要从 Electron 运行态发送。`;
+
+      fallbackOpenClawMessages.push(
+        {
+          id: `fallback-openclaw-user-${now}`,
+          role: "user",
+          text: normalizedPrompt,
+          timestamp: new Date(now).toISOString()
+        },
+        {
+          id: `fallback-openclaw-assistant-${now}`,
+          role: "assistant",
+          text: reply,
+          timestamp: new Date(now + 1).toISOString()
+        }
+      );
+
+      return {
+        prompt: normalizedPrompt,
+        reply,
+        source: "mock",
+        sessionId: "fallback-openclaw-session",
+        provider: "relay",
+        model: "gpt-5.5",
+        durationMs: 180,
+        command: "openclaw agent --agent main --json --message <prompt>"
+      };
     },
     async createOpenClawChatSession(): Promise<StudioOpenClawChatSessionRef> {
-      throw new Error("当前 fallback 模式未接入 OpenClaw 会话执行链，请在 Electron 运行态里使用这个页面。");
+      return {
+        sessionId: `fallback-openclaw-${Date.now()}`,
+        sessionKey: "agent:main:explicit:fallback-preview"
+      };
     },
     async getOpenClawGatewayServiceState(): Promise<StudioGatewayServiceState> {
       return fallbackGatewayState("openclaw");

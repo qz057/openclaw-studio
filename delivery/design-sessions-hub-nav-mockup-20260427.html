@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sessions Hub Navigation Mockup</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080b0f;
+      --panel: #10151c;
+      --panel-2: #151b24;
+      --panel-3: #0d1218;
+      --line: rgba(170, 188, 210, 0.16);
+      --line-2: rgba(170, 188, 210, 0.09);
+      --text: #eef4fb;
+      --soft: #a8b5c4;
+      --muted: #6f7d8b;
+      --blue: #67b8ff;
+      --green: #54d68f;
+      --amber: #f2c66b;
+      --rose: #ff7c9a;
+      --ink: #05070a;
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Microsoft YaHei UI", "Segoe UI", system-ui, sans-serif;
+      letter-spacing: 0;
+    }
+
+    body {
+      padding: 12px;
+    }
+
+    .shell {
+      width: 1440px;
+      height: 980px;
+      display: grid;
+      grid-template-columns: 216px minmax(0, 1fr);
+      gap: 12px;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #07090d;
+      border: 1px solid rgba(170, 188, 210, 0.1);
+    }
+
+    .nav {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 14px;
+      padding: 14px;
+      border-right: 1px solid var(--line-2);
+      background: #090d12;
+    }
+
+    .brand {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .brand-mark,
+    .icon-box {
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius);
+      background: #edf5fb;
+      color: #10161d;
+      font-weight: 800;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+    }
+
+    .brand strong {
+      display: block;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .brand span {
+      display: block;
+      margin-top: 5px;
+      color: var(--soft);
+      font-size: 12px;
+    }
+
+    .cmd {
+      min-height: 58px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 12px;
+      border: 1px solid rgba(103, 184, 255, 0.36);
+      border-radius: var(--radius);
+      background: rgba(20, 44, 74, 0.78);
+    }
+
+    .cmd strong,
+    .cmd kbd {
+      font-size: 12px;
+    }
+
+    .cmd span {
+      color: var(--soft);
+      font-size: 12px;
+    }
+
+    .nav-group {
+      display: grid;
+      align-content: start;
+      gap: 7px;
+    }
+
+    .nav-label {
+      margin: 9px 0 2px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .nav-item {
+      position: relative;
+      display: grid;
+      grid-template-columns: 32px minmax(0, 1fr) auto;
+      gap: 9px;
+      align-items: center;
+      min-height: 58px;
+      padding: 9px 10px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: transparent;
+    }
+
+    .nav-item.active {
+      border-color: rgba(103, 184, 255, 0.42);
+      background: rgba(103, 184, 255, 0.1);
+    }
+
+    .nav-item.active::before {
+      content: "";
+      position: absolute;
+      left: -1px;
+      top: 10px;
+      bottom: 10px;
+      width: 3px;
+      border-radius: 4px;
+      background: var(--blue);
+    }
+
+    .icon-box {
+      width: 30px;
+      height: 30px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--soft);
+      font-size: 14px;
+    }
+
+    .active .icon-box {
+      background: var(--blue);
+      color: var(--ink);
+    }
+
+    .nav-copy {
+      min-width: 0;
+    }
+
+    .nav-copy strong,
+    .nav-copy span {
+      display: block;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .nav-copy strong {
+      font-size: 14px;
+      line-height: 1.25;
+    }
+
+    .nav-copy span {
+      margin-top: 4px;
+      color: var(--soft);
+      font-size: 12px;
+    }
+
+    .badge {
+      min-width: 24px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      padding: 0 7px;
+      border-radius: 999px;
+      background: rgba(242, 198, 107, 0.14);
+      color: var(--amber);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .rail-status {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .rail-status__row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--soft);
+      font-size: 12px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      display: inline-block;
+      margin-right: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 4px rgba(84, 214, 143, 0.12);
+    }
+
+    .main {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 14px;
+      padding: 18px 18px 20px 0;
+    }
+
+    .top {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 392px;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .title {
+      display: grid;
+      gap: 8px;
+      padding: 2px 6px 0;
+    }
+
+    .eyebrow {
+      margin: 0;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    h1,
+    h2,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 31px;
+      line-height: 1.05;
+    }
+
+    .title p:last-child {
+      color: var(--soft);
+      font-size: 14px;
+    }
+
+    .top-actions {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .search {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 13px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .btn {
+      height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .btn.primary {
+      border-color: rgba(103, 184, 255, 0.5);
+      background: #15314d;
+    }
+
+    .content {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr) 344px;
+      gap: 14px;
+    }
+
+    .panel {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(16, 21, 28, 0.9);
+    }
+
+    .queue {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .metric {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      padding: 12px;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--line-2);
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .metric strong {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .metric b {
+      align-self: end;
+      color: var(--green);
+      font-size: 12px;
+    }
+
+    .source-tabs,
+    .filters {
+      display: grid;
+      gap: 7px;
+    }
+
+    .source-tab,
+    .filter {
+      min-height: 42px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 10px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.025);
+      color: var(--soft);
+      font-size: 13px;
+    }
+
+    .source-tab.active,
+    .filter.active {
+      color: var(--text);
+      border-color: rgba(103, 184, 255, 0.35);
+      background: rgba(103, 184, 255, 0.09);
+    }
+
+    .filter em,
+    .source-tab em {
+      color: var(--muted);
+      font-style: normal;
+      font-size: 12px;
+    }
+
+    .list {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      overflow: hidden;
+    }
+
+    .list-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .list-head h2 {
+      font-size: 18px;
+    }
+
+    .list-head span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .rows {
+      min-height: 0;
+      overflow: hidden;
+      display: grid;
+      align-content: start;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) 124px 94px auto;
+      gap: 12px;
+      align-items: center;
+      min-height: 82px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line-2);
+      background: transparent;
+    }
+
+    .row.selected {
+      background: rgba(103, 184, 255, 0.09);
+      box-shadow: inset 3px 0 0 var(--blue);
+    }
+
+    .row-icon {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius);
+      color: var(--ink);
+      background: var(--blue);
+      font-weight: 900;
+    }
+
+    .row-title {
+      min-width: 0;
+      display: grid;
+      gap: 5px;
+    }
+
+    .row-title strong,
+    .row-title span {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .row-title span,
+    .row-cell span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .row-cell {
+      display: grid;
+      gap: 4px;
+    }
+
+    .row-cell strong {
+      color: var(--soft);
+      font-size: 13px;
+    }
+
+    .chip {
+      width: max-content;
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .chip.green {
+      color: var(--green);
+      background: rgba(84, 214, 143, 0.12);
+    }
+
+    .chip.amber {
+      color: var(--amber);
+      background: rgba(242, 198, 107, 0.13);
+    }
+
+    .chip.blue {
+      color: var(--blue);
+      background: rgba(103, 184, 255, 0.12);
+    }
+
+    .detail {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .detail-title {
+      display: grid;
+      gap: 8px;
+    }
+
+    .detail-title h2 {
+      font-size: 21px;
+      line-height: 1.2;
+    }
+
+    .detail-title p {
+      color: var(--soft);
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .step-card {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(103, 184, 255, 0.32);
+      background: rgba(103, 184, 255, 0.08);
+    }
+
+    .step-card span {
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .step-card strong {
+      font-size: 16px;
+    }
+
+    .facts {
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .fact {
+      display: grid;
+      grid-template-columns: 96px 1fr;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--line-2);
+      font-size: 13px;
+    }
+
+    .fact span {
+      color: var(--muted);
+    }
+
+    .detail-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .detail-actions .primary {
+      grid-column: span 2;
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <aside class="nav">
+      <div class="brand">
+        <div class="brand-mark">盾</div>
+        <div>
+          <strong>山谷智合</strong>
+          <span><i class="dot"></i>实时同步 · 刚刚</span>
+        </div>
+      </div>
+
+      <div class="cmd">
+        <div>
+          <strong>命令面板</strong><br />
+          <span>搜索动作、页面和会话</span>
+        </div>
+        <kbd>⌘K</kbd>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-label">主入口</div>
+        <div class="nav-item">
+          <div class="icon-box">⌂</div>
+          <div class="nav-copy"><strong>总览</strong><span>运行健康</span></div>
+        </div>
+        <div class="nav-item">
+          <div class="icon-box">✦</div>
+          <div class="nav-copy"><strong>对话</strong><span>主会话与终端流</span></div>
+          <span class="badge">3</span>
+        </div>
+        <div class="nav-item active">
+          <div class="icon-box">↺</div>
+          <div class="nav-copy"><strong>会话</strong><span>继续、复核、回看</span></div>
+          <span class="badge">2</span>
+        </div>
+
+        <div class="nav-label">工具配置</div>
+        <div class="nav-item">
+          <div class="icon-box">◇</div>
+          <div class="nav-copy"><strong>能力</strong><span>能力与接入</span></div>
+        </div>
+        <div class="nav-item">
+          <div class="icon-box">⚙</div>
+          <div class="nav-copy"><strong>配置</strong><span>当前配置</span></div>
+        </div>
+        <div class="nav-item">
+          <div class="icon-box">⌁</div>
+          <div class="nav-copy"><strong>诊断</strong><span>高级审查</span></div>
+        </div>
+      </div>
+
+      <div class="rail-status">
+        <div class="rail-status__row"><span>OpenClaw</span><strong>已运行</strong></div>
+        <div class="rail-status__row"><span>Hermes</span><strong>已运行</strong></div>
+        <div class="rail-status__row"><span>待处理</span><strong>2 项</strong></div>
+      </div>
+    </aside>
+
+    <section class="main">
+      <div class="top">
+        <div class="title">
+          <p class="eyebrow">会话中枢</p>
+          <h1>继续当前工作，而不是重新找入口</h1>
+          <p>把主会话、Hermes、Claude 历史合并到一个可筛选队列；右侧固定显示下一步。</p>
+        </div>
+        <div class="top-actions">
+          <div class="search">⌕ 搜索标题、工作区、模型、最近动作</div>
+          <button class="btn">↺ 恢复上次</button>
+          <button class="btn primary">＋ 新会话</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <aside class="panel queue">
+          <div class="metric">
+            <div><span>当前队列</span><strong>12</strong></div>
+            <b>2 待处理</b>
+          </div>
+
+          <div class="source-tabs">
+            <div class="nav-label">来源</div>
+            <div class="source-tab active">全部来源 <em>12</em></div>
+            <div class="source-tab">OpenClaw <em>5</em></div>
+            <div class="source-tab">Hermes <em>4</em></div>
+            <div class="source-tab">Claude <em>3</em></div>
+          </div>
+
+          <div class="filters">
+            <div class="nav-label">状态</div>
+            <div class="filter active">需继续 <em>4</em></div>
+            <div class="filter">待复核 <em>2</em></div>
+            <div class="filter">最近完成 <em>6</em></div>
+            <div class="filter">已归档 <em>18</em></div>
+          </div>
+        </aside>
+
+        <section class="panel list">
+          <div class="list-head">
+            <div>
+              <h2>最近会话</h2>
+              <span>按“可继续程度”排序，点击行即可进入；不再需要先翻工作台。</span>
+            </div>
+            <span>排序：待处理优先</span>
+          </div>
+
+          <div class="rows">
+            <article class="row selected">
+              <div class="row-icon">01</div>
+              <div class="row-title">
+                <strong>GitHub 预览发布收口</strong>
+                <span>E:\claucd\界面控制台程序 · qz057 · 2 分钟前</span>
+              </div>
+              <div class="row-cell"><span>来源</span><strong>OpenClaw</strong></div>
+              <div class="chip amber">待复核</div>
+              <button class="btn">继续</button>
+            </article>
+
+            <article class="row">
+              <div class="row-icon" style="background: var(--green)">02</div>
+              <div class="row-title">
+                <strong>Hermes 网关状态巡检</strong>
+                <span>~/.hermes · gateway snapshot · 14 分钟前</span>
+              </div>
+              <div class="row-cell"><span>来源</span><strong>Hermes</strong></div>
+              <div class="chip green">进行中</div>
+              <button class="btn">进入</button>
+            </article>
+
+            <article class="row">
+              <div class="row-icon" style="background: var(--amber)">03</div>
+              <div class="row-title">
+                <strong>会话页导航改版方案</strong>
+                <span>UI review · sessions hub · 刚刚</span>
+              </div>
+              <div class="row-cell"><span>来源</span><strong>OpenClaw</strong></div>
+              <div class="chip blue">设计中</div>
+              <button class="btn">查看</button>
+            </article>
+
+            <article class="row">
+              <div class="row-icon" style="background: #a7b6ff">04</div>
+              <div class="row-title">
+                <strong>Claude 历史导入检查</strong>
+                <span>本机历史记录 · 42 分钟前</span>
+              </div>
+              <div class="row-cell"><span>来源</span><strong>Claude</strong></div>
+              <div class="chip green">已完成</div>
+              <button class="btn">打开</button>
+            </article>
+
+            <article class="row">
+              <div class="row-icon" style="background: var(--rose)">05</div>
+              <div class="row-title">
+                <strong>签名材料包与 TSA 验证</strong>
+                <span>release chain · 1 小时前</span>
+              </div>
+              <div class="row-cell"><span>来源</span><strong>OpenClaw</strong></div>
+              <div class="chip amber">需证书</div>
+              <button class="btn">复核</button>
+            </article>
+          </div>
+        </section>
+
+        <aside class="panel detail">
+          <div class="detail-title">
+            <p class="eyebrow">已选会话</p>
+            <h2>GitHub 预览发布收口</h2>
+            <p>检测到最新版本已经上传，需要清理旧版 release/tag 并复跑 retention 验收。</p>
+          </div>
+
+          <div class="step-card">
+            <span>建议下一步</span>
+            <strong>删除旧版 v0.1.0-preview.4</strong>
+            <p style="color: var(--soft); font-size: 13px; line-height: 1.45;">执行清理脚本后，Phase22 应返回 clean。</p>
+          </div>
+
+          <div class="facts">
+            <div class="fact"><span>工作区</span><strong>E:\claucd\界面控制台程序</strong></div>
+            <div class="fact"><span>当前版本</span><strong>v0.1.0-preview.5</strong></div>
+            <div class="fact"><span>旧版状态</span><strong>preview.4 仍存在</strong></div>
+            <div class="fact"><span>风险</span><strong>旧下载入口混淆</strong></div>
+            <div class="fact"><span>验证</span><strong>phase21 / phase22</strong></div>
+          </div>
+
+          <div class="detail-actions">
+            <button class="btn primary">运行清理脚本</button>
+            <button class="btn">复制命令</button>
+            <button class="btn">打开 GitHub</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

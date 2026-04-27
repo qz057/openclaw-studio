@@ -1,8 +1,7 @@
 import type { DashboardDataSource, DashboardRealtimeViewModel } from "../hooks/useDashboardRealtimeData";
-import { ChevronDown, Moon, RefreshCw, Sun } from "lucide-react";
+import { ChevronDown, RefreshCw } from "lucide-react";
 import {
   ClaudeOrchestrationPanel,
-  CollectorDiagnosticsPanel,
   DashboardKpiStrip,
   LiveSessionStream,
   ModelRouteMap,
@@ -12,8 +11,6 @@ import {
 
 interface DashboardPageProps {
   viewModel: DashboardRealtimeViewModel;
-  themeMode: DashboardThemeMode;
-  onThemeModeChange: (mode: DashboardThemeMode) => void;
 }
 
 export type DashboardThemeMode = "night" | "day";
@@ -43,10 +40,7 @@ function formatUpdatedAt(timestamp: number | null): string {
   return `${Math.floor(diffMs / 60_000)} 分钟前`;
 }
 
-export function DashboardPage({ viewModel, themeMode, onThemeModeChange }: DashboardPageProps) {
-  const nextThemeMode: DashboardThemeMode = themeMode === "night" ? "day" : "night";
-  const ThemeIcon = themeMode === "night" ? Sun : Moon;
-
+export function DashboardPage({ viewModel }: DashboardPageProps) {
   return (
     <section className="page dashboard-page">
       <div className="dashboard-cockpit-shell">
@@ -63,17 +57,6 @@ export function DashboardPage({ viewModel, themeMode, onThemeModeChange }: Dashb
             <button type="button" className="dashboard-range-button">
               {viewModel.periodLabel}
               <ChevronDown size={15} strokeWidth={2.2} aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              className="dashboard-icon-button dashboard-theme-toggle"
-              aria-label={themeMode === "night" ? "切换白天模式" : "切换夜晚模式"}
-              title={themeMode === "night" ? "切换白天模式" : "切换夜晚模式"}
-              onClick={() => {
-                onThemeModeChange(nextThemeMode);
-              }}
-            >
-              <ThemeIcon size={17} strokeWidth={2.2} aria-hidden="true" />
             </button>
             <button type="button" className="dashboard-icon-button" aria-label="刷新总览">
               <RefreshCw size={17} strokeWidth={2.2} aria-hidden="true" />
@@ -101,7 +84,6 @@ export function DashboardPage({ viewModel, themeMode, onThemeModeChange }: Dashb
           <TaskTypeDonut slices={viewModel.taskSlices} />
           <ResourceUsagePanel resources={viewModel.resources} />
           <ClaudeOrchestrationPanel viewModel={viewModel} />
-          <CollectorDiagnosticsPanel items={viewModel.collectorStatuses} syncError={viewModel.syncError} />
         </div>
       </div>
     </section>

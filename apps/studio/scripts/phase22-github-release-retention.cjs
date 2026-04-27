@@ -6,10 +6,6 @@ const DATE = "20260427";
 const UPSTREAM_DATE = "20260426";
 const REPO = process.env.OPENCLAW_GITHUB_REPO || "qz057/openclaw-studio";
 const DEFAULT_ACTIVE_VERSION = "v0.1.0-preview.4";
-const RETIRED_VERSIONS = (process.env.OPENCLAW_RETIRED_RELEASES || "v0.1.0-preview.1,v0.1.0-preview.2,v0.1.0-preview.3")
-  .split(",")
-  .map((item) => item.trim())
-  .filter(Boolean);
 
 function run(command, args, cwd) {
   const result = spawnSync(command, args, {
@@ -36,6 +32,27 @@ function writeJson(filePath, value) {
 
 function readJsonIfExists(filePath) {
   return fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, "")) : null;
+}
+
+function deriveRetiredVersions(activeVersion) {
+  if (process.env.OPENCLAW_RETIRED_RELEASES) {
+    return process.env.OPENCLAW_RETIRED_RELEASES
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  const match = /^v(?<base>\d+\.\d+\.\d+)-preview\.(?<index>\d+)$/.exec(activeVersion);
+  if (!match) {
+    return ["v0.1.0-preview.1", "v0.1.0-preview.2", "v0.1.0-preview.3"];
+  }
+
+  const index = Number(match.groups.index);
+  if (!Number.isInteger(index) || index <= 1) {
+    return [];
+  }
+
+  return Array.from({ length: index - 1 }, (_, offset) => `v${match.groups.base}-preview.${offset + 1}`);
 }
 
 async function listReleasesViaApi(repo) {
@@ -69,6 +86,7 @@ async function main() {
   const deliveryRoot = path.join(repoRoot, "delivery");
   const phase19 = readJsonIfExists(path.join(deliveryRoot, `phase19-github-release-staging-${UPSTREAM_DATE}.json`));
   const activeVersion = process.env.OPENCLAW_RELEASE_VERSION || phase19?.version || DEFAULT_ACTIVE_VERSION;
+  const retiredVersions = deriveRetiredVersions(activeVersion);
   const blockers = [];
   const warnings = [];
 
@@ -103,7 +121,7 @@ async function main() {
   }
 
   const activeRelease = releases.find((release) => release.tagName === activeVersion);
-  const retiredReleaseFindings = RETIRED_VERSIONS
+  const retiredReleaseFindings = retiredVersions
     .map((version) => ({
       version,
       releasePresent: releases.some((release) => release.tagName === version)
@@ -126,7 +144,7 @@ async function main() {
   }
 
   const remoteTagChecks = [];
-  for (const version of [activeVersion, ...RETIRED_VERSIONS]) {
+  for (const version of [activeVersion, ...retiredVersions]) {
     const tagResult = run("git", ["ls-remote", "--tags", "origin", `${version}*`], repoRoot);
     if (tagResult.status !== 0) {
       blockers.push({
@@ -152,7 +170,7 @@ async function main() {
     });
   }
 
-  for (const entry of remoteTagChecks.filter((item) => RETIRED_VERSIONS.includes(item.version))) {
+  for (const entry of remoteTagChecks.filter((item) => retiredVersions.includes(item.version))) {
     if (entry.present) {
       blockers.push({
         id: "retired-tag-still-present",
@@ -163,7 +181,7 @@ async function main() {
 
   const localTagsResult = run("git", ["tag", "--list", "v0.1.0-preview.*"], repoRoot);
   const localTags = localTagsResult.stdout ? localTagsResult.stdout.split(/\r?\n/).filter(Boolean) : [];
-  for (const version of RETIRED_VERSIONS) {
+  for (const version of retiredVersions) {
     if (localTags.includes(version)) {
       warnings.push(`Retired local tag is still present: ${version}`);
     }
@@ -175,7 +193,7 @@ async function main() {
     repo: REPO,
     activeVersion,
     releaseSource,
-    retiredVersions: RETIRED_VERSIONS,
+    retiredVersions,
     activeRelease: activeRelease
       ? {
           tagName: activeRelease.tagName,
@@ -213,7 +231,7 @@ async function main() {
       "",
       "## Retired Versions",
       "",
-      ...RETIRED_VERSIONS.map((version) => {
+      ...retiredVersions.map((version) => {
         const releaseFinding = retiredReleaseFindings.find((item) => item.version === version);
         const tagFinding = remoteTagChecks.find((item) => item.version === version);
         return `- ${version}: release=${releaseFinding?.releasePresent ? "present" : "absent"}, remoteTag=${tagFinding?.present ? "present" : "absent"}`;

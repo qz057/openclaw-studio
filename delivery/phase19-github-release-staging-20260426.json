@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-04-26T17:24:41.475Z",
-  "status": "github-release-upload-staged",
+  "generatedAt": "2026-04-27T01:02:03.807Z",
+  "status": "github-release-upload-staging-blocked",
   "version": "v0.1.0-preview.5",
   "uploadRoot": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426",
   "assetsRoot": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\assets",
@@ -59,18 +59,19 @@
       "source": "E:\\claucd\\界面控制台程序\\delivery\\phase20-runtime-release-closeout-20260426.md",
       "target": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\assets\\phase20-runtime-release-closeout-20260426.md",
       "size": 2922,
-      "sha256": "84CB097E0ED016060E20631C79E054CB0D6182B5050952DDFA406855593B9C2E"
+      "sha256": "67DEE441F06F5AAFF5F41B35A63C3057EB9B2D7157A2A909A91FD280CC4101FF"
     }
   ],
   "sha256Sums": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\assets\\SHA256SUMS.txt",
   "commands": {
     "browserSteps": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\BROWSER_UPLOAD_STEPS.md",
-    "ghPublish": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\PUBLISH_WITH_GH.ps1"
+    "ghPublish": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\PUBLISH_WITH_GH.ps1",
+    "ghCleanupOldReleases": "E:\\claucd\\界面控制台程序\\delivery\\github-release-upload-20260426\\DELETE_OLD_RELEASES_WITH_GH.ps1"
   },
   "git": {
-    "head": "8b2ea8cfb9d0ac2ae4aa9a858f5d46156d6d62b8",
+    "head": "5542b8d48c9bfbe8ec83cb9da5fe1eb34b8d8e5c",
     "tagCommit": "8b2ea8cfb9d0ac2ae4aa9a858f5d46156d6d62b8",
-    "tagAlignedWithHead": true,
+    "tagAlignedWithHead": false,
     "remotes": "origin\thttps://github.com/qz057/openclaw-studio.git (fetch)\norigin\thttps://github.com/qz057/openclaw-studio.git (push)"
   },
   "githubCli": {
@@ -83,5 +84,10 @@
     "Optional asset not staged by default: RC Windows zip (E:\\claucd\\界面控制台程序\\apps\\studio\\release\\OpenClaw Studio-0.1.0-win-x64.zip)",
     "GitHub CLI is not logged in. Use browser upload or run gh auth login before CLI publishing."
   ],
-  "blockers": []
+  "blockers": [
+    {
+      "id": "tag-not-aligned-with-head",
+      "detail": "v0.1.0-preview.5 must point to current HEAD before publishing."
+    }
+  ]
 }

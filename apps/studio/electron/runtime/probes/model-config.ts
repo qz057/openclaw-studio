@@ -8,6 +8,10 @@ const DEFAULT_TIMEOUT_MS = 30_000;
 const MAX_CAPTURE_CHARS = 128_000;
 const OPENCLAW_CONFIG_PATH_SEGMENTS = [".openclaw", "openclaw.json"] as const;
 const HERMES_CONFIG_PATH_SEGMENTS = [".hermes", "config.yaml"] as const;
+const WIN32_OPENCLAW_CONFIG_CANDIDATES = [
+  "\\\\wsl$\\Ubuntu-24.04\\home\\qz057\\.openclaw\\openclaw.json",
+  "\\\\wsl.localhost\\Ubuntu-24.04\\home\\qz057\\.openclaw\\openclaw.json"
+] as const;
 
 interface CommandInvocation {
   command: string;
@@ -141,10 +145,27 @@ function buildWslReadCommand(targetPath: "~/.openclaw/openclaw.json" | "~/.herme
 
 async function readOpenClawConfig(): Promise<OpenClawConfigFile | null> {
   try {
-    const raw =
-      process.platform === "win32"
-        ? (await runCommandCapture(buildWslReadCommand("~/.openclaw/openclaw.json"))).stdout
-        : await fs.readFile(getOpenClawConfigPath(), "utf8");
+    let raw: string;
+
+    if (process.platform === "win32") {
+      raw = "";
+
+      for (const candidatePath of WIN32_OPENCLAW_CONFIG_CANDIDATES) {
+        try {
+          raw = await fs.readFile(candidatePath, "utf8");
+          break;
+        } catch {
+          continue;
+        }
+      }
+
+      if (!raw) {
+        raw = (await runCommandCapture(buildWslReadCommand("~/.openclaw/openclaw.json"), 8_000)).stdout;
+      }
+    } else {
+      raw = await fs.readFile(getOpenClawConfigPath(), "utf8");
+    }
+
     return JSON.parse(raw) as OpenClawConfigFile;
   } catch {
     return null;
@@ -209,9 +230,9 @@ function collectConfiguredModelLabels(config: OpenClawConfigFile | null): Map<st
 
 import { parseModelIdentity, buildModelOption, dedupeModelOptions, filterModelLines } from "./model-config-utils.js";
 
-async function listOpenClawModelIds(): Promise<string[]> {
+async function listOpenClawModelIds(timeoutMs = 12_000): Promise<string[]> {
   const invocation = buildOpenClawCommand(["models", "list", "--plain"], "openclaw models list --plain");
-  const captured = await runCommandCapture(invocation, 45_000, 64_000);
+  const captured = await runCommandCapture(invocation, timeoutMs, 64_000);
 
   return filterModelLines(captured.stdout.split(/\r?\n/));
 }
@@ -241,24 +262,22 @@ export async function loadOpenClawModelCatalog(): Promise<StudioModelCatalog> {
 
   let discoveredIds: string[] = [];
 
-  try {
-    discoveredIds = await listOpenClawModelIds();
-  } catch {
-    discoveredIds = [];
+  if (configuredIds.length === 0) {
+    try {
+      discoveredIds = await listOpenClawModelIds();
+    } catch {
+      discoveredIds = [];
+    }
   }
-
-  const orderedIds = [
-    ...(selectedModelId ? [selectedModelId] : []),
-    ...discoveredIds,
-    ...configuredIds
-  ];
 
   return {
     selectedModelId,
     options: dedupeModelOptions(
-      orderedIds.map((modelId, index) =>
-        buildModelOption(modelId, labelMap, index < discoveredIds.length + Number(Boolean(selectedModelId)) ? "runtime" : "config")
-      )
+      [
+        ...(selectedModelId ? [buildModelOption(selectedModelId, labelMap, "config")] : []),
+        ...discoveredIds.map((modelId) => buildModelOption(modelId, labelMap, "runtime")),
+        ...configuredIds.map((modelId) => buildModelOption(modelId, labelMap, "config"))
+      ]
     )
   };
 }

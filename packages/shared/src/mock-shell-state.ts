@@ -5263,7 +5263,8 @@ export const mockShellState: StudioShellState = {
   },
   pages: [
     { id: "dashboard", label: "总览", hint: "健康、网关、会话和模型路由判断入口" },
-    { id: "chat", label: "会话", hint: "OpenClaw、Hermes 和 Claude 会话工作台" },
+    { id: "chat", label: "OpenClaw", hint: "OpenClaw 主会话与终端流" },
+    { id: "hermes", label: "Hermes", hint: "Hermes 记忆会话层" },
     { id: "sessions", label: "历史", hint: "继续任务、最近工作区和回放记录" },
     { id: "skills", label: "能力", hint: "插件、MCP、工具和技能清单" },
     { id: "settings", label: "配置", hint: "运行路径、网关策略、安全策略和模型设置" },

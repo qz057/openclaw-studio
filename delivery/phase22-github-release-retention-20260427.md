@@ -8,22 +8,24 @@ github-release-retention-blocked
 
 - repo: `qz057/openclaw-studio`
 - active version: `v0.1.0-preview.5`
-- url: missing
+- url: https://github.com/qz057/openclaw-studio/releases/tag/v0.1.0-preview.5
 
 ## Retired Versions
 
 - v0.1.0-preview.1: release=absent, remoteTag=absent
 - v0.1.0-preview.2: release=absent, remoteTag=absent
 - v0.1.0-preview.3: release=absent, remoteTag=absent
+- v0.1.0-preview.4: release=present, remoteTag=present
 
 ## Blockers
 
-- active-release-missing: v0.1.0-preview.5 is not present in GitHub releases.
-- active-tag-missing: v0.1.0-preview.5 is not present on origin.
+- retired-release-still-present: v0.1.0-preview.4 still exists as a GitHub release.
+- retired-tag-still-present: v0.1.0-preview.4 still exists on origin.
 
 ## Warnings
 
 - GitHub CLI release list failed, so Phase 22 used the public GitHub API fallback.
+- Retired local tag is still present: v0.1.0-preview.4
 
 ## Verification
 

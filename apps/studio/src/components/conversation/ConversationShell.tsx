@@ -8,20 +8,22 @@ import {
   History,
   LayoutDashboard,
   MessageSquare,
+  Moon,
   Plus,
   Power,
   RefreshCw,
-  Search,
   Send,
   Settings,
   ShieldCheck,
+  Sun,
   TerminalSquare,
   Wrench
 } from "lucide-react";
 
 export type ConversationSurfaceId = "openclaw" | "hermes";
-export type ConversationNavTarget = "dashboard" | "chat" | "sessions" | "agents" | "skills" | "settings";
+export type ConversationNavTarget = "dashboard" | "chat" | "hermes" | "sessions" | "agents" | "skills" | "settings";
 export type ConversationTone = "neutral" | "active" | "positive" | "warning" | "danger" | "violet";
+export type ConversationThemeMode = "night" | "day";
 
 export interface ConversationChip {
   label: string;
@@ -46,6 +48,10 @@ interface ConversationShellProps {
   onCreateSession?: () => void;
   onNavigatePage?: (pageId: ConversationNavTarget) => void;
   onSessionSurfaceChange?: (surface: ConversationSurfaceId) => void;
+  themeMode?: ConversationThemeMode;
+  onThemeModeChange?: (mode: ConversationThemeMode) => void;
+  showGlobalNav?: boolean;
+  showSessionList?: boolean;
 }
 
 export interface SessionHeaderProps {
@@ -171,7 +177,7 @@ const navGroups: Array<{
       },
       {
         id: "current",
-        title: "主会话",
+        title: "OpenClaw",
         subtitle: "当前活动",
         target: "chat",
         surface: "openclaw",
@@ -181,7 +187,7 @@ const navGroups: Array<{
         id: "hermes",
         title: "Hermes",
         subtitle: "记忆会话",
-        target: "chat",
+        target: "hermes",
         surface: "hermes",
         icon: <TerminalSquare size={18} strokeWidth={2.1} aria-hidden="true" />
       },
@@ -226,18 +232,10 @@ const sessionGroups: Array<{
   }>;
 }> = [
   {
-    label: "进行中",
+    label: "会话通道",
     items: [
-      { id: "openclaw-main", title: "主会话", meta: "gpt-5.5 · relay", time: "15:20", surface: "openclaw" },
-      { id: "hermes-memory", title: "Hermes 记忆会话", meta: "Hermes · 会话层", time: "刚刚", surface: "hermes" },
-      { id: "api-debug", title: "API 调试", meta: "gateway · relay", time: "10:42" }
-    ]
-  },
-  {
-    label: "最近",
-    items: [
-      { id: "incident-debug", title: "故障排查", meta: "runtime · alerts", time: "昨天" },
-      { id: "frontend-talk", title: "前端实现讨论", meta: "ui · layout", time: "昨天" }
+      { id: "openclaw-main", title: "OpenClaw", meta: "gpt-5.5 · relay", time: "当前", surface: "openclaw" },
+      { id: "hermes-memory", title: "Hermes", meta: "记忆会话层", time: "待连接", surface: "hermes" }
     ]
   }
 ];
@@ -251,22 +249,40 @@ export function ConversationShell({
   inspector,
   onCreateSession,
   onNavigatePage,
-  onSessionSurfaceChange
+  onSessionSurfaceChange,
+  themeMode = "night",
+  onThemeModeChange,
+  showGlobalNav = true,
+  showSessionList = true
 }: ConversationShellProps) {
+  const shellClassName = [
+    "conversation-shell",
+    !showGlobalNav ? "conversation-shell--no-global-nav" : "",
+    !showSessionList ? "conversation-shell--no-session-list" : ""
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <section className="conversation-shell" aria-label="Conversation Shell">
-      <GlobalNav
-        activeSurface={activeSurface}
-        gatewaySummary={gatewaySummary}
-        onNavigatePage={onNavigatePage}
-        onSessionSurfaceChange={onSessionSurfaceChange}
-      />
-      <SessionListPanel
-        selectedSessionId={selectedSessionId}
-        onCreateSession={onCreateSession}
-        onNavigatePage={onNavigatePage}
-        onSessionSurfaceChange={onSessionSurfaceChange}
-      />
+    <section className={shellClassName} aria-label="Conversation Shell">
+      {showGlobalNav ? (
+        <GlobalNav
+          activeSurface={activeSurface}
+          gatewaySummary={gatewaySummary}
+          onNavigatePage={onNavigatePage}
+          onSessionSurfaceChange={onSessionSurfaceChange}
+          themeMode={themeMode}
+          onThemeModeChange={onThemeModeChange}
+        />
+      ) : null}
+      {showSessionList ? (
+        <SessionListPanel
+          selectedSessionId={selectedSessionId}
+          onCreateSession={onCreateSession}
+          onNavigatePage={onNavigatePage}
+          onSessionSurfaceChange={onSessionSurfaceChange}
+        />
+      ) : null}
       <SessionHeader {...header} />
       <main className="conversation-shell__main">{children}</main>
       <InspectorPanel>{inspector}</InspectorPanel>
@@ -278,13 +294,20 @@ export function GlobalNav({
   activeSurface,
   gatewaySummary,
   onNavigatePage,
-  onSessionSurfaceChange
+  onSessionSurfaceChange,
+  themeMode = "night",
+  onThemeModeChange
 }: {
   activeSurface: ConversationSurfaceId;
   gatewaySummary: ConversationGatewaySummary;
   onNavigatePage?: (pageId: ConversationNavTarget) => void;
   onSessionSurfaceChange?: (surface: ConversationSurfaceId) => void;
+  themeMode?: ConversationThemeMode;
+  onThemeModeChange?: (mode: ConversationThemeMode) => void;
 }) {
+  const ThemeIcon = themeMode === "night" ? Sun : Moon;
+  const nextThemeMode: ConversationThemeMode = themeMode === "night" ? "day" : "night";
+
   return (
     <aside className="conversation-global-nav" aria-label="全局导航栏">
       <div className="conversation-brand">
@@ -296,6 +319,20 @@ export function GlobalNav({
           <span>OpenClaw Console</span>
         </div>
       </div>
+      {onThemeModeChange ? (
+        <button
+          type="button"
+          className="theme-mode-switch theme-mode-switch--conversation"
+          aria-label={themeMode === "night" ? "切换白天模式" : "切换夜晚模式"}
+          title={themeMode === "night" ? "切换白天模式" : "切换夜晚模式"}
+          onClick={() => {
+            onThemeModeChange(nextThemeMode);
+          }}
+        >
+          <ThemeIcon size={16} strokeWidth={2.2} aria-hidden="true" />
+          <span>{themeMode === "night" ? "白天模式" : "夜晚模式"}</span>
+        </button>
+      ) : null}
 
       <div className="conversation-global-nav__groups">
         {navGroups.map((group) => (
@@ -360,27 +397,12 @@ export function SessionListPanel({
     <aside className="conversation-session-list" aria-label="会话列表栏">
       <div className="conversation-session-list__top">
         <div>
-          <strong>会话列表</strong>
-          <span>关键会话与恢复入口</span>
+          <strong>会话通道</strong>
+          <span>直接进入当前聊天层</span>
         </div>
         <button type="button" className="conversation-mini-button conversation-mini-button--primary" onClick={onCreateSession}>
           <Plus size={15} strokeWidth={2.4} aria-hidden="true" />
           新建
-        </button>
-      </div>
-      <label className="conversation-search">
-        <Search size={15} strokeWidth={2.2} aria-hidden="true" />
-        <input placeholder="搜索会话..." />
-      </label>
-      <div className="conversation-filter-tabs" role="tablist" aria-label="会话过滤">
-        <button type="button" className="conversation-filter-tab conversation-filter-tab--active">
-          全部 5
-        </button>
-        <button type="button" className="conversation-filter-tab">
-          活跃 2
-        </button>
-        <button type="button" className="conversation-filter-tab">
-          最近
         </button>
       </div>
       <div className="conversation-session-list__scroll">

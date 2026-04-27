@@ -1,0 +1,2493 @@
+{
+  "generatedAt": "2026-04-27T03:36:21.984Z",
+  "status": "passed",
+  "host": {
+    "platform": "win32",
+    "arch": "x64",
+    "hostname": "山谷神奇"
+  },
+  "runtime": {
+    "launchMode": "source",
+    "launchCommand": "E:\\claucd\\界面控制台程序\\node_modules\\electron\\dist\\electron.exe",
+    "appRoot": "E:\\claucd\\界面控制台程序\\apps\\studio",
+    "userDataDir": "C:\\Users\\qz057\\AppData\\Local\\Temp\\openclaw-studio-ui-full-check-Jio8gH",
+    "cdpPort": 64988
+  },
+  "pages": [
+    {
+      "id": "dashboard",
+      "label": "总览",
+      "navResult": {
+        "clicked": true,
+        "target": {
+          "x": 120.00000381469727,
+          "y": 169.6666717529297,
+          "width": 186.6666717529297,
+          "height": 61,
+          "text": "总览 运行健康",
+          "tag": "BUTTON",
+          "className": "nav-item nav-item--active"
+        }
+      },
+      "stateAfterNav": {
+        "hash": "#dashboard",
+        "title": "山谷智合",
+        "bodyLength": 3303,
+        "bodyPreview": "山谷智合 实时同步 刚刚同步 主入口 总览 运行健康 会话 主会话与终端流 历史 历史与恢复 工具配置 能力 能力与接入 配置 当前配置 高级诊断 诊断与审查 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 采样 2/2 宿主执行 受保护 总览 实时同步 数据每 5 秒刷新 近 24 小时 山谷智合实时运营驾驶舱 就绪 · 混合 · 刚刚同步 Shell 快照 5 秒刷新 真实快照 运行指标 已连接 · 265ms 运行指标 网关/Hermes 9/9 正常 · 1675ms 运行服务 滚动缓存 3 个样本 滚动缓存 任务总数 服务 6 滚动持平 1 运行 · 0 待处理 · 4 完成 采样成功率 服务 100% 运行态已采样 9/9 运行态调用成功 · 会话 2/3 采样耗时 服务 1675ms 最新批次 运行态 1675ms · 指标 265ms · 网关 2/2 系统健康 服务 100% 运行态已连接 就绪 · 混合 CODEX 任务流 Codex 全部会话 我会继续自己推，但先把边界说清：我能完成本机清理、GitHub token 本地",
+        "activeNav": [
+          "总览 运行健康"
+        ],
+        "headings": [
+          "总览",
+          "Codex",
+          "模型路由",
+          "任务类型分布",
+          "资源使用趋势",
+          "网关与节点",
+          "Claude Code"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 运行健康",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 1,
+            "text": "会话 主会话与终端流",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "历史 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "能力 能力与接入",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "配置 当前配置",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 5,
+            "text": "高级诊断 诊断与审查",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 6,
+            "text": "近 24 小时",
+            "disabled": false,
+            "className": "dashboard-range-button"
+          },
+          {
+            "index": 9,
+            "text": "全部会话",
+            "disabled": false,
+            "className": "dashboard-session-filter"
+          },
+          {
+            "index": 10,
+            "text": "全部会话",
+            "disabled": false,
+            "className": "dashboard-session-filter"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false,
+        "hasObjectObjectText": false,
+        "hasNaNText": false,
+        "hasOldLiveSessionTitle": false,
+        "hasClaudeCodeTitle": true,
+        "internalTermMatches": [],
+        "internalTermContexts": [],
+        "visibleEnglishMatches": [],
+        "visibleEnglishContexts": [],
+        "hasGatewayControl": false,
+        "hasModelControl": false,
+        "hasChatOperationResult": false,
+        "hasDiagnosticsTabs": false
+      },
+      "pagePaletteClick": {
+        "clicked": true,
+        "method": "Ctrl+K"
+      },
+      "pagePaletteState": {
+        "open": true,
+        "entries": [
+          "打开总览一级页 进入运行健康、网关状态和实时概览。 导航 Alt+1",
+          "打开会话一级页 进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。 导航 Alt+2",
+          "打开历史一级页 进入历史与恢复，继续最近任务、工作区和回放记录。 导航 Alt+3",
+          "打开能力一级页 进入技能、工具和 MCP 能力清单。 导航 Alt+4",
+          "打开配置一级页 进入工作区、运行态和安全策略配置。 导航 Alt+5",
+          "打开高级诊断一级页 进入运行态探针、桥接与 IPC、安全边界等诊断入口。 导航 Alt+6"
+        ],
+        "contexts": [
+          "全局入口",
+          "总览入口",
+          "Ctrl/Cmd+K · 打开命令面板",
+          "Esc · 关闭命令面板",
+          "Alt+Enter · 推进当前上下文流程",
+          "Alt+1 · 前往总览",
+          "Alt+2 · 打开会话",
+          "Alt+3 · 打开历史",
+          "Alt+4 · 打开能力",
+          "Alt+5 · 打开配置",
+          "主入口",
+          "一级页"
+        ],
+        "bodyPreview": "命令面 命令面板 Esc 感知当前流程的本地动作路由器 全局入口 总览入口 Ctrl/Cmd+K · 打开命令面板 Esc · 关闭命令面板 Alt+Enter · 推进当前上下文流程 Alt+1 · 前往总览 Alt+2 · 打开会话 Alt+3 · 打开历史 Alt+4 · 打开能力 Alt+5 · 打开配置 主入口 打开总览、会话、历史、能力、配置或高级诊断。 打开总览一级页 进入运行健康、网关状态和实时概览。 导航 Alt+1 打开会话一级页 进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。 导航 Alt+2 打开历史一级页 进入历史与恢复，继续最近任务、工作区和回放记录。 导航 Alt+3 打开能力一级页 进入技能、工具和 MCP 能力清单。 导航 Alt+4 打开配置一级页 进入工作区、运行态和安全策略配置。 导航 Alt+5 打开高级诊断一级页 进入运行态探针、桥接与 IPC、安全边界等诊断入口。 导航 Alt+6 命令预览打开总览 进入运行健康、网关状态和实时概览。 主入口 一级页 路由上下文 dashboard / 无工作区 / 无意图 导航 Alt+1 执行提示 按 Enter 执行当前受控本地动作。 方向键只切换选择，不离开当前审查上下文。",
+        "internalTermMatches": [],
+        "visibleEnglishMatches": [],
+        "removedCommandMatches": [],
+        "primaryCommandMatches": [
+          "打开总览",
+          "打开会话",
+          "打开历史",
+          "打开能力",
+          "打开配置",
+          "打开高级诊断"
+        ]
+      },
+      "typed": {
+        "typed": false,
+        "reason": "No chat input expected on this page"
+      },
+      "interactions": {
+        "clicked": [],
+        "skippedDangerous": [],
+        "pageId": "dashboard"
+      },
+      "finalState": {
+        "hash": "#dashboard",
+        "title": "山谷智合",
+        "bodyLength": 3303,
+        "bodyPreview": "山谷智合 实时同步 刚刚同步 主入口 总览 运行健康 会话 主会话与终端流 历史 历史与恢复 工具配置 能力 能力与接入 配置 当前配置 高级诊断 诊断与审查 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 采样 2/2 宿主执行 受保护 总览 实时同步 数据每 5 秒刷新 近 24 小时 山谷智合实时运营驾驶舱 就绪 · 混合 · 刚刚同步 Shell 快照 5 秒刷新 真实快照 运行指标 已连接 · 265ms 运行指标 网关/Hermes 9/9 正常 · 1675ms 运行服务 滚动缓存 3 个样本 滚动缓存 任务总数 服务 6 滚动持平 1 运行 · 0 待处理 · 4 完成 采样成功率 服务 100% 运行态已采样 9/9 运行态调用成功 · 会话 2/3 采样耗时 服务 1675ms 最新批次 运行态 1675ms · 指标 265ms · 网关 2/2 系统健康 服务 100% 运行态已连接 就绪 · 混合 CODEX 任务流 Codex 全部会话 我会继续自己推，但先把边界说清：我能完成本机清理、GitHub token 本地",
+        "activeNav": [
+          "总览 运行健康"
+        ],
+        "headings": [
+          "总览",
+          "Codex",
+          "模型路由",
+          "任务类型分布",
+          "资源使用趋势",
+          "网关与节点",
+          "Claude Code"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 运行健康",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 1,
+            "text": "会话 主会话与终端流",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "历史 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "能力 能力与接入",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "配置 当前配置",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 5,
+            "text": "高级诊断 诊断与审查",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 6,
+            "text": "近 24 小时",
+            "disabled": false,
+            "className": "dashboard-range-button"
+          },
+          {
+            "index": 9,
+            "text": "全部会话",
+            "disabled": false,
+            "className": "dashboard-session-filter"
+          },
+          {
+            "index": 10,
+            "text": "全部会话",
+            "disabled": false,
+            "className": "dashboard-session-filter"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false,
+        "hasObjectObjectText": false,
+        "hasNaNText": false,
+        "hasOldLiveSessionTitle": false,
+        "hasClaudeCodeTitle": true,
+        "internalTermMatches": [],
+        "internalTermContexts": [],
+        "visibleEnglishMatches": [],
+        "visibleEnglishContexts": [],
+        "hasGatewayControl": false,
+        "hasModelControl": false,
+        "hasChatOperationResult": false,
+        "hasDiagnosticsTabs": false
+      },
+      "screenshot": {
+        "path": "E:\\claucd\\界面控制台程序\\delivery\\phase11-ui-dashboard-gateway-nodes-v4-20260427\\dashboard.png",
+        "size": 251928,
+        "sha256": "2B2D2D7C73B5684F304CA76D23D8E43CC1E30CA54196A8CE7DA753F3B951C0FE"
+      },
+      "failures": []
+    },
+    {
+      "id": "chat",
+      "label": "会话",
+      "navResult": {
+        "clicked": true,
+        "target": {
+          "x": 120.00000381469727,
+          "y": 236.6666717529297,
+          "width": 186.6666717529297,
+          "height": 61,
+          "text": "会话 主会话与终端流",
+          "tag": "BUTTON",
+          "className": "nav-item"
+        }
+      },
+      "stateAfterNav": {
+        "hash": "#session",
+        "title": "山谷智合",
+        "bodyLength": 15482,
+        "bodyPreview": "山谷智合 当前版本 实时同步 刚刚同步 主入口 总览 运行健康 会话 主会话与终端流 历史 历史与恢复 工具配置 能力 能力与接入 配置 当前配置 高级诊断 诊断与审查 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 采样 2/2 宿主执行 受保护 OpenClaw 主会话 Hermes 终端会话 Claude 历史记录 OPENCLAW 主会话 agent:main:main gpt-5.5 · relay 未选择模型 本地网关 · 已连接 网络连接 · 可访问 桥接 · 混合 运行态 · 就绪 工作区 · 操作壳层 聊天状态 · 可发送 10 小时前同步 模型设置 OpenClaw 默认模型 等待模型列表 待应用模型 未发现可用模型 当前模型 未选择模型 待应用模型 无待应用变更 会话模型 gpt-5.5 · relay 新建会话 应用模型 应用结果 尚未执行模型应用 下一步：选择模型后点击应用模型。 最近一次操作：暂无 Gateway 控制 Gateway 状态加载中 可操作 当前网关状态 读取中 网络/RPC 状态 网络连接 · 可访问",
+        "activeNav": [
+          "会话 主会话与终端流"
+        ],
+        "headings": [],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 运行健康",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "会话 主会话与终端流",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 2,
+            "text": "历史 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "能力 能力与接入",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "配置 当前配置",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 5,
+            "text": "高级诊断 诊断与审查",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 6,
+            "text": "OpenClaw 主会话",
+            "disabled": false,
+            "className": "session-surface-tab session-surface-tab--active"
+          },
+          {
+            "index": 7,
+            "text": "Hermes 终端会话",
+            "disabled": false,
+            "className": "session-surface-tab"
+          },
+          {
+            "index": 8,
+            "text": "Claude 历史记录",
+            "disabled": false,
+            "className": "session-surface-tab"
+          },
+          {
+            "index": 9,
+            "text": "新建会话",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 10,
+            "text": "应用模型",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 11,
+            "text": "刷新网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 12,
+            "text": "启动网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 13,
+            "text": "停止网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 14,
+            "text": "回到底部看最新回复",
+            "disabled": false,
+            "className": "quick-action-button quick-action-button--primary"
+          },
+          {
+            "index": 15,
+            "text": "总结当前 OpenClaw 运行状态",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 16,
+            "text": "检查最近会话和待处理事项",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 17,
+            "text": "告诉我现在最值得继续的下一步",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 18,
+            "text": "帮我诊断当前工作区里最明显的问题",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 19,
+            "text": "清空",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 20,
+            "text": "发送到 OpenClaw Ctrl/Cmd + Enter",
+            "disabled": true,
+            "className": "quick-action-button quick-action-button--primary"
+          }
+        ],
+        "fields": [
+          {
+            "tag": "SELECT",
+            "placeholder": "",
+            "disabled": true,
+            "readOnly": false,
+            "valueLength": 0
+          },
+          {
+            "tag": "TEXTAREA",
+            "placeholder": "直接向 OpenClaw 主会话发消息，例如：总结当前 OpenClaw 状态，并告诉我下一步最应该做什么。",
+            "disabled": false,
+            "readOnly": false,
+            "valueLength": 0
+          }
+        ],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false,
+        "hasObjectObjectText": false,
+        "hasNaNText": false,
+        "hasOldLiveSessionTitle": false,
+        "hasClaudeCodeTitle": false,
+        "internalTermMatches": [],
+        "internalTermContexts": [],
+        "visibleEnglishMatches": [],
+        "visibleEnglishContexts": [],
+        "hasGatewayControl": true,
+        "hasModelControl": true,
+        "hasChatOperationResult": true,
+        "hasDiagnosticsTabs": false
+      },
+      "pagePaletteClick": {
+        "clicked": true,
+        "method": "Ctrl+K"
+      },
+      "pagePaletteState": {
+        "open": true,
+        "entries": [
+          "打开总览一级页 进入运行健康、网关状态和实时概览。 导航 Alt+1",
+          "打开会话一级页 进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。 导航 Alt+2",
+          "打开历史一级页 进入历史与恢复，继续最近任务、工作区和回放记录。 导航 Alt+3",
+          "打开能力一级页 进入技能、工具和 MCP 能力清单。 导航 Alt+4",
+          "打开配置一级页 进入工作区、运行态和安全策略配置。 导航 Alt+5",
+          "打开高级诊断一级页 进入运行态探针、桥接与 IPC、安全边界等诊断入口。 导航 Alt+6"
+        ],
+        "contexts": [
+          "全局入口",
+          "会话入口",
+          "Ctrl/Cmd+K · 打开命令面板",
+          "Esc · 关闭命令面板",
+          "Alt+Enter · 推进当前上下文流程",
+          "Alt+1 · 前往总览",
+          "Alt+2 · 打开会话",
+          "Alt+3 · 打开历史",
+          "Alt+4 · 打开能力",
+          "Alt+5 · 打开配置",
+          "主入口",
+          "一级页"
+        ],
+        "bodyPreview": "命令面 命令面板 Esc 感知当前流程的本地动作路由器 全局入口 会话入口 Ctrl/Cmd+K · 打开命令面板 Esc · 关闭命令面板 Alt+Enter · 推进当前上下文流程 Alt+1 · 前往总览 Alt+2 · 打开会话 Alt+3 · 打开历史 Alt+4 · 打开能力 Alt+5 · 打开配置 主入口 打开总览、会话、历史、能力、配置或高级诊断。 打开总览一级页 进入运行健康、网关状态和实时概览。 导航 Alt+1 打开会话一级页 进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。 导航 Alt+2 打开历史一级页 进入历史与恢复，继续最近任务、工作区和回放记录。 导航 Alt+3 打开能力一级页 进入技能、工具和 MCP 能力清单。 导航 Alt+4 打开配置一级页 进入工作区、运行态和安全策略配置。 导航 Alt+5 打开高级诊断一级页 进入运行态探针、桥接与 IPC、安全边界等诊断入口。 导航 Alt+6 命令预览打开总览 进入运行健康、网关状态和实时概览。 主入口 一级页 路由上下文 dashboard / 无工作区 / 无意图 导航 Alt+1 执行提示 按 Enter 执行当前受控本地动作。 方向键只切换选择，不离开当前审查上下文。",
+        "internalTermMatches": [],
+        "visibleEnglishMatches": [],
+        "removedCommandMatches": [],
+        "primaryCommandMatches": [
+          "打开总览",
+          "打开会话",
+          "打开历史",
+          "打开能力",
+          "打开配置",
+          "打开高级诊断"
+        ]
+      },
+      "typed": {
+        "typed": true,
+        "target": {
+          "x": 832,
+          "y": 884.2083549499512,
+          "tag": "TEXTAREA",
+          "placeholder": "直接向 OpenClaw 主会话发消息，例如：总结当前 OpenClaw 状态，并告诉我下一步最应该做什么。",
+          "valueLength": 0
+        },
+        "valueLength": 22
+      },
+      "interactions": {
+        "clicked": [
+          {
+            "text": "刷新网关",
+            "result": {
+              "clicked": true,
+              "target": {
+                "x": 902.3333549499512,
+                "y": 515.15625,
+                "width": 97.33333587646484,
+                "height": 46,
+                "text": "刷新网关",
+                "tag": "BUTTON",
+                "className": "secondary-button"
+              }
+            }
+          },
+          {
+            "text": "检查最近会话和待处理事项",
+            "result": {
+              "clicked": true,
+              "target": {
+                "x": 604.1041717529297,
+                "y": 782.28125,
+                "width": 217.33334350585938,
+                "height": 46,
+                "text": "检查最近会话和待处理事项",
+                "tag": "BUTTON",
+                "className": "secondary-button chat-preset-button"
+              }
+            }
+          },
+          {
+            "text": "清空",
+            "result": {
+              "clicked": true,
+              "target": {
+                "x": 276.6666679382324,
+                "y": 960.46875,
+                "width": 65.33333587646484,
+                "height": 56,
+                "text": "清空",
+                "tag": "BUTTON",
+                "className": "secondary-button"
+              }
+            }
+          }
+        ],
+        "skippedDangerous": [
+          "新建会话",
+          "停止网关",
+          "发送到 OpenClaw Ctrl/Cmd + Enter"
+        ],
+        "pageId": "chat"
+      },
+      "finalState": {
+        "hash": "#session",
+        "title": "山谷智合",
+        "bodyLength": 15552,
+        "bodyPreview": "山谷智合 当前版本 实时同步 刚刚同步 主入口 总览 运行健康 会话 主会话与终端流 历史 历史与恢复 工具配置 能力 能力与接入 配置 当前配置 高级诊断 诊断与审查 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 采样 2/2 宿主执行 受保护 OpenClaw 主会话 Hermes 终端会话 Claude 历史记录 OPENCLAW 主会话 agent:main:main gpt-5.5 · relay 未选择模型 本地网关 · 已连接 网络连接 · 可访问 桥接 · 混合 运行态 · 就绪 工作区 · 操作壳层 聊天状态 · 可发送 10 小时前同步 模型设置 OpenClaw 默认模型 等待模型列表 待应用模型 未发现可用模型 当前模型 未选择模型 待应用模型 无待应用变更 会话模型 gpt-5.5 · relay 新建会话 应用模型 应用结果 尚未执行模型应用 下一步：选择模型后点击应用模型。 最近一次操作：暂无 Gateway 控制 Gateway 已运行 可操作 当前网关状态 运行中 网络/RPC 状态 RPC 可达 · ws:",
+        "activeNav": [
+          "会话 主会话与终端流"
+        ],
+        "headings": [],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 运行健康",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "会话 主会话与终端流",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 2,
+            "text": "历史 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "能力 能力与接入",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "配置 当前配置",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 5,
+            "text": "高级诊断 诊断与审查",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 6,
+            "text": "OpenClaw 主会话",
+            "disabled": false,
+            "className": "session-surface-tab session-surface-tab--active"
+          },
+          {
+            "index": 7,
+            "text": "Hermes 终端会话",
+            "disabled": false,
+            "className": "session-surface-tab"
+          },
+          {
+            "index": 8,
+            "text": "Claude 历史记录",
+            "disabled": false,
+            "className": "session-surface-tab"
+          },
+          {
+            "index": 9,
+            "text": "新建会话",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 10,
+            "text": "应用模型",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 11,
+            "text": "刷新网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 12,
+            "text": "启动网关",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 13,
+            "text": "停止网关",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 14,
+            "text": "回到底部看最新回复",
+            "disabled": false,
+            "className": "quick-action-button quick-action-button--primary"
+          },
+          {
+            "index": 15,
+            "text": "总结当前 OpenClaw 运行状态",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 16,
+            "text": "检查最近会话和待处理事项",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 17,
+            "text": "告诉我现在最值得继续的下一步",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 18,
+            "text": "帮我诊断当前工作区里最明显的问题",
+            "disabled": false,
+            "className": "secondary-button chat-preset-button"
+          },
+          {
+            "index": 19,
+            "text": "清空",
+            "disabled": true,
+            "className": "secondary-button"
+          },
+          {
+            "index": 20,
+            "text": "发送到 OpenClaw Ctrl/Cmd + Enter",
+            "disabled": true,
+            "className": "quick-action-button quick-action-button--primary"
+          }
+        ],
+        "fields": [
+          {
+            "tag": "SELECT",
+            "placeholder": "",
+            "disabled": true,
+            "readOnly": false,
+            "valueLength": 0
+          },
+          {
+            "tag": "TEXTAREA",
+            "placeholder": "直接向 OpenClaw 主会话发消息，例如：总结当前 OpenClaw 状态，并告诉我下一步最应该做什么。",
+            "disabled": false,
+            "readOnly": false,
+            "valueLength": 0
+          }
+        ],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false,
+        "hasObjectObjectText": false,
+        "hasNaNText": false,
+        "hasOldLiveSessionTitle": false,
+        "hasClaudeCodeTitle": false,
+        "internalTermMatches": [],
+        "internalTermContexts": [],
+        "visibleEnglishMatches": [],
+        "visibleEnglishContexts": [],
+        "hasGatewayControl": true,
+        "hasModelControl": true,
+        "hasChatOperationResult": true,
+        "hasDiagnosticsTabs": false
+      },
+      "screenshot": {
+        "path": "E:\\claucd\\界面控制台程序\\delivery\\phase11-ui-dashboard-gateway-nodes-v4-20260427\\chat.png",
+        "size": 171701,
+        "sha256": "F095DEDBF363BD0F8F71B1DBD2D6BC531319D25DB69A9B40DB53F7D174C5B33F"
+      },
+      "failures": []
+    },
+    {
+      "id": "sessions",
+      "label": "历史",
+      "navResult": {
+        "clicked": true,
+        "target": {
+          "x": 120.00000381469727,
+          "y": 334.3333435058594,
+          "width": 186.6666717529297,
+          "height": 61,
+          "text": "历史 历史与恢复",
+          "tag": "BUTTON",
+          "className": "nav-item"
+        }
+      },
+      "stateAfterNav": {
+        "hash": "#history",
+        "title": "山谷智合",
+        "bodyLength": 2357,
+        "bodyPreview": "山谷智合 当前版本 实时同步 刚刚同步 主入口 总览 运行健康 会话 主会话与终端流 历史 历史与恢复 工具配置 能力 能力与接入 配置 当前配置 高级诊断 诊断与审查 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 采样 2/2 宿主执行 受保护 工作台首页 工作台 继续当前任务，或启动新的流程 新建会话 通过命令面板启动新的流程或任务。 恢复上次工作 Studio Alpha 初始化 · 2 分钟前 桥接 混合 Studio Alpha (混合) 运行态 就绪 0.1.0-alpha 工作区 操作壳层 意图聚焦 聚焦 通道应用 IPC 槽位 当前聚焦 最近同步 2 分钟前 暂无最近操作 待处理 2 项 1 项待复核 当前流程 操作壳层 → 轨迹台 → 审查台 按流程查看当前锚点、追踪位与复核位，把状态与入口放在同一条主链上。 操作壳层当前节点 已锚定 保持导航锚点和边界检查入口，作为当前工作流的起点。 进入 操作壳层 轨迹台流程节点 就绪 聚焦当前槽位与追踪链路，适合继续当前执行细节。 进入 轨迹台 审查台流程节点 待复核 集中处理边界复核",
+        "activeNav": [
+          "历史 历史与恢复"
+        ],
+        "headings": [
+          "工作台",
+          "操作壳层 → 轨迹台 → 审查台",
+          "进入审查台",
+          "最近会话",
+          "快速启动",
+          "当前执行就绪快照"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 运行健康",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "会话 主会话与终端流",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "历史 历史与恢复",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 3,
+            "text": "能力 能力与接入",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "配置 当前配置",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 5,
+            "text": "高级诊断 诊断与审查",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 6,
+            "text": "新建会话 通过命令面板启动新的流程或任务。",
+            "disabled": false,
+            "className": "workbench-header-action workbench-header-action--primary"
+          },
+          {
+            "index": 7,
+            "text": "恢复上次工作 Studio Alpha 初始化 · 2 分钟前",
+            "disabled": false,
+            "className": "workbench-header-action"
+          },
+          {
+            "index": 8,
+            "text": "进入 操作壳层",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 9,
+            "text": "进入 轨迹台",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 10,
+            "text": "进入 审查台",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 11,
+            "text": "立即进入",
+            "disabled": false,
+            "className": "quick-action-button quick-action-button--primary"
+          },
+          {
+            "index": 12,
+            "text": "执行",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 13,
+            "text": "执行",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 14,
+            "text": "全部",
+            "disabled": false,
+            "className": "shell-tab shell-tab--active"
+          },
+          {
+            "index": 15,
+            "text": "进行中",
+            "disabled": false,
+            "className": "shell-tab"
+          },
+          {
+            "index": 16,
+            "text": "待复核",
+            "disabled": false,
+            "className": "shell-tab"
+          },
+          {
+            "index": 17,
+            "text": "已完成",
+            "disabled": false,
+            "className": "shell-tab"
+          },
+          {
+            "index": 18,
+            "text": "继续",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 19,
+            "text": "查看",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 20,
+            "text": "打开",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 21,
+            "text": "↗ Shift+T 查看聚焦槽位追踪 把当前聚焦槽位切到优先追踪姿态。",
+            "disabled": false,
+            "className": "workbench-action-card workbench-action-card--positive"
+          },
+          {
+            "index": 22,
+            "text": "▣ 动作入口 进入审查台 让壳层优先展示窗口意图、占位状态和审查姿态。",
+            "disabled": false,
+            "className": "workbench-action-card workbench-action-card--neutral"
+          },
+          {
+            "index": 23,
+            "text": "◎ Shift+I 检查边界契约 把右侧栏聚焦到边界状态，并保留停靠区上下文。",
+            "disabled": false,
+            "className": "workbench-action-card workbench-action-card--positive"
+          },
+          {
+            "index": 24,
+            "text": "↺ 动作入口 恢复最近工作区 Studio Alpha 初始化 · openclaw-studio",
+            "disabled": false,
+            "className": "workbench-action-card workbench-action-card--neutral"
+          },
+          {
+            "index": 25,
+            "text": "● 动作入口 打开命令面板 打开命令面板并启动新的流程或任务。",
+            "disabled": false,
+            "className": "workbench-action-card workbench-action-card--positive"
+          },
+          {
+            "index": 26,
+            "text": "打开轨迹台",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 27,
+            "text": "打开审查台",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 28,
+            "text": "查看收口状态",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 29,
+            "text": "恢复上次工作",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 30,
+            "text": "进入审查面",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false,
+        "hasObjectObjectText": false,
+        "hasNaNText": false,
+        "hasOldLiveSessionTitle": false,
+        "hasClaudeCodeTitle": false,
+        "internalTermMatches": [],
+        "internalTermContexts": [],
+        "visibleEnglishMatches": [],
+        "visibleEnglishContexts": [],
+        "hasGatewayControl": false,
+        "hasModelControl": false,
+        "hasChatOperationResult": false,
+        "hasDiagnosticsTabs": false
+      },
+      "pagePaletteClick": {
+        "clicked": true,
+        "method": "Ctrl+K"
+      },
+      "pagePaletteState": {
+        "open": true,
+        "entries": [
+          "打开总览一级页 进入运行健康、网关状态和实时概览。 导航 Alt+1",
+          "打开会话一级页 进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。 导航 Alt+2",
+          "打开历史一级页 进入历史与恢复，继续最近任务、工作区和回放记录。 导航 Alt+3",
+          "打开能力一级页 进入技能、工具和 MCP 能力清单。 导航 Alt+4",
+          "打开配置一级页 进入工作区、运行态和安全策略配置。 导航 Alt+5",
+          "打开高级诊断一级页 进入运行态探针、桥接与 IPC、安全边界等诊断入口。 导航 Alt+6"
+        ],
+        "contexts": [
+          "全局入口",
+          "历史入口",
+          "Ctrl/Cmd+K · 打开命令面板",
+          "Esc · 关闭命令面板",
+          "Alt+Enter · 推进当前上下文流程",
+          "Alt+1 · 前往总览",
+          "Alt+2 · 打开会话",
+          "Alt+3 · 打开历史",
+          "Alt+4 · 打开能力",
+          "Alt+5 · 打开配置",
+          "主入口",
+          "一级页"
+        ],
+        "bodyPreview": "命令面 命令面板 Esc 感知当前流程的本地动作路由器 全局入口 历史入口 Ctrl/Cmd+K · 打开命令面板 Esc · 关闭命令面板 Alt+Enter · 推进当前上下文流程 Alt+1 · 前往总览 Alt+2 · 打开会话 Alt+3 · 打开历史 Alt+4 · 打开能力 Alt+5 · 打开配置 主入口 打开总览、会话、历史、能力、配置或高级诊断。 打开总览一级页 进入运行健康、网关状态和实时概览。 导航 Alt+1 打开会话一级页 进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。 导航 Alt+2 打开历史一级页 进入历史与恢复，继续最近任务、工作区和回放记录。 导航 Alt+3 打开能力一级页 进入技能、工具和 MCP 能力清单。 导航 Alt+4 打开配置一级页 进入工作区、运行态和安全策略配置。 导航 Alt+5 打开高级诊断一级页 进入运行态探针、桥接与 IPC、安全边界等诊断入口。 导航 Alt+6 命令预览打开总览 进入运行健康、网关状态和实时概览。 主入口 一级页 路由上下文 dashboard / 无工作区 / 无意图 导航 Alt+1 执行提示 按 Enter 执行当前受控本地动作。 方向键只切换选择，不离开当前审查上下文。",
+        "internalTermMatches": [],
+        "visibleEnglishMatches": [],
+        "removedCommandMatches": [],
+        "primaryCommandMatches": [
+          "打开总览",
+          "打开会话",
+          "打开历史",
+          "打开能力",
+          "打开配置",
+          "打开高级诊断"
+        ]
+      },
+      "typed": {
+        "typed": false,
+        "reason": "No chat input expected on this page"
+      },
+      "interactions": {
+        "clicked": [],
+        "skippedDangerous": [
+          "新建会话 通过命令面板启动新的流程或任务。",
+          "进入 操作壳层",
+          "进入 轨迹台",
+          "进入 审查台",
+          "立即进入",
+          "执行",
+          "继续",
+          "查看",
+          "打开",
+          "↗ Shift+T 查看聚焦槽位追踪 把当前聚焦槽位切到优先追踪姿态。",
+          "▣ 动作入口 进入审查台 让壳层优先展示窗口意图、占位状态和审查姿态。",
+          "◎ Shift+I 检查边界契约 把右侧栏聚焦到边界状态，并保留停靠区上下文。"
+        ],
+        "pageId": "sessions"
+      },
+      "finalState": {
+        "hash": "#history",
+        "title": "山谷智合",
+        "bodyLength": 2357,
+        "bodyPreview": "山谷智合 当前版本 实时同步 刚刚同步 主入口 总览 运行健康 会话 主会话与终端流 历史 历史与恢复 工具配置 能力 能力与接入 配置 当前配置 高级诊断 诊断与审查 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 采样 2/2 宿主执行 受保护 工作台首页 工作台 继续当前任务，或启动新的流程 新建会话 通过命令面板启动新的流程或任务。 恢复上次工作 Studio Alpha 初始化 · 2 分钟前 桥接 混合 Studio Alpha (混合) 运行态 就绪 0.1.0-alpha 工作区 操作壳层 意图聚焦 聚焦 通道应用 IPC 槽位 当前聚焦 最近同步 2 分钟前 暂无最近操作 待处理 2 项 1 项待复核 当前流程 操作壳层 → 轨迹台 → 审查台 按流程查看当前锚点、追踪位与复核位，把状态与入口放在同一条主链上。 操作壳层当前节点 已锚定 保持导航锚点和边界检查入口，作为当前工作流的起点。 进入 操作壳层 轨迹台流程节点 就绪 聚焦当前槽位与追踪链路，适合继续当前执行细节。 进入 轨迹台 审查台流程节点 待复核 集中处理边界复核",
+        "activeNav": [
+          "历史 历史与恢复"
+        ],
+        "headings": [
+          "工作台",
+          "操作壳层 → 轨迹台 → 审查台",
+          "进入审查台",
+          "最近会话",
+          "快速启动",
+          "当前执行就绪快照"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 运行健康",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "会话 主会话与终端流",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "历史 历史与恢复",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 3,
+            "text": "能力 能力与接入",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "配置 当前配置",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 5,
+            "text": "高级诊断 诊断与审查",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 6,
+            "text": "新建会话 通过命令面板启动新的流程或任务。",
+            "disabled": false,
+            "className": "workbench-header-action workbench-header-action--primary"
+          },
+          {
+            "index": 7,
+            "text": "恢复上次工作 Studio Alpha 初始化 · 2 分钟前",
+            "disabled": false,
+            "className": "workbench-header-action"
+          },
+          {
+            "index": 8,
+            "text": "进入 操作壳层",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 9,
+            "text": "进入 轨迹台",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 10,
+            "text": "进入 审查台",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 11,
+            "text": "立即进入",
+            "disabled": false,
+            "className": "quick-action-button quick-action-button--primary"
+          },
+          {
+            "index": 12,
+            "text": "执行",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 13,
+            "text": "执行",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 14,
+            "text": "全部",
+            "disabled": false,
+            "className": "shell-tab shell-tab--active"
+          },
+          {
+            "index": 15,
+            "text": "进行中",
+            "disabled": false,
+            "className": "shell-tab"
+          },
+          {
+            "index": 16,
+            "text": "待复核",
+            "disabled": false,
+            "className": "shell-tab"
+          },
+          {
+            "index": 17,
+            "text": "已完成",
+            "disabled": false,
+            "className": "shell-tab"
+          },
+          {
+            "index": 18,
+            "text": "继续",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 19,
+            "text": "查看",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 20,
+            "text": "打开",
+            "disabled": false,
+            "className": "secondary-button"
+          },
+          {
+            "index": 21,
+            "text": "↗ Shift+T 查看聚焦槽位追踪 把当前聚焦槽位切到优先追踪姿态。",
+            "disabled": false,
+            "className": "workbench-action-card workbench-action-card--positive"
+          },
+          {
+            "index": 22,
+            "text": "▣ 动作入口 进入审查台 让壳层优先展示窗口意图、占位状态和审查姿态。",
+            "disabled": false,
+            "className": "workbench-action-card workbench-action-card--neutral"
+          },
+          {
+            "index": 23,
+            "text": "◎ Shift+I 检查边界契约 把右侧栏聚焦到边界状态，并保留停靠区上下文。",
+            "disabled": false,
+            "className": "workbench-action-card workbench-action-card--positive"
+          },
+          {
+            "index": 24,
+            "text": "↺ 动作入口 恢复最近工作区 Studio Alpha 初始化 · openclaw-studio",
+            "disabled": false,
+            "className": "workbench-action-card workbench-action-card--neutral"
+          },
+          {
+            "index": 25,
+            "text": "● 动作入口 打开命令面板 打开命令面板并启动新的流程或任务。",
+            "disabled": false,
+            "className": "workbench-action-card workbench-action-card--positive"
+          },
+          {
+            "index": 26,
+            "text": "打开轨迹台",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 27,
+            "text": "打开审查台",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 28,
+            "text": "查看收口状态",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 29,
+            "text": "恢复上次工作",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          },
+          {
+            "index": 30,
+            "text": "进入审查面",
+            "disabled": false,
+            "className": "secondary-button workbench-inline-action"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false,
+        "hasObjectObjectText": false,
+        "hasNaNText": false,
+        "hasOldLiveSessionTitle": false,
+        "hasClaudeCodeTitle": false,
+        "internalTermMatches": [],
+        "internalTermContexts": [],
+        "visibleEnglishMatches": [],
+        "visibleEnglishContexts": [],
+        "hasGatewayControl": false,
+        "hasModelControl": false,
+        "hasChatOperationResult": false,
+        "hasDiagnosticsTabs": false
+      },
+      "screenshot": {
+        "path": "E:\\claucd\\界面控制台程序\\delivery\\phase11-ui-dashboard-gateway-nodes-v4-20260427\\sessions.png",
+        "size": 194210,
+        "sha256": "982975613301039291234F1FAC73E13F404B0FDCB3C737F69C946667A57F507E"
+      },
+      "failures": []
+    },
+    {
+      "id": "skills",
+      "label": "能力",
+      "navResult": {
+        "clicked": true,
+        "target": {
+          "x": 112.00000381469727,
+          "y": 438.66668701171875,
+          "width": 170.6666717529297,
+          "height": 61,
+          "text": "能力 能力与接入",
+          "tag": "BUTTON",
+          "className": "nav-item"
+        }
+      },
+      "stateAfterNav": {
+        "hash": "#capabilities",
+        "title": "山谷智合",
+        "bodyLength": 4149,
+        "bodyPreview": "山谷智合 当前版本 实时同步 刚刚同步 主入口 总览 运行健康 会话 主会话与终端流 历史 历史与恢复 工具配置 能力 能力与接入 配置 当前配置 高级诊断 诊断与审查 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 采样 2/2 宿主执行 受保护 能力概览 技能与工具 这里集中查看当前可用能力、根路径与详情，支持只读检查和安全动作。 分组 5 运行态条目 19 可查看详情 6 根路径状态 4 scanned 插件路径 1 paths MCP 根路径 Not found 已扫描根路径 当前实际扫描到的能力根路径。 4 scanned ~\\.openclaw\\skills · ~\\.openclaw\\工作区\\skills · ~\\.openclaw\\extensions · ~\\.codex\\skills\\.system ~\\.openclaw\\skills 插件与 MCP 概览 把插件路径和 MCP 根路径放到页首统一查看。 插件路径 Load paths 1 · curated cache present · installs 1. ~/.o",
+        "activeNav": [
+          "能力 能力与接入"
+        ],
+        "headings": [
+          "技能与工具",
+          "已扫描根路径",
+          "插件与 MCP 概览",
+          "OpenClaw Skills",
+          "Codex System Skills",
+          "Extension Sources",
+          "Tools",
+          "MCP",
+          "详情面板"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 运行健康",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "会话 主会话与终端流",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "历史 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "能力 能力与接入",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 4,
+            "text": "配置 当前配置",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 5,
+            "text": "高级诊断 诊断与审查",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 6,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 7,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 8,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 9,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 10,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 11,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false,
+        "hasObjectObjectText": false,
+        "hasNaNText": false,
+        "hasOldLiveSessionTitle": false,
+        "hasClaudeCodeTitle": false,
+        "internalTermMatches": [],
+        "internalTermContexts": [],
+        "visibleEnglishMatches": [],
+        "visibleEnglishContexts": [],
+        "hasGatewayControl": false,
+        "hasModelControl": false,
+        "hasChatOperationResult": false,
+        "hasDiagnosticsTabs": false
+      },
+      "pagePaletteClick": {
+        "clicked": true,
+        "method": "Ctrl+K"
+      },
+      "pagePaletteState": {
+        "open": true,
+        "entries": [
+          "打开总览一级页 进入运行健康、网关状态和实时概览。 导航 Alt+1",
+          "打开会话一级页 进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。 导航 Alt+2",
+          "打开历史一级页 进入历史与恢复，继续最近任务、工作区和回放记录。 导航 Alt+3",
+          "打开能力一级页 进入技能、工具和 MCP 能力清单。 导航 Alt+4",
+          "打开配置一级页 进入工作区、运行态和安全策略配置。 导航 Alt+5",
+          "打开高级诊断一级页 进入运行态探针、桥接与 IPC、安全边界等诊断入口。 导航 Alt+6"
+        ],
+        "contexts": [
+          "全局入口",
+          "能力入口",
+          "Ctrl/Cmd+K · 打开命令面板",
+          "Esc · 关闭命令面板",
+          "Alt+Enter · 推进当前上下文流程",
+          "Alt+1 · 前往总览",
+          "Alt+2 · 打开会话",
+          "Alt+3 · 打开历史",
+          "Alt+4 · 打开能力",
+          "Alt+5 · 打开配置",
+          "主入口",
+          "一级页"
+        ],
+        "bodyPreview": "命令面 命令面板 Esc 感知当前流程的本地动作路由器 全局入口 能力入口 Ctrl/Cmd+K · 打开命令面板 Esc · 关闭命令面板 Alt+Enter · 推进当前上下文流程 Alt+1 · 前往总览 Alt+2 · 打开会话 Alt+3 · 打开历史 Alt+4 · 打开能力 Alt+5 · 打开配置 主入口 打开总览、会话、历史、能力、配置或高级诊断。 打开总览一级页 进入运行健康、网关状态和实时概览。 导航 Alt+1 打开会话一级页 进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。 导航 Alt+2 打开历史一级页 进入历史与恢复，继续最近任务、工作区和回放记录。 导航 Alt+3 打开能力一级页 进入技能、工具和 MCP 能力清单。 导航 Alt+4 打开配置一级页 进入工作区、运行态和安全策略配置。 导航 Alt+5 打开高级诊断一级页 进入运行态探针、桥接与 IPC、安全边界等诊断入口。 导航 Alt+6 命令预览打开总览 进入运行健康、网关状态和实时概览。 主入口 一级页 路由上下文 dashboard / 无工作区 / 无意图 导航 Alt+1 执行提示 按 Enter 执行当前受控本地动作。 方向键只切换选择，不离开当前审查上下文。",
+        "internalTermMatches": [],
+        "visibleEnglishMatches": [],
+        "removedCommandMatches": [],
+        "primaryCommandMatches": [
+          "打开总览",
+          "打开会话",
+          "打开历史",
+          "打开能力",
+          "打开配置",
+          "打开高级诊断"
+        ]
+      },
+      "typed": {
+        "typed": false,
+        "reason": "No chat input expected on this page"
+      },
+      "interactions": {
+        "clicked": [
+          {
+            "text": "查看详情",
+            "result": {
+              "clicked": true,
+              "target": {
+                "x": 326.0000114440918,
+                "y": 487.66668701171875,
+                "width": 89.33333587646484,
+                "height": 38,
+                "text": "查看详情",
+                "tag": "BUTTON",
+                "className": "action-button"
+              }
+            }
+          },
+          {
+            "text": "查看详情",
+            "result": {
+              "clicked": true,
+              "target": {
+                "x": 326.0000114440918,
+                "y": 487.66668701171875,
+                "width": 89.33333587646484,
+                "height": 38,
+                "text": "查看详情",
+                "tag": "BUTTON",
+                "className": "action-button"
+              }
+            }
+          },
+          {
+            "text": "查看详情",
+            "result": {
+              "clicked": true,
+              "target": {
+                "x": 326.0000114440918,
+                "y": 487.66668701171875,
+                "width": 89.33333587646484,
+                "height": 38,
+                "text": "查看详情",
+                "tag": "BUTTON",
+                "className": "action-button"
+              }
+            }
+          },
+          {
+            "text": "查看详情",
+            "result": {
+              "clicked": true,
+              "target": {
+                "x": 326.0000114440918,
+                "y": 487.66668701171875,
+                "width": 89.33333587646484,
+                "height": 38,
+                "text": "查看详情",
+                "tag": "BUTTON",
+                "className": "action-button"
+              }
+            }
+          }
+        ],
+        "skippedDangerous": [],
+        "pageId": "skills"
+      },
+      "finalState": {
+        "hash": "#capabilities",
+        "title": "山谷智合",
+        "bodyLength": 4958,
+        "bodyPreview": "山谷智合 当前版本 实时同步 刚刚同步 主入口 总览 运行健康 会话 主会话与终端流 历史 历史与恢复 工具配置 能力 能力与接入 配置 当前配置 高级诊断 诊断与审查 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 采样 2/2 宿主执行 受保护 能力概览 技能与工具 这里集中查看当前可用能力、根路径与详情，支持只读检查和安全动作。 分组 5 运行态条目 19 可查看详情 6 根路径状态 4 scanned 插件路径 1 paths MCP 根路径 Not found 已扫描根路径 当前实际扫描到的能力根路径。 4 scanned ~\\.openclaw\\skills · ~\\.openclaw\\工作区\\skills · ~\\.openclaw\\extensions · ~\\.codex\\skills\\.system ~\\.openclaw\\skills 插件与 MCP 概览 把插件路径和 MCP 根路径放到页首统一查看。 插件路径 Load paths 1 · curated cache present · installs 1. ~/.o",
+        "activeNav": [
+          "能力 能力与接入"
+        ],
+        "headings": [
+          "技能与工具",
+          "已扫描根路径",
+          "插件与 MCP 概览",
+          "OpenClaw Skills",
+          "Codex System Skills",
+          "Extension Sources",
+          "Tools",
+          "MCP",
+          "详情面板"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 运行健康",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "会话 主会话与终端流",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "历史 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "能力 能力与接入",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 4,
+            "text": "配置 当前配置",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 5,
+            "text": "高级诊断 诊断与审查",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 6,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 7,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 8,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 9,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 10,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 11,
+            "text": "查看详情",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 12,
+            "text": "Probe config",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 13,
+            "text": "List hooks",
+            "disabled": false,
+            "className": "action-button"
+          },
+          {
+            "index": 14,
+            "text": "Test web readiness",
+            "disabled": false,
+            "className": "action-button"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false,
+        "hasObjectObjectText": false,
+        "hasNaNText": false,
+        "hasOldLiveSessionTitle": false,
+        "hasClaudeCodeTitle": false,
+        "internalTermMatches": [],
+        "internalTermContexts": [],
+        "visibleEnglishMatches": [],
+        "visibleEnglishContexts": [],
+        "hasGatewayControl": false,
+        "hasModelControl": false,
+        "hasChatOperationResult": false,
+        "hasDiagnosticsTabs": false
+      },
+      "screenshot": {
+        "path": "E:\\claucd\\界面控制台程序\\delivery\\phase11-ui-dashboard-gateway-nodes-v4-20260427\\skills.png",
+        "size": 153390,
+        "sha256": "7856A70B46F8B29BCE7960F761F957E7BE9E34A41AE2DA4860ED1873D96A6753"
+      },
+      "failures": []
+    },
+    {
+      "id": "settings",
+      "label": "配置",
+      "navResult": {
+        "clicked": true,
+        "target": {
+          "x": 120.00000381469727,
+          "y": 505.66668701171875,
+          "width": 186.6666717529297,
+          "height": 61,
+          "text": "配置 当前配置",
+          "tag": "BUTTON",
+          "className": "nav-item"
+        }
+      },
+      "stateAfterNav": {
+        "hash": "#settings",
+        "title": "山谷智合",
+        "bodyLength": 1860,
+        "bodyPreview": "山谷智合 当前版本 实时同步 刚刚同步 主入口 总览 运行健康 会话 主会话与终端流 历史 历史与恢复 工具配置 能力 能力与接入 配置 当前配置 高级诊断 诊断与审查 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 采样 2/2 宿主执行 受保护 配置概览 设置 这里集中查看当前工作区、运行态与安全策略。 当前配置概览 设置页会优先读取实时 shell 与运行态姿态；探针无法安全读取的项目仍保留类型化回退。 网关已连接. Network 可访问. 启动路由已在设置页同步本地预检链：构建就绪、Electron 就绪、无需显示环境、启动就绪。 正常项 12 需关注 2 分组 4 运行态 壳层模式与集成姿态。 6 项 桥接模式 总览、高级诊断、Codex、能力和工具/MCP 会混合本地运行态观测；探针保持只读时使用类型化回退。 混合 回退策略 渲染端正在接收实时观测；缺失探针仍可使用类型化回退。 活动 本地网关 http://127.0.0.1:18789/ · TCP 可达 · 127.0.0.1:18789 已连接 网络探针 https://g",
+        "activeNav": [
+          "配置 当前配置"
+        ],
+        "headings": [
+          "设置",
+          "当前配置概览",
+          "运行态",
+          "工作区",
+          "Startup Routing",
+          "Safety",
+          "工具策略",
+          "插件与 MCP"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 运行健康",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "会话 主会话与终端流",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "历史 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "能力 能力与接入",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "配置 当前配置",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 5,
+            "text": "高级诊断 诊断与审查",
+            "disabled": false,
+            "className": "nav-item"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false,
+        "hasObjectObjectText": false,
+        "hasNaNText": false,
+        "hasOldLiveSessionTitle": false,
+        "hasClaudeCodeTitle": false,
+        "internalTermMatches": [],
+        "internalTermContexts": [],
+        "visibleEnglishMatches": [],
+        "visibleEnglishContexts": [],
+        "hasGatewayControl": false,
+        "hasModelControl": false,
+        "hasChatOperationResult": false,
+        "hasDiagnosticsTabs": false
+      },
+      "pagePaletteClick": {
+        "clicked": true,
+        "method": "Ctrl+K"
+      },
+      "pagePaletteState": {
+        "open": true,
+        "entries": [
+          "打开总览一级页 进入运行健康、网关状态和实时概览。 导航 Alt+1",
+          "打开会话一级页 进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。 导航 Alt+2",
+          "打开历史一级页 进入历史与恢复，继续最近任务、工作区和回放记录。 导航 Alt+3",
+          "打开能力一级页 进入技能、工具和 MCP 能力清单。 导航 Alt+4",
+          "打开配置一级页 进入工作区、运行态和安全策略配置。 导航 Alt+5",
+          "打开高级诊断一级页 进入运行态探针、桥接与 IPC、安全边界等诊断入口。 导航 Alt+6"
+        ],
+        "contexts": [
+          "全局入口",
+          "配置入口",
+          "Ctrl/Cmd+K · 打开命令面板",
+          "Esc · 关闭命令面板",
+          "Alt+Enter · 推进当前上下文流程",
+          "Alt+1 · 前往总览",
+          "Alt+2 · 打开会话",
+          "Alt+3 · 打开历史",
+          "Alt+4 · 打开能力",
+          "Alt+5 · 打开配置",
+          "主入口",
+          "一级页"
+        ],
+        "bodyPreview": "命令面 命令面板 Esc 感知当前流程的本地动作路由器 全局入口 配置入口 Ctrl/Cmd+K · 打开命令面板 Esc · 关闭命令面板 Alt+Enter · 推进当前上下文流程 Alt+1 · 前往总览 Alt+2 · 打开会话 Alt+3 · 打开历史 Alt+4 · 打开能力 Alt+5 · 打开配置 主入口 打开总览、会话、历史、能力、配置或高级诊断。 打开总览一级页 进入运行健康、网关状态和实时概览。 导航 Alt+1 打开会话一级页 进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。 导航 Alt+2 打开历史一级页 进入历史与恢复，继续最近任务、工作区和回放记录。 导航 Alt+3 打开能力一级页 进入技能、工具和 MCP 能力清单。 导航 Alt+4 打开配置一级页 进入工作区、运行态和安全策略配置。 导航 Alt+5 打开高级诊断一级页 进入运行态探针、桥接与 IPC、安全边界等诊断入口。 导航 Alt+6 命令预览打开总览 进入运行健康、网关状态和实时概览。 主入口 一级页 路由上下文 dashboard / 无工作区 / 无意图 导航 Alt+1 执行提示 按 Enter 执行当前受控本地动作。 方向键只切换选择，不离开当前审查上下文。",
+        "internalTermMatches": [],
+        "visibleEnglishMatches": [],
+        "removedCommandMatches": [],
+        "primaryCommandMatches": [
+          "打开总览",
+          "打开会话",
+          "打开历史",
+          "打开能力",
+          "打开配置",
+          "打开高级诊断"
+        ]
+      },
+      "typed": {
+        "typed": false,
+        "reason": "No chat input expected on this page"
+      },
+      "interactions": {
+        "clicked": [],
+        "skippedDangerous": [],
+        "pageId": "settings"
+      },
+      "finalState": {
+        "hash": "#settings",
+        "title": "山谷智合",
+        "bodyLength": 1860,
+        "bodyPreview": "山谷智合 当前版本 实时同步 刚刚同步 主入口 总览 运行健康 会话 主会话与终端流 历史 历史与恢复 工具配置 能力 能力与接入 配置 当前配置 高级诊断 诊断与审查 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 采样 2/2 宿主执行 受保护 配置概览 设置 这里集中查看当前工作区、运行态与安全策略。 当前配置概览 设置页会优先读取实时 shell 与运行态姿态；探针无法安全读取的项目仍保留类型化回退。 网关已连接. Network 可访问. 启动路由已在设置页同步本地预检链：构建就绪、Electron 就绪、无需显示环境、启动就绪。 正常项 12 需关注 2 分组 4 运行态 壳层模式与集成姿态。 6 项 桥接模式 总览、高级诊断、Codex、能力和工具/MCP 会混合本地运行态观测；探针保持只读时使用类型化回退。 混合 回退策略 渲染端正在接收实时观测；缺失探针仍可使用类型化回退。 活动 本地网关 http://127.0.0.1:18789/ · TCP 可达 · 127.0.0.1:18789 已连接 网络探针 https://g",
+        "activeNav": [
+          "配置 当前配置"
+        ],
+        "headings": [
+          "设置",
+          "当前配置概览",
+          "运行态",
+          "工作区",
+          "Startup Routing",
+          "Safety",
+          "工具策略",
+          "插件与 MCP"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 运行健康",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "会话 主会话与终端流",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "历史 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "能力 能力与接入",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "配置 当前配置",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 5,
+            "text": "高级诊断 诊断与审查",
+            "disabled": false,
+            "className": "nav-item"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false,
+        "hasObjectObjectText": false,
+        "hasNaNText": false,
+        "hasOldLiveSessionTitle": false,
+        "hasClaudeCodeTitle": false,
+        "internalTermMatches": [],
+        "internalTermContexts": [],
+        "visibleEnglishMatches": [],
+        "visibleEnglishContexts": [],
+        "hasGatewayControl": false,
+        "hasModelControl": false,
+        "hasChatOperationResult": false,
+        "hasDiagnosticsTabs": false
+      },
+      "screenshot": {
+        "path": "E:\\claucd\\界面控制台程序\\delivery\\phase11-ui-dashboard-gateway-nodes-v4-20260427\\settings.png",
+        "size": 149630,
+        "sha256": "320DEB42DCA0227E19A5B27F5FE67D5514009895809987642209B6EAE408B952"
+      },
+      "failures": []
+    },
+    {
+      "id": "agents",
+      "label": "高级诊断",
+      "navResult": {
+        "clicked": true,
+        "target": {
+          "x": 120.00000381469727,
+          "y": 572.6666870117188,
+          "width": 186.6666717529297,
+          "height": 61,
+          "text": "高级诊断 诊断与审查",
+          "tag": "BUTTON",
+          "className": "nav-item"
+        }
+      },
+      "stateAfterNav": {
+        "hash": "#diagnostics",
+        "title": "山谷智合",
+        "bodyLength": 1309,
+        "bodyPreview": "山谷智合 当前版本 实时同步 刚刚同步 主入口 总览 运行健康 会话 主会话与终端流 历史 历史与恢复 工具配置 能力 能力与接入 配置 当前配置 高级诊断 诊断与审查 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 采样 2/2 宿主执行 受保护 诊断与审查 高级诊断 主界面只保留判断入口；运行态探针、桥接、审查链和安全边界集中在这里。 诊断摘要 宿主执行器：受保护，未启用真实宿主写入。需要查看细节时再切换下面的诊断分区。 活动代理 2 等待通道 1 边界层 仅本地 审查阶段 审查中 运行态探针 网关、资源和最近运行信号 桥接与 IPC 桥接、命令面与通道状态 安全边界 宿主写入、审查链和恢复依据 运行态探针 最近的代理、会话、网关和资源类信号。 3 条通道 Shell 集成器 渲染壳层负责人 活动 扩展路由壳层与页面注册表。 来源 未知 提供方 未知 会话数 - 工作目录 apps/studio 桥接观察器 Contracts and preload lane 等待中 追踪受保护宿主动作所需的审批与未来执行器条件。 来源 未知 提供方 未知",
+        "activeNav": [
+          "高级诊断 诊断与审查"
+        ],
+        "headings": [
+          "高级诊断",
+          "诊断摘要",
+          "运行态探针",
+          "最近诊断动态",
+          "协作提示"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 运行健康",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "会话 主会话与终端流",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "历史 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "能力 能力与接入",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "配置 当前配置",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 5,
+            "text": "高级诊断 诊断与审查",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 6,
+            "text": "运行态探针 网关、资源和最近运行信号",
+            "disabled": false,
+            "className": "diagnostics-tab diagnostics-tab--active"
+          },
+          {
+            "index": 7,
+            "text": "桥接与 IPC 桥接、命令面与通道状态",
+            "disabled": false,
+            "className": "diagnostics-tab"
+          },
+          {
+            "index": 8,
+            "text": "安全边界 宿主写入、审查链和恢复依据",
+            "disabled": false,
+            "className": "diagnostics-tab"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false,
+        "hasObjectObjectText": false,
+        "hasNaNText": false,
+        "hasOldLiveSessionTitle": false,
+        "hasClaudeCodeTitle": false,
+        "internalTermMatches": [],
+        "internalTermContexts": [],
+        "visibleEnglishMatches": [],
+        "visibleEnglishContexts": [],
+        "hasGatewayControl": false,
+        "hasModelControl": false,
+        "hasChatOperationResult": false,
+        "hasDiagnosticsTabs": true
+      },
+      "pagePaletteClick": {
+        "clicked": true,
+        "method": "Ctrl+K"
+      },
+      "pagePaletteState": {
+        "open": true,
+        "entries": [
+          "打开总览一级页 进入运行健康、网关状态和实时概览。 导航 Alt+1",
+          "打开会话一级页 进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。 导航 Alt+2",
+          "打开历史一级页 进入历史与恢复，继续最近任务、工作区和回放记录。 导航 Alt+3",
+          "打开能力一级页 进入技能、工具和 MCP 能力清单。 导航 Alt+4",
+          "打开配置一级页 进入工作区、运行态和安全策略配置。 导航 Alt+5",
+          "打开高级诊断一级页 进入运行态探针、桥接与 IPC、安全边界等诊断入口。 导航 Alt+6",
+          "Focus Lifecycle Review Packet审查包 Bias 审查台 into the blocked lifecycle packet so promotion-readiness coverage, review posture, and preview handoff stay aligned. window 仅本地 无快捷键",
+          "Focus 当前审批队列审查队列 Jump into the live approval queue so operator review, acknowledgement posture, signoff verdict framing, and trace-linked coverage stay synchronized. window 仅本地 无快捷键",
+          "Focus Publish Decision Gate决策门 Pivot the shell into the blocked final decision gate so publish-facing window, board, observability coverage, and final verdict posture stay explicit. window 仅本地 无快捷键",
+          "Focus Rollback Closeout Window收口窗口 Bring the rollback settlement shadow into view so overdue acknowledgement, closeout timing, observability closeout, and trace-owned recovery coverage stay linked. window 仅本地 无快捷键",
+          "Focus Materialization Artifact Progression产物进度 Center the current-vs-下一步 artifact handoff so source artifacts, staged-output proof, seal checkpoints, and the same review spine stay readable together. window 仅本地 无快捷键",
+          "Focus Materialization Validator Bridge校验桥 Pivot into the validator-linked materialization bridge so staged-output continuity, observability rows, and the 活动 review lane stay aligned. window 仅本地 无快捷键",
+          "Focus Materialization Failure Path失败路径 Keep the 活动 materialization failure path in scope so checksum drift, rollback posture, publish gating, and command preview stay readable together. window 仅本地 无快捷键",
+          "Focus Decision Handoff Surface当前审查面 Keep the 活动 approval baton, acknowledgement state, and trace-linked window ownership in one explicit review surface. window 仅本地 无快捷键",
+          "Focus Evidence Closeout Surface证据收口 Surface the 活动 closeout contract so sealed evidence, pending evidence, acceptance closeout timing, and trace-owned approval posture stay linked. window 仅本地 无快捷键",
+          "Focus Decision Handoff SurfaceDecision Handoff 活动 Route · 当前序列 Keep decision handoff current while evidence closeout, reviewer ownership, and publish posture remain visible on the same relay. window 仅本地 无快捷键",
+          "Focus Evidence Closeout SurfaceEvidence Closeout Alternate Route · 当前序列 Keep evidence closeout current while decision handoff, reviewer ownership, and publish posture remain visible on the same relay. window 仅本地 无快捷键",
+          "Focus Decision Handoff Surface历史恢复 / Focus Evidence Closeout Surface -> Focus Decision Handoff Surface Remember the closeout -> decision handback so baton posture can resume from sealing review with the same downstream publish gate still in scope. Operator review / Trace Review Window Trace Review Lane / Trace Review Orchestration / 活动 approval posture Closeout memory",
+          "Focus Evidence Closeout Surface路径交接稳定化 / Focus Decision Handoff Surface -> Focus Evidence Closeout Surface Remember the baton -> closeout handoff so returning to the stabilization lane restores sealing posture with the same acknowledgement chain still attached. Operator review / Trace Review Window Trace Review Lane / Trace Review Orchestration / 活动 approval posture Decision memory",
+          "Focus Decision Handoff SurfaceStep 1 of 4 · 当前审查面 Treat decision handoff as the current surface while baton state is being stabilized. Operator review / Trace Review Window Trace Review Lane / Trace Review Orchestration / 活动 approval posture Step 1 of 4",
+          "Focus Evidence Closeout SurfaceStep 2 of 4 · 主伴随 Lift evidence closeout 下一步 so sealing posture stays attached to the baton handoff. Operator review / Trace Review Window Trace Review Lane / Trace Review Orchestration / 活动 approval posture Step 2 of 4",
+          "Focus 当前审批队列Step 3 of 4 · 后续伴随 Keep the reviewer queue in sequence so acknowledgement timing never detaches from queue ownership. Operator review / Trace Review Window Trace Review Lane / Trace Review Orchestration / 活动 approval posture Step 3 of 4",
+          "Focus Publish Decision GateStep 4 of 4 · 后续伴随 Carry the handoff relay all the way to the publish gate so downstream decision posture remains in scope. Publish decision gate / Main Shell Window Boundary Review Lane / Boundary Review Orchestration / Blocked final decision gate Step 4 of 4",
+          "Focus Evidence Closeout Surface交接伴随 · 来自 Focus Decision Handoff Surface Treat decision handoff as the current review surface, then lift evidence closeout as the primary companion so baton state, acknowledgement timing, and sealing posture remain attached to the same trace-owned review lane. Operator review / Trace Review Window Trace Review Lane / Trace Review Orchestration / 活动 approval posture skills / trace-deck / Trace 工作区 Intent -> skills / trace-deck / Trace 工作区 Intent",
+          "Focus Decision Handoff Surface稳定化伴随 · 来自 Focus Evidence Closeout Surface When evidence closeout is current, re-surface decision handoff as the primary companion so the sealing contract, baton target, and publish-facing decision gate stay synchronized through the same handoff lane. Operator review / Trace Review Window Trace Review Lane / Trace Review Orchestration / 活动 approval posture skills / trace-deck / Trace 工作区 Intent -> skills / trace-deck / Trace 工作区 Intent",
+          "Focus Decision Handoff Surface当前映射路径 Trace Review Window, Trace Review Lane, and Trace Review Orchestration currently own the live review posture, so the 活动 reviewer queue, acknowledgement state, escalation window, closeout window, and focused slot all resolve through one explicit cross-window map. Operator review / Trace Review Window / skills Trace Review Lane / Trace Review Orchestration 2 个已联动审查面",
+          "Focus Evidence Closeout Surface结论路径 Surface the 活动 closeout contract so sealed evidence, pending evidence, acceptance closeout timing, and trace-owned approval posture stay linked. 结论阻塞 0 个就绪 / 0 个复核中 Approval closeout window / open",
+          "Focus Decision Handoff Surface验收收口 Keep the 活动 approval baton, acknowledgement state, and trace-linked window ownership in one explicit review surface. 结论阻塞 0 个就绪 / 0 个复核中 Approval closeout window / open",
+          "Inspect Cross-window Observability观测收口 持续让多窗口收口看板可见，确保结论姿态、收口时序和观测结算保持对齐。 结论阻塞 0 个就绪 / 0 个复核中 Approval closeout window / open",
+          "Focus Publish Decision Gate审查包后续动作 Pivot the shell into the blocked final decision gate so publish-facing window, board, observability coverage, and final verdict posture stay explicit. 结论阻塞 0 个就绪 / 0 个复核中 Approval closeout window / open",
+          "打开总览上下文 进入运行健康、网关状态和实时概览。 route 仅本地 Alt+1",
+          "打开会话上下文 进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。 route 仅本地 Alt+2",
+          "打开历史上下文 进入历史与恢复，继续最近任务、工作区和回放记录。 route 仅本地 Alt+3",
+          "打开能力上下文 进入技能、工具和 MCP 能力清单。 route 仅本地 Alt+4",
+          "打开配置上下文 进入工作区、运行态和安全策略配置。 route 仅本地 Alt+5",
+          "打开高级诊断上下文 进入运行态探针、桥接与 IPC、安全边界等诊断入口。 route 仅本地 Alt+6",
+          "检查边界契约上下文 把右侧栏聚焦到边界状态，并保留停靠区上下文。 layout 仅本地 Shift+I",
+          "查看聚焦槽位追踪上下文 把当前聚焦槽位切到优先追踪姿态。 focus 受保护预检 Shift+T",
+          "进入审查台视图上下文 让壳层优先展示窗口意图、占位状态和审查姿态。 window 仅本地 无快捷键",
+          "Inspect Cross-window Observability上下文 Surface the windows rail and dock so delivery coverage, closeout timing, shared-state lanes, and observability mappings stay visible together. window 仅本地 无快捷键",
+          "Focus Review 工作区 Intent上下文 Focus the review-deck intent so delivery coverage and window-aware review posture stay aligned. window 仅本地 无快捷键",
+          "Focus 当前审批队列上下文 Jump into the live approval queue so operator review, acknowledgement posture, signoff verdict framing, and trace-linked coverage stay synchronized. window 仅本地 无快捷键",
+          "Focus Publish Decision Gate上下文 Pivot the shell into the blocked final decision gate so publish-facing window, board, observability coverage, and final verdict posture stay explicit. window 仅本地 无快捷键",
+          "Stage Inspector Detach Intent上下文 Record the detached-inspector 占位状态 intent without opening a real window. window 仅本地 无快捷键",
+          "Advance Current Workflow Lane上下文 Advance the selected 仅本地 workflow lane by surfacing its 下一步 工作区, detached candidate, or handoff posture. window 仅本地 Shift+W",
+          "Toggle Compact Mode上下文 Switch the shell into a denser layout and persist that preference. layout 仅本地 Shift+M",
+          "打开总览注册表 进入运行健康、网关状态和实时概览。 route 仅本地 Alt+1",
+          "打开会话注册表 进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。 route 仅本地 Alt+2",
+          "打开历史注册表 进入历史与恢复，继续最近任务、工作区和回放记录。 route 仅本地 Alt+3",
+          "打开能力注册表 进入技能、工具和 MCP 能力清单。 route 仅本地 Alt+4",
+          "打开配置注册表 进入工作区、运行态和安全策略配置。 route 仅本地 Alt+5",
+          "打开高级诊断注册表 进入运行态探针、桥接与 IPC、安全边界等诊断入口。 route 仅本地 Alt+6",
+          "检查边界契约注册表 把右侧栏聚焦到边界状态，并保留停靠区上下文。 layout 仅本地 Shift+I",
+          "查看聚焦槽位追踪注册表 把当前聚焦槽位切到优先追踪姿态。 focus 受保护预检 Shift+T",
+          "进入审查台视图注册表 让壳层优先展示窗口意图、占位状态和审查姿态。 window 仅本地 无快捷键",
+          "Inspect Cross-window Observability注册表 Surface the windows rail and dock so delivery coverage, closeout timing, shared-state lanes, and observability mappings stay visible together. window 仅本地 无快捷键",
+          "Focus Review 工作区 Intent注册表 Focus the review-deck intent so delivery coverage and window-aware review posture stay aligned. window 仅本地 无快捷键",
+          "Focus 当前审批队列注册表 Jump into the live approval queue so operator review, acknowledgement posture, signoff verdict framing, and trace-linked coverage stay synchronized. window 仅本地 无快捷键",
+          "Focus Publish Decision Gate注册表 Pivot the shell into the blocked final decision gate so publish-facing window, board, observability coverage, and final verdict posture stay explicit. window 仅本地 无快捷键",
+          "Stage Inspector Detach Intent注册表 Record the detached-inspector 占位状态 intent without opening a real window. window 仅本地 无快捷键",
+          "Advance Current Workflow Lane注册表 Advance the selected 仅本地 workflow lane by surfacing its 下一步 工作区, detached candidate, or handoff posture. window 仅本地 Shift+W",
+          "Toggle Compact Mode注册表 Switch the shell into a denser layout and persist that preference. layout 仅本地 Shift+M"
+        ],
+        "contexts": [
+          "全局入口",
+          "高级诊断动作",
+          "Operator review / 交付阶段",
+          "Focus Decision Handoff Surface / 审查面",
+          "Decision Handoff 活动 Route / 伴随路由",
+          "Decision Handoff Acceptance Pack / 回放包",
+          "Trace Review Window -> Trace Review Lane",
+          "活动 approval posture / 当前姿态主控",
+          "Ctrl/Cmd+K · 打开命令面板",
+          "Esc · 关闭命令面板",
+          "Alt+Enter · 推进当前上下文流程",
+          "Alt+1 · 前往总览",
+          "Alt+2 · 打开会话",
+          "Alt+3 · 打开历史",
+          "Alt+4 · 打开能力",
+          "Alt+5 · 打开配置",
+          "主入口",
+          "一级页"
+        ],
+        "bodyPreview": "命令面 命令面板 Esc 感知当前流程的本地动作路由器 全局入口 高级诊断动作 Operator review / 交付阶段 Focus Decision Handoff Surface / 审查面 Decision Handoff 活动 Route / 伴随路由 Decision Handoff Acceptance Pack / 回放包 Trace Review Window -> Trace Review Lane 活动 approval posture / 当前姿态主控 Ctrl/Cmd+K · 打开命令面板 Esc · 关闭命令面板 Alt+Enter · 推进当前上下文流程 Alt+1 · 前往总览 Alt+2 · 打开会话 Alt+3 · 打开历史 Alt+4 · 打开能力 Alt+5 · 打开配置 主入口 打开总览、会话、历史、能力、配置或高级诊断。 打开总览一级页 进入运行健康、网关状态和实时概览。 导航 Alt+1 打开会话一级页 进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。 导航 Alt+2 打开历史一级页 进入历史与恢复，继续最近任务、工作区和回放记录。 导航 Alt+3 打开能力一级页 进入技能、工具和 MCP 能力清单。 导航 Alt+4 打开配置一级页 进入工作区、运行态和安全策略配置。 导航 Alt+5 打开高级诊断一级页 进入运行态探针、桥接与 IPC、安全边界等诊断入口。 导航 Alt+6 审查面覆盖 把选中的审查面及其交付/窗口/通道/看板/观测映射一起联动展示。 Focus Lifecycle Review",
+        "internalTermMatches": [],
+        "visibleEnglishMatches": [],
+        "removedCommandMatches": [],
+        "primaryCommandMatches": [
+          "打开总览",
+          "打开会话",
+          "打开历史",
+          "打开能力",
+          "打开配置",
+          "打开高级诊断"
+        ]
+      },
+      "typed": {
+        "typed": false,
+        "reason": "No chat input expected on this page"
+      },
+      "interactions": {
+        "clicked": [],
+        "skippedDangerous": [],
+        "pageId": "agents"
+      },
+      "finalState": {
+        "hash": "#diagnostics",
+        "title": "山谷智合",
+        "bodyLength": 1309,
+        "bodyPreview": "山谷智合 当前版本 正在同步 刚刚同步 主入口 总览 运行健康 会话 主会话与终端流 历史 历史与恢复 工具配置 能力 能力与接入 配置 当前配置 高级诊断 诊断与审查 网关连接 OpenClaw Gateway 已运行 Hermes Gateway 已运行 采样 2/2 宿主执行 受保护 诊断与审查 高级诊断 主界面只保留判断入口；运行态探针、桥接、审查链和安全边界集中在这里。 诊断摘要 宿主执行器：受保护，未启用真实宿主写入。需要查看细节时再切换下面的诊断分区。 活动代理 2 等待通道 1 边界层 仅本地 审查阶段 审查中 运行态探针 网关、资源和最近运行信号 桥接与 IPC 桥接、命令面与通道状态 安全边界 宿主写入、审查链和恢复依据 运行态探针 最近的代理、会话、网关和资源类信号。 3 条通道 Shell 集成器 渲染壳层负责人 活动 扩展路由壳层与页面注册表。 来源 未知 提供方 未知 会话数 - 工作目录 apps/studio 桥接观察器 Contracts and preload lane 等待中 追踪受保护宿主动作所需的审批与未来执行器条件。 来源 未知 提供方 未知",
+        "activeNav": [
+          "高级诊断 诊断与审查"
+        ],
+        "headings": [
+          "高级诊断",
+          "诊断摘要",
+          "运行态探针",
+          "最近诊断动态",
+          "协作提示"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 运行健康",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 1,
+            "text": "会话 主会话与终端流",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "历史 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "能力 能力与接入",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "配置 当前配置",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 5,
+            "text": "高级诊断 诊断与审查",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 6,
+            "text": "运行态探针 网关、资源和最近运行信号",
+            "disabled": false,
+            "className": "diagnostics-tab diagnostics-tab--active"
+          },
+          {
+            "index": 7,
+            "text": "桥接与 IPC 桥接、命令面与通道状态",
+            "disabled": false,
+            "className": "diagnostics-tab"
+          },
+          {
+            "index": 8,
+            "text": "安全边界 宿主写入、审查链和恢复依据",
+            "disabled": false,
+            "className": "diagnostics-tab"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false,
+        "hasObjectObjectText": false,
+        "hasNaNText": false,
+        "hasOldLiveSessionTitle": false,
+        "hasClaudeCodeTitle": false,
+        "internalTermMatches": [],
+        "internalTermContexts": [],
+        "visibleEnglishMatches": [],
+        "visibleEnglishContexts": [],
+        "hasGatewayControl": false,
+        "hasModelControl": false,
+        "hasChatOperationResult": false,
+        "hasDiagnosticsTabs": true
+      },
+      "screenshot": {
+        "path": "E:\\claucd\\界面控制台程序\\delivery\\phase11-ui-dashboard-gateway-nodes-v4-20260427\\agents.png",
+        "size": 146503,
+        "sha256": "D8DEACFFD05EEF50BAB12DA1F25101F0D5E608F06822C3254221DEAFFCDF2C4C"
+      },
+      "failures": []
+    }
+  ],
+  "globalInteractions": [
+    {
+      "name": "initial-render",
+      "state": {
+        "hash": "",
+        "title": "山谷智合",
+        "bodyLength": 1606,
+        "bodyPreview": "山谷智合 实时同步 刚刚同步 主入口 总览 运行健康 会话 主会话与终端流 历史 历史与恢复 工具配置 能力 能力与接入 配置 当前配置 高级诊断 诊断与审查 网关连接 OpenClaw 混合 Hermes 状态加载中 采样 0/2 宿主执行 受保护 总览 实时同步 数据每 5 秒刷新 近 24 小时 山谷智合实时运营驾驶舱 就绪 · 混合 · 刚刚同步 Shell 快照 5 秒刷新 真实快照 运行指标 已连接 · 265ms 运行指标 网关/Hermes 未采样 未采样 滚动缓存 1 个样本 滚动缓存 任务总数 服务 6 滚动持平 1 运行 · 0 待处理 · 4 完成 采样成功率 未采样 未采样 等待采样 会话 2/3 · 等待首个运行态批次 采样耗时 指标 265ms 等待采样 运行态 未采样 · 指标 265ms · 网关 0/2 系统健康 服务 60% 运行态已连接 就绪 · 混合 CODEX 任务流 Codex 全部会话 我会继续自己推，但先把边界说清：我能完成本机清理、GitHub token 本地失效/登出、signtool 检测/安装路径查找、签名链脚... Just",
+        "activeNav": [
+          "总览 运行健康"
+        ],
+        "headings": [
+          "总览",
+          "Codex",
+          "模型路由",
+          "任务类型分布",
+          "资源使用趋势",
+          "网关与节点",
+          "Claude Code"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "总览 运行健康",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 1,
+            "text": "会话 主会话与终端流",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 2,
+            "text": "历史 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 3,
+            "text": "能力 能力与接入",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 4,
+            "text": "配置 当前配置",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 5,
+            "text": "高级诊断 诊断与审查",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 6,
+            "text": "近 24 小时",
+            "disabled": false,
+            "className": "dashboard-range-button"
+          },
+          {
+            "index": 9,
+            "text": "全部会话",
+            "disabled": false,
+            "className": "dashboard-session-filter"
+          },
+          {
+            "index": 10,
+            "text": "全部会话",
+            "disabled": false,
+            "className": "dashboard-session-filter"
+          }
+        ],
+        "fields": [],
+        "modalOpen": false,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false,
+        "hasObjectObjectText": false,
+        "hasNaNText": false,
+        "hasOldLiveSessionTitle": false,
+        "hasClaudeCodeTitle": true,
+        "internalTermMatches": [],
+        "internalTermContexts": [],
+        "visibleEnglishMatches": [],
+        "visibleEnglishContexts": [],
+        "hasGatewayControl": false,
+        "hasModelControl": false,
+        "hasChatOperationResult": false,
+        "hasDiagnosticsTabs": false
+      }
+    },
+    {
+      "name": "open-command-palette",
+      "result": {
+        "clicked": true,
+        "method": "Ctrl+K"
+      },
+      "state": {
+        "hash": "",
+        "title": "山谷智合",
+        "bodyLength": 2160,
+        "bodyPreview": "命令面 命令面板 Esc 感知当前流程的本地动作路由器 全局入口 总览入口 Ctrl/Cmd+K · 打开命令面板 Esc · 关闭命令面板 Alt+Enter · 推进当前上下文流程 Alt+1 · 前往总览 Alt+2 · 打开会话 Alt+3 · 打开历史 Alt+4 · 打开能力 Alt+5 · 打开配置 主入口 打开总览、会话、历史、能力、配置或高级诊断。 打开总览一级页 进入运行健康、网关状态和实时概览。 导航 Alt+1 打开会话一级页 进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。 导航 Alt+2 打开历史一级页 进入历史与恢复，继续最近任务、工作区和回放记录。 导航 Alt+3 打开能力一级页 进入技能、工具和 MCP 能力清单。 导航 Alt+4 打开配置一级页 进入工作区、运行态和安全策略配置。 导航 Alt+5 打开高级诊断一级页 进入运行态探针、桥接与 IPC、安全边界等诊断入口。 导航 Alt+6 命令预览打开总览 进入运行健康、网关状态和实时概览。 主入口 一级页 路由上下文 dashboard / 无工作区 / 无意图 导",
+        "activeNav": [
+          "总览 运行健康"
+        ],
+        "headings": [
+          "命令面板",
+          "总览",
+          "Codex",
+          "模型路由",
+          "任务类型分布",
+          "资源使用趋势",
+          "网关与节点",
+          "Claude Code"
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "text": "Esc",
+            "disabled": false,
+            "className": "command-palette__close"
+          },
+          {
+            "index": 1,
+            "text": "打开总览一级页 进入运行健康、网关状态和实时概览。 导航 Alt+1",
+            "disabled": false,
+            "className": "command-palette__item command-palette__item--neutral"
+          },
+          {
+            "index": 2,
+            "text": "打开会话一级页 进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。 导航 Alt+2",
+            "disabled": false,
+            "className": "command-palette__item command-palette__item--neutral"
+          },
+          {
+            "index": 3,
+            "text": "打开历史一级页 进入历史与恢复，继续最近任务、工作区和回放记录。 导航 Alt+3",
+            "disabled": false,
+            "className": "command-palette__item command-palette__item--neutral"
+          },
+          {
+            "index": 4,
+            "text": "打开能力一级页 进入技能、工具和 MCP 能力清单。 导航 Alt+4",
+            "disabled": false,
+            "className": "command-palette__item command-palette__item--neutral"
+          },
+          {
+            "index": 5,
+            "text": "打开配置一级页 进入工作区、运行态和安全策略配置。 导航 Alt+5",
+            "disabled": false,
+            "className": "command-palette__item command-palette__item--neutral"
+          },
+          {
+            "index": 6,
+            "text": "打开高级诊断一级页 进入运行态探针、桥接与 IPC、安全边界等诊断入口。 导航 Alt+6",
+            "disabled": false,
+            "className": "command-palette__item command-palette__item--neutral"
+          },
+          {
+            "index": 7,
+            "text": "总览 运行健康",
+            "disabled": false,
+            "className": "nav-item nav-item--active"
+          },
+          {
+            "index": 8,
+            "text": "会话 主会话与终端流",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 9,
+            "text": "历史 历史与恢复",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 10,
+            "text": "能力 能力与接入",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 11,
+            "text": "配置 当前配置",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 12,
+            "text": "高级诊断 诊断与审查",
+            "disabled": false,
+            "className": "nav-item"
+          },
+          {
+            "index": 13,
+            "text": "近 24 小时",
+            "disabled": false,
+            "className": "dashboard-range-button"
+          },
+          {
+            "index": 16,
+            "text": "全部会话",
+            "disabled": false,
+            "className": "dashboard-session-filter"
+          },
+          {
+            "index": 17,
+            "text": "全部会话",
+            "disabled": false,
+            "className": "dashboard-session-filter"
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "placeholder": "搜索页面、状态、会话、能力、配置或诊断入口",
+            "disabled": false,
+            "readOnly": false,
+            "valueLength": 0
+          }
+        ],
+        "modalOpen": true,
+        "stuckLoading": false,
+        "hasBlankRoot": false,
+        "reactCrashText": false,
+        "hasObjectObjectText": false,
+        "hasNaNText": false,
+        "hasOldLiveSessionTitle": false,
+        "hasClaudeCodeTitle": true,
+        "internalTermMatches": [],
+        "internalTermContexts": [],
+        "visibleEnglishMatches": [],
+        "visibleEnglishContexts": [],
+        "hasGatewayControl": false,
+        "hasModelControl": false,
+        "hasChatOperationResult": false,
+        "hasDiagnosticsTabs": true
+      },
+      "paletteState": {
+        "open": true,
+        "entries": [
+          "打开总览一级页 进入运行健康、网关状态和实时概览。 导航 Alt+1",
+          "打开会话一级页 进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。 导航 Alt+2",
+          "打开历史一级页 进入历史与恢复，继续最近任务、工作区和回放记录。 导航 Alt+3",
+          "打开能力一级页 进入技能、工具和 MCP 能力清单。 导航 Alt+4",
+          "打开配置一级页 进入工作区、运行态和安全策略配置。 导航 Alt+5",
+          "打开高级诊断一级页 进入运行态探针、桥接与 IPC、安全边界等诊断入口。 导航 Alt+6"
+        ],
+        "contexts": [
+          "全局入口",
+          "总览入口",
+          "Ctrl/Cmd+K · 打开命令面板",
+          "Esc · 关闭命令面板",
+          "Alt+Enter · 推进当前上下文流程",
+          "Alt+1 · 前往总览",
+          "Alt+2 · 打开会话",
+          "Alt+3 · 打开历史",
+          "Alt+4 · 打开能力",
+          "Alt+5 · 打开配置",
+          "主入口",
+          "一级页"
+        ],
+        "bodyPreview": "命令面 命令面板 Esc 感知当前流程的本地动作路由器 全局入口 总览入口 Ctrl/Cmd+K · 打开命令面板 Esc · 关闭命令面板 Alt+Enter · 推进当前上下文流程 Alt+1 · 前往总览 Alt+2 · 打开会话 Alt+3 · 打开历史 Alt+4 · 打开能力 Alt+5 · 打开配置 主入口 打开总览、会话、历史、能力、配置或高级诊断。 打开总览一级页 进入运行健康、网关状态和实时概览。 导航 Alt+1 打开会话一级页 进入 OpenClaw、Hermes 和 Claude 历史统一会话工作台。 导航 Alt+2 打开历史一级页 进入历史与恢复，继续最近任务、工作区和回放记录。 导航 Alt+3 打开能力一级页 进入技能、工具和 MCP 能力清单。 导航 Alt+4 打开配置一级页 进入工作区、运行态和安全策略配置。 导航 Alt+5 打开高级诊断一级页 进入运行态探针、桥接与 IPC、安全边界等诊断入口。 导航 Alt+6 命令预览打开总览 进入运行健康、网关状态和实时概览。 主入口 一级页 路由上下文 dashboard / 无工作区 / 无意图 导航 Alt+1 执行提示 按 Enter 执行当前受控本地动作。 方向键只切换选择，不离开当前审查上下文。",
+        "internalTermMatches": [],
+        "visibleEnglishMatches": [],
+        "removedCommandMatches": [],
+        "primaryCommandMatches": [
+          "打开总览",
+          "打开会话",
+          "打开历史",
+          "打开能力",
+          "打开配置",
+          "打开高级诊断"
+        ]
+      }
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "E:\\claucd\\界面控制台程序\\delivery\\phase11-ui-dashboard-gateway-nodes-v4-20260427\\dashboard.png",
+      "size": 251928,
+      "sha256": "2B2D2D7C73B5684F304CA76D23D8E43CC1E30CA54196A8CE7DA753F3B951C0FE"
+    },
+    {
+      "path": "E:\\claucd\\界面控制台程序\\delivery\\phase11-ui-dashboard-gateway-nodes-v4-20260427\\chat.png",
+      "size": 171701,
+      "sha256": "F095DEDBF363BD0F8F71B1DBD2D6BC531319D25DB69A9B40DB53F7D174C5B33F"
+    },
+    {
+      "path": "E:\\claucd\\界面控制台程序\\delivery\\phase11-ui-dashboard-gateway-nodes-v4-20260427\\sessions.png",
+      "size": 194210,
+      "sha256": "982975613301039291234F1FAC73E13F404B0FDCB3C737F69C946667A57F507E"
+    },
+    {
+      "path": "E:\\claucd\\界面控制台程序\\delivery\\phase11-ui-dashboard-gateway-nodes-v4-20260427\\skills.png",
+      "size": 153390,
+      "sha256": "7856A70B46F8B29BCE7960F761F957E7BE9E34A41AE2DA4860ED1873D96A6753"
+    },
+    {
+      "path": "E:\\claucd\\界面控制台程序\\delivery\\phase11-ui-dashboard-gateway-nodes-v4-20260427\\settings.png",
+      "size": 149630,
+      "sha256": "320DEB42DCA0227E19A5B27F5FE67D5514009895809987642209B6EAE408B952"
+    },
+    {
+      "path": "E:\\claucd\\界面控制台程序\\delivery\\phase11-ui-dashboard-gateway-nodes-v4-20260427\\agents.png",
+      "size": 146503,
+      "sha256": "D8DEACFFD05EEF50BAB12DA1F25101F0D5E608F06822C3254221DEAFFCDF2C4C"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "warnings": [],
+  "failures": []
+}

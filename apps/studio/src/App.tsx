@@ -10,11 +10,13 @@ import {
   History,
   LayoutDashboard,
   MessageSquare,
+  Moon,
   PanelRight,
   RefreshCw,
   Settings,
   ShieldCheck,
   Sparkles,
+  Sun,
   TerminalSquare,
   Users
 } from "lucide-react";
@@ -159,11 +161,11 @@ function navigateToPage(pageId: StudioPageId) {
   window.location.hash = `#${getRouteHashForPageId(pageId)}`;
 }
 
-const LIVE_PAGE_IDS = new Set<StudioPageId>(["dashboard", "chat", "sessions"]);
+const LIVE_PAGE_IDS = new Set<StudioPageId>(["dashboard", "chat", "hermes", "sessions"]);
 const UTILITY_PAGE_IDS = new Set<StudioPageId>(["skills", "settings", "agents"]);
 type SessionSurfaceId = "openclaw" | "hermes";
 const SESSION_SURFACES: Array<{ id: SessionSurfaceId; label: string; detail: string }> = [
-  { id: "openclaw", label: "OpenClaw", detail: "主会话" },
+  { id: "openclaw", label: "OpenClaw", detail: "当前活动" },
   { id: "hermes", label: "Hermes", detail: "记忆与网关" }
 ];
 
@@ -182,8 +184,8 @@ function resolveInitialSessionSurface(): SessionSurfaceId {
 const PAGE_LABEL_ZH: Partial<Record<StudioPageId, string>> = {
   dashboard: "总览",
   home: "总览",
-  chat: "会话",
-  hermes: "会话",
+  chat: "OpenClaw",
+  hermes: "Hermes",
   claude: "会话",
   sessions: "历史",
   agents: "高级诊断",
@@ -228,9 +230,9 @@ function isAdvancedReviewDeckEnabled(): boolean {
 const PAGE_HINT_ZH: Partial<Record<StudioPageId, string>> = {
   dashboard: "运行健康",
   home: "运行健康",
-  chat: "主会话与终端流",
-  hermes: "主会话与终端流",
-  claude: "主会话与终端流",
+  chat: "OpenClaw 与终端流",
+  hermes: "记忆会话层",
+  claude: "OpenClaw 与终端流",
   sessions: "历史与恢复",
   agents: "诊断与审查",
   codex: "运行健康",
@@ -1165,13 +1167,11 @@ function renderPage(
     networkStatus: string;
   },
   hermesReadinessLabel: string,
-  dashboardRealtime: DashboardRealtimeViewModel,
-  dashboardThemeMode: DashboardThemeMode,
-  onDashboardThemeModeChange: (mode: DashboardThemeMode) => void
+  dashboardRealtime: DashboardRealtimeViewModel
 ) {
   switch (activePage) {
     case "dashboard":
-      return <DashboardPage viewModel={dashboardRealtime} themeMode={dashboardThemeMode} onThemeModeChange={onDashboardThemeModeChange} />;
+      return <DashboardPage viewModel={dashboardRealtime} />;
     case "chat":
       return <LazyChatPage {...chatSummary} />;
     case "sessions":
@@ -1289,7 +1289,9 @@ export function App() {
     const syncRoute = () => {
       const nextPage = resolvePage();
       setActivePage(nextPage);
-      if (nextPage === "chat") {
+      if (nextPage === "hermes") {
+        setSessionSurface("hermes");
+      } else if (nextPage === "chat") {
         setSessionSurface(resolveInitialSessionSurface());
       }
     };
@@ -1308,6 +1310,13 @@ export function App() {
       window.removeEventListener("hashchange", syncRoute);
     };
   }, []);
+
+  useEffect(() => {
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      document.querySelector<HTMLElement>(".main-panel")?.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    });
+  }, [activePage, sessionSurface]);
 
   useEffect(() => {
     let cancelled = false;
@@ -5396,22 +5405,24 @@ export function App() {
     }
   };
 
-  const chatFocusMode = activePage === "chat";
+  const conversationPageMode = activePage === "chat" || activePage === "hermes";
   const centerFocusMode = activePage === "sessions";
   const dashboardHomeMode = activePage === "dashboard";
-  const showWorkbenchScaffolding = !dashboardHomeMode && !chatFocusMode && !centerFocusMode && !currentPageUsesSimpleShell;
+  const showWorkbenchScaffolding = !dashboardHomeMode && !conversationPageMode && !centerFocusMode && !currentPageUsesSimpleShell;
   const showWorkbenchBlocks = showWorkbenchScaffolding && !dashboardHomeMode;
   const showRightRail = showWorkbenchBlocks && resolvedLayoutState.rightRailVisible;
   const showBottomDock = showWorkbenchBlocks && resolvedLayoutState.bottomDockVisible;
   const liveSyncTone = syncError ? "warning" : isRefreshing ? "active" : "positive";
   const liveSyncLabel = syncError ? "同步异常" : isRefreshing ? "正在同步" : "实时同步";
   const liveSyncDetail = syncError ? `最近快照 · ${formatLiveSyncAge(lastUpdatedAt)}` : formatLiveSyncAge(lastUpdatedAt);
+  const nextDashboardThemeMode: DashboardThemeMode = dashboardThemeMode === "night" ? "day" : "night";
+  const ThemeModeIcon = dashboardThemeMode === "night" ? Sun : Moon;
   const shellClassNames = [
     "studio-shell",
     resolvedLayoutState.compactMode ? "studio-shell--compact" : "",
     !showRightRail ? "studio-shell--no-right-rail" : "",
     !showBottomDock ? "studio-shell--no-bottom-dock" : "",
-    chatFocusMode ? "studio-shell--chat-focus" : "",
+    conversationPageMode ? "studio-shell--conversation-page" : "",
     centerFocusMode ? "studio-shell--center-focus" : "",
     dashboardHomeMode ? "studio-shell--dashboard-home" : ""
   ]
@@ -5423,7 +5434,7 @@ export function App() {
   };
   const handleConversationSurfaceChange = (surface: SessionSurfaceId) => {
     setSessionSurface(surface);
-    setActivePage("chat");
+    setActivePage(surface === "hermes" ? "hermes" : "chat");
     window.location.hash = surface === "hermes" ? "#hermes" : "#chat";
   };
 
@@ -5464,6 +5475,18 @@ export function App() {
               </div>
             </div>
           </div>
+          <button
+            type="button"
+            className="theme-mode-switch"
+            aria-label={dashboardThemeMode === "night" ? "切换白天模式" : "切换夜晚模式"}
+            title={dashboardThemeMode === "night" ? "切换白天模式" : "切换夜晚模式"}
+            onClick={() => {
+              setDashboardThemeMode(nextDashboardThemeMode);
+            }}
+          >
+            <ThemeModeIcon size={16} strokeWidth={2.2} aria-hidden="true" />
+            <span>{dashboardThemeMode === "night" ? "白天模式" : "夜晚模式"}</span>
+          </button>
           <div className="nav-section">
             <span className="nav-section__label">主入口</span>
             <nav className="nav-list">
@@ -5476,6 +5499,8 @@ export function App() {
                     setActivePage(page.id);
                     if (page.id === "chat") {
                       setSessionSurface("openclaw");
+                    } else if (page.id === "hermes") {
+                      setSessionSurface("hermes");
                     }
                     navigateToPage(page.id);
                   }}
@@ -6017,19 +6042,23 @@ export function App() {
           ) : null}
 
           <Suspense fallback={<PageLoadingState />}>
-            {activePage === "chat" ? (
-              sessionSurface === "openclaw" ? (
-                <LazyChatPage
-                  {...chatSummary}
-                  onNavigatePage={handleConversationNavigate}
-                  onSessionSurfaceChange={handleConversationSurfaceChange}
-                />
-              ) : (
+            {activePage === "chat" || activePage === "hermes" ? (
+              activePage === "hermes" || sessionSurface === "hermes" ? (
                 <LazyHermesPage
                   {...chatSummary}
                   readinessLabel={hermesReadinessLabel}
                   onNavigatePage={handleConversationNavigate}
                   onSessionSurfaceChange={handleConversationSurfaceChange}
+                  themeMode={dashboardThemeMode}
+                  onThemeModeChange={setDashboardThemeMode}
+                />
+              ) : (
+                <LazyChatPage
+                  {...chatSummary}
+                  onNavigatePage={handleConversationNavigate}
+                  onSessionSurfaceChange={handleConversationSurfaceChange}
+                  themeMode={dashboardThemeMode}
+                  onThemeModeChange={setDashboardThemeMode}
                 />
               )
             ) : (
@@ -6043,9 +6072,7 @@ export function App() {
                 workbenchProps,
                 chatSummary,
                 hermesReadinessLabel,
-                dashboardRealtime,
-                dashboardThemeMode,
-                setDashboardThemeMode
+                dashboardRealtime
               )
             )}
           </Suspense>

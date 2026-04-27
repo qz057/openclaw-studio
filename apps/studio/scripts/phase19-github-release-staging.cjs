@@ -221,6 +221,49 @@ function main() {
   ].join("\n");
   writeFile(path.join(uploadRoot, "PUBLISH_WITH_GH.ps1"), uploadCommand);
 
+  const cleanupCommand = [
+    "$ErrorActionPreference = 'Stop'",
+    "function Invoke-NativeChecked {",
+    "  param(",
+    "    [Parameter(Mandatory = $true)] [string] $FilePath,",
+    "    [Parameter(ValueFromRemainingArguments = $true)] [string[]] $ArgumentList",
+    "  )",
+    "  & $FilePath @ArgumentList",
+    "  if ($LASTEXITCODE -ne 0) {",
+    "    throw \"$FilePath $($ArgumentList -join ' ') failed with exit code $LASTEXITCODE\"",
+    "  }",
+    "}",
+    "",
+    "$UploadRoot = $PSScriptRoot",
+    "$RepoRoot = (Resolve-Path -LiteralPath (Join-Path $UploadRoot '..\\..')).Path",
+    "Set-Location -LiteralPath $RepoRoot",
+    `$Owner = "${owner}"`,
+    `$Repo = "${repo}"`,
+    `$ActiveTag = "${VERSION}"`,
+    "$RepoFullName = \"$Owner/$Repo\"",
+    "",
+    "Invoke-NativeChecked gh auth status",
+    "$ReleaseJson = gh release list --repo $RepoFullName --limit 100 --json tagName,isPrerelease",
+    "if ($LASTEXITCODE -ne 0) { throw \"gh release list failed with exit code $LASTEXITCODE\" }",
+    "$OldReleases = @($ReleaseJson | ConvertFrom-Json | Where-Object { $_.tagName -like 'v0.1.0-preview.*' -and $_.tagName -ne $ActiveTag })",
+    "foreach ($Release in $OldReleases) {",
+    "  Write-Host \"Deleting old release $($Release.tagName)\"",
+    "  Invoke-NativeChecked gh release delete $Release.tagName --repo $RepoFullName --yes --cleanup-tag",
+    "}",
+    "$RemoteTags = git ls-remote --tags origin 'v0.1.0-preview.*'",
+    "if ($LASTEXITCODE -ne 0) { throw \"git ls-remote failed with exit code $LASTEXITCODE\" }",
+    "$OldTags = @($RemoteTags -split \"`n\" | ForEach-Object {",
+    "  if ($_ -match 'refs/tags/(v0\\.1\\.0-preview\\.[0-9]+)(\\^\\{\\})?$') { $Matches[1] }",
+    "} | Where-Object { $_ -and $_ -ne $ActiveTag } | Sort-Object -Unique)",
+    "foreach ($Tag in $OldTags) {",
+    "  Write-Host \"Deleting old remote tag $Tag\"",
+    "  Invoke-NativeChecked git push origin --delete $Tag",
+    "}",
+    "Write-Host \"Old preview release cleanup complete. Active tag: $ActiveTag\"",
+    ""
+  ].join("\n");
+  writeFile(path.join(uploadRoot, "DELETE_OLD_RELEASES_WITH_GH.ps1"), cleanupCommand);
+
   const browserSteps = [
     "# Browser Release Upload Steps",
     "",
@@ -259,7 +302,8 @@ function main() {
     sha256Sums: path.join(assetsRoot, "SHA256SUMS.txt"),
     commands: {
       browserSteps: path.join(uploadRoot, "BROWSER_UPLOAD_STEPS.md"),
-      ghPublish: path.join(uploadRoot, "PUBLISH_WITH_GH.ps1")
+      ghPublish: path.join(uploadRoot, "PUBLISH_WITH_GH.ps1"),
+      ghCleanupOldReleases: path.join(uploadRoot, "DELETE_OLD_RELEASES_WITH_GH.ps1")
     },
     git: {
       head: currentCommit.stdout,

@@ -33,7 +33,8 @@ import {
   SessionActionsCard,
   type ConversationChip,
   type ConversationNavTarget,
-  type ConversationSurfaceId
+  type ConversationSurfaceId,
+  type ConversationThemeMode
 } from "../components/conversation/ConversationShell";
 
 interface HermesPageProps {
@@ -45,6 +46,8 @@ interface HermesPageProps {
   networkStatus: string;
   onNavigatePage?: (pageId: ConversationNavTarget) => void;
   onSessionSurfaceChange?: (surface: ConversationSurfaceId) => void;
+  themeMode?: ConversationThemeMode;
+  onThemeModeChange?: (mode: ConversationThemeMode) => void;
 }
 
 interface PersistedHermesState {
@@ -403,7 +406,9 @@ export function HermesPage({
   readinessLabel,
   gatewayStatus,
   onNavigatePage,
-  onSessionSurfaceChange
+  onSessionSurfaceChange,
+  themeMode,
+  onThemeModeChange
 }: HermesPageProps) {
   const persistedFreshSession = readFreshSessionState();
   const [draft, setDraft] = useState(() => readPersistedHermesState().draft);
@@ -1114,6 +1119,10 @@ export function HermesPage({
         onCreateSession={() => void handleStartFreshSession()}
         onNavigatePage={onNavigatePage}
         onSessionSurfaceChange={onSessionSurfaceChange}
+        themeMode={themeMode}
+        onThemeModeChange={onThemeModeChange}
+        showGlobalNav={false}
+        showSessionList={false}
         gatewaySummary={{
           openclaw: gatewayStatus.includes("运行") || gatewayStatus.includes("连接") ? "运行中" : gatewayStatus,
           hermes: gatewayServiceState?.running ? "运行中" : "待连接",
