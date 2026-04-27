@@ -50,6 +50,10 @@ export function resolvePage(): StudioPageId {
   return normalizePageId(route);
 }
 
+export function resolveStartupPage(): StudioPageId {
+  return "dashboard";
+}
+
 export function formatLiveSyncAge(timestampMs: number | null): string {
   if (!timestampMs) {
     return "等待同步";

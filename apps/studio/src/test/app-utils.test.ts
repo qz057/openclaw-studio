@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mockShellState } from '@openclaw/shared/mock-shell-state';
-import { resolvePage, getRouteHashForPageId, visibleStudioPageIds, formatLiveSyncAge, dedupeCommandActions, dedupeById } from '../lib/app-utils';
+import { resolvePage, resolveStartupPage, getRouteHashForPageId, visibleStudioPageIds, formatLiveSyncAge, dedupeCommandActions, dedupeById } from '../lib/app-utils';
 import type { StudioCommandAction } from '@openclaw/shared';
 
 describe('app-utils', () => {
@@ -19,6 +19,12 @@ describe('app-utils', () => {
 
       window.location.hash = '';
       expect(resolvePage()).toBe('dashboard');
+    });
+
+    it('keeps overview as the startup page and first navigation entry', () => {
+      window.location.hash = '#session';
+      expect(resolveStartupPage()).toBe('dashboard');
+      expect(visibleStudioPageIds[0]).toBe('dashboard');
     });
 
     it('returns "dashboard" for removed home page', () => {

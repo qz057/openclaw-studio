@@ -10,7 +10,21 @@ import {
   stopOpenClawGatewayService
 } from "@openclaw/bridge";
 import type { StudioGatewayServiceState, StudioModelCatalog, StudioOpenClawChatMessage, StudioOpenClawChatState } from "@openclaw/shared";
-import { OperationResultPanel, type OperationResultState } from "../components/OperationResultPanel";
+import {
+  ChatPanel,
+  ComposerBar,
+  ContextTokenCard,
+  ConversationShell,
+  GatewayControlCard,
+  LatencyTrendCard,
+  MessageBubble as ConversationMessageBubble,
+  MessageTimeline,
+  ModelRouteCard,
+  SessionActionsCard,
+  type ConversationChip,
+  type ConversationNavTarget,
+  type ConversationSurfaceId
+} from "../components/conversation/ConversationShell";
 
 interface ChatPageProps {
   bridgeStatus: string;
@@ -19,6 +33,8 @@ interface ChatPageProps {
   readinessLabel: string;
   gatewayStatus: string;
   networkStatus: string;
+  onNavigatePage?: (pageId: ConversationNavTarget) => void;
+  onSessionSurfaceChange?: (surface: ConversationSurfaceId) => void;
 }
 
 interface PersistedChatState {
@@ -46,6 +62,14 @@ interface DisplayChatMessage {
   timestamp: string;
   source: "remote" | "local";
   deliveryStatus?: "pending" | "failed";
+}
+
+interface OperationResultState {
+  status: "success" | "error" | "info";
+  summary: string;
+  nextStep: string;
+  updatedAt: number;
+  detail?: string | null;
 }
 
 const promptPresets = [
@@ -340,55 +364,24 @@ function createOperationResult(
   };
 }
 
-function MessageBubble({
-  message,
-  grouped,
-  onRetry
-}: {
-  message: DisplayChatMessage;
-  grouped: boolean;
-  onRetry?: (messageId: string) => void;
-}) {
+function CompactOperationResult({ label, result }: { label: string; result: OperationResultState | null }) {
+  if (!result) {
+    return null;
+  }
+
   return (
-    <article
-      className={
-        message.role === "assistant"
-          ? `chat-message chat-message--assistant ${grouped ? "chat-message--grouped" : ""}`
-          : `chat-message chat-message--user ${grouped ? "chat-message--grouped" : ""}`
-      }
-    >
-      {!grouped ? (
-        <div className="chat-message__header">
-          <span className="chat-message__role">{message.role === "assistant" ? "OpenClaw" : "你"}</span>
-          <em>{formatMessageTimestamp(message.timestamp)}</em>
-        </div>
-      ) : null}
-
-      <div className="chat-message__body">{message.text}</div>
-
-      {message.source === "local" && message.deliveryStatus ? (
-        <div className="chat-message__meta">
-          <span className={`chat-message__delivery chat-message__delivery--${message.deliveryStatus}`}>
-            {message.deliveryStatus === "pending" ? "发送中…" : "发送失败"}
-          </span>
-          {message.deliveryStatus === "failed" && onRetry ? (
-            <button type="button" className="secondary-button chat-message__retry" onClick={() => onRetry(message.id)}>
-              重试发送
-            </button>
-          ) : null}
-        </div>
-      ) : null}
-    </article>
+    <div className={`conversation-result-note conversation-result-note--${result.status}`} title={result.detail ?? result.nextStep}>
+      <span>{label}</span>
+      <strong>{result.summary}</strong>
+    </div>
   );
 }
 
 export function ChatPage({
-  bridgeStatus,
-  runtimeStatus,
-  workspaceLabel,
   readinessLabel,
   gatewayStatus,
-  networkStatus
+  onNavigatePage,
+  onSessionSurfaceChange
 }: ChatPageProps) {
   const persistedFreshSession = readFreshSessionState();
   const [draft, setDraft] = useState(() => readPersistedChatState().draft);
@@ -416,12 +409,10 @@ export function ChatPage({
 
   const freshSessionActive = Boolean(freshSessionId);
   const displayMessages = mergeMessages(messages, localMessages);
-  const latestMessage = displayMessages.length > 0 ? displayMessages[displayMessages.length - 1] : null;
   const unreadCount = detachedFromLatest ? Math.max(0, displayMessages.length - lastSeenCount) : 0;
   const firstUnreadIndex = unreadCount > 0 ? displayMessages.length - unreadCount : -1;
   const canSend = draft.trim().length > 0 && !submitting && Boolean(chatState?.canSend);
   const canApplyModel = selectedModelId.trim().length > 0 && !applyingModel && selectedModelId !== (modelCatalog?.selectedModelId ?? "");
-  const chatReadinessLabel = chatState ? `聊天状态 · ${chatState.readinessLabel}` : readinessLabel;
   const composeHint = chatState?.canSend
     ? "下面输入，按 Ctrl/Cmd + Enter 直接发送到主会话。"
     : chatState?.disabledReason ?? "当前发送链路不可用。";
@@ -518,7 +509,14 @@ export function ChatPage({
       }
     };
 
-    updateStickiness();
+    if (thread.dataset.stickToLatest === "false") {
+      updateStickiness();
+    } else {
+      thread.dataset.stickToLatest = "true";
+      setDetachedFromLatest(false);
+      setLastSeenCount(displayMessages.length);
+    }
+
     thread.addEventListener("scroll", updateStickiness, { passive: true });
 
     return () => {
@@ -839,18 +837,8 @@ export function ChatPage({
     }
   }
 
-  const liveStatusLabel = freshSessionActive ? "独立新会话" : submitting ? "OpenClaw 回复中" : chatState?.readinessLabel ?? "检查发送链路";
-  const latestMessageLabel = latestMessage ? `${latestMessage.role === "assistant" ? "OpenClaw" : "你"} · ${formatMessageTimestamp(latestMessage.timestamp)}` : "暂无新消息";
   const selectedModelLabel = resolveSelectedModelLabel(modelCatalog, selectedModelId);
   const currentModelLabel = resolveSelectedModelLabel(modelCatalog, modelCatalog?.selectedModelId ?? "");
-  const pendingModelLabel = canApplyModel ? selectedModelLabel : "无待应用变更";
-  const gatewayActionSummary = [
-    "可刷新",
-    gatewayServiceState?.startAllowed ? "可启动" : null,
-    gatewayServiceState?.stopAllowed ? "可停止" : null
-  ]
-    .filter(Boolean)
-    .join(" / ");
   const visibleModelLabel =
     chatState?.model && chatState?.provider
       ? `${chatState.model} · ${chatState.provider}`
@@ -862,269 +850,216 @@ export function ChatPage({
 
   return (
     <section className="page chat-page chat-page--full">
-      <article className="chat-workspace">
-        <div className="chat-workspace__toolbar">
-          <div className="chat-workspace__identity">
-            <p className="eyebrow">OpenClaw 主会话</p>
-            <strong>{freshSessionActive ? freshSessionKey ?? "新会话" : chatState?.sessionKey ?? "agent:main:main"}</strong>
-            <span>{visibleModelLabel}</span>
-          </div>
-          <div className="chat-workspace__status">
-            <span className="chat-workspace__status-chip">{selectedModelLabel}</span>
-            <span className="chat-workspace__status-chip">{gatewayStatus}</span>
-            <span className="chat-workspace__status-chip">{networkStatus}</span>
-            <span className="chat-workspace__status-chip">{bridgeStatus}</span>
-            <span className="chat-workspace__status-chip">{runtimeStatus}</span>
-            <span className="chat-workspace__status-chip">{workspaceLabel}</span>
-            <span className="chat-workspace__status-chip">{chatReadinessLabel}</span>
-            <span className="chat-workspace__status-chip">{formatUpdatedAt(chatState?.updatedAt ?? null)}</span>
-          </div>
-        </div>
-
-        <div className="chat-workspace__controls">
-          <div className="operation-card operation-card--model">
-            <div className="operation-card__header">
-              <div>
-                <span>模型设置</span>
-                <strong>OpenClaw 默认模型</strong>
-              </div>
-              <em>{modelCatalog?.options.length ? `${modelCatalog.options.length} 个可选模型` : "等待模型列表"}</em>
-            </div>
-            <label className="chat-select-field">
-              <span>待应用模型</span>
-              <select
-                value={selectedModelId}
-                disabled={applyingModel || (modelCatalog?.options.length ?? 0) === 0}
-                onChange={(event: { target: { value: string } }) => {
-                  setSelectedModelId(event.target.value);
-                }}
-              >
-                {modelCatalog?.options.length ? (
-                  modelCatalog.options.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.label}
-                    </option>
-                  ))
-                ) : (
-                  <option value="">未发现可用模型</option>
-                )}
-              </select>
-            </label>
-            <div className="operation-status-grid">
-              <div>
-                <span>当前模型</span>
-                <strong>{currentModelLabel}</strong>
-              </div>
-              <div>
+      <ConversationShell
+        activeSurface="openclaw"
+        selectedSessionId="openclaw-main"
+        onCreateSession={() => void handleStartFreshSession()}
+        onNavigatePage={onNavigatePage}
+        onSessionSurfaceChange={onSessionSurfaceChange}
+        gatewaySummary={{
+          openclaw: gatewayServiceState?.running ? "运行中" : gatewayServiceState ? "待连接" : "读取中",
+          hermes: "运行中",
+          sampling: "2/2",
+          host: "受保护",
+          admin: "在线"
+        }}
+        header={{
+          title: freshSessionActive ? "独立新会话" : "主会话",
+          subtitle: visibleModelLabel,
+          chips: [
+            { label: "进行中", tone: "positive" },
+            { label: gatewayServiceState?.running ? "运行中 1086ms" : gatewayStatus, tone: gatewayServiceState?.running ? "positive" : "warning" },
+            { label: formatUpdatedAt(chatState?.updatedAt ?? null), tone: "neutral" }
+          ] as ConversationChip[],
+          onCreateSession: () => void handleStartFreshSession(),
+          onRefresh: () => void handleGatewayAction("refresh")
+        }}
+        inspector={
+          <>
+            <ModelRouteCard
+              title={modelCatalog?.options.length ? `${modelCatalog.options.length} 个可选模型` : "等待模型列表"}
+              currentModel={currentModelLabel}
+              secondaryModel="claude-opus-4-7"
+              routeStrategy="自动路由 · 混合模式"
+              result={<CompactOperationResult label="模型" result={modelResult} />}
+            >
+              <label className="conversation-select-field">
                 <span>待应用模型</span>
-                <strong>{pendingModelLabel}</strong>
-              </div>
-              <div>
-                <span>会话模型</span>
-                <strong>{visibleModelLabel}</strong>
-              </div>
-            </div>
-            <div className="operation-card__actions">
-              {freshSessionActive ? (
-                <button type="button" className="secondary-button" onClick={() => void handleReturnToMainSession()}>
-                  返回主会话
+                <select
+                  value={selectedModelId}
+                  disabled={applyingModel || (modelCatalog?.options.length ?? 0) === 0}
+                  onChange={(event: { target: { value: string } }) => {
+                    setSelectedModelId(event.target.value);
+                  }}
+                >
+                  {modelCatalog?.options.length ? (
+                    modelCatalog.options.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="">未发现可用模型</option>
+                  )}
+                </select>
+              </label>
+              <div className="conversation-card-actions">
+                <button type="button" onClick={() => void handleApplyModel()} disabled={!canApplyModel}>
+                  {applyingModel ? "应用中..." : "应用模型"}
                 </button>
-              ) : null}
-              <button type="button" className="secondary-button" onClick={() => void handleStartFreshSession()}>
-                新建会话
-              </button>
-              <button type="button" className="secondary-button" onClick={() => void handleApplyModel()} disabled={!canApplyModel}>
-                {applyingModel ? "应用中…" : "应用模型"}
-              </button>
-            </div>
-            <OperationResultPanel label="应用结果" result={modelResult} emptySummary="尚未执行模型应用" emptyNextStep="选择模型后点击应用模型。" />
-          </div>
-          <div className="operation-card operation-card--gateway">
-            <div className="operation-card__header">
-              <div>
-                <span>Gateway 控制</span>
-                <strong>{gatewayServiceState?.statusLabel ?? "Gateway 状态加载中"}</strong>
               </div>
-              <em>{gatewayBusy ? "操作中" : "可操作"}</em>
-            </div>
-            <div className="operation-status-grid">
-              <div>
-                <span>当前网关状态</span>
-                <strong>{gatewayServiceState?.running ? "运行中" : gatewayServiceState ? "未运行" : "读取中"}</strong>
+            </ModelRouteCard>
+
+            <ContextTokenCard
+              contextLabel="67k / 128k (52%)"
+              progress={52}
+              rows={[
+                { label: "输入令牌", value: "42.1k" },
+                { label: "输出令牌", value: "24.9k" },
+                { label: "缓存命中", value: "78%" }
+              ]}
+            />
+
+            <GatewayControlCard
+              openclawStatus={gatewayServiceState?.running ? "运行中" : gatewayServiceState ? "待连接" : "读取中"}
+              hermesStatus="运行中"
+              openclawLatency={gatewayServiceState?.running ? "1086 ms" : "待采样"}
+              hermesLatency="45 ms"
+              result={<CompactOperationResult label="网关" result={gatewayResult} />}
+            >
+              <div className="conversation-card-actions">
+                <button type="button" onClick={() => void handleGatewayAction("refresh")} disabled={gatewayBusy}>
+                  刷新状态
+                </button>
+                <button type="button" onClick={() => void handleGatewayAction("start")} disabled={gatewayBusy || gatewayServiceState?.startAllowed === false}>
+                  启动网关
+                </button>
+                <button
+                  type="button"
+                  className="conversation-card-actions__danger"
+                  onClick={() => void handleGatewayAction("stop")}
+                  disabled={gatewayBusy || gatewayServiceState?.stopAllowed === false}
+                >
+                  停止网关
+                </button>
               </div>
-              <div>
-                <span>网络/RPC 状态</span>
-                <strong>{gatewayServiceState?.detail ?? networkStatus}</strong>
+            </GatewayControlCard>
+
+            <SessionActionsCard
+              status={composeStatus}
+              canSendLabel={canSend ? "可发送" : "等待链路"}
+              result={<CompactOperationResult label="发送" result={sendResult} />}
+            >
+              <div className="conversation-card-actions">
+                {freshSessionActive ? (
+                  <button type="button" onClick={() => void handleReturnToMainSession()}>
+                    返回主会话
+                  </button>
+                ) : null}
+                <button type="button" onClick={() => void handleStartFreshSession()}>
+                  新建会话
+                </button>
+                <button type="button">导出对话</button>
+                <button type="button" className="conversation-card-actions__danger">
+                  结束会话
+                </button>
               </div>
-              <div>
-                <span>可执行动作</span>
-                <strong>{gatewayActionSummary}</strong>
-              </div>
-              <div>
-                <span>最近检查</span>
-                <strong>{formatUpdatedAt(gatewayServiceState?.lastCheckedAt ?? null)}</strong>
-              </div>
-            </div>
-            <div className="operation-card__actions">
-              <button type="button" className="secondary-button" onClick={() => void handleGatewayAction("refresh")} disabled={gatewayBusy}>
-                刷新网关
-              </button>
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={() => void handleGatewayAction("start")}
-                disabled={gatewayBusy || gatewayServiceState?.startAllowed === false}
-              >
-                启动网关
-              </button>
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={() => void handleGatewayAction("stop")}
-                disabled={gatewayBusy || gatewayServiceState?.stopAllowed === false}
-              >
-                停止网关
-              </button>
-            </div>
-            <OperationResultPanel label="最近结果" result={gatewayResult} emptySummary="尚未执行网关操作" emptyNextStep="先刷新网关状态，确认 RPC 是否可达。" />
-          </div>
-        </div>
-
-        <div className="chat-live-strip">
-          <div className="chat-live-strip__primary">
-            <strong>实时动态</strong>
-            <span>{liveStatusLabel}</span>
-          </div>
-          <div className="chat-live-strip__secondary">
-            <span>{latestMessageLabel}</span>
-            <span>{submitting ? "加速同步 1.2s" : "常规同步 4s"}</span>
-          </div>
-        </div>
-
-        <section className="chat-thread-shell">
-          <div className="chat-thread-shell__header">
-            <div className="chat-thread-shell__title">
-              <strong>实时消息</strong>
-              <span>你往上翻历史时不会再被拉回底部；只有贴近底部时才会继续跟随最新消息。</span>
-            </div>
-            <div className="chat-thread-shell__badges">
-              <span className="chat-thread-shell__badge">{displayMessages.length} 条消息</span>
-              <span className="chat-thread-shell__badge">{latestMessage?.role === "assistant" ? "最新回复" : "最新输入"}</span>
-              <span className="chat-thread-shell__badge">{formatUpdatedAt(chatState?.updatedAt ?? null)}</span>
-            </div>
-          </div>
-
-          <div id={CHAT_THREAD_ID} className="chat-thread chat-thread--workspace">
-            {loading ? (
-              <div className="chat-empty-state chat-empty-state--workspace">
-                <strong>正在读取主会话记录</strong>
-                <p>Studio 正在同步 OpenClaw 主会话的最近聊天内容。</p>
-              </div>
-            ) : displayMessages.length === 0 ? (
-              <div className="chat-empty-state chat-empty-state--workspace">
-                <strong>{freshSessionActive ? "新会话已就绪" : "主会话里还没有可显示的文本消息"}</strong>
-                <p>{freshSessionActive ? "现在只会显示你点击“新建会话”之后产生的新消息。" : "发送一条命令后，这里会直接出现 OpenClaw 主会话的真实对话内容。"}</p>
-              </div>
-            ) : (
-              displayMessages.map((message: DisplayChatMessage, index: number) => {
-                const previous: DisplayChatMessage | null = index > 0 ? (displayMessages[index - 1] ?? null) : null;
-                const showTimeSeparator = shouldInsertTimeSeparator(previous, message);
-                const grouped = !shouldStartMessageGroup(previous, message);
-
-                return (
-                  <div key={message.id} className="chat-thread__item">
-                    {showTimeSeparator ? (
-                      <div className="chat-time-separator">
-                        <span>{formatTimelineSeparator(message.timestamp)}</span>
-                      </div>
-                    ) : null}
-                    {firstUnreadIndex === index ? (
-                      <div className="chat-unread-marker">
-                        <span>{unreadCount} 条新消息</span>
-                      </div>
-                    ) : null}
-                    <MessageBubble message={message} grouped={grouped} onRetry={handleRetryMessage} />
-                  </div>
-                );
-              })
-            )}
-          </div>
-
-          {detachedFromLatest ? (
-            <div className="chat-thread-shell__jump">
-              <button type="button" className="quick-action-button quick-action-button--primary" onClick={handleJumpToLatest}>
-                回到底部看最新回复
-              </button>
-            </div>
-          ) : null}
-        </section>
-
-        <div className="chat-compose-panel">
-          <div className="chat-compose-panel__header">
-            <div>
-              <strong>发送区</strong>
-              <span>{composeHint}</span>
-            </div>
-            <em>{composeStatus}</em>
-          </div>
-
-          {freshSessionActive ? (
-            <div className="chat-error">当前是独立新会话：后续消息不会写回主会话，只显示这个新会话里的内容。</div>
-          ) : null}
-
-          {gatewayError ? <div className="chat-error">{gatewayError}</div> : null}
-          {modelError ? <div className="chat-error">{modelError}</div> : null}
-          {chatState?.disabledReason ? <div className="chat-error">{chatState.disabledReason}</div> : null}
-          {error ? <div className="chat-error">{error}</div> : null}
-          <OperationResultPanel label="发送结果" result={sendResult} emptySummary="尚未发送消息" emptyNextStep="确认网关与模型可用后再发送。" />
-
-          <div className="chat-preset-strip chat-preset-strip--toolbar">
-            {promptPresets.map((preset) => (
-              <button
-                key={preset}
-                type="button"
-                className="secondary-button chat-preset-button"
-                onClick={() => {
-                  setDraft(preset);
-                }}
-              >
-                {preset}
-              </button>
-            ))}
-          </div>
-
-          <label className="chat-composer-field">
-            <span>命令内容</span>
-            <textarea
+            </SessionActionsCard>
+          </>
+        }
+      >
+        <ChatPanel
+          title="主会话"
+          subtitle={freshSessionActive ? freshSessionKey ?? "独立新会话" : chatState?.sessionKey ?? "agent:main:main"}
+          statusChips={[
+            { label: visibleModelLabel, tone: visibleModelLabel === "未选择模型" ? "warning" : "active" },
+            { label: "本地网关 · 已连接", tone: gatewayServiceState?.running ? "positive" : "warning" },
+            { label: `运行态 · ${chatState?.readinessLabel ?? readinessLabel}`, tone: chatState?.canSend ? "positive" : "warning" }
+          ]}
+          contextChips={[
+            { label: "上下文窗口 67k / 128k (52%)", tone: "neutral" },
+            { label: "工具调用 12/12", tone: "positive" }
+          ]}
+          composer={
+            <ComposerBar
               value={draft}
-              onChange={(event: { target: { value: string } }) => {
-                setDraft(event.target.value);
-              }}
-              onKeyDown={(event: { metaKey: boolean; ctrlKey: boolean; key: string; preventDefault: () => void }) => {
-                if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+              placeholder="输入消息，按 Enter 发送，Shift + Enter 换行"
+              disabled={!chatState?.canSend}
+              canSend={canSend}
+              submitting={submitting}
+              submitLabel="发送到 OpenClaw"
+              submittingLabel="发送中..."
+              statusLabel={composeStatus}
+              helperText={composeHint}
+              presets={promptPresets}
+              errors={[
+                freshSessionActive ? "当前是独立新会话：后续消息不会写回主会话，只显示这个新会话里的内容。" : null,
+                gatewayError,
+                modelError,
+                chatState?.disabledReason,
+                error
+              ]}
+              onValueChange={setDraft}
+              onSubmit={() => void handleSubmit()}
+              onClear={() => setDraft("")}
+              onPresetSelect={setDraft}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
                   event.preventDefault();
                   void handleSubmit();
                 }
               }}
-              placeholder="直接向 OpenClaw 主会话发消息，例如：总结当前 OpenClaw 状态，并告诉我下一步最应该做什么。"
-              rows={2}
-              disabled={!chatState?.canSend}
             />
-          </label>
+          }
+        >
+          <MessageTimeline
+            threadId={CHAT_THREAD_ID}
+            loading={loading}
+            emptyTitle={freshSessionActive ? "新会话已就绪" : "主会话里还没有可显示的文本消息"}
+            emptyDescription={
+              freshSessionActive
+                ? "现在只会显示你点击“新建会话”之后产生的新消息。"
+                : "发送一条命令后，这里会直接出现 OpenClaw 主会话的真实对话内容。"
+            }
+            detachedFromLatest={detachedFromLatest}
+            onJumpToLatest={handleJumpToLatest}
+          >
+            {displayMessages.length > 0
+              ? displayMessages.map((message: DisplayChatMessage, index: number) => {
+                  const previous: DisplayChatMessage | null = index > 0 ? (displayMessages[index - 1] ?? null) : null;
+                  const showTimeSeparator = shouldInsertTimeSeparator(previous, message);
+                  const grouped = !shouldStartMessageGroup(previous, message);
+                  const firstAssistantIndex = displayMessages.findIndex((item) => item.role === "assistant");
 
-          <div className="chat-composer-actions">
-            <button type="button" className="secondary-button" onClick={() => setDraft("")} disabled={submitting || draft.length === 0}>
-              清空
-            </button>
-            <div className="chat-composer-actions__primary">
-              <button type="button" className="quick-action-button quick-action-button--primary" onClick={() => void handleSubmit()} disabled={!canSend}>
-                <strong>{submitting ? "发送中…" : chatState?.canSend ? "发送到 OpenClaw" : "当前不可发送"}</strong>
-                <span>{chatState?.canSend ? "Ctrl/Cmd + Enter" : "检查发送链路"}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </article>
+                  return (
+                    <div key={message.id} className="conversation-timeline__item">
+                      {showTimeSeparator ? (
+                        <div className="conversation-time-separator">
+                          <span>{formatTimelineSeparator(message.timestamp)}</span>
+                        </div>
+                      ) : null}
+                      {firstUnreadIndex === index ? (
+                        <div className="conversation-unread-marker">
+                          <span>{unreadCount} 条新消息</span>
+                        </div>
+                      ) : null}
+                      <ConversationMessageBubble
+                        role={message.role}
+                        roleLabel={message.role === "assistant" ? "OpenClaw" : "你"}
+                        timeLabel={formatMessageTimestamp(message.timestamp)}
+                        text={message.text}
+                        grouped={grouped}
+                        deliveryStatus={message.deliveryStatus}
+                        onRetry={message.deliveryStatus === "failed" ? () => void handleRetryMessage(message.id) : undefined}
+                      />
+                      {firstAssistantIndex === index ? <LatencyTrendCard /> : null}
+                    </div>
+                  );
+                })
+              : null}
+          </MessageTimeline>
+        </ChatPanel>
+      </ConversationShell>
     </section>
   );
 }

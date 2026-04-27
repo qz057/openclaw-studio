@@ -129,11 +129,6 @@ const LazyHermesPage = lazy(async () => {
   return { default: HermesPage };
 });
 
-const LazyClaudeSessionsPage = lazy(async () => {
-  const { ClaudeSessionsPage } = await import("./pages/ClaudeSessionsPage");
-  return { default: ClaudeSessionsPage };
-});
-
 const LazyAgentsPage = lazy(async () => {
   const { AgentsPage } = await import("./pages/AgentsPage");
   return { default: AgentsPage };
@@ -151,6 +146,7 @@ const LazySettingsPage = lazy(async () => {
 
 import {
   resolvePage,
+  resolveStartupPage,
   getRouteHashForPageId,
   visibleStudioPageIds,
   formatLiveSyncAge,
@@ -165,11 +161,10 @@ function navigateToPage(pageId: StudioPageId) {
 
 const LIVE_PAGE_IDS = new Set<StudioPageId>(["dashboard", "chat", "sessions"]);
 const UTILITY_PAGE_IDS = new Set<StudioPageId>(["skills", "settings", "agents"]);
-type SessionSurfaceId = "openclaw" | "hermes" | "claude";
+type SessionSurfaceId = "openclaw" | "hermes";
 const SESSION_SURFACES: Array<{ id: SessionSurfaceId; label: string; detail: string }> = [
   { id: "openclaw", label: "OpenClaw", detail: "主会话" },
-  { id: "hermes", label: "Hermes", detail: "终端会话" },
-  { id: "claude", label: "Claude", detail: "历史记录" }
+  { id: "hermes", label: "Hermes", detail: "记忆与网关" }
 ];
 
 function resolveInitialSessionSurface(): SessionSurfaceId {
@@ -180,9 +175,6 @@ function resolveInitialSessionSurface(): SessionSurfaceId {
   const route = window.location.hash.replace("#", "").trim().toLowerCase();
   if (route === "hermes") {
     return "hermes";
-  }
-  if (route === "claude") {
-    return "claude";
   }
   return "openclaw";
 }
@@ -1254,8 +1246,8 @@ export function App() {
   const { data, error, syncError, isRefreshing, lastUpdatedAt } = useStudioData();
   const dashboardRealtime = useDashboardRealtimeData(data, lastUpdatedAt);
   const [hermesState, setHermesState] = useState<StudioHermesState | null>(null);
-  const [activePage, setActivePage] = useState<StudioPageId>(() => resolvePage());
-  const [sessionSurface, setSessionSurface] = useState<SessionSurfaceId>(resolveInitialSessionSurface);
+  const [activePage, setActivePage] = useState<StudioPageId>(resolveStartupPage);
+  const [sessionSurface, setSessionSurface] = useState<SessionSurfaceId>("openclaw");
   const [dashboardThemeMode, setDashboardThemeMode] = useState<DashboardThemeMode>(getInitialDashboardTheme);
   const [paletteReturnFocus, setPaletteReturnFocus] = useState<HTMLElement | null>(null);
   const [focusedSlotId, setFocusedSlotId] = useState<string | null>(() => readPersistedFocusedSlotId());
@@ -1303,7 +1295,14 @@ export function App() {
     };
 
     window.addEventListener("hashchange", syncRoute);
-    syncRoute();
+
+    const startupPage = resolveStartupPage();
+
+    if (resolvePage() !== startupPage || window.location.hash !== `#${getRouteHashForPageId(startupPage)}`) {
+      navigateToPage(startupPage);
+    } else {
+      syncRoute();
+    }
 
     return () => {
       window.removeEventListener("hashchange", syncRoute);
@@ -5418,6 +5417,15 @@ export function App() {
   ]
     .filter(Boolean)
     .join(" ");
+  const handleConversationNavigate = (pageId: StudioPageId) => {
+    setActivePage(pageId);
+    navigateToPage(pageId);
+  };
+  const handleConversationSurfaceChange = (surface: SessionSurfaceId) => {
+    setSessionSurface(surface);
+    setActivePage("chat");
+    window.location.hash = surface === "hermes" ? "#hermes" : "#chat";
+  };
 
   return (
     <>
@@ -5456,20 +5464,6 @@ export function App() {
               </div>
             </div>
           </div>
-          <button
-            type="button"
-            className="nav-command-button"
-            aria-label="打开命令面板"
-            onClick={() => {
-              openCommandPalette("");
-            }}
-          >
-            <span>
-              <Command size={16} strokeWidth={2.2} aria-hidden="true" />
-              打开命令面板
-            </span>
-            <strong>Ctrl/Cmd K</strong>
-          </button>
           <div className="nav-section">
             <span className="nav-section__label">主入口</span>
             <nav className="nav-list">
@@ -6024,50 +6018,20 @@ export function App() {
 
           <Suspense fallback={<PageLoadingState />}>
             {activePage === "chat" ? (
-              <section className="session-workspace-shell">
-                <div className="session-surface-switcher" aria-label="会话来源切换">
-                  {SESSION_SURFACES.map((surface) => (
-                    <button
-                      key={surface.id}
-                      type="button"
-                      className={sessionSurface === surface.id ? "session-surface-tab session-surface-tab--active" : "session-surface-tab"}
-                      onClick={() => {
-                        setSessionSurface(surface.id);
-                      }}
-                    >
-                      <strong>{surface.label}</strong>
-                      <span>{surface.detail}</span>
-                    </button>
-                  ))}
-                </div>
-                <div
-                  style={{
-                    display: sessionSurface === "openclaw" ? "block" : "none",
-                    minHeight: 0,
-                    height: "100%"
-                  }}
-                >
-                  <LazyChatPage {...chatSummary} />
-                </div>
-                <div
-                  style={{
-                    display: sessionSurface === "hermes" ? "block" : "none",
-                    minHeight: 0,
-                    height: "100%"
-                  }}
-                >
-                  <LazyHermesPage {...chatSummary} readinessLabel={hermesReadinessLabel} />
-                </div>
-                <div
-                  style={{
-                    display: sessionSurface === "claude" ? "block" : "none",
-                    minHeight: 0,
-                    height: "100%"
-                  }}
-                >
-                  <LazyClaudeSessionsPage />
-                </div>
-              </section>
+              sessionSurface === "openclaw" ? (
+                <LazyChatPage
+                  {...chatSummary}
+                  onNavigatePage={handleConversationNavigate}
+                  onSessionSurfaceChange={handleConversationSurfaceChange}
+                />
+              ) : (
+                <LazyHermesPage
+                  {...chatSummary}
+                  readinessLabel={hermesReadinessLabel}
+                  onNavigatePage={handleConversationNavigate}
+                  onSessionSurfaceChange={handleConversationSurfaceChange}
+                />
+              )
             ) : (
               renderPage(
                 activePage,

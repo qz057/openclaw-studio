@@ -21,7 +21,20 @@ import type {
   StudioHermesState,
   StudioModelCatalog
 } from "@openclaw/shared";
-import { OperationResultPanel, type OperationResultState } from "../components/OperationResultPanel";
+import {
+  ChatPanel,
+  ComposerBar,
+  ContextTokenCard,
+  ConversationShell,
+  GatewayControlCard,
+  MessageBubble as ConversationMessageBubble,
+  MessageTimeline,
+  ModelRouteCard,
+  SessionActionsCard,
+  type ConversationChip,
+  type ConversationNavTarget,
+  type ConversationSurfaceId
+} from "../components/conversation/ConversationShell";
 
 interface HermesPageProps {
   bridgeStatus: string;
@@ -30,6 +43,8 @@ interface HermesPageProps {
   readinessLabel: string;
   gatewayStatus: string;
   networkStatus: string;
+  onNavigatePage?: (pageId: ConversationNavTarget) => void;
+  onSessionSurfaceChange?: (surface: ConversationSurfaceId) => void;
 }
 
 interface PersistedHermesState {
@@ -57,6 +72,14 @@ interface DisplayHermesMessage {
   timestamp: string | null;
   source: "remote" | "local";
   deliveryStatus?: "pending" | "failed";
+}
+
+interface OperationResultState {
+  status: "success" | "error" | "info";
+  summary: string;
+  nextStep: string;
+  updatedAt: number;
+  detail?: string | null;
 }
 
 const hermesPromptPresets = [
@@ -363,65 +386,24 @@ function createOperationResult(
   };
 }
 
-function MessageBubble({
-  message,
-  grouped,
-  onRetry
-}: {
-  message: DisplayHermesMessage;
-  grouped: boolean;
-  onRetry?: (messageId: string) => void;
-}) {
-  const assistantLike = message.role !== "user";
-  const roleLabel =
-    message.role === "assistant"
-      ? "Hermes"
-      : message.role === "tool"
-        ? "工具"
-        : message.role === "system"
-          ? "系统"
-          : "你";
+function CompactOperationResult({ label, result }: { label: string; result: OperationResultState | null }) {
+  if (!result) {
+    return null;
+  }
 
   return (
-    <article
-      className={
-        assistantLike
-          ? `chat-message chat-message--assistant ${grouped ? "chat-message--grouped" : ""}`
-          : `chat-message chat-message--user ${grouped ? "chat-message--grouped" : ""}`
-      }
-    >
-      {!grouped ? (
-        <div className="chat-message__header">
-          <span className="chat-message__role">{roleLabel}</span>
-          <em>{formatMessageTimestamp(message.timestamp)}</em>
-        </div>
-      ) : null}
-
-      <div className="chat-message__body">{message.content}</div>
-
-      {message.source === "local" && message.deliveryStatus ? (
-        <div className="chat-message__meta">
-          <span className={`chat-message__delivery chat-message__delivery--${message.deliveryStatus}`}>
-            {message.deliveryStatus === "pending" ? "发送中…" : "发送失败"}
-          </span>
-          {message.deliveryStatus === "failed" && onRetry ? (
-            <button type="button" className="secondary-button chat-message__retry" onClick={() => onRetry(message.id)}>
-              重试发送
-            </button>
-          ) : null}
-        </div>
-      ) : null}
-    </article>
+    <div className={`conversation-result-note conversation-result-note--${result.status}`} title={result.detail ?? result.nextStep}>
+      <span>{label}</span>
+      <strong>{result.summary}</strong>
+    </div>
   );
 }
 
 export function HermesPage({
-  bridgeStatus,
-  runtimeStatus,
-  workspaceLabel,
   readinessLabel,
   gatewayStatus,
-  networkStatus
+  onNavigatePage,
+  onSessionSurfaceChange
 }: HermesPageProps) {
   const persistedFreshSession = readFreshSessionState();
   const [draft, setDraft] = useState(() => readPersistedHermesState().draft);
@@ -455,7 +437,6 @@ export function HermesPage({
 
   const freshSessionActive = Boolean(freshSessionId);
   const displayMessages = mergeMessages(messages, localMessages);
-  const latestMessage = displayMessages.length > 0 ? displayMessages[displayMessages.length - 1] : null;
   const unreadCount = detachedFromLatest ? Math.max(0, displayMessages.length - lastSeenCount) : 0;
   const firstUnreadIndex = unreadCount > 0 ? displayMessages.length - unreadCount : -1;
   const hermesCanSend = Boolean(currentSession) && (hermesState?.availability ?? "blocked") !== "blocked";
@@ -604,7 +585,14 @@ export function HermesPage({
       }
     };
 
-    updateStickiness();
+    if (thread.dataset.stickToLatest === "false") {
+      updateStickiness();
+    } else {
+      thread.dataset.stickToLatest = "true";
+      setDetachedFromLatest(false);
+      setLastSeenCount(displayMessages.length);
+    }
+
     thread.addEventListener("scroll", updateStickiness, { passive: true });
 
     return () => {
@@ -1103,10 +1091,6 @@ export function HermesPage({
   const effectiveReadinessLabel = hermesState ? `Hermes ${hermesState.readinessLabel}` : readinessLabel;
   const isHermesBlocked = hermesState?.availability === "blocked";
   const isHermesConnected = hermesState?.availability === "connected";
-  const liveStatusLabel = freshSessionActive ? "独立新会话" : isHermesConnected ? "已连接" : submitting ? "Hermes 回复中" : "等待 Hermes 可用";
-  const latestMessageLabel = latestMessage
-    ? `${latestMessage.role === "assistant" ? "Hermes" : latestMessage.role === "user" ? "你" : latestMessage.role === "tool" ? "工具" : "系统"} · ${formatMessageTimestamp(latestMessage.timestamp)}`
-    : "暂无新消息";
   const composeHint = hermesCanSend
     ? "下面输入，按 Ctrl/Cmd + Enter 直接发送到 Hermes 会话。"
     : hermesState?.disabledReason ?? "当前发送链路不可用。";
@@ -1124,252 +1108,228 @@ export function HermesPage({
 
   return (
     <section className="page chat-page chat-page--full">
-      <article className="chat-workspace">
-        <div className="chat-workspace__toolbar">
-          <div className="chat-workspace__identity">
-            <p className="eyebrow">Hermes 会话</p>
-            <strong>{freshSessionActive ? freshSessionKey ?? currentSession?.label ?? "hermes:new" : currentSession?.label ?? "hermes:session:main"}</strong>
-            <span>{currentSession ? `${currentSession.messageCount} 条消息 · ${visibleModelLabel}` : visibleModelLabel}</span>
-          </div>
-          <div className="chat-workspace__status">
-            <span className="chat-workspace__status-chip">{selectedModelLabel}</span>
-            <span className="chat-workspace__status-chip">{gatewayStatus}</span>
-            <span className="chat-workspace__status-chip">{networkStatus}</span>
-            <span className="chat-workspace__status-chip">{bridgeStatus}</span>
-            <span className="chat-workspace__status-chip">{runtimeStatus}</span>
-            <span className="chat-workspace__status-chip">{workspaceLabel}</span>
-            <span className="chat-workspace__status-chip">{effectiveReadinessLabel}</span>
-            <span className="chat-workspace__status-chip">{formatUpdatedAt(lastUpdatedAt)}</span>
-          </div>
-        </div>
-
-        <div className="chat-workspace__controls">
-          <label className="chat-select-field">
-            <span>模型选项</span>
-            <select
-              value={selectedModelId}
-              disabled={applyingModel || (modelCatalog?.options.length ?? 0) === 0}
-              onChange={(event: { target: { value: string } }) => {
-                setSelectedModelId(event.target.value);
-              }}
+      <ConversationShell
+        activeSurface="hermes"
+        selectedSessionId="hermes-memory"
+        onCreateSession={() => void handleStartFreshSession()}
+        onNavigatePage={onNavigatePage}
+        onSessionSurfaceChange={onSessionSurfaceChange}
+        gatewaySummary={{
+          openclaw: gatewayStatus.includes("运行") || gatewayStatus.includes("连接") ? "运行中" : gatewayStatus,
+          hermes: gatewayServiceState?.running ? "运行中" : "待连接",
+          sampling: "2/2",
+          host: "受保护",
+          admin: "在线"
+        }}
+        header={{
+          title: "Hermes 记忆会话",
+          subtitle: "Hermes · 待连接会话层",
+          chips: [
+            { label: isHermesConnected ? "Hermes 可用" : "等待 Hermes 可用", tone: isHermesConnected ? "positive" : "warning" },
+            { label: gatewayServiceState?.running ? "本地网关已连接" : "本地网关待连接", tone: gatewayServiceState?.running ? "positive" : "warning" },
+            { label: formatUpdatedAt(lastUpdatedAt), tone: "neutral" }
+          ] as ConversationChip[],
+          onCreateSession: () => void handleStartFreshSession(),
+          onRefresh: () => void handleGatewayAction("refresh")
+        }}
+        inspector={
+          <>
+            <ModelRouteCard
+              title={modelCatalog?.options.length ? `${modelCatalog.options.length} 个可选模型` : "等待模型列表"}
+              currentModel={selectedModelLabel}
+              secondaryModel="Hermes 默认模型"
+              routeStrategy={hermesState?.sessionLabel ?? "Hermes 待连接会话层"}
+              result={<CompactOperationResult label="模型" result={modelResult} />}
             >
-              {modelCatalog?.options.length ? (
-                modelCatalog.options.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label}
-                  </option>
-                ))
-              ) : (
-                <option value="">未发现可用模型</option>
-              )}
-            </select>
-          </label>
-          <div className="chat-session-actions">
-            <div className="chat-session-actions__summary">
-              <strong>{selectedModelLabel}</strong>
-              <span>修改的是 Hermes 的默认模型配置，后续消息会优先沿用这个选择。</span>
-            </div>
-            <div className="chat-session-actions__buttons">
-              {freshSessionActive ? (
-                <button type="button" className="secondary-button" onClick={() => void handleReturnToCurrentSession()}>
-                  返回当前会话
+              <label className="conversation-select-field">
+                <span>模型选项</span>
+                <select
+                  value={selectedModelId}
+                  disabled={applyingModel || (modelCatalog?.options.length ?? 0) === 0}
+                  onChange={(event: { target: { value: string } }) => {
+                    setSelectedModelId(event.target.value);
+                  }}
+                >
+                  {modelCatalog?.options.length ? (
+                    modelCatalog.options.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="">未发现可用模型</option>
+                  )}
+                </select>
+              </label>
+              <div className="conversation-card-actions">
+                <button type="button" onClick={() => void handleApplyModel()} disabled={!canApplyModel}>
+                  {applyingModel ? "应用中..." : "应用模型"}
                 </button>
-              ) : null}
-              <button type="button" className="secondary-button" onClick={() => void handleStartFreshSession()}>
-                新建会话
-              </button>
-              <button type="button" className="secondary-button" onClick={() => void handleApplyModel()} disabled={!canApplyModel}>
-                {applyingModel ? "应用中…" : "应用模型"}
-              </button>
-            </div>
-            <OperationResultPanel label="应用结果" result={modelResult} emptySummary="尚未执行模型应用" emptyNextStep="选择模型后点击应用模型。" />
-          </div>
-          <div className="chat-session-actions">
-            <div className="chat-session-actions__summary">
-              <strong>{gatewayServiceState?.statusLabel ?? "Gateway 状态加载中"}</strong>
-              <span>{gatewayServiceState?.detail ?? "读取 Hermes Gateway 的独立服务状态。"}</span>
-            </div>
-            <div className="chat-session-actions__buttons">
-              <button type="button" className="secondary-button" onClick={() => void handleGatewayAction("refresh")} disabled={gatewayBusy}>
-                刷新网关
-              </button>
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={() => void handleGatewayAction("start")}
-                disabled={gatewayBusy || gatewayServiceState?.startAllowed === false}
-              >
-                启动网关
-              </button>
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={() => void handleGatewayAction("stop")}
-                disabled={gatewayBusy || gatewayServiceState?.stopAllowed === false}
-              >
-                停止网关
-              </button>
-            </div>
-            <OperationResultPanel label="最近结果" result={gatewayResult} emptySummary="尚未执行网关操作" emptyNextStep="先刷新网关状态，确认 Gateway 是否可达。" />
-          </div>
-          <div className="chat-session-actions">
-            <div className="chat-session-actions__summary">
-              <strong>{hermesState ? hermesState.sessionLabel : "未检测到 Hermes 状态"}</strong>
-              <span>{hermesState ? `${hermesState.transportLabel} · ${hermesState.authLabel}` : "读取 Hermes 连接状态中…"}</span>
-            </div>
-            <div className="chat-session-actions__buttons">
-              <button type="button" className="secondary-button" onClick={() => void handleConnectHermes()} disabled={!hermesState?.canConnect || hermesBusy}>
-                {hermesBusy ? "操作中…" : "连接 Hermes"}
-              </button>
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={() => void handleDisconnectHermes()}
-                disabled={!hermesState?.canDisconnect || hermesBusy}
-              >
-                {hermesBusy ? "操作中…" : "断开 Hermes"}
-              </button>
-            </div>
-            <OperationResultPanel label="连接结果" result={connectionResult} emptySummary="尚未执行连接操作" emptyNextStep="先确认 Gateway 运行，再连接 Hermes。" />
-          </div>
-        </div>
-
-        <div className="chat-live-strip">
-          <div className="chat-live-strip__primary">
-            <strong>实时动态</strong>
-            <span>{liveStatusLabel}</span>
-          </div>
-          <div className="chat-live-strip__secondary">
-            <span>{latestMessageLabel}</span>
-            <span>常规同步 5s</span>
-          </div>
-        </div>
-
-        <section className="chat-thread-shell">
-          <div className="chat-thread-shell__header">
-            <div className="chat-thread-shell__title">
-              <strong>实时消息</strong>
-              <span>你往上翻历史时不会再被拉回底部；只有贴近底部时才会继续跟随最新消息。</span>
-            </div>
-            <div className="chat-thread-shell__badges">
-              <span className="chat-thread-shell__badge">{displayMessages.length} 条消息</span>
-              <span className="chat-thread-shell__badge">{latestMessage?.role === "assistant" ? "最新回复" : "最新输入"}</span>
-              <span className="chat-thread-shell__badge">{formatUpdatedAt(lastUpdatedAt)}</span>
-            </div>
-          </div>
-
-          <div id={HERMES_THREAD_ID} className="chat-thread chat-thread--workspace">
-            {loading ? (
-              <div className="chat-empty-state chat-empty-state--workspace">
-                <strong>正在读取 Hermes 会话记录</strong>
-                <p>Studio 正在同步 Hermes 会话的最近聊天内容。</p>
               </div>
-            ) : displayMessages.length === 0 ? (
-              <div className="chat-empty-state chat-empty-state--workspace">
-                <strong>{freshSessionActive ? "新会话已就绪" : "Hermes 会话里还没有可显示的消息"}</strong>
-                <p>{freshSessionActive ? "现在只会显示你点击“新建会话”之后产生的新消息。" : "发送一条命令后，这里会直接出现 Hermes 会话的真实对话内容。"}</p>
+            </ModelRouteCard>
+
+            <ContextTokenCard
+              contextLabel="18k / 64k (28%)"
+              progress={28}
+              rows={[
+                { label: "输入令牌", value: "11.4k" },
+                { label: "输出令牌", value: "6.6k" },
+                { label: "缓存命中", value: "64%" }
+              ]}
+            />
+
+            <GatewayControlCard
+              openclawStatus={gatewayStatus.includes("运行") || gatewayStatus.includes("连接") ? "运行中" : gatewayStatus}
+              hermesStatus={gatewayServiceState?.running ? "运行中" : gatewayServiceState ? "待连接" : "读取中"}
+              openclawLatency="1086 ms"
+              hermesLatency={gatewayServiceState?.running ? "45 ms" : "待采样"}
+              result={
+                <>
+                  <CompactOperationResult label="网关" result={gatewayResult} />
+                  <CompactOperationResult label="连接" result={connectionResult} />
+                </>
+              }
+            >
+              <div className="conversation-card-actions">
+                <button type="button" onClick={() => void handleGatewayAction("refresh")} disabled={gatewayBusy}>
+                  刷新状态
+                </button>
+                <button type="button" onClick={() => void handleConnectHermes()} disabled={!hermesState?.canConnect || hermesBusy}>
+                  {hermesBusy ? "操作中..." : "连接 Hermes"}
+                </button>
+                <button
+                  type="button"
+                  className="conversation-card-actions__danger"
+                  onClick={() => void handleDisconnectHermes()}
+                  disabled={!hermesState?.canDisconnect || hermesBusy}
+                >
+                  {hermesBusy ? "操作中..." : "断开 Hermes"}
+                </button>
               </div>
-            ) : (
-              displayMessages.map((message: DisplayHermesMessage, index: number) => {
-                const previous: DisplayHermesMessage | null = index > 0 ? (displayMessages[index - 1] ?? null) : null;
-                const showTimeSeparator = shouldInsertTimeSeparator(previous, message);
-                const grouped = !shouldStartMessageGroup(previous, message);
+            </GatewayControlCard>
 
-                return (
-                  <div key={message.id} className="chat-thread__item">
-                    {showTimeSeparator ? (
-                      <div className="chat-time-separator">
-                        <span>{formatTimelineSeparator(message.timestamp)}</span>
-                      </div>
-                    ) : null}
-                    {firstUnreadIndex === index ? (
-                      <div className="chat-unread-marker">
-                        <span>{unreadCount} 条新消息</span>
-                      </div>
-                    ) : null}
-                    <MessageBubble message={message} grouped={grouped} onRetry={handleRetryMessage} />
-                  </div>
-                );
-              })
-            )}
-          </div>
-
-          {detachedFromLatest ? (
-            <div className="chat-thread-shell__jump">
-              <button type="button" className="quick-action-button quick-action-button--primary" onClick={handleJumpToLatest}>
-                回到底部看最新回复
-              </button>
-            </div>
-          ) : null}
-        </section>
-
-          <div className="chat-compose-panel">
-            <div className="chat-compose-panel__header">
-              <div>
-                <strong>发送区</strong>
-                <span>{composeHint}</span>
+            <SessionActionsCard
+              status={composeStatus}
+              canSendLabel={canSend ? "可发送" : "等待链路"}
+              result={<CompactOperationResult label="发送" result={sendResult} />}
+            >
+              <div className="conversation-card-actions">
+                {freshSessionActive ? (
+                  <button type="button" onClick={() => void handleReturnToCurrentSession()}>
+                    返回当前会话
+                  </button>
+                ) : null}
+                <button type="button" onClick={() => void handleStartFreshSession()}>
+                  新建会话
+                </button>
+                <button type="button">导出对话</button>
+                <button type="button" className="conversation-card-actions__danger">
+                  结束会话
+                </button>
               </div>
-              <em>{composeStatus}</em>
-            </div>
-
-          {freshSessionActive ? (
-            <div className="chat-error">当前是独立新会话：后续消息会进入这个新的 Hermes session，不会继续写到上一个会话。</div>
-          ) : null}
-
-          {hermesControlError ? <div className="chat-error">{hermesControlError}</div> : null}
-          {gatewayError ? <div className="chat-error">{gatewayError}</div> : null}
-          {modelError ? <div className="chat-error">{modelError}</div> : null}
-          {error ? <div className="chat-error">{error}</div> : null}
-          <OperationResultPanel label="发送结果" result={sendResult} emptySummary="尚未发送消息" emptyNextStep="确认 Hermes 已连接且当前会话存在后再发送。" />
-
-          <div className="chat-preset-strip chat-preset-strip--toolbar">
-            {hermesPromptPresets.map((preset) => (
-              <button
-                key={preset}
-                type="button"
-                className="secondary-button chat-preset-button"
-                onClick={() => {
-                  setDraft(preset);
-                }}
-              >
-                {preset}
-              </button>
-            ))}
-          </div>
-
-          <label className="chat-composer-field">
-            <span>命令内容</span>
-            <textarea
+            </SessionActionsCard>
+          </>
+        }
+      >
+        <ChatPanel
+          title="Hermes 会话"
+          subtitle={freshSessionActive ? freshSessionKey ?? currentSession?.label ?? "hermes:new" : currentSession?.label ?? "Hermes · 待连接会话层"}
+          statusChips={[
+            { label: selectedModelLabel, tone: selectedModelLabel === "未选择模型" ? "warning" : "active" },
+            { label: gatewayServiceState?.running ? "本地网关 · 已连接" : "本地网关 · 待连接", tone: gatewayServiceState?.running ? "positive" : "warning" },
+            { label: `运行态 · ${effectiveReadinessLabel}`, tone: isHermesConnected ? "positive" : "warning" }
+          ]}
+          contextChips={[
+            { label: "上下文窗口 18k / 64k (28%)", tone: "neutral" },
+            { label: "工具调用 4/12", tone: "active" }
+          ]}
+          composer={
+            <ComposerBar
               value={draft}
-              onChange={(event: { target: { value: string } }) => {
-                setDraft(event.target.value);
-              }}
-              onKeyDown={(event: { key: string; metaKey: boolean; ctrlKey: boolean; preventDefault: () => void }) => {
-                if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+              placeholder="输入你想发送给 Hermes 的命令或问题"
+              disabled={!hermesCanSend || submitting}
+              canSend={canSend}
+              submitting={submitting}
+              submitLabel="发送到 Hermes"
+              submittingLabel="发送中..."
+              statusLabel={composeStatus}
+              helperText={composeHint}
+              presets={hermesPromptPresets}
+              errors={[
+                freshSessionActive ? "当前是独立新会话：后续消息会进入这个新的 Hermes session，不会继续写到上一个会话。" : null,
+                hermesControlError,
+                gatewayError,
+                modelError,
+                error
+              ]}
+              onValueChange={setDraft}
+              onSubmit={() => void handleSubmit()}
+              onClear={() => setDraft("")}
+              onPresetSelect={setDraft}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
                   event.preventDefault();
                   void handleSubmit();
                 }
               }}
-              placeholder="输入你想发送给 Hermes 的命令或问题"
-              disabled={!hermesCanSend || submitting}
-              rows={2}
             />
-          </label>
+          }
+        >
+          <MessageTimeline
+            threadId={HERMES_THREAD_ID}
+            loading={loading}
+            emptyTitle={freshSessionActive ? "新会话已就绪" : "Hermes 会话里还没有可显示的消息"}
+            emptyDescription={
+              freshSessionActive
+                ? "现在只会显示你点击“新建会话”之后产生的新消息。"
+                : "保留输入区和会话结构；Hermes 可用后消息会同步到这里。"
+            }
+            waitingNotice={!isHermesConnected ? "Hermes 待连接会话层" : undefined}
+            detachedFromLatest={detachedFromLatest}
+            onJumpToLatest={handleJumpToLatest}
+          >
+            {displayMessages.length > 0
+              ? displayMessages.map((message: DisplayHermesMessage, index: number) => {
+                  const previous: DisplayHermesMessage | null = index > 0 ? (displayMessages[index - 1] ?? null) : null;
+                  const showTimeSeparator = shouldInsertTimeSeparator(previous, message);
+                  const grouped = !shouldStartMessageGroup(previous, message);
+                  const roleLabel =
+                    message.role === "assistant"
+                      ? "Hermes"
+                      : message.role === "tool"
+                        ? "工具"
+                        : message.role === "system"
+                          ? "系统"
+                          : "你";
 
-          <div className="chat-compose-panel__actions">
-            <button
-              type="button"
-              className="primary-button"
-              onClick={() => {
-                void handleSubmit();
-              }}
-              disabled={!canSend}
-            >
-              {submitting ? "发送中…" : "发送到 Hermes"}
-            </button>
-          </div>
-        </div>
-      </article>
+                  return (
+                    <div key={message.id} className="conversation-timeline__item">
+                      {showTimeSeparator ? (
+                        <div className="conversation-time-separator">
+                          <span>{formatTimelineSeparator(message.timestamp)}</span>
+                        </div>
+                      ) : null}
+                      {firstUnreadIndex === index ? (
+                        <div className="conversation-unread-marker">
+                          <span>{unreadCount} 条新消息</span>
+                        </div>
+                      ) : null}
+                      <ConversationMessageBubble
+                        role={message.role}
+                        roleLabel={roleLabel}
+                        timeLabel={formatMessageTimestamp(message.timestamp)}
+                        text={message.content}
+                        grouped={grouped}
+                        deliveryStatus={message.deliveryStatus}
+                        onRetry={message.deliveryStatus === "failed" ? () => void handleRetryMessage(message.id) : undefined}
+                      />
+                    </div>
+                  );
+                })
+              : null}
+          </MessageTimeline>
+        </ChatPanel>
+      </ConversationShell>
     </section>
   );
 }
