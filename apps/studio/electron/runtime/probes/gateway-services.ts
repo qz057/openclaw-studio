@@ -1,14 +1,37 @@
 import { spawn } from "node:child_process";
 import type { StudioGatewayServiceMutationResult, StudioGatewayServiceState } from "@openclaw/shared";
+import { runSerializedProbe } from "./probe-command-queue.js";
 
 const DEFAULT_TIMEOUT_MS = 60_000;
 const MAX_CAPTURE_CHARS = 128_000;
+let gatewayCommandQueue: Promise<void> = Promise.resolve();
 
 interface CommandInvocation {
   command: string;
   args: string[];
   env: NodeJS.ProcessEnv;
   label: string;
+}
+
+interface OpenClawGatewayStatusPayload {
+  service?: {
+    runtime?: {
+      status?: string;
+      state?: string;
+    };
+  };
+  rpc?: {
+    ok?: boolean;
+    url?: string;
+    error?: string;
+  };
+  port?: {
+    status?: string;
+    hints?: string[];
+  };
+  gateway?: {
+    probeUrl?: string;
+  };
 }
 
 async function runCommandCapture(
@@ -72,11 +95,32 @@ async function runCommandCapture(
   });
 }
 
+async function runQueuedGatewayCommandCapture(
+  invocation: CommandInvocation,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+  maxCaptureChars = MAX_CAPTURE_CHARS
+): Promise<{ stdout: string; stderr: string }> {
+  const previousCommand = gatewayCommandQueue;
+  let releaseQueue: () => void = () => {};
+  gatewayCommandQueue = new Promise<void>((resolve) => {
+    releaseQueue = resolve;
+  });
+
+  await previousCommand.catch(() => undefined);
+
+  try {
+    return await runSerializedProbe("wsl", () => runCommandCapture(invocation, timeoutMs, maxCaptureChars));
+  } finally {
+    releaseQueue();
+  }
+}
+
 function createGatewayServiceState(
   serviceId: "openclaw" | "hermes",
   running: boolean,
   statusLabel: string,
-  detail: string
+  detail: string,
+  latencyMs: number | null = null
 ): StudioGatewayServiceState {
   return {
     serviceId,
@@ -85,6 +129,7 @@ function createGatewayServiceState(
     detail,
     source: "runtime",
     lastCheckedAt: Date.now(),
+    latencyMs,
     startAllowed: !running,
     stopAllowed: running
   };
@@ -133,54 +178,74 @@ function formatGatewayError(serviceId: "openclaw" | "hermes", cause: unknown): S
   return createGatewayServiceState(serviceId, false, "状态未知", `${normalizedMessage} ${describeGatewayNextStep(serviceId, normalizedMessage, "status")}`);
 }
 
+async function captureOpenClawGatewayStatus(): Promise<{ parsed: OpenClawGatewayStatusPayload; latencyMs: number }> {
+  const startedAt = Date.now();
+  const captured = await runQueuedGatewayCommandCapture(
+    {
+      command: "wsl.exe",
+      args: ["-e", "bash", "-lc", "openclaw gateway status --json"],
+      env: {
+        ...process.env
+      },
+      label: "openclaw gateway status --json"
+    },
+    30_000
+  );
+
+  return {
+    parsed: JSON.parse(captured.stdout) as OpenClawGatewayStatusPayload,
+    latencyMs: Date.now() - startedAt
+  };
+}
+
+function isOpenClawGatewayProcessRunning(parsed: OpenClawGatewayStatusPayload): boolean {
+  return (
+    parsed.service?.runtime?.status === "running" ||
+    parsed.service?.runtime?.state === "active" ||
+    parsed.rpc?.ok === true
+  );
+}
+
+function createOpenClawGatewayState(parsed: OpenClawGatewayStatusPayload, latencyMs: number): StudioGatewayServiceState {
+  const running = isOpenClawGatewayProcessRunning(parsed);
+
+  const detail =
+    parsed.rpc?.ok === true
+      ? `RPC 可达 · ${parsed.rpc.url ?? parsed.gateway?.probeUrl ?? "ws://127.0.0.1"}`
+      : parsed.rpc?.error
+        ? `服务进程${running ? "已运行" : "未运行"}，但 RPC 探针失败：${parsed.rpc.error}。下一步：确认 gateway token/认证配置与 CLI probe 使用同一份 ~/.openclaw/openclaw.json。`
+        : parsed.port?.hints?.[0] ?? (running ? "服务进程已运行，但端口/RPC 探针未返回可用结果。" : "Gateway 服务当前未运行。");
+
+  const statusLabel =
+    parsed.rpc?.ok === true
+      ? "Gateway 已运行"
+      : running
+        ? "RPC 探针失败"
+        : "Gateway 未运行";
+
+  return createGatewayServiceState("openclaw", running, statusLabel, detail, latencyMs);
+}
+
+async function waitForGatewayRetry() {
+  await new Promise((resolve) => {
+    setTimeout(resolve, 750);
+  });
+}
+
 export async function loadOpenClawGatewayServiceState(): Promise<StudioGatewayServiceState> {
   try {
-    const captured = await runCommandCapture(
-      {
-        command: "wsl.exe",
-        args: ["-e", "bash", "-lc", "openclaw gateway status --json"],
-        env: {
-          ...process.env
-        },
-        label: "openclaw gateway status --json"
-      },
-      30_000
-    );
+    let status = await captureOpenClawGatewayStatus();
 
-    const parsed = JSON.parse(captured.stdout) as {
-      service?: {
-        runtime?: {
-          status?: string;
-          state?: string;
-        };
-      };
-      rpc?: {
-        ok?: boolean;
-        url?: string;
-        error?: string;
-      };
-      port?: {
-        status?: string;
-        hints?: string[];
-      };
-      gateway?: {
-        probeUrl?: string;
-      };
-    };
+    if (isOpenClawGatewayProcessRunning(status.parsed) && status.parsed.rpc?.ok !== true) {
+      await waitForGatewayRetry();
+      const retryStatus = await captureOpenClawGatewayStatus().catch(() => null);
 
-    const running =
-      parsed.service?.runtime?.status === "running" ||
-      parsed.service?.runtime?.state === "active" ||
-      parsed.rpc?.ok === true;
+      if (retryStatus?.parsed.rpc?.ok === true) {
+        status = retryStatus;
+      }
+    }
 
-    const detail =
-      parsed.rpc?.ok === true
-        ? `RPC 可达 · ${parsed.rpc.url ?? parsed.gateway?.probeUrl ?? "ws://127.0.0.1"}`
-        : parsed.rpc?.error
-          ? `服务进程${running ? "已运行" : "未运行"}，但 RPC 探针失败：${parsed.rpc.error}。下一步：确认 gateway token/认证配置与 CLI probe 使用同一份 ~/.openclaw/openclaw.json。`
-          : parsed.port?.hints?.[0] ?? (running ? "服务进程已运行，但端口/RPC 探针未返回可用结果。" : "Gateway 服务当前未运行。");
-
-    return createGatewayServiceState("openclaw", running, running ? "Gateway 已运行" : "Gateway 未运行", detail);
+    return createOpenClawGatewayState(status.parsed, status.latencyMs);
   } catch (cause) {
     return formatGatewayError("openclaw", cause);
   }
@@ -188,7 +253,7 @@ export async function loadOpenClawGatewayServiceState(): Promise<StudioGatewaySe
 
 export async function startOpenClawGatewayService(): Promise<StudioGatewayServiceMutationResult> {
   try {
-    await runCommandCapture(
+    await runQueuedGatewayCommandCapture(
       {
         command: "wsl.exe",
         args: ["-e", "bash", "-lc", "openclaw gateway start --json || openclaw gateway start"],
@@ -226,7 +291,7 @@ export async function startOpenClawGatewayService(): Promise<StudioGatewayServic
 
 export async function stopOpenClawGatewayService(): Promise<StudioGatewayServiceMutationResult> {
   try {
-    await runCommandCapture(
+    await runQueuedGatewayCommandCapture(
       {
         command: "wsl.exe",
         args: ["-e", "bash", "-lc", "openclaw gateway stop --json || openclaw gateway stop"],
@@ -264,7 +329,8 @@ export async function stopOpenClawGatewayService(): Promise<StudioGatewayService
 
 export async function loadHermesGatewayServiceState(): Promise<StudioGatewayServiceState> {
   try {
-    const captured = await runCommandCapture(
+    const startedAt = Date.now();
+    const captured = await runQueuedGatewayCommandCapture(
       {
         command: "wsl.exe",
         args: ["-e", "bash", "-lc", "hermes gateway status"],
@@ -275,6 +341,7 @@ export async function loadHermesGatewayServiceState(): Promise<StudioGatewayServ
       },
       30_000
     );
+    const latencyMs = Date.now() - startedAt;
 
     const combined = `${captured.stdout}\n${captured.stderr}`;
     const running = /active \(running\)|gateway service is running/i.test(combined);
@@ -284,7 +351,7 @@ export async function loadHermesGatewayServiceState(): Promise<StudioGatewayServ
         .map((line) => line.trim())
         .find((line) => /Main PID:|gateway service is running|Loaded:|Active:/i.test(line)) ?? "Hermes gateway 状态已检查。";
 
-    return createGatewayServiceState("hermes", running, running ? "Gateway 已运行" : "Gateway 未运行", detailLine);
+    return createGatewayServiceState("hermes", running, running ? "Gateway 已运行" : "Gateway 未运行", detailLine, latencyMs);
   } catch (cause) {
     return formatGatewayError("hermes", cause);
   }
@@ -292,7 +359,7 @@ export async function loadHermesGatewayServiceState(): Promise<StudioGatewayServ
 
 export async function startHermesGatewayService(): Promise<StudioGatewayServiceMutationResult> {
   try {
-    await runCommandCapture(
+    await runQueuedGatewayCommandCapture(
       {
         command: "wsl.exe",
         args: ["-e", "bash", "-lc", "hermes gateway start"],
@@ -330,7 +397,7 @@ export async function startHermesGatewayService(): Promise<StudioGatewayServiceM
 
 export async function stopHermesGatewayService(): Promise<StudioGatewayServiceMutationResult> {
   try {
-    await runCommandCapture(
+    await runQueuedGatewayCommandCapture(
       {
         command: "wsl.exe",
         args: ["-e", "bash", "-lc", "hermes gateway stop"],

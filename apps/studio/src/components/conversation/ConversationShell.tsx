@@ -709,23 +709,30 @@ export function SessionActionsCard({ status, canSendLabel, result, children }: S
   );
 }
 
-export function LatencyTrendCard() {
-  const points = "0,52 38,44 76,48 114,30 152,34 190,22 228,28 266,18 304,24";
+export function LatencyTrendCard({
+  title,
+  subtitle,
+  value,
+  sourceLabel
+}: {
+  title: string;
+  subtitle: string;
+  value: string;
+  sourceLabel: string;
+}) {
   return (
-    <section className="conversation-latency-card" aria-label="延迟趋势近 24 小时">
+    <section className="conversation-latency-card" aria-label={title}>
       <div className="conversation-latency-card__header">
         <div>
-          <span>延迟趋势</span>
-          <strong>近 24 小时</strong>
+          <span>{title}</span>
+          <strong>{subtitle}</strong>
         </div>
-        <em>平均 1086ms</em>
+        <em>{value}</em>
       </div>
-      <svg viewBox="0 0 304 64" preserveAspectRatio="none" role="img" aria-label="延迟趋势 mock chart">
-        <path d="M0 60 H304" />
-        <path d="M0 38 H304" />
-        <path d={`M${points}`} className="conversation-latency-card__line" />
-        <path d={`M${points} L304 64 L0 64 Z`} className="conversation-latency-card__area" />
-      </svg>
+      <div className="conversation-latency-card__sample">
+        <span>runtime probe</span>
+        <strong>{sourceLabel}</strong>
+      </div>
     </section>
   );
 }

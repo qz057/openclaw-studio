@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import type { StudioModelCatalog, StudioModelMutationResult, StudioModelOption } from "@openclaw/shared";
+import { runSerializedProbe } from "./probe-command-queue.js";
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 const MAX_CAPTURE_CHARS = 128_000;
@@ -52,62 +53,66 @@ async function runCommandCapture(
   timeoutMs = DEFAULT_TIMEOUT_MS,
   maxCaptureChars = MAX_CAPTURE_CHARS
 ): Promise<{ stdout: string; stderr: string }> {
-  const stdout = { value: "" };
-  const stderr = { value: "" };
+  const execute = async () => {
+    const stdout = { value: "" };
+    const stderr = { value: "" };
 
-  return await new Promise<{ stdout: string; stderr: string }>((resolve, reject) => {
-    const child = spawn(invocation.command, invocation.args, {
-      stdio: ["ignore", "pipe", "pipe"],
-      env: invocation.env
-    });
+    return await new Promise<{ stdout: string; stderr: string }>((resolve, reject) => {
+      const child = spawn(invocation.command, invocation.args, {
+        stdio: ["ignore", "pipe", "pipe"],
+        env: invocation.env
+      });
 
-    const timeoutHandle = setTimeout(() => {
-      child.kill("SIGTERM");
-      reject(new Error(`${invocation.label} timed out after ${timeoutMs}ms.`));
-    }, timeoutMs);
+      const timeoutHandle = setTimeout(() => {
+        child.kill("SIGTERM");
+        reject(new Error(`${invocation.label} timed out after ${timeoutMs}ms.`));
+      }, timeoutMs);
 
-    child.stdout.on("data", (chunk) => {
-      stdout.value += chunk.toString();
+      child.stdout.on("data", (chunk) => {
+        stdout.value += chunk.toString();
 
-      if (stdout.value.length > maxCaptureChars) {
-        stdout.value = stdout.value.slice(-maxCaptureChars);
-      }
-    });
+        if (stdout.value.length > maxCaptureChars) {
+          stdout.value = stdout.value.slice(-maxCaptureChars);
+        }
+      });
 
-    child.stderr.on("data", (chunk) => {
-      stderr.value += chunk.toString();
+      child.stderr.on("data", (chunk) => {
+        stderr.value += chunk.toString();
 
-      if (stderr.value.length > maxCaptureChars) {
-        stderr.value = stderr.value.slice(-maxCaptureChars);
-      }
-    });
+        if (stderr.value.length > maxCaptureChars) {
+          stderr.value = stderr.value.slice(-maxCaptureChars);
+        }
+      });
 
-    child.on("error", (error) => {
-      clearTimeout(timeoutHandle);
-      reject(error);
-    });
+      child.on("error", (error) => {
+        clearTimeout(timeoutHandle);
+        reject(error);
+      });
 
-    child.on("exit", (code) => {
-      clearTimeout(timeoutHandle);
+      child.on("exit", (code) => {
+        clearTimeout(timeoutHandle);
 
-      if (code !== 0) {
-        reject(
-          new Error(
-            [
-              `${invocation.label} exited with code ${code ?? 1}.`,
-              stderr.value.trim() || stdout.value.trim() || invocation.label
-            ].join("\n")
-          )
-        );
-        return;
-      }
+        if (code !== 0) {
+          reject(
+            new Error(
+              [
+                `${invocation.label} exited with code ${code ?? 1}.`,
+                stderr.value.trim() || stdout.value.trim() || invocation.label
+              ].join("\n")
+            )
+          );
+          return;
+        }
 
-      resolve({
-        stdout: stdout.value,
-        stderr: stderr.value
+        resolve({
+          stdout: stdout.value,
+          stderr: stderr.value
+        });
       });
     });
-  });
+  };
+
+  return invocation.command.toLowerCase() === "wsl.exe" ? runSerializedProbe("wsl", execute) : execute();
 }
 
 function buildOpenClawCommand(args: string[], label: string): CommandInvocation {

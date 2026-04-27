@@ -84,6 +84,7 @@ export function createFallbackApi(): StudioApi {
     detail: "当前 fallback 模式未接入网关服务控制链。",
     source: "mock",
     lastCheckedAt: null,
+    latencyMs: null,
     startAllowed: false,
     stopAllowed: false
   });

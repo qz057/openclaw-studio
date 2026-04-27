@@ -4,6 +4,7 @@ import {
   connectHermes,
   getHermesSessions,
   getHermesMessages,
+  loadOpenClawGatewayServiceState,
   loadHermesGatewayServiceState,
   loadHermesModelCatalog,
   loadHermesState,
@@ -95,6 +96,7 @@ const hermesPromptPresets = [
 const HERMES_STORAGE_KEY = "openclaw-studio.hermes-page.v1";
 const HERMES_FRESH_SESSION_STORAGE_KEY = "openclaw-studio.hermes-page.fresh-session";
 const HERMES_REFRESH_INTERVAL_MS = 5_000;
+const HERMES_MODEL_REFRESH_INTERVAL_MS = 15_000;
 const HERMES_THREAD_ID = "hermes-chat-thread";
 const HERMES_AUTO_SCROLL_THRESHOLD_PX = 72;
 const HERMES_GROUP_BREAK_MS = 5 * 60 * 1000;
@@ -186,6 +188,38 @@ function formatUpdatedAt(updatedAt: number | null): string {
 
   const hours = Math.floor(minutes / 60);
   return `${hours} 小时前同步`;
+}
+
+function formatGatewayStatus(state: StudioGatewayServiceState | null, fallback = "读取中"): string {
+  if (!state) {
+    return fallback;
+  }
+
+  if (/失败|不可用|未知|受限/i.test(state.statusLabel)) {
+    return state.statusLabel;
+  }
+
+  if (state.running) {
+    return "运行中";
+  }
+
+  return state.statusLabel || "待连接";
+}
+
+function formatGatewayLatency(state: StudioGatewayServiceState | null): string {
+  if (!state) {
+    return "读取中";
+  }
+
+  return typeof state.latencyMs === "number" ? `${state.latencyMs} ms` : "未采样";
+}
+
+function pickSelectedModelId(catalog: StudioModelCatalog, currentSelectedModelId: string): string {
+  if (currentSelectedModelId && catalog.options.some((option) => option.id === currentSelectedModelId)) {
+    return currentSelectedModelId;
+  }
+
+  return catalog.selectedModelId ?? catalog.options[0]?.id ?? "";
 }
 
 function formatMessageTimestamp(timestamp: string | null): string {
@@ -422,6 +456,7 @@ export function HermesPage({
   const [modelCatalog, setModelCatalog] = useState<StudioModelCatalog | null>(null);
   const [selectedModelId, setSelectedModelId] = useState("");
   const [applyingModel, setApplyingModel] = useState(false);
+  const [openClawGatewayServiceState, setOpenClawGatewayServiceState] = useState<StudioGatewayServiceState | null>(null);
   const [gatewayServiceState, setGatewayServiceState] = useState<StudioGatewayServiceState | null>(null);
   const [gatewayError, setGatewayError] = useState<string | null>(null);
   const [gatewayBusy, setGatewayBusy] = useState(false);
@@ -439,6 +474,7 @@ export function HermesPage({
   const [detachedFromLatest, setDetachedFromLatest] = useState(false);
   const [lastSeenCount, setLastSeenCount] = useState(0);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
+  const [refreshNonce, setRefreshNonce] = useState(0);
 
   const freshSessionActive = Boolean(freshSessionId);
   const displayMessages = mergeMessages(messages, localMessages);
@@ -478,7 +514,7 @@ export function HermesPage({
         }
 
         setModelCatalog(nextCatalog);
-        setSelectedModelId(nextCatalog.selectedModelId ?? nextCatalog.options[0]?.id ?? "");
+        setSelectedModelId((currentSelectedModelId) => pickSelectedModelId(nextCatalog, currentSelectedModelId));
       } catch (cause) {
         console.error("[HermesPage] 模型列表加载失败:", cause);
         if (!cancelled) {
@@ -490,37 +526,69 @@ export function HermesPage({
     };
 
     void refreshModelCatalog();
+    const interval = window.setInterval(() => {
+      void refreshModelCatalog();
+    }, HERMES_MODEL_REFRESH_INTERVAL_MS);
 
     return () => {
       cancelled = true;
+      window.clearInterval(interval);
     };
-  }, []);
+  }, [refreshNonce]);
 
   useEffect(() => {
     let cancelled = false;
+    let refreshInFlight = false;
 
     const refreshGatewayState = async () => {
-      try {
-        const nextState = await loadHermesGatewayServiceState();
+      if (refreshInFlight) {
+        return;
+      }
 
-        if (!cancelled) {
-          setGatewayServiceState(nextState);
+      refreshInFlight = true;
+
+      try {
+        const [openClawResult, hermesResult] = await Promise.allSettled([
+          loadOpenClawGatewayServiceState(),
+          loadHermesGatewayServiceState()
+        ]);
+
+        if (cancelled) {
+          return;
         }
-      } catch (cause) {
-        if (!cancelled) {
-          const detail = extractErrorMessage(cause, "加载 Hermes Gateway 状态失败。");
+
+        if (openClawResult.status === "fulfilled") {
+          setOpenClawGatewayServiceState(openClawResult.value);
+        }
+
+        if (hermesResult.status === "fulfilled") {
+          setGatewayServiceState(hermesResult.value);
+        } else {
+          const detail = extractErrorMessage(hermesResult.reason, "加载 Hermes Gateway 状态失败。");
           setGatewayError(detail);
           setGatewayResult(createOperationResult("error", "Hermes Gateway 状态读取未完成", buildHermesNextStep("gateway", detail), detail));
         }
+      } catch (cause) {
+        if (!cancelled) {
+          const detail = extractErrorMessage(cause, "加载网关状态失败。");
+          setGatewayError(detail);
+          setGatewayResult(createOperationResult("error", "Hermes Gateway 状态读取未完成", buildHermesNextStep("gateway", detail), detail));
+        }
+      } finally {
+        refreshInFlight = false;
       }
     };
 
     void refreshGatewayState();
+    const interval = window.setInterval(() => {
+      void refreshGatewayState();
+    }, HERMES_REFRESH_INTERVAL_MS);
 
     return () => {
       cancelled = true;
+      window.clearInterval(interval);
     };
-  }, []);
+  }, [refreshNonce]);
 
   useEffect(() => {
     let cancelled = false;
@@ -571,7 +639,7 @@ export function HermesPage({
       window.clearInterval(interval);
       unsubscribe?.();
     };
-  }, []);
+  }, [refreshNonce]);
 
   useEffect(() => {
     const thread = getThreadElement();
@@ -715,7 +783,7 @@ export function HermesPage({
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [freshSessionId, submitting]);
+  }, [freshSessionId, refreshNonce, submitting]);
 
   async function submitPrompt(prompt: string, retryMessageId?: string) {
     const normalizedPrompt = prompt.trim();
@@ -981,14 +1049,15 @@ export function HermesPage({
 
     try {
       if (action === "refresh") {
-        const nextState = await loadHermesGatewayServiceState();
+        const [nextOpenClawState, nextState] = await Promise.all([loadOpenClawGatewayServiceState(), loadHermesGatewayServiceState()]);
+        setOpenClawGatewayServiceState(nextOpenClawState);
         setGatewayServiceState(nextState);
         setGatewayResult(
           createOperationResult(
             "success",
             "Hermes Gateway 状态已刷新",
             nextState.running ? "Gateway 正在运行；如仍不能发送，请检查 Hermes 连接状态。" : "如需发送 Hermes 消息，先启动网关。",
-            nextState.detail
+            `${nextState.detail} | OpenClaw: ${nextOpenClawState.detail}`
           )
         );
         return;
@@ -1110,6 +1179,10 @@ export function HermesPage({
           : "等待 Hermes 可用";
   const selectedModelLabel = resolveSelectedModelLabel(modelCatalog, selectedModelId);
   const visibleModelLabel = selectedModelLabel !== "未选择模型" ? selectedModelLabel : "等待识别模型";
+  const openClawGatewayStatus = formatGatewayStatus(openClawGatewayServiceState, gatewayStatus);
+  const hermesGatewayStatus = formatGatewayStatus(gatewayServiceState);
+  const openClawGatewayLatency = formatGatewayLatency(openClawGatewayServiceState);
+  const hermesGatewayLatency = formatGatewayLatency(gatewayServiceState);
 
   return (
     <section className="page chat-page chat-page--full">
@@ -1124,8 +1197,8 @@ export function HermesPage({
         showGlobalNav={false}
         showSessionList={false}
         gatewaySummary={{
-          openclaw: gatewayStatus.includes("运行") || gatewayStatus.includes("连接") ? "运行中" : gatewayStatus,
-          hermes: gatewayServiceState?.running ? "运行中" : "待连接",
+          openclaw: openClawGatewayStatus,
+          hermes: hermesGatewayStatus,
           sampling: "2/2",
           host: "受保护",
           admin: "在线"
@@ -1139,7 +1212,10 @@ export function HermesPage({
             { label: formatUpdatedAt(lastUpdatedAt), tone: "neutral" }
           ] as ConversationChip[],
           onCreateSession: () => void handleStartFreshSession(),
-          onRefresh: () => void handleGatewayAction("refresh")
+          onRefresh: () => {
+            setRefreshNonce((value) => value + 1);
+            void handleGatewayAction("refresh");
+          }
         }}
         inspector={
           <>
@@ -1178,20 +1254,21 @@ export function HermesPage({
             </ModelRouteCard>
 
             <ContextTokenCard
-              contextLabel="18k / 64k (28%)"
-              progress={28}
+              contextLabel="未采样"
+              progress={0}
               rows={[
-                { label: "输入令牌", value: "11.4k" },
-                { label: "输出令牌", value: "6.6k" },
-                { label: "缓存命中", value: "64%" }
+                { label: "输入令牌", value: "未采样" },
+                { label: "输出令牌", value: "未采样" },
+                { label: "缓存命中", value: "未采样" },
+                { label: "数据来源", value: "运行时暂未暴露" }
               ]}
             />
 
             <GatewayControlCard
-              openclawStatus={gatewayStatus.includes("运行") || gatewayStatus.includes("连接") ? "运行中" : gatewayStatus}
-              hermesStatus={gatewayServiceState?.running ? "运行中" : gatewayServiceState ? "待连接" : "读取中"}
-              openclawLatency="1086 ms"
-              hermesLatency={gatewayServiceState?.running ? "45 ms" : "待采样"}
+              openclawStatus={openClawGatewayStatus}
+              hermesStatus={hermesGatewayStatus}
+              openclawLatency={openClawGatewayLatency}
+              hermesLatency={hermesGatewayLatency}
               result={
                 <>
                   <CompactOperationResult label="网关" result={gatewayResult} />
@@ -1249,8 +1326,8 @@ export function HermesPage({
             { label: `运行态 · ${effectiveReadinessLabel}`, tone: isHermesConnected ? "positive" : "warning" }
           ]}
           contextChips={[
-            { label: "上下文窗口 18k / 64k (28%)", tone: "neutral" },
-            { label: "工具调用 4/12", tone: "active" }
+            { label: "上下文统计 · 未采样", tone: "neutral" },
+            { label: "工具调用 · 未采样", tone: "neutral" }
           ]}
           composer={
             <ComposerBar

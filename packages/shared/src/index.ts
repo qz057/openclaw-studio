@@ -2405,6 +2405,7 @@ export interface StudioGatewayServiceState {
   detail: string;
   source: "runtime" | "mock";
   lastCheckedAt: number | null;
+  latencyMs?: number | null;
   startAllowed: boolean;
   stopAllowed: boolean;
 }

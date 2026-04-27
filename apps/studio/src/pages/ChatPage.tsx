@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   createOpenClawChatSession,
+  loadHermesGatewayServiceState,
   loadOpenClawChatState,
   loadOpenClawGatewayServiceState,
   loadOpenClawModelCatalog,
@@ -87,6 +88,8 @@ const CHAT_STORAGE_KEY = "openclaw-studio.chat-page.v2";
 const CHAT_FRESH_SESSION_STORAGE_KEY = "openclaw-studio.chat-page.fresh-session";
 const CHAT_REFRESH_INTERVAL_IDLE_MS = 4_000;
 const CHAT_REFRESH_INTERVAL_ACTIVE_MS = 1_200;
+const CHAT_GATEWAY_REFRESH_INTERVAL_MS = 5_000;
+const CHAT_MODEL_REFRESH_INTERVAL_MS = 15_000;
 const CHAT_THREAD_ID = "openclaw-studio-chat-thread";
 const CHAT_AUTO_SCROLL_THRESHOLD_PX = 72;
 const CHAT_GROUP_BREAK_MS = 5 * 60 * 1000;
@@ -181,6 +184,54 @@ function formatUpdatedAt(updatedAt: number | null): string {
 
   const hours = Math.floor(minutes / 60);
   return `${hours} 小时前同步`;
+}
+
+function formatGatewayStatus(state: StudioGatewayServiceState | null, fallback = "读取中"): string {
+  if (!state) {
+    return fallback;
+  }
+
+  if (/失败|不可用|未知|受限/i.test(state.statusLabel)) {
+    return state.statusLabel;
+  }
+
+  if (state.running) {
+    return "运行中";
+  }
+
+  return state.statusLabel || "待连接";
+}
+
+function formatGatewayHeaderStatus(state: StudioGatewayServiceState | null, fallback: string): string {
+  if (!state) {
+    return fallback;
+  }
+
+  if (!state.running) {
+    return state.statusLabel || "待连接";
+  }
+
+  if (/失败|不可用|未知|受限/i.test(state.statusLabel)) {
+    return `${state.statusLabel} ${typeof state.latencyMs === "number" ? `${state.latencyMs}ms` : ""}`.trim();
+  }
+
+  return typeof state.latencyMs === "number" ? `运行中 ${state.latencyMs}ms` : "运行中 · 已采样";
+}
+
+function formatGatewayLatency(state: StudioGatewayServiceState | null): string {
+  if (!state) {
+    return "读取中";
+  }
+
+  return typeof state.latencyMs === "number" ? `${state.latencyMs} ms` : "未采样";
+}
+
+function pickSelectedModelId(catalog: StudioModelCatalog, currentSelectedModelId: string): string {
+  if (currentSelectedModelId && catalog.options.some((option) => option.id === currentSelectedModelId)) {
+    return currentSelectedModelId;
+  }
+
+  return catalog.selectedModelId ?? catalog.options[0]?.id ?? "";
 }
 
 function formatMessageTimestamp(timestamp: string): string {
@@ -426,6 +477,7 @@ export function ChatPage({
   const [selectedModelId, setSelectedModelId] = useState("");
   const [applyingModel, setApplyingModel] = useState(false);
   const [gatewayServiceState, setGatewayServiceState] = useState<StudioGatewayServiceState | null>(null);
+  const [hermesGatewayServiceState, setHermesGatewayServiceState] = useState<StudioGatewayServiceState | null>(null);
   const [gatewayError, setGatewayError] = useState<string | null>(null);
   const [gatewayBusy, setGatewayBusy] = useState(false);
   const [sendResult, setSendResult] = useState<OperationResultState | null>(null);
@@ -436,6 +488,7 @@ export function ChatPage({
   const [freshSessionKey, setFreshSessionKey] = useState(() => persistedFreshSession.sessionKey);
   const [detachedFromLatest, setDetachedFromLatest] = useState(false);
   const [lastSeenCount, setLastSeenCount] = useState(0);
+  const [refreshNonce, setRefreshNonce] = useState(0);
 
   const freshSessionActive = Boolean(freshSessionId);
   const displayMessages = mergeMessages(messages, localMessages);
@@ -466,7 +519,7 @@ export function ChatPage({
         }
 
         setModelCatalog(nextCatalog);
-        setSelectedModelId(nextCatalog.selectedModelId ?? nextCatalog.options[0]?.id ?? "");
+        setSelectedModelId((currentSelectedModelId) => pickSelectedModelId(nextCatalog, currentSelectedModelId));
       } catch (cause) {
         console.error("[ChatPage] 模型列表加载失败:", cause);
         if (!cancelled) {
@@ -478,37 +531,69 @@ export function ChatPage({
     };
 
     void refreshModelCatalog();
+    const interval = window.setInterval(() => {
+      void refreshModelCatalog();
+    }, CHAT_MODEL_REFRESH_INTERVAL_MS);
 
     return () => {
       cancelled = true;
+      window.clearInterval(interval);
     };
-  }, []);
+  }, [refreshNonce]);
 
   useEffect(() => {
     let cancelled = false;
+    let refreshInFlight = false;
 
     const refreshGatewayState = async () => {
-      try {
-        const nextState = await loadOpenClawGatewayServiceState();
+      if (refreshInFlight) {
+        return;
+      }
 
-        if (!cancelled) {
-          setGatewayServiceState(nextState);
+      refreshInFlight = true;
+
+      try {
+        const [openClawResult, hermesResult] = await Promise.allSettled([
+          loadOpenClawGatewayServiceState(),
+          loadHermesGatewayServiceState()
+        ]);
+
+        if (cancelled) {
+          return;
         }
-      } catch (cause) {
-        if (!cancelled) {
-          const detail = extractErrorMessage(cause, "加载 OpenClaw Gateway 状态失败。");
+
+        if (openClawResult.status === "fulfilled") {
+          setGatewayServiceState(openClawResult.value);
+        } else {
+          const detail = extractErrorMessage(openClawResult.reason, "加载 OpenClaw Gateway 状态失败。");
           setGatewayError(detail);
           setGatewayResult(createOperationResult("error", "网关状态读取未完成", buildOpenClawNextStep("gateway", detail), detail));
         }
+
+        if (hermesResult.status === "fulfilled") {
+          setHermesGatewayServiceState(hermesResult.value);
+        }
+      } catch (cause) {
+        if (!cancelled) {
+          const detail = extractErrorMessage(cause, "加载网关状态失败。");
+          setGatewayError(detail);
+          setGatewayResult(createOperationResult("error", "网关状态读取未完成", buildOpenClawNextStep("gateway", detail), detail));
+        }
+      } finally {
+        refreshInFlight = false;
       }
     };
 
     void refreshGatewayState();
+    const interval = window.setInterval(() => {
+      void refreshGatewayState();
+    }, CHAT_GATEWAY_REFRESH_INTERVAL_MS);
 
     return () => {
       cancelled = true;
+      window.clearInterval(interval);
     };
-  }, []);
+  }, [refreshNonce]);
 
   useEffect(() => {
     writePersistedChatState({ draft });
@@ -609,7 +694,7 @@ export function ChatPage({
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [freshSessionId, submitting]);
+  }, [freshSessionId, refreshNonce, submitting]);
 
   async function submitPrompt(prompt: string, retryMessageId?: string) {
     const normalizedPrompt = prompt.trim();
@@ -860,14 +945,15 @@ export function ChatPage({
 
     try {
       if (action === "refresh") {
-        const nextState = await loadOpenClawGatewayServiceState();
+        const [nextState, nextHermesState] = await Promise.all([loadOpenClawGatewayServiceState(), loadHermesGatewayServiceState()]);
         setGatewayServiceState(nextState);
+        setHermesGatewayServiceState(nextHermesState);
         setGatewayResult(
           createOperationResult(
             "success",
             "OpenClaw Gateway 状态已刷新",
             nextState.running ? "RPC 已可继续观察；需要维护时再停止网关。" : "如需发送真实请求，先启动网关。",
-            nextState.detail
+            `${nextState.detail} | Hermes: ${nextHermesState.detail}`
           )
         );
         return;
@@ -906,6 +992,10 @@ export function ChatPage({
 
   const selectedModelLabel = resolveSelectedModelLabel(modelCatalog, selectedModelId);
   const currentModelLabel = resolveSelectedModelLabel(modelCatalog, modelCatalog?.selectedModelId ?? "");
+  const openClawGatewayStatus = formatGatewayStatus(gatewayServiceState);
+  const hermesGatewayStatus = formatGatewayStatus(hermesGatewayServiceState);
+  const openClawGatewayLatency = formatGatewayLatency(gatewayServiceState);
+  const hermesGatewayLatency = formatGatewayLatency(hermesGatewayServiceState);
   const visibleModelLabel =
     chatState?.model && chatState?.provider
       ? `${chatState.model} · ${chatState.provider}`
@@ -928,8 +1018,8 @@ export function ChatPage({
         showGlobalNav={false}
         showSessionList={false}
         gatewaySummary={{
-          openclaw: gatewayServiceState?.running ? "运行中" : gatewayServiceState ? "待连接" : "读取中",
-          hermes: "运行中",
+          openclaw: openClawGatewayStatus,
+          hermes: hermesGatewayStatus,
           sampling: "2/2",
           host: "受保护",
           admin: "在线"
@@ -939,11 +1029,14 @@ export function ChatPage({
           subtitle: visibleModelLabel,
           chips: [
             { label: "进行中", tone: "positive" },
-            { label: gatewayServiceState?.running ? "运行中 1086ms" : gatewayStatus, tone: gatewayServiceState?.running ? "positive" : "warning" },
+            { label: formatGatewayHeaderStatus(gatewayServiceState, gatewayStatus), tone: gatewayServiceState?.running ? "positive" : "warning" },
             { label: formatUpdatedAt(chatState?.updatedAt ?? null), tone: "neutral" }
           ] as ConversationChip[],
           onCreateSession: () => void handleStartFreshSession(),
-          onRefresh: () => void handleGatewayAction("refresh")
+          onRefresh: () => {
+            setRefreshNonce((value) => value + 1);
+            void handleGatewayAction("refresh");
+          }
         }}
         inspector={
           <>
@@ -982,20 +1075,21 @@ export function ChatPage({
             </ModelRouteCard>
 
             <ContextTokenCard
-              contextLabel="67k / 128k (52%)"
-              progress={52}
+              contextLabel="未采样"
+              progress={0}
               rows={[
-                { label: "输入令牌", value: "42.1k" },
-                { label: "输出令牌", value: "24.9k" },
-                { label: "缓存命中", value: "78%" }
+                { label: "输入令牌", value: "未采样" },
+                { label: "输出令牌", value: "未采样" },
+                { label: "缓存命中", value: "未采样" },
+                { label: "数据来源", value: "运行时暂未暴露" }
               ]}
             />
 
             <GatewayControlCard
-              openclawStatus={gatewayServiceState?.running ? "运行中" : gatewayServiceState ? "待连接" : "读取中"}
-              hermesStatus="运行中"
-              openclawLatency={gatewayServiceState?.running ? "1086 ms" : "待采样"}
-              hermesLatency="45 ms"
+              openclawStatus={openClawGatewayStatus}
+              hermesStatus={hermesGatewayStatus}
+              openclawLatency={openClawGatewayLatency}
+              hermesLatency={hermesGatewayLatency}
               result={<CompactOperationResult label="网关" result={gatewayResult} />}
             >
               <div className="conversation-card-actions">
@@ -1044,12 +1138,12 @@ export function ChatPage({
           subtitle={freshSessionActive ? freshSessionKey ?? "独立新会话" : chatState?.sessionKey ?? "agent:main:main"}
           statusChips={[
             { label: visibleModelLabel, tone: visibleModelLabel === "未选择模型" ? "warning" : "active" },
-            { label: "本地网关 · 已连接", tone: gatewayServiceState?.running ? "positive" : "warning" },
+            { label: `本地网关 · ${openClawGatewayStatus}`, tone: gatewayServiceState?.running ? "positive" : "warning" },
             { label: `运行态 · ${chatState?.readinessLabel ?? readinessLabel}`, tone: chatState?.canSend ? "positive" : "warning" }
           ]}
           contextChips={[
-            { label: "上下文窗口 67k / 128k (52%)", tone: "neutral" },
-            { label: "工具调用 12/12", tone: "positive" }
+            { label: "上下文统计 · 未采样", tone: "neutral" },
+            { label: "工具调用 · 未采样", tone: "neutral" }
           ]}
           composer={
             <ComposerBar
@@ -1123,7 +1217,14 @@ export function ChatPage({
                         deliveryStatus={message.deliveryStatus}
                         onRetry={message.deliveryStatus === "failed" ? () => void handleRetryMessage(message.id) : undefined}
                       />
-                      {firstAssistantIndex === index ? <LatencyTrendCard /> : null}
+                      {firstAssistantIndex === index && gatewayServiceState?.lastCheckedAt ? (
+                        <LatencyTrendCard
+                          title="网关状态采样"
+                          subtitle="最近一次"
+                          value={openClawGatewayLatency}
+                          sourceLabel={formatUpdatedAt(gatewayServiceState.lastCheckedAt)}
+                        />
+                      ) : null}
                     </div>
                   );
                 })

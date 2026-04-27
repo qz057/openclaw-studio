@@ -39,6 +39,7 @@ export function createMockRuntime(): StudioApi {
     detail: "Mock runtime 未接入真实网关服务控制。",
     source: "mock",
     lastCheckedAt: null,
+    latencyMs: null,
     startAllowed: false,
     stopAllowed: false
   });

@@ -9,6 +9,7 @@ const connectHermesMock = vi.fn();
 const disconnectHermesMock = vi.fn();
 const getHermesMessagesMock = vi.fn();
 const getHermesSessionsMock = vi.fn();
+const loadOpenClawGatewayServiceStateMock = vi.fn();
 const loadHermesGatewayServiceStateMock = vi.fn();
 const loadHermesModelCatalogMock = vi.fn();
 const loadHermesStateMock = vi.fn();
@@ -24,6 +25,8 @@ vi.mock("@openclaw/bridge", () => ({
   disconnectHermes: (...args: Parameters<typeof disconnectHermesMock>) => disconnectHermesMock(...args),
   getHermesMessages: (...args: Parameters<typeof getHermesMessagesMock>) => getHermesMessagesMock(...args),
   getHermesSessions: (...args: Parameters<typeof getHermesSessionsMock>) => getHermesSessionsMock(...args),
+  loadOpenClawGatewayServiceState: (...args: Parameters<typeof loadOpenClawGatewayServiceStateMock>) =>
+    loadOpenClawGatewayServiceStateMock(...args),
   loadHermesGatewayServiceState: (...args: Parameters<typeof loadHermesGatewayServiceStateMock>) =>
     loadHermesGatewayServiceStateMock(...args),
   loadHermesModelCatalog: (...args: Parameters<typeof loadHermesModelCatalogMock>) => loadHermesModelCatalogMock(...args),
@@ -118,6 +121,7 @@ beforeEach(() => {
   disconnectHermesMock.mockReset();
   getHermesMessagesMock.mockReset();
   getHermesSessionsMock.mockReset();
+  loadOpenClawGatewayServiceStateMock.mockReset();
   loadHermesGatewayServiceStateMock.mockReset();
   loadHermesModelCatalogMock.mockReset();
   loadHermesStateMock.mockReset();
@@ -127,6 +131,7 @@ beforeEach(() => {
   stopHermesGatewayServiceMock.mockReset();
   subscribeToHermesEventsMock.mockReset();
 
+  loadOpenClawGatewayServiceStateMock.mockResolvedValue(createGatewayState({ serviceId: "openclaw" }));
   loadHermesGatewayServiceStateMock.mockResolvedValue(createGatewayState());
   loadHermesModelCatalogMock.mockResolvedValue(createModelCatalog());
   loadHermesStateMock.mockResolvedValue(createHermesState());
