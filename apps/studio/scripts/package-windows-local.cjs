@@ -5,6 +5,7 @@ const { formatPreflightSummary, getPaths, getPreflightSummary } = require("./stu
 
 const STAGE_ROOT_SEGMENTS = [".packaging", "windows-local"];
 const DEFAULT_TARGET = "dir";
+const DEFAULT_ELECTRON_MIRROR = "https://npmmirror.com/mirrors/electron/";
 const VALID_TARGETS = new Set(["dir", "portable"]);
 const LOCAL_BUILDER_REQUIRED_MODULES = [
   "electron-builder/package.json",
@@ -103,6 +104,7 @@ function getPackagingPaths(paths) {
     packagingRoot,
     stageRoot: path.join(packagingRoot, "app"),
     outputRoot: path.join(packagingRoot, "out"),
+    electronCacheRoot: path.join(packagingRoot, "electron-cache"),
     builderConfigPath: path.join(paths.appRoot, "electron-builder.local-test.json"),
     generatedConfigPath: path.join(packagingRoot, "electron-builder.generated.json"),
     builderCliPath: path.join(paths.repoRoot, "node_modules", "electron-builder", "cli.js"),
@@ -170,10 +172,28 @@ function writeGeneratedBuilderConfig(paths, packagingPaths) {
     throw new Error("Could not determine the Electron version for Windows local packaging.");
   }
 
+  const electronMirror =
+    process.env.OPENCLAW_STUDIO_ELECTRON_MIRROR?.trim() ||
+    process.env.ELECTRON_MIRROR?.trim() ||
+    baseConfig.electronDownload?.mirror ||
+    DEFAULT_ELECTRON_MIRROR;
+
   fs.mkdirSync(packagingPaths.packagingRoot, { recursive: true });
   fs.writeFileSync(
     packagingPaths.generatedConfigPath,
-    `${JSON.stringify({ ...baseConfig, electronVersion }, null, 2)}\n`,
+    `${JSON.stringify(
+      {
+        ...baseConfig,
+        electronVersion,
+        electronDownload: {
+          ...baseConfig.electronDownload,
+          cache: packagingPaths.electronCacheRoot,
+          mirror: electronMirror
+        }
+      },
+      null,
+      2
+    )}\n`,
     "utf8"
   );
 }
@@ -368,7 +388,20 @@ function runNpmExecTool(packageSpecs, toolName, args, cwd) {
   }
 }
 
-function runBuilder(paths, packagingPaths, target) {
+function buildElectronDownloadEnv() {
+  const electronMirror =
+    process.env.OPENCLAW_STUDIO_ELECTRON_MIRROR?.trim() ||
+    process.env.ELECTRON_MIRROR?.trim() ||
+    DEFAULT_ELECTRON_MIRROR;
+
+  return {
+    ELECTRON_MIRROR: electronMirror,
+    NPM_CONFIG_ELECTRON_MIRROR: electronMirror,
+    npm_config_electron_mirror: electronMirror
+  };
+}
+
+function runBuilderOnce(paths, packagingPaths, target) {
   const builder = resolveBuilderInvocation(paths, packagingPaths);
   const builderTarget = resolveBuilderTarget(target);
   const args = [
@@ -392,6 +425,7 @@ function runBuilder(paths, packagingPaths, target) {
     shell: builder.shell,
     env: {
       ...process.env,
+      ...buildElectronDownloadEnv(),
       CSC_IDENTITY_AUTO_DISCOVERY: "false"
     }
   });
@@ -405,6 +439,30 @@ function runBuilder(paths, packagingPaths, target) {
   }
 
   return builder;
+}
+
+function resetElectronPackagingArtifacts(packagingPaths) {
+  fs.rmSync(packagingPaths.electronCacheRoot, { recursive: true, force: true });
+  fs.rmSync(packagingPaths.outputRoot, { recursive: true, force: true });
+  fs.mkdirSync(packagingPaths.outputRoot, { recursive: true });
+}
+
+function runBuilder(paths, packagingPaths, target) {
+  try {
+    return runBuilderOnce(paths, packagingPaths, target);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn(
+      [
+        "OpenClaw Studio Windows local package: electron-builder failed on the first attempt.",
+        "Clearing the project-local Electron cache and retrying once.",
+        message
+      ].join("\n")
+    );
+
+    resetElectronPackagingArtifacts(packagingPaths);
+    return runBuilderOnce(paths, packagingPaths, target);
+  }
 }
 
 function patchPackagedSharedDist(paths, packagingPaths) {
