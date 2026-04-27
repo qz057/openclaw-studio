@@ -3,8 +3,9 @@ const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
 const DATE = "20260427";
+const UPSTREAM_DATE = "20260426";
 const REPO = process.env.OPENCLAW_GITHUB_REPO || "qz057/openclaw-studio";
-const ACTIVE_VERSION = process.env.OPENCLAW_RELEASE_VERSION || "v0.1.0-preview.4";
+const DEFAULT_ACTIVE_VERSION = "v0.1.0-preview.4";
 const RETIRED_VERSIONS = (process.env.OPENCLAW_RETIRED_RELEASES || "v0.1.0-preview.1,v0.1.0-preview.2,v0.1.0-preview.3")
   .split(",")
   .map((item) => item.trim())
@@ -33,23 +34,75 @@ function writeJson(filePath, value) {
   writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-function main() {
+function readJsonIfExists(filePath) {
+  return fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, "")) : null;
+}
+
+async function listReleasesViaApi(repo) {
+  const response = await fetch(`https://api.github.com/repos/${repo}/releases?per_page=100`, {
+    headers: {
+      "User-Agent": "openclaw-studio-release-retention"
+    }
+  });
+
+  if (!response.ok) {
+    return {
+      ok: false,
+      detail: `GitHub API release list returned ${response.status}.`
+    };
+  }
+
+  const releases = await response.json();
+  return {
+    ok: true,
+    releases: releases.map((release) => ({
+      tagName: release.tag_name,
+      name: release.name,
+      isPrerelease: release.prerelease
+    }))
+  };
+}
+
+async function main() {
   const appRoot = path.resolve(__dirname, "..");
   const repoRoot = path.resolve(appRoot, "..", "..");
   const deliveryRoot = path.join(repoRoot, "delivery");
+  const phase19 = readJsonIfExists(path.join(deliveryRoot, `phase19-github-release-staging-${UPSTREAM_DATE}.json`));
+  const activeVersion = process.env.OPENCLAW_RELEASE_VERSION || phase19?.version || DEFAULT_ACTIVE_VERSION;
   const blockers = [];
   const warnings = [];
 
   const releaseListResult = run("gh", ["release", "list", "--repo", REPO, "--limit", "100", "--json", "tagName,name,isPrerelease"], repoRoot);
-  if (releaseListResult.status !== 0) {
+  let releases = [];
+  let releaseSource = "gh";
+
+  if (releaseListResult.status === 0) {
+    releases = JSON.parse(releaseListResult.stdout);
+  } else {
+    const apiResult = await listReleasesViaApi(REPO);
+    if (apiResult.ok) {
+      releases = apiResult.releases;
+      releaseSource = "github-api";
+      warnings.push("GitHub CLI release list failed, so Phase 22 used the public GitHub API fallback.");
+    } else {
+      releaseSource = "missing";
+      blockers.push({
+        id: "github-release-list-failed",
+        detail:
+          `${releaseListResult.stderr || releaseListResult.stdout || `gh release list exited with ${releaseListResult.status}`} ` +
+          `GitHub API fallback: ${apiResult.detail}`
+      });
+    }
+  }
+
+  if (releaseSource === "missing") {
     blockers.push({
-      id: "github-release-list-failed",
-      detail: releaseListResult.stderr || releaseListResult.stdout || `gh release list exited with ${releaseListResult.status}`
+      id: "github-release-list-unavailable",
+      detail: `Could not list GitHub releases for ${REPO}.`
     });
   }
 
-  const releases = releaseListResult.status === 0 ? JSON.parse(releaseListResult.stdout) : [];
-  const activeRelease = releases.find((release) => release.tagName === ACTIVE_VERSION);
+  const activeRelease = releases.find((release) => release.tagName === activeVersion);
   const retiredReleaseFindings = RETIRED_VERSIONS
     .map((version) => ({
       version,
@@ -59,7 +112,7 @@ function main() {
   if (!activeRelease) {
     blockers.push({
       id: "active-release-missing",
-      detail: `${ACTIVE_VERSION} is not present in GitHub releases.`
+      detail: `${activeVersion} is not present in GitHub releases.`
     });
   }
 
@@ -73,7 +126,7 @@ function main() {
   }
 
   const remoteTagChecks = [];
-  for (const version of [ACTIVE_VERSION, ...RETIRED_VERSIONS]) {
+  for (const version of [activeVersion, ...RETIRED_VERSIONS]) {
     const tagResult = run("git", ["ls-remote", "--tags", "origin", `${version}*`], repoRoot);
     if (tagResult.status !== 0) {
       blockers.push({
@@ -91,11 +144,11 @@ function main() {
     });
   }
 
-  const activeTag = remoteTagChecks.find((entry) => entry.version === ACTIVE_VERSION);
+  const activeTag = remoteTagChecks.find((entry) => entry.version === activeVersion);
   if (!activeTag?.present) {
     blockers.push({
       id: "active-tag-missing",
-      detail: `${ACTIVE_VERSION} is not present on origin.`
+      detail: `${activeVersion} is not present on origin.`
     });
   }
 
@@ -120,14 +173,15 @@ function main() {
     generatedAt: new Date().toISOString(),
     status: blockers.length === 0 ? "github-release-retention-clean" : "github-release-retention-blocked",
     repo: REPO,
-    activeVersion: ACTIVE_VERSION,
+    activeVersion,
+    releaseSource,
     retiredVersions: RETIRED_VERSIONS,
     activeRelease: activeRelease
       ? {
           tagName: activeRelease.tagName,
           name: activeRelease.name,
           isPrerelease: activeRelease.isPrerelease,
-          url: `https://github.com/${REPO}/releases/tag/${ACTIVE_VERSION}`
+          url: `https://github.com/${REPO}/releases/tag/${activeVersion}`
         }
       : null,
     releaseTags: releases.map((release) => release.tagName),
@@ -154,7 +208,7 @@ function main() {
       "## Active Release",
       "",
       `- repo: \`${REPO}\``,
-      `- active version: \`${ACTIVE_VERSION}\``,
+      `- active version: \`${activeVersion}\``,
       report.activeRelease?.url ? `- url: ${report.activeRelease.url}` : "- url: missing",
       "",
       "## Retired Versions",
@@ -189,8 +243,11 @@ function main() {
     for (const blocker of blockers) {
       console.error(`- ${blocker.id}: ${blocker.detail}`);
     }
-    process.exit(1);
+    process.exitCode = 1;
   }
 }
 
-main();
+main().catch((error) => {
+  console.error(error instanceof Error ? error.stack || error.message : String(error));
+  process.exitCode = 1;
+});

@@ -4,7 +4,7 @@ const { spawnSync } = require("node:child_process");
 
 const DELIVERY_DATE = "20260427";
 const UPSTREAM_DATE = "20260426";
-const VERSION = process.env.OPENCLAW_RELEASE_VERSION || "v0.1.0-preview.4";
+const DEFAULT_VERSION = "v0.1.0-preview.4";
 const REPO = process.env.OPENCLAW_GITHUB_REPO || "qz057/openclaw-studio";
 
 function readJson(filePath) {
@@ -38,7 +38,38 @@ function basename(filePath) {
   return path.basename(filePath);
 }
 
-function main() {
+async function fetchReleaseViaApi(repo, version) {
+  const response = await fetch(`https://api.github.com/repos/${repo}/releases/tags/${version}`, {
+    headers: {
+      "User-Agent": "openclaw-studio-release-closeout"
+    }
+  });
+
+  if (!response.ok) {
+    return {
+      ok: false,
+      status: response.status,
+      detail: `GitHub API release lookup returned ${response.status}.`
+    };
+  }
+
+  const release = await response.json();
+  return {
+    ok: true,
+    release: {
+      tagName: release.tag_name,
+      name: release.name,
+      isPrerelease: release.prerelease,
+      url: release.html_url,
+      assets: (release.assets ?? []).map((asset) => ({
+        name: asset.name,
+        size: asset.size
+      }))
+    }
+  };
+}
+
+async function main() {
   const appRoot = path.resolve(__dirname, "..");
   const repoRoot = path.resolve(appRoot, "..", "..");
   const deliveryRoot = path.join(repoRoot, "delivery");
@@ -51,10 +82,11 @@ function main() {
 
   const phase19 = readJson(phase19Path);
   const phase20 = fs.existsSync(phase20Path) ? readJson(phase20Path) : null;
+  const version = process.env.OPENCLAW_RELEASE_VERSION || phase19.version || DEFAULT_VERSION;
   const releaseResult = run("gh", [
     "release",
     "view",
-    VERSION,
+    version,
     "--repo",
     REPO,
     "--json",
@@ -63,15 +95,35 @@ function main() {
 
   const blockers = [];
   const warnings = [];
+  let release = null;
+  let releaseSource = "gh";
 
-  if (releaseResult.status !== 0) {
+  if (releaseResult.status === 0) {
+    release = JSON.parse(releaseResult.stdout);
+  } else {
+    const apiResult = await fetchReleaseViaApi(REPO, version);
+    if (apiResult.ok) {
+      release = apiResult.release;
+      releaseSource = "github-api";
+      warnings.push("GitHub CLI release view failed, so Phase 21 used the public GitHub API fallback.");
+    } else {
+      releaseSource = "missing";
+      blockers.push({
+        id: "github-release-view-failed",
+        detail:
+          `${releaseResult.stderr || releaseResult.stdout || `gh release view exited with ${releaseResult.status}`} ` +
+          `GitHub API fallback: ${apiResult.detail}`
+      });
+    }
+  }
+
+  if (!release) {
     blockers.push({
-      id: "github-release-view-failed",
-      detail: releaseResult.stderr || releaseResult.stdout || `gh release view exited with ${releaseResult.status}`
+      id: "github-release-missing",
+      detail: `${version} is not visible as a GitHub release for ${REPO}.`
     });
   }
 
-  const release = releaseResult.status === 0 ? JSON.parse(releaseResult.stdout) : null;
   const expectedAssets = [
     ...(phase19.stagedAssets ?? []).map((asset) => ({
       name: basename(asset.target),
@@ -102,10 +154,10 @@ function main() {
   });
 
   if (release) {
-    if (release.tagName !== VERSION) {
+    if (release.tagName !== version) {
       blockers.push({
         id: "github-release-tag-mismatch",
-        detail: `Expected ${VERSION}, got ${release.tagName}.`
+        detail: `Expected ${version}, got ${release.tagName}.`
       });
     }
 
@@ -140,7 +192,7 @@ function main() {
   const report = {
     generatedAt: new Date().toISOString(),
     status: blockers.length === 0 ? "github-prerelease-published" : "github-prerelease-closeout-blocked",
-    version: VERSION,
+    version,
     repo: REPO,
     release: release
       ? {
@@ -148,7 +200,8 @@ function main() {
           name: release.name,
           isPrerelease: release.isPrerelease,
           url: release.url,
-          assetCount: releaseAssets.length
+          assetCount: releaseAssets.length,
+          source: releaseSource
         }
       : null,
     upstream: {
@@ -176,7 +229,7 @@ function main() {
       "## Release",
       "",
       `- repo: \`${REPO}\``,
-      `- tag: \`${VERSION}\``,
+      `- tag: \`${version}\``,
       report.release?.url ? `- url: ${report.release.url}` : "- url: missing",
       `- prerelease: ${report.release?.isPrerelease ? "yes" : "no"}`,
       `- assets: ${report.release?.assetCount ?? 0}`,
@@ -212,8 +265,11 @@ function main() {
     for (const blocker of blockers) {
       console.error(`- ${blocker.id}: ${blocker.detail}`);
     }
-    process.exit(1);
+    process.exitCode = 1;
   }
 }
 
-main();
+main().catch((error) => {
+  console.error(error instanceof Error ? error.stack || error.message : String(error));
+  process.exitCode = 1;
+});

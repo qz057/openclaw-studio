@@ -26,7 +26,9 @@ github-prerelease-closeout-blocked
 
 ## Blockers
 
-- github-release-view-failed: release not found
+- github-release-view-failed: To get started with GitHub CLI, please run:  gh auth login
+Alternatively, populate the GH_TOKEN environment variable with a GitHub API authentication token. GitHub API fallback: GitHub API release lookup returned 404.
+- github-release-missing: v0.1.0-preview.5 is not visible as a GitHub release for qz057/openclaw-studio.
 - github-release-asset-missing: OpenClaw-Studio-0.1.0-win-x64-setup.exe is missing from the GitHub release.
 - github-release-asset-missing: OpenClaw-Studio-0.1.0-alpha-x64-portable.zip is missing from the GitHub release.
 - github-release-asset-missing: openclaw-studio-rc-manifest-20260426.md is missing from the GitHub release.

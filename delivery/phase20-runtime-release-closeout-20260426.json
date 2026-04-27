@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-26T17:16:51.519Z",
+  "generatedAt": "2026-04-27T00:06:42.747Z",
   "status": "release-candidate-ready-for-github-preview",
   "version": "v0.1.0-preview.5",
   "appRoot": "E:\\claucd\\界面控制台程序\\apps\\studio",
@@ -192,12 +192,12 @@
     ]
   },
   "git": {
-    "head": "8895dde61641ecf0f36618ba924bb481168492f7",
+    "head": "8b2ea8cfb9d0ac2ae4aa9a858f5d46156d6d62b8",
     "tag": "v0.1.0-preview.5",
-    "tagCommit": "8895dde61641ecf0f36618ba924bb481168492f7",
+    "tagCommit": "8b2ea8cfb9d0ac2ae4aa9a858f5d46156d6d62b8",
     "tagAlignedWithHead": true,
     "remotes": "origin\thttps://github.com/qz057/openclaw-studio.git (fetch)\norigin\thttps://github.com/qz057/openclaw-studio.git (push)",
-    "dirtyFiles": 13
+    "dirtyFiles": 10
   },
   "githubCli": {
     "loggedIn": false

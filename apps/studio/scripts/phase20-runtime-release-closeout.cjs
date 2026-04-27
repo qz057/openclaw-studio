@@ -4,7 +4,7 @@ const crypto = require("node:crypto");
 const { spawnSync } = require("node:child_process");
 
 const DATE = "20260426";
-const VERSION = process.env.OPENCLAW_RELEASE_VERSION || "v0.1.0-preview.4";
+const DEFAULT_VERSION = "v0.1.0-preview.4";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, ""));
@@ -126,6 +126,7 @@ function main() {
   const phase17 = readJsonIfExists(reportPath(deliveryRoot, "phase17-signing-handoff-audit"));
   const phase18 = readJsonIfExists(reportPath(deliveryRoot, "phase18-github-public-preview-pack"));
   const phase19 = readJsonIfExists(reportPath(deliveryRoot, "phase19-github-release-staging"));
+  const version = process.env.OPENCLAW_RELEASE_VERSION || phase19?.version || DEFAULT_VERSION;
 
   const expectedPages = countItems(phase11?.pages) || 6;
   const artifacts = [
@@ -199,7 +200,7 @@ function main() {
   }
 
   const head = run("git", ["rev-parse", "HEAD"], repoRoot);
-  const tagCommit = run("git", ["rev-list", "-n", "1", VERSION], repoRoot);
+  const tagCommit = run("git", ["rev-list", "-n", "1", version], repoRoot);
   const remotes = run("git", ["remote", "-v"], repoRoot);
   const statusShort = run("git", ["status", "--short"], repoRoot);
   const ghStatus = run("gh", ["auth", "status"], repoRoot);
@@ -211,7 +212,7 @@ function main() {
         ? "release-candidate-ready-for-github-preview"
         : "runtime-release-closeout-ready"
       : "runtime-release-closeout-blocked",
-    version: VERSION,
+    version,
     appRoot,
     deliveryRoot,
     artifacts,
@@ -254,7 +255,7 @@ function main() {
     },
     git: {
       head: head.stdout || null,
-      tag: VERSION,
+      tag: version,
       tagCommit: tagCommit.stdout || null,
       tagAlignedWithHead: Boolean(head.stdout && tagCommit.stdout && head.stdout === tagCommit.stdout),
       remotes: remotes.stdout,
@@ -316,7 +317,7 @@ function main() {
     `- Public preview root: \`${report.releaseStaging.publicPreviewRoot}\``,
     `- Upload root: \`${report.releaseStaging.uploadRoot}\``,
     report.releaseStaging.releaseNotes ? `- Release notes: \`${report.releaseStaging.releaseNotes}\`` : "- Release notes: not staged yet",
-    `- Git tag ${VERSION} aligned with HEAD: ${report.git.tagAlignedWithHead ? "yes" : "no"}`,
+    `- Git tag ${version} aligned with HEAD: ${report.git.tagAlignedWithHead ? "yes" : "no"}`,
     `- GitHub CLI logged in: ${report.githubCli.loggedIn ? "yes" : "no"}`,
     "",
     "## Blockers",

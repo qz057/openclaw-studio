@@ -2,13 +2,13 @@
 
 ## Status
 
-github-release-retention-clean
+github-release-retention-blocked
 
 ## Active Release
 
 - repo: `qz057/openclaw-studio`
-- active version: `v0.1.0-preview.4`
-- url: https://github.com/qz057/openclaw-studio/releases/tag/v0.1.0-preview.4
+- active version: `v0.1.0-preview.5`
+- url: missing
 
 ## Retired Versions
 
@@ -18,11 +18,12 @@ github-release-retention-clean
 
 ## Blockers
 
-- none
+- active-release-missing: v0.1.0-preview.5 is not present in GitHub releases.
+- active-tag-missing: v0.1.0-preview.5 is not present on origin.
 
 ## Warnings
 
-- none
+- GitHub CLI release list failed, so Phase 22 used the public GitHub API fallback.
 
 ## Verification
 
