@@ -5,6 +5,7 @@ import { createStudioRuntime } from "./runtime/studio-runtime";
 import { loadClaudeSessionMessages, loadClaudeSnapshot } from "./runtime/probes/claude-sessions";
 import { connectHermesRuntime, createHermesSessionFromWSL, disconnectHermesRuntime, loadHermesSessionMessages, loadHermesSnapshot, loadHermesState, sendHermesMessage } from "./runtime/probes/hermes";
 import { createOpenClawChatSession, loadOpenClawChatState, sendOpenClawChatTurn } from "./runtime/probes/openclaw-chat";
+import { loadDeviceBootstrapState } from "./runtime/probes/device-bootstrap";
 import {
   loadHermesGatewayServiceState,
   loadOpenClawGatewayServiceState,
@@ -17,6 +18,38 @@ import { loadHermesModelCatalog, loadOpenClawModelCatalog, setHermesModel, setOp
 import { studioChannels, studioHostBridgeSlotChannels } from "@openclaw/shared";
 import type { StudioHermesEvent, PerformanceAlert } from "@openclaw/shared";
 import { getPerformanceMonitor } from "./runtime/performance-monitor";
+
+function isEpipeError(cause: unknown): boolean {
+  return typeof cause === "object" && cause !== null && "code" in cause && (cause as { code?: unknown }).code === "EPIPE";
+}
+
+function installSafeConsoleForClosedPipes(): void {
+  for (const method of ["log", "info", "warn", "error"] as const) {
+    const original = console[method].bind(console);
+    console[method] = (...args: unknown[]) => {
+      try {
+        original(...args);
+      } catch (cause) {
+        if (!isEpipeError(cause)) {
+          throw cause;
+        }
+      }
+    };
+  }
+
+  process.stdout.on("error", (cause) => {
+    if (!isEpipeError(cause)) {
+      throw cause;
+    }
+  });
+  process.stderr.on("error", (cause) => {
+    if (!isEpipeError(cause)) {
+      throw cause;
+    }
+  });
+}
+
+installSafeConsoleForClosedPipes();
 
 const runtime = createStudioRuntime();
 const disableElectronSandbox = process.env.OPENCLAW_STUDIO_NO_SANDBOX === "1" || process.env.ELECTRON_DISABLE_SANDBOX === "1";
@@ -271,6 +304,7 @@ function registerIpcHandlers(): void {
   ipcMain.handle(studioChannels.runtimeItemAction, (_event, itemId, actionId) =>
     runtime.runRuntimeItemAction(String(itemId ?? ""), String(actionId ?? ""))
   );
+  ipcMain.handle(studioChannels.deviceBootstrapState, () => loadDeviceBootstrapState());
 
   // 性能监控
   ipcMain.handle(studioChannels.performanceMetrics, () => {

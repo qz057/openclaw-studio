@@ -27,6 +27,7 @@ afterEach(() => {
   invokeHostBridgeSlot: vi.fn(),
   getRuntimeItemDetail: vi.fn(),
   runRuntimeItemAction: vi.fn(),
+  getDeviceBootstrapState: vi.fn(),
   getPerformanceMetrics: vi.fn()
 };
 

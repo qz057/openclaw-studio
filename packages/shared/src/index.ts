@@ -128,6 +128,7 @@ export const studioChannels = {
   hostPreviewHandoff: "studio:host-preview-handoff",
   runtimeItemDetail: "studio:runtime-item-detail",
   runtimeItemAction: "studio:runtime-item-action",
+  deviceBootstrapState: "studio:device-bootstrap-state",
   performanceMetrics: "studio:performance-metrics",
   performanceSubscribe: "studio:performance-subscribe",
   performanceUnsubscribe: "studio:performance-unsubscribe",
@@ -2416,6 +2417,52 @@ export interface StudioGatewayServiceMutationResult {
   state: StudioGatewayServiceState;
 }
 
+export type StudioDeviceBootstrapCheckStatus = "ready" | "warning" | "missing" | "blocked";
+export type StudioDeviceBootstrapOverall = "ready" | "partial" | "blocked";
+export type StudioDeviceBootstrapCommandSafety = "read-only" | "setup" | "secret";
+
+export interface StudioDeviceBootstrapCheck {
+  id: string;
+  label: string;
+  status: StudioDeviceBootstrapCheckStatus;
+  summary: string;
+  detail: string;
+  path?: string | null;
+  command?: string | null;
+  evidence?: string | null;
+}
+
+export interface StudioDeviceBootstrapCommand {
+  id: string;
+  label: string;
+  shell: "powershell" | "wsl" | "manual";
+  command: string;
+  detail: string;
+  safety: StudioDeviceBootstrapCommandSafety;
+}
+
+export interface StudioDeviceBootstrapMigrationPlan {
+  secretPolicy: string;
+  exportPlan: string[];
+  importPlan: string[];
+  portableReadiness: string;
+}
+
+export interface StudioDeviceBootstrapState {
+  source: "runtime" | "mock";
+  host: {
+    platform: string;
+    arch: string;
+    homeDir: string;
+    checkedAt: number;
+  };
+  overall: StudioDeviceBootstrapOverall;
+  summary: string;
+  checks: StudioDeviceBootstrapCheck[];
+  commands: StudioDeviceBootstrapCommand[];
+  migration: StudioDeviceBootstrapMigrationPlan;
+}
+
 export interface StudioOpenClawChatSessionRef {
   sessionId: string;
   sessionKey: string;
@@ -2753,6 +2800,7 @@ export interface StudioApi {
   handoffHostPreview(itemId: string, actionId: string): Promise<StudioHostPreviewHandoff | null>;
   getRuntimeItemDetail(itemId: string): Promise<StudioRuntimeDetail | null>;
   runRuntimeItemAction(itemId: string, actionId: string): Promise<StudioRuntimeActionResult | null>;
+  getDeviceBootstrapState(): Promise<StudioDeviceBootstrapState>;
   getPerformanceMetrics(): Promise<PerformanceMetrics>;
   subscribePerformanceAlerts(listener: (alert: PerformanceAlert) => void): () => void;
 }

@@ -25,7 +25,8 @@ import {
   type StudioShellState,
   type StudioOpenClawChatMessage,
   type PerformanceMetrics,
-  type PerformanceAlert
+  type PerformanceAlert,
+  type StudioDeviceBootstrapState
 } from "@openclaw/shared";
 import { mockShellState } from "@openclaw/shared/mock-shell-state";
 
@@ -87,6 +88,43 @@ export function createFallbackApi(): StudioApi {
     latencyMs: null,
     startAllowed: false,
     stopAllowed: false
+  });
+  const fallbackDeviceBootstrapState = (): StudioDeviceBootstrapState => ({
+    source: "mock",
+    host: {
+      platform: "browser-preview",
+      arch: "unknown",
+      homeDir: "unavailable",
+      checkedAt: Date.now()
+    },
+    overall: "partial",
+    summary: "浏览器预览未接入 Electron 主进程，无法读取这台设备的真实 OpenClaw/Hermes 状态。",
+    checks: [
+      {
+        id: "electron-runtime",
+        label: "Electron 运行态",
+        status: "missing",
+        summary: "未接入",
+        detail: "请在桌面应用运行态打开设置页，才能检测 WSL、OpenClaw、Hermes、gateway 与登录态。",
+        evidence: "fallback mode"
+      }
+    ],
+    commands: [
+      {
+        id: "open-desktop-app",
+        label: "打开桌面运行态",
+        shell: "manual",
+        command: "启动 OpenClaw Studio 桌面版后重新进入设置页。",
+        detail: "桌面运行态会通过主进程做只读本机检测。",
+        safety: "read-only"
+      }
+    ],
+    migration: {
+      secretPolicy: "fallback 模式不会读取或迁移任何密钥。",
+      exportPlan: ["在桌面运行态导出非敏感清单。"],
+      importPlan: ["在目标设备重新安装 CLI 并重新登录。"],
+      portableReadiness: "预览模式不能判断其他设备真实可用性。"
+    }
   });
   const blockedHermesState: StudioHermesState = {
     source: "mock",
@@ -272,6 +310,9 @@ export function createFallbackApi(): StudioApi {
     },
     async runRuntimeItemAction(_itemId: string, _actionId: string): Promise<StudioRuntimeActionResult | null> {
       return null;
+    },
+    async getDeviceBootstrapState(): Promise<StudioDeviceBootstrapState> {
+      return fallbackDeviceBootstrapState();
     },
     async sendHermesMessage(_sessionId: string, _content: string): Promise<StudioHermesSendMessageResult> {
       return {

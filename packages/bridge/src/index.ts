@@ -27,7 +27,8 @@ import type {
   StudioRuntimeDetail,
   StudioShellState,
   PerformanceMetrics,
-  PerformanceAlert
+  PerformanceAlert,
+  StudioDeviceBootstrapState
 } from "@openclaw/shared";
 
 type StudioReadApi = Pick<
@@ -52,6 +53,7 @@ type StudioReadApi = Pick<
   | "getHostExecutorState"
   | "getHostBridgeState"
   | "getRuntimeItemDetail"
+  | "getDeviceBootstrapState"
   | "getPerformanceMetrics"
   | "subscribePerformanceAlerts"
 >;
@@ -207,6 +209,10 @@ export async function loadRuntimeItemDetail(itemId: string): Promise<StudioRunti
 
 export async function loadRuntimeItemAction(itemId: string, actionId: string): Promise<StudioRuntimeActionResult | null> {
   return (await getStudioApi()).runRuntimeItemAction(itemId, actionId);
+}
+
+export async function loadDeviceBootstrapState(): Promise<StudioDeviceBootstrapState> {
+  return (await getStudioApi()).getDeviceBootstrapState();
 }
 
 export async function connectHermes(): Promise<StudioHermesConnectResult> {

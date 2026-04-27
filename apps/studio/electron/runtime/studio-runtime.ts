@@ -41,6 +41,7 @@ import { probeLiveSkills } from "./probes/skills";
 import { createOpenClawChatSession, loadOpenClawChatState, sendOpenClawChatTurn } from "./probes/openclaw-chat";
 import { loadHermesModelCatalog, loadOpenClawModelCatalog, setHermesModel, setOpenClawModel } from "./probes/model-config";
 import { createHermesSessionFromWSL } from "./probes/hermes";
+import { loadDeviceBootstrapState } from "./probes/device-bootstrap";
 import { probeStartupRouting } from "./probes/startup-routing";
 import { probeLiveSystemStatus } from "./probes/system-status";
 import {
@@ -1952,6 +1953,9 @@ export function createStudioRuntime(): StudioRuntime {
     },
     async runRuntimeItemAction(itemId: string, actionId: string) {
       return runToolsMcpAction(itemId, actionId, toolsMcpControlSession);
+    },
+    async getDeviceBootstrapState() {
+      return loadDeviceBootstrapState();
     },
     subscribeHermesEvents(listener: (event: StudioHermesEvent) => void): () => void {
       return subscribeToHermesEvents(listener);

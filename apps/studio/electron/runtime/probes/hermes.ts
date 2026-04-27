@@ -84,9 +84,20 @@ interface HermesGatewayStateFile {
   pid?: number;
   kind?: string;
   gateway_state?: string;
+  exit_reason?: string | null;
   active_agents?: number;
   platforms?: Record<string, HermesGatewayPlatformState>;
   updated_at?: string | null;
+}
+
+interface HermesApiDetailedHealth {
+  status?: string;
+  gateway_state?: string;
+  platforms?: Record<string, HermesGatewayPlatformState>;
+  active_agents?: number;
+  exit_reason?: string | null;
+  updated_at?: string | null;
+  pid?: number;
 }
 
 interface HermesChannelDirectoryEntry {
@@ -357,6 +368,72 @@ async function readJsonFile<T>(filePath: string): Promise<T | null> {
   try {
     const raw = await fs.readFile(filePath, "utf8");
     return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
+}
+
+function normalizeApiHealthToGatewayState(health: HermesApiDetailedHealth): HermesGatewayStateFile | null {
+  if (health.status !== "ok" && health.gateway_state !== "running") {
+    return null;
+  }
+
+  return {
+    pid: health.pid,
+    kind: "hermes-api-server",
+    gateway_state: health.gateway_state ?? "running",
+    active_agents: health.active_agents ?? 0,
+    exit_reason: health.exit_reason ?? null,
+    platforms: health.platforms ?? {
+      api_server: {
+        state: "connected",
+        error_code: null,
+        error_message: null,
+        updated_at: health.updated_at ?? null
+      }
+    },
+    updated_at: health.updated_at ?? new Date().toISOString()
+  };
+}
+
+async function readHermesApiHealthState(): Promise<HermesGatewayStateFile | null> {
+  if (process.platform !== "win32") {
+    return null;
+  }
+
+  const script = String.raw`endpoint="$(awk '
+BEGIN { host="127.0.0.1"; port="8642"; section=0 }
+/^api_server:[[:space:]]*$/ { section=1; next }
+section && /^[^[:space:]]/ { section=0 }
+section && $1 == "host:" { host=$2 }
+section && $1 == "port:" { port=$2 }
+END { print host ":" port }
+' "$HOME/.hermes/config.yaml" 2>/dev/null || printf "127.0.0.1:8642")"
+for attempt in 1 2 3; do
+  body="$(curl -sS --max-time 5 "http://\${endpoint}/health/detailed" 2>/dev/null || true)"
+  if [ -n "$body" ]; then
+    printf "%s" "$body"
+    exit 0
+  fi
+  sleep 0.75
+done
+exit 1`;
+
+  try {
+    const captured = await runCommandCapture(
+      {
+        command: "wsl.exe",
+        args: ["-e", "bash", "-lc", script],
+        env: {
+          ...process.env
+        },
+        label: "Hermes API server health probe"
+      },
+      12_000,
+      16_000
+    );
+    const parsed = JSON.parse(captured.stdout) as HermesApiDetailedHealth;
+    return normalizeApiHealthToGatewayState(parsed);
   } catch {
     return null;
   }
@@ -703,6 +780,7 @@ function createHermesState(
   const platformState =
     gatewayState?.platforms &&
     Object.values(gatewayState.platforms).find((entry) => Boolean(entry?.state));
+  const apiServerState = gatewayState?.platforms?.api_server?.state ?? null;
   const channelEntry =
     channelDirectory?.platforms &&
     Object.values(channelDirectory.platforms).flat().find((entry) => Boolean(entry?.id));
@@ -741,9 +819,9 @@ function createHermesState(
           ? "待连接会话层"
           : "运行态受限",
     disabledReason: availability === "blocked" ? "未检测到 Hermes 运行时可用入口。请先确认 WSL ~/.hermes 与网关可用。" : null,
-    endpoint: gatewayState ? "WSL Hermes gateway" : null,
+    endpoint: apiServerState ? `WSL Hermes API server · ${apiServerState}` : gatewayState ? "WSL Hermes gateway" : null,
     sessionLabel: latestSession?.sessionLabel ?? channelEntry?.name ?? channelEntry?.id ?? "Hermes session",
-    transportLabel: gatewayState ? "WSL gateway / filesystem" : "WSL filesystem",
+    transportLabel: apiServerState ? "WSL API server / filesystem" : gatewayState ? "WSL gateway / filesystem" : "WSL filesystem",
     authLabel: authPresent ? "已检测到认证" : "未检测到认证",
     lastEventAt: updatedAt,
     updatedAt,
@@ -755,14 +833,16 @@ export async function loadHermesSnapshot(): Promise<StudioHermesSnapshot> {
   const { getHermesGatewayManager } = await import("../hermes-gateway");
   const manager = getHermesGatewayManager();
 
-  const [rootExists, authPresent, gatewayState, channelDirectory, sessions, history] = await Promise.all([
+  const [rootExists, authPresent, gatewayStateFile, apiHealthState, channelDirectory, sessions, history] = await Promise.all([
     pathExists(hermesRoot),
     pathExists(authPath),
     readJsonFile<HermesGatewayStateFile>(gatewayStatePath),
+    readHermesApiHealthState(),
     readJsonFile<HermesChannelDirectoryFile>(channelDirectoryPath),
     readHermesSessions(),
     readHermesHistory()
   ]);
+  const gatewayState = apiHealthState ?? gatewayStateFile;
   const connectionState = manager.getConnectionState();
 
   return {

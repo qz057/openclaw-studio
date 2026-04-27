@@ -63,6 +63,7 @@ describe('Bridge Layer', () => {
         'getHostExecutorState',
         'getHostBridgeState',
         'handoffHostPreview',
+        'getDeviceBootstrapState',
         'subscribePerformanceAlerts',
         'getPerformanceMetrics'
       ];

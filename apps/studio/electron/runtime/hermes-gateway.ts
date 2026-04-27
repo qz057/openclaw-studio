@@ -10,6 +10,7 @@
 
 import { EventEmitter } from "node:events";
 import { spawn } from "node:child_process";
+import http from "node:http";
 import type { StudioHermesEvent } from "@openclaw/shared";
 import { loadHermesState } from "./probes/hermes";
 
@@ -81,11 +82,210 @@ async function getWslIpAddresses(): Promise<string[]> {
 
 const DEFAULT_CONFIG: HermesGatewayConfig = {
   host: "localhost",
-  port: 8765,
+  port: 8642,
   reconnectInterval: 5000,
   maxReconnectAttempts: 10,
   heartbeatInterval: 30000
 };
+
+interface HermesApiServerEndpoint {
+  host: string;
+  port: number;
+  source: "config" | "default";
+}
+
+interface CommandResult {
+  ok: boolean;
+  stdout: string;
+  stderr: string;
+  error: string | null;
+}
+
+function shellQuote(value: string): string {
+  return `'${value.replace(/'/g, "'\\''")}'`;
+}
+
+function isEpipeError(cause: unknown): boolean {
+  return typeof cause === "object" && cause !== null && "code" in cause && (cause as { code?: unknown }).code === "EPIPE";
+}
+
+function logSafely(level: "log" | "warn" | "error", ...args: unknown[]): void {
+  try {
+    console[level](...args);
+  } catch (cause) {
+    if (!isEpipeError(cause)) {
+      throw cause;
+    }
+  }
+}
+
+async function runCommandCapture(command: string, args: string[], timeoutMs = 5000): Promise<CommandResult> {
+  return await new Promise<CommandResult>((resolve) => {
+    let stdout = "";
+    let stderr = "";
+    let settled = false;
+    let child: ReturnType<typeof spawn> | null = null;
+
+    const settle = (result: CommandResult) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      clearTimeout(timeoutHandle);
+      resolve(result);
+    };
+
+    const timeoutHandle = setTimeout(() => {
+      child?.kill("SIGTERM");
+      settle({
+        ok: false,
+        stdout,
+        stderr,
+        error: `${command} timed out after ${timeoutMs}ms.`
+      });
+    }, timeoutMs);
+
+    try {
+      child = spawn(command, args, {
+        stdio: ["ignore", "pipe", "pipe"],
+        env: {
+          ...process.env
+        }
+      });
+    } catch (cause) {
+      settle({
+        ok: false,
+        stdout,
+        stderr,
+        error: cause instanceof Error ? cause.message : String(cause)
+      });
+      return;
+    }
+
+    child.stdout?.on("data", (chunk) => {
+      stdout += chunk.toString();
+    });
+    child.stderr?.on("data", (chunk) => {
+      stderr += chunk.toString();
+    });
+    child.on("error", (cause) => {
+      settle({
+        ok: false,
+        stdout,
+        stderr,
+        error: cause.message
+      });
+    });
+    child.on("exit", (code) => {
+      settle({
+        ok: code === 0,
+        stdout,
+        stderr,
+        error: code === 0 ? null : stderr.trim() || stdout.trim() || `${command} exited with code ${code ?? 1}.`
+      });
+    });
+  });
+}
+
+async function resolveWslApiServerEndpoint(): Promise<HermesApiServerEndpoint> {
+  const script = String.raw`if [ -f "$HOME/.hermes/config.yaml" ]; then awk '
+BEGIN { host="127.0.0.1"; port="8642"; section=0; found=0 }
+/^api_server:[[:space:]]*$/ { section=1; found=1; next }
+section && /^[^[:space:]]/ { section=0 }
+section && $1 == "host:" { host=$2 }
+section && $1 == "port:" { port=$2 }
+END { print host "\t" port "\t" (found ? "config" : "default") }
+' "$HOME/.hermes/config.yaml"; else printf "127.0.0.1\t8642\tdefault\n"; fi`;
+  const result = await runCommandCapture("wsl.exe", ["-e", "bash", "-lc", script], 6000);
+
+  if (!result.ok) {
+    return {
+      host: "127.0.0.1",
+      port: DEFAULT_CONFIG.port,
+      source: "default"
+    };
+  }
+
+  const [host = "127.0.0.1", rawPort = String(DEFAULT_CONFIG.port), rawSource = "default"] = result.stdout.trim().split(/\t/);
+  const parsedPort = Number.parseInt(rawPort, 10);
+
+  return {
+    host: host.trim() || "127.0.0.1",
+    port: Number.isFinite(parsedPort) ? parsedPort : DEFAULT_CONFIG.port,
+    source: rawSource === "config" ? "config" : "default"
+  };
+}
+
+function readHttpJson(url: string, timeoutMs = 5000): Promise<unknown> {
+  return new Promise((resolve, reject) => {
+    const request = http.get(url, { timeout: timeoutMs }, (response) => {
+      let body = "";
+
+      response.setEncoding("utf8");
+      response.on("data", (chunk) => {
+        body += chunk;
+      });
+      response.on("end", () => {
+        if (!response.statusCode || response.statusCode < 200 || response.statusCode >= 300) {
+          reject(new Error(`${url} returned HTTP ${response.statusCode ?? "unknown"}.`));
+          return;
+        }
+
+        try {
+          resolve(JSON.parse(body));
+        } catch (cause) {
+          reject(cause);
+        }
+      });
+    });
+
+    request.on("timeout", () => {
+      request.destroy(new Error(`${url} timed out after ${timeoutMs}ms.`));
+    });
+    request.on("error", reject);
+  });
+}
+
+async function sleep(ms: number): Promise<void> {
+  await new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+async function readWslHttpJson(endpoint: HermesApiServerEndpoint, path: string): Promise<unknown> {
+  const url = `http://${endpoint.host}:${endpoint.port}${path}`;
+  const script = `curl -sS --max-time 5 ${shellQuote(url)}`;
+  let lastError: unknown = null;
+
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const result = await runCommandCapture("wsl.exe", ["-e", "bash", "-lc", script], 7000);
+
+    try {
+      if (!result.ok) {
+        throw new Error(result.error ?? (result.stderr.trim() || `Hermes API server probe failed: ${url}`));
+      }
+
+      return JSON.parse(result.stdout);
+    } catch (cause) {
+      lastError = cause;
+
+      if (attempt < 3) {
+        await sleep(750);
+      }
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error(`Hermes API server probe failed: ${url}`);
+}
+
+function isHealthyApiPayload(payload: unknown): boolean {
+  if (!payload || typeof payload !== "object") {
+    return false;
+  }
+
+  const record = payload as Record<string, unknown>;
+  return record.status === "ok" || record.gateway_state === "running";
+}
 
 /**
  * Hermes Gateway Connection Manager
@@ -156,7 +356,7 @@ export class HermesGatewayManager extends EventEmitter {
         this.ws.close();
         this.ws = null;
       } catch (error) {
-        console.error("关闭 WebSocket 连接失败:", error);
+        logSafely("error", "关闭 WebSocket 连接失败:", error);
       }
     }
 
@@ -193,31 +393,67 @@ export class HermesGatewayManager extends EventEmitter {
    * 建立 WebSocket 连接
    */
   private async establishConnection(): Promise<void> {
+    try {
+      await this.establishHttpApiConnection();
+      return;
+    } catch (error) {
+      logSafely("warn", "[Hermes] HTTP API server probe failed, falling back to WebSocket:", error);
+    }
+
     const hosts = await this.resolveConnectionHosts();
     const errors: string[] = [];
+    const paths = ["/api/ws", "/hermes"];
 
     for (const host of hosts) {
-      const url = `ws://${host}:${this.config.port}/hermes`;
-      console.log(`[Hermes] 尝试连接到: ${url}`);
+      for (const path of paths) {
+        const url = `ws://${host}:${this.config.port}${path}`;
+        logSafely("log", `[Hermes] 尝试连接到: ${url}`);
 
-      try {
-        await this.establishConnectionToUrl(url);
-        return;
-      } catch (error) {
-        errors.push(`${url}: ${error instanceof Error ? error.message : String(error)}`);
+        try {
+          await this.establishConnectionToUrl(url);
+          return;
+        } catch (error) {
+          errors.push(`${url}: ${error instanceof Error ? error.message : String(error)}`);
 
-        if (this.ws) {
-          try {
-            this.ws.close();
-          } catch {
-            // Ignore cleanup errors while probing fallback endpoints.
+          if (this.ws) {
+            try {
+              this.ws.close();
+            } catch {
+              // Ignore cleanup errors while probing fallback endpoints.
+            }
+            this.ws = null;
           }
-          this.ws = null;
         }
       }
     }
 
     throw new Error(`Hermes Gateway 连接失败：${errors.join("; ")}`);
+  }
+
+  private async establishHttpApiConnection(): Promise<void> {
+    const endpoint =
+      process.platform === "win32"
+        ? await resolveWslApiServerEndpoint()
+        : {
+            host: this.config.host,
+            port: this.config.port,
+            source: "default" as const
+          };
+    const payload =
+      process.platform === "win32"
+        ? await readWslHttpJson(endpoint, "/health/detailed")
+        : await readHttpJson(`http://${endpoint.host}:${endpoint.port}/health/detailed`);
+
+    if (!isHealthyApiPayload(payload)) {
+      throw new Error(`Hermes API server unhealthy at ${endpoint.host}:${endpoint.port}.`);
+    }
+
+    this.setConnectionState("connected");
+    this.reconnectAttempts = 0;
+    this.clearReconnectTimer();
+    this.clearHeartbeatTimer();
+    this.emit("connected");
+    logSafely("log", `[Hermes] API server connected: http://${endpoint.host}:${endpoint.port}/health/detailed (${endpoint.source})`);
   }
 
   private async resolveConnectionHosts(): Promise<string[]> {
@@ -230,7 +466,7 @@ export class HermesGatewayManager extends EventEmitter {
     const wslIps = await getWslIpAddresses();
 
     if (wslIps.length > 0) {
-      console.log(`[Hermes] 检测到 WSL IP: ${wslIps.join(", ")}`);
+      logSafely("log", `[Hermes] 检测到 WSL IP: ${wslIps.join(", ")}`);
     }
 
     return uniqueValues(["127.0.0.1", "localhost", ...wslIps]);
@@ -307,10 +543,10 @@ export class HermesGatewayManager extends EventEmitter {
           // 心跳响应，保持连接活跃
           break;
         default:
-          console.warn("未知的消息类型:", message.type);
+          logSafely("warn", "未知的消息类型:", message.type);
       }
     } catch (error) {
-      console.error("解析消息失败:", error);
+      logSafely("error", "解析消息失败:", error);
     }
   }
 
@@ -360,7 +596,7 @@ export class HermesGatewayManager extends EventEmitter {
           };
           this.ws.send(JSON.stringify(heartbeat));
         } catch (error) {
-          console.error("发送心跳失败:", error);
+          logSafely("error", "发送心跳失败:", error);
         }
       }
     }, this.config.heartbeatInterval);

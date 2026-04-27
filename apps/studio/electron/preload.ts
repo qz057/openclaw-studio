@@ -26,7 +26,8 @@ import type {
   StudioHermesLoadSessionsResult,
   StudioHermesLoadSessionResult,
   PerformanceMetrics,
-  PerformanceAlert
+  PerformanceAlert,
+  StudioDeviceBootstrapState
 } from "@openclaw/shared";
 
 const studioChannels = {
@@ -65,6 +66,7 @@ const studioChannels = {
   hostPreviewHandoff: "studio:host-preview-handoff",
   runtimeItemDetail: "studio:runtime-item-detail",
   runtimeItemAction: "studio:runtime-item-action",
+  deviceBootstrapState: "studio:device-bootstrap-state",
   performanceMetrics: "studio:performance-metrics",
   performanceSubscribe: "studio:performance-subscribe",
   performanceUnsubscribe: "studio:performance-unsubscribe",
@@ -191,6 +193,9 @@ const studioApi: StudioApi = {
   runRuntimeItemAction(itemId: string, actionId: string): Promise<StudioRuntimeActionResult | null> {
     return ipcRenderer.invoke(studioChannels.runtimeItemAction, itemId, actionId) as Promise<StudioRuntimeActionResult | null>;
   },
+  getDeviceBootstrapState(): Promise<StudioDeviceBootstrapState> {
+    return ipcRenderer.invoke(studioChannels.deviceBootstrapState) as Promise<StudioDeviceBootstrapState>;
+  },
   getPerformanceMetrics(): Promise<PerformanceMetrics> {
     return ipcRenderer.invoke(studioChannels.performanceMetrics) as Promise<PerformanceMetrics>;
   },
@@ -230,6 +235,7 @@ const studioReadApi = Object.freeze({
   getHostExecutorState: studioApi.getHostExecutorState,
   getHostBridgeState: studioApi.getHostBridgeState,
   getRuntimeItemDetail: studioApi.getRuntimeItemDetail,
+  getDeviceBootstrapState: studioApi.getDeviceBootstrapState,
   getPerformanceMetrics: studioApi.getPerformanceMetrics,
   subscribePerformanceAlerts: studioApi.subscribePerformanceAlerts
 });

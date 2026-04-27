@@ -23,7 +23,8 @@ import {
   type StudioHermesSendMessageResult,
   type StudioHermesSnapshot,
   type PerformanceMetrics,
-  type PerformanceAlert
+  type PerformanceAlert,
+  type StudioDeviceBootstrapState
 } from "@openclaw/shared";
 import { mockShellState } from "@openclaw/shared/mock-shell-state";
 
@@ -316,6 +317,36 @@ export function createMockRuntime(): StudioApi {
     },
     async runRuntimeItemAction() {
       return null;
+    },
+    async getDeviceBootstrapState(): Promise<StudioDeviceBootstrapState> {
+      return {
+        source: "mock",
+        host: {
+          platform: "mock",
+          arch: "mock",
+          homeDir: "unavailable",
+          checkedAt: Date.now()
+        },
+        overall: "partial",
+        summary: "Mock runtime 未连接真实设备运行态。",
+        checks: [
+          {
+            id: "mock-runtime",
+            label: "Mock runtime",
+            status: "missing",
+            summary: "未接入",
+            detail: "Mock runtime 不能检测 WSL、OpenClaw、Hermes、gateway 或登录态。",
+            evidence: "mock"
+          }
+        ],
+        commands: [],
+        migration: {
+          secretPolicy: "Mock runtime 不读取或迁移密钥。",
+          exportPlan: [],
+          importPlan: [],
+          portableReadiness: "Mock runtime 不能判断跨设备接入状态。"
+        }
+      };
     },
     async getPerformanceMetrics(): Promise<PerformanceMetrics> {
       return {
