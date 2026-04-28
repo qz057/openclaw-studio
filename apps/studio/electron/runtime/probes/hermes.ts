@@ -58,6 +58,7 @@ const maxSessionList = 20;
 const maxMessageList = 200;
 const maxHistoryList = 100;
 const HERMES_CLI_TIMEOUT_MS = 300_000;
+const HERMES_WSL_TIMEOUT_SECONDS = Math.max(30, Math.floor((HERMES_CLI_TIMEOUT_MS - 15_000) / 1000));
 type HermesConnectionState = "disconnected" | "connecting" | "connected" | "reconnecting" | "error";
 
 interface HermesOrigin {
@@ -807,13 +808,17 @@ function createHermesState(
   const isManagerConnected = connectionState === "connected";
   const isManagerConnecting =
     connectionState === "connecting" || connectionState === "reconnecting";
+  const hasLiveGateway =
+    gatewayState?.gateway_state === "running" ||
+    apiServerState === "connected" ||
+    platformState?.state === "connected";
   const hasFilesystemRuntime = authPresent || sessions.length > 0 || history.length > 0 || Boolean(gatewayState);
   const availability =
-    isManagerConnected
+    isManagerConnected || hasLiveGateway
       ? "connected"
       : isManagerConnecting
         ? "connecting"
-      : gatewayState?.gateway_state === "running" || hasFilesystemRuntime
+      : hasFilesystemRuntime
         ? "disconnected"
         : "blocked";
   const updatedAtCandidates = [
@@ -829,7 +834,7 @@ function createHermesState(
     source: "runtime",
     availability,
     canConnect: availability === "disconnected",
-    canDisconnect: availability === "connected",
+    canDisconnect: isManagerConnected,
     readinessLabel:
       availability === "connected"
         ? "已连接"
@@ -948,10 +953,15 @@ export async function sendHermesMessage(
             "-e",
             "bash",
             "-lc",
-            'MESSAGE="$(printf %s "$1" | base64 -d)"; hermes chat -Q --resume "$2" -q "$MESSAGE"',
+            [
+              "set -euo pipefail",
+              'MESSAGE="$(printf %s "$1" | base64 -d)"',
+              'exec timeout --kill-after=10s "$3" hermes chat -Q --source tool --resume "$2" -q "$MESSAGE"'
+            ].join("; "),
             "--",
             encodedContent,
-            sessionId.trim()
+            sessionId.trim(),
+            `${HERMES_WSL_TIMEOUT_SECONDS}s`
           ],
           env: {
             ...process.env
