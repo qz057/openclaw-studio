@@ -1,5 +1,11 @@
 import type { StudioModelOption } from "@openclaw/shared";
 
+export interface HermesModelCatalogEntries {
+  selectedModelId: string | null;
+  modelIds: string[];
+  labelMap: Map<string, string>;
+}
+
 export function parseModelIdentity(modelId: string): { provider: string | null; model: string } {
   const trimmed = modelId.trim();
   const separatorIndex = trimmed.indexOf("/");
@@ -44,6 +50,109 @@ export function dedupeModelOptions(options: StudioModelOption[]): StudioModelOpt
   }
 
   return resolved;
+}
+
+function parseYamlScalar(value: string | undefined): string | null {
+  const trimmed = value?.trim();
+
+  if (!trimmed || trimmed === "''" || trimmed === '""') {
+    return null;
+  }
+
+  if (
+    (trimmed.startsWith("'") && trimmed.endsWith("'")) ||
+    (trimmed.startsWith('"') && trimmed.endsWith('"'))
+  ) {
+    return trimmed.slice(1, -1).trim() || null;
+  }
+
+  return trimmed;
+}
+
+function readYamlChildBlock(rawConfig: string | null, key: string): string {
+  if (!rawConfig) {
+    return "";
+  }
+
+  const match = rawConfig.match(new RegExp(`^${key}:\\n((?:^[ \\t].*(?:\\r?\\n|$))*)`, "m"));
+  return match?.[1] ?? "";
+}
+
+export function parseHermesSelectedModelId(rawConfig: string | null): string | null {
+  const modelBlock = readYamlChildBlock(rawConfig, "model");
+  const provider = parseYamlScalar(modelBlock.match(/^\s+provider:\s*(.+)\s*$/m)?.[1]);
+  const model = parseYamlScalar(modelBlock.match(/^\s+default:\s*(.+)\s*$/m)?.[1]);
+
+  if (!model) {
+    return null;
+  }
+
+  return provider ? `${provider}/${model}` : model;
+}
+
+export function collectHermesModelCatalogEntries(rawConfig: string | null): HermesModelCatalogEntries {
+  const selectedModelId = parseHermesSelectedModelId(rawConfig);
+  const modelIds = new Set<string>();
+  const labelMap = new Map<string, string>();
+  const aliasesBlock = readYamlChildBlock(rawConfig, "model_aliases");
+  let currentAlias: { name: string; model: string | null; provider: string | null } | null = null;
+
+  const commitAlias = () => {
+    if (!currentAlias?.model) {
+      return;
+    }
+
+    const modelId = currentAlias.provider ? `${currentAlias.provider}/${currentAlias.model}` : currentAlias.model;
+    modelIds.add(modelId);
+
+    if (!labelMap.has(modelId)) {
+      labelMap.set(modelId, currentAlias.name);
+    }
+  };
+
+  for (const rawLine of aliasesBlock.split(/\r?\n/)) {
+    const aliasMatch = rawLine.match(/^\s{2}([A-Za-z0-9_.-]+):\s*$/);
+
+    if (aliasMatch) {
+      commitAlias();
+      currentAlias = {
+        name: aliasMatch[1] ?? "",
+        model: null,
+        provider: null
+      };
+      continue;
+    }
+
+    if (!currentAlias) {
+      continue;
+    }
+
+    const fieldMatch = rawLine.match(/^\s{4}(model|provider):\s*(.+)\s*$/);
+
+    if (!fieldMatch) {
+      continue;
+    }
+
+    const value = parseYamlScalar(fieldMatch[2]);
+
+    if (fieldMatch[1] === "model") {
+      currentAlias.model = value;
+    } else {
+      currentAlias.provider = value;
+    }
+  }
+
+  commitAlias();
+
+  if (selectedModelId) {
+    modelIds.add(selectedModelId);
+  }
+
+  return {
+    selectedModelId,
+    modelIds: Array.from(modelIds),
+    labelMap
+  };
 }
 
 /** MODEL_ID_PATTERN matches "provider/model-name" format */

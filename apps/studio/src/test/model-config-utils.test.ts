@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { parseModelIdentity, buildModelOption, dedupeModelOptions, filterModelLines } from '../../electron/runtime/probes/model-config-utils';
+import {
+  buildModelOption,
+  collectHermesModelCatalogEntries,
+  dedupeModelOptions,
+  filterModelLines,
+  parseHermesSelectedModelId,
+  parseModelIdentity
+} from '../../electron/runtime/probes/model-config-utils';
 import type { StudioModelOption } from '@openclaw/shared';
 
 describe('model-config-utils', () => {
@@ -146,6 +153,41 @@ describe('model-config-utils', () => {
 
       const result = filterModelLines(lines);
       expect(result).toEqual(['relay/gpt-5.4', 'babycookbook/claude']);
+    });
+  });
+
+  describe('collectHermesModelCatalogEntries', () => {
+    it('uses only Hermes config models and aliases', () => {
+      const rawConfig = [
+        'model:',
+        '  default: gpt-5.5',
+        '  provider: openai-codex',
+        'model_aliases:',
+        '  codex55:',
+        '    model: gpt-5.5',
+        '    provider: openai-codex',
+        'custom_providers: []'
+      ].join('\n');
+
+      expect(parseHermesSelectedModelId(rawConfig)).toBe('openai-codex/gpt-5.5');
+
+      const result = collectHermesModelCatalogEntries(rawConfig);
+      expect(result.selectedModelId).toBe('openai-codex/gpt-5.5');
+      expect(result.modelIds).toEqual(['openai-codex/gpt-5.5']);
+      expect(result.labelMap.get('openai-codex/gpt-5.5')).toBe('codex55');
+    });
+
+    it('does not invent OpenClaw relay options for Hermes', () => {
+      const result = collectHermesModelCatalogEntries([
+        'model:',
+        '  default: gpt-5.5',
+        '  provider: openai-codex',
+        'model_aliases: {}'
+      ].join('\n'));
+
+      expect(result.modelIds).toEqual(['openai-codex/gpt-5.5']);
+      expect(result.modelIds).not.toContain('relay/gpt-5.5');
+      expect(result.modelIds).not.toContain('relay/gpt-5.4');
     });
   });
 });

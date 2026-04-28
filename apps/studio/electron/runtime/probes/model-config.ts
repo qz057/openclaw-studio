@@ -251,7 +251,13 @@ function collectConfiguredModelLabels(config: OpenClawConfigFile | null): Map<st
   return labels;
 }
 
-import { parseModelIdentity, buildModelOption, dedupeModelOptions, filterModelLines } from "./model-config-utils.js";
+import {
+  buildModelOption,
+  collectHermesModelCatalogEntries,
+  dedupeModelOptions,
+  filterModelLines,
+  parseModelIdentity
+} from "./model-config-utils.js";
 
 async function listOpenClawModelIds(timeoutMs = 12_000): Promise<string[]> {
   const invocation = buildOpenClawCommand(["models", "list", "--plain"], "openclaw models list --plain");
@@ -334,27 +340,6 @@ export async function setOpenClawModel(modelId: string): Promise<StudioModelMuta
   }
 }
 
-function parseHermesSelectedModelId(rawConfig: string | null): string | null {
-  if (!rawConfig) {
-    return null;
-  }
-
-  const modelBlockMatch = rawConfig.match(/^model:\n((?:^[ \t].*(?:\r?\n|$))*)/m);
-  const modelBlock = modelBlockMatch?.[1] ?? "";
-  const provider = modelBlock.match(/^\s+provider:\s*(.+)\s*$/m)?.[1]?.trim() ?? null;
-  const model = modelBlock.match(/^\s+default:\s*(.+)\s*$/m)?.[1]?.trim() ?? null;
-
-  if (!model) {
-    return null;
-  }
-
-  if (provider && provider !== "''" && provider !== "\"\"") {
-    return `${provider}/${model}`;
-  }
-
-  return model;
-}
-
 function formatYamlScalar(value: string | null): string {
   if (!value) {
     return "''";
@@ -426,29 +411,18 @@ async function writeHermesConfigRaw(rawConfig: string): Promise<void> {
 }
 
 export async function loadHermesModelCatalog(): Promise<StudioModelCatalog> {
-  const [hermesConfigRaw, openClawCatalog] = await Promise.all([
-    readHermesConfigRaw(),
-    loadOpenClawModelCatalog().catch(() => ({
-      selectedModelId: null,
-      options: []
-    }))
-  ]);
-
-  const selectedModelId = parseHermesSelectedModelId(hermesConfigRaw) ?? openClawCatalog.selectedModelId;
-  const options = [...openClawCatalog.options];
-
-  if (selectedModelId && !options.some((option) => option.id === selectedModelId)) {
-    options.unshift({
-      id: selectedModelId,
-      label: selectedModelId,
-      ...parseModelIdentity(selectedModelId),
-      source: "fallback"
-    });
-  }
+  const hermesConfigRaw = await readHermesConfigRaw();
+  const catalogEntries = collectHermesModelCatalogEntries(hermesConfigRaw);
+  const selectedModelId = catalogEntries.selectedModelId;
 
   return {
     selectedModelId,
-    options: dedupeModelOptions(options)
+    options: dedupeModelOptions(
+      [
+        ...(selectedModelId ? [buildModelOption(selectedModelId, catalogEntries.labelMap, "config")] : []),
+        ...catalogEntries.modelIds.map((modelId) => buildModelOption(modelId, catalogEntries.labelMap, "config"))
+      ]
+    )
   };
 }
 
