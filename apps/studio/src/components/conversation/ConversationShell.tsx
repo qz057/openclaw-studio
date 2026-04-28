@@ -93,6 +93,7 @@ export interface MessageBubbleProps {
   timeLabel: string;
   text: string;
   grouped: boolean;
+  statusLabel?: string;
   deliveryStatus?: "pending" | "failed";
   onRetry?: () => void;
 }
@@ -240,6 +241,10 @@ const sessionGroups: Array<{
   }
 ];
 
+function gatewayTone(value: string): "positive" | "warning" {
+  return /未|不可|失败|未知|受限|待|启动中|stopped|error/i.test(value) ? "warning" : "positive";
+}
+
 export function ConversationShell({
   activeSurface,
   selectedSessionId,
@@ -373,8 +378,8 @@ export function GlobalNav({
           <Power size={15} strokeWidth={2.2} aria-hidden="true" />
           <strong>网关连接</strong>
         </div>
-        <StatusLine label="OpenClaw Gateway" value={gatewaySummary.openclaw} tone="positive" />
-        <StatusLine label="Hermes Gateway" value={gatewaySummary.hermes} tone={gatewaySummary.hermes.includes("待") ? "warning" : "positive"} />
+        <StatusLine label="OpenClaw Gateway" value={gatewaySummary.openclaw} tone={gatewayTone(gatewaySummary.openclaw)} />
+        <StatusLine label="Hermes Gateway" value={gatewaySummary.hermes} tone={gatewayTone(gatewaySummary.hermes)} />
         <div className="conversation-nav-status__grid">
           <span>采样</span>
           <strong>{gatewaySummary.sampling}</strong>
@@ -540,7 +545,7 @@ export function MessageTimeline({
   );
 }
 
-export function MessageBubble({ role, roleLabel, timeLabel, text, grouped, deliveryStatus, onRetry }: MessageBubbleProps) {
+export function MessageBubble({ role, roleLabel, timeLabel, text, grouped, statusLabel, deliveryStatus, onRetry }: MessageBubbleProps) {
   return (
     <article
       className={[
@@ -563,11 +568,14 @@ export function MessageBubble({ role, roleLabel, timeLabel, text, grouped, deliv
         </div>
       ) : null}
       <div className="conversation-message__body">{text}</div>
-      {deliveryStatus ? (
+      {statusLabel || deliveryStatus ? (
         <div className="conversation-message__meta">
-          <span className={`conversation-message__delivery conversation-message__delivery--${deliveryStatus}`}>
-            {deliveryStatus === "pending" ? "发送中..." : "发送失败"}
-          </span>
+          {statusLabel ? <span className="conversation-message__phase">{statusLabel}</span> : null}
+          {deliveryStatus ? (
+            <span className={`conversation-message__delivery conversation-message__delivery--${deliveryStatus}`}>
+              {deliveryStatus === "pending" ? "发送中..." : "发送失败"}
+            </span>
+          ) : null}
           {deliveryStatus === "failed" && onRetry ? (
             <button type="button" className="conversation-mini-button" onClick={onRetry}>
               重试发送

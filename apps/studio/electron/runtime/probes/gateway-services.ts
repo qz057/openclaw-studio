@@ -4,7 +4,20 @@ import { runSerializedProbe } from "./probe-command-queue.js";
 
 const DEFAULT_TIMEOUT_MS = 60_000;
 const MAX_CAPTURE_CHARS = 128_000;
+const STATUS_CACHE_TTL_MS = 2_500;
+const STABLE_RUNNING_GRACE_MS = 120_000;
 let gatewayCommandQueue: Promise<void> = Promise.resolve();
+const gatewayStatusCache: Record<
+  "openclaw" | "hermes",
+  {
+    state: StudioGatewayServiceState | null;
+    updatedAt: number;
+    inFlight: Promise<StudioGatewayServiceState> | null;
+  }
+> = {
+  openclaw: { state: null, updatedAt: 0, inFlight: null },
+  hermes: { state: null, updatedAt: 0, inFlight: null }
+};
 
 interface CommandInvocation {
   command: string;
@@ -135,6 +148,60 @@ function createGatewayServiceState(
   };
 }
 
+function cloneGatewayServiceState(state: StudioGatewayServiceState, overrides: Partial<StudioGatewayServiceState> = {}): StudioGatewayServiceState {
+  return {
+    ...state,
+    ...overrides
+  };
+}
+
+async function loadCachedGatewayState(
+  serviceId: "openclaw" | "hermes",
+  options: { force?: boolean } | undefined,
+  loader: () => Promise<StudioGatewayServiceState>
+): Promise<StudioGatewayServiceState> {
+  const force = options?.force === true;
+  const cache = gatewayStatusCache[serviceId];
+  const now = Date.now();
+
+  if (!force && cache.state && now - cache.updatedAt <= STATUS_CACHE_TTL_MS) {
+    return cloneGatewayServiceState(cache.state);
+  }
+
+  if (!force && cache.inFlight) {
+    return cloneGatewayServiceState(await cache.inFlight);
+  }
+
+  const inFlight = loader()
+    .then((state) => {
+      cache.state = state;
+      cache.updatedAt = Date.now();
+      return state;
+    })
+    .catch((cause) => {
+      const cached = cache.state;
+      const cachedAgeMs = cached ? Date.now() - cache.updatedAt : Number.POSITIVE_INFINITY;
+
+      if (!force && cached?.running && cachedAgeMs <= STABLE_RUNNING_GRACE_MS) {
+        return cloneGatewayServiceState(cached, {
+          detail: `${cached.detail} · 本次状态探针抖动已抑制：${extractFirstLine(cause)}`,
+          lastCheckedAt: Date.now(),
+          latencyMs: null
+        });
+      }
+
+      return formatGatewayError(serviceId, cause);
+    })
+    .finally(() => {
+      if (cache.inFlight === inFlight) {
+        cache.inFlight = null;
+      }
+    });
+
+  cache.inFlight = inFlight;
+  return cloneGatewayServiceState(await inFlight);
+}
+
 function extractFirstLine(cause: unknown): string {
   const message = cause instanceof Error ? cause.message : String(cause);
   return message.split(/\r?\n/).map((line) => line.trim()).find(Boolean) ?? "操作失败。";
@@ -208,10 +275,17 @@ function isOpenClawGatewayProcessRunning(parsed: OpenClawGatewayStatusPayload): 
 
 function createOpenClawGatewayState(parsed: OpenClawGatewayStatusPayload, latencyMs: number): StudioGatewayServiceState {
   const running = isOpenClawGatewayProcessRunning(parsed);
+  const rpcError = parsed.rpc?.error ?? "";
+  const starting =
+    running &&
+    parsed.rpc?.ok !== true &&
+    (/ECONNREFUSED|connection refused/i.test(rpcError) || parsed.port?.status === "free");
 
   const detail =
     parsed.rpc?.ok === true
       ? `RPC 可达 · ${parsed.rpc.url ?? parsed.gateway?.probeUrl ?? "ws://127.0.0.1"}`
+      : starting
+        ? "服务进程已启动，HTTP/RPC 端口仍在绑定中；继续保留运行态并等待下一次采样。"
       : parsed.rpc?.error
         ? `服务进程${running ? "已运行" : "未运行"}，但 RPC 探针失败：${parsed.rpc.error}。下一步：确认 gateway token/认证配置与 CLI probe 使用同一份 ~/.openclaw/openclaw.json。`
         : parsed.port?.hints?.[0] ?? (running ? "服务进程已运行，但端口/RPC 探针未返回可用结果。" : "Gateway 服务当前未运行。");
@@ -219,6 +293,8 @@ function createOpenClawGatewayState(parsed: OpenClawGatewayStatusPayload, latenc
   const statusLabel =
     parsed.rpc?.ok === true
       ? "Gateway 已运行"
+      : starting
+        ? "Gateway 启动中"
       : running
         ? "RPC 探针失败"
         : "Gateway 未运行";
@@ -232,8 +308,20 @@ async function waitForGatewayRetry() {
   });
 }
 
-export async function loadOpenClawGatewayServiceState(): Promise<StudioGatewayServiceState> {
-  try {
+async function waitForOpenClawGatewayReady(timeoutMs = 18_000): Promise<StudioGatewayServiceState> {
+  const startedAt = Date.now();
+  let latestState = await loadOpenClawGatewayServiceState({ force: true });
+
+  while (latestState.running && latestState.statusLabel !== "Gateway 已运行" && Date.now() - startedAt < timeoutMs) {
+    await new Promise((resolve) => setTimeout(resolve, 1_000));
+    latestState = await loadOpenClawGatewayServiceState({ force: true });
+  }
+
+  return latestState;
+}
+
+export async function loadOpenClawGatewayServiceState(options?: { force?: boolean }): Promise<StudioGatewayServiceState> {
+  return loadCachedGatewayState("openclaw", options, async () => {
     let status = await captureOpenClawGatewayStatus();
 
     if (isOpenClawGatewayProcessRunning(status.parsed) && status.parsed.rpc?.ok !== true) {
@@ -246,9 +334,7 @@ export async function loadOpenClawGatewayServiceState(): Promise<StudioGatewaySe
     }
 
     return createOpenClawGatewayState(status.parsed, status.latencyMs);
-  } catch (cause) {
-    return formatGatewayError("openclaw", cause);
-  }
+  });
 }
 
 export async function startOpenClawGatewayService(): Promise<StudioGatewayServiceMutationResult> {
@@ -268,16 +354,16 @@ export async function startOpenClawGatewayService(): Promise<StudioGatewayServic
     return {
       applied: false,
       error: formatGatewayMutationError("openclaw", cause, "start"),
-      state: await loadOpenClawGatewayServiceState()
+      state: await loadOpenClawGatewayServiceState({ force: true })
     };
   }
 
-  const state = await loadOpenClawGatewayServiceState();
+  const state = await waitForOpenClawGatewayReady();
 
-  if (!state.running) {
+  if (!state.running || state.statusLabel !== "Gateway 已运行") {
     return {
       applied: false,
-      error: state.detail || "启动命令已返回，但 Gateway 仍未进入运行状态。",
+      error: state.detail || "启动命令已返回，但 Gateway RPC 仍未就绪。",
       state
     };
   }
@@ -306,11 +392,11 @@ export async function stopOpenClawGatewayService(): Promise<StudioGatewayService
     return {
       applied: false,
       error: formatGatewayMutationError("openclaw", cause, "stop"),
-      state: await loadOpenClawGatewayServiceState()
+      state: await loadOpenClawGatewayServiceState({ force: true })
     };
   }
 
-  const state = await loadOpenClawGatewayServiceState();
+  const state = await loadOpenClawGatewayServiceState({ force: true });
 
   if (state.running) {
     return {
@@ -327,8 +413,8 @@ export async function stopOpenClawGatewayService(): Promise<StudioGatewayService
   };
 }
 
-export async function loadHermesGatewayServiceState(): Promise<StudioGatewayServiceState> {
-  try {
+export async function loadHermesGatewayServiceState(options?: { force?: boolean }): Promise<StudioGatewayServiceState> {
+  return loadCachedGatewayState("hermes", options, async () => {
     const startedAt = Date.now();
     const captured = await runQueuedGatewayCommandCapture(
       {
@@ -352,9 +438,7 @@ export async function loadHermesGatewayServiceState(): Promise<StudioGatewayServ
         .find((line) => /Main PID:|gateway service is running|Loaded:|Active:/i.test(line)) ?? "Hermes gateway 状态已检查。";
 
     return createGatewayServiceState("hermes", running, running ? "Gateway 已运行" : "Gateway 未运行", detailLine, latencyMs);
-  } catch (cause) {
-    return formatGatewayError("hermes", cause);
-  }
+  });
 }
 
 export async function startHermesGatewayService(): Promise<StudioGatewayServiceMutationResult> {
@@ -374,11 +458,11 @@ export async function startHermesGatewayService(): Promise<StudioGatewayServiceM
     return {
       applied: false,
       error: formatGatewayMutationError("hermes", cause, "start"),
-      state: await loadHermesGatewayServiceState()
+      state: await loadHermesGatewayServiceState({ force: true })
     };
   }
 
-  const state = await loadHermesGatewayServiceState();
+  const state = await loadHermesGatewayServiceState({ force: true });
 
   if (!state.running) {
     return {
@@ -412,11 +496,11 @@ export async function stopHermesGatewayService(): Promise<StudioGatewayServiceMu
     return {
       applied: false,
       error: formatGatewayMutationError("hermes", cause, "stop"),
-      state: await loadHermesGatewayServiceState()
+      state: await loadHermesGatewayServiceState({ force: true })
     };
   }
 
-  const state = await loadHermesGatewayServiceState();
+  const state = await loadHermesGatewayServiceState({ force: true });
 
   if (state.running) {
     return {

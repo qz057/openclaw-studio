@@ -10,7 +10,14 @@ import {
   startOpenClawGatewayService,
   stopOpenClawGatewayService
 } from "@openclaw/bridge";
-import type { StudioGatewayServiceState, StudioModelCatalog, StudioOpenClawChatMessage, StudioOpenClawChatState } from "@openclaw/shared";
+import type {
+  StudioConversationRuntimePhase,
+  StudioConversationRuntimeRole,
+  StudioGatewayServiceState,
+  StudioModelCatalog,
+  StudioOpenClawChatMessage,
+  StudioOpenClawChatState
+} from "@openclaw/shared";
 import {
   ChatPanel,
   ComposerBar,
@@ -40,6 +47,7 @@ interface ChatPageProps {
   onSessionSurfaceChange?: (surface: ConversationSurfaceId) => void;
   themeMode?: ConversationThemeMode;
   onThemeModeChange?: (mode: ConversationThemeMode) => void;
+  isActive?: boolean;
 }
 
 interface PersistedChatState {
@@ -63,10 +71,12 @@ interface LocalChatMessage {
 
 interface DisplayChatMessage {
   id: string;
-  role: "user" | "assistant";
+  role: StudioConversationRuntimeRole;
   text: string;
   timestamp: string;
   source: "remote" | "local";
+  phase?: StudioConversationRuntimePhase;
+  statusLabel?: string;
   deliveryStatus?: "pending" | "failed";
 }
 
@@ -338,7 +348,9 @@ function mergeMessages(remoteMessages: StudioOpenClawChatMessage[], localMessage
       role: message.role,
       text: message.text,
       timestamp: message.timestamp,
-      source: "remote" as const
+      source: "remote" as const,
+      phase: message.phase,
+      statusLabel: message.statusLabel
     })),
     ...localMessages.map((message) => ({
       id: message.id,
@@ -463,7 +475,8 @@ export function ChatPage({
   onNavigatePage,
   onSessionSurfaceChange,
   themeMode,
-  onThemeModeChange
+  onThemeModeChange,
+  isActive = true
 }: ChatPageProps) {
   const persistedFreshSession = readFreshSessionState();
   const [draft, setDraft] = useState(() => readPersistedChatState().draft);
@@ -503,6 +516,10 @@ export function ChatPage({
   const composeStatus = submitting ? "OpenClaw 正在回复…" : chatState?.readinessLabel ?? "检查发送链路";
 
   useEffect(() => {
+    if (!isActive) {
+      return;
+    }
+
     let cancelled = false;
 
     const refreshModelCatalog = async () => {
@@ -540,9 +557,13 @@ export function ChatPage({
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [refreshNonce]);
+  }, [isActive, refreshNonce]);
 
   useEffect(() => {
+    if (!isActive) {
+      return;
+    }
+
     let cancelled = false;
     let refreshInFlight = false;
 
@@ -594,7 +615,7 @@ export function ChatPage({
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [refreshNonce]);
+  }, [isActive, refreshNonce]);
 
   useEffect(() => {
     writePersistedChatState({ draft });
@@ -647,6 +668,10 @@ export function ChatPage({
   }, [detachedFromLatest, displayMessages.length]);
 
   useEffect(() => {
+    if (!isActive && !submitting) {
+      return;
+    }
+
     let cancelled = false;
 
     const refresh = async () => {
@@ -695,7 +720,7 @@ export function ChatPage({
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [freshSessionId, refreshNonce, submitting]);
+  }, [freshSessionId, isActive, refreshNonce, submitting]);
 
   async function submitPrompt(prompt: string, retryMessageId?: string) {
     const normalizedPrompt = prompt.trim();
@@ -1188,6 +1213,14 @@ export function ChatPage({
                   const showTimeSeparator = shouldInsertTimeSeparator(previous, message);
                   const grouped = !shouldStartMessageGroup(previous, message);
                   const firstAssistantIndex = displayMessages.findIndex((item) => item.role === "assistant");
+                  const roleLabel =
+                    message.role === "assistant"
+                      ? "OpenClaw"
+                      : message.role === "tool"
+                        ? "工具"
+                        : message.role === "system"
+                          ? "系统"
+                          : "你";
 
                   return (
                     <div key={message.id} className="conversation-timeline__item">
@@ -1203,10 +1236,11 @@ export function ChatPage({
                       ) : null}
                       <ConversationMessageBubble
                         role={message.role}
-                        roleLabel={message.role === "assistant" ? "OpenClaw" : "你"}
+                        roleLabel={roleLabel}
                         timeLabel={formatMessageTimestamp(message.timestamp)}
                         text={message.text}
                         grouped={grouped}
+                        statusLabel={message.statusLabel}
                         deliveryStatus={message.deliveryStatus}
                         onRetry={message.deliveryStatus === "failed" ? () => void handleRetryMessage(message.id) : undefined}
                       />

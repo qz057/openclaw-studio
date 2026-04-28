@@ -256,6 +256,79 @@ function normalizeHermesMessageContent(raw: unknown): string {
   return "";
 }
 
+function truncateRuntimeText(text: string, maxLength = 900): string {
+  const normalized = text.trim();
+
+  if (normalized.length <= maxLength) {
+    return normalized;
+  }
+
+  return `${normalized.slice(0, maxLength).trimEnd()}\n...`;
+}
+
+function formatHermesToolCalls(raw: unknown): string[] {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+
+  return raw
+    .map((item) => {
+      if (!item || typeof item !== "object") {
+        return null;
+      }
+
+      const record = item as Record<string, unknown>;
+      const fn = record.function && typeof record.function === "object" ? record.function as Record<string, unknown> : null;
+      const name =
+        (typeof record.name === "string" && record.name.trim()) ||
+        (typeof fn?.name === "string" && fn.name.trim()) ||
+        "tool";
+      const args = normalizeHermesMessageContent(record.arguments ?? fn?.arguments);
+      return args ? `${name} ${truncateRuntimeText(args, 260)}` : name;
+    })
+    .filter((item): item is string => Boolean(item));
+}
+
+function buildHermesRuntimeActivityMessage(message: Record<string, unknown>): {
+  content: string;
+  phase: import("@openclaw/shared").StudioConversationRuntimePhase;
+  statusLabel: string;
+} | null {
+  const toolCalls = formatHermesToolCalls(message.tool_calls);
+
+  if (toolCalls.length > 0) {
+    return {
+      content: `正在调用工具：${toolCalls.slice(0, 3).join("；")}${toolCalls.length > 3 ? `；另 ${toolCalls.length - 3} 个` : ""}`,
+      phase: "tool_call",
+      statusLabel: "工具调用"
+    };
+  }
+
+  const hasReasoning =
+    Boolean(message.reasoning) ||
+    (Array.isArray(message.codex_reasoning_items) && message.codex_reasoning_items.length > 0);
+
+  if (hasReasoning) {
+    return {
+      content: "正在思考和规划下一步，等待工具调用或最终回复。",
+      phase: "thinking",
+      statusLabel: "思考中"
+    };
+  }
+
+  const finishReason = typeof message.finish_reason === "string" ? message.finish_reason.trim() : "";
+
+  if (finishReason && finishReason !== "stop") {
+    return {
+      content: `运行状态：${finishReason}`,
+      phase: "system",
+      statusLabel: "运行状态"
+    };
+  }
+
+  return null;
+}
+
 function estimateTokenCount(text: string): number {
   const normalized = text.trim();
 
@@ -661,10 +734,11 @@ function parseJsonSessionMessages(sessionFile: HermesSessionFile): StudioHermesM
   const messages = Array.isArray(sessionFile.messages) ? sessionFile.messages : [];
 
   return messages
-    .map((message, index) => {
+    .map((message, index): StudioHermesMessage | null => {
       const content = normalizeHermesMessageContent(message.content);
+      const runtimeActivity = content ? null : buildHermesRuntimeActivityMessage(message);
 
-      if (!content) {
+      if (!content && !runtimeActivity) {
         return null;
       }
 
@@ -683,8 +757,14 @@ function parseJsonSessionMessages(sessionFile: HermesSessionFile): StudioHermesM
               ? message.tool_call_id
               : `hermes-message-${index + 1}`,
         role: ensureHermesMessageRole(typeof message.role === "string" ? message.role : null),
-        content,
-        timestamp
+        content: content || runtimeActivity?.content || "",
+        timestamp,
+        phase:
+          runtimeActivity?.phase ??
+          (message.role === "tool" ? "tool_result" : message.role === "assistant" ? "response" : message.role === "user" ? "input" : "system"),
+        statusLabel:
+          runtimeActivity?.statusLabel ??
+          (message.role === "tool" ? "工具返回" : message.role === "assistant" ? "最终回复" : message.role === "user" ? "用户输入" : "系统")
       } satisfies StudioHermesMessage;
     })
     .filter((message): message is StudioHermesMessage => message !== null)
@@ -704,18 +784,25 @@ function parseJsonlSessionMessages(raw: string): StudioHermesMessage[] {
       }
     })
     .filter((message): message is Record<string, unknown> => message !== null)
-    .map((message, index) => {
+    .map((message, index): StudioHermesMessage | null => {
       const content = normalizeHermesMessageContent(message.content ?? message.text ?? message.message);
+      const runtimeActivity = content ? null : buildHermesRuntimeActivityMessage(message);
 
-      if (!content) {
+      if (!content && !runtimeActivity) {
         return null;
       }
 
       return {
         id: typeof message.id === "string" ? message.id : `hermes-jsonl-message-${index + 1}`,
         role: ensureHermesMessageRole(typeof message.role === "string" ? message.role : null),
-        content,
-        timestamp: typeof message.timestamp === "string" ? message.timestamp : null
+        content: content || runtimeActivity?.content || "",
+        timestamp: typeof message.timestamp === "string" ? message.timestamp : null,
+        phase:
+          runtimeActivity?.phase ??
+          (message.role === "tool" ? "tool_result" : message.role === "assistant" ? "response" : message.role === "user" ? "input" : "system"),
+        statusLabel:
+          runtimeActivity?.statusLabel ??
+          (message.role === "tool" ? "工具返回" : message.role === "assistant" ? "最终回复" : message.role === "user" ? "用户输入" : "系统")
       } satisfies StudioHermesMessage;
     })
     .filter((message): message is StudioHermesMessage => message !== null);
@@ -1254,12 +1341,29 @@ export async function loadHermesSessionFromWSL(sessionId: string): Promise<impor
       };
     }
 
-    const messages: StudioHermesMessage[] = session.messages.map((msg, index) => ({
-      id: `${sessionId}-msg-${index}`,
-      role: msg.role as StudioHermesMessageRole,
-      content: msg.content,
-      timestamp: normalizeHermesRuntimeTimestamp(msg.timestamp)
-    }));
+    const messages: StudioHermesMessage[] = session.messages
+      .map((msg, index): StudioHermesMessage | null => {
+        const content = normalizeHermesMessageContent(msg.content);
+        const runtimeActivity = content ? null : buildHermesRuntimeActivityMessage(msg as unknown as Record<string, unknown>);
+
+        if (!content && !runtimeActivity) {
+          return null;
+        }
+
+        return {
+          id: `${sessionId}-msg-${index}`,
+          role: ensureHermesMessageRole(msg.role),
+          content: content || runtimeActivity?.content || "",
+          timestamp: normalizeHermesRuntimeTimestamp(msg.timestamp),
+          phase:
+            runtimeActivity?.phase ??
+            (msg.role === "tool" ? "tool_result" : msg.role === "assistant" ? "response" : msg.role === "user" ? "input" : "system"),
+          statusLabel:
+            runtimeActivity?.statusLabel ??
+            (msg.role === "tool" ? "工具返回" : msg.role === "assistant" ? "最终回复" : msg.role === "user" ? "用户输入" : "系统")
+        };
+      })
+      .filter((message): message is StudioHermesMessage => message !== null);
     const sendError = await loadLatestHermesSendError(sessionId, session.lastModified.getTime());
 
     return {

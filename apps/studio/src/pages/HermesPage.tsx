@@ -16,6 +16,7 @@ import {
   stopHermesGatewayService
 } from "@openclaw/bridge";
 import type {
+  StudioConversationRuntimePhase,
   StudioGatewayServiceState,
   StudioHermesMessage,
   StudioHermesSessionSummary,
@@ -50,6 +51,7 @@ interface HermesPageProps {
   onSessionSurfaceChange?: (surface: ConversationSurfaceId) => void;
   themeMode?: ConversationThemeMode;
   onThemeModeChange?: (mode: ConversationThemeMode) => void;
+  isActive?: boolean;
 }
 
 interface PersistedHermesState {
@@ -76,6 +78,8 @@ interface DisplayHermesMessage {
   content: string;
   timestamp: string | null;
   source: "remote" | "local";
+  phase?: StudioConversationRuntimePhase;
+  statusLabel?: string;
   deliveryStatus?: "pending" | "failed";
 }
 
@@ -338,7 +342,9 @@ function mergeMessages(remoteMessages: StudioHermesMessage[], localMessages: Loc
       role: message.role,
       content: message.content,
       timestamp: message.timestamp,
-      source: "remote" as const
+      source: "remote" as const,
+      phase: message.phase,
+      statusLabel: message.statusLabel
     })),
     ...localMessages.map((message) => ({
       id: message.id,
@@ -465,7 +471,8 @@ export function HermesPage({
   onNavigatePage,
   onSessionSurfaceChange,
   themeMode,
-  onThemeModeChange
+  onThemeModeChange,
+  isActive = true
 }: HermesPageProps) {
   const persistedFreshSession = readFreshSessionState();
   const [draft, setDraft] = useState(() => readPersistedHermesState().draft);
@@ -531,6 +538,10 @@ export function HermesPage({
   }, [messages, localMessages.length]);
 
   useEffect(() => {
+    if (!isActive) {
+      return;
+    }
+
     let cancelled = false;
 
     const refreshModelCatalog = async () => {
@@ -568,9 +579,13 @@ export function HermesPage({
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [refreshNonce]);
+  }, [isActive, refreshNonce]);
 
   useEffect(() => {
+    if (!isActive) {
+      return;
+    }
+
     let cancelled = false;
     let refreshInFlight = false;
 
@@ -622,9 +637,13 @@ export function HermesPage({
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [refreshNonce]);
+  }, [isActive, refreshNonce]);
 
   useEffect(() => {
+    if (!isActive) {
+      return;
+    }
+
     let cancelled = false;
     let unsubscribe: (() => void) | null = null;
 
@@ -673,7 +692,7 @@ export function HermesPage({
       window.clearInterval(interval);
       unsubscribe?.();
     };
-  }, [refreshNonce]);
+  }, [isActive, refreshNonce]);
 
   useEffect(() => {
     const thread = getThreadElement();
@@ -714,6 +733,10 @@ export function HermesPage({
   }, [detachedFromLatest, displayMessages.length]);
 
   useEffect(() => {
+    if (!isActive && !submitting) {
+      return;
+    }
+
     let cancelled = false;
 
     const refresh = async () => {
@@ -817,7 +840,7 @@ export function HermesPage({
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [freshSessionId, refreshNonce, submitting]);
+  }, [freshSessionId, isActive, refreshNonce, submitting]);
 
   async function submitPrompt(prompt: string, retryMessageId?: string) {
     const normalizedPrompt = prompt.trim();
@@ -1432,6 +1455,7 @@ export function HermesPage({
                         timeLabel={formatMessageTimestamp(message.timestamp)}
                         text={message.content}
                         grouped={grouped}
+                        statusLabel={message.statusLabel}
                         deliveryStatus={message.deliveryStatus}
                         onRetry={message.deliveryStatus === "failed" ? () => void handleRetryMessage(message.id) : undefined}
                       />

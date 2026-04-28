@@ -2,7 +2,7 @@ import { execFileSync } from "child_process";
 import type { StudioTokenContextSummary } from "@openclaw/shared";
 
 export interface HermesMessage {
-  role: "user" | "assistant" | "system";
+  role: "user" | "assistant" | "system" | "tool";
   content: string;
   timestamp?: string;
   tool_calls?: any[];

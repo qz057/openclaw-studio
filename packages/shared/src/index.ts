@@ -2527,11 +2527,16 @@ export interface StudioClaudeSnapshot {
   history: StudioClaudeHistoryEntry[];
 }
 
+export type StudioConversationRuntimeRole = "user" | "assistant" | "tool" | "system";
+export type StudioConversationRuntimePhase = "input" | "thinking" | "tool_call" | "tool_result" | "response" | "system" | "error";
+
 export interface StudioOpenClawChatMessage {
   id: string;
-  role: "user" | "assistant";
+  role: StudioConversationRuntimeRole;
   text: string;
   timestamp: string;
+  phase?: StudioConversationRuntimePhase;
+  statusLabel?: string;
 }
 
 export type StudioOpenClawChatAvailability = "ready" | "blocked";
@@ -2609,6 +2614,8 @@ export interface StudioHermesMessage {
   role: StudioHermesMessageRole;
   content: string;
   timestamp: string | null;
+  phase?: StudioConversationRuntimePhase;
+  statusLabel?: string;
 }
 
 export interface StudioHermesSessionSummary {

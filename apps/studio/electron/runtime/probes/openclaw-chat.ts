@@ -79,7 +79,17 @@ interface OpenClawSessionEvent {
     content?: Array<{
       type?: string;
       text?: string;
+      name?: string;
+      arguments?: unknown;
     }>;
+    toolName?: string;
+    toolCallId?: string;
+    details?: {
+      statusText?: string;
+      status?: string;
+      tool?: string;
+      error?: string;
+    };
     usage?: {
       input?: number;
       output?: number;
@@ -89,9 +99,6 @@ interface OpenClawSessionEvent {
       cost?: {
         total?: number;
       };
-    };
-    details?: {
-      statusText?: string;
     };
   };
 }
@@ -265,6 +272,52 @@ function sanitizeUserMessage(text: string): string {
 function normalizeMessage(role: "user" | "assistant", text: string): string {
   const trimmed = text.trim();
   return role === "user" ? sanitizeUserMessage(trimmed) : trimmed;
+}
+
+function truncateRuntimeText(text: string, maxLength = 900): string {
+  const normalized = text.trim();
+
+  if (normalized.length <= maxLength) {
+    return normalized;
+  }
+
+  return `${normalized.slice(0, maxLength).trimEnd()}\n...`;
+}
+
+function formatUnknownPayload(payload: unknown): string {
+  if (payload == null) {
+    return "";
+  }
+
+  if (typeof payload === "string") {
+    return payload.trim();
+  }
+
+  try {
+    return JSON.stringify(payload, null, 2);
+  } catch {
+    return String(payload);
+  }
+}
+
+function extractToolCallSummaries(event: OpenClawSessionEvent): string[] {
+  return (event.message?.content ?? [])
+    .filter((item) => item.type === "toolCall")
+    .map((item) => {
+      const name = item.name?.trim() || "tool";
+      const args = truncateRuntimeText(formatUnknownPayload(item.arguments), 260);
+      return args ? `${name} ${args}` : name;
+    });
+}
+
+function extractToolResultSummary(event: OpenClawSessionEvent): string | null {
+  const toolName = event.message?.toolName ?? event.message?.details?.tool ?? "tool";
+  const status = event.message?.details?.status ?? (event.message?.details?.error ? "error" : "ok");
+  const content = extractMessageText(event) ?? event.message?.details?.error ?? "";
+  const summary = truncateRuntimeText(content, 900);
+  const statusLabel = /error|failed|fail/i.test(status) ? "失败" : "返回";
+
+  return summary ? `工具 ${toolName} ${statusLabel}\n${summary}` : `工具 ${toolName} ${statusLabel}`;
 }
 
 function parseJsonLine(line: string): OpenClawSessionEvent | null {
@@ -887,13 +940,61 @@ function parseSessionMessages(raw: string): StudioOpenClawChatMessage[] {
         return [];
       }
 
-      const role = event.message?.role as "user" | "assistant" | undefined;
+      const role = event.message?.role;
+
+      if (role === "toolResult") {
+        const text = extractToolResultSummary(event);
+
+        if (!text) {
+          return [];
+        }
+
+        return [
+          {
+            id: event.id ?? `tool-${event.timestamp ?? Math.random().toString(36).slice(2)}`,
+            role: "tool" as const,
+            text,
+            timestamp: event.timestamp ?? new Date().toISOString(),
+            phase: event.message?.details?.error ? "error" as const : "tool_result" as const,
+            statusLabel: event.message?.details?.error ? "工具失败" : "工具返回"
+          }
+        ];
+      }
 
       if (role !== "user" && role !== "assistant") {
         return [];
       }
 
       const text = extractMessageText(event);
+      const toolCalls = extractToolCallSummaries(event);
+
+      if (!text && toolCalls.length > 0) {
+        return [
+          {
+            id: event.id ?? `tool-call-${event.timestamp ?? Math.random().toString(36).slice(2)}`,
+            role: "assistant" as const,
+            text: `正在调用工具：${toolCalls.slice(0, 3).join("；")}${toolCalls.length > 3 ? `；另 ${toolCalls.length - 3} 个` : ""}`,
+            timestamp: event.timestamp ?? new Date().toISOString(),
+            phase: "tool_call" as const,
+            statusLabel: "工具调用"
+          }
+        ];
+      }
+
+      const hasThinking = (event.message?.content ?? []).some((item) => item.type === "thinking");
+
+      if (!text && hasThinking) {
+        return [
+          {
+            id: event.id ?? `thinking-${event.timestamp ?? Math.random().toString(36).slice(2)}`,
+            role: "assistant" as const,
+            text: "正在思考和规划下一步，等待工具调用或最终回复。",
+            timestamp: event.timestamp ?? new Date().toISOString(),
+            phase: "thinking" as const,
+            statusLabel: "思考中"
+          }
+        ];
+      }
 
       if (!text) {
         return [];
@@ -905,14 +1006,29 @@ function parseSessionMessages(raw: string): StudioOpenClawChatMessage[] {
         return [];
       }
 
-      return [
+      const messages: StudioOpenClawChatMessage[] = [
         {
           id: event.id ?? `${role}-${event.timestamp ?? Math.random().toString(36).slice(2)}`,
           role,
           text: normalizedText,
-          timestamp: event.timestamp ?? new Date().toISOString()
+          timestamp: event.timestamp ?? new Date().toISOString(),
+          phase: role === "user" ? "input" : "response",
+          statusLabel: role === "user" ? "用户输入" : "最终回复"
         }
       ];
+
+      if (toolCalls.length > 0) {
+        messages.push({
+          id: `${event.id ?? event.timestamp ?? "assistant"}-tool-call`,
+          role: "assistant",
+          text: `继续调用工具：${toolCalls.slice(0, 3).join("；")}${toolCalls.length > 3 ? `；另 ${toolCalls.length - 3} 个` : ""}`,
+          timestamp: event.timestamp ?? new Date().toISOString(),
+          phase: "tool_call",
+          statusLabel: "工具调用"
+        });
+      }
+
+      return messages;
     });
 
   return messages.slice(-MAX_CHAT_MESSAGES);

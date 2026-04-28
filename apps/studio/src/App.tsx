@@ -6061,6 +6061,7 @@ export function App() {
                     onSessionSurfaceChange={handleConversationSurfaceChange}
                     themeMode={dashboardThemeMode}
                     onThemeModeChange={setDashboardThemeMode}
+                    isActive={activeConversationSurface === "openclaw"}
                   />
                 </div>
                 <div className="conversation-page-pane" hidden={activeConversationSurface !== "hermes"}>
@@ -6071,6 +6072,7 @@ export function App() {
                     onSessionSurfaceChange={handleConversationSurfaceChange}
                     themeMode={dashboardThemeMode}
                     onThemeModeChange={setDashboardThemeMode}
+                    isActive={activeConversationSurface === "hermes"}
                   />
                 </div>
               </div>

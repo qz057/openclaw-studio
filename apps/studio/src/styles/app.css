@@ -2823,9 +2823,14 @@ button:disabled {
   gap: 10px;
 }
 
-.conversation-message__delivery {
+.conversation-message__delivery,
+.conversation-message__phase {
   color: var(--text-muted);
   font-size: 0.76rem;
+}
+
+.conversation-message__phase {
+  color: var(--cyan);
 }
 
 .conversation-message__delivery--pending {
@@ -8476,6 +8481,7 @@ button:disabled {
 :root[data-dashboard-theme="day"] .conversation-message__header,
 :root[data-dashboard-theme="day"] .conversation-message__header time,
 :root[data-dashboard-theme="day"] .conversation-message__delivery,
+:root[data-dashboard-theme="day"] .conversation-message__phase,
 :root[data-dashboard-theme="day"] .conversation-card-title em,
 :root[data-dashboard-theme="day"] .conversation-select-field span,
 :root[data-dashboard-theme="day"] .conversation-status-line span,
