@@ -54,11 +54,12 @@ const channelDirectoryPath = joinHermesPath("channel_directory.json");
 const historyPath = joinHermesPath(".hermes_history");
 const sessionsRoot = joinHermesPath("sessions");
 const sessionsIndexPath = joinHermesPath("sessions", "sessions.json");
+const sendLogsRoot = joinHermesPath("logs", "studio-send");
 const maxSessionList = 20;
 const maxMessageList = 200;
 const maxHistoryList = 100;
 const HERMES_CLI_TIMEOUT_MS = 300_000;
-const HERMES_WSL_TIMEOUT_SECONDS = Math.max(30, Math.floor((HERMES_CLI_TIMEOUT_MS - 15_000) / 1000));
+const HERMES_SEND_TIMEOUT_SECONDS = 180;
 type HermesConnectionState = "disconnected" | "connecting" | "connected" | "reconnecting" | "error";
 
 interface HermesOrigin {
@@ -697,27 +698,107 @@ function parseJsonlSessionMessages(raw: string): StudioHermesMessage[] {
   return messages.slice(-maxMessageList);
 }
 
+function extractHermesSendLogError(raw: string): string | null {
+  const patterns = [
+    /API call failed after \d+ retries:\s*([^\r\n]+)/i,
+    /Non-retryable client error:\s*([^\r\n]+)/i,
+    /Error code:\s*([^\r\n]+)/i,
+    /Hermes command timed out after\s*([^\r\n]+)/i
+  ];
+
+  for (const pattern of patterns) {
+    const match = raw.match(pattern);
+    const detail = match?.[1]?.trim();
+
+    if (detail) {
+      return detail;
+    }
+  }
+
+  return null;
+}
+
+async function loadLatestHermesSendError(sessionId: string, newerThanMs = 0): Promise<StudioHermesMessage | null> {
+  try {
+    const entries = await fs.readdir(sendLogsRoot, { withFileTypes: true });
+    const logFiles = await Promise.all(
+      entries
+        .filter((entry) => entry.isFile() && entry.name.endsWith(".log"))
+        .map(async (entry) => {
+          const filePath = path.join(sendLogsRoot, entry.name);
+          const stats = await fs.stat(filePath);
+          return { filePath, mtimeMs: stats.mtimeMs, timestamp: stats.mtime.toISOString() };
+        })
+    );
+
+    logFiles.sort((left, right) => right.mtimeMs - left.mtimeMs);
+
+    for (const logFile of logFiles.slice(0, 20)) {
+      if (logFile.mtimeMs <= newerThanMs) {
+        continue;
+      }
+
+      const raw = await fs.readFile(logFile.filePath, "utf8");
+
+      if (!raw.includes(`session_id: ${sessionId}`)) {
+        continue;
+      }
+
+      const errorDetail = extractHermesSendLogError(raw);
+
+      if (!errorDetail) {
+        continue;
+      }
+
+      return {
+        id: `hermes-send-error-${path.basename(logFile.filePath)}-${Math.round(logFile.mtimeMs)}`,
+        role: "assistant",
+        content: `Hermes 发送失败：${errorDetail}`,
+        timestamp: logFile.timestamp
+      };
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
 export async function loadHermesSessionMessages(sessionId: string): Promise<StudioHermesMessage[]> {
   if (!sessionId.trim()) {
     return [];
   }
 
-  const sessionFilePath = await resolveSessionFilePath(sessionId);
+  const normalizedSessionId = sessionId.trim();
+  const sessionFilePath = await resolveSessionFilePath(normalizedSessionId);
 
   if (!sessionFilePath) {
-    return [];
+    const sendError = await loadLatestHermesSendError(normalizedSessionId);
+    return sendError ? [sendError] : [];
+  }
+
+  let messages: StudioHermesMessage[] = [];
+  let sessionUpdatedAtMs = 0;
+
+  try {
+    sessionUpdatedAtMs = (await fs.stat(sessionFilePath)).mtimeMs;
+  } catch {
+    sessionUpdatedAtMs = 0;
   }
 
   if (sessionFilePath.endsWith(".json")) {
     const sessionFile = await readJsonFile<HermesSessionFile>(sessionFilePath);
-    return sessionFile ? parseJsonSessionMessages(sessionFile) : [];
+    messages = sessionFile ? parseJsonSessionMessages(sessionFile) : [];
+  } else {
+    try {
+      messages = parseJsonlSessionMessages(await fs.readFile(sessionFilePath, "utf8"));
+    } catch {
+      messages = [];
+    }
   }
 
-  try {
-    return parseJsonlSessionMessages(await fs.readFile(sessionFilePath, "utf8"));
-  } catch {
-    return [];
-  }
+  const sendError = await loadLatestHermesSendError(normalizedSessionId, sessionUpdatedAtMs);
+  return sendError ? [...messages, sendError].slice(-maxMessageList) : messages;
 }
 
 function createHermesEvents(
@@ -955,21 +1036,30 @@ export async function sendHermesMessage(
             "-lc",
             [
               "set -euo pipefail",
-              'MESSAGE="$(printf %s "$1" | base64 -d)"',
-              'exec timeout --kill-after=10s "$3" hermes chat -Q --source tool --resume "$2" -q "$MESSAGE"'
+              "command -v hermes >/dev/null",
+              "command -v timeout >/dev/null",
+              "command -v systemd-run >/dev/null",
+              'LOG_DIR="$HOME/.hermes/logs/studio-send"',
+              'mkdir -p "$LOG_DIR"',
+              'UNIT="openclaw-studio-hermes-send-$(date +%Y%m%d%H%M%S)-$$"',
+              'LOG_FILE="$LOG_DIR/${UNIT}.log"',
+              "SYSTEMD_ENV_ARGS=(--setenv=TERM=xterm-256color --setenv=COLUMNS=120 --setenv=LINES=40)",
+              "for ENV_NAME in HTTP_PROXY HTTPS_PROXY http_proxy https_proxy ALL_PROXY all_proxy NO_PROXY no_proxy; do ENV_VALUE=\"$(printenv \"$ENV_NAME\" || true)\"; if [ -n \"$ENV_VALUE\" ]; then SYSTEMD_ENV_ARGS+=(--setenv=\"${ENV_NAME}=${ENV_VALUE}\"); fi; done",
+              "systemd-run --user --collect --unit \"$UNIT\" \"${SYSTEMD_ENV_ARGS[@]}\" /usr/bin/bash -lc 'MESSAGE=\"$(printf %s \"$1\" | base64 -d)\"; set +e; timeout --kill-after=10s \"$3\" hermes chat -Q --source tool --resume \"$2\" -q \"$MESSAGE\" >> \"$4\" 2>&1; STATUS=$?; if [ \"$STATUS\" -eq 124 ] || [ \"$STATUS\" -eq 137 ]; then printf \"\\nsession_id: %s\\nHermes command timed out after %s.\\n\" \"$2\" \"$3\" >> \"$4\"; fi; exit \"$STATUS\"' -- \"$1\" \"$2\" \"$3\" \"$LOG_FILE\" >/dev/null",
+              'printf "%s" "$LOG_FILE"'
             ].join("; "),
             "--",
             encodedContent,
             sessionId.trim(),
-            `${HERMES_WSL_TIMEOUT_SECONDS}s`
+            `${HERMES_SEND_TIMEOUT_SECONDS}s`
           ],
           env: {
             ...process.env
           },
           label: "hermes chat --resume <session> -q <message>"
         },
-        HERMES_CLI_TIMEOUT_MS,
-        256_000
+        10_000,
+        8_000
       );
 
       return {

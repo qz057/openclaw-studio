@@ -364,6 +364,28 @@ function mergeMessages(remoteMessages: StudioHermesMessage[], localMessages: Loc
   });
 }
 
+function remoteMessageAcknowledgesLocal(remoteMessages: StudioHermesMessage[], localMessage: LocalHermesMessage): boolean {
+  const localTimestamp = Date.parse(localMessage.timestamp ?? "");
+  const localContent = localMessage.content.trim();
+
+  return remoteMessages.some((remoteMessage) => {
+    const remoteTimestamp = Date.parse(remoteMessage.timestamp ?? "");
+
+    if (remoteMessage.role === localMessage.role && remoteMessage.content.trim() === localContent) {
+      return true;
+    }
+
+    return (
+      localMessage.deliveryStatus === "pending" &&
+      localMessage.role === "user" &&
+      remoteMessage.role === "assistant" &&
+      Number.isFinite(localTimestamp) &&
+      Number.isFinite(remoteTimestamp) &&
+      remoteTimestamp >= localTimestamp
+    );
+  });
+}
+
 function resolveSelectedModelLabel(modelCatalog: StudioModelCatalog | null, selectedModelId: string): string {
   if (!selectedModelId) {
     return "未选择模型";
@@ -479,6 +501,7 @@ export function HermesPage({
 
   const freshSessionActive = Boolean(freshSessionId);
   const displayMessages = mergeMessages(messages, localMessages);
+  const hasPendingLocalMessages = localMessages.some((message) => message.deliveryStatus === "pending");
   const unreadCount = detachedFromLatest ? Math.max(0, displayMessages.length - lastSeenCount) : 0;
   const firstUnreadIndex = unreadCount > 0 ? displayMessages.length - unreadCount : -1;
   const hermesCanSend = Boolean(currentSession) && (hermesState?.availability ?? "blocked") !== "blocked";
@@ -496,6 +519,16 @@ export function HermesPage({
       sessionKey: freshSessionKey
     });
   }, [freshSessionId, freshSessionKey, freshSessionStartedAt]);
+
+  useEffect(() => {
+    if (messages.length === 0 || localMessages.length === 0) {
+      return;
+    }
+
+    setLocalMessages((currentMessages) =>
+      currentMessages.filter((message) => !remoteMessageAcknowledgesLocal(messages, message))
+    );
+  }, [messages, localMessages.length]);
 
   useEffect(() => {
     let cancelled = false;
@@ -838,26 +871,26 @@ export function HermesPage({
 
     setSubmitting(true);
     setError(null);
-    setSendResult(createOperationResult("info", "正在发送到 Hermes", "等待 Hermes 返回，完成后会同步当前会话消息。", normalizedPrompt));
+    setSendResult(createOperationResult("info", "正在投递到 Hermes", "请求会在后台运行，页面会自动同步当前会话消息。", normalizedPrompt));
 
     try {
       const result = await sendHermesMessage(currentSession.id, normalizedPrompt);
 
       if (result.sent) {
-        setLocalMessages((currentMessages) => currentMessages.filter((message) => message.id !== localMessageId));
-
         const messagesResult = await getHermesMessages(currentSession.id);
         if (messagesResult.success) {
           setMessages(messagesResult.messages);
-          setSendResult(
-            createOperationResult(
-              "success",
-              "Hermes 发送完成",
-              "查看最新回复；如果要验证模型切换，请创建新会话后发送短消息。",
-              `${messagesResult.messages.length} 条消息已同步。`
-            )
-          );
         }
+
+        setSendResult(
+          createOperationResult(
+            "success",
+            "Hermes 已接收",
+            "回复会在后台生成；页面每 5 秒同步一次当前会话。",
+            result.messageId ?? `${messagesResult.success ? messagesResult.messages.length : 0} 条消息已同步。`
+          )
+        );
+        setRefreshNonce((value) => value + 1);
       } else {
         throw new Error(result.error || "发送失败");
       }
@@ -1170,7 +1203,9 @@ export function HermesPage({
     ? "下面输入，按 Ctrl/Cmd + Enter 直接发送到 Hermes 会话。"
     : hermesState?.disabledReason ?? "当前发送链路不可用。";
   const composeStatus = submitting
-    ? "Hermes 正在回复…"
+    ? "正在投递到 Hermes…"
+    : hasPendingLocalMessages
+      ? "Hermes 正在回复…"
     : !currentSession
       ? "检查 Hermes 会话"
       : hermesCanSend
@@ -1328,7 +1363,7 @@ export function HermesPage({
               canSend={canSend}
               submitting={submitting}
               submitLabel="发送到 Hermes"
-              submittingLabel="发送中..."
+              submittingLabel="投递中..."
               statusLabel={composeStatus}
               helperText={composeHint}
               presets={hermesPromptPresets}
