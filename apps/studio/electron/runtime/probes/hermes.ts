@@ -60,6 +60,7 @@ const maxMessageList = 200;
 const maxHistoryList = 100;
 const HERMES_CLI_TIMEOUT_MS = 300_000;
 const HERMES_SEND_TIMEOUT_SECONDS = 180;
+const HERMES_STUDIO_SEND_MAX_TURNS = 1;
 type HermesConnectionState = "disconnected" | "connecting" | "connected" | "reconnecting" | "error";
 
 interface HermesOrigin {
@@ -1074,13 +1075,14 @@ export async function sendHermesMessage(
               'LOG_FILE="$LOG_DIR/${UNIT}.log"',
               "SYSTEMD_ENV_ARGS=(--setenv=TERM=xterm-256color --setenv=COLUMNS=120 --setenv=LINES=40)",
               "for ENV_NAME in HTTP_PROXY HTTPS_PROXY http_proxy https_proxy ALL_PROXY all_proxy NO_PROXY no_proxy; do ENV_VALUE=\"$(printenv \"$ENV_NAME\" || true)\"; if [ -n \"$ENV_VALUE\" ]; then SYSTEMD_ENV_ARGS+=(--setenv=\"${ENV_NAME}=${ENV_VALUE}\"); fi; done",
-              "systemd-run --user --collect --unit \"$UNIT\" \"${SYSTEMD_ENV_ARGS[@]}\" /usr/bin/bash -lc 'MESSAGE=\"$(printf %s \"$1\" | base64 -d)\"; set +e; timeout --kill-after=10s \"$3\" hermes chat -Q --source tool --resume \"$2\" -q \"$MESSAGE\" >> \"$4\" 2>&1; STATUS=$?; if [ \"$STATUS\" -eq 124 ] || [ \"$STATUS\" -eq 137 ]; then printf \"\\nsession_id: %s\\nHermes command timed out after %s.\\n\" \"$2\" \"$3\" >> \"$4\"; fi; exit \"$STATUS\"' -- \"$1\" \"$2\" \"$3\" \"$LOG_FILE\" >/dev/null",
+              "systemd-run --user --collect --unit \"$UNIT\" \"${SYSTEMD_ENV_ARGS[@]}\" /usr/bin/bash -lc 'MESSAGE=\"$(printf %s \"$1\" | base64 -d)\"; set +e; timeout --kill-after=10s \"$3\" hermes chat -Q --source tool --resume \"$2\" --max-turns \"$5\" -q \"$MESSAGE\" >> \"$4\" 2>&1; STATUS=$?; if [ \"$STATUS\" -eq 124 ] || [ \"$STATUS\" -eq 137 ]; then printf \"\\nsession_id: %s\\nHermes command timed out after %s.\\n\" \"$2\" \"$3\" >> \"$4\"; fi; exit \"$STATUS\"' -- \"$1\" \"$2\" \"$3\" \"$LOG_FILE\" \"$4\" >/dev/null",
               'printf "%s" "$LOG_FILE"'
             ].join("; "),
             "--",
             encodedContent,
             sessionId.trim(),
-            `${HERMES_SEND_TIMEOUT_SECONDS}s`
+            `${HERMES_SEND_TIMEOUT_SECONDS}s`,
+            String(HERMES_STUDIO_SEND_MAX_TURNS)
           ],
           env: {
             ...process.env

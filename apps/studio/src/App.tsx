@@ -5413,6 +5413,7 @@ export function App() {
   };
 
   const conversationPageMode = activePage === "chat" || activePage === "hermes";
+  const activeConversationSurface: SessionSurfaceId = activePage === "hermes" || sessionSurface === "hermes" ? "hermes" : "openclaw";
   const centerFocusMode = activePage === "sessions";
   const dashboardHomeMode = activePage === "dashboard";
   const showWorkbenchScaffolding = !dashboardHomeMode && !conversationPageMode && !centerFocusMode && !currentPageUsesSimpleShell;
@@ -6052,24 +6053,27 @@ export function App() {
 
           <Suspense fallback={<PageLoadingState />}>
             {activePage === "chat" || activePage === "hermes" ? (
-              activePage === "hermes" || sessionSurface === "hermes" ? (
-                <LazyHermesPage
-                  {...chatSummary}
-                  readinessLabel={hermesReadinessLabel}
-                  onNavigatePage={handleConversationNavigate}
-                  onSessionSurfaceChange={handleConversationSurfaceChange}
-                  themeMode={dashboardThemeMode}
-                  onThemeModeChange={setDashboardThemeMode}
-                />
-              ) : (
-                <LazyChatPage
-                  {...chatSummary}
-                  onNavigatePage={handleConversationNavigate}
-                  onSessionSurfaceChange={handleConversationSurfaceChange}
-                  themeMode={dashboardThemeMode}
-                  onThemeModeChange={setDashboardThemeMode}
-                />
-              )
+              <div className="conversation-page-stack">
+                <div className="conversation-page-pane" hidden={activeConversationSurface !== "openclaw"}>
+                  <LazyChatPage
+                    {...chatSummary}
+                    onNavigatePage={handleConversationNavigate}
+                    onSessionSurfaceChange={handleConversationSurfaceChange}
+                    themeMode={dashboardThemeMode}
+                    onThemeModeChange={setDashboardThemeMode}
+                  />
+                </div>
+                <div className="conversation-page-pane" hidden={activeConversationSurface !== "hermes"}>
+                  <LazyHermesPage
+                    {...chatSummary}
+                    readinessLabel={hermesReadinessLabel}
+                    onNavigatePage={handleConversationNavigate}
+                    onSessionSurfaceChange={handleConversationSurfaceChange}
+                    themeMode={dashboardThemeMode}
+                    onThemeModeChange={setDashboardThemeMode}
+                  />
+                </div>
+              </div>
             ) : (
               renderPage(
                 activePage,

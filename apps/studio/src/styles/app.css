@@ -219,6 +219,17 @@ button:disabled {
   overflow: hidden;
 }
 
+.conversation-page-stack,
+.conversation-page-pane {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.conversation-page-pane[hidden] {
+  display: none !important;
+}
+
 .surface {
   border: 1px solid var(--border-soft);
   background: var(--bg-panel);
