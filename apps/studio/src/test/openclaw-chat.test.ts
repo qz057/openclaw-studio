@@ -44,14 +44,18 @@ describe('openclaw-chat', () => {
         const result = buildCommand('Test message', 'session-123');
 
         expect(result.args[6]).toBe('session-123');
+        expect(result.args[7]).toBe('600');
         expect(result.args[3]).toContain('--session-id "$2"');
+        expect(result.args[3]).toContain('--timeout "$TIMEOUT_SECONDS"');
       });
 
       it('omits session ID when null', () => {
         const result = buildCommand('Test message', null);
 
         expect(result.args[6]).toBe('');
+        expect(result.args[7]).toBe('600');
         expect(result.args[3]).toContain('if [ -n "$2" ]');
+        expect(result.args[3]).toContain('timeout --kill-after=10s');
       });
 
       it('handles special characters in prompt', () => {
@@ -82,6 +86,8 @@ describe('openclaw-chat', () => {
         expect(result.args).toContain('--agent');
         expect(result.args).toContain('main');
         expect(result.args).toContain('--json');
+        expect(result.args).toContain('--timeout');
+        expect(result.args).toContain('600');
         expect(result.args).toContain('--message');
         expect(result.args).toContain('Hello world');
       });
@@ -112,7 +118,7 @@ describe('openclaw-chat', () => {
         const result = buildCommand('Test', null);
 
         expect(result.env).toBeDefined();
-        expect(result.label).toBe('openclaw agent --agent main --json --message <prompt>');
+        expect(result.label).toBe('openclaw agent --agent main --json --timeout <seconds> --message <prompt>');
       });
     });
   });

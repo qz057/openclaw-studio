@@ -107,7 +107,7 @@ export function createMockRuntime(): StudioApi {
         canSend: false,
         readinessLabel: "Mock runtime",
         disabledReason: "当前 mock runtime 还没有连接 OpenClaw 聊天执行链。",
-        command: "openclaw agent --agent main --json --message <prompt>",
+        command: "openclaw agent --agent main --json --timeout <seconds> --message <prompt>",
         sessionKey: "agent:main:main",
         sessionId: null,
         model: null,
@@ -145,7 +145,7 @@ export function createMockRuntime(): StudioApi {
         provider: null,
         model: null,
         durationMs: null,
-        command: "openclaw agent --agent main --json --message <prompt>"
+        command: "openclaw agent --agent main --json --timeout <seconds> --message <prompt>"
       };
     },
     async createOpenClawChatSession(): Promise<StudioOpenClawChatSessionRef> {

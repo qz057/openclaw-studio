@@ -164,7 +164,7 @@ export function createFallbackApi(): StudioApi {
         canSend: false,
         readinessLabel: "未接入运行态",
         disabledReason: "当前 fallback 模式不会模拟发送。请在桌面运行态连接本机 OpenClaw 后再发送。",
-        command: "openclaw agent --agent main --json --message <prompt>",
+        command: "openclaw agent --agent main --json --timeout <seconds> --message <prompt>",
         sessionKey: "agent:main:main",
         sessionId: "fallback-openclaw-session",
         model: "gpt-5.5",
@@ -202,7 +202,7 @@ export function createFallbackApi(): StudioApi {
         provider: null,
         model: null,
         durationMs: null,
-        command: "openclaw agent --agent main --json --message <prompt>"
+        command: "openclaw agent --agent main --json --timeout <seconds> --message <prompt>"
       };
     },
     async createOpenClawChatSession(): Promise<StudioOpenClawChatSessionRef> {

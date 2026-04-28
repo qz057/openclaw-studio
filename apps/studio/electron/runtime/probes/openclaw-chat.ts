@@ -13,10 +13,12 @@ import type {
   StudioTokenContextSummary
 } from "@openclaw/shared";
 
-const DEFAULT_TIMEOUT_MS = 180_000;
+const OPENCLAW_AGENT_DEFAULT_TIMEOUT_SECONDS = 600;
+const OPENCLAW_AGENT_TIMEOUT_SECONDS = resolveOpenClawAgentTimeoutSeconds();
+const DEFAULT_TIMEOUT_MS = OPENCLAW_AGENT_TIMEOUT_SECONDS * 1000 + 30_000;
 const MAX_CAPTURE_CHARS = 32_000;
 const MAIN_SESSION_KEY = "agent:main:main";
-const OPENCLAW_CHAT_COMMAND = "openclaw agent --agent main --json --message <prompt>";
+const OPENCLAW_CHAT_COMMAND = "openclaw agent --agent main --json --timeout <seconds> --message <prompt>";
 const MAX_CHAT_MESSAGES = 40;
 const MAX_SESSION_LINES = 400;
 const SESSION_INDEX_PATH_SEGMENTS = [".openclaw", "agents", "main", "sessions", "sessions.json"] as const;
@@ -27,6 +29,17 @@ let readinessCacheTime = 0;
 const READINESS_CACHE_DURATION_MS = 30 * 1000; // 30 秒
 const SESSION_DIRECTORY_PATH_SEGMENTS = [".openclaw", "agents", "main", "sessions"] as const;
 const SESSION_FILE_SCAN_LIMIT = 12;
+
+function resolveOpenClawAgentTimeoutSeconds(): number {
+  const rawValue = process.env.OPENCLAW_STUDIO_AGENT_TIMEOUT_SECONDS?.trim();
+  const parsedValue = rawValue ? Number(rawValue) : NaN;
+
+  if (Number.isFinite(parsedValue) && parsedValue >= 30) {
+    return Math.floor(parsedValue);
+  }
+
+  return OPENCLAW_AGENT_DEFAULT_TIMEOUT_SECONDS;
+}
 
 function resolveWslDistroName(): string {
   return process.env.OPENCLAW_STUDIO_WSL_DISTRO?.trim() || process.env.WSL_DISTRO_NAME?.trim() || "Ubuntu-24.04";
@@ -915,10 +928,16 @@ export function buildCommand(prompt: string, sessionId?: string | null) {
         "-e",
         "bash",
         "-lc",
-        'MESSAGE="$(printf %s "$1" | base64 -d)"; if [ -n "$2" ]; then openclaw agent --agent main --json --session-id "$2" --message "$MESSAGE"; else openclaw agent --agent main --json --message "$MESSAGE"; fi',
+        [
+          'MESSAGE="$(printf %s "$1" | base64 -d)"',
+          'TIMEOUT_SECONDS="$3"',
+          'if command -v timeout >/dev/null 2>&1; then WRAP=(timeout --kill-after=10s "${TIMEOUT_SECONDS}s"); else WRAP=(); fi',
+          'if [ -n "$2" ]; then "${WRAP[@]}" openclaw agent --agent main --json --session-id "$2" --timeout "$TIMEOUT_SECONDS" --message "$MESSAGE"; else "${WRAP[@]}" openclaw agent --agent main --json --timeout "$TIMEOUT_SECONDS" --message "$MESSAGE"; fi'
+        ].join("; "),
         "--",
         encodedPrompt,
-        sessionId ?? ""
+        sessionId ?? "",
+        String(OPENCLAW_AGENT_TIMEOUT_SECONDS)
       ],
       env: {
         ...process.env
@@ -935,6 +954,8 @@ export function buildCommand(prompt: string, sessionId?: string | null) {
       "main",
       "--json",
       ...(sessionId ? ["--session-id", sessionId] : []),
+      "--timeout",
+      String(OPENCLAW_AGENT_TIMEOUT_SECONDS),
       "--message",
       prompt
     ],
