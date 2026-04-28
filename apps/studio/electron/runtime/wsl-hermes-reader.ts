@@ -71,31 +71,34 @@ conn.row_factory = sqlite3.Row
 rows = conn.execute(
     """
     SELECT
-      id,
-      source,
-      model,
-      started_at,
-      ended_at,
-      message_count,
-      title,
-      tool_call_count,
-      input_tokens,
-      output_tokens,
-      cache_read_tokens,
-      cache_write_tokens,
-      estimated_cost_usd,
-      actual_cost_usd
+      sessions.id,
+      sessions.source,
+      sessions.model,
+      sessions.started_at,
+      sessions.ended_at,
+      sessions.message_count,
+      sessions.title,
+      sessions.tool_call_count,
+      sessions.input_tokens,
+      sessions.output_tokens,
+      sessions.cache_read_tokens,
+      sessions.cache_write_tokens,
+      sessions.estimated_cost_usd,
+      sessions.actual_cost_usd,
+      COALESCE(MAX(messages.timestamp), sessions.ended_at, sessions.started_at) AS last_activity
     FROM sessions
-    WHERE source = ?
-    ORDER BY started_at DESC
+    LEFT JOIN messages ON messages.session_id = sessions.id
+    WHERE source IN (?, ?)
+    GROUP BY sessions.id
+    ORDER BY CASE WHEN sessions.source = 'studio' THEN 0 ELSE 1 END, last_activity DESC
     LIMIT 50
     """,
-    ('cli',)
+    ('studio', 'cli')
 ).fetchall()
 
 payload = []
 for row in rows:
-    ts = row['ended_at'] if row['ended_at'] is not None else row['started_at']
+    ts = row['last_activity'] if row['last_activity'] is not None else (row['ended_at'] if row['ended_at'] is not None else row['started_at'])
     input_tokens = int(row['input_tokens'] or 0)
     output_tokens = int(row['output_tokens'] or 0)
     cache_read_tokens = int(row['cache_read_tokens'] or 0)
@@ -218,6 +221,13 @@ messages = conn.execute(
     "SELECT role, content, timestamp, tool_calls FROM messages WHERE session_id = ? ORDER BY timestamp ASC, id ASC",
     (session_id,)
 ).fetchall()
+latest_message = conn.execute(
+    "SELECT MAX(timestamp) AS timestamp FROM messages WHERE session_id = ?",
+    (session_id,)
+).fetchone()
+last_activity = latest_message['timestamp'] if latest_message and latest_message['timestamp'] is not None else (
+    session['ended_at'] if session['ended_at'] is not None else session['started_at']
+)
 input_tokens = int(session['input_tokens'] or 0)
 output_tokens = int(session['output_tokens'] or 0)
 cache_read_tokens = int(session['cache_read_tokens'] or 0)
@@ -230,7 +240,7 @@ payload = {
     'source': session['source'],
     'model': session['model'],
     'message_count': int(session['message_count'] or 0),
-    'timestamp_ms': int(((session['ended_at'] if session['ended_at'] is not None else session['started_at']) or time.time()) * 1000),
+    'timestamp_ms': int((last_activity or time.time()) * 1000),
     'token_context': {
         'source': 'runtime',
         'statusLabel': 'Hermes session.db',
@@ -249,7 +259,7 @@ payload = {
         'toolCallCount': int(session['tool_call_count'] or 0),
         'availableFunctionCount': None,
         'fileCount': None,
-        'updatedAt': int(((session['ended_at'] if session['ended_at'] is not None else session['started_at']) or time.time()) * 1000)
+        'updatedAt': int((last_activity or time.time()) * 1000)
     },
     'messages': [
         {
@@ -320,10 +330,11 @@ session_id = time.strftime('%Y%m%d_%H%M%S') + '_' + secrets.token_hex(3)
 db = SessionDB()
 db.create_session(
     session_id=session_id,
-    source='cli',
+    source='studio',
     model=model_id,
     model_config={'model': model_id} if model_id else None,
     system_prompt=None,
+    user_id='openclaw-studio',
 )
 
 print(json.dumps({'id': session_id, 'name': session_id, 'timestamp_ms': int(time.time() * 1000)}, ensure_ascii=False))

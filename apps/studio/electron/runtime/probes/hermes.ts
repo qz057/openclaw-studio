@@ -212,6 +212,30 @@ function ensureHermesMessageRole(role: string | null | undefined): StudioHermesM
   }
 }
 
+function normalizeHermesRuntimeTimestamp(value: unknown): string | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return new Date(value < 10_000_000_000 ? value * 1000 : value).toISOString();
+  }
+
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  const numericValue = Number(trimmed);
+
+  if (Number.isFinite(numericValue)) {
+    return new Date(numericValue < 10_000_000_000 ? numericValue * 1000 : numericValue).toISOString();
+  }
+
+  return trimmed;
+}
+
 function normalizeHermesMessageContent(raw: unknown): string {
   if (typeof raw === "string") {
     return raw.trim();
@@ -699,11 +723,16 @@ function parseJsonlSessionMessages(raw: string): StudioHermesMessage[] {
 }
 
 function extractHermesSendLogError(raw: string): string | null {
+  const timeoutMatch = raw.match(/Hermes command timed out after\s*([^\r\n]+)/i);
+
+  if (timeoutMatch?.[1]?.trim()) {
+    return `Hermes command timed out after ${timeoutMatch[1].trim()}`;
+  }
+
   const patterns = [
     /API call failed after \d+ retries:\s*([^\r\n]+)/i,
     /Non-retryable client error:\s*([^\r\n]+)/i,
-    /Error code:\s*([^\r\n]+)/i,
-    /Hermes command timed out after\s*([^\r\n]+)/i
+    /Error code:\s*([^\r\n]+)/i
   ];
 
   for (const pattern of patterns) {
@@ -1160,16 +1189,32 @@ export function subscribeToHermesEvents(listener: (event: StudioHermesEvent) => 
 export async function loadHermesSessionsFromWSL(): Promise<import("@openclaw/shared").StudioHermesLoadSessionsResult> {
   try {
     const { wslHermesReader } = await import("../wsl-hermes-reader");
-    const sessions = await wslHermesReader.listSessions();
+    let sessions = await wslHermesReader.listSessions();
+
+    if (!sessions.some((session) => session.source === "studio")) {
+      const created = await wslHermesReader.createSession(null);
+      sessions = [
+        {
+          id: created.id,
+          name: created.name,
+          lastModified: created.lastModified,
+          messageCount: 0,
+          model: null,
+          source: "studio",
+          tokenContext: null
+        },
+        ...sessions
+      ];
+    }
 
     const sessionSummaries: StudioHermesSessionSummary[] = sessions.map(session => ({
       id: session.id,
       sessionKey: session.id,
       filename: `${session.id}.json`,
-      label: session.name,
-      sessionLabel: session.name,
+      label: session.source === "studio" ? `OpenClaw Studio · ${session.id}` : session.name,
+      sessionLabel: session.source === "studio" ? `Studio 专属会话 · ${session.id}` : session.name,
       platform: session.source ?? "cli",
-      chatType: "direct",
+      chatType: session.source === "studio" ? "studio" : "direct",
       messageCount: session.messageCount ?? 0,
       createdAt: session.lastModified.toISOString(),
       updatedAt: session.lastModified.toISOString(),
@@ -1211,12 +1256,13 @@ export async function loadHermesSessionFromWSL(sessionId: string): Promise<impor
       id: `${sessionId}-msg-${index}`,
       role: msg.role as StudioHermesMessageRole,
       content: msg.content,
-      timestamp: msg.timestamp || null
+      timestamp: normalizeHermesRuntimeTimestamp(msg.timestamp)
     }));
+    const sendError = await loadLatestHermesSendError(sessionId, session.lastModified.getTime());
 
     return {
       success: true,
-      messages,
+      messages: sendError ? [...messages, sendError].slice(-maxMessageList) : messages,
       error: null
     };
   } catch (error) {
@@ -1237,10 +1283,10 @@ export async function createHermesSessionFromWSL(modelId?: string | null): Promi
     id: created.id,
     sessionKey: created.id,
     filename: `${created.id}.json`,
-    label: created.name,
-    sessionLabel: created.name,
-    platform: "cli",
-    chatType: "direct",
+    label: `OpenClaw Studio · ${created.id}`,
+    sessionLabel: `Studio 专属会话 · ${created.id}`,
+    platform: "studio",
+    chatType: "studio",
     messageCount: 0,
     createdAt: created.lastModified.toISOString(),
     updatedAt: created.lastModified.toISOString(),
